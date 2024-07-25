@@ -6,6 +6,7 @@ internal enum SpecialActionType : byte
 {
     None,
     MeleeRange,
+    MovingBackward,
     MovingForward,
 }
 
