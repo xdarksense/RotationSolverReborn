@@ -115,7 +115,7 @@ partial class DarkKnightRotation
 
     static partial void ModifyBloodWeaponPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Blood >= 70;
+        setting.ActionCheck = () => Blood <= 70;
         setting.StatusProvide = [StatusID.BloodWeapon];
         setting.CreateConfig = () => new()
         {
@@ -132,7 +132,7 @@ partial class DarkKnightRotation
 
     static partial void ModifyStalwartSoulPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Blood >= 80;
+        setting.ActionCheck = () => Blood <= 80;
         setting.ComboIds = [ActionID.UnleashPvE];
         setting.CreateConfig = () => new()
         {
