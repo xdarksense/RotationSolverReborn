@@ -335,7 +335,7 @@ partial class BlackMageRotation
 
     static partial void ModifyAmplifierPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => !EnochianEndAfter(10) && !IsPolyglotStacksMaxed;
+        setting.ActionCheck = () => (InAstralFire || InUmbralIce) && !EnochianEndAfter(10) && !IsPolyglotStacksMaxed;
     }
 
     static partial void ModifyParadoxPvE(ref ActionSetting setting)
@@ -390,30 +390,6 @@ partial class BlackMageRotation
             Fire4Time = Player.TotalCastTime;
         }
         base.UpdateInfo();
-    }
-
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.ManawardPvE)]
-    protected sealed override bool DefenseSingleGCD(out IAction? act)
-    {
-        if (ManawardPvE.CanUse(out act)) return true;
-        return base.DefenseSingleGCD(out act);
-    }
-
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.AddlePvE)]
-    protected override bool DefenseAreaAbility(IAction nextGCD, out IAction act)
-    {
-        if (AddlePvE.CanUse(out act)) return true;
-        return false;
-    }
-
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.AetherialManipulationPvE)]
-    protected sealed override bool MoveForwardGCD(out IAction? act)
-    {
-        if (AetherialManipulationPvE.CanUse(out act)) return true;
-        return base.MoveForwardGCD(out act);
     }
 
     // PvP
