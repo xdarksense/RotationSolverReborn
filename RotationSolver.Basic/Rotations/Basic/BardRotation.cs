@@ -61,7 +61,7 @@ partial class BardRotation
 
     static partial void ModifyStraightShotPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.HawksEye_3861];
+        setting.StatusNeed = [StatusID.HawksEye_3861, StatusID.Barrage];
     }
 
     static partial void ModifyRagingStrikesPvE(ref ActionSetting setting)
@@ -238,13 +238,13 @@ partial class BardRotation
 
     static partial void ModifyRefulgentArrowPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.HawksEye_3861];
+        setting.StatusNeed = [StatusID.HawksEye_3861, StatusID.Barrage];
         setting.UnlockedByQuestID = 68430;
     }
 
     static partial void ModifyShadowbitePvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.HawksEye_3861];
+        setting.StatusNeed = [StatusID.HawksEye_3861, StatusID.Barrage];
         setting.CreateConfig = () => new()
         {
             AoeCount = 3,
