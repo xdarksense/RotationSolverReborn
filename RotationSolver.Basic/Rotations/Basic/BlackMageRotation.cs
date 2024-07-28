@@ -261,6 +261,10 @@ partial class BlackMageRotation
         {
             TimeToKill = 15,
         };
+        setting.CreateConfig = () => new()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyBlizzardIvPvE(ref ActionSetting setting)
@@ -278,6 +282,10 @@ partial class BlackMageRotation
     static partial void ModifyBetweenTheLinesPvE(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingBackward;
+        setting.CreateConfig = () => new()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyThunderIvPvE(ref ActionSetting setting)
@@ -362,8 +370,12 @@ partial class BlackMageRotation
 
     static partial void ModifyRetracePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => !IsMoving;
+        setting.ActionCheck = () => !IsMoving && !Player.HasStatus(true, StatusID.CircleOfPower);
         setting.StatusNeed = [StatusID.LeyLines];
+        setting.CreateConfig = () => new()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyFlareStarPvE(ref ActionSetting setting)
