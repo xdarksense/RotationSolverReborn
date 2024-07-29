@@ -110,7 +110,8 @@ partial class NinjaRotation
 
     static partial void ModifyKassatsuPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.Kassatsu, StatusID.TenChiJin];
+        setting.StatusProvide = [StatusID.Kassatsu];
+        setting.ActionCheck = () => !Player.HasStatus(true, StatusID.TenChiJin);
         setting.UnlockedByQuestID = 65770;
     }
 
@@ -166,7 +167,7 @@ partial class NinjaRotation
         setting.StatusNeed = [StatusID.Kassatsu];
         setting.StatusProvide = [StatusID.TenChiJin, StatusID.TenriJindoReady];
         setting.UnlockedByQuestID = 68488;
-        setting.ActionCheck = () => Ninki <= 50 && !IsMoving;
+        setting.ActionCheck = () => !IsMoving;
     }
 
     static partial void ModifyMeisuiPvE(ref ActionSetting setting)
@@ -194,6 +195,10 @@ partial class NinjaRotation
     static partial void ModifyHollowNozuchiPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.Doton];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyForkedRaijuPvE(ref ActionSetting setting)
