@@ -37,7 +37,7 @@ partial class BlueMageRotation
 
     static partial void ModifyFeatherRainPvE(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -45,7 +45,7 @@ partial class BlueMageRotation
 
     static partial void ModifyEruptionPvE(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };

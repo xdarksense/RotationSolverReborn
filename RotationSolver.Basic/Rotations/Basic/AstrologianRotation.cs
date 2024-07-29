@@ -206,7 +206,7 @@ partial class AstrologianRotation
     {
         setting.TargetStatusProvide = [StatusID.Divination];
         setting.StatusProvide = [StatusID.Divining]; //need to double check this status
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
             AoeCount = 1,

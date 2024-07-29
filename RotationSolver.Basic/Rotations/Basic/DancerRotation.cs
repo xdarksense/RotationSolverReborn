@@ -32,6 +32,41 @@ partial class DancerRotation
         setting.StatusProvide = [StatusID.SilkenSymmetry];
     }
 
+    static partial void ModifyCuringWaltzPvE(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyShieldSambaPvE(ref ActionSetting setting)
+    {
+        setting.StatusProvide = StatusHelper.RangePhysicalDefense;
+        setting.StatusFromSelf = false;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyImprovisationPvE(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.Improvisation, StatusID.Improvisation_2695, StatusID.RisingRhythm];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyImprovisedFinishPvE(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
     static partial void ModifyFountainPvE(ref ActionSetting setting)
     {
         setting.ComboIds = [ActionID.CascadePvE];
@@ -66,6 +101,10 @@ partial class DancerRotation
     static partial void ModifyBladeshowerPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.SilkenFlow];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 3,
+        };
     }
 
     static partial void ModifyRisingWindmillPvE(ref ActionSetting setting)
@@ -73,7 +112,7 @@ partial class DancerRotation
         setting.StatusNeed = [StatusID.SilkenSymmetry, StatusID.FlourishingSymmetry];
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 2,
+            AoeCount = 3,
         };
     }
 
@@ -90,26 +129,34 @@ partial class DancerRotation
     {
         setting.ActionCheck = () => Feathers > 0;
         setting.StatusProvide = [StatusID.ThreefoldFanDance];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 2,
+            AoeCount = 3,
         };
     }
 
     static partial void ModifyFanDanceIiiPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.ThreefoldFanDance];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyFanDanceIvPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.FourfoldFanDance];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifySaberDancePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Esprit >= 50;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -118,13 +165,17 @@ partial class DancerRotation
     static partial void ModifyStarfallDancePvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.FlourishingStarfall];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyTillanaPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Esprit <= 50;
         setting.StatusNeed = [StatusID.FlourishingFinish];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -140,12 +191,6 @@ partial class DancerRotation
         setting.SpecialType = SpecialActionType.MovingForward;
     }
 
-    static partial void ModifyShieldSambaPvE(ref ActionSetting setting)
-    {
-        setting.StatusFromSelf = false;
-        setting.StatusProvide = StatusHelper.RangePhysicalDefense;
-    }
-
     static partial void ModifyClosedPositionPvE(ref ActionSetting setting)
     {
         setting.TargetType = TargetType.Melee;
@@ -154,7 +199,7 @@ partial class DancerRotation
 
     static partial void ModifyDevilmentPvE(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
         };
@@ -176,12 +221,9 @@ partial class DancerRotation
     static partial void ModifyDoubleTechnicalFinishPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.StandardStep, StatusID.TechnicalStep, StatusID.DanceOfTheDawnReady];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 20,
-        };
-        setting.CreateConfig = () => new()
-        {
             AoeCount = 1,
         };
     }
@@ -191,7 +233,7 @@ partial class DancerRotation
         setting.StatusNeed = [StatusID.StandardStep];
         setting.StatusProvide = [StatusID.LastDanceReady];
         setting.ActionCheck = () => IsDancing && CompletedSteps == 2 && Service.GetAdjustedActionId(ActionID.StandardStepPvE) == ActionID.DoubleStandardFinishPvE;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -202,7 +244,7 @@ partial class DancerRotation
         setting.StatusNeed = [StatusID.TechnicalStep];
         setting.StatusProvide = [StatusID.DanceOfTheDawnReady];
         setting.ActionCheck = () => IsDancing && CompletedSteps == 4 && Service.GetAdjustedActionId(ActionID.TechnicalStepPvE) == ActionID.QuadrupleTechnicalFinishPvE;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -231,7 +273,7 @@ partial class DancerRotation
     static partial void ModifyLastDancePvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.LastDanceReady];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -242,7 +284,7 @@ partial class DancerRotation
     {
         setting.StatusNeed = [StatusID.FinishingMoveReady];
         setting.StatusProvide = [StatusID.LastDanceReady];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -253,7 +295,7 @@ partial class DancerRotation
     {
         setting.ActionCheck = () => Esprit >= 50;
         setting.StatusNeed = [StatusID.DanceOfTheDawnReady];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };

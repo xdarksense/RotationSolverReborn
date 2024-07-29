@@ -139,7 +139,7 @@ partial class MachinistRotation
     {
         setting.TargetStatusProvide = [StatusID.Wildfire];
         setting.StatusProvide = [StatusID.Wildfire_1946];
-        setting.ActionCheck = () => Battery >= 50;
+        setting.ActionCheck = () => Heat >= 50 || Player.HasStatus(true, StatusID.Hypercharged);
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
