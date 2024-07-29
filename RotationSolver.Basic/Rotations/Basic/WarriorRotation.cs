@@ -122,7 +122,7 @@ partial class WarriorRotation
     static partial void ModifyInfuriatePvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.NascentChaos];
-        setting.ActionCheck = () => HasHostilesInRange && BeastGauge <= 50 && InCombat;
+        setting.ActionCheck = () => HasHostilesInRange && BeastGauge <= 50 && InCombat && !Player.HasStatus(true, StatusID.NascentChaos) && !Player.HasStatus(true, StatusID.PrimalRendReady) && !Player.HasStatus(true, StatusID.PrimalRuinationReady);
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 0,
