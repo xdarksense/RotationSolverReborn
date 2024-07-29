@@ -45,6 +45,29 @@ partial class WhiteMageRotation
     static partial void ModifyMedicaIiPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.MedicaIi, StatusID.TrueMedicaIi];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+
+    }
+
+    static partial void ModifyMedicaPvE(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+
+    }
+
+    static partial void ModifyCureIiiPvE(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+
     }
 
     static partial void ModifyRegenPvE(ref ActionSetting setting)
@@ -81,6 +104,11 @@ partial class WhiteMageRotation
     static partial void ModifyAfflatusRapturePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Lily > 0;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+
     }
 
     static partial void ModifyAeroPvE(ref ActionSetting setting)
@@ -96,6 +124,10 @@ partial class WhiteMageRotation
     static partial void ModifyAfflatusMiseryPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => BloodLily == 3;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyCureIiiPvP(ref ActionSetting setting)
@@ -117,6 +149,10 @@ partial class WhiteMageRotation
     static partial void ModifyAsylumPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 67256;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyStoneIiiPvE(ref ActionSetting setting)
@@ -127,6 +163,10 @@ partial class WhiteMageRotation
     static partial void ModifyAssizePvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 67258;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyThinAirPvE(ref ActionSetting setting)
@@ -143,6 +183,10 @@ partial class WhiteMageRotation
     static partial void ModifyPlenaryIndulgencePvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 67954;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifySeraphStrikePvP(ref ActionSetting setting)
@@ -173,13 +217,29 @@ partial class WhiteMageRotation
         setting.StatusProvide = [StatusID.Temperance, StatusID.DivineGrace];
     }
 
+    static partial void ModifyLiturgyOfTheBellPvE(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
     static partial void ModifyGlareIvPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.SacredSight];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyDivineCaressPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.DivineGrace];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 }
