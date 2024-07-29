@@ -77,7 +77,7 @@ partial class DarkKnightRotation
 
     static partial void ModifyUnleashPvE(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -107,7 +107,7 @@ partial class DarkKnightRotation
     {
         setting.StatusProvide = [StatusID.Darkside];
         setting.UnlockedByQuestID = 67590;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -117,7 +117,7 @@ partial class DarkKnightRotation
     {
         setting.ActionCheck = () => Blood <= 70;
         setting.StatusProvide = [StatusID.BloodWeapon];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
         };
@@ -134,7 +134,7 @@ partial class DarkKnightRotation
     {
         setting.ActionCheck = () => Blood <= 80;
         setting.ComboIds = [ActionID.UnleashPvE];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -172,7 +172,7 @@ partial class DarkKnightRotation
     static partial void ModifyAbyssalDrainPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 67598;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -191,7 +191,7 @@ partial class DarkKnightRotation
     static partial void ModifyQuietusPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Blood >= 50 || !Player.WillStatusEnd(0, true, StatusID.Delirium_1972);
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -200,7 +200,7 @@ partial class DarkKnightRotation
     static partial void ModifyDeliriumPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Delirium_1972, StatusID.BloodWeapon];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
         };
@@ -217,7 +217,7 @@ partial class DarkKnightRotation
     {
         setting.MPOverride = () => HasDarkArts ? 0 : null;
         setting.StatusProvide = [StatusID.Darkside];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -233,6 +233,10 @@ partial class DarkKnightRotation
     {
         setting.StatusProvide = [StatusID.DarkMissionary];
         setting.ActionCheck = Player.IsTargetOnSelf;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyLivingShadowPvE(ref ActionSetting setting)
@@ -244,12 +248,16 @@ partial class DarkKnightRotation
     {
         setting.StatusProvide = [StatusID.Oblation];
         setting.ActionCheck = Player.IsTargetOnSelf;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifySaltAndDarknessPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 67596;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -258,7 +266,7 @@ partial class DarkKnightRotation
     static partial void ModifyShadowbringerPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => !DarkSideEndAfterGCD();
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -289,7 +297,7 @@ partial class DarkKnightRotation
     static partial void ModifyImpalementPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.Delirium_1972];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -298,7 +306,7 @@ partial class DarkKnightRotation
     static partial void ModifyDisesteemPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.Scorn];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -307,7 +315,7 @@ partial class DarkKnightRotation
     /// <inheritdoc/>
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        if (LivingDeadPvE.CanUse(out act) 
+        if (LivingDeadPvE.CanUse(out act)
             && Player.GetHealthRatio() <= Service.Config.HealthForDyingTanks) return true;
         return base.EmergencyAbility(nextGCD, out act);
     }

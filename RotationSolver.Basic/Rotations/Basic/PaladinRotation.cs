@@ -54,7 +54,7 @@ partial class PaladinRotation
     static partial void ModifyFightOrFlightPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.GoringBladeReady];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 0,
         };
@@ -67,9 +67,9 @@ partial class PaladinRotation
 
     static partial void ModifyTotalEclipsePvE(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 2,
+            AoeCount = 3,
         };
     }
 
@@ -124,9 +124,9 @@ partial class PaladinRotation
         setting.StatusProvide = [StatusID.DivineMight];
         setting.ComboIds = [ActionID.TotalEclipsePvE];
         setting.UnlockedByQuestID = 66593;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 2,
+            AoeCount = 3,
         };
     }
 
@@ -142,9 +142,9 @@ partial class PaladinRotation
     static partial void ModifyCircleOfScornPvE(ref ActionSetting setting)
     {
         setting.TargetStatusProvide = [StatusID.CircleOfScorn];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 2,
+            AoeCount = 3,
         };
     }
 
@@ -198,7 +198,7 @@ partial class PaladinRotation
     static partial void ModifyRequiescatPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.ConfiteorReady];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 0,
         };
@@ -212,9 +212,9 @@ partial class PaladinRotation
 
     static partial void ModifyHolyCirclePvE(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 2,
+            AoeCount = 3,
         };
     }
 
@@ -243,7 +243,7 @@ partial class PaladinRotation
     static partial void ModifyConfiteorPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.ConfiteorReady];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -259,7 +259,7 @@ partial class PaladinRotation
 
     static partial void ModifyExpiacionPvE(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -268,7 +268,7 @@ partial class PaladinRotation
     static partial void ModifyBladeOfFaithPvE(ref ActionSetting setting)
     {
         setting.ComboIds = [ActionID.ConfiteorPvE];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -277,7 +277,7 @@ partial class PaladinRotation
     static partial void ModifyBladeOfTruthPvE(ref ActionSetting setting)
     {
         setting.ComboIds = [ActionID.BladeOfFaithPvE];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -286,7 +286,7 @@ partial class PaladinRotation
     static partial void ModifyBladeOfValorPvE(ref ActionSetting setting)
     {
         setting.ComboIds = [ActionID.BladeOfTruthPvE];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -295,12 +295,13 @@ partial class PaladinRotation
     static partial void ModifyGuardianPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = StatusHelper.RampartStatus;
+        setting.TargetType = TargetType.Self;
     }
 
     static partial void ModifyImperatorPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.ConfiteorReady, StatusID.Requiescat];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -308,7 +309,7 @@ partial class PaladinRotation
     static partial void ModifyBladeOfHonorPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.BladeOfHonorReady];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -319,7 +320,6 @@ partial class PaladinRotation
     {
         setting.SpecialType = SpecialActionType.MovingForward;
     }
-
     /// <inheritdoc/>
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {

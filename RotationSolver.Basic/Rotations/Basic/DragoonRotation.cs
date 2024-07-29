@@ -64,7 +64,7 @@ partial class DragoonRotation
     {
         setting.ComboIds = [ActionID.TrueThrustPvE, ActionID.RaidenThrustPvE];
         setting.StatusProvide = [StatusID.PowerSurge_2720];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             StatusGcdCount = 3,
         };
@@ -77,7 +77,7 @@ partial class DragoonRotation
 
     static partial void ModifyLanceChargePvE(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
         };
@@ -99,7 +99,7 @@ partial class DragoonRotation
     static partial void ModifyDoomSpikePvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 66605;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -115,7 +115,7 @@ partial class DragoonRotation
     {
         setting.ComboIds = [ActionID.DisembowelPvE];
         setting.TargetStatusProvide = [StatusID.ChaoticSpring];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             StatusGcdCount = 3,
         };
@@ -127,7 +127,7 @@ partial class DragoonRotation
     {
         setting.UnlockedByQuestID = 66608;
         setting.StatusProvide = [StatusID.DragonsFlight];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -137,12 +137,9 @@ partial class DragoonRotation
     {
         setting.StatusProvide = [StatusID.BattleLitany];
         setting.UnlockedByQuestID = 67226;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
-        };
-        setting.CreateConfig = () => new()
-        {
             AoeCount = 1,
         };
     }
@@ -164,7 +161,7 @@ partial class DragoonRotation
     {
         setting.UnlockedByQuestID = 67231;
         setting.StatusProvide = [StatusID.NastrondReady, StatusID.LifeOfTheDragon];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -174,7 +171,7 @@ partial class DragoonRotation
     {
         setting.ComboIds = [ActionID.DraconianFuryPvE, ActionID.DoomSpikePvE];
         setting.StatusProvide = [StatusID.PowerSurge_2720];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -195,7 +192,7 @@ partial class DragoonRotation
     {
         setting.StatusNeed = [StatusID.NastrondReady];
         setting.UnlockedByQuestID = 68450;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -205,7 +202,7 @@ partial class DragoonRotation
     {
         setting.StatusProvide = [StatusID.DraconianFire];
         setting.ComboIds = [ActionID.SonicThrustPvE];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -225,7 +222,7 @@ partial class DragoonRotation
     {
         setting.ActionCheck = () => JobGauge.IsLOTDActive;
         setting.StatusProvide = [StatusID.StarcrossReady];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -234,7 +231,7 @@ partial class DragoonRotation
     static partial void ModifyDraconianFuryPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.DraconianFire];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -249,7 +246,7 @@ partial class DragoonRotation
     {
         setting.ComboIds = [ActionID.SpiralBlowPvE];
         setting.TargetStatusProvide = [StatusID.ChaoticSpring];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             StatusGcdCount = 3,
         };
@@ -258,7 +255,7 @@ partial class DragoonRotation
     static partial void ModifyWyrmwindThrustPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => FocusCount == 2;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -268,7 +265,7 @@ partial class DragoonRotation
     {
         setting.UnlockedByQuestID = 66608;
         setting.StatusNeed = [StatusID.DragonsFlight];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -283,7 +280,7 @@ partial class DragoonRotation
     {
         setting.ComboIds = [ActionID.TrueThrustPvE, ActionID.RaidenThrustPvE];
         setting.StatusProvide = [StatusID.PowerSurge_2720];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             StatusGcdCount = 3,
         };
@@ -292,14 +289,13 @@ partial class DragoonRotation
     static partial void ModifyStarcrossPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.StarcrossReady];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
     }
 
     // PvP
-
     static partial void ModifyHighJumpPvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;

@@ -59,6 +59,7 @@ public partial class PictomancerRotation
 
     static partial void ModifyAeroInGreenPvE(ref ActionSetting setting)
     {
+        setting.ActionCheck = () => !Player.HasStatus(true, StatusID.SubtractivePalette);
         setting.StatusProvide = [StatusID.AetherhuesIi];
         setting.StatusNeed = [StatusID.Aetherhues];
     }
@@ -70,6 +71,7 @@ public partial class PictomancerRotation
 
     static partial void ModifyWaterInBluePvE(ref ActionSetting setting)
     {
+        setting.ActionCheck = () => Paint <= 4 && PaletteGauge <= 75 && !Player.HasStatus(true, StatusID.SubtractivePalette);
         setting.StatusNeed = [StatusID.AetherhuesIi];
     }
 
@@ -82,6 +84,10 @@ public partial class PictomancerRotation
     {
         setting.ActionCheck = () => !Player.HasStatus(true, StatusID.SubtractivePalette);
         setting.StatusProvide = [StatusID.Aetherhues];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 3,
+        };
     }
 
     static partial void ModifyCreatureMotifPvE(ref ActionSetting setting)
@@ -97,6 +103,10 @@ public partial class PictomancerRotation
     static partial void ModifyMogOfTheAgesPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => MooglePortraitReady;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyPomMotifPvE(ref ActionSetting setting)
@@ -112,22 +122,40 @@ public partial class PictomancerRotation
     static partial void ModifyPomMusePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => CreatureMotifDrawn;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyWingedMusePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => CreatureMotifDrawn;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyAeroIiInGreenPvE(ref ActionSetting setting)
     {
+        setting.ActionCheck = () => !Player.HasStatus(true, StatusID.SubtractivePalette);
         setting.StatusNeed = [StatusID.Aetherhues];
         setting.StatusProvide = [StatusID.AetherhuesIi];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 3,
+        };
     }
 
     static partial void ModifyWaterIiInBluePvE(ref ActionSetting setting)
     {
+        setting.ActionCheck = () => Paint <= 4 && PaletteGauge <= 75 && !Player.HasStatus(true, StatusID.SubtractivePalette);
         setting.StatusNeed = [StatusID.AetherhuesIi];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 3,
+        };
     }
 
     static partial void ModifyWeaponMotifPvE(ref ActionSetting setting)
@@ -143,6 +171,10 @@ public partial class PictomancerRotation
     static partial void ModifyHammerStampPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.HammerTime];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 3,
+        };
     }
 
     static partial void ModifyHammerMotifPvE(ref ActionSetting setting)
@@ -157,45 +189,55 @@ public partial class PictomancerRotation
 
     static partial void ModifyBlizzardInCyanPvE(ref ActionSetting setting)
     {
+        setting.StatusNeed = [StatusID.SubtractivePalette];
         setting.StatusProvide = [StatusID.Aetherhues];
     }
 
     static partial void ModifyBlizzardIiInCyanPvE(ref ActionSetting setting)
     {
+        setting.StatusNeed = [StatusID.SubtractivePalette];
         setting.StatusProvide = [StatusID.AetherhuesIi];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 3,
+        };
     }
 
     static partial void ModifySubtractivePalettePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => PaletteGauge >= 50 || Player.HasStatus(true, StatusID.SubtractiveSpectrum);
+        setting.ActionCheck = () => !Player.HasStatus(true, StatusID.SubtractivePalette) && (PaletteGauge >= 50 || Player.HasStatus(true, StatusID.SubtractiveSpectrum));
     }
 
     static partial void ModifyStoneInYellowPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (Player.HasStatus(true, StatusID.Hyperphantasia) || Player.HasStatus(true, StatusID.SubtractivePalette));
-        setting.StatusNeed = [StatusID.Aetherhues];
+        setting.StatusNeed = [StatusID.Aetherhues, StatusID.SubtractivePalette];
         setting.StatusProvide = [StatusID.AetherhuesIi];
     }
 
     static partial void ModifyThunderInMagentaPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (Player.HasStatus(true, StatusID.Hyperphantasia) || Player.HasStatus(true, StatusID.SubtractivePalette));
-        setting.StatusNeed = [StatusID.AetherhuesIi]; ;
+        setting.ActionCheck = () => Paint <= 4;
+        setting.StatusNeed = [StatusID.AetherhuesIi, StatusID.SubtractivePalette];
     }
 
     static partial void ModifyStoneIiInYellowPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (Player.HasStatus(true, StatusID.Hyperphantasia) || Player.HasStatus(true, StatusID.SubtractivePalette));
-        setting.StatusNeed = [StatusID.Aetherhues];
+        setting.StatusNeed = [StatusID.Aetherhues, StatusID.SubtractivePalette];
         setting.StatusProvide = [StatusID.AetherhuesIi];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 3,
+        };
     }
-
     static partial void ModifyThunderIiInMagentaPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (Player.HasStatus(true, StatusID.Hyperphantasia) || Player.HasStatus(true, StatusID.SubtractivePalette));
-        setting.StatusNeed = [StatusID.AetherhuesIi]; ;
+        setting.ActionCheck = () => Paint <= 4;
+        setting.StatusNeed = [StatusID.AetherhuesIi, StatusID.SubtractivePalette];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 3,
+        };
     }
-
     static partial void ModifyLandscapeMotifPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => !LandscapeMotifDrawn;
@@ -214,24 +256,36 @@ public partial class PictomancerRotation
     static partial void ModifyStarryMusePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => LandscapeMotifDrawn;
-        setting.StatusProvide = [StatusID.Starstruck, StatusID.SubtractiveSpectrum];
+        setting.StatusProvide = [StatusID.Starstruck, StatusID.SubtractiveSpectrum, StatusID.Inspiration, StatusID.Hyperphantasia, StatusID.RainbowBright];
     }
 
     static partial void ModifyHolyInWhitePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Paint > 0 && !Player.HasStatus(true, StatusID.MonochromeTones);
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyHammerBrushPvE(ref ActionSetting setting)
     {
         setting.ComboIds = [ActionID.HammerStampPvE];
         setting.StatusNeed = [StatusID.HammerTime];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyPolishingHammerPvE(ref ActionSetting setting)
     {
-        setting.ComboIds = [ActionID.PolishingHammerPvE];
+        setting.ComboIds = [ActionID.HammerBrushPvE];
         setting.StatusNeed = [StatusID.HammerTime];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyTemperaGrassaPvE(ref ActionSetting setting)
@@ -244,11 +298,19 @@ public partial class PictomancerRotation
     {
         setting.ActionCheck = () => Paint > 0;
         setting.StatusNeed = [StatusID.MonochromeTones, StatusID.BlackPaint];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyRainbowDripPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.RainbowBright];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyClawMotifPvE(ref ActionSetting setting)
@@ -264,20 +326,36 @@ public partial class PictomancerRotation
     static partial void ModifyClawedMusePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => CreatureMotifDrawn && CanvasFlags == CanvasFlags.Claw;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyFangedMusePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => CreatureMotifDrawn && CanvasFlags == CanvasFlags.Maw;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyRetributionOfTheMadeenPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => MadeenPortraitReady;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyStarPrismPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.Starstruck];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 }

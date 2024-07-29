@@ -84,9 +84,9 @@ partial class MonkRotation
     static partial void ModifyArmOfTheDestroyerPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.RaptorForm];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 2,
+            AoeCount = 3,
         };
     }
 
@@ -102,9 +102,9 @@ partial class MonkRotation
         setting.UnlockedByQuestID = 66597;
         setting.StatusNeed = [StatusID.CoeurlForm, StatusID.PerfectBalance];
         setting.StatusProvide = [StatusID.OpoopoForm];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 2,
+            AoeCount = 3,
         };
     }
 
@@ -123,16 +123,16 @@ partial class MonkRotation
     {
         setting.ActionCheck = () => InCombat && Chakra >= 5;
         setting.UnlockedByQuestID = 66599;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 2,
+            AoeCount = 3,
         };
     }
 
     static partial void ModifyMantraPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Mantra];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
         };
@@ -143,9 +143,9 @@ partial class MonkRotation
         setting.UnlockedByQuestID = 66600;
         setting.StatusNeed = [StatusID.RaptorForm, StatusID.PerfectBalance];
         setting.StatusProvide = [StatusID.CoeurlForm];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 2,
+            AoeCount = 3,
         };
     }
 
@@ -187,7 +187,7 @@ partial class MonkRotation
     {
         setting.ActionCheck = () => HasSolar && HasLunar && BeastChakras.Any(chakra => chakra != BeastChakra.NONE);
         setting.StatusProvide = [StatusID.FormlessFist];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -197,7 +197,7 @@ partial class MonkRotation
     {
         setting.ActionCheck = () => BeastChakras.Distinct().Count() == 1 && BeastChakras.Any(chakra => chakra != BeastChakra.NONE);
         setting.StatusProvide = [StatusID.FormlessFist];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -207,7 +207,7 @@ partial class MonkRotation
     {
         setting.ActionCheck = () => BeastChakras.Distinct().Count() == 2 && BeastChakras.Any(chakra => chakra != BeastChakra.NONE);
         setting.StatusProvide = [StatusID.FormlessFist];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -217,7 +217,7 @@ partial class MonkRotation
     {
         setting.ActionCheck = () => BeastChakras.Distinct().Count() == 3 && BeastChakras.Any(chakra => chakra != BeastChakra.NONE);
         setting.StatusProvide = [StatusID.FormlessFist];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -236,7 +236,7 @@ partial class MonkRotation
     static partial void ModifyRiddleOfFirePvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.RiddleOfFire, StatusID.FiresRumination];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
         };
@@ -245,7 +245,7 @@ partial class MonkRotation
     static partial void ModifyBrotherhoodPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Brotherhood, StatusID.MeditativeBrotherhood];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
         };
@@ -255,7 +255,7 @@ partial class MonkRotation
     static partial void ModifyRiddleOfWindPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.RiddleOfWind, StatusID.WindsRumination];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
         };
@@ -269,7 +269,7 @@ partial class MonkRotation
     static partial void ModifyEnlightenmentPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => InCombat && Chakra >= 5;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -290,7 +290,7 @@ partial class MonkRotation
     {
         setting.ActionCheck = () => BeastChakras.Distinct().Count() == 3 && BeastChakras.Any(chakra => chakra != BeastChakra.NONE);
         setting.StatusProvide = [StatusID.FormlessFist];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -300,7 +300,7 @@ partial class MonkRotation
     {
         setting.ActionCheck = () => HasSolar && HasLunar && BeastChakras.Any(chakra => chakra != BeastChakra.NONE);
         setting.StatusProvide = [StatusID.FormlessFist];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -330,7 +330,7 @@ partial class MonkRotation
     {
         setting.ActionCheck = () => BeastChakras.Distinct().Count() == 1 && BeastChakras.Any(chakra => chakra != BeastChakra.NONE);
         setting.StatusProvide = [StatusID.FormlessFist];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -339,7 +339,7 @@ partial class MonkRotation
     static partial void ModifyWindsReplyPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.WindsRumination];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -349,7 +349,7 @@ partial class MonkRotation
     {
         setting.StatusNeed = [StatusID.FiresRumination];
         setting.StatusProvide = [StatusID.FormlessFist];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };

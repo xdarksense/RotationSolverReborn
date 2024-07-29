@@ -55,7 +55,7 @@ partial class AstrologianRotation
     static partial void ModifyLightspeedPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Lightspeed];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
         };
@@ -64,7 +64,7 @@ partial class AstrologianRotation
     static partial void ModifyHeliosPvE(ref ActionSetting setting)
     {
         setting.IsFriendly = true;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -174,7 +174,7 @@ partial class AstrologianRotation
         setting.StatusProvide = [StatusID.AspectedHelios];
         setting.UnlockedByQuestID = 67551;
         setting.IsFriendly = true;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -182,11 +182,11 @@ partial class AstrologianRotation
 
     static partial void ModifyGravityPvE(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new()
+        setting.UnlockedByQuestID = 67553;
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
-        setting.UnlockedByQuestID = 67553;
     }
 
     static partial void ModifyCombustIiPvE(ref ActionSetting setting)
@@ -209,9 +209,6 @@ partial class AstrologianRotation
         setting.CreateConfig = () => new()
         {
             TimeToKill = 10,
-        };
-        setting.CreateConfig = () => new()
-        {
             AoeCount = 1,
         };
     }
@@ -226,7 +223,7 @@ partial class AstrologianRotation
         setting.TargetStatusProvide = [StatusID.CollectiveUnconscious, StatusID.WheelOfFortune];
         setting.UnlockedByQuestID = 67560;
         setting.IsFriendly = true;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -237,7 +234,7 @@ partial class AstrologianRotation
         setting.TargetStatusProvide = [StatusID.Opposition];
         setting.UnlockedByQuestID = 67561;
         setting.IsFriendly = true;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -246,12 +243,9 @@ partial class AstrologianRotation
     static partial void ModifyEarthlyStarPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.EarthlyDominance, StatusID.GiantDominance];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
-        };
-        setting.CreateConfig = () => new()
-        {
             AoeCount = 1,
         };
     }
@@ -259,7 +253,7 @@ partial class AstrologianRotation
     static partial void ModifyStellarDetonationPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.GiantDominance];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -279,7 +273,7 @@ partial class AstrologianRotation
     {
         setting.ActionCheck = () => DrawnCard.All(card => card == CardType.NONE) && DrawnCrownCard == CardType.LORD;
         setting.IsFriendly = false;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -289,7 +283,7 @@ partial class AstrologianRotation
     {
         setting.ActionCheck = () => DrawnCard.All(card => card == CardType.NONE) && DrawnCrownCard == CardType.LADY;
         setting.IsFriendly = true;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -315,7 +309,7 @@ partial class AstrologianRotation
     {
         setting.TargetStatusProvide = [StatusID.Horoscope];
         setting.IsFriendly = true;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -325,7 +319,7 @@ partial class AstrologianRotation
     {
         setting.StatusNeed = [StatusID.Horoscope];
         setting.IsFriendly = true;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -333,7 +327,7 @@ partial class AstrologianRotation
 
     static partial void ModifyNeutralSectPvE(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 15,
         };
@@ -348,7 +342,7 @@ partial class AstrologianRotation
 
     static partial void ModifyGravityIiPvE(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -364,7 +358,7 @@ partial class AstrologianRotation
     {
         setting.TargetStatusProvide = [StatusID.Macrocosmos];
         setting.StatusProvide = [StatusID.Macrocosmos];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -374,7 +368,7 @@ partial class AstrologianRotation
     {
         setting.StatusNeed = [StatusID.Macrocosmos];
         setting.IsFriendly = true;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -383,7 +377,7 @@ partial class AstrologianRotation
     static partial void ModifyOraclePvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.Divining];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -393,7 +387,7 @@ partial class AstrologianRotation
     {
         setting.StatusProvide = [StatusID.HeliosConjunction];
         setting.IsFriendly = true;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -403,7 +397,7 @@ partial class AstrologianRotation
     {
         setting.StatusNeed = [StatusID.Suntouched];
         setting.IsFriendly = true;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };

@@ -8,7 +8,7 @@ namespace DefaultRotations.Melee;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.0")]
 [SourceCode(Path = "main/DefaultRotations/Melee/VPR_Default.cs")]
-[Api(2)]
+[Api(1)]
 public sealed class VPR_Default : ViperRotation
 {
     #region Countdown logic
