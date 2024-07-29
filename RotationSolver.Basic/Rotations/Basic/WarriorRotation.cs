@@ -111,7 +111,7 @@ partial class WarriorRotation
     static partial void ModifyStormsEyePvE(ref ActionSetting setting)
     {
         setting.ComboIds = [ActionID.MaimPvE];
-        setting.StatusProvide = [StatusID.StormsEye];
+        setting.StatusProvide = [StatusID.SurgingTempest];
         setting.CreateConfig = () => new ActionConfig()
         {
             StatusGcdCount = 9,

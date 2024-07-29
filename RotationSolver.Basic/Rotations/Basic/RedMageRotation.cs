@@ -216,7 +216,7 @@ partial class RedMageRotation
     static partial void ModifyGrandImpactPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.GrandImpactReady];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
