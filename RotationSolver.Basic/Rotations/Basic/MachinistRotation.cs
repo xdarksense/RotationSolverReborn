@@ -96,6 +96,7 @@ partial class MachinistRotation
     static partial void ModifyHyperchargePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => !IsOverheated && (Heat >= 50 || Player.HasStatus(true, StatusID.Hypercharged));
+        setting.StatusProvide = [StatusID.Overheated];
         setting.UnlockedByQuestID = 67233;
         setting.CreateConfig = () => new ActionConfig()
         {

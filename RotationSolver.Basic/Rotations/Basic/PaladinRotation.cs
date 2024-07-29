@@ -152,6 +152,7 @@ partial class PaladinRotation
     {
         setting.StatusProvide = [StatusID.HallowedGround];
         setting.UnlockedByQuestID = 66596;
+        setting.ActionCheck = () => InCombat;
     }
 
     static partial void ModifyBulwarkPvE(ref ActionSetting setting)

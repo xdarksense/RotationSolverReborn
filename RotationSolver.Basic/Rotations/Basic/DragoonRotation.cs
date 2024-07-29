@@ -43,6 +43,11 @@ partial class DragoonRotation
 
     //Job
 
+    static partial void ModifyTrueThrustPvE(ref ActionSetting setting)
+    {
+
+    }
+
     static partial void ModifyVorpalThrustPvE(ref ActionSetting setting)
     {
         setting.ComboIds = [ActionID.TrueThrustPvE, ActionID.RaidenThrustPvE];
@@ -66,13 +71,13 @@ partial class DragoonRotation
         setting.StatusProvide = [StatusID.PowerSurge_2720];
         setting.CreateConfig = () => new ActionConfig()
         {
-            StatusGcdCount = 3,
+            StatusGcdCount = 2,
         };
     }
 
     static partial void ModifyFullThrustPvE(ref ActionSetting setting)
     {
-        setting.ComboIds = [ActionID.VorpalThrustPvE];
+        setting.ComboIds = [ActionID.VorpalThrustPvE, ActionID.LanceBarragePvE];
     }
 
     static partial void ModifyLanceChargePvE(ref ActionSetting setting)
@@ -113,8 +118,8 @@ partial class DragoonRotation
 
     static partial void ModifyChaosThrustPvE(ref ActionSetting setting)
     {
-        setting.ComboIds = [ActionID.DisembowelPvE];
-        setting.TargetStatusProvide = [StatusID.ChaoticSpring];
+        setting.ComboIds = [ActionID.DisembowelPvE, ActionID.SpiralBlowPvE];
+        setting.TargetStatusProvide = [StatusID.ChaosThrust,StatusID.ChaoticSpring];
         setting.CreateConfig = () => new ActionConfig()
         {
             StatusGcdCount = 3,
@@ -181,6 +186,10 @@ partial class DragoonRotation
     {
         setting.ComboIds = [ActionID.WheelingThrustPvE, ActionID.FangAndClawPvE];
         setting.StatusProvide = [StatusID.DraconianFire];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            StatusGcdCount = 5,
+        };
     }
 
     static partial void ModifyMirageDivePvE(ref ActionSetting setting)
@@ -239,7 +248,7 @@ partial class DragoonRotation
 
     static partial void ModifyHeavensThrustPvE(ref ActionSetting setting)
     {
-        setting.ComboIds = [ActionID.LanceBarragePvE];
+        setting.ComboIds = [ActionID.VorpalThrustPvE, ActionID.LanceBarragePvE];
     }
 
     static partial void ModifyChaoticSpringPvE(ref ActionSetting setting)

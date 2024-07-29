@@ -154,7 +154,8 @@ partial class DarkKnightRotation
     static partial void ModifyLivingDeadPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.LivingDead, StatusID.WalkingDead, StatusID.UndeadRebirth];
-        setting.ActionCheck = Player.IsTargetOnSelf;
+        setting.ActionCheck = () => InCombat;
+        setting.TargetType = TargetType.Self;
         setting.UnlockedByQuestID = 67594;
     }
 

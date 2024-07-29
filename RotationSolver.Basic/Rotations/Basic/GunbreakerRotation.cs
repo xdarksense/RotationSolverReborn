@@ -111,7 +111,8 @@ partial class GunbreakerRotation
     static partial void ModifySuperbolidePvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Superbolide];
-        setting.ActionCheck = () => Player.IsTargetOnSelf();
+        setting.ActionCheck = () => InCombat;
+        setting.TargetType = TargetType.Self;
     }
 
     static partial void ModifySonicBreakPvE(ref ActionSetting setting)
