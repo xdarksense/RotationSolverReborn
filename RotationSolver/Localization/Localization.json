@@ -546,5 +546,11 @@
   "RotationSolver.Basic.Data.DescType.MoveBackAbility": "Move Back Ability",
   "RotationSolver.DummyRotations.TestingRotation.Name": "DoomSpikeWhenever",
   "RotationSolver.DummyRotations.TestingRotation.DisplayName": "Use Doom Spike for damage uptime if out of melee range even if it breaks combo",
-  "RotationSolver.Data.UiString.SpecialCommandType_MoveBack": "Move Back"
+  "RotationSolver.Data.UiString.SpecialCommandType_MoveBack": "Move Back",
+  "DefaultRotations.Tank.WAR_Default.Name": "EquilibriumHeal",
+  "DefaultRotations.Tank.WAR_Default.DisplayName": "Equilibrium Heal Threshold",
+  "DefaultRotations.Melee.NIN_Default.Name": "AutoUnhide",
+  "DefaultRotations.Melee.NIN_Default.DisplayName": "Use Unhide",
+  "DefaultRotations.Tank.DRK_Default.Name": "TheBlackestNight",
+  "DefaultRotations.Tank.DRK_Default.DisplayName": "Keep at least 3000 MP"
 }

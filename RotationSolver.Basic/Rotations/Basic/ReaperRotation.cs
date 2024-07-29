@@ -97,9 +97,9 @@ partial class ReaperRotation
     {
         setting.ActionCheck = () => !HasSoulReaver;
         setting.TargetStatusProvide = [StatusID.DeathsDesign];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 2,
+            AoeCount = 3,
         };
     }
 
@@ -159,7 +159,7 @@ partial class ReaperRotation
     static partial void ModifyArcaneCirclePvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.BloodsownCircle_2972];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
         };

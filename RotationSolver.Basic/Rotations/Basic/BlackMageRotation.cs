@@ -161,7 +161,7 @@ partial class BlackMageRotation
     static partial void ModifyBlizzardIiPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => InAstralFire;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -175,7 +175,7 @@ partial class BlackMageRotation
     static partial void ModifyFireIiPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => InUmbralIce;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -224,7 +224,7 @@ partial class BlackMageRotation
     {
         setting.ActionCheck = () => InUmbralIce && !ElementTimeEndAfter(ActionID.FreezePvE.GetCastTime() - 0.1f) && UmbralHearts == 0;
         setting.UnlockedByQuestID = 66611;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -246,7 +246,7 @@ partial class BlackMageRotation
     {
         setting.ActionCheck = () => InAstralFire && AstralSoulStacks <= 3 && !ElementTimeEndAfter(ActionID.FlarePvE.GetCastTime() - 0.1f);
         setting.UnlockedByQuestID = 66614;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -257,12 +257,9 @@ partial class BlackMageRotation
         setting.ActionCheck = () => !IsMoving;
         setting.StatusProvide = [StatusID.LeyLines];
         setting.UnlockedByQuestID = 67215;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 15,
-        };
-        setting.CreateConfig = () => new()
-        {
             AoeCount = 1,
         };
     }
@@ -282,7 +279,7 @@ partial class BlackMageRotation
     static partial void ModifyBetweenTheLinesPvE(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingBackward;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -292,7 +289,7 @@ partial class BlackMageRotation
     {
         setting.TargetStatusProvide = [StatusID.HighThunder_3872, StatusID.Thunder];
         setting.StatusNeed = [StatusID.Thunderhead];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -307,7 +304,7 @@ partial class BlackMageRotation
     {
         setting.ActionCheck = () => PolyglotStacks > 0;
         setting.UnlockedByQuestID = 68128;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -326,7 +323,7 @@ partial class BlackMageRotation
     static partial void ModifyHighFireIiPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => InUmbralIce;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -335,7 +332,7 @@ partial class BlackMageRotation
     static partial void ModifyHighBlizzardIiPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => InAstralFire;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -362,7 +359,7 @@ partial class BlackMageRotation
     {
         setting.StatusNeed = [StatusID.Thunderhead];
         setting.TargetStatusProvide = [StatusID.HighThunder_3872, StatusID.Thunder];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -372,7 +369,7 @@ partial class BlackMageRotation
     {
         setting.ActionCheck = () => !IsMoving && !Player.HasStatus(true, StatusID.CircleOfPower);
         setting.StatusNeed = [StatusID.LeyLines];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -381,7 +378,7 @@ partial class BlackMageRotation
     static partial void ModifyFlareStarPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => AstralSoulStacks == 6;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };

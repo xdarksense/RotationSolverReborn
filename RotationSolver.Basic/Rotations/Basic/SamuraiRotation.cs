@@ -166,7 +166,7 @@ partial class SamuraiRotation
     static partial void ModifyMeikyoShisuiPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.MeikyoShisui];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 0,
         };

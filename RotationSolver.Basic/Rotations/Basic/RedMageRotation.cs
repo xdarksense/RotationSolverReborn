@@ -85,9 +85,9 @@ partial class RedMageRotation
     static partial void ModifyScatterPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = SwiftcastStatus;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 2,
+            AoeCount = 3,
         };
     }
 
@@ -130,7 +130,7 @@ partial class RedMageRotation
 
     static partial void ModifyEmboldenPvE(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
         };
@@ -159,7 +159,7 @@ partial class RedMageRotation
         );
         ;
 
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
         };

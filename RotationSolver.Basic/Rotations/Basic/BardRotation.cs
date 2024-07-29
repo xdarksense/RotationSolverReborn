@@ -92,7 +92,7 @@ partial class BardRotation
     static partial void ModifyQuickNockPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.HawksEye_3861];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -101,7 +101,7 @@ partial class BardRotation
     static partial void ModifyWideVolleyPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.HawksEye_3861];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -131,7 +131,6 @@ partial class BardRotation
     static partial void ModifyBarragePvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Barrage, StatusID.ResonantArrowReady];
-        setting.UnlockedByQuestID = 68430;
     }
 
     static partial void ModifyArmysPaeonPvE(ref ActionSetting setting)
@@ -145,7 +144,7 @@ partial class BardRotation
     static partial void ModifyRainOfDeathPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 66624;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -155,12 +154,9 @@ partial class BardRotation
     {
         setting.StatusProvide = [StatusID.BattleVoice];
         setting.UnlockedByQuestID = 66626;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
-        };
-        setting.CreateConfig = () => new()
-        {
             AoeCount = 1,
         };
     }
@@ -176,7 +172,7 @@ partial class BardRotation
     static partial void ModifyPitchPerfectPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Song == Song.WANDERER && Repertoire > 0;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -209,7 +205,7 @@ partial class BardRotation
     {
         setting.StatusFromSelf = false;
         setting.StatusProvide = StatusHelper.RangePhysicalDefense;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -230,7 +226,7 @@ partial class BardRotation
     static partial void ModifyNaturesMinnePvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.NaturesMinne];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -245,7 +241,7 @@ partial class BardRotation
     static partial void ModifyShadowbitePvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.HawksEye_3861, StatusID.Barrage];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -260,7 +256,7 @@ partial class BardRotation
     {
         setting.StatusProvide = [StatusID.BlastArrowReady];
         setting.ActionCheck = () => SoulVoice >= 20;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -269,7 +265,7 @@ partial class BardRotation
     static partial void ModifyLadonsbitePvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.HawksEye_3861];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -278,7 +274,7 @@ partial class BardRotation
     static partial void ModifyBlastArrowPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.BlastArrowReady];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -288,12 +284,9 @@ partial class BardRotation
     {
         setting.ActionCheck = () => JobGauge.Coda.Any(s => s != Song.NONE);
         setting.StatusProvide = [StatusID.RadiantEncoreReady];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
-        };
-        setting.CreateConfig = () => new()
-        {
             AoeCount = 1,
         };
     }
@@ -306,7 +299,7 @@ partial class BardRotation
     static partial void ModifyResonantArrowPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.ResonantArrowReady];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -315,7 +308,7 @@ partial class BardRotation
     static partial void ModifyRadiantEncorePvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.RadiantEncoreReady];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };

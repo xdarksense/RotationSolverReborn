@@ -155,7 +155,7 @@ partial class WhiteMageRotation
     static partial void ModifyPresenceOfMindPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => !IsMoving;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
         };
@@ -170,8 +170,7 @@ partial class WhiteMageRotation
 
     static partial void ModifyTemperancePvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.Temperance];
-        setting.StatusProvide = [StatusID.DivineGrace];
+        setting.StatusProvide = [StatusID.Temperance, StatusID.DivineGrace];
     }
 
     static partial void ModifyGlareIvPvE(ref ActionSetting setting)

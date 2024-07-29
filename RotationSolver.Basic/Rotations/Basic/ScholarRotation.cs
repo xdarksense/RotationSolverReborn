@@ -128,7 +128,7 @@ partial class ScholarRotation
     static partial void ModifyChainStratagemPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => InCombat;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
         };
@@ -136,9 +136,9 @@ partial class ScholarRotation
 
     static partial void ModifyArtOfWarPvE(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 2,
+            AoeCount = 3,
         };
     }
 

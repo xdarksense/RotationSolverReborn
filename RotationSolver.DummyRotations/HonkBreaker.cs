@@ -1,3 +1,6 @@
+using Dalamud.Game.Text.SeStringHandling.Payloads;
+using FFXIVClientStructs.FFXIV.Client.Game.Gauge;
+using ImGuiNET;
 using RotationSolver.Basic.Actions;
 using RotationSolver.Basic.Attributes;
 using RotationSolver.Basic.Data;
@@ -7,108 +10,130 @@ using RotationSolver.Basic.Rotations.Basic;
 namespace RotationSolver.DummyRotations;
 
 [Rotation("TestingRotation", CombatType.PvE, GameVersion = "7.01")]
-[Api(2)]
+[Api(1)]
 
-public sealed class TestingRotation : DragoonRotation
+public sealed class TestingRotation : ViperRotation
 {
-    #region Config Options
-    [RotationConfig(CombatType.PvE, Name = "Use this to create toggles for users")]
-    public bool YesNoSetting { get; set; } = true;
-
-    [Range(1, 69, ConfigUnitType.Seconds, 1)]
-    [RotationConfig(CombatType.PvE, Name = "Use this to create user configurable time setting")]
-    public float TimeSetting { get; set; } = 69;
-
-    [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Use this to create a percentage slide for user configuration")]
-    public float PercentageSetting { get; set; } = 0.69f;
-    #endregion
-
     #region Additional oGCD Logic
-
-    [RotationDesc]
-    protected override bool InterruptAbility(IAction nextGCD, out IAction? act)
-    {
-        act = null; return false;
-    }
-
-    [RotationDesc]
-    protected override bool AntiKnockbackAbility(IAction nextGCD, out IAction? act)
-    {
-        act = null; return false;
-    }
-
-    [RotationDesc]
-    protected override bool ProvokeAbility(IAction nextGCD, out IAction? act)
-    {
-        act = null; return false;
-    }
 
     [RotationDesc]
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        act = null; return false;
+        // Uncoiled Fury Combo
+        if (UncoiledTwinfangPvE.CanUse(out act)) return true;
+        if (UncoiledTwinbloodPvE.CanUse(out act)) return true;
+
+        //AOE Dread Combo
+        if (TwinfangThreshPvE.CanUse(out act)) return true;
+        if (TwinbloodThreshPvE.CanUse(out act)) return true;
+
+        //Single Target Dread Combo
+        if (TwinfangBitePvE.CanUse(out act)) return true;
+        if (TwinbloodBitePvE.CanUse(out act)) return true;
+        return base.EmergencyAbility(nextGCD, out act);
     }
 
     [RotationDesc]
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
-        act = null; return false;
-    }
-
-    [RotationDesc]
-    protected override bool MoveBackAbility(IAction nextGCD, out IAction? act)
-    {
-        act = null; return false;
-    }
-
-    [RotationDesc]
-    protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
-    {
-        act = null; return false;
-    }
-
-    [RotationDesc]
-    protected override bool HealAreaAbility(IAction nextGCD, out IAction? act)
-    {
-        act = null; return false;
-    }
-
-    [RotationDesc]
-    protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
-    {
-        act = null; return false;
+        if (SlitherPvE.CanUse(out act)) return true;
+        return base.AttackAbility(nextGCD, out act);
     }
 
     [RotationDesc]
     protected sealed override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        act = null; return false;
-    }
-
-    [RotationDesc]
-    protected override bool SpeedAbility(IAction nextGCD, out IAction? act)
-    {
-        act = null; return false;
+        if (FeintPvE.CanUse(out act)) return true;
+        return base.DefenseAreaAbility(nextGCD, out act);
     }
     #endregion
 
     #region oGCD Logic
-    protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
-    {
-        act = null; return false;
-    }
-
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        act = null; return false;
+        //Reawaken Combo
+        if (FirstLegacyPvE.CanUse(out act)) return true;
+        if (SecondLegacyPvE.CanUse(out act)) return true;
+        if (ThirdLegacyPvE.CanUse(out act)) return true;
+        if (FourthLegacyPvE.CanUse(out act)) return true;
+        if (SerpentsIrePvE.CanUse(out act)) return true;
+
+        //Serpent Combo oGCDs
+        if (LastLashPvE.CanUse(out act)) return true;
+        if (DeathRattlePvE.CanUse(out act)) return true;
+
+        return base.AttackAbility(nextGCD, out act);
     }
     #endregion
 
     #region GCD Logic
     protected override bool GeneralGCD(out IAction? act)
     {
-        act = null; return false;
+
+        if (DreadwinderPvE.Cooldown.CurrentCharges > 0 || !SerpentsIrePvE.Cooldown.IsCoolingDown)
+        {
+            if (UncoiledFuryPvE.CanUse(out act)) return true;
+        }
+
+        //Reawaken Combo
+        if (OuroborosPvE.CanUse(out act)) return true;
+        if (FourthGenerationPvE.CanUse(out act)) return true;
+        if (ThirdGenerationPvE.CanUse(out act)) return true;
+        if (SecondGenerationPvE.CanUse(out act)) return true;
+        if (FirstGenerationPvE.CanUse(out act)) return true;
+        if (DreadwinderPvE.Cooldown.CurrentCharges == 0 || (DreadwinderPvE.Cooldown.CurrentCharges == 1 && DreadwinderPvE.Cooldown.RecastTimeRemainOneCharge > 10))
+        { 
+            if (ReawakenPvE.CanUse(out act)) return true;
+        }
+        if (HostileTarget?.StatusTime(true, StatusID.NoxiousGnash) <= 20 && HostileTarget?.StatusTime(true, StatusID.NoxiousGnash) > 0 && Player.HasStatus(true, StatusID.Swiftscaled, StatusID.Swiftscaled_4121))
+        {
+            //Dreadwinder Usage
+            if (PitOfDreadPvE.CanUse(out act, usedUp: true) && DreadCombo is 0) return true;
+            if (DreadwinderPvE.CanUse(out act, usedUp: true) && DreadCombo is 0) return true;
+        }
+
+        //AOE Dread Combo
+        if (HuntersDenPvE.CanUse(out act, skipComboCheck: true)) return true;
+        if (SwiftskinsDenPvE.CanUse(out act, skipComboCheck: true)) return true;
+
+        if (PitOfDreadPvE.CanUse(out act, usedUp: true)) return true;
+
+        //Single Target Dread Combo
+        if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true)) return true;
+        if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true)) return true;
+
+        if (DreadwinderPvE.CanUse(out act, usedUp: true)) return true;
+
+        //AOE Serpent Combo
+        if (JaggedMawPvE.CanUse(out act, skipStatusProvideCheck: true) && !Player.HasStatus(true, StatusID.GrimhuntersVenom) && !Player.HasStatus(true, StatusID.GrimskinsVenom)) return true;
+        if (JaggedMawPvE.CanUse(out act)) return true;
+        if (BloodiedMawPvE.CanUse(out act)) return true;
+
+        if (HuntersBitePvE.CanUse(out act)) return true;
+        if (SwiftskinsBitePvE.CanUse(out act)) return true;
+
+        if (DreadMawPvE.CanUse(out act)) return true;
+        if (SteelMawPvE.CanUse(out act)) return true;
+
+        //Single Target Serpent Combo
+        if (FlankstingStrikePvE.CanUse(out act)) return true;
+        if (FlanksbaneFangPvE.CanUse(out act)) return true;
+        if (HindstingStrikePvE.CanUse(out act)) return true;
+        if (HindsbaneFangPvE.CanUse(out act)) return true;
+
+        if (HuntersStingPvE.CanUse(out act)) return true;
+        if (SwiftskinsStingPvE.CanUse(out act)) return true;
+
+        if (DreadFangsPvE.CanUse(out act)) return true;
+        if (SteelFangsPvE.CanUse(out act)) return true;
+
+        // Uncoiled Fury Combo
+        if (UncoiledFuryPvE.CanUse(out act)) return true;
+
+        //Ranged
+        if (WrithingSnapPvE.CanUse(out act)) return true;
+
+        return base.GeneralGCD(out act);
     }
     #endregion
 }

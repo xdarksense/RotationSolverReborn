@@ -41,7 +41,7 @@ partial class GunbreakerRotation
     static partial void ModifyNoMercyPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.ReadyToBreak];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
         };
@@ -59,7 +59,7 @@ partial class GunbreakerRotation
 
     static partial void ModifyDemonSlicePvE(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -97,7 +97,7 @@ partial class GunbreakerRotation
     static partial void ModifyDemonSlaughterPvE(ref ActionSetting setting)
     {
         setting.ComboIds = [ActionID.DemonSlicePvE];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 2,
         };
@@ -153,7 +153,7 @@ partial class GunbreakerRotation
     static partial void ModifyHeartOfLightPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.HeartOfLight];
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
@@ -195,7 +195,7 @@ partial class GunbreakerRotation
     {
         setting.StatusProvide = [StatusID.ReadyToRaze];
         setting.ActionCheck = () => Ammo > 0;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
         };
@@ -228,7 +228,7 @@ partial class GunbreakerRotation
     static partial void ModifyDoubleDownPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Ammo > 1;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };

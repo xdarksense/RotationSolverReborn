@@ -242,7 +242,7 @@ partial class SummonerRotation
     {
         setting.StatusProvide = [StatusID.SearingLight];
         setting.ActionCheck = () => InCombat;
-        setting.CreateConfig = () => new()
+        setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 15,
         };
