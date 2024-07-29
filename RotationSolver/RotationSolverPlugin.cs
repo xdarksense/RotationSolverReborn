@@ -163,7 +163,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
     private void OnOpenConfigUi()
     {
-        _rotationConfigWindow!.IsOpen = true;
+        OpenConfigWindow();
     }
 
     internal static void OpenConfigWindow()
