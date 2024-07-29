@@ -84,18 +84,19 @@ partial class WarriorRotation
     static partial void ModifyMythrilTempestPvE(ref ActionSetting setting)
     {
         setting.ComboIds = [ActionID.OverpowerPvE];
-        setting.StatusProvide = [StatusID.SurgingTempest];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 2,
         };
         setting.UnlockedByQuestID = 66587;
+
     }
 
     static partial void ModifyHolmgangPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Holmgang_409];
         setting.TargetType = TargetType.Self;
+        setting.ActionCheck = () => InCombat;
     }
 
     static partial void ModifySteelCyclonePvE(ref ActionSetting setting)

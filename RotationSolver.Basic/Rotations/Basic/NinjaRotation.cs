@@ -166,13 +166,14 @@ partial class NinjaRotation
         setting.StatusNeed = [StatusID.Kassatsu];
         setting.StatusProvide = [StatusID.TenChiJin, StatusID.TenriJindoReady];
         setting.UnlockedByQuestID = 68488;
+        setting.ActionCheck = () => Ninki <= 50 && !IsMoving;
     }
 
     static partial void ModifyMeisuiPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.ShadowWalker];
         setting.StatusProvide = [StatusID.Meisui];
-        setting.ActionCheck = () => Ninki <= 50 && InCombat;
+        setting.ActionCheck = () => !Player.HasStatus(true, StatusID.Kassatsu) && InCombat;
     }
 
     static partial void ModifyBunshinPvE(ref ActionSetting setting)
@@ -207,7 +208,7 @@ partial class NinjaRotation
 
     static partial void ModifyKunaisBanePvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Hidden];
+        setting.ActionCheck = () => Player.HasStatus(true, StatusID.Hidden) || Player.HasStatus(true, StatusID.ShadowWalker);
         setting.TargetStatusProvide = [StatusID.KunaisBane];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -293,7 +294,7 @@ partial class NinjaRotation
         setting.StatusProvide = [StatusID.Doton];
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 1,
+            AoeCount = 3,
         };
     }
 
