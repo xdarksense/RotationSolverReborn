@@ -9,7 +9,7 @@ using RotationSolver.GameData.Getters.Actions;
 using System.Net;
 using System.Resources.NetStandard;
 
-var gameData = new GameData(@"D:\FFXIV\Game\game\sqpack", new LuminaOptions
+var gameData = new GameData(@"C:\FF14\game\sqpack", new LuminaOptions
 {
     LoadMultithreaded = true,
     CacheFileResources = true,
