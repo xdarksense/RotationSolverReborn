@@ -552,5 +552,7 @@
   "DefaultRotations.Melee.NIN_Default.Name": "AutoUnhide",
   "DefaultRotations.Melee.NIN_Default.DisplayName": "Use Unhide",
   "DefaultRotations.Tank.DRK_Default.Name": "TheBlackestNight",
-  "DefaultRotations.Tank.DRK_Default.DisplayName": "Keep at least 3000 MP"
+  "DefaultRotations.Tank.DRK_Default.DisplayName": "Keep at least 3000 MP",
+  "DefaultRotations.Ranged.BRD_Default.Name": "FirstSong",
+  "DefaultRotations.Ranged.BRD_Default.DisplayName": "First Song"
 }
