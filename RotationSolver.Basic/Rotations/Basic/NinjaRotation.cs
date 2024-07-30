@@ -164,7 +164,6 @@ partial class NinjaRotation
 
     static partial void ModifyTenChiJinPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Kassatsu];
         setting.StatusProvide = [StatusID.TenChiJin, StatusID.TenriJindoReady];
         setting.UnlockedByQuestID = 68488;
         setting.ActionCheck = () => !IsMoving;

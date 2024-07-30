@@ -1,88 +1,131 @@
-﻿using FFXIVClientStructs.FFXIV.Application.Network.WorkDefinitions;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Attributes;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Rotations.Basic;
+﻿//using FFXIVClientStructs.FFXIV.Application.Network.WorkDefinitions;
+//using ImGuiNET;
+//using RotationSolver.Basic.Actions;
+//using RotationSolver.Basic.Attributes;
+//using RotationSolver.Basic.Data;
+//using RotationSolver.Basic.Helpers;
+//using RotationSolver.Basic.Rotations;
+//using RotationSolver.Basic.Rotations.Basic;
 
-namespace DefaultRotations.Melee;
+//namespace DefaultRotations.Melee;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.0")]
-[SourceCode(Path = "main/DefaultRotations/Melee/VPR_Default.cs")]
-[Api(1)]
-public sealed class VPR_Default : ViperRotation
-{
-    #region Countdown logic
-    // Defines logic for actions to take during the countdown before combat starts.
-    /*protected override IAction? CountDownAction(float remainTime)
-    {
+//[Rotation("MeowViper", CombatType.PvE, GameVersion = "7.01")]
+//[SourceCode(Path = "main/DefaultRotations/Melee/VPR_Testing.cs")]
+//[Api(3)]
+//public sealed class VPR_Testing : ViperRotation
+//{
+//    #region Emergency Logic
+//    // Determines emergency actions to take based on the next planned GCD action.
+//    protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
+//    {
+//        if (OuroborosPvE.CanUse(out act)) return true;
+//        if (FourthGenerationPvE.CanUse(out act)) return true;
+//        if (ThirdGenerationPvE.CanUse(out act)) return true;
+//        if (SecondGenerationPvE.CanUse(out act)) return true;
+//        if (FirstGenerationPvE.CanUse(out act)) return true;
+//        if (TwinfangBitePvE.CanUse(out act) && HasHunterVenom) return true;
+//        if (TwinbloodBitePvE.CanUse(out act) && HasSwiftVenom) return true;
+//        if (UncoiledTwinfangPvE.CanUse(out act) && HasPoisedFang) return true;
+//        if (UncoiledTwinbloodPvE.CanUse(out act) && HasPoisedBlood) return true;
 
-    }*/
-    #endregion
+//        return base.EmergencyAbility(nextGCD, out act);
+//    }
+//    #endregion
 
-    #region Emergency Logic
-    // Determines emergency actions to take based on the next planned GCD action.
-    protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
-    {
-        act = null;
-        if (InCombat && SerpentsIrePvE.CanUse(out act)) return true;
+//    #region oGCD Logic
+//    protected override bool AttackAbility(IAction nextGCD, out IAction? act)
+//    {
+//        if (SerpentsIrePvE.CanUse(out act)) return true;
+//        if (TwinfangThreshPvE.CanUse(out act) && HasFellHuntersVenom) return true;
+//        if (TwinbloodThreshPvE.CanUse(out act) && HasFellskinsVenom) return true;
 
-        return base.EmergencyAbility(nextGCD, out act);
-    }
-    #endregion
+//        if (LastLashPvE.CanUse(out act)) return true;
+//        if (DeathRattlePvE.CanUse(out act)) return true;
+//        return base.AttackAbility(nextGCD, out act);
+//    }
 
-    #region oGCD Logic
-    protected override bool AttackAbility(IAction nextGCD, out IAction? act)
-    {
+//    protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
+//    {
+//        if (SlitherPvE.CanUse(out act)) return true;
+//        return base.MoveForwardAbility(nextGCD, out act);
+//    }
+//    #endregion
 
-        if (SerpentsTailPvE.CanUse(out act)) return true;
-        if (TwinfangPvE.CanUse(out act)) return true;
-        if (TwinbloodPvE.CanUse(out act)) return true;
+//    #region GCD Logic
+
+//    protected override bool GeneralGCD(out IAction? act)
+//    {
+//        ////Reawaken Combo
+//        if (OuroborosPvE.CanUse(out act)) return true;
+//        if (FourthGenerationPvE.CanUse(out act)) return true;
+//        if (ThirdGenerationPvE.CanUse(out act)) return true;
+//        if (SecondGenerationPvE.CanUse(out act)) return true;
+//        if (FirstGenerationPvE.CanUse(out act)) return true;
+
+//        //Overcap protection
+//        //if ((DreadwinderPvE.Cooldown.CurrentCharges > 0 || !SerpentsIrePvE.Cooldown.IsCoolingDown) &&
+//        //    ((RattlingCoilStacks is 3 && EnhancedVipersRattleTrait.EnoughLevel) ||
+//        //    (RattlingCoilStacks is 2 && !EnhancedVipersRattleTrait.EnoughLevel)))
+//        //{
+//        //    if (UncoiledFuryPvE.CanUse(out act)) return true;
+//        //}
+
+//        if (HuntersDenPvE.CanUse(out act, skipComboCheck: true, skipCastingCheck: true, skipAoeCheck: true, skipStatusProvideCheck: true)) return true;
+//        if (SwiftskinsDenPvE.CanUse(out act, skipComboCheck: true, skipCastingCheck: true, skipAoeCheck: true, skipStatusProvideCheck: true)) return true;
+//        if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true)) return true;
+//        if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true)) return true;
+
+//        //Reawakend Usage
+//        //if (SerpentsIrePvE.Cooldown.RecastTimeRemainOneCharge > (100 - SerpentOffering)
+//        //    && (DreadwinderPvE.Cooldown.CurrentCharges == 0
+//        //    || (DreadwinderPvE.Cooldown.CurrentCharges == 1
+//        //    && DreadwinderPvE.Cooldown.RecastTimeRemainOneCharge > 10)) &&
+//        //    SwiftTime > 10 &&
+//        //    HuntersTime > 10 &&
+//        //    !HasHunterVenom && !HasSwiftVenom &&
+//        //    !HasPoisedBlood && !HasPoisedFang)
+//        //{
+//        //    if (ReawakenPvE.CanUse(out act, skipComboCheck: true, skipCastingCheck: true, skipAoeCheck: true, skipStatusProvideCheck: true)) return true;
+//        //}
+
+//        //if (Vicepit.CanUse(out act, usedUp: true)) return true;
+//        //if (Vicewinder.CanUse(out act, usedUp: true)) return true;
 
 
-        return base.AttackAbility(nextGCD, out act);
-    }
+//        //if (HasGrimSkin)
+//        //{
+//        //    if (DreadMawPvE.CanUse(out act)) return true;
+//        //}
+//        //if (SteelMawPvE.CanUse(out act)) return true;
 
-    protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
-    {
-        act = null;
+//        //if (HunterLessThanSwift)
+//        //{
+//        //    if (SteelMawPvE.CanUse(out act)) return true;
+//        //}
+//        //if (DreadMawPvE.CanUse(out act)) return true;
 
-        if (SlitherPvE.CanUse(out act)) return true;
+//        //if (SteelMawPvE.CanUse(out act)) return true;
+//        //if (HasBane)
+//        //{
+//        //    if (DreadFangsPvE.CanUse(out act)) return true;
+//        //}
+//        //if (SteelFangsPvE.CanUse(out act)) return true;
+//        //if (HasFlank)
+//        //{
+//        //    if (SteelFangsPvE.CanUse(out act)) return true;
+//        //}
+//        //if (DreadFangsPvE.CanUse(out act)) return true;
 
-        return base.MoveForwardAbility(nextGCD, out act);
-    }
-    #endregion
+//        //if (SteelFangsPvE.CanUse(out act)) return true;
 
-    #region GCD Logic
+//        //if (!Player.HasStatus(true, StatusID.ReadyToReawaken) && !HasHunterVenom && !HasSwiftVenom && IsHunter && IsSwift)
+//        //{
+//        //    if (UncoiledFuryPvE.CanUse(out act)) return true;
+//        //}
 
-    protected override bool GeneralGCD(out IAction? act)
-    {
-        act = null;
-        return base.GeneralGCD(out act);
-    }
+//        //if (WrithingSnapPvE.CanUse(out act)) return true;
 
-    private bool AttackGCD(out IAction? act, bool burst)
-    {
-        if (HindstingStrikePvE.CanUse(out act)) return true;
-        if (HindsbaneFangPvE.CanUse(out act)) return true;
-        if (FlankstingStrikePvE.CanUse(out act)) return true;
-        if (FlanksbaneFangPvE.CanUse(out act)) return true;
-        if (SwiftskinsStingPvE.CanUse(out act)) return true;
-        if (HuntersStingPvE.CanUse(out act)) return true;
-        if (DreadFangsPvE.CanUse(out act)) return true;
-        if (SteelFangsPvE.CanUse(out act)) return true;
-        if (WrithingSnapPvE.CanUse(out act)) return true;
-        return false;
-        //return base.AttackGCD(out act);
-    }
-    #endregion
-
-    #region Extra Methods
-    // Extra private helper methods for determining the usability of specific abilities under certain conditions.
-    // These methods simplify the main logic by encapsulating specific checks related to abilities' cooldowns and prerequisites.
-    private bool CanUseExamplePvE(out IAction? act)
-    {
-        act = null;
-        return false;
-    }
-    #endregion
-}
+//        //return base.GeneralGCD(out act);
+//    }
+//    #endregion
+//}
