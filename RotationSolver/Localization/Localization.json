@@ -555,4 +555,7 @@
   "DefaultRotations.Tank.DRK_Default.DisplayName": "Keep at least 3000 MP",
   "DefaultRotations.Ranged.BRD_Default.Name": "FirstSong",
   "DefaultRotations.Ranged.BRD_Default.DisplayName": "First Song"
+  "RotationSolver.Basic.Data.DescType.HealAreaGCD": "Heal Area GCD",
+  "RotationSolver.Basic.Data.DescType.HealSingleAbility": "Heal Single Ability",
+  "RotationSolver.Basic.Data.DescType.DefenseSingleGCD": "Defense Single GCD"
 }

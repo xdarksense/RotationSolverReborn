@@ -65,6 +65,10 @@ partial class SageRotation
         setting.StatusProvide = [StatusID.Kardia];
         setting.TargetStatusProvide = [StatusID.Kardion];
         setting.ActionCheck = () => !DataCenter.AllianceMembers.Any(m => m.HasStatus(true, StatusID.Kardion));
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            TimeToKill = 0,
+        };
     }
 
     static partial void ModifyPrognosisPvE(ref ActionSetting setting)
@@ -111,6 +115,10 @@ partial class SageRotation
         setting.TargetType = TargetType.BeAttacked;
         setting.StatusFromSelf = false;
         setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            TimeToKill = 0,
+        };
     }
 
     static partial void ModifyEukrasianPrognosisPvE(ref ActionSetting setting)
@@ -212,6 +220,10 @@ partial class SageRotation
     {
         setting.ActionCheck = () => Addersgall >= 1;
         setting.TargetStatusProvide = [StatusID.Taurochole];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            TimeToKill = 0,
+        };
     }
 
     static partial void ModifyToxikonPvE(ref ActionSetting setting)
