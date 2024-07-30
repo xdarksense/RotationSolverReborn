@@ -9,195 +9,168 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using RotationSolver.Basic.Helpers;
+using Dalamud.Game.ClientState.JobGauge.Enums;
 
 namespace RotationSolver.DummyRotations
 {
-    [Rotation("Dummy Rotation", CombatType.PvE, GameVersion = "6.58")]
-    [Api(2)]
-    public class DummyClass : MachinistRotation
+    [Rotation("Samurai", CombatType.PvE, GameVersion = "7.05")]
+    [SourceCode(Path = "main/DefaultRotations/Melee/SAM_Testing.cs")]
+    [Api(3)]
+    public class SAM_Testing : SamuraiRotation
     {
         #region Config Options
 
-        [RotationConfig(CombatType.PvE,
-            Name = "Skip Queen Logic and uses Rook Autoturret/Automaton Queen immediately whenever you get 50 battery")]
-        public bool SkipQueenLogic { get; set; } = false;
+        [Range(0, 85, ConfigUnitType.None, 5)]
+        [RotationConfig(CombatType.PvE, Name = "Use Kenki above.")]
+        public int AddKenki { get; set; } = 50;
 
         #endregion
 
-        #region Countdown logic
+        #region Countdown Logic
 
-        // Defines logic for actions to take during the countdown before combat starts.
         protected override IAction? CountDownAction(float remainTime)
         {
-            if (remainTime < 5)
-            {
-                if (ReassemblePvE.CanUse(out var act)) return act;
-            }
-
-            if (remainTime < 2)
-            {
-                if (UseBurstMedicine(out var act)) return act;
-            }
-
+            // pre-pull: can be changed to -9 and -5 instead of 5 and 2, but it's hard to be universal !!! check later !!!
+            if (remainTime <= 5 && MeikyoShisuiPvE.CanUse(out var act)) return act;
+            if (remainTime <= 2 && TrueNorthPvE.CanUse(out act)) return act;
             return base.CountDownAction(remainTime);
+        }
+
+        #endregion
+
+        #region Additional oGCD Logic
+
+        
+        [RotationDesc(ActionID.HissatsuGyotenPvE)]
+        protected sealed override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
+        {
+            if (HissatsuGyotenPvE.CanUse(out act)) return true;
+            return base.MoveForwardAbility(nextGCD, out act);
+        }
+
+        [RotationDesc(ActionID.FeintPvE)]
+        protected sealed override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
+        {
+            if (FeintPvE.CanUse(out act)) return true;
+            return base.DefenseAreaAbility(nextGCD, out act);
+        }
+
+        [RotationDesc(ActionID.ThirdEyePvE)]
+        protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
+        {
+            if (TengentsuPvE.CanUse(out act)) return true;
+            if (ThirdEyePvE.CanUse(out act)) return true;
+            return base.DefenseSingleAbility(nextGCD, out act);
         }
 
         #endregion
 
         #region oGCD Logic
 
-        // Determines emergency actions to take based on the next planned GCD action.
-        protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
-        {
-            // Reassemble Logic
-            // Check next GCD action and conditions for Reassemble.
-            bool isReassembleUsable =
-                //Reassemble current # of charges and double proc protection
-                ReassemblePvE.Cooldown.CurrentCharges > 0 && !Player.HasStatus(true, StatusID.Reassembled) &&
-                //Chainsaw Level Check and NextGCD Check
-                ((ChainSawPvE.EnoughLevel && nextGCD.IsTheSameTo(true, ChainSawPvE)) ||
-                 //AirAnchor Logic
-                 (AirAnchorPvE.EnoughLevel && nextGCD.IsTheSameTo(true, AirAnchorPvE)) ||
-                 //Drill Logic
-                 (DrillPvE.EnoughLevel && !ChainSawPvE.EnoughLevel && nextGCD.IsTheSameTo(true, DrillPvE)) ||
-                 //Cleanshot Logic
-                 (!DrillPvE.EnoughLevel && CleanShotPvE.EnoughLevel && nextGCD.IsTheSameTo(true, CleanShotPvE)) ||
-                 //HotShot Logic
-                 (!CleanShotPvE.EnoughLevel && nextGCD.IsTheSameTo(true, HotShotPvE)));
-
-            // Keeps Ricochet and Gauss cannon Even
-            bool isRicochetMore = RicochetPvE.EnoughLevel &&
-                                  GaussRoundPvE.Cooldown.CurrentCharges <= RicochetPvE.Cooldown.CurrentCharges;
-            bool isGaussMore = !RicochetPvE.EnoughLevel ||
-                               GaussRoundPvE.Cooldown.CurrentCharges > RicochetPvE.Cooldown.CurrentCharges;
-
-            // Attempt to use Reassemble if it's ready
-            if (isReassembleUsable)
-            {
-                if (ReassemblePvE.CanUse(out act, skipComboCheck: true, usedUp: true)) return true;
-            }
-
-            // Use Ricochet
-            if (isRicochetMore &&
-                ((!IsLastAction(true, new[] { GaussRoundPvE, RicochetPvE }) &&
-                  IsLastGCD(true, new[] { HeatBlastPvE, AutoCrossbowPvE })) ||
-                 !IsLastGCD(true, new[] { HeatBlastPvE, AutoCrossbowPvE })))
-            {
-                if (RicochetPvE.CanUse(out act, skipAoeCheck: true, usedUp: true))
-                    return true;
-            }
-
-            // Use Gauss
-            if (isGaussMore &&
-                ((!IsLastAction(true, new[] { GaussRoundPvE, RicochetPvE }) &&
-                  IsLastGCD(true, new[] { HeatBlastPvE, AutoCrossbowPvE })) ||
-                 !IsLastGCD(true, new[] { HeatBlastPvE, AutoCrossbowPvE })))
-            {
-                if (GaussRoundPvE.CanUse(out act, usedUp: true))
-                    return true;
-            }
-
-            return base.EmergencyAbility(nextGCD, out act);
-        }
-
-        // Logic for using attack abilities outside of GCD, focusing on burst windows and cooldown management.
         protected override bool AttackAbility(IAction nextGCD, out IAction? act)
         {
-            // Define conditions under which the Rook Autoturret/Queen can be used.
-            bool NoQueenLogic = SkipQueenLogic;
-            bool OpenerQueen = !CombatElapsedLess(20f) && CombatElapsedLess(25f);
-            bool CombatTimeQueen = CombatElapsedLess(60f) && !CombatElapsedLess(45f);
-            bool WildfireCooldownQueen = WildfirePvE.Cooldown.IsCoolingDown &&
-                                         WildfirePvE.Cooldown.ElapsedAfter(105f) && Battery == 100 &&
-                                         (nextGCD.IsTheSameTo(true, AirAnchorPvE) ||
-                                          nextGCD.IsTheSameTo(true, CleanShotPvE) ||
-                                          nextGCD.IsTheSameTo(true, HeatedCleanShotPvE) ||
-                                          nextGCD.IsTheSameTo(true, ChainSawPvE));
-            bool BatteryCheckQueen = Battery >= 90 && !WildfirePvE.Cooldown.ElapsedAfter(70f);
-            bool LastGCDCheckQueen = Battery >= 80 && !WildfirePvE.Cooldown.ElapsedAfter(77.5f) &&
-                                     IsLastGCD(true, AirAnchorPvE);
-            // Check for not burning Hypercharge below level 52 on AOE
-            bool LowLevelHyperCheck = !AutoCrossbowPvE.EnoughLevel && SpreadShotPvE.CanUse(out _);
+            var IsTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
+            var IsTargetDying = HostileTarget?.IsDying() ?? false;
 
-            // If Wildfire is active, use Hypercharge.....Period
-            if (Player.HasStatus(true, StatusID.Wildfire_1946))
+            // IkishotenPvE logic combined with the delayed opener:
+            // you should weave the tincture in manually after rsr lands the first gcd (usually Gekko)
+            // and that's the only chance for tincture weaving during opener
+            if (!CombatElapsedLessGCD(2) && IkishotenPvE.CanUse(out act)) return true;
+            if (ShohaPvE.CanUse(out act)) return true;
+            // from old version - didn't touch this, didn't test this, never saw Hagakure button pressed personally !!! check later !!!
+            if ((HostileTarget?.HasStatus(true, StatusID.Higanbana) ?? false) &&
+                (HostileTarget?.WillStatusEnd(32, true, StatusID.Higanbana) ?? false) &&
+                !(HostileTarget?.WillStatusEnd(28, true, StatusID.Higanbana) ?? false) &&
+                SenCount == 1 && IsLastAction(true, YukikazePvE) && !HaveMeikyoShisui)
             {
-                return HyperchargePvE.CanUse(out act);
+                if (HagakurePvE.CanUse(out act)) return true;
             }
 
-            // Burst
-            if (IsBurst)
-            {
-                if (UseBurstMedicine(out act)) return true;
+            if (HissatsuGurenPvE.CanUse(out act)) return true;
+            if (HissatsuSeneiPvE.CanUse(out act)) return true;
 
-                {
-                    if ((IsLastAbility(false, HyperchargePvE) || Heat >= 50) && !CombatElapsedLess(10) &&
-                        CanUseHyperchargePvE(out _)
-                        && !LowLevelHyperCheck && WildfirePvE.CanUse(out act)) return true;
-                }
-            }
-
-            // Use Hypercharge if at least 12 seconds of combat and (if wildfire will not be up in 30 seconds or if you hit 100 heat)
-            if (!LowLevelHyperCheck && !CombatElapsedLess(12) && !Player.HasStatus(true, StatusID.Reassembled) &&
-                (!WildfirePvE.Cooldown.WillHaveOneCharge(30) || (Heat == 100)))
-            {
-                if (CanUseHyperchargePvE(out act)) return true;
-            }
-
-            // Rook Autoturret/Queen Logic
-            if (NoQueenLogic || OpenerQueen || CombatTimeQueen || WildfireCooldownQueen || BatteryCheckQueen ||
-                LastGCDCheckQueen)
-            {
-                if (RookAutoturretPvE.CanUse(out act)) return true;
-            }
-
-            // Use Barrel Stabilizer on CD if won't cap
-            if (BarrelStabilizerPvE.CanUse(out act)) return true;
+            if (ZanshinPvE.CanUse(out act)) return true; // need to check rsr code for upgrade and remove aoecheck here !!! check later !!!
+            if (HissatsuKyutenPvE.CanUse(out act)) return true;
+            if (HissatsuShintenPvE.CanUse(out act)) return true;
 
             return base.AttackAbility(nextGCD, out act);
+        }
+
+        protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
+        {
+            var IsTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
+            var IsTargetDying = HostileTarget?.IsDying() ?? false;
+
+            // from old version - didn't touch this, didn't test this, personally i doubt it's working !!! check later !!!
+            if (HasHostilesInRange && IsLastGCD(true, YukikazePvE, MangetsuPvE, OkaPvE) &&
+                (!IsTargetBoss || (HostileTarget?.HasStatus(true, StatusID.Higanbana) ?? false) && !(HostileTarget?.WillStatusEnd(40, true, StatusID.Higanbana) ?? false) || !HasMoon && !HasFlower || IsTargetBoss && IsTargetDying))
+            {
+                if (MeikyoShisuiPvE.CanUse(out act, usedUp: true)) return true;
+            }
+            return base.EmergencyAbility(nextGCD, out act);
         }
 
         #endregion
 
         #region GCD Logic
 
-        // Defines the general logic for determining which global cooldown (GCD) action to take.
         protected override bool GeneralGCD(out IAction? act)
         {
-            // Checks and executes AutoCrossbow or HeatBlast if conditions are met (overheated state).
-            if (AutoCrossbowPvE.CanUse(out act)) return true;
-            if (HeatBlastPvE.CanUse(out act)) return true;
+            if (MidareSetsugekkaPvE.CanUse(out act)) return true;
 
-            // Executes Bioblaster, and then checks for AirAnchor or HotShot, and Drill based on availability and conditions.
-            if (BioblasterPvE.CanUse(out act)) return true;
-            // Check if SpreadShot cannot be used
-            if (!SpreadShotPvE.CanUse(out _))
+            if (TendoGokenPvE.CanUse(out act)) return true;
+            if (TendoSetsugekkaPvE.CanUse(out act)) return true;
+            if (TendoKaeshiGokenPvE.CanUse(out act)) return true;
+            if (TendoKaeshiSetsugekkaPvE.CanUse(out act)) return true;
+            // use 2nd finisher combo spell first
+            if (KaeshiNamikiriPvE.CanUse(out act, usedUp: true)) return true;
+
+            var IsTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
+            var IsTargetDying = HostileTarget?.IsDying() ?? false;
+
+            // use 2nd finisher combo spell first
+            if (KaeshiGokenPvE.CanUse(out act, usedUp: true)) return true;
+            if (KaeshiSetsugekkaPvE.CanUse(out act, usedUp: true)) return true;
+            if (TendoKaeshiGokenPvE.CanUse(out act, usedUp: true)) return true;
+            if (TendoKaeshiSetsugekkaPvE.CanUse(out act, usedUp: true)) return true;
+
+            // burst finisher
+            if ((!IsTargetBoss || (HostileTarget?.HasStatus(true, StatusID.Higanbana) ?? false)) && HasMoon && HasFlower
+                && OgiNamikiriPvE.CanUse(out act)) return true;
+
+            if (HiganbanaPvE.CanUse(out act)) return true;
+
+            if (TendoGokenPvE.CanUse(out act)) return true;
+
+            if (TendoSetsugekkaPvE.CanUse(out act)) return true;
+            if (MidareSetsugekkaPvE.CanUse(out act)) return true;
+
+            // aoe 12 combo's 2
+            if ((!HasMoon || IsMoonTimeLessThanFlower || !OkaPvE.EnoughLevel) && MangetsuPvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && !HasGetsu)) return true;
+            if ((!HasFlower || !IsMoonTimeLessThanFlower) && OkaPvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && !HasKa)) return true;
+
+            if (!HasSetsu && YukikazePvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && HasGetsu && HasKa)) return true;
+            // single target 123 combo's 3 or used 3 directly during burst when MeikyoShisui is active
+            if (GekkoPvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && !HasGetsu)) return true;
+            if (KashaPvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && !HasKa)) return true;
+
+            // single target 123 combo's 2
+            if ((!HasMoon || IsMoonTimeLessThanFlower || !ShifuPvE.EnoughLevel) && JinpuPvE.CanUse(out act)) return true;
+            if ((!HasFlower || !IsMoonTimeLessThanFlower) && ShifuPvE.CanUse(out act)) return true;
+
+            // initiate aoe
+            if (FukoPvE.CanUse(out act, skipComboCheck: true)) return true; // fuga doesn't becomes fuko automatically
+            if (!FukoPvE.EnoughLevel && FugaPvE.CanUse(out act, skipComboCheck: true)) return true;
+
+            // MeikyoShisui buff is not active - not bursting - single target 123 combo's 1
+            if (!HaveMeikyoShisui)
             {
-                // Check if AirAnchor can be used
-                if (AirAnchorPvE.CanUse(out act)) return true;
+                // target in range
+                if (HakazePvE.CanUse(out act)) return true;
 
-                // If not at the required level for AirAnchor and HotShot can be used
-                if (!AirAnchorPvE.EnoughLevel && HotShotPvE.CanUse(out act)) return true;
-
-                // Check if Drill can be used
-                if (DrillPvE.CanUse(out act)) return true;
+                // target out of range
+                if (EnpiPvE.CanUse(out act)) return true;
             }
-
-            // Special condition for using ChainSaw outside of AoE checks if no action is chosen within 4 GCDs.
-            if (!CombatElapsedLessGCD(4) && ChainSawPvE.CanUse(out act, skipAoeCheck: true)) return true;
-
-            // AoE actions: ChainSaw and SpreadShot based on their usability.
-            if (SpreadShotPvE.CanUse(out _))
-            {
-                if (ChainSawPvE.CanUse(out act)) return true;
-            }
-
-            if (SpreadShotPvE.CanUse(out act)) return true;
-
-            // Single target actions: CleanShot, SlugShot, and SplitShot based on their usability.
-            if (CleanShotPvE.CanUse(out act)) return true;
-            if (SlugShotPvE.CanUse(out act)) return true;
-            if (SplitShotPvE.CanUse(out act)) return true;
 
             return base.GeneralGCD(out act);
         }
@@ -205,40 +178,7 @@ namespace RotationSolver.DummyRotations
         #endregion
 
         #region Extra Methods
-
-        // Extra private helper methods for determining the usability of specific abilities under certain conditions.
-        // These methods simplify the main logic by encapsulating specific checks related to abilities' cooldowns and prerequisites.
-        // Logic for Hypercharge
-        private bool CanUseHyperchargePvE(out IAction? act)
-        {
-            float REST_TIME = 6f;
-            if
-                //Cannot AOE
-                ((!SpreadShotPvE.CanUse(out _))
-                 &&
-                 // AirAnchor Enough Level % AirAnchor 
-                 ((AirAnchorPvE.EnoughLevel && AirAnchorPvE.Cooldown.WillHaveOneCharge(REST_TIME))
-                  ||
-                  // HotShot Charge Detection
-                  (!AirAnchorPvE.EnoughLevel && HotShotPvE.EnoughLevel &&
-                   HotShotPvE.Cooldown.WillHaveOneCharge(REST_TIME))
-                  ||
-                  // Drill Charge Detection
-                  (DrillPvE.EnoughLevel && DrillPvE.Cooldown.WillHaveOneCharge(REST_TIME))
-                  ||
-                  // Chainsaw Charge Detection
-                  (ChainSawPvE.EnoughLevel && ChainSawPvE.Cooldown.WillHaveOneCharge(REST_TIME))))
-            {
-                act = null;
-                return false;
-            }
-            else
-            {
-                // Use Hypercharge
-                return HyperchargePvE.CanUse(out act);
-            }
-        }
-
+        private static bool HaveMeikyoShisui => Player.HasStatus(true, StatusID.MeikyoShisui);
         #endregion
     }
 }
