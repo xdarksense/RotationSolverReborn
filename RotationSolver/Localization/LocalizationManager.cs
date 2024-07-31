@@ -72,22 +72,40 @@ internal static class LocalizationManager
         }
         else
         {
-            try
+            if (Svc.PluginInterface.UiLanguage == "en")
             {
-                var url = $"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/RotationSolver/Localization/{lang}.json";
-                using var client = new HttpClient();
-                _rightLang = _translations[lang] = JsonConvert.DeserializeObject<Dictionary<string, string>>(await client.GetStringAsync(url))!;
+                try
+                {
+                    var url = $"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/RotationSolver/Localization/Localization.json";
+                    using var client = new HttpClient();
+                    _rightLang = _translations[lang] = JsonConvert.DeserializeObject<Dictionary<string, string>>(await client.GetStringAsync(url))!;
+                }
+                catch (HttpRequestException ex) when (ex?.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    Svc.Log.Information(ex, $"No language {lang}");
+                    _rightLang = [];
+                }
             }
-            catch (HttpRequestException ex) when (ex?.StatusCode == System.Net.HttpStatusCode.NotFound)
+            else
             {
-                Svc.Log.Information(ex, $"No language {lang}");
-                _rightLang = [];
+                try
+                {
+                    var url = $"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/RotationSolver/Localization/{lang}.json";
+                    using var client = new HttpClient();
+                    _rightLang = _translations[lang] = JsonConvert.DeserializeObject<Dictionary<string, string>>(await client.GetStringAsync(url))!;
+                }
+                catch (HttpRequestException ex) when (ex?.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    Svc.Log.Information(ex, $"No language {lang}");
+                    _rightLang = [];
+                }
+                catch (Exception ex)
+                {
+                    Svc.Log.Warning(ex, $"Failed to download the language {lang}");
+                    _rightLang = [];
+                }
             }
-            catch (Exception ex)
-            {
-                Svc.Log.Warning(ex, $"Failed to download the language {lang}");
-                _rightLang = [];
-            }
+
         }
 
         RotationSolverPlugin.ChangeUITranslation();

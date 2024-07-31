@@ -50,6 +50,9 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         _dis.Add(new Service());
         try
         {
+        // Check if the config file exists before attempting to read and deserialize it
+        if (File.Exists(Svc.PluginInterface.ConfigFile.FullName))
+        {
             var oldConfigs = JsonConvert.DeserializeObject<Configs>(
                 File.ReadAllText(Svc.PluginInterface.ConfigFile.FullName),
                 new BaseTimelineItemConverter(), new ITimelineConditionConverter())
@@ -58,11 +61,16 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
             var newConfigs = Configs.Migrate(oldConfigs);
             Service.Config = newConfigs;
         }
-        catch (Exception ex)
+        else
         {
-            Svc.Log.Warning(ex, "Failed to load config");
             Service.Config = new Configs();
         }
+    }
+    catch (Exception ex)
+    {
+        Svc.Log.Warning(ex, "Failed to load config");
+        Service.Config = new Configs();
+    }
 
         IPCProvider = new();
 
