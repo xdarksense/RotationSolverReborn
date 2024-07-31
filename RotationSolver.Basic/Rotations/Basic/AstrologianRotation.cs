@@ -271,17 +271,18 @@ partial class AstrologianRotation
 
     static partial void ModifyLordOfCrownsPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DrawnCard.All(card => card == CardType.NONE) && DrawnCrownCard == CardType.LORD;
+        setting.ActionCheck = () => DrawnCrownCard == CardType.LORD;
         setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
+            /// Keeping as one for use in boss fights, Players may optionally increase required hostile count
             AoeCount = 1,
         };
     }
 
     static partial void ModifyLadyOfCrownsPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DrawnCard.All(card => card == CardType.NONE) && DrawnCrownCard == CardType.LADY;
+        setting.ActionCheck = () => DrawnCrownCard == CardType.LADY;
         setting.IsFriendly = true;
         setting.CreateConfig = () => new ActionConfig()
         {
