@@ -76,7 +76,7 @@ internal static class LocalizationManager
             {
                 try
                 {
-                    var url = $"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/RotationSolver/Localization/Localization.json";
+                    var url = $"https://raw.githubusercontent.com/FFXIV-CombatReborn/RotationSolverReborn/main/RotationSolver/Localization/Localization.json";
                     using var client = new HttpClient();
                     _rightLang = _translations[lang] = JsonConvert.DeserializeObject<Dictionary<string, string>>(await client.GetStringAsync(url))!;
                 }
@@ -90,7 +90,7 @@ internal static class LocalizationManager
             {
                 try
                 {
-                    var url = $"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/RotationSolver/Localization/{lang}.json";
+                    var url = $"https://raw.githubusercontent.com/FFXIV-CombatReborn/RotationSolverReborn/main/RotationSolver/Localization/{lang}.json";
                     using var client = new HttpClient();
                     _rightLang = _translations[lang] = JsonConvert.DeserializeObject<Dictionary<string, string>>(await client.GetStringAsync(url))!;
                 }
