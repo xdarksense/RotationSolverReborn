@@ -286,8 +286,7 @@ partial class AstrologianRotation
         setting.IsFriendly = true;
         setting.CreateConfig = () => new ActionConfig()
         {
-            /// Prioritizing usage with party in mind, however won't be used in solo instances
-            AoeCount = 3,
+            AoeCount = 1,
         };
     }
 
