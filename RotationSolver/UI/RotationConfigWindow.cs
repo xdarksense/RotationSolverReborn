@@ -2411,6 +2411,7 @@ public partial class RotationConfigWindow : Window
         if (Svc.Targets.Target is IBattleChara b)
         {
             ImGui.Text("HP: " + b.CurrentHp + " / " + b.MaxHp);
+            ImGui.Text("TTK: " + b.GetTimeToKill().ToString());
             ImGui.Text("Is Boss TTK: " + b.IsBossFromTTK().ToString());
             ImGui.Text("Is Boss Icon: " + b.IsBossFromIcon().ToString());
             ImGui.Text("Rank: " + b.GetObjectNPC()?.Rank.ToString() ?? string.Empty);
@@ -2420,7 +2421,7 @@ public partial class RotationConfigWindow : Window
             ImGui.Text("NamePlate: " + b.GetNamePlateIcon().ToString());
             ImGui.Text("StatusFlags: " + b.StatusFlags.ToString());
             ImGui.Text("InView: " + Svc.GameGui.WorldToScreen(b.Position, out _).ToString());
-            ImGui.Text("Name Id: " + b.NameId.ToString());
+            ImGui.Text("Name Id: " + b.NameId.ToString()); 
             ImGui.Text("Data Id: " + b.DataId.ToString());
             ImGui.Text("Targetable: " + b.Struct()->Character.GameObject.TargetableStatus.ToString());
 
