@@ -2,7 +2,7 @@
 
 internal class ColorEditSearch(PropertyInfo property) : Searchable(property)
 {
-    protected Vector4 Value 
+    protected Vector4 Value
     {
         get => (Vector4)_property.GetValue(Service.Config)!;
         set => _property.SetValue(Service.Config, value);

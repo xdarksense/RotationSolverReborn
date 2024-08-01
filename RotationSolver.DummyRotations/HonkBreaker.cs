@@ -1,10 +1,6 @@
-using Dalamud.Game.Text.SeStringHandling.Payloads;
-using FFXIVClientStructs.FFXIV.Client.Game.Gauge;
-using ImGuiNET;
 using RotationSolver.Basic.Actions;
 using RotationSolver.Basic.Attributes;
 using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
 using RotationSolver.Basic.Rotations.Basic;
 
 namespace RotationSolver.DummyRotations;
@@ -71,7 +67,7 @@ public sealed class TestingRotation : ViperRotation
     {
         // Uncoiled Fury Overcap protection
         if (MaxRattling == RattlingCoilStacks)
-            {
+        {
             if (UncoiledFuryPvE.CanUse(out act)) return true;
         }
 
@@ -87,7 +83,7 @@ public sealed class TestingRotation : ViperRotation
             HuntersTime > 10 &&
             !HasHunterVenom && !HasSwiftVenom &&
             !HasPoisedBlood && !HasPoisedFang)
-            {
+        {
             if (ReawakenPvE.CanUse(out act, skipComboCheck: true)) return true;
         }
 
@@ -104,7 +100,7 @@ public sealed class TestingRotation : ViperRotation
         if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true)) return true;
         if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true)) return true;
         if (VicewinderPvE.Cooldown.CurrentCharges == 1 && VicewinderPvE.Cooldown.RecastTimeRemainOneCharge < 10)
-            {
+        {
             if (VicewinderPvE.CanUse(out act, usedUp: true)) return true;
         }
         if (VicewinderPvE.CanUse(out act, usedUp: true)) return true;

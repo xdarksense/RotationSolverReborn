@@ -21,7 +21,7 @@ public class RotationAttribute(string name, CombatType type) : Attribute
     /// <summary>
     /// Your description about this rotation.
     /// </summary>
-    public string? Description {  get; set; }
+    public string? Description { get; set; }
 
     /// <summary>
     /// The Game version of this rotation.

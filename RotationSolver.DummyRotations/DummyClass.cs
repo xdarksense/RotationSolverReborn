@@ -1,15 +1,8 @@
-﻿using ImGuiNET;
-using RotationSolver.Basic.Actions;
+﻿using RotationSolver.Basic.Actions;
 using RotationSolver.Basic.Attributes;
 using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Rotations.Basic;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RotationSolver.Basic.Helpers;
-using Dalamud.Game.ClientState.JobGauge.Enums;
+using RotationSolver.Basic.Rotations.Basic;
 
 namespace RotationSolver.DummyRotations
 {
@@ -40,7 +33,7 @@ namespace RotationSolver.DummyRotations
 
         #region Additional oGCD Logic
 
-        
+
         [RotationDesc(ActionID.HissatsuGyotenPvE)]
         protected sealed override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
         {

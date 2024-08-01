@@ -25,15 +25,15 @@ internal class RotationConfigSet : IRotationConfigSet
             {
                 Configs.Add(new RotationConfigCombo(rotation, prop));
             }
-            else if(type == typeof(float))
+            else if (type == typeof(float))
             {
                 Configs.Add(new RotationConfigFloat(rotation, prop));
             }
-            else if(type == typeof(int))
+            else if (type == typeof(int))
             {
                 Configs.Add(new RotationConfigInt(rotation, prop));
             }
-            else if(type == typeof(string))
+            else if (type == typeof(string))
             {
                 Configs.Add(new RotationConfigString(rotation, prop));
             }

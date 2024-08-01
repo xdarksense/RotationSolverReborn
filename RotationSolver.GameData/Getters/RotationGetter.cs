@@ -1,7 +1,5 @@
-﻿using Lumina.Data;
-using Lumina.Excel.GeneratedSheets;
+﻿using Lumina.Excel.GeneratedSheets;
 using RotationSolver.GameData.Getters.Actions;
-using System.Xml.Linq;
 
 namespace RotationSolver.GameData.Getters;
 
@@ -60,7 +58,7 @@ internal class RotationGetter(Lumina.GameData gameData, ClassJob job)
          {{traitsCode.Table()}}
 
          {{Util.ArrayNames("AllTraits", "IBaseTrait",
-         "public override", [..traitsGetter.AddedNames]).Table()}}
+         "public override", [.. traitsGetter.AddedNames]).Table()}}
          #endregion
          }
          """;

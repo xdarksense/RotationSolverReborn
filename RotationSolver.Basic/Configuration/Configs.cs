@@ -1,8 +1,6 @@
 ﻿using Dalamud.Configuration;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
-using Newtonsoft.Json.Linq;
-using RotationSolver.Basic.Configuration.Timeline;
 using static RotationSolver.Basic.Configuration.ConfigTypes;
 
 namespace RotationSolver.Basic.Configuration;
@@ -46,10 +44,6 @@ internal partial class Configs : IPluginConfiguration
 
     [UI("What kind of AoE moves to use.", Description = "Full - Use all AoE actions\nCleave - Use only single target AoE actions\nOff - Use no AoE at all", Filter = AutoActionUsage, Section = 3)]
     public AoEType AoEType { get; set; } = AoEType.Full;
-
-    //[ConditionBool, UI("Show RSR logo animation",
-    //    Filter = UiWindows)]
-    private static readonly bool _drawIconAnimation = false;
 
     [ConditionBool, UI("Disable automatically during area transitions.",
         Filter = BasicAutoSwitch)]
@@ -115,18 +109,18 @@ internal partial class Configs : IPluginConfiguration
         Parent = nameof(AddEnemyListToHostile))]
     private static readonly bool _onlyAttackInEnemyList = false;
 
-    [ConditionBool, UI("Use Gemdraughts/Tinctures/Pots", Description = "This is the RSR control and still requires Gemdraughts/Tinctures/Pots to be programed in rotation by the rotation writers.", 
+    [ConditionBool, UI("Use Gemdraughts/Tinctures/Pots", Description = "This is the RSR control and still requires Gemdraughts/Tinctures/Pots to be programed in rotation by the rotation writers.",
         Filter = AutoActionUsage)]
     private static readonly bool _useTinctures = false;
 
     [ConditionBool, UI("Automatically use Anti-Knockback role actions (Arms Length, Surecast)", Filter = AutoActionUsage)]
     private static readonly bool _useKnockback = true;
 
-    [ConditionBool, UI("Automatically use HP Potions", Description = "Experimental.", 
+    [ConditionBool, UI("Automatically use HP Potions", Description = "Experimental.",
         Filter = AutoActionUsage)]
     private static readonly bool _useHpPotions = false;
 
-    [ConditionBool, UI("Automatically use MP Potions", Description = "Experimental.", 
+    [ConditionBool, UI("Automatically use MP Potions", Description = "Experimental.",
         Filter = AutoActionUsage)]
     private static readonly bool _useMpPotions = false;
 
@@ -368,9 +362,6 @@ internal partial class Configs : IPluginConfiguration
         Filter = UiInformation)]
     private static readonly bool _showToggledActionInChat = false;
 
-    private static readonly bool _showTimelineDrawing = false;
-
-    private static readonly bool _enableTimelineMovement = false;
     [ConditionBool, UI("Timeline overrides automatic action usage.",
         Filter = TimelineFilter)]
     private static readonly bool _timelineOverride = false;
@@ -683,9 +674,6 @@ internal partial class Configs : IPluginConfiguration
 
     public Dictionary<uint, string> DutyRotationChoice { get; set; } = [];
 
-    [JobConfig]
-    private readonly Dictionary<uint, Dictionary<float, List<BaseTimelineItem>>> _timeline = [];
-
     public void Save()
     {
 #if DEBUG
@@ -698,18 +686,18 @@ internal partial class Configs : IPluginConfiguration
     public static Configs Migrate(Configs oldConfigs)
     {
         return oldConfigs; // Disable migration until a better solution can be found.
-        var newConfigs = new Configs();
+        //var newConfigs = new Configs();
 
-        JObject oldJson = JObject.FromObject(oldConfigs);
-        JObject newJson = JObject.FromObject(newConfigs);
+        //JObject oldJson = JObject.FromObject(oldConfigs);
+        //JObject newJson = JObject.FromObject(newConfigs);
 
-        newJson.Merge(oldJson, new JsonMergeSettings
-        {
-            MergeArrayHandling = MergeArrayHandling.Union,
-            MergeNullValueHandling = MergeNullValueHandling.Merge
-        });
+        //newJson.Merge(oldJson, new JsonMergeSettings
+        //{
+        //    MergeArrayHandling = MergeArrayHandling.Union,
+        //    MergeNullValueHandling = MergeNullValueHandling.Merge
+        //});
 
-        var migratedConfigs = newJson.ToObject<Configs>();
-        return migratedConfigs ?? new Configs();
+        //var migratedConfigs = newJson.ToObject<Configs>();
+        //return migratedConfigs ?? new Configs();
     }
 }

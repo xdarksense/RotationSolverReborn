@@ -114,7 +114,7 @@ partial class CustomRotation
         //TODO: that is too complex! 
         if (movingTarget && act is IBaseAction a)
         {
-            if(a.PreviewTarget.HasValue && a.PreviewTarget.Value.Target != Player
+            if (a.PreviewTarget.HasValue && a.PreviewTarget.Value.Target != Player
                 && a.PreviewTarget.Value.Target != null)
             {
                 var dir = Player.Position - a.PreviewTarget.Value.Position;

@@ -1,13 +1,11 @@
-﻿using Dalamud.Utility;
+﻿namespace RotationSolver.Basic.Configuration.RotationConfig;
 
-namespace RotationSolver.Basic.Configuration.RotationConfig;
-
-internal class RotationConfigCombo: RotationConfigBase
+internal class RotationConfigCombo : RotationConfigBase
 {
     public string[] DisplayValues { get; }
 
     public RotationConfigCombo(ICustomRotation rotation, PropertyInfo property)
-        :base(rotation, property)
+        : base(rotation, property)
     {
         var names = new List<string>();
         foreach (Enum v in Enum.GetValues(property.PropertyType))

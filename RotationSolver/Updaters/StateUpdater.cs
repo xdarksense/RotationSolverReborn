@@ -1,7 +1,5 @@
-﻿using ECommons.DalamudServices;
-using ECommons.GameHelpers;
+﻿using ECommons.GameHelpers;
 using RotationSolver.Basic.Configuration.Conditions;
-using RotationSolver.Basic.Configuration.Timeline;
 
 namespace RotationSolver.Updaters;
 internal static class StateUpdater
@@ -21,7 +19,7 @@ internal static class StateUpdater
         DataCenter.AutoStatus = StatusFromAutomatic();
     }
 
-    static RandomDelay 
+    static RandomDelay
         _healDelay1 = new(() => Service.Config.HealDelay),
         _healDelay2 = new(() => Service.Config.HealDelay),
         _healDelay3 = new(() => Service.Config.HealDelay),
@@ -29,8 +27,6 @@ internal static class StateUpdater
 
     private static AutoStatus StatusFromAutomatic()
     {
-        var hasTimeline = Service.Config.TimelineOverride ? Service.Config.Timeline.TryGetValue(Svc.ClientState.TerritoryType, out var timeline) : false;
-
         AutoStatus status = AutoStatus.None;
 
         if (DataCenter.DeathTarget is not null)
@@ -50,7 +46,7 @@ internal static class StateUpdater
             }
         }
 
-        var noHeal = DataCenter.Role is JobRole.Healer && hasTimeline;
+        var noHeal = DataCenter.Role is JobRole.Healer;
         if (DataCenter.HPNotFull && CanUseHealAction && !noHeal)
         {
             var singleAbility = ShouldHealSingle(StatusHelper.SingleHots,
@@ -61,14 +57,14 @@ internal static class StateUpdater
                 Service.Config.HealthSingleSpell,
                 Service.Config.HealthSingleSpellHot);
 
-            var onlyHealSelf = Service.Config.OnlyHealSelfWhenNoHealer 
+            var onlyHealSelf = Service.Config.OnlyHealSelfWhenNoHealer
                 && DataCenter.Role != JobRole.Healer;
 
             var canHealSingleAbility = onlyHealSelf ? ShouldHealSingle(Player.Object, StatusHelper.SingleHots,
                 Service.Config.HealthSingleAbility, Service.Config.HealthSingleAbilityHot)
                 : singleAbility > 0;
 
-            var canHealSingleSpell = onlyHealSelf ? ShouldHealSingle(Player.Object, StatusHelper.SingleHots,         
+            var canHealSingleSpell = onlyHealSelf ? ShouldHealSingle(Player.Object, StatusHelper.SingleHots,
                 Service.Config.HealthSingleSpell, Service.Config.HealthSingleSpellHot)
                 : singleSpell > 0;
 
@@ -109,12 +105,12 @@ internal static class StateUpdater
         {
             if (Service.Config.UseDefenseAbility)
             {
-                if (DataCenter.IsHostileCastingAOE && !hasTimeline)
+                if (DataCenter.IsHostileCastingAOE)
                 {
                     status |= AutoStatus.DefenseArea;
                 }
 
-                if (DataCenter.AreHostilesCastingKnockback && !hasTimeline && Service.Config.UseKnockback)
+                if (DataCenter.AreHostilesCastingKnockback && Service.Config.UseKnockback)
                 {
                     status |= AutoStatus.AntiKnockback;
                 }

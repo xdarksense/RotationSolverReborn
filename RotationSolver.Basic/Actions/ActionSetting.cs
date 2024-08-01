@@ -1,6 +1,4 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game;
-
-namespace RotationSolver.Basic.Actions;
+﻿namespace RotationSolver.Basic.Actions;
 
 internal enum SpecialActionType : byte
 {
@@ -35,7 +33,7 @@ public class ActionSetting()
     /// By default true, if false, it can be added by other sources and prevents the action from being used in case of overlapping statuses.
     /// </summary>
     public bool StatusFromSelf { get; set; } = true;
-    
+
     /// <summary>
     /// The status that is provided to the target of the ability.
     /// </summary>
@@ -90,7 +88,7 @@ public class ActionSetting()
     /// <summary>
     /// The strategy to target the target.
     /// </summary>
-    public TargetType TargetType 
+    public TargetType TargetType
     {
         get
         {
@@ -110,7 +108,7 @@ public class ActionSetting()
 
             return type;
         }
-        set => _type = value; 
+        set => _type = value;
     }
 
     /// <summary>

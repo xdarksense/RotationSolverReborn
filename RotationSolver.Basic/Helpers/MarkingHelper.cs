@@ -19,7 +19,7 @@ internal enum HeadMarker : byte
     Cross,
     Triangle,
     Attack6,
-    Attack7, 
+    Attack7,
     Attack8,
 }
 
@@ -29,7 +29,7 @@ internal class MarkingHelper
 
     internal static bool HaveAttackChara => AttackSignTargets.Any(id => id != 0);
 
-    internal static long[] AttackSignTargets => 
+    internal static long[] AttackSignTargets =>
     [
         GetMarker(HeadMarker.Attack1),
         GetMarker(HeadMarker.Attack2),

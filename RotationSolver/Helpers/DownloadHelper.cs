@@ -22,6 +22,7 @@ public static class DownloadHelper
         }
         catch (Exception ex)
         {
+#pragma warning disable 0436
             WarningHelper.AddSystemWarning($"Failed to load downloading List because: {ex.Message}");
             Svc.Log.Information(ex, "Failed to load downloading List.");
             return default;

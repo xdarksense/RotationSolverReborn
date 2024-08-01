@@ -1,12 +1,8 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.ClientState.Objects.SubKinds;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using RotationSolver.Basic.Configuration;
-using RotationSolver.Data;
-using RotationSolver.Localization;
-using RotationSolver.UI;
 using RotationSolver.Updaters;
 
 namespace RotationSolver.Commands;
@@ -130,6 +126,7 @@ public static partial class RSCommands
         catch (Exception ex)
         {
             Svc.Log.Warning(ex, "Pulse Failed!");
+#pragma warning disable 0436
             WarningHelper.AddSystemWarning($"Action bar failed to pulse because: {ex.Message}");
         }
         finally { started = false; }

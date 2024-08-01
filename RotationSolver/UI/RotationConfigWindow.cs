@@ -1,13 +1,8 @@
-﻿using System.Diagnostics;
-using Dalamud.Game.ClientState.Keys;
+﻿using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
-using Dalamud.Interface.Internal;
-using Dalamud.Interface.Textures;
-using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using ECommons;
 using ECommons.DalamudServices;
@@ -26,9 +21,9 @@ using RotationSolver.Helpers;
 using RotationSolver.Localization;
 using RotationSolver.UI.SearchableConfigs;
 using RotationSolver.Updaters;
+using System.Diagnostics;
 using GAction = Lumina.Excel.GeneratedSheets.Action;
 using Status = Lumina.Excel.GeneratedSheets.Status;
-using TargetType = RotationSolver.Basic.Actions.TargetType;
 using Task = System.Threading.Tasks.Task;
 
 namespace RotationSolver.UI;
@@ -315,7 +310,7 @@ public partial class RotationConfigWindow : Window
                     _searchResults = [];
                 }
                 ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Punchline.Local());
-                
+
                 var logoUrl = $"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Images/Logo.png";
                 if (ThreadLoadImageHandler.TryGetTextureWrap(logoUrl, out var logo))
                 {
@@ -2421,7 +2416,7 @@ public partial class RotationConfigWindow : Window
             ImGui.Text("NamePlate: " + b.GetNamePlateIcon().ToString());
             ImGui.Text("StatusFlags: " + b.StatusFlags.ToString());
             ImGui.Text("InView: " + Svc.GameGui.WorldToScreen(b.Position, out _).ToString());
-            ImGui.Text("Name Id: " + b.NameId.ToString()); 
+            ImGui.Text("Name Id: " + b.NameId.ToString());
             ImGui.Text("Data Id: " + b.DataId.ToString());
             ImGui.Text("Targetable: " + b.Struct()->Character.GameObject.TargetableStatus.ToString());
 

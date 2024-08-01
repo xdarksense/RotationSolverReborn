@@ -1,11 +1,9 @@
-﻿using Dalamud;
-using Dalamud.Game;
+﻿using Dalamud.Game;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Plugin.Services;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
-using RotationSolver.Basic.Configuration;
 
 namespace RotationSolver.Basic.Rotations;
 partial class CustomRotation
@@ -103,7 +101,7 @@ partial class CustomRotation
     #region Target
     /// <summary>
     /// The player's target.
-    /// <br>WARNING: You'd better not use it. Because this target isn't the action's target. Try to use <see cref="IBaseAction.Target"/> or <seealso cref="HostileTarget"/> instead after using <seealso cref="IBaseAction.CanUse(out IAction, bool, bool, bool, bool, bool, bool, bool, byte)"/></br>
+    /// <br> WARNING: Do not use if there is more than one target, this is not the actions target, it is the players current hard target. Try to use <see cref="IBaseAction.Target"/> or <seealso cref="HostileTarget"/> instead after using this.</br>
     /// </summary>
     [Obsolete("You'd better not use it. More information in summary.")]
     protected static IBattleChara Target => Svc.Targets.Target is IBattleChara b ? b : Player;
@@ -155,18 +153,18 @@ partial class CustomRotation
     public static int NumberOfAllHostilesInMaxRange => DataCenter.NumberOfAllHostilesInMaxRange;
 
     /// <summary>
-    /// All hostile Targets. This is all can attack.
+    /// All hostile Targets. This is all attackable targets.
     /// </summary>
     protected static IEnumerable<IBattleChara> AllHostileTargets => DataCenter.AllHostileTargets;
 
     /// <summary>
-    /// Average dead time of hostiles.
+    /// Average time to kill for all targets.
     /// </summary>
     [Description("Average time to kill")]
     public static float AverageTimeToKill => DataCenter.AverageTimeToKill;
 
     /// <summary>
-    /// The level of LB.
+    /// The level of the LB.
     /// </summary>
     [Description("Limit Break Level")]
     public unsafe static byte LimitBreakLevel
@@ -192,44 +190,44 @@ partial class CustomRotation
     }
 
     /// <summary>
-    /// Now, it is attacking the mobs!
+    /// How long each mob has been in combat.
     /// </summary>
     [Description("Mobs Time")]
     public static bool MobsTime => DataCenter.MobsTime;
     #endregion
 
     /// <summary>
-    /// 
+    /// Whether or not the player can use AOE heal oGCDs.
     /// </summary>
     [Description("Can heal area ability")]
     public virtual bool CanHealAreaAbility => true;
 
     /// <summary>
-    /// 
+    /// Whether or not the player can use AOE heal GCDs.
     /// </summary>
     [Description("Can heal area spell")]
     public virtual bool CanHealAreaSpell => true;
 
     /// <summary>
-    /// 
+    /// Whether or not the player can use ST heal oGCDs.
     /// </summary>
     [Description("Can heal single ability")]
     public virtual bool CanHealSingleAbility => true;
 
     /// <summary>
-    /// 
+    /// Whether or not the player can use ST heal GCDs.
     /// </summary>
     [Description("Can heal single area")]
     public virtual bool CanHealSingleSpell => true;
 
     /// <summary>
-    /// True for On, false for off.
+    /// Is RSR enabled.
     /// </summary>
     [Description("The state of auto. True for on.")]
     public static bool AutoState => DataCenter.State;
 
     /// <summary>
-    /// Ture for Manual Target, false for Auto Target.
+    /// Is RSR in manual mode.
     /// </summary>
     [Description("The state of manual. True for manual.")]
     public static bool IsManual => DataCenter.IsManual;
@@ -253,17 +251,17 @@ partial class CustomRotation
     #endregion
 
     /// <summary>
-    /// 
+    /// Client Language.
     /// </summary>
     protected static ClientLanguage Language => Svc.ClientState.ClientLanguage;
 
     /// <summary>
-    /// 
+    /// Type of the content player is in.
     /// </summary>
     protected static TerritoryContentType TerritoryContentType => DataCenter.TerritoryContentType;
 
     /// <summary>
-    /// Is player in high-end duty.
+    /// Is player in high-end duty, savage, extrene or ultimate.
     /// </summary>
     [Description("Is in the high-end duty")]
     public static bool IsInHighEndDuty => DataCenter.IsInHighEndDuty;
@@ -275,49 +273,49 @@ partial class CustomRotation
     public static bool IsInDuty => Svc.Condition[ConditionFlag.BoundByDuty];
 
     /// <summary>
-    /// 
+    /// Your ping.
     /// </summary>
     [Description("Your ping")]
     [Obsolete("No longer tracked or calculated")]
     public static float Ping => 0f;
 
     /// <summary>
-    /// 
+    /// Time from next ability to next GCD
     /// </summary>
     [Description("Time from next ability to next GCD")]
     public static float NextAbilityToNextGCD => DataCenter.DefaultGCDRemain;
 
     /// <summary>
-    /// 
+    /// Treats one action as another.
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
     public static uint AdjustId(uint id) => Service.GetAdjustedActionId(id);
 
     /// <summary>
-    /// 
+    /// Treats one action as another.
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
     public static ActionID AdjustId(ActionID id) => Service.GetAdjustedActionId(id);
 
     /// <summary>
-    /// 
+    /// Average amount of times a rotation calls IsLastGCD, IsLastAbility, or IsLastAction.
     /// </summary>
     public double AverageCountOfLastUsing { get; internal set; } = 0;
 
     /// <summary>
-    /// 
+    /// Max amount of times a rotation calls IsLastGCD, IsLastAbility, or IsLastAction.
     /// </summary>
     public int MaxCountOfLastUsing { get; internal set; } = 0;
 
     /// <summary>
-    /// 
+    /// The average count of not recommend members using.
     /// </summary>
     public double AverageCountOfCombatTimeUsing { get; internal set; } = 0;
 
     /// <summary>
-    /// 
+    /// The max count of not recommend members using.
     /// </summary>
     public int MaxCountOfCombatTimeUsing { get; internal set; } = 0;
     internal long CountOfTracking { get; set; } = 0;
@@ -340,7 +338,7 @@ partial class CustomRotation
     }
 
     /// <summary>
-    /// How much time has passed since the last action was released.
+    /// How much time has passed since the last action was used.
     /// <br>WARNING: Do Not make this method the main of your rotation.</br>
     /// </summary>
     protected static TimeSpan TimeSinceLastAction
@@ -353,7 +351,7 @@ partial class CustomRotation
     }
 
     /// <summary>
-    /// Check for GCD Record.
+    /// Last used GCD.
     /// <br>WARNING: Do Not make this method the main of your rotation.</br>
     /// </summary>
     /// <param name="isAdjust">Check for adjust id not raw id.</param>
@@ -367,7 +365,7 @@ partial class CustomRotation
     }
 
     /// <summary>
-    /// Check for GCD Record.
+    /// Last used GCD.
     /// <br>WARNING: Do Not make this method the main of your rotation.</br>
     /// </summary>
     /// <param name="ids">True if any of this is matched.</param>
@@ -379,7 +377,7 @@ partial class CustomRotation
     }
 
     /// <summary>
-    /// Check for ability Record.
+    /// Last used Ability.
     /// <br>WARNING: Do Not make this method the main of your rotation.</br>
     /// </summary>
     /// <param name="isAdjust">Check for adjust id not raw id.</param>
@@ -393,7 +391,7 @@ partial class CustomRotation
     }
 
     /// <summary>
-    /// Check for ability Record.
+    /// Last used Ability.
     /// <br>WARNING: Do Not make this method the main of your rotation.</br>
     /// </summary>
     /// <param name="ids">True if any of this is matched.</param>
@@ -405,7 +403,7 @@ partial class CustomRotation
     }
 
     /// <summary>
-    /// Check for action Record.
+    /// Last used Action.
     /// <br>WARNING: Do Not make this method the main of your rotation.</br>
     /// </summary>
     /// <param name="isAdjust">Check for adjust id not raw id.</param>
@@ -419,7 +417,7 @@ partial class CustomRotation
     }
 
     /// <summary>
-    /// Check for action Record.
+    /// Last used Action.
     /// <br>WARNING: Do Not make this method the main of your rotation.</br>
     /// </summary>
     /// <param name="ids">True if any of this is matched.</param>
@@ -454,7 +452,7 @@ partial class CustomRotation
     }
 
     /// <summary>
-    /// The combat time.
+    /// How long combat has been going.
     /// <br>WARNING: Do Not make this method the main of your rotation.</br>
     /// </summary>
     [Description("Combat time")]
@@ -482,7 +480,7 @@ partial class CustomRotation
     protected static bool StopMovingElapsedLess(float time) => StopMovingTime <= time;
 
     /// <summary>
-    /// The time of stopping moving.
+    /// How long the player has been standing still.
     /// <br>WARNING: Do Not make this method the main of your rotation.</br>
     /// </summary>
     [Description("Stop moving time")]

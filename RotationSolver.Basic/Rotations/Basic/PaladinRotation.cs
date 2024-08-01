@@ -193,7 +193,7 @@ partial class PaladinRotation
 
     static partial void ModifyHolySpiritPvE(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyRequiescatPvE(ref ActionSetting setting)

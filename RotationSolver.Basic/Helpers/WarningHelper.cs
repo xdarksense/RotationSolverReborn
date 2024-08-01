@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RotationSolver.Basic.Helpers
+﻿namespace RotationSolver.Basic.Helpers
 {
     internal static class WarningHelper
     {

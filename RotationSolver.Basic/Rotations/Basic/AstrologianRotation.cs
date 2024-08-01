@@ -39,7 +39,7 @@ partial class AstrologianRotation
 
     static partial void ModifyMaleficPvE(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyBeneficPvE(ref ActionSetting setting)
@@ -97,20 +97,20 @@ partial class AstrologianRotation
 
     static partial void ModifyPlayIPvE(ref ActionSetting setting) //37019
     {
-        
+
     }
 
     static partial void ModifyPlayIiPvE(ref ActionSetting setting) //37020
     {
-        
+
     }
 
     static partial void ModifyPlayIiiPvE(ref ActionSetting setting) //37021
     {
-        
+
     }
 
-    static partial void ModifyTheBalancePvE(ref ActionSetting setting) 
+    static partial void ModifyTheBalancePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => DrawnCard.Any(card => card == CardType.BALANCE);
         setting.TargetStatusProvide = [StatusID.TheBalance_3887, StatusID.Weakness,
@@ -261,7 +261,7 @@ partial class AstrologianRotation
 
     static partial void ModifyMaleficIiiPvE(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyMinorArcanaPvE(ref ActionSetting setting)
@@ -275,7 +275,7 @@ partial class AstrologianRotation
         setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
-            /// Keeping as one for use in boss fights, Players may optionally increase required hostile count
+            // Keeping as one for use in boss fights, Players may optionally increase required hostile count
             AoeCount = 1,
         };
     }

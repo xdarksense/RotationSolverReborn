@@ -1,7 +1,6 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Game.ClientState.Statuses;
 using ECommons.DalamudServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
@@ -89,7 +88,7 @@ public static class ObjectHelper
             names = names.Union(ns1);
 
         if (names.Any(n => !string.IsNullOrEmpty(n) && new Regex(n).Match(IBattleChara.Name.TextValue).Success)) return false;
-        
+
         //Fate
         if (DataCenter.TerritoryContentType != TerritoryContentType.Eureka)
         {
@@ -172,7 +171,7 @@ public static class ObjectHelper
 
     internal static unsafe bool IsAlliance(this IGameObject obj)
         => obj.GameObjectId is not 0
-        && (!(DataCenter.IsPvP) && obj is IPlayerCharacter 
+        && (!(DataCenter.IsPvP) && obj is IPlayerCharacter
         || ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, obj.Struct()));
 
     internal static bool IsParty(this IGameObject IGameObject)

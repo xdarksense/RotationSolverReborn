@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using RotationSolver.Localization;
-using System;
+﻿using RotationSolver.Localization;
 
 namespace RotationSolver.UI.SearchableConfigs;
 

@@ -1,8 +1,8 @@
-﻿using ECommons.DalamudServices;
+﻿using Dalamud.Game;
+using ECommons.DalamudServices;
 using Newtonsoft.Json.Linq;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using Dalamud.Game;
 
 namespace RotationSolver.Basic.Data;
 internal enum TimelineType : byte
@@ -33,7 +33,7 @@ internal class TimelineItem(float time, string name, TimelineType type, JObject?
         List<uint> reuslt = [];
         List<Regex> regexes = [];
 
-        foreach ( var id in idsRaw)
+        foreach (var id in idsRaw)
         {
             if (uint.TryParse(id, NumberStyles.HexNumber, null, out var i))
             {
@@ -72,7 +72,7 @@ internal class TimelineItem(float time, string name, TimelineType type, JObject?
                 ClientLanguage.Japanese => "ja",
                 ClientLanguage.German => "de",
                 ClientLanguage.French => "fr",
-                (ClientLanguage)4 => "cn", 
+                (ClientLanguage)4 => "cn",
                 (ClientLanguage)5 => "ko",
                 _ => "",
             };
@@ -165,12 +165,12 @@ internal class TimelineItem(float time, string name, TimelineType type, JObject?
     public TimelineItem(float time, string name, string type, JObject? obj, RaidLangs langs, float? jumpTime, float windowMin, float windowMax)
         : this(time, name, GetTypeFromName(type), obj, langs, jumpTime, windowMin, windowMax)
     {
-        
+
     }
 
     private static TimelineType GetTypeFromName(string type)
     {
-        switch(type)
+        switch (type)
         {
             case "":
                 return TimelineType.Unknown;

@@ -1,11 +1,10 @@
-﻿using Dalamud.Interface.Internal;
+﻿using Dalamud.Interface.Textures.TextureWraps;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.ImGuiMethods;
 using Lumina.Excel.GeneratedSheets;
 using Svg;
 using System.Drawing.Imaging;
-using Dalamud.Interface.Textures.TextureWraps;
 
 namespace RotationSolver.Basic.Data;
 
@@ -166,7 +165,7 @@ public static class IconSet
         {
             return GetTexture(0, out texture, 0);
         }
-        if(actionID == ActionID.SprintPvE)
+        if (actionID == ActionID.SprintPvE)
         {
             return GetTexture(104, out texture, 0);
         }

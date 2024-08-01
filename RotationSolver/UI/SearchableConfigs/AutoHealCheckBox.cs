@@ -5,7 +5,7 @@ using RotationSolver.UI.SearchableSettings;
 
 namespace RotationSolver.UI.SearchableConfigs;
 
-internal class AutoHealCheckBox(PropertyInfo property, params ISearchable[] otherChildren) 
+internal class AutoHealCheckBox(PropertyInfo property, params ISearchable[] otherChildren)
     : CheckBoxSearchCondition(property, otherChildren.Union(new ISearchable[]
         {
             _healthAreaAbility,
@@ -24,11 +24,11 @@ internal class AutoHealCheckBox(PropertyInfo property, params ISearchable[] othe
         _healthAreaAbility = new(typeof(Configs).GetRuntimeProperty(nameof(Configs.HealthAreaAbility))!),
         _healthAreaAbilityHot = new(typeof(Configs).GetRuntimeProperty(nameof(Configs.HealthAreaAbilityHot))!),
         _healthAreaSpell = new(typeof(Configs).GetRuntimeProperty(nameof(Configs.HealthAreaSpell))!),
-        _healthAreaSpellHot =  new (typeof(Configs).GetRuntimeProperty(nameof(Configs.HealthAreaSpellHot))!),
-        _healthSingleAbility =  new (typeof(Configs).GetRuntimeProperty(nameof(Configs.HealthSingleAbility))!),
-        _healthSingleAbilityHot =  new (typeof(Configs).GetRuntimeProperty(nameof(Configs.HealthSingleAbilityHot))!),
-        _healthSingleSpell =  new (typeof(Configs).GetRuntimeProperty(nameof(Configs.HealthSingleSpell))!),
-        _healthSingleSpellHot =  new (typeof(Configs).GetRuntimeProperty(nameof(Configs.HealthSingleSpellHot))!);
+        _healthAreaSpellHot = new(typeof(Configs).GetRuntimeProperty(nameof(Configs.HealthAreaSpellHot))!),
+        _healthSingleAbility = new(typeof(Configs).GetRuntimeProperty(nameof(Configs.HealthSingleAbility))!),
+        _healthSingleAbilityHot = new(typeof(Configs).GetRuntimeProperty(nameof(Configs.HealthSingleAbilityHot))!),
+        _healthSingleSpell = new(typeof(Configs).GetRuntimeProperty(nameof(Configs.HealthSingleSpell))!),
+        _healthSingleSpellHot = new(typeof(Configs).GetRuntimeProperty(nameof(Configs.HealthSingleSpellHot))!);
 
     protected override void DrawChildren()
     {

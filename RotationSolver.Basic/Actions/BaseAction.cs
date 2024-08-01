@@ -56,9 +56,9 @@ public class BaseAction : IBaseAction
     public byte Level => Info.Level;
 
     /// <inheritdoc/>
-    public bool IsEnabled 
-    { 
-        get => Config.IsEnabled; 
+    public bool IsEnabled
+    {
+        get => Config.IsEnabled;
         set => Config.IsEnabled = value;
     }
 
@@ -82,16 +82,18 @@ public class BaseAction : IBaseAction
         {
             if (!Service.Config.RotationActionConfig.TryGetValue(ID, out var value))
             {
-                Service.Config.RotationActionConfig[ID] = value 
+                Service.Config.RotationActionConfig[ID] = value
                     = Setting.CreateConfig?.Invoke() ?? new();
                 if (Action.ClassJob.Value?.GetJobRole() == JobRole.Tank)
                 {
                     value.AoeCount = 2;
                 }
+
                 if (value.TimeToUntargetable == 0)
                 {
                     value.TimeToUntargetable = value.TimeToKill;
                 }
+
                 if (Setting.TargetStatusProvide != null)
                 {
                     value.TimeToKill = 10;
@@ -117,7 +119,7 @@ public class BaseAction : IBaseAction
     }
 
     /// <inheritdoc/>
-    public bool CanUse(out IAction act, bool skipStatusProvideCheck = false, bool skipComboCheck = false, bool skipCastingCheck = false, 
+    public bool CanUse(out IAction act, bool skipStatusProvideCheck = false, bool skipComboCheck = false, bool skipCastingCheck = false,
         bool usedUp = false, bool skipAoeCheck = false, byte gcdCountForAbility = 0)
     {
         act = this!;
@@ -155,7 +157,7 @@ public class BaseAction : IBaseAction
 
         return true;
     }
-    
+
 
     /// <inheritdoc/>
     public unsafe bool Use()
@@ -172,7 +174,7 @@ public class BaseAction : IBaseAction
 
             return ActionManager.Instance()->UseActionLocation(ActionType.Action, ID, Player.Object.GameObjectId, &loc);
         }
-        else if (Svc.Objects.SearchById(target.Target?.GameObjectId 
+        else if (Svc.Objects.SearchById(target.Target?.GameObjectId
             ?? Player.Object?.GameObjectId ?? 0) == null)
         {
             return false;

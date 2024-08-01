@@ -68,7 +68,7 @@ partial class SamuraiRotation
     {
         setting.ActionCheck = () => Kenki <= 95;
     }
-    
+
     static partial void ModifyJinpuPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Kenki <= 95;

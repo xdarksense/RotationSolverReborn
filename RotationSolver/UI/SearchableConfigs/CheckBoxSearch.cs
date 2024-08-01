@@ -1,5 +1,4 @@
-﻿using Dalamud.Interface.Internal;
-using Dalamud.Interface.Textures.TextureWraps;
+﻿using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Configuration.Conditions;
@@ -9,8 +8,8 @@ using RotationSolver.UI.SearchableConfigs;
 
 namespace RotationSolver.UI.SearchableSettings;
 
-internal class CheckBoxSearchCondition(PropertyInfo property, params ISearchable[] children) 
-    : CheckBoxSearch(property, 
+internal class CheckBoxSearchCondition(PropertyInfo property, params ISearchable[] children)
+    : CheckBoxSearch(property,
     [
         new CheckBoxEnable(property),
         new CheckBoxDisable(property),
@@ -52,7 +51,7 @@ internal class CheckBoxSearchCondition(PropertyInfo property, params ISearchable
     {
         public override string Name => UiString.ForcedDisableCondition.Local();
 
-        public override string Description => UiString.ForcedDisableConditionDesc.Local(); 
+        public override string Description => UiString.ForcedDisableConditionDesc.Local();
 
         protected override bool Value
         {
@@ -73,7 +72,7 @@ internal class CheckBoxSearchCondition(PropertyInfo property, params ISearchable
 
         public override string Description => UiString.ForcedEnableConditionDesc.Local();
 
-        protected override bool Value 
+        protected override bool Value
         {
             get => _condition.Enable;
             set => _condition.Enable = value;
@@ -115,9 +114,9 @@ internal class CheckBoxSearchCondition(PropertyInfo property, params ISearchable
 internal class CheckBoxSearchNoCondition(PropertyInfo property, params ISearchable[] children)
     : CheckBoxSearch(property, children)
 {
-    protected override bool Value 
+    protected override bool Value
     {
-        get => (bool)_property.GetValue(Service.Config)!; 
+        get => (bool)_property.GetValue(Service.Config)!;
         set => _property.SetValue(Service.Config, value);
     }
 
@@ -140,7 +139,7 @@ internal abstract class CheckBoxSearch : Searchable
     public override string Description => Action == ActionID.None ? base.Description : Action.ToString();
 
     internal CheckBoxSearch(PropertyInfo property, params ISearchable[] children)
-        :base(property)
+        : base(property)
     {
         Action = property.GetCustomAttribute<UIAttribute>()?.Action ?? ActionID.None;
         foreach (var child in children)

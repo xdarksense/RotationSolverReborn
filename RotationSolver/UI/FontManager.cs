@@ -1,11 +1,4 @@
-﻿using Dalamud.Interface.ManagedFontAtlas;
-using Dalamud.Interface.Utility.Raii;
-using ECommons.DalamudServices;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ECommons.DalamudServices;
 
 namespace RotationSolver.UI
 {

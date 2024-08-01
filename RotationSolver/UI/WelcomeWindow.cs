@@ -1,22 +1,9 @@
-﻿using Dalamud;
-using Dalamud.Interface.Colors;
-using Dalamud.Interface.Style;
-using Dalamud.Interface.Utility;
-using Dalamud.Interface.Utility.Raii;
+﻿using Dalamud.Interface.Colors;
 using Dalamud.Interface.Windowing;
-using ECommons;
 using ECommons.DalamudServices;
-using ECommons.Reflection;
 using RotationSolver.Data;
 using RotationSolver.Localization;
 using RotationSolver.Updaters;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace RotationSolver.UI
 {
@@ -64,7 +51,15 @@ namespace RotationSolver.UI
                     if (response.IsSuccessStatusCode)
                     {
                         var content = await response.Content.ReadAsStringAsync();
-                        _changeLog = JsonConvert.DeserializeObject<GitHubCommitComparison>(content);
+                        var changeLog = JsonConvert.DeserializeObject<GitHubCommitComparison>(content);
+                        if (changeLog != null)
+                        {
+                            _changeLog = changeLog;
+                        }
+                        else
+                        {
+                            Svc.Log.Error("Failed to deserialize GitHub commit comparison.");
+                        }
                     }
                     else
                     {
@@ -77,6 +72,7 @@ namespace RotationSolver.UI
                 Svc.Log.Error(ex, "Failed to get comparison");
             }
         }
+
 
         private async Task<string> GetNextMostRecentReleaseTag()
         {

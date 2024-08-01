@@ -1,6 +1,4 @@
-﻿using ECommons.ExcelServices;
-
-namespace RotationSolver.Basic.Configuration.RotationConfig;
+﻿namespace RotationSolver.Basic.Configuration.RotationConfig;
 
 /// <summary>
 /// The single config of rotation.

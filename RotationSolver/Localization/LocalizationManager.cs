@@ -40,7 +40,7 @@ internal static class LocalizationManager
     public static void InIt()
     {
 #if DEBUG
-        
+
         var dirInfo = Svc.PluginInterface.AssemblyLocation.Directory;
         dirInfo = dirInfo?.Parent!.Parent!.Parent!.Parent!;
 
@@ -54,7 +54,7 @@ internal static class LocalizationManager
         var path = Path.Combine(directory, "Localization.json");
         _rightLang = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(path)) ?? [];
 
-        if( _rightLang == null)
+        if (_rightLang == null)
         {
             Svc.Log.Error("Load translations failed");
         }

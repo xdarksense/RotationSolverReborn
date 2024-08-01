@@ -33,7 +33,7 @@ internal abstract class DelayCondition : ICondition
             _delay = new(() => (DelayMin, DelayMax));
         }
 
-        if(_offsetDelay.GetDelay == null)
+        if (_offsetDelay.GetDelay == null)
         {
             _offsetDelay = new(() => DelayOffset);
         }

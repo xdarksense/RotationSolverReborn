@@ -30,7 +30,7 @@ internal class DragFloatRangeSearch : Searchable
         get => (Vector2)_property.GetValue(Service.Config)!;
         set => _property.SetValue(Service.Config, value);
     }
-    protected float MinValue 
+    protected float MinValue
     {
         get => Value.X;
         set

@@ -78,7 +78,7 @@
 		<Pack>True</Pack>
 		<PackagePath>\</PackagePath>
       </None>
-      <PackageReference Include="Svg" Version="3.4.4" />
+      <PackageReference Include="Svg" Version="3.4.7" />
 	  <None Update="README.md">
 		<Pack>True</Pack>
 		<PackagePath>\</PackagePath>

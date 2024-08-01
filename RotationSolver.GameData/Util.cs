@@ -36,7 +36,7 @@ internal static partial class Util
 
     public static string OnlyAscii(this string input) => new(input.Where(char.IsAscii).ToArray());
 
-    public  static string ToPascalCase(this string input)
+    public static string ToPascalCase(this string input)
     {
         var pascalCase = InvalidCharsRgx().Replace(WhiteSpace().Replace(input, "_"), string.Empty)
             .Split(new char[] { '_' }, StringSplitOptions.RemoveEmptyEntries)

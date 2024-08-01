@@ -14,7 +14,7 @@ partial class CustomRotation : ICustomRotation
     private JobRole? _role = null;
 
     /// <inheritdoc/>
-    public JobRole Role  => _role ??= Svc.Data.GetExcelSheet<ClassJob>()!.GetRow((uint)Job)!.GetJobRole();
+    public JobRole Role => _role ??= Svc.Data.GetExcelSheet<ClassJob>()!.GetRow((uint)Job)!.GetJobRole();
     private string? _name = null;
 
     /// <inheritdoc/>
