@@ -46,8 +46,7 @@ internal static class StateUpdater
             }
         }
 
-        var noHeal = DataCenter.Role is JobRole.Healer;
-        if (DataCenter.HPNotFull && CanUseHealAction && !noHeal)
+        if (DataCenter.HPNotFull && CanUseHealAction)
         {
             var singleAbility = ShouldHealSingle(StatusHelper.SingleHots,
                 Service.Config.HealthSingleAbility,

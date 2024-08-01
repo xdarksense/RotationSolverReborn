@@ -407,7 +407,7 @@ public partial class ViperRotation
 
     static partial void ModifyUncoiledFuryPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => RattlingCoilStacks >= 1 && !UNCOILEDREADY && NODREAD && !THRESHREADY && !TWINSREADY & !HasReawakend;
+        setting.ActionCheck = () => RattlingCoilStacks >= 1 && !UNCOILEDREADY && NODREAD && !THRESHREADY && !TWINSREADY && AnguineTribute == 0 && !Player.HasStatus(true, StatusID.Reawakened);
         setting.StatusProvide = [StatusID.PoisedForTwinfang];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -435,7 +435,7 @@ public partial class ViperRotation
 
     static partial void ModifySerpentsIrePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => RattlingCoilStacks < MaxRattling && InCombat && !HasReawakend;
+        setting.ActionCheck = () => RattlingCoilStacks < MaxRattling && InCombat;
         setting.StatusProvide = [StatusID.ReadyToReawaken];
     }
 
