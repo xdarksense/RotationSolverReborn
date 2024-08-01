@@ -38,13 +38,12 @@ partial class CustomRotation
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.TankStance)
             && (TankStance?.CanUse(out act) ?? false)) return true;
 
-
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.AntiKnockback)
             && AntiKnockback(role, nextGCD, out act)) return true;
 
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.Positional))
         {
-            if (TrueNorthPvE.Cooldown.CurrentCharges > 0)
+            if (TrueNorthPvE.Cooldown.CurrentCharges > 0 && !IsLastAbility(true, TrueNorthPvE))
             {
                 if (TrueNorthPvE.CanUse(out act, skipComboCheck: true, usedUp: true)) return true;
             }
@@ -262,8 +261,15 @@ partial class CustomRotation
     {
         if (nextGCD is BaseAction action)
         {
-            if (Role is JobRole.Healer or JobRole.RangedMagical &&
+            if (Role is JobRole.RangedMagical &&
             action.Info.CastTime >= 5 && SwiftcastPvE.CanUse(out act)) return true;
+
+        }
+
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
+        {
+
+            if (Role is JobRole.Healer && SwiftcastPvE.CanUse(out act)) return true;
         }
 
         if (DataCenter.RightNowDutyRotation?.EmergencyAbility(nextGCD, out act) ?? false) return true;
