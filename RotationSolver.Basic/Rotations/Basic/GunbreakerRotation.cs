@@ -64,7 +64,7 @@ partial class GunbreakerRotation
     {
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 2,
         };
     }
 
@@ -201,7 +201,7 @@ partial class GunbreakerRotation
         setting.ActionCheck = () => Ammo > 0;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 2,
         };
     }
 
@@ -250,7 +250,7 @@ partial class GunbreakerRotation
         setting.StatusNeed = [StatusID.ReadyToRaze];
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 2,
         };
     }
 

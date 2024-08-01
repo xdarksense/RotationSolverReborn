@@ -152,17 +152,6 @@ internal static class ActionUpdater
         }
         else
         {
-            if (DataCenter.CombatTimeRaw == 0)
-            {
-                foreach (var item in DataCenter.TimelineItems)
-                {
-                    if (!item.IsInWindow) continue;
-                    if (item.Type is not TimelineType.InCombat) continue;
-
-                    item.UpdateRaidTimeOffset();
-                    break;
-                }
-            }
             DataCenter.CombatTimeRaw = (float)(DateTime.Now - _startCombatTime).TotalSeconds;
         }
     }
