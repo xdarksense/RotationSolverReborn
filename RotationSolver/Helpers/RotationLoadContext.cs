@@ -1,13 +1,12 @@
 ﻿using Dalamud.Plugin;
 using ECommons.DalamudServices;
-using FFXIVClientStructs.Interop;
 using Lumina.Excel;
 using Lumina.Excel.CustomSheets;
 using System.Runtime.Loader;
 
 namespace RotationSolver.Helpers;
 
-internal class RotationLoadContext(DirectoryInfo? directoryInfo) 
+internal class RotationLoadContext(DirectoryInfo? directoryInfo)
     : AssemblyLoadContext(true)
 {
     readonly DirectoryInfo? _directory = directoryInfo;

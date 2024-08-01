@@ -42,6 +42,12 @@ public static partial class RSCommands
         var strs = str.Split(' ');
         var settingName = strs[0];
         var value = strs.LastOrDefault();
+        if (settingName == null || value == null)
+        {
+            Svc.Chat.PrintError("Invalid setting command format.");
+            return;
+        }
+
         foreach (var property in typeof(Configs).GetRuntimeProperties().Where(p => p.GetMethod?.IsPublic ?? false))
         {
             if (!settingName.Equals(property.Name, StringComparison.OrdinalIgnoreCase))
@@ -51,7 +57,7 @@ public static partial class RSCommands
             if (type == typeof(ConditionBoolean))
                 type = typeof(bool);
 
-            object convertedValue = null;
+            object? convertedValue = null;
             bool valueParsedSuccessfully = true;
 
             if (type.IsEnum)
@@ -88,8 +94,11 @@ public static partial class RSCommands
                 else if (type.IsEnum)
                 {
                     // If invalid enum value provided - increment to the next enum value
-                    var currentEnumValue = (Enum)property.GetValue(Service.Config);
-                    convertedValue = GetNextEnumValue(currentEnumValue);
+                    var currentEnumValue = property.GetValue(Service.Config) as Enum;
+                    if (currentEnumValue != null)
+                    {
+                        convertedValue = GetNextEnumValue(currentEnumValue);
+                    }
                 }
             }
 
@@ -118,6 +127,7 @@ public static partial class RSCommands
 
         Svc.Chat.PrintError(UiString.CommandsCannotFindConfig.Local());
     }
+
 
     private static Enum GetNextEnumValue(Enum currentEnumValue)
     {

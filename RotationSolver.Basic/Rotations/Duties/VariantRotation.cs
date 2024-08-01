@@ -1,6 +1,10 @@
 ﻿namespace RotationSolver.Basic.Rotations.Duties;
 
+/// <summary>
+/// Represents a rotation for variant duties in the game.
+/// </summary>
 [DutyTerritory(1069, 1075, 1076, 1137, 1176)] //TODO: the variant territory ids!
+
 public abstract class VariantRotation : DutyRotation
 {
 }

@@ -1,13 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RotationSolver.Data
+﻿namespace RotationSolver.Data
 {
     public class GitHubCommitComparison
     {
+        public GitHubCommitComparison()
+        {
+            Url = string.Empty;
+            HtmlUrl = string.Empty;
+            PermalinkUrl = string.Empty;
+            DiffUrl = string.Empty;
+            PatchUrl = string.Empty;
+            BaseCommit = new Commit();
+            MergeBaseCommit = new Commit();
+            Status = string.Empty;
+            Commits = new List<Commit>();
+            Files = new List<CommitFile>();
+        }
+
         [JsonProperty("url")]
         public string Url { get; set; }
 
@@ -50,6 +58,19 @@ namespace RotationSolver.Data
 
     public class Commit
     {
+        public Commit()
+        {
+            Sha = string.Empty;
+            NodeId = string.Empty;
+            CommitData = new CommitData();
+            Url = string.Empty;
+            HtmlUrl = string.Empty;
+            CommentsUrl = string.Empty;
+            Author = new GithubRelease.Author();
+            Committer = new GithubRelease.Author();
+            Parents = new List<Parent>();
+        }
+
         [JsonProperty("sha")]
         public string Sha { get; set; }
 
@@ -80,6 +101,16 @@ namespace RotationSolver.Data
 
     public class CommitData
     {
+        public CommitData()
+        {
+            CommitAuthor = new Author();
+            CommitCommitter = new Author();
+            Message = string.Empty;
+            Tree = new Tree();
+            Url = string.Empty;
+            Verification = new Verification();
+        }
+
         [JsonProperty("author")]
         public Author CommitAuthor { get; set; }
 
@@ -104,6 +135,12 @@ namespace RotationSolver.Data
 
     public class Author
     {
+        public Author()
+        {
+            Name = string.Empty;
+            Email = string.Empty;
+        }
+
         [JsonProperty("name")]
         public string Name { get; set; }
 
@@ -116,6 +153,12 @@ namespace RotationSolver.Data
 
     public class Tree
     {
+        public Tree()
+        {
+            Sha = string.Empty;
+            Url = string.Empty;
+        }
+
         [JsonProperty("sha")]
         public string Sha { get; set; }
 
@@ -125,6 +168,13 @@ namespace RotationSolver.Data
 
     public class Verification
     {
+        public Verification()
+        {
+            Reason = string.Empty;
+            Signature = string.Empty;
+            Payload = string.Empty;
+        }
+
         [JsonProperty("verified")]
         public bool Verified { get; set; }
 
@@ -140,6 +190,13 @@ namespace RotationSolver.Data
 
     public class Parent
     {
+        public Parent()
+        {
+            Sha = string.Empty;
+            Url = string.Empty;
+            HtmlUrl = string.Empty;
+        }
+
         [JsonProperty("sha")]
         public string Sha { get; set; }
 
@@ -152,6 +209,17 @@ namespace RotationSolver.Data
 
     public class CommitFile
     {
+        public CommitFile()
+        {
+            Sha = string.Empty;
+            Filename = string.Empty;
+            Status = string.Empty;
+            BlobUrl = string.Empty;
+            RawUrl = string.Empty;
+            ContentsUrl = string.Empty;
+            Patch = string.Empty;
+        }
+
         [JsonProperty("sha")]
         public string Sha { get; set; }
 

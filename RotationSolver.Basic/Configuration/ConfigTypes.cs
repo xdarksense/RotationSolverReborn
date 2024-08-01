@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RotationSolver.Basic.Configuration
+﻿namespace RotationSolver.Basic.Configuration
 {
     /// <summary>
     /// Various types used in the configuration.

@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
-using System.Security.Cryptography;
 
 namespace RotationSolver.SourceGenerators;
 
@@ -55,7 +54,7 @@ public class ConditionBoolGenerator : IIncrementalGenerator
                 var fieldTypeStr = field.Declaration.Type;
                 var fieldType = model.GetTypeInfo(fieldTypeStr).Type!;
 
-                if(fieldType.GetFullMetadataName() != "System.Boolean")
+                if (fieldType.GetFullMetadataName() != "System.Boolean")
                 {
                     var diag = new DiagnosticDescriptor("a", "aa", "aaa", "1", DiagnosticSeverity.Warning, true);
                     context.ReportDiagnostic(Diagnostic.Create(diag, variableInfo.GetLocation()));

@@ -10,7 +10,7 @@ namespace RotationSolver.Basic.Data;
 /// Constructer.
 /// </remarks>
 /// <param name="getRange"></param>
-public class ObjectListDelay<T>(Func<(float min, float max)> getRange) 
+public class ObjectListDelay<T>(Func<(float min, float max)> getRange)
     : IEnumerable<T> where T : IGameObject
 {
     IEnumerable<T> _list = [];
@@ -29,7 +29,7 @@ public class ObjectListDelay<T>(Func<(float min, float max)> getRange)
             return (vec.X, vec.Y);
         })
     {
-        
+
     }
 
     /// <summary>

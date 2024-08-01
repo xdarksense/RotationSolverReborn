@@ -23,7 +23,7 @@ internal class ItemGetter(Lumina.GameData gameData)
 
     protected override string ToCode(Item item)
     {
-       var name = item.Singular.RawString.ToPascalCase();
+        var name = item.Singular.RawString.ToPascalCase();
         if (AddedNames.Contains(name))
         {
             name += "_" + item.RowId.ToString();

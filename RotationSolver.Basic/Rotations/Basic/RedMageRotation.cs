@@ -1,6 +1,4 @@
-﻿using FFXIVClientStructs.FFXIV.Client.UI.Shell;
-
-namespace RotationSolver.Basic.Rotations.Basic;
+﻿namespace RotationSolver.Basic.Rotations.Basic;
 
 partial class RedMageRotation
 {
@@ -62,23 +60,23 @@ partial class RedMageRotation
 
     static partial void ModifyReprisePvE(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyRipostePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (BlackMana >= 20 && WhiteMana >= 20)  || Player.HasStatus(true, StatusID.MagickedSwordplay);
+        setting.ActionCheck = () => (BlackMana >= 20 && WhiteMana >= 20) || Player.HasStatus(true, StatusID.MagickedSwordplay);
     }
 
     static partial void ModifyZwerchhauPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (BlackMana >= 15 && WhiteMana >= 15)  || Player.HasStatus(true, StatusID.MagickedSwordplay);
+        setting.ActionCheck = () => (BlackMana >= 15 && WhiteMana >= 15) || Player.HasStatus(true, StatusID.MagickedSwordplay);
         setting.ComboIds = [ActionID.RipostePvE];
     }
 
     static partial void ModifyRedoublementPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (BlackMana >= 15 && WhiteMana >= 15)  || Player.HasStatus(true, StatusID.MagickedSwordplay);
+        setting.ActionCheck = () => (BlackMana >= 15 && WhiteMana >= 15) || Player.HasStatus(true, StatusID.MagickedSwordplay);
         setting.ComboIds = [ActionID.ZwerchhauPvE];
     }
 
@@ -139,22 +137,22 @@ partial class RedMageRotation
     static partial void ModifyManaficationPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => WhiteMana <= 50 && BlackMana <= 50 && InCombat && ManaStacks == 0 && !IsLastGCD(
-            ActionID.RipostePvE, 
-            ActionID.EnchantedRipostePvE, 
-            ActionID.EnchantedRipostePvE_27055, 
-            ActionID.EnchantedRipostePvE_24918, 
-            ActionID.ZwerchhauPvE, 
-            ActionID.EnchantedZwerchhauPvE, 
-            ActionID.EnchantedZwerchhauPvE_27056, 
-            ActionID.EnchantedZwerchhauPvE_24919, 
-            ActionID.ScorchPvE, 
-            ActionID.ScorchPvE_24831, 
-            ActionID.ScorchPvE_24898, 
-            ActionID.VerflarePvE, 
-            ActionID.VerholyPvE, 
-            ActionID.VerholyPvE_21923, 
-            ActionID.VerholyPvE_27059, 
-            ActionID.VerflarePvE_20532, 
+            ActionID.RipostePvE,
+            ActionID.EnchantedRipostePvE,
+            ActionID.EnchantedRipostePvE_27055,
+            ActionID.EnchantedRipostePvE_24918,
+            ActionID.ZwerchhauPvE,
+            ActionID.EnchantedZwerchhauPvE,
+            ActionID.EnchantedZwerchhauPvE_27056,
+            ActionID.EnchantedZwerchhauPvE_24919,
+            ActionID.ScorchPvE,
+            ActionID.ScorchPvE_24831,
+            ActionID.ScorchPvE_24898,
+            ActionID.VerflarePvE,
+            ActionID.VerholyPvE,
+            ActionID.VerholyPvE_21923,
+            ActionID.VerholyPvE_27059,
+            ActionID.VerflarePvE_20532,
             ActionID.VerflarePvE_27052
         );
         ;
@@ -205,14 +203,14 @@ partial class RedMageRotation
         if (MagickBarrierPvE.CanUse(out act, skipAoeCheck: true)) return true;
         return base.DefenseAreaAbility(nextGCD, out act);
     }
-    
+
     //DT Changes
 
     static partial void ModifyViceOfThornsPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.ThornedFlourish];
     }
-    
+
     static partial void ModifyGrandImpactPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.GrandImpactReady];
@@ -221,7 +219,7 @@ partial class RedMageRotation
             AoeCount = 1,
         };
     }
-    
+
     static partial void ModifyPrefulgencePvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.PrefulgenceReady];

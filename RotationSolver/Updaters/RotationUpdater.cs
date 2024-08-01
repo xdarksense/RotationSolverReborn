@@ -24,7 +24,7 @@ internal static class RotationUpdater
 
     static bool _isLoading = false;
 
-    public static async Task ResetToDefaults()
+    public static Task ResetToDefaults()
     {
         Service.Config.RotationLibs = Configs.DefaultRotations;
         try
@@ -41,6 +41,8 @@ internal static class RotationUpdater
         {
             Svc.Log.Error(ex, "Failed to delete the rotation files");
         }
+
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -81,6 +83,7 @@ internal static class RotationUpdater
         }
         catch (Exception ex)
         {
+#pragma warning disable 0436
             WarningHelper.AddSystemWarning($"Failed to load rotations because: {ex.Message}");
             Svc.Log.Error(ex, "Failed to get custom rotations");
         }
@@ -468,7 +471,7 @@ internal static class RotationUpdater
                }
                else
                {
-                   result = UiString.ActionAbility.Local(); 
+                   result = UiString.ActionAbility.Local();
                }
 
                if (act.Setting.IsFriendly)

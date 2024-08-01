@@ -31,7 +31,7 @@ public struct RandomDelay(Func<(float min, float max)> getRange)
             return (vec.X, vec.Y);
         })
     {
-        
+
     }
 
     /// <summary>

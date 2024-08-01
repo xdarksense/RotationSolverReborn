@@ -107,7 +107,7 @@ internal class SearchableCollection
             {
                 ImGui.Separator();
             }
-            foreach(var item in grp.OrderBy(i => i.Attribute.Order))
+            foreach (var item in grp.OrderBy(i => i.Attribute.Order))
             {
                 item.Searchable.Draw();
             }

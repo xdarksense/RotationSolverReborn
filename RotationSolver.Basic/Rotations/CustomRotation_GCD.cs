@@ -8,7 +8,7 @@ partial class CustomRotation
         var act = DataCenter.CommandNextAction;
 
         IBaseAction.ForceEnable = true;
-        if (act is IBaseAction a && a != null && a.Info.IsRealGCD 
+        if (act is IBaseAction a && a != null && a.Info.IsRealGCD
             && a.CanUse(out _, usedUp: true, skipAoeCheck: true)) return act;
         IBaseAction.ForceEnable = false;
 
@@ -94,9 +94,9 @@ partial class CustomRotation
 
                 if (PartyMembersMinHP < Service.Config.HealWhenNothingTodoBelow)
                 {
-                    IBaseAction.TargetOverride =  TargetType.Heal;
+                    IBaseAction.TargetOverride = TargetType.Heal;
 
-                    if (DataCenter.PartyMembersDifferHP < Service.Config.HealthDifference 
+                    if (DataCenter.PartyMembersDifferHP < Service.Config.HealthDifference
                         && DataCenter.PartyMembersHP.Count(i => i < 1) > 2
                         && HealAreaGCD(out act)) return act;
                     if (HealSingleGCD(out act)) return act;
@@ -121,7 +121,7 @@ partial class CustomRotation
 
         return LimitBreakLevel switch
         {
-            1 => ((DataCenter.IsPvP) 
+            1 => ((DataCenter.IsPvP)
                 ? LimitBreakPvP?.CanUse(out act, skipAoeCheck: true)
                 : LimitBreak1?.CanUse(out act, skipAoeCheck: true)) ?? false,
             2 => LimitBreak2?.CanUse(out act, skipAoeCheck: true) ?? false,
@@ -213,7 +213,7 @@ partial class CustomRotation
             && (Player.GetHealthRatio() <= Service.Config.HealthForGuard
             || DataCenter.CommandStatus.HasFlag(AutoStatus.Raise | AutoStatus.Shirk))) return true;
 
-        
+
         if (StandardissueElixirPvP.CanUse(out act)) return true;
         #endregion
 

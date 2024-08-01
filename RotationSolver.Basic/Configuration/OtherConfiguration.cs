@@ -1,5 +1,4 @@
 ﻿using ECommons.DalamudServices;
-using RotationSolver.Basic.Configuration.Timeline;
 
 namespace RotationSolver.Basic.Configuration;
 
@@ -179,7 +178,8 @@ internal class OtherConfiguration
                     Error = delegate (object sender, Newtonsoft.Json.Serialization.ErrorEventArgs args)
                     {
                         args.ErrorContext.Handled = true;
-                    }!
+                    }
+                    !
                 })!;
             }
             catch

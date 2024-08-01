@@ -13,7 +13,7 @@ public static class StatusHelper
     /// <summary>
     /// 
     /// </summary>
-    public static StatusID[] RangePhysicalDefense { get;  } =
+    public static StatusID[] RangePhysicalDefense { get; } =
     [
         StatusID.Troubadour,
         StatusID.Tactician_1951,

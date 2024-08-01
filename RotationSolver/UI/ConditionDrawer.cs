@@ -91,7 +91,7 @@ internal static class ConditionDrawer
     {
         var values = Enum.GetValues<T>().Where(i => i.GetAttribute<ObsoleteAttribute>() == null).ToHashSet().ToArray();
         var index = Array.IndexOf(values, value);
-        var names = values.Select(v =>  v.Local()).ToArray();
+        var names = values.Select(v => v.Local()).ToArray();
 
         if (ImGuiHelper.SelectableCombo(name, names, ref index))
         {
@@ -138,7 +138,7 @@ internal static class ConditionDrawer
         var show = type == ConfigUnitType.Percent ? $"{value * 100:F1}{type.ToSymbol()}" : $"{value:F2}{type.ToSymbol()}";
 
         ImGui.SetNextItemWidth(Math.Max(50 * ImGuiHelpers.GlobalScale, ImGui.CalcTextSize(show).X));
-        var result = type == ConfigUnitType.Percent ? ImGui.SliderFloat(name, ref value, 0, 1, show) 
+        var result = type == ConfigUnitType.Percent ? ImGui.SliderFloat(name, ref value, 0, 1, show)
             : ImGui.DragFloat(name, ref value, 0.1f, 0, 0, show);
         if (!string.IsNullOrEmpty(tooltip))
         {

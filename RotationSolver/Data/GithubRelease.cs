@@ -1,15 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RotationSolver.Data
+﻿namespace RotationSolver.Data
 {
     public class GithubRelease
     {
         public class Release
         {
+            public Release()
+            {
+                Url = string.Empty;
+                AssetsUrl = string.Empty;
+                UploadUrl = string.Empty;
+                HtmlUrl = string.Empty;
+                NodeId = string.Empty;
+                TagName = string.Empty;
+                TargetCommitish = string.Empty;
+                Name = string.Empty;
+                Assets = new List<Asset>();
+                TarballUrl = string.Empty;
+                ZipballUrl = string.Empty;
+                Body = string.Empty;
+                Author = new Author();
+            }
+
             [JsonProperty("url")]
             public string Url { get; set; }
 
@@ -70,6 +81,26 @@ namespace RotationSolver.Data
 
         public class Author
         {
+            public Author()
+            {
+                Login = string.Empty;
+                NodeId = string.Empty;
+                AvatarUrl = string.Empty;
+                GravatarId = string.Empty;
+                Url = string.Empty;
+                HtmlUrl = string.Empty;
+                FollowersUrl = string.Empty;
+                FollowingUrl = string.Empty;
+                GistsUrl = string.Empty;
+                StarredUrl = string.Empty;
+                SubscriptionsUrl = string.Empty;
+                OrganizationsUrl = string.Empty;
+                ReposUrl = string.Empty;
+                EventsUrl = string.Empty;
+                ReceivedEventsUrl = string.Empty;
+                Type = string.Empty;
+            }
+
             [JsonProperty("login")]
             public string Login { get; set; }
 
@@ -127,6 +158,18 @@ namespace RotationSolver.Data
 
         public class Asset
         {
+            public Asset()
+            {
+                Url = string.Empty;
+                NodeId = string.Empty;
+                Name = string.Empty;
+                Label = string.Empty;
+                Uploader = new Uploader();
+                ContentType = string.Empty;
+                State = string.Empty;
+                BrowserDownloadUrl = string.Empty;
+            }
+
             [JsonProperty("url")]
             public string Url { get; set; }
 
@@ -169,6 +212,26 @@ namespace RotationSolver.Data
 
         public class Uploader
         {
+            public Uploader()
+            {
+                Login = string.Empty;
+                NodeId = string.Empty;
+                AvatarUrl = string.Empty;
+                GravatarId = string.Empty;
+                Url = string.Empty;
+                HtmlUrl = string.Empty;
+                FollowersUrl = string.Empty;
+                FollowingUrl = string.Empty;
+                GistsUrl = string.Empty;
+                StarredUrl = string.Empty;
+                SubscriptionsUrl = string.Empty;
+                OrganizationsUrl = string.Empty;
+                ReposUrl = string.Empty;
+                EventsUrl = string.Empty;
+                ReceivedEventsUrl = string.Empty;
+                Type = string.Empty;
+            }
+
             [JsonProperty("login")]
             public string Login { get; set; }
 

@@ -6,9 +6,8 @@ using ECommons;
 using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using ECommons.ImGuiMethods;
+using Lumina.Excel.GeneratedSheets;
 using RotationSolver.Basic.Configuration;
-using RotationSolver.Basic.Configuration.Timeline;
-using RotationSolver.Basic.Configuration.Timeline.TimelineCondition;
 using RotationSolver.Basic.IPC;
 using RotationSolver.Commands;
 using RotationSolver.Data;
@@ -50,27 +49,26 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         _dis.Add(new Service());
         try
         {
-        // Check if the config file exists before attempting to read and deserialize it
-        if (File.Exists(Svc.PluginInterface.ConfigFile.FullName))
-        {
-            var oldConfigs = JsonConvert.DeserializeObject<Configs>(
-                File.ReadAllText(Svc.PluginInterface.ConfigFile.FullName),
-                new BaseTimelineItemConverter(), new ITimelineConditionConverter())
-                ?? new Configs();
+            // Check if the config file exists before attempting to read and deserialize it
+            if (File.Exists(Svc.PluginInterface.ConfigFile.FullName))
+            {
+                var oldConfigs = JsonConvert.DeserializeObject<Configs>(
+                    File.ReadAllText(Svc.PluginInterface.ConfigFile.FullName))
+                    ?? new Configs();
 
-            var newConfigs = Configs.Migrate(oldConfigs);
-            Service.Config = newConfigs;
+                var newConfigs = Configs.Migrate(oldConfigs);
+                Service.Config = newConfigs;
+            }
+            else
+            {
+                Service.Config = new Configs();
+            }
         }
-        else
+        catch (Exception ex)
         {
+            Svc.Log.Warning(ex, "Failed to load config");
             Service.Config = new Configs();
         }
-    }
-    catch (Exception ex)
-    {
-        Svc.Log.Warning(ex, "Failed to load config");
-        Service.Config = new Configs();
-    }
 
         IPCProvider = new();
 
@@ -101,6 +99,62 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         Watcher.Enable();
         OtherConfiguration.Init();
         LocalizationManager.InIt();
+
+        Svc.DutyState.DutyStarted += DutyState_DutyStarted;
+        Svc.DutyState.DutyWiped += DutyState_DutyWiped;
+        Svc.DutyState.DutyCompleted += DutyState_DutyCompleted;
+        Svc.ClientState.TerritoryChanged += ClientState_TerritoryChanged;
+        ClientState_TerritoryChanged(Svc.ClientState.TerritoryType);
+
+
+        static async void DutyState_DutyCompleted(object? sender, ushort e)
+        {
+            await Task.Delay(new Random().Next(4000, 6000));
+
+            Service.Config.DutyEnd.AddMacro();
+
+            if (Service.Config.AutoOffWhenDutyCompleted)
+            {
+                RSCommands.CancelState();
+            }
+        }
+
+        static void ClientState_TerritoryChanged(ushort id)
+        {
+            DataCenter.ResetAllRecords();
+
+            var territory = Service.GetSheet<TerritoryType>().GetRow(id);
+
+            DataCenter.Territory = territory;
+
+            try
+            {
+                DataCenter.RightNowRotation?.OnTerritoryChanged();
+            }
+            catch (Exception ex)
+            {
+                Svc.Log.Error(ex, "Failed on Territory changed.");
+            }
+        }
+
+        static void DutyState_DutyStarted(object? sender, ushort e)
+        {
+            if (!Player.Available) return;
+            if (!Player.Object.IsJobCategory(JobRole.Tank) && !Player.Object.IsJobCategory(JobRole.Healer)) return;
+
+            if (DataCenter.IsInHighEndDuty)
+            {
+                string.Format(UiString.HighEndWarning.Local(),
+                    DataCenter.ContentFinderName).ShowWarning();
+            }
+        }
+
+        static void DutyState_DutyWiped(object? sender, ushort e)
+        {
+            if (!Player.Available) return;
+            DataCenter.ResetAllRecords();
+        }
+
         ChangeUITranslation();
 
         OpenLinkPayload = pluginInterface.AddChatLinkHandler(0, (id, str) =>

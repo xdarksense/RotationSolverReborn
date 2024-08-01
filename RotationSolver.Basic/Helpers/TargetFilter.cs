@@ -1,10 +1,6 @@
-﻿using ECommons.DalamudServices;
-using ECommons.ExcelServices;
-using ECommons.GameHelpers;
+﻿using ECommons.ExcelServices;
 using Lumina.Excel.GeneratedSheets;
-using RotationSolver.Basic.Configuration;
 using System.Data;
-using System.Text.RegularExpressions;
 
 namespace RotationSolver.Basic.Helpers;
 
@@ -68,12 +64,12 @@ public static class TargetFilter
     /// <returns></returns>
     public static bool IsJobs(this IGameObject obj, params Job[] validJobs)
     {
-        return obj.IsJobs(new SortedSet<byte>( validJobs.Select(j => (byte)(uint)j)));
+        return obj.IsJobs(new SortedSet<byte>(validJobs.Select(j => (byte)(uint)j)));
     }
 
     private static bool IsJobs(this IGameObject obj, SortedSet<byte> validJobs)
     {
-        if(obj is not IBattleChara b) return false;
+        if (obj is not IBattleChara b) return false;
         return validJobs.Contains((byte?)b.ClassJob.GameData?.RowId ?? 0);
     }
     #endregion

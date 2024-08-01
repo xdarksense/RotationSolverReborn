@@ -44,15 +44,15 @@ internal class MedicineItem : BaseItem
 
     public MedicineItem(Item item) : base(item)
     {
-         Type = _item.Unknown19 switch
-         {
-             10120 => MedicineType.Strength,
-             10140 => MedicineType.Dexterity,
-             10160 => MedicineType.Vitality,
-             10180 => MedicineType.Intelligence,
-             10200 => MedicineType.Mind,
-             _ => MedicineType.None,
-         };
+        Type = _item.Unknown19 switch
+        {
+            10120 => MedicineType.Strength,
+            10140 => MedicineType.Dexterity,
+            10160 => MedicineType.Vitality,
+            10180 => MedicineType.Intelligence,
+            10200 => MedicineType.Mind,
+            _ => MedicineType.None,
+        };
     }
 
     protected override bool CanUseThis => Service.Config.UseTinctures;

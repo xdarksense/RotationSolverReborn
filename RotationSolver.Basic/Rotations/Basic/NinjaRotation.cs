@@ -19,7 +19,7 @@ partial class NinjaRotation
 
     static partial void ModifySpinningEdgePvE(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyShadeShiftPvE(ref ActionSetting setting)

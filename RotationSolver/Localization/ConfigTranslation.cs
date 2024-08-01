@@ -1,7 +1,4 @@
-﻿using RotationSolver.Basic.Configuration;
-using RotationSolver.UI;
-
-namespace RotationSolver.Localization;
+﻿namespace RotationSolver.Localization;
 
 internal static class ConfigTranslation
 {

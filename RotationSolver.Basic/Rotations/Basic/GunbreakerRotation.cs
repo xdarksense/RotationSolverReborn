@@ -33,6 +33,9 @@ partial class GunbreakerRotation
     public static byte MaxAmmo => CartridgeChargeIiTrait.EnoughLevel ? (byte)3 : (byte)2;
     #endregion
 
+
+    #region PvE Actions
+
     static partial void ModifyKeenEdgePvE(ref ActionSetting setting)
     {
 
@@ -74,7 +77,7 @@ partial class GunbreakerRotation
 
     static partial void ModifyDangerZonePvE(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifySolidBarrelPvE(ref ActionSetting setting)
@@ -279,7 +282,10 @@ partial class GunbreakerRotation
         //setting.ComboIds = [ActionID.NobleBloodPvE];
     }
 
-    // PVP
+    #endregion
+
+    #region PvP Actions
+
     static partial void ModifyRoughDividePvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
@@ -300,4 +306,6 @@ partial class GunbreakerRotation
         if (TrajectoryPvE.CanUse(out act)) return true;
         return false;
     }
+
+    #endregion
 }

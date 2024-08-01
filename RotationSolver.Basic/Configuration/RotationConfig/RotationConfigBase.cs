@@ -12,7 +12,7 @@ internal abstract class RotationConfigBase
     public string DisplayName { get; }
     public CombatType Type { get; }
 
-    public string Value 
+    public string Value
     {
         get
         {
@@ -74,7 +74,7 @@ internal abstract class RotationConfigBase
         {
             return Enum.Parse(type, value);
         }
-        else if(type == typeof(bool))
+        else if (type == typeof(bool))
         {
             return bool.Parse(value);
         }

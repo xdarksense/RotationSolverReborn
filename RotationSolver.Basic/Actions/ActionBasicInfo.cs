@@ -1,7 +1,6 @@
 ﻿using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using RotationSolver.Basic.Configuration;
 
 namespace RotationSolver.Basic.Actions;
 
@@ -193,14 +192,14 @@ public readonly struct ActionBasicInfo
         {
             if (!CheckForCombo()) return false;
         }
-        
+
         if (_action.Action.IsRoleAction)
         {
             if (!_action.Action.ClassJobCategory.Value?.DoesJobMatchCategory(DataCenter.Job) ?? false) return false;
         }
 
         //Need casting.
-        if (CastTime > 0 && !player.HasStatus(true, 
+        if (CastTime > 0 && !player.HasStatus(true,
             [
                 StatusID.Swiftcast,
                 StatusID.Triplecast,
@@ -209,7 +208,7 @@ public readonly struct ActionBasicInfo
             && !ActionsNoNeedCasting.Contains(ID))
         {
             //No casting.
-            if(DataCenter.SpecialType == SpecialCommandType.NoCasting) return false;
+            if (DataCenter.SpecialType == SpecialCommandType.NoCasting) return false;
 
             //Is knocking back.
             if (DateTime.Now > DataCenter.KnockbackStart && DateTime.Now < DataCenter.KnockbackFinished) return false;

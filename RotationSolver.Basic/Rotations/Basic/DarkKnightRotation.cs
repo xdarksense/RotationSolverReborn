@@ -85,7 +85,7 @@ partial class DarkKnightRotation
 
     static partial void ModifyGritPvE(ref ActionSetting setting)
     {
- 
+
     }
 
     static partial void ModifyReleaseGritPvE(ref ActionSetting setting)

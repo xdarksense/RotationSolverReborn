@@ -52,7 +52,7 @@ partial class MachinistRotation
 
     static partial void ModifySplitShotPvE(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifySlugShotPvE(ref ActionSetting setting)
@@ -62,7 +62,7 @@ partial class MachinistRotation
 
     static partial void ModifyHotShotPvE(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyReassemblePvE(ref ActionSetting setting)
@@ -73,7 +73,7 @@ partial class MachinistRotation
 
     static partial void ModifyGaussRoundPvE(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifySpreadShotPvE(ref ActionSetting setting)

@@ -10,7 +10,7 @@ public class ActionConfig()
     /// <summary>
     /// If this action is enabled.
     /// </summary>
-    public bool IsEnabled 
+    public bool IsEnabled
     {
         get => IBaseAction.ForceEnable || _isEnable;
         set => _isEnable = value;

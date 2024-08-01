@@ -1,6 +1,5 @@
 ﻿using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
-using Dalamud.Interface.Internal;
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
@@ -281,7 +280,7 @@ internal static class ImGuiHelper
         return result;
     }
 
-    internal static readonly uint ProgressCol = ImGui.ColorConvertFloat4ToU32(new Vector4(0.6f, 0.6f, 0.6f, 0.7f)); 
+    internal static readonly uint ProgressCol = ImGui.ColorConvertFloat4ToU32(new Vector4(0.6f, 0.6f, 0.6f, 0.7f));
     internal static readonly uint Black = ImGui.ColorConvertFloat4ToU32(new Vector4(0, 0, 0, 1));
     internal static readonly uint White = ImGui.ColorConvertFloat4ToU32(new Vector4(1, 1, 1, 1));
 

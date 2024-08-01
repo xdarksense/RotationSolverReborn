@@ -27,7 +27,7 @@ internal abstract class ActionGetterBase(Lumina.GameData gameData)
         if (!name.All(char.IsAscii)) return false;
         if (item.Icon is 0 or 405) return false;
 
-        if (item.ActionCategory.Row 
+        if (item.ActionCategory.Row
             is 6 or 7 // No DoL or DoH Action
             or 8 //No Event.
             or 12 // No Mount,

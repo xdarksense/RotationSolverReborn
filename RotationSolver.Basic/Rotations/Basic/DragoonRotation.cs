@@ -119,7 +119,7 @@ partial class DragoonRotation
     static partial void ModifyChaosThrustPvE(ref ActionSetting setting)
     {
         setting.ComboIds = [ActionID.DisembowelPvE, ActionID.SpiralBlowPvE];
-        setting.TargetStatusProvide = [StatusID.ChaosThrust,StatusID.ChaoticSpring];
+        setting.TargetStatusProvide = [StatusID.ChaosThrust, StatusID.ChaoticSpring];
         setting.CreateConfig = () => new ActionConfig()
         {
             StatusGcdCount = 3,

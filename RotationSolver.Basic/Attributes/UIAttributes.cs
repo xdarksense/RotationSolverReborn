@@ -63,7 +63,7 @@ public enum JobFilterType : byte
     Raise,
     Interrupt,
     Dispel,
-    Tank, 
+    Tank,
     Melee,
 }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
@@ -79,6 +79,6 @@ internal class JobChoiceConfigAttribute : Attribute
 }
 
 [AttributeUsage(AttributeTargets.Field)]
-internal class ConditionBoolAttribute: Attribute
+internal class ConditionBoolAttribute : Attribute
 {
 }

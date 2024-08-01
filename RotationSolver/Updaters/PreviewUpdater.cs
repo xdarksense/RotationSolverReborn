@@ -33,6 +33,7 @@ internal static class PreviewUpdater
             }
             catch
             {
+#pragma warning disable 0436
                 WarningHelper.AddSystemWarning($"Unable to add server bar entry");
                 return;
             }
@@ -51,7 +52,7 @@ internal static class PreviewUpdater
         }
     }
 
-    static RandomDelay _tarStopCastDelay = new(() =>Service.Config.StopCastingDelay); 
+    static RandomDelay _tarStopCastDelay = new(() => Service.Config.StopCastingDelay);
 
     private static unsafe void UpdateCancelCast()
     {
@@ -108,7 +109,7 @@ internal static class PreviewUpdater
             var hotBar = Framework.Instance()->GetUIModule()->GetRaptureHotbarModule()->Hotbars[hotBarIndex];
             var slotIndex = 0;
 
-            foreach (var slot in actionBar->ActionBarSlotVector.Span)
+            foreach (var slot in actionBar->ActionBarSlotVector.AsSpan())
             {
                 var highLightId = 0x53550000 + index;
 
@@ -127,8 +128,9 @@ internal static class PreviewUpdater
         }
     }
 
+
     public unsafe static void Dispose()
     {
-        
+
     }
 }

@@ -1,5 +1,4 @@
-﻿using Dalamud.Interface.Utility.Raii;
-using RotationSolver.Updaters;
+﻿using RotationSolver.Updaters;
 
 namespace RotationSolver.UI;
 

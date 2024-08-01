@@ -59,8 +59,6 @@ public interface IBaseAction : IAction
     /// <param name="skipComboCheck">Skip Combo Check</param>
     /// <param name="skipCastingCheck">Skip Casting and Moving Check</param>
     /// <param name="usedUp">Is it used up all stacks</param>
-    /// <param name="onLastAbility">Is it on the last ability</param>
-    /// <param name="skipClippingCheck">Skip clipping Check</param>
     /// <param name="skipAoeCheck">Skip aoe Check</param>
     /// <param name="gcdCountForAbility">the gcd count for the ability.</param>
     /// <returns>can I use it</returns>

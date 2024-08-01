@@ -23,7 +23,7 @@ partial class CustomRotation
     }
 
     #region Role Actions
-        
+
     static partial void ModifyTrueNorthPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.TrueNorth];
@@ -145,7 +145,7 @@ partial class CustomRotation
     /// <summary>
     /// All actions of this rotation.
     /// </summary>
-    public virtual IAction[] AllActions => 
+    public virtual IAction[] AllActions =>
     [
         .. AllBaseActions.Where(i => i.Action.IsInJob()),
         .. Medicines.Where(i => i.HasIt),

@@ -18,7 +18,7 @@ internal static class ActionUpdater
 
     private static IBaseAction? _nextGCDAction;
     const float gcdHeight = 5;
-    internal static IBaseAction? NextGCDAction 
+    internal static IBaseAction? NextGCDAction
     {
         get => _nextGCDAction;
         set
@@ -55,6 +55,7 @@ internal static class ActionUpdater
         }
         catch (Exception ex)
         {
+#pragma warning disable 0436
             WarningHelper.AddSystemWarning($"Failed to update the next action in the rotation because: {ex.Message}");
             Svc.Log.Error(ex, "Failed to update next action.");
         }
@@ -62,7 +63,7 @@ internal static class ActionUpdater
         NextAction = NextGCDAction = null;
     }
 
-    private static List<uint> actionOverrideList;
+    private static List<uint> actionOverrideList = new List<uint>();
 
     private static void SetAction(uint id)
     {

@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace RotationSolver.Basic.Data;
+﻿namespace RotationSolver.Basic.Data;
 
 /// <summary>
-/// the option for the <see cref="IBaseAction.CanUse(out IAction, CanUseOption, byte)"/>
+/// Specifies options for determining whether an action can be used.
 /// </summary>
 [Flags]
 public enum CanUseOption : byte
@@ -36,7 +30,7 @@ public enum CanUseOption : byte
     SkipCastingCheck = 1 << 2,
 
     /// <summary>
-    /// Is it used up all stacks
+    /// Indicates that all stacks should be used up.
     /// </summary>
     [Description("Is it used up all stacks")]
     UsedUp = 1 << 3,

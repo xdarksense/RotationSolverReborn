@@ -26,7 +26,7 @@ internal abstract class ActionMultiRotationGetter(Lumina.GameData gameData)
 {
     protected static bool IsADutyAction(Lumina.Excel.GeneratedSheets.Action action)
     {
-        return !action.IsRoleAction && !action.IsPvP && action.ActionCategory.Row 
+        return !action.IsRoleAction && !action.IsPvP && action.ActionCategory.Row
             is not 10 and not 11 // Not System
             and not 9 and not 15; // Not LB.
     }

@@ -14,7 +14,7 @@ partial class SummonerRotation
     /// 
     /// </summary>
     public static bool InBahamut => Service.GetAdjustedActionId(ActionID.AstralFlowPvE) == ActionID.DeathflarePvE;
-    
+
     /// <summary>
     /// 
     /// </summary>
@@ -30,7 +30,7 @@ partial class SummonerRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasAetherflowStacks => (JobGauge.AetherFlags.HasFlag((Enum) FFXIVClientStructs.FFXIV.Client.Game.Gauge.AetherFlags.Aetherflow1) || JobGauge.AetherFlags.HasFlag((Enum) FFXIVClientStructs.FFXIV.Client.Game.Gauge.AetherFlags.Aetherflow2));
+    public static bool HasAetherflowStacks => (JobGauge.AetherFlags.HasFlag((Enum)FFXIVClientStructs.FFXIV.Client.Game.Gauge.AetherFlags.Aetherflow1) || JobGauge.AetherFlags.HasFlag((Enum)FFXIVClientStructs.FFXIV.Client.Game.Gauge.AetherFlags.Aetherflow2));
 
     /// <summary>
     /// 
@@ -145,7 +145,7 @@ partial class SummonerRotation
         setting.ActionCheck = () => SummonTime <= WeaponRemain && IsGarudaReady;
     }
 
-    static RandomDelay _carbuncleDelay = new (() => (2, 2));
+    static RandomDelay _carbuncleDelay = new(() => (2, 2));
     static partial void ModifySummonCarbunclePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => _carbuncleDelay.Delay(!DataCenter.HasPet && AttunmentTimeRaw == 0 && SummonTimeRaw == 0) && DataCenter.LastGCD is not ActionID.SummonCarbunclePvE;
@@ -171,7 +171,7 @@ partial class SummonerRotation
         setting.ActionCheck = () => InCombat && SummonTime <= WeaponRemain;
         setting.UnlockedByQuestID = 68165;
     }
-    
+
     static partial void ModifySummonBahamutPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => InCombat && SummonTime <= WeaponRemain;
@@ -263,12 +263,12 @@ partial class SummonerRotation
     {
         setting.ActionCheck = () => HasAetherflowStacks;
     }
-    
+
     static partial void ModifyNecrotizePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => HasAetherflowStacks;
     }
-    
+
     static partial void ModifyEnergySiphonPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.FurtherRuin];
@@ -341,7 +341,7 @@ partial class SummonerRotation
         if (AddlePvE.CanUse(out act)) return true;
         return base.DefenseAreaAbility(nextGCD, out act);
     }
-    
+
     /// <inheritdoc/>
     [RotationDesc(ActionID.CrimsonCyclonePvE)]
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)

@@ -56,8 +56,8 @@ public struct IncompatiblePlugin
     public string Features { get; set; }
 
     [JsonIgnore]
-    public readonly bool IsInstalled 
-    { 
+    public readonly bool IsInstalled
+    {
         get
         {
             var name = this.Name;

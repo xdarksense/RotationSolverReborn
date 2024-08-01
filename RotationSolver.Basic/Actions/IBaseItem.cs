@@ -12,7 +12,7 @@ public interface IBaseItem : IAction
     /// <summary>
     /// Has this item.
     /// </summary>
-    bool HasIt {  get; }
+    bool HasIt { get; }
     /// <summary>
     /// The item can be used.
     /// </summary>

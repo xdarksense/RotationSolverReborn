@@ -151,7 +151,7 @@ public struct ActionTargetInfo(IBaseAction action)
             if (!IGameObject.IsAttackable()) return false;
         }
 
-        return CheckStatus(IGameObject, skipStatusProvideCheck) 
+        return CheckStatus(IGameObject, skipStatusProvideCheck)
             && CheckTimeToKill(IGameObject)
             && CheckResistance(IGameObject);
     }
@@ -184,7 +184,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 return false;
             }
         }
-        else if(action.Info.Aspect != Aspect.Piercing) // Physical
+        else if (action.Info.Aspect != Aspect.Piercing) // Physical
         {
             if (IGameObject.HasStatus(false, StatusHelper.PhysicalResistance))
             {
@@ -267,7 +267,7 @@ public struct ActionTargetInfo(IBaseAction action)
         var target = GetMostCanTargetObjects(canTargets, canAffects, aoeCount)
             .OrderByDescending(ObjectHelper.GetHealthRatio).FirstOrDefault();
         if (target == null) return null;
-        return new(target, [..GetAffects(target, canAffects)], target.Position);
+        return new(target, [.. GetAffects(target, canAffects)], target.Position);
     }
 
     private readonly TargetResult? FindTargetAreaMove(float range)

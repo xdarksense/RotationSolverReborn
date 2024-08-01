@@ -10,7 +10,7 @@ internal class RotationConfigFloat : RotationConfigBase
         : base(rotation, property)
     {
         var attr = property.GetCustomAttribute<RangeAttribute>();
-        if(attr != null)
+        if (attr != null)
         {
             Min = attr.MinValue;
             Max = attr.MaxValue;

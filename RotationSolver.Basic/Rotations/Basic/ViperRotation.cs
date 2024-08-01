@@ -9,7 +9,7 @@ public partial class ViperRotation
     /// Gets how many uses of uncoiled fury the player has.
     /// </summary>
     public static byte RattlingCoilStacks => JobGauge.RattlingCoilStacks;
-    
+
     /// <summary>
     /// Gets Max stacks of Anguine Tribute.
     /// </summary>
@@ -173,7 +173,7 @@ public partial class ViperRotation
     /// </summary>
     public static bool HunterLessThanSwift => Player.StatusTime(true, StatusID.HuntersInstinct) < Player.StatusTime(true, StatusID.Swiftscaled);
 
-    // <summary>
+    /// <summary>
     /// Indicates that Swiftscaled is ending before Hunters Instinct.
     /// </summary>
     public static bool SwiftLessThanHunter => Player.StatusTime(true, StatusID.Swiftscaled) < Player.StatusTime(true, StatusID.HuntersInstinct);

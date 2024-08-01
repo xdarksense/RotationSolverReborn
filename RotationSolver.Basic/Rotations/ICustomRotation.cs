@@ -1,5 +1,4 @@
 ﻿using ECommons.ExcelServices;
-using Lumina.Excel.GeneratedSheets;
 using RotationSolver.Basic.Traits;
 
 namespace RotationSolver.Basic.Rotations;

@@ -374,7 +374,7 @@ partial class DancerRotation
     [RotationDesc(ActionID.EnAvantPvE)]
     protected sealed override bool MoveForwardAbility(IAction nextGCD, out IAction act)
     {
-        if (EnAvantPvE.CanUse(out act, usedUp:true)) return true;
+        if (EnAvantPvE.CanUse(out act, usedUp: true)) return true;
         return false;
     }
 

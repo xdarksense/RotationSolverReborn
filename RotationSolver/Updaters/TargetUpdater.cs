@@ -1,17 +1,8 @@
-﻿using Dalamud.Game.ClientState.Objects.Enums;
-using Dalamud.Game.ClientState.Objects.SubKinds;
-using ECommons.DalamudServices;
-using ECommons.GameFunctions;
-using ECommons.GameHelpers;
-using FFXIVClientStructs.FFXIV.Client.UI.Misc;
-using RotationSolver.Basic.Configuration;
-using Action = Lumina.Excel.GeneratedSheets.Action;
-
-namespace RotationSolver.Updaters;
+﻿namespace RotationSolver.Updaters;
 
 internal static partial class TargetUpdater
 {
-    static readonly ObjectListDelay<IBattleChara> 
+    static readonly ObjectListDelay<IBattleChara>
         _raisePartyTargets = new(() => Service.Config.RaiseDelay),
         _raiseAllTargets = new(() => Service.Config.RaiseDelay);
     internal static void UpdateTarget()
@@ -34,5 +25,5 @@ internal static partial class TargetUpdater
 
         DataCenter.RecordedHP.Enqueue((now, new SortedList<ulong, float>(DataCenter.AllTargets.Where(b => b != null && b.CurrentHp != 0).ToDictionary(b => b.GameObjectId, b => b.GetHealthRatio()))));
     }
-    
+
 }
