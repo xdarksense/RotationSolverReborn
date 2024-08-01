@@ -122,8 +122,7 @@ partial class AstrologianRotation
     static partial void ModifyTheArrowPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => DrawnCard.Any(card => card == CardType.ARROW);
-        setting.TargetStatusProvide = [StatusID.TheArrow_3888, StatusID.Weakness,
-        StatusID.BrinkOfDeath];
+        setting.TargetStatusProvide = [StatusID.TheArrow_3888, StatusID.BrinkOfDeath];
         setting.TargetType = TargetType.BeAttacked;
         setting.IsFriendly = true;
     }
@@ -131,8 +130,7 @@ partial class AstrologianRotation
     static partial void ModifyTheSpirePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => DrawnCard.Any(card => card == CardType.SPIRE);
-        setting.TargetStatusProvide = [StatusID.TheSpire_3892, StatusID.Weakness,
-        StatusID.BrinkOfDeath];
+        setting.TargetStatusProvide = [StatusID.TheSpire_3892, StatusID.BrinkOfDeath];
         setting.TargetType = TargetType.BeAttacked;
         setting.IsFriendly = true;
     }
@@ -149,8 +147,7 @@ partial class AstrologianRotation
     static partial void ModifyTheBolePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => DrawnCard.Any(card => card == CardType.BOLE);
-        setting.TargetStatusProvide = [StatusID.TheBole_3890, StatusID.Weakness,
-        StatusID.BrinkOfDeath];
+        setting.TargetStatusProvide = [StatusID.TheBole_3890, StatusID.BrinkOfDeath];
         setting.TargetType = TargetType.BeAttacked;
         setting.IsFriendly = true;
     }
@@ -158,8 +155,7 @@ partial class AstrologianRotation
     static partial void ModifyTheEwerPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => DrawnCard.Any(card => card == CardType.EWER);
-        setting.TargetStatusProvide = [StatusID.TheEwer_3891, StatusID.Weakness,
-        StatusID.BrinkOfDeath];
+        setting.TargetStatusProvide = [StatusID.TheEwer_3891, StatusID.BrinkOfDeath];
         setting.TargetType = TargetType.BeAttacked;
         setting.IsFriendly = true;
     }
