@@ -125,7 +125,7 @@
   "RotationSolver.Data.UiString.ConfigWindow_Basic_AutoSwitch": "Auto Switch",
   "RotationSolver.Data.UiString.ConfigWindow_Basic_NamedConditions": "Named Conditions",
   "RotationSolver.Data.UiString.ConfigWindow_Basic_Others": "Others",
-  "RotationSolver.Basic.Data.TargetHostileType.AllTargetsCanAttack": "All targets that are in range for any abilities (Tanks)",
+  "RotationSolver.Basic.Data.TargetHostileType.AllTargetsCanAttack": "All targets that are in range for any abilities (Tanks/Autoduty)",
   "RotationSolver.Data.UiString.ConfigWindow_Rotation_Description": "Description",
   "RotationSolver.Data.UiString.ConfigWindow_Rotation_Status": "Status",
   "RotationSolver.Data.UiString.ConfigWindow_Rotation_Configuration": "Configuration",
