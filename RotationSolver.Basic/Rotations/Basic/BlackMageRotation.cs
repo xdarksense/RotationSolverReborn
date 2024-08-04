@@ -160,7 +160,6 @@ partial class BlackMageRotation
 
     static partial void ModifyBlizzardIiPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InAstralFire;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -174,7 +173,6 @@ partial class BlackMageRotation
 
     static partial void ModifyFireIiPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InUmbralIce;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -190,7 +188,7 @@ partial class BlackMageRotation
     static partial void ModifyManawardPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Manaward];
-        setting.UnlockedByQuestID = 66612;
+        setting.UnlockedByQuestID = 65889;
     }
 
     static partial void ModifyManafontPvE(ref ActionSetting setting)
@@ -248,7 +246,7 @@ partial class BlackMageRotation
         setting.UnlockedByQuestID = 66614;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 1,
+            AoeCount = 2,
         };
     }
 
@@ -306,7 +304,7 @@ partial class BlackMageRotation
         setting.UnlockedByQuestID = 68128;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 1,
+            AoeCount = 2,
         };
     }
 
@@ -322,7 +320,6 @@ partial class BlackMageRotation
 
     static partial void ModifyHighFireIiPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InUmbralIce;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -331,7 +328,6 @@ partial class BlackMageRotation
 
     static partial void ModifyHighBlizzardIiPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InAstralFire;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
