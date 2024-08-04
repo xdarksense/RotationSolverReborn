@@ -9,10 +9,10 @@ namespace RotationSolver.Helpers;
 
 internal static class SpeechHelper
 {
-    static IDalamudPlugin? _textToTalk = null;
-    static MethodInfo? _say = null;
-    static object? _manager = null;
-    static MethodInfo? _stop = null;
+    private static IDalamudPlugin? _textToTalk;
+    private static MethodInfo? _say;
+    private static object? _manager;
+    private static MethodInfo? _stop;
 
     internal static void Speak(string text)
     {
@@ -24,20 +24,19 @@ internal static class SpeechHelper
             }
         }
 
-        _say ??= _textToTalk?.GetType().GetRuntimeMethods().FirstOrDefault(m => m.Name == "Say");
-        _manager ??= _textToTalk?.GetType().GetRuntimeFields().FirstOrDefault(m => m.Name == "backendManager")?.GetValue(_textToTalk);
-        _stop ??= _manager?.GetType().GetRuntimeMethods().FirstOrDefault(m => m.Name == "CancelAllSpeech");
+        _say ??= _textToTalk?.GetType().GetMethod("Say", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        _manager ??= _textToTalk?.GetType().GetField("backendManager", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)?.GetValue(_textToTalk);
+        _stop ??= _manager?.GetType().GetMethod("CancelAllSpeech", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
         try
         {
-            _stop?.Invoke(_manager, []);
+            _stop?.Invoke(_manager, null);
 
-            _say?.Invoke(_textToTalk, [null, new SeString(new TextPayload("Rotation Solver")), XivChatType.SystemMessage,
-                    text, 2]);
+            _say?.Invoke(_textToTalk, new object?[] { null, new SeString(new TextPayload("Rotation Solver")), XivChatType.SystemMessage, text, 2 });
         }
         catch (Exception ex)
         {
-            Svc.Log.Warning(ex, "Something wrong with TTT.");
+            Svc.Log.Warning(ex, "Something went wrong with TextToTalk.");
         }
     }
 }

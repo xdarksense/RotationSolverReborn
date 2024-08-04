@@ -13,7 +13,7 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 using Lumina.Excel.GeneratedSheets;
 using RotationSolver.Commands;
 using RotationSolver.Data;
-using RotationSolver.Localization;
+
 using RotationSolver.UI.HighlightTeachingMode;
 using System.Runtime.InteropServices;
 using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule;
@@ -181,11 +181,11 @@ internal static class MajorUpdater
     {
         if (!Svc.PluginInterface.InstalledPlugins.Any(p => p.InternalName == "Avarice"))
         {
-            UiString.AvariceWarning.Local().ShowWarning(0);
+            UiString.AvariceWarning.GetDescription().ShowWarning(0);
         }
         if (!Svc.PluginInterface.InstalledPlugins.Any(p => p.InternalName == "TextToTalk"))
         {
-            UiString.TextToTalkWarning.Local().ShowWarning(0);
+            UiString.TextToTalkWarning.GetDescription().ShowWarning(0);
         }
     }
 

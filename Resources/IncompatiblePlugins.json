@@ -15,7 +15,7 @@
   },
   {
     "Name": "BossMod Reborn",
-    "Icon": "https://github.com/FFXIV-CombatReborn/RebornAssets/blob/main/IconAssets/BMR_Icon.png",
+    "Icon": "https://raw.githubusercontent.com/FFXIV-CombatReborn/RebornAssets/main/IconAssets/BMR_Icon.png",
     "Url": "https://github.com/FFXIV-CombatReborn/BossmodReborn",
     "Features": "Auto rotation conflicts",
     "Type": 3

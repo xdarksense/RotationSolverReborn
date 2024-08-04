@@ -12,7 +12,7 @@ using RotationSolver.Basic.IPC;
 using RotationSolver.Commands;
 using RotationSolver.Data;
 using RotationSolver.Helpers;
-using RotationSolver.Localization;
+
 using RotationSolver.UI;
 using RotationSolver.UI.HighlightTeachingMode;
 using RotationSolver.UI.HighlightTeachingMode.ElementSpecial;
@@ -98,7 +98,6 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         MajorUpdater.Enable();
         Watcher.Enable();
         OtherConfiguration.Init();
-        LocalizationManager.InIt();
 
         Svc.DutyState.DutyStarted += DutyState_DutyStarted;
         Svc.DutyState.DutyWiped += DutyState_DutyWiped;
@@ -144,7 +143,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
             if (DataCenter.IsInHighEndDuty)
             {
-                string.Format(UiString.HighEndWarning.Local(),
+                string.Format(UiString.HighEndWarning.GetDescription(),
                     DataCenter.ContentFinderName).ShowWarning();
             }
         }
@@ -191,7 +190,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
     internal static void ChangeUITranslation()
     {
-        _rotationConfigWindow!.WindowName = UiString.ConfigWindowHeader.Local()
+        _rotationConfigWindow!.WindowName = UiString.ConfigWindowHeader.GetDescription()
             + typeof(RotationConfigWindow).Assembly.GetName().Version?.ToString() ?? "?.?.?";
 
         RSCommands.Disable();
@@ -212,7 +211,6 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         }
         _dis?.Clear();
 
-        LocalizationManager.Dispose();
         MajorUpdater.Dispose();
         //HotbarHighlightDrawerManager.Dispose();
         HotbarHighlightManager.Dispose();

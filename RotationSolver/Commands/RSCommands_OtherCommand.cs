@@ -1,7 +1,7 @@
 ﻿using ECommons.DalamudServices;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Data;
-using RotationSolver.Localization;
+
 using RotationSolver.Updaters;
 
 namespace RotationSolver.Commands;
@@ -120,12 +120,12 @@ public static partial class RSCommands
             property.SetValue(Service.Config, convertedValue);
             value = convertedValue.ToString();
 
-            Svc.Chat.Print(string.Format(UiString.CommandsChangeSettingsValue.Local(), property.Name, value));
+            Svc.Chat.Print(string.Format(UiString.CommandsChangeSettingsValue.GetDescription(), property.Name, value));
 
             return;
         }
 
-        Svc.Chat.PrintError(UiString.CommandsCannotFindConfig.Local());
+        Svc.Chat.PrintError(UiString.CommandsCannotFindConfig.GetDescription());
     }
 
 
@@ -172,7 +172,7 @@ public static partial class RSCommands
 
                     if (Service.Config.ShowToastsAboutDoAction)
                     {
-                        Svc.Toasts.ShowQuest(string.Format(UiString.CommandsInsertAction.Local(), time),
+                        Svc.Toasts.ShowQuest(string.Format(UiString.CommandsInsertAction.GetDescription(), time),
                             new Dalamud.Game.Gui.Toast.QuestToastOptions()
                             {
                                 IconId = iAct.IconID,
@@ -184,7 +184,7 @@ public static partial class RSCommands
             }
         }
 
-        Svc.Chat.PrintError(UiString.CommandsInsertActionFailure.Local());
+        Svc.Chat.PrintError(UiString.CommandsInsertActionFailure.GetDescription());
     }
 
 
@@ -195,13 +195,13 @@ public static partial class RSCommands
         {
             if (config.DoCommand(configs, str))
             {
-                Svc.Chat.Print(string.Format(UiString.CommandsChangeSettingsValue.Local(),
+                Svc.Chat.Print(string.Format(UiString.CommandsChangeSettingsValue.GetDescription(),
                     config.DisplayName, config.Value));
 
                 return;
             }
         }
 
-        Svc.Chat.PrintError(UiString.CommandsInsertActionFailure.Local());
+        Svc.Chat.PrintError(UiString.CommandsInsertActionFailure.GetDescription());
     }
 }

@@ -3,7 +3,6 @@ using Dalamud.Interface.Utility;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Configuration.Conditions;
 using RotationSolver.Data;
-using RotationSolver.Localization;
 using RotationSolver.UI.SearchableConfigs;
 
 namespace RotationSolver.UI.SearchableSettings;
@@ -49,9 +48,9 @@ internal class CheckBoxSearchCondition(PropertyInfo property, params ISearchable
 
     private class CheckBoxDisable(PropertyInfo property) : CheckBoxConditionAbstract(property)
     {
-        public override string Name => UiString.ForcedDisableCondition.Local();
+        public override string Name => UiString.ForcedDisableCondition.GetDescription();
 
-        public override string Description => UiString.ForcedDisableConditionDesc.Local();
+        public override string Description => UiString.ForcedDisableConditionDesc.GetDescription();
 
         protected override bool Value
         {
@@ -68,9 +67,9 @@ internal class CheckBoxSearchCondition(PropertyInfo property, params ISearchable
 
     private class CheckBoxEnable(PropertyInfo property) : CheckBoxConditionAbstract(property)
     {
-        public override string Name => UiString.ForcedEnableCondition.Local();
+        public override string Name => UiString.ForcedEnableCondition.GetDescription();
 
-        public override string Description => UiString.ForcedEnableConditionDesc.Local();
+        public override string Description => UiString.ForcedEnableConditionDesc.GetDescription();
 
         protected override bool Value
         {

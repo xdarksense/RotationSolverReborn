@@ -1,6 +1,5 @@
 ﻿using RotationSolver.Basic.Configuration;
 using RotationSolver.Data;
-using RotationSolver.Localization;
 using RotationSolver.UI.SearchableSettings;
 
 namespace RotationSolver.UI.SearchableConfigs;
@@ -48,14 +47,14 @@ internal class AutoHealCheckBox(PropertyInfo property, params ISearchable[] othe
             ImGui.TableHeader("");
 
             ImGui.TableNextColumn();
-            ImGui.TableHeader(UiString.NormalTargets.Local());
+            ImGui.TableHeader(UiString.NormalTargets.GetDescription());
 
             ImGui.TableNextColumn();
-            ImGui.TableHeader(UiString.HotTargets.Local());
+            ImGui.TableHeader(UiString.HotTargets.GetDescription());
 
             ImGui.TableNextRow();
             ImGui.TableNextColumn();
-            ImGui.Text(UiString.HpAoe0Gcd.Local());
+            ImGui.Text(UiString.HpAoe0Gcd.GetDescription());
 
             ImGui.TableNextColumn();
 
@@ -67,7 +66,7 @@ internal class AutoHealCheckBox(PropertyInfo property, params ISearchable[] othe
 
             ImGui.TableNextRow();
             ImGui.TableNextColumn();
-            ImGui.Text(UiString.HpAoeGcd.Local());
+            ImGui.Text(UiString.HpAoeGcd.GetDescription());
 
             ImGui.TableNextColumn();
 
@@ -80,7 +79,7 @@ internal class AutoHealCheckBox(PropertyInfo property, params ISearchable[] othe
 
             ImGui.TableNextRow();
             ImGui.TableNextColumn();
-            ImGui.Text(UiString.HpSingle0Gcd.Local());
+            ImGui.Text(UiString.HpSingle0Gcd.GetDescription());
 
             ImGui.TableNextColumn();
 
@@ -92,7 +91,7 @@ internal class AutoHealCheckBox(PropertyInfo property, params ISearchable[] othe
 
             ImGui.TableNextRow();
             ImGui.TableNextColumn();
-            ImGui.Text(UiString.HpSingleGcd.Local());
+            ImGui.Text(UiString.HpSingleGcd.GetDescription());
 
             ImGui.TableNextColumn();
 

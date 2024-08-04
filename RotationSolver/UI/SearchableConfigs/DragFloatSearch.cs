@@ -1,6 +1,4 @@
-﻿using RotationSolver.Localization;
-
-namespace RotationSolver.UI.SearchableConfigs;
+﻿namespace RotationSolver.UI.SearchableConfigs;
 
 internal class DragFloatSearch : Searchable
 {
@@ -16,11 +14,11 @@ internal class DragFloatSearch : Searchable
             var baseDesc = base.Description;
             if (!string.IsNullOrEmpty(baseDesc))
             {
-                return baseDesc + "\n" + Unit.Local();
+                return baseDesc + "\n" + Unit.ToString();
             }
             else
             {
-                return Unit.Local();
+                return Unit.ToString();
             }
         }
     }

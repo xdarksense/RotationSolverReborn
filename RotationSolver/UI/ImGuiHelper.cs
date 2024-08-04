@@ -9,7 +9,7 @@ using ECommons.LanguageHelpers;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Commands;
 using RotationSolver.Data;
-using RotationSolver.Localization;
+
 
 namespace RotationSolver.UI;
 
@@ -32,7 +32,7 @@ internal static class ImGuiHelper
         }
         if (ImGui.IsItemHovered())
         {
-            ImguiTooltips.ShowTooltip($"{UiString.ConfigWindow_Helper_RunCommand.Local()}: {cmdStr}\n{UiString.ConfigWindow_Helper_CopyCommand.Local()}: {cmdStr}");
+            ImguiTooltips.ShowTooltip($"{UiString.ConfigWindow_Helper_RunCommand.GetDescription()}: {cmdStr}\n{UiString.ConfigWindow_Helper_CopyCommand.GetDescription()}: {cmdStr}");
 
             if (ImGui.IsMouseClicked(ImGuiMouseButton.Right))
             {
@@ -62,7 +62,7 @@ internal static class ImGuiHelper
     public static void DisplayMacro(this MacroInfo info)
     {
         ImGui.SetNextItemWidth(50);
-        if (ImGui.DragInt($"{UiString.ConfigWindow_Events_MacroIndex.Local()}##MacroIndex{info.GetHashCode()}",
+        if (ImGui.DragInt($"{UiString.ConfigWindow_Events_MacroIndex.GetDescription()}##MacroIndex{info.GetHashCode()}",
             ref info.MacroIndex, 1, -1, 99))
         {
             Service.Config.Save();
@@ -70,7 +70,7 @@ internal static class ImGuiHelper
 
         ImGui.SameLine();
 
-        if (ImGui.Checkbox($"{UiString.ConfigWindow_Events_ShareMacro.Local()}##ShareMacro{info.GetHashCode()}",
+        if (ImGui.Checkbox($"{UiString.ConfigWindow_Events_ShareMacro.GetDescription()}##ShareMacro{info.GetHashCode()}",
             ref info.IsShared))
         {
             Service.Config.Save();
@@ -79,7 +79,7 @@ internal static class ImGuiHelper
 
     public static void DisplayEvent(this ActionEventInfo info)
     {
-        if (ImGui.InputText($"{UiString.ConfigWindow_Events_ActionName.Local()}##ActionName{info.GetHashCode()}",
+        if (ImGui.InputText($"{UiString.ConfigWindow_Events_ActionName.GetDescription()}##ActionName{info.GetHashCode()}",
             ref info.Name, 100))
         {
             Service.Config.Save();
