@@ -29,7 +29,7 @@ internal static class PreviewUpdater
         {
             try
             {
-                _dtrEntry ??= Svc.DtrBar.Get("Rotation Solver");
+                _dtrEntry ??= Svc.DtrBar.Get("Rotation Solver Reborn");
             }
             catch
             {
