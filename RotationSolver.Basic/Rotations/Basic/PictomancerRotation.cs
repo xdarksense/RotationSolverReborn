@@ -110,6 +110,20 @@ public partial class PictomancerRotation
 
     #endregion
 
+    #region Job States
+
+    /// <summary>
+    /// Number of max charges Striking Muse can have
+    /// </summary>
+    public static byte MaxStrikingMuse => EnhancedPictomancyIiTrait.EnoughLevel ? (byte)2 : (byte)1;
+
+    /// <summary>
+    /// Determines if player is max level or not
+    /// </summary>
+    public static bool Level100 => EnhancedPictomancyVTrait.EnoughLevel;
+
+    #endregion
+
     #region Statuses
     /// <summary>
     /// Indicates if the player has Aetherhues.
@@ -303,7 +317,7 @@ public partial class PictomancerRotation
 
     static partial void ModifySubtractivePalettePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => !HasSubtractivePalette && (PaletteGauge >= 50 || HasSubtractiveSpectrum);
+        setting.ActionCheck = () => !HasSubtractivePalette && (PaletteGauge >= 50 || HasSubtractiveSpectrum) && !HasMonochromeTones;
         setting.StatusProvide = [StatusID.SubtractivePalette];
     }
 

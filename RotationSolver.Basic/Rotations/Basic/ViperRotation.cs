@@ -195,12 +195,12 @@ public partial class ViperRotation
 
     static partial void ModifySteelFangsPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && !UNCOILEDREADY && !TWINSREADY && !THRESHREADY && (HasSteel || NoHone);
+        setting.ActionCheck = () => NODREAD && !UNCOILEDREADY && !TWINSREADY && !THRESHREADY && HasSteel;
     }
 
     static partial void ModifyHuntersStingPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && !UNCOILEDREADY && !TWINSREADY && !THRESHREADY && (HasNoVenom || HasFlank);
+        setting.ActionCheck = () => NODREAD && !UNCOILEDREADY && !TWINSREADY && !THRESHREADY && HasFlank;
         setting.StatusProvide = [StatusID.HuntersInstinct];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -210,37 +210,37 @@ public partial class ViperRotation
 
     static partial void ModifyFlankstingStrikePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && !UNCOILEDREADY && !TWINSREADY && !THRESHREADY && (HasNoVenom || (HasFlank && HasSting));
+        setting.ActionCheck = () => NODREAD && !UNCOILEDREADY && !TWINSREADY && !THRESHREADY && (HasFlank && HasSting);
         setting.StatusProvide = [StatusID.HindstungVenom];
     }
 
     static partial void ModifyFlanksbaneFangPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && !UNCOILEDREADY && !TWINSREADY && !THRESHREADY && (HasNoVenom || (HasFlank && HasBane));
+        setting.ActionCheck = () => NODREAD && !UNCOILEDREADY && !TWINSREADY && !THRESHREADY && (HasFlank && HasBane);
         setting.StatusProvide = [StatusID.HindsbaneVenom];
     }
 
     static partial void ModifyReavingFangsPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && !UNCOILEDREADY && !TWINSREADY && !THRESHREADY && HasReavers;
+        setting.ActionCheck = () => NODREAD && !UNCOILEDREADY && !TWINSREADY && !THRESHREADY && (HasReavers || NoHone);
         setting.StatusProvide = [StatusID.HonedSteel];
     }
 
     static partial void ModifySwiftskinsStingPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && !UNCOILEDREADY && !TWINSREADY && !THRESHREADY && HasHind;
+        setting.ActionCheck = () => NODREAD && !UNCOILEDREADY && !TWINSREADY && !THRESHREADY && (HasNoVenom || HasHind);
         setting.StatusProvide = [StatusID.Swiftscaled];
     }
 
     static partial void ModifyHindstingStrikePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && !UNCOILEDREADY && !TWINSREADY && !THRESHREADY && (HasHind && HasSting);
+        setting.ActionCheck = () => NODREAD && !UNCOILEDREADY && !TWINSREADY && !THRESHREADY && (HasNoVenom || (HasHind && HasSting));
         setting.StatusProvide = [StatusID.FlanksbaneVenom];
     }
 
     static partial void ModifyHindsbaneFangPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && !UNCOILEDREADY && !TWINSREADY && !THRESHREADY && (HasHind && HasBane);
+        setting.ActionCheck = () => NODREAD && !UNCOILEDREADY && !TWINSREADY && !THRESHREADY && (HasNoVenom || (HasHind && HasBane));
         setting.StatusProvide = [StatusID.FlankstungVenom];
     }
 
