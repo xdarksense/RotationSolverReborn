@@ -3,7 +3,7 @@ using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using Lumina.Excel.GeneratedSheets;
 using RotationSolver.Data;
-using RotationSolver.Localization;
+
 using RotationSolver.UI.SearchableSettings;
 
 namespace RotationSolver.UI.SearchableConfigs;
@@ -124,7 +124,7 @@ internal readonly struct JobFilter
         {
             var roleOrJob = string.Join("\n",
                 AllJobs.Select(job => Svc.Data.GetExcelSheet<ClassJob>()?.GetRow((uint)job)?.Name ?? job.ToString()));
-            return string.Format(UiString.NotInJob.Local(), roleOrJob);
+            return string.Format(UiString.NotInJob.GetDescription(), roleOrJob);
         }
     }
 }
@@ -145,9 +145,10 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
             var ui = _property.GetCustomAttribute<UIAttribute>();
             if (ui == null) return string.Empty;
 
-            return (_property.Name + "Name").Local(ui.Name);
+            return ui.Name;
         }
     }
+
     public virtual string Description
     {
         get
@@ -155,9 +156,10 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
             var ui = _property.GetCustomAttribute<UIAttribute>();
             if (ui == null || string.IsNullOrEmpty(ui.Description)) return string.Empty;
 
-            return (_property.Name + "Description").Local(ui.Description);
+            return ui.Description;
         }
     }
+
     public virtual string Command
     {
         get
@@ -258,7 +260,7 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
         if (IconSet.GetTexture(IconSet.GetJobIcon(DataCenter.Job, IconType.Framed), out var texture))
         {
             ImGui.Image(texture.ImGuiHandle, Vector2.One * 24 * ImGuiHelpers.GlobalScale);
-            ImguiTooltips.HoveredTooltip(UiString.JobConfigTip.Local());
+            ImguiTooltips.HoveredTooltip(UiString.JobConfigTip.GetDescription());
         }
     }
 

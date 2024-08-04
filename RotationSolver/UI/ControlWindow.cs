@@ -5,7 +5,7 @@ using ECommons.DalamudServices;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Commands;
 using RotationSolver.Data;
-using RotationSolver.Localization;
+
 using RotationSolver.Updaters;
 
 namespace RotationSolver.UI;
@@ -49,7 +49,7 @@ internal class ControlWindow : CtrlWindow
         columnWidth = Math.Max(columnWidth, ImGui.GetCursorPosX());
 
         var autoMode = DataCenter.TargetingType;
-        ImGui.Text(" Targeting: " + autoMode.Local());
+        ImGui.Text(" Targeting: " + autoMode.ToString());
 
         var aoeType = Service.Config.AoEType;
         if (ImGuiHelper.SelectableButton("AoE: " + aoeType.ToString()))
@@ -84,10 +84,10 @@ internal class ControlWindow : CtrlWindow
         ImGui.SameLine();
 
         var value = Service.Config.IsControlWindowLock ? 0 : 1;
-        if (ImGuiHelper.SelectableCombo("Rotation Solver Lock the Control Window",
+        if (ImGuiHelper.SelectableCombo("Rotation Solver Reborn Lock the Control Window",
         [
-            UiString.InfoWindowNoMove.Local(),
-            UiString.InfoWindowMove.Local(),
+            UiString.InfoWindowNoMove.GetDescription(),
+            UiString.InfoWindowMove.GetDescription(),
         ], ref value))
         {
             Service.Config.IsControlWindowLock.Value = value == 0;
@@ -181,7 +181,7 @@ internal class ControlWindow : CtrlWindow
         {
             if (group)
             {
-                ImGui.Text(DataCenter.RightNowTargetToHostileType.Local());
+                ImGui.Text(DataCenter.RightNowTargetToHostileType.GetDescription());
                 ImGui.Text("Auto: " + DataCenter.AutoStatus.ToString());
             }
         }
@@ -207,7 +207,7 @@ internal class ControlWindow : CtrlWindow
                 ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(2, width / 2 - strWidth / 2));
                 ImGui.TextColored(color, str);
 
-                var help = command.Local();
+                var help = command.GetDescription();
                 if (ability != null)
                 {
                     help = help + "\n" + $"({ability.Name})";
@@ -295,7 +295,7 @@ internal class ControlWindow : CtrlWindow
                 ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, width / 2 - strWidth / 2));
                 ImGui.TextColored(color, str);
 
-                var help = command.Local();
+                var help = command.GetDescription();
                 if (!string.IsNullOrEmpty(helpAddition))
                 {
                     help += "\n" + helpAddition;
@@ -339,7 +339,7 @@ internal class ControlWindow : CtrlWindow
                 ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, width / 2 - strWidth / 2) - 3.5f);
                 ImGui.TextColored(color, str);
 
-                var help = command.Local();
+                var help = command.GetDescription();
                 string baseId = "ImgButton" + command.ToString();
 
                 if (IconSet.GetTexture(iconId, out var texture))

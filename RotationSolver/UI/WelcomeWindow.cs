@@ -2,7 +2,7 @@
 using Dalamud.Interface.Windowing;
 using ECommons.DalamudServices;
 using RotationSolver.Data;
-using RotationSolver.Localization;
+
 using RotationSolver.Updaters;
 
 namespace RotationSolver.UI
@@ -122,7 +122,7 @@ namespace RotationSolver.UI
         {
             var windowWidth = ImGui.GetWindowWidth();
             // Centered title
-            var text = UiString.WelcomeWindow_Header.Local();
+            var text = UiString.WelcomeWindow_Header.GetDescription();
             ImGui.PushFont(FontManager.GetFont(ImGui.GetFontSize() + 10));
             var textSize = ImGui.CalcTextSize(text).X;
             ImGuiHelper.DrawItemMiddle(() =>
@@ -140,7 +140,7 @@ namespace RotationSolver.UI
             }, windowWidth, textSize);
             ImGui.PopFont();
 
-            text = Service.Config.FirstTimeSetupDone ? UiString.WelcomeWindow_WelcomeBack.Local() : UiString.WelcomeWindow_Welcome.Local();
+            text = Service.Config.FirstTimeSetupDone ? UiString.WelcomeWindow_WelcomeBack.GetDescription() : UiString.WelcomeWindow_Welcome.GetDescription();
             ImGui.PushFont(FontManager.GetFont(ImGui.GetFontSize() + 1));
             textSize = ImGui.CalcTextSize(text).X;
             ImGuiHelper.DrawItemMiddle(() =>
@@ -154,7 +154,7 @@ namespace RotationSolver.UI
 
             if (!Service.Config.FirstTimeSetupDone)
             {
-                text = UiString.WelcomeWindow_FirstTime.Local();
+                text = UiString.WelcomeWindow_FirstTime.GetDescription();
                 ImGui.PushFont(FontManager.GetFont(ImGui.GetFontSize() + 3));
                 textSize = ImGui.CalcTextSize(text).X;
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudOrange);
@@ -162,22 +162,22 @@ namespace RotationSolver.UI
                 ImGui.PopStyleColor();
                 ImGui.PopFont();
 
-                text = UiString.WelcomeWindow_FirstTime3.Local();
+                text = UiString.WelcomeWindow_FirstTime3.GetDescription();
                 ImGui.Text(text);
                 var autoUpdate = Service.Config.AutoLoadRotations.Value;
-                if (ImGui.Checkbox(UiString.WelcomeWindow_LoadAtStartup.Local(), ref autoUpdate))
+                if (ImGui.Checkbox(UiString.WelcomeWindow_LoadAtStartup.GetDescription(), ref autoUpdate))
                 {
                     Service.Config.AutoLoadRotations.Value = autoUpdate;
                     Service.Config.Save();
                 }
                 var autoReload = Service.Config.AutoReloadRotations.Value;
-                if (ImGui.Checkbox(UiString.WelcomeWindow_AutoReload.Local(), ref autoReload))
+                if (ImGui.Checkbox(UiString.WelcomeWindow_AutoReload.GetDescription(), ref autoReload))
                 {
                     Service.Config.AutoReloadRotations.Value = autoReload;
                     Service.Config.Save();
                 }
 
-                text = UiString.WelcomeWindow_FirstTime2.Local();
+                text = UiString.WelcomeWindow_FirstTime2.GetDescription();
                 ImGui.PushFont(FontManager.GetFont(ImGui.GetFontSize() + 2));
                 textSize = ImGui.CalcTextSize(text).X;
                 ImGuiHelper.DrawItemMiddle(() =>
@@ -186,7 +186,7 @@ namespace RotationSolver.UI
                 }, windowWidth, textSize);
                 ImGui.PopFont();
 
-                text = UiString.WelcomeWindow_SaveAndInstall.Local();
+                text = UiString.WelcomeWindow_SaveAndInstall.GetDescription();
                 textSize = ImGui.CalcTextSize(text).X;
                 ImGuiHelper.DrawItemMiddle(async () =>
                 {
@@ -217,7 +217,7 @@ namespace RotationSolver.UI
 
         private void DrawChangeLog()
         {
-            var text = UiString.WelcomeWindow_Changelog.Local();
+            var text = UiString.WelcomeWindow_Changelog.GetDescription();
             var textSize = ImGui.CalcTextSize(text).X;
             ImGuiHelper.DrawItemMiddle(() =>
             {

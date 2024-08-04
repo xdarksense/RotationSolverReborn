@@ -1,7 +1,7 @@
 ﻿using Dalamud.Game.Command;
 using ECommons.DalamudServices;
 using RotationSolver.Data;
-using RotationSolver.Localization;
+
 
 namespace RotationSolver.Commands;
 
@@ -11,12 +11,12 @@ public static partial class RSCommands
     {
         Svc.Commands.AddHandler(Service.COMMAND, new CommandInfo(OnCommand)
         {
-            HelpMessage = UiString.Commands_Rotation.Local(),
+            HelpMessage = UiString.Commands_Rotation.GetDescription(),
             ShowInHelp = true,
         });
         Svc.Commands.AddHandler(Service.ALTCOMMAND, new CommandInfo(OnCommand)
         {
-            HelpMessage = UiString.Commands_Rotation.Local(),
+            HelpMessage = UiString.Commands_Rotation.GetDescription(),
             ShowInHelp = true,
         });
     }

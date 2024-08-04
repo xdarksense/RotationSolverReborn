@@ -6,7 +6,7 @@ using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Rotations.Duties;
 using RotationSolver.Data;
 using RotationSolver.Helpers;
-using RotationSolver.Localization;
+
 
 namespace RotationSolver.Updaters;
 
@@ -442,16 +442,16 @@ internal static class RotationUpdater
                }
                else
                {
-                   result = UiString.ActionAbility.Local();
+                   result = "oGCD";
                }
 
                if (act.Setting.IsFriendly)
                {
-                   result += "-" + UiString.ActionFriendly.Local();
+                   result += "-Friendly";
                }
                else
                {
-                   result += "-" + UiString.ActionAttack.Local();
+                   result += "-Attack";
                }
                return result;
            }
@@ -557,8 +557,6 @@ internal static class RotationUpdater
     private static Type? GetChosenType(IEnumerable<Type> types, string name)
     {
         var rotation = types.FirstOrDefault(r => r.FullName == name);
-
-        rotation ??= types.FirstOrDefault(r => r.Assembly.FullName!.Contains("SupportersRotations", StringComparison.OrdinalIgnoreCase));
 
         rotation ??= types.FirstOrDefault(r => r.Assembly.FullName!.Contains("DefaultRotations", StringComparison.OrdinalIgnoreCase));
 

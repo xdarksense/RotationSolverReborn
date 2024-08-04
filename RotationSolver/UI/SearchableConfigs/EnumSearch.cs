@@ -1,4 +1,4 @@
-﻿using RotationSolver.Localization;
+﻿using RotationSolver.Data;
 
 namespace RotationSolver.UI.SearchableConfigs;
 
@@ -17,7 +17,7 @@ internal class EnumSearch(PropertyInfo property) : Searchable(property)
         var enumValueToNameMap = new Dictionary<int, string>();
         foreach (Enum enumValue in Enum.GetValues(_property.PropertyType))
         {
-            enumValueToNameMap[Convert.ToInt32(enumValue)] = enumValue.Local();
+            enumValueToNameMap[Convert.ToInt32(enumValue)] = enumValue.GetDescription();
         }
 
         var displayNames = enumValueToNameMap.Values.ToArray();

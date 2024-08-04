@@ -260,10 +260,10 @@ internal partial class Configs : IPluginConfiguration
 
     [ConditionBool, UI("Show Original Cooldown",
         Filter = UiInformation)]
-    private static readonly bool _useOriginalCooldown = true;
+    private static readonly bool _useOriginalCooldown = false;
 
     [ConditionBool, UI("Always Show Cooldowns", Filter = UiInformation)]
-    private static readonly bool _showCooldownsAlways = true;
+    private static readonly bool _showCooldownsAlways = false;
 
     [ConditionBool, UI("Show tooltips",
         Filter = UiInformation)]
@@ -598,7 +598,7 @@ internal partial class Configs : IPluginConfiguration
     public int TargetingIndex { get; set; }
 
     [UI("Beneficial AoE strategy", Parent = nameof(UseGroundBeneficialAbility))]
-    public BeneficialAreaStrategy BeneficialAreaStrategy { get; set; } = BeneficialAreaStrategy.OnCalculated;
+    public BeneficialAreaStrategy BeneficialAreaStrategy { get; set; } = BeneficialAreaStrategy.OnTarget;
 
     [UI("Number of hostiles", Parent = nameof(UseDefenseAbility),
         PvEFilter = JobFilterType.Tank)]
@@ -649,7 +649,7 @@ internal partial class Configs : IPluginConfiguration
     private readonly float _action4head = 0.4f;
 
     [JobConfig, UI("Engage settings", Filter = TargetConfig, PvPFilter = JobFilterType.NoJob)]
-    private readonly TargetHostileType _hostileType = TargetHostileType.TargetsHaveTarget;
+    private readonly TargetHostileType _hostileType = TargetHostileType.AllTargetsWhenSoloInDuty;
 
     [JobConfig]
     private readonly string _PvPRotationChoice = string.Empty;

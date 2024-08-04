@@ -1,6 +1,4 @@
-﻿using RotationSolver.Localization;
-
-namespace RotationSolver.UI.SearchableConfigs;
+﻿namespace RotationSolver.UI.SearchableConfigs;
 
 internal class DragFloatRangeSearch : Searchable
 {
@@ -14,14 +12,7 @@ internal class DragFloatRangeSearch : Searchable
         get
         {
             var baseDesc = base.Description;
-            if (!string.IsNullOrEmpty(baseDesc))
-            {
-                return baseDesc + "\n" + Unit.Local();
-            }
-            else
-            {
-                return Unit.Local();
-            }
+            return !string.IsNullOrEmpty(baseDesc) ? $"{baseDesc}\n{Unit}" : Unit.ToString();
         }
     }
 
@@ -30,6 +21,7 @@ internal class DragFloatRangeSearch : Searchable
         get => (Vector2)_property.GetValue(Service.Config)!;
         set => _property.SetValue(Service.Config, value);
     }
+
     protected float MinValue
     {
         get => Value.X;
@@ -40,6 +32,7 @@ internal class DragFloatRangeSearch : Searchable
             Value = v;
         }
     }
+
     protected float MaxValue
     {
         get => Value.Y;
@@ -50,6 +43,7 @@ internal class DragFloatRangeSearch : Searchable
             Value = v;
         }
     }
+
     public DragFloatRangeSearch(PropertyInfo property) : base(property)
     {
         var range = _property.GetCustomAttribute<RangeAttribute>();
@@ -65,9 +59,16 @@ internal class DragFloatRangeSearch : Searchable
         var maxValue = MaxValue;
         ImGui.SetNextItemWidth(Scale * DRAG_WIDTH);
 
-        if (ImGui.DragFloatRange2($"##Config_{ID}{GetHashCode()}", ref minValue, ref maxValue, Speed, Min, Max,
-     Unit == ConfigUnitType.Percent ? $"{minValue * 100:F1}{Unit.ToSymbol()}" : $"{minValue:F2}{Unit.ToSymbol()}",
-    Unit == ConfigUnitType.Percent ? $"{maxValue * 100:F1}{Unit.ToSymbol()}" : $"{maxValue:F2}{Unit.ToSymbol()}"))
+        if (ImGui.DragFloatRange2(
+            $"##Config_{ID}{GetHashCode()}",
+            ref minValue,
+            ref maxValue,
+            Speed,
+            Min,
+            Max,
+            Unit == ConfigUnitType.Percent ? $"{minValue * 100:F1}{Unit.ToSymbol()}" : $"{minValue:F2}{Unit.ToSymbol()}",
+            Unit == ConfigUnitType.Percent ? $"{maxValue * 100:F1}{Unit.ToSymbol()}" : $"{maxValue:F2}{Unit.ToSymbol()}"
+        ))
         {
             MinValue = Math.Min(minValue, maxValue);
             MaxValue = Math.Max(minValue, maxValue);
