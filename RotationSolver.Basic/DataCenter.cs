@@ -276,10 +276,6 @@ internal static class DataCenter
             if (value < 0)
             {
                 _startRaidTime = DateTime.MinValue;
-                foreach (var item in TimelineItems)
-                {
-                    item.LastActionID = 0;
-                }
             }
             else
             {
@@ -287,8 +283,6 @@ internal static class DataCenter
             }
         }
     }
-
-    internal static TimelineItem[] TimelineItems { get; set; } = [];
 
     public unsafe static IBattleChara[] PartyMembers => AllianceMembers.Where(ObjectHelper.IsParty)
         .Where(b => b.Character()->CharacterData.OnlineStatus != 15 && b.IsTargetable).ToArray();

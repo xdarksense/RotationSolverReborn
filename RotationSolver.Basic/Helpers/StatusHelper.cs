@@ -246,16 +246,18 @@ public static class StatusHelper
     private static IEnumerable<Status> GetStatus(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
     {
         var newEffects = statusIDs.Select(a => (uint)a);
-        return obj.GetAllStatus(isFromSelf).Where(status => newEffects.Contains(status.StatusId));
+        var allStatuses = obj.GetAllStatus(isFromSelf);
+        return allStatuses.Where(status => newEffects.Contains(status.StatusId));
     }
 
     private static IEnumerable<Status> GetAllStatus(this IGameObject obj, bool isFromSelf)
     {
-        if (obj is not IBattleChara b) return [];
+        if (obj is not IBattleChara b) return Enumerable.Empty<Status>();
 
+        var playerId = Player.Object?.GameObjectId ?? 0;
         return b.StatusList.Where(status => !isFromSelf
-                                              || status.SourceId == Player.Object.GameObjectId
-                                              || status.SourceObject?.OwnerId == Player.Object.GameObjectId);
+                                              || status.SourceId == playerId
+                                              || status.SourceObject?.OwnerId == playerId);
     }
 
     /// <summary>

@@ -3,15 +3,22 @@
     "Name": "XIV Combo",
     "Icon": "https://raw.githubusercontent.com/daemitus/XIVComboPlugin/master/res/icon.png",
     "Url": "https://github.com/daemitus/XIVComboPlugin",
-    "Features": "Rotation",
+    "Features": "Auto rotation conflicts",
     "Type": 2
   },
   {
     "Name": "XIV Sloth Combo",
     "Icon": "https://raw.githubusercontent.com/Nik-Potokar/XIVSlothCombo/main/res/plugin/xivslothcombo.png",
     "Url": "https://github.com/Nik-Potokar/XIVSlothCombo",
-    "Features": "Rotation",
+    "Features": "Auto rotation conflicts",
     "Type": 2
+  },
+  {
+    "Name": "BossMod Reborn",
+    "Icon": "https://github.com/FFXIV-CombatReborn/RebornAssets/blob/main/IconAssets/BMR_Icon.png",
+    "Url": "https://github.com/FFXIV-CombatReborn/BossmodReborn",
+    "Features": "Auto rotation conflicts",
+    "Type": 3
   },
   {
     "Name": "BossMod",
@@ -24,7 +31,7 @@
     "Name": "Redirect",
     "Icon": "https://raw.githubusercontent.com/cairthenn/Redirect/main/Redirect/icon.png",
     "Url": "https://github.com/cairthenn/Redirect",
-    "Features": "Skill targetting",
+    "Features": "Skill targetting conflicts",
     "Type": 1
   },
   {

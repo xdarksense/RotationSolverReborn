@@ -99,20 +99,8 @@ internal enum UiString
     [Description("Configuration")]
     ConfigWindow_Rotation_Configuration,
 
-    [Description("Rating")]
-    ConfigWindow_Rotation_Rating,
-
     [Description("Information")]
     ConfigWindow_Rotation_Information,
-
-    [Description("Here are some rating methods to analysis this rotation. Most of these methods need your engagement.")]
-    ConfigWindow_Rotation_Rating_Description,
-
-    [Description("This is the count of using last action checking in this rotation. First is average one, second is maximum one. The less the better.\nLast used action is not a part of information from the game, it is recorded by player or author. \nIt can't accurately describe the current state of combat, which may make this rotation not general. \nFor example, clipping the gcd, death, take some status that grated by some action off manually, etc.")]
-    ConfigWindow_Rotation_Rating_CountOfLastUsing,
-
-    [Description("This is the count of using combat time in this rotation. First is average one, second is maximum one. The less the better.\nCombat time is not a part of information from the game, it is recorded by player or author. \nIt can't accurately describe the current state of combat, which may make this rotation not general.\nFor example, engaged by others in the party, different gcd time, etc.")]
-    ConfigWindow_Rotation_Rating_CountOfCombatTimeUsing,
 
     [Description("Status")]
     ConfigWindow_Rotation_Status,
@@ -125,9 +113,6 @@ internal enum UiString
 
     [Description("TTK that this action needs the target be before it is used.")]
     ConfigWindow_Actions_TTK,
-
-    [Description("TTK that this action needs the target be on the timeline before it is used")]
-    ConfigWindow_Actions_TTU,
 
     [Description("How many targets are needed to use this action.")]
     ConfigWindow_Actions_AoeCount,
@@ -246,9 +231,6 @@ internal enum UiString
     [Description("From Clipboard")]
     ActionSequencer_FromClipboard,
 
-    [Description("Open the timeline link")]
-    Timeline_OpenLink,
-
     [Description("Add Status")]
     ConfigWindow_List_AddStatus,
 
@@ -299,15 +281,6 @@ internal enum UiString
 
     [Description("Add beneficial AoE location")]
     ConfigWindow_List_AddPosition,
-
-    [Description("Time")]
-    ConfigWindow_Timeline_Time,
-
-    [Description("Name")]
-    ConfigWindow_Timeline_Name,
-
-    [Description("Actions")]
-    ConfigWindow_Timeline_Actions,
 
     [Description("Ability")]
     ActionAbility,
@@ -665,87 +638,6 @@ internal enum UiString
 
     [Description("This option is unavailable while using your current job\n \nRoles or jobs needed:\n{0}")]
     NotInJob,
-
-    [Description("Raid Time")]
-    TimelineRaidTime,
-
-    [Description("Execute")]
-    TimelineExecute,
-
-    [Description("Position")]
-    TimelinePosition,
-
-    [Description("Duration")]
-    TimelineDuration,
-
-    [Description("Target Count")]
-    TimelineTargetCount,
-
-    [Description("Target Getter")]
-    TimelineTargetGetter,
-
-    [Description("Effect Duration")]
-    TimelineEffectDuration,
-
-    [Description("Scale")]
-    TimelineScale,
-
-    [Description("Showing Text")]
-    TimelineShowText,
-
-    [Description("Ground")]
-    TimelineGround,
-
-    [Description("Actor")]
-    TimelineActor,
-
-    [Description("Rotation")]
-    TimelineRotation,
-
-    [Description("Object Getter")]
-    TimelineObjectGetter,
-
-    [Description("Need a target")]
-    TimelineNeedATarget,
-
-    [Description("Target by target")]
-    TimelineTargetByTarget,
-
-    [Description("Position Offset")]
-    TimelinePositionOffset,
-
-    [Description("Corner")]
-    TimelineCorner,
-
-    [Description("Padding")]
-    TimelinePadding,
-
-    [Description("Color")]
-    TimelineColor,
-
-    [Description("Background Color")]
-    TimelineBackgroundColor,
-
-    [Description("Place On Target")]
-    TimelinePlaceOnTarget,
-
-    [Description("Add a timeline item.")]
-    AddTimelineButton,
-
-    [Description("Add a condition item.")]
-    AddTimelineCondition,
-
-    [Description("Add a drawing timeline item.")]
-    AddDrawingTimelineButton,
-
-    [Description("Click to toggle the timeline item condition.")]
-    TimelineItemCondition,
-
-    [Description("The time before this action.")]
-    TimelineItemTime,
-
-    [Description("The duration of this action.")]
-    TimelineItemDuration,
 
     [Description("Welcome to Rotation Solver Reborn!")]
     WelcomeWindow_Header,

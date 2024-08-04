@@ -122,35 +122,6 @@ internal static class RotationUpdater
             }
         }
 
-        DataCenter.AuthorHashes = [];
-        foreach (var assembly in assemblies)
-        {
-            try
-            {
-                var authorHashAttribute = assembly.GetCustomAttribute<AuthorHashAttribute>();
-                if (authorHashAttribute != null)
-                {
-                    var key = authorHashAttribute.Hash;
-                    if (string.IsNullOrEmpty(key)) continue;
-
-                    var value = $"{assembly.GetInfo().Author} - {assembly.GetInfo().Name}";
-
-                    if (DataCenter.AuthorHashes.ContainsKey(key))
-                    {
-                        DataCenter.AuthorHashes[key] += $", {value}";
-                    }
-                    else
-                    {
-                        DataCenter.AuthorHashes.Add(key, value);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Svc.Log.Warning(ex, "Failed to get author's hash");
-            }
-        }
-
         DutyRotations = LoadDutyRotationGroup(assemblies);
         CustomRotations = LoadCustomRotationGroup(assemblies);
         var customRotationsGroupedByJobRole = new Dictionary<JobRole, List<CustomRotationGroup>>();

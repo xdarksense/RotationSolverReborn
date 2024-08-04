@@ -22,7 +22,6 @@ internal partial class Configs : IPluginConfiguration
         Rotations = "Rotations",
         List = "List",
         List2 = "List2",
-        TimelineFilter = "Timeline",
         Debug = "Debug";
 
     public int Version { get; set; } = 8;
@@ -361,10 +360,6 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Show action toggle feedback in chat.",
         Filter = UiInformation)]
     private static readonly bool _showToggledActionInChat = false;
-
-    [ConditionBool, UI("Timeline overrides automatic action usage.",
-        Filter = TimelineFilter)]
-    private static readonly bool _timelineOverride = false;
 
     [ConditionBool, UI("Record knockback actions", Filter = List2)]
     private static readonly bool _recordKnockbackies = false;
