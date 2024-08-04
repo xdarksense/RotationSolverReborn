@@ -1,30 +1,31 @@
-﻿namespace RotationSolver.Basic.Configuration.Conditions;
-
-[Description("Condition Set")]
-internal class ConditionSet : DelayCondition
+﻿namespace RotationSolver.Basic.Configuration.Conditions
 {
-    public List<ICondition> Conditions { get; set; } = [];
-
-    public LogicalType Type;
-
-    protected override bool IsTrueInside(ICustomRotation rotation)
+    [Description("Condition Set")]
+    internal class ConditionSet : DelayCondition
     {
-        if (Conditions.Count == 0) return false;
+        public List<ICondition> Conditions { get; set; } = new List<ICondition>();
 
-        return Type switch
+        public LogicalType Type;
+
+        protected override bool IsTrueInside(ICustomRotation rotation)
         {
-            LogicalType.And => Conditions.All(c => c.IsTrue(rotation)),
-            LogicalType.Or => Conditions.Any(c => c.IsTrue(rotation)),
-            _ => false,
-        };
+            if (Conditions.Count == 0) return false;
+
+            return Type switch
+            {
+                LogicalType.And => Conditions.All(c => c.IsTrue(rotation)),
+                LogicalType.Or => Conditions.Any(c => c.IsTrue(rotation)),
+                _ => false,
+            };
+        }
     }
-}
 
-internal enum LogicalType : byte
-{
-    [Description("&&")]
-    And,
+    internal enum LogicalType : byte
+    {
+        [Description("&&")]
+        And,
 
-    [Description(" | | ")]
-    Or,
+        [Description("||")]
+        Or,
+    }
 }

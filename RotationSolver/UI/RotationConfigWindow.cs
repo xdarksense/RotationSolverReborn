@@ -357,7 +357,7 @@ public partial class RotationConfigWindow : Window
 
         const string slash = " - ";
         var gameVersionSize = ImGui.CalcTextSize(slash + rot.GameVersion).X + ImGui.GetStyle().ItemSpacing.X;
-        var gameVersion = UiString.ConfigWindow_Helper_GameVersion.ToString() + ": ";
+        var gameVersion = UiString.ConfigWindow_Helper_GameVersion.GetDescription() + ": ";
         var drawCenter = ImGui.CalcTextSize(slash + gameVersion + rot.GameVersion).X + iconSize + ImGui.GetStyle().ItemSpacing.X * 3 < wholeWidth;
         if (drawCenter) gameVersionSize += ImGui.CalcTextSize(gameVersion).X + ImGui.GetStyle().ItemSpacing.X;
 
@@ -672,43 +672,28 @@ public partial class RotationConfigWindow : Window
     {
         using var style = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0f, 5f));
 
-        StateCommandType.Auto.DisplayCommandHelp();
+        StateCommandType.Auto.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
+        StateCommandType.Manual.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
+        StateCommandType.Off.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
 
-        StateCommandType.Manual.DisplayCommandHelp();
-
-        StateCommandType.Off.DisplayCommandHelp();
-
-        OtherCommandType.NextAction.DisplayCommandHelp();
+        OtherCommandType.NextAction.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
 
         ImGui.NewLine();
 
-        SpecialCommandType.EndSpecial.DisplayCommandHelp();
-
-        SpecialCommandType.HealArea.DisplayCommandHelp();
-
-        SpecialCommandType.HealSingle.DisplayCommandHelp();
-
-        SpecialCommandType.DefenseArea.DisplayCommandHelp();
-
-        SpecialCommandType.DefenseSingle.DisplayCommandHelp();
-
-        SpecialCommandType.MoveForward.DisplayCommandHelp();
-
-        SpecialCommandType.MoveBack.DisplayCommandHelp();
-
-        SpecialCommandType.Speed.DisplayCommandHelp();
-
-        SpecialCommandType.DispelStancePositional.DisplayCommandHelp();
-
-        SpecialCommandType.RaiseShirk.DisplayCommandHelp();
-
-        SpecialCommandType.AntiKnockback.DisplayCommandHelp();
-
-        SpecialCommandType.Burst.DisplayCommandHelp();
-
-        SpecialCommandType.LimitBreak.DisplayCommandHelp();
-
-        SpecialCommandType.NoCasting.DisplayCommandHelp();
+        SpecialCommandType.EndSpecial.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
+        SpecialCommandType.HealArea.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
+        SpecialCommandType.HealSingle.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
+        SpecialCommandType.DefenseArea.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
+        SpecialCommandType.DefenseSingle.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
+        SpecialCommandType.MoveForward.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
+        SpecialCommandType.MoveBack.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
+        SpecialCommandType.Speed.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
+        SpecialCommandType.DispelStancePositional.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
+        SpecialCommandType.RaiseShirk.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
+        SpecialCommandType.AntiKnockback.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
+        SpecialCommandType.Burst.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
+        SpecialCommandType.LimitBreak.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
+        SpecialCommandType.NoCasting.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
     }
 
     private static void DrawAboutCompatibility()
