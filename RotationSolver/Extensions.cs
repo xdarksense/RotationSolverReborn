@@ -4,6 +4,10 @@
     {
         public static string ToStateString(this StateCommandType stateType, JobRole role)
         {
+            if (stateType == StateCommandType.Auto)
+            {
+                return $"{stateType} ({DataCenter.TargetingType})";
+            }
             return stateType.ToString();
         }
 
