@@ -671,11 +671,13 @@ internal static class DataCenter
     public static bool IsHostileCastingKnockback(IBattleChara h)
     {
         return IsHostileCastingBase(h,
-            (act) => { return OtherConfiguration.HostileCastingKnockback.Contains(act.RowId); });
+            (act) => act != null && OtherConfiguration.HostileCastingKnockback.Contains(act.RowId));
     }
 
     private static bool IsHostileCastingBase(IBattleChara h, Func<Action, bool> check)
     {
+        if (h == null) return false; // Check if h is null
+
         if (!h.IsCasting) return false;
 
         if (h.IsCastInterruptible) return false;
@@ -685,8 +687,12 @@ internal static class DataCenter
         if (!(h.TotalCastTime > 2.5 &&
               t > 0 && t < DataCenter.GCDTime(2))) return false;
 
-        var action = Service.GetSheet<Action>().GetRow(h.CastActionId);
-        if (action == null) return false;
-        return check?.Invoke(action) ?? false;
+        var actionSheet = Service.GetSheet<Action>();
+        if (actionSheet == null) return false; // Check if actionSheet is null
+
+        var action = actionSheet.GetRow(h.CastActionId);
+        if (action == null) return false; // Check if action is null
+
+        return check?.Invoke(action) ?? false; // Check if check is null
     }
 }
