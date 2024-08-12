@@ -110,9 +110,9 @@ namespace RotationSolver.DummyRotations
         protected override bool GeneralGCD(out IAction? act)
         {
             if (MidareSetsugekkaPvE.CanUse(out act)) return true;
+            if (TendoSetsugekkaPvE.CanUse(out act)) return true;
 
             if (TendoGokenPvE.CanUse(out act)) return true;
-            if (TendoSetsugekkaPvE.CanUse(out act)) return true;
             if (TendoKaeshiGokenPvE.CanUse(out act)) return true;
             if (TendoKaeshiSetsugekkaPvE.CanUse(out act)) return true;
             // use 2nd finisher combo spell first
@@ -135,8 +135,8 @@ namespace RotationSolver.DummyRotations
 
             if (TendoGokenPvE.CanUse(out act)) return true;
 
-            if (TendoSetsugekkaPvE.CanUse(out act)) return true;
             if (MidareSetsugekkaPvE.CanUse(out act)) return true;
+            if (TendoSetsugekkaPvE.CanUse(out act)) return true;
 
             // aoe 12 combo's 2
             if ((!HasMoon || IsMoonTimeLessThanFlower || !OkaPvE.EnoughLevel) && MangetsuPvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && !HasGetsu)) return true;
