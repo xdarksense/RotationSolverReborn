@@ -291,7 +291,7 @@ partial class SamuraiRotation
 
     static partial void ModifyMidareSetsugekkaPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SenCount == 3 && MeditationStacks <= 2;
+        setting.ActionCheck = () => SenCount == 3 && MeditationStacks <= 2 && !Player.HasStatus(true, StatusID.Tendo);
     }
 
     static partial void ModifyKaeshiGokenPvE(ref ActionSetting setting)
@@ -305,7 +305,8 @@ partial class SamuraiRotation
 
     static partial void ModifyKaeshiSetsugekkaPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Kaeshi == Kaeshi.SETSUGEKKA;
+        //setting.ActionCheck = () => Kaeshi == Kaeshi.SETSUGEKKA;
+        setting.StatusNeed = [StatusID.Tsubamegaeshi];
     }
 
     static partial void ModifyTendoGokenPvE(ref ActionSetting setting)
@@ -322,15 +323,16 @@ partial class SamuraiRotation
 
     static partial void ModifyTendoSetsugekkaPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SenCount == 3 && MeditationStacks <= 2;
+        setting.ActionCheck = () => SenCount == 3 && MeditationStacks <= 2 && Player.HasStatus(true, StatusID.Tendo);
         setting.StatusProvide = [StatusID.Tsubamegaeshi];
         setting.StatusNeed = [StatusID.Tendo];
     }
 
     static partial void ModifyTendoKaeshiGokenPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (byte)Kaeshi == 5;
+        //setting.ActionCheck = () => (byte)Kaeshi == 5;
         setting.IsFriendly = false;
+        setting.StatusNeed = [StatusID.Tendo];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -339,7 +341,8 @@ partial class SamuraiRotation
 
     static partial void ModifyTendoKaeshiSetsugekkaPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (byte)Kaeshi == 6; // Temporary until Dalamud enums are updated
+        //setting.ActionCheck = () => (byte)Kaeshi == 6; // Temporary until Dalamud enums are updated
+        setting.StatusNeed = [StatusID.Tsubamegaeshi_4218];
     }
 
     #endregion
