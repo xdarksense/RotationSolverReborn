@@ -39,6 +39,6 @@ No Plugins will be installed, you have just made them available. You can now sel
 
 ## Links
 
-The rotations definitions are [here](https://github.com/LTS-FFXIV/LTSDefaults).
+The rotations definitions are [here](https://github.com/FFXIV-CombatReborn/RebornRotations).
 
 [![Crowdin](https://badges.crowdin.net/badge/light/crowdin-on-dark.png)](https://crowdin.com/project/rotationsolver)
