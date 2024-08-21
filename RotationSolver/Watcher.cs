@@ -79,7 +79,7 @@ public static class Watcher
                 {
                     DataCenter.KnockbackStart = DateTime.Now;
                     DataCenter.KnockbackFinished = DateTime.Now + TimeSpan.FromSeconds(knock.Distance / (float)knock.Speed);
-                    if (!OtherConfiguration.HostileCastingKnockback.Contains(set.Action.RowId) && Service.Config.RecordKnockbackies)
+                    if (set.Action != null && !OtherConfiguration.HostileCastingKnockback.Contains(set.Action.RowId) && Service.Config.RecordKnockbackies)
                     {
                         OtherConfiguration.HostileCastingKnockback.Add(set.Action.RowId);
                         OtherConfiguration.Save();
@@ -113,6 +113,7 @@ public static class Watcher
 
     private static void ActionFromSelf(ActionEffectSet set)
     {
+        if (set.Source == null || Player.Object == null) return;
         if (set.Source.GameObjectId != Player.Object.GameObjectId) return;
         if (set.Header.ActionType != ActionType.Action && set.Header.ActionType != ActionType.Item) return;
         if (set.Action == null) return;
