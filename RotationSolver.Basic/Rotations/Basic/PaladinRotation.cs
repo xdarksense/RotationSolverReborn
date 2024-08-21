@@ -115,7 +115,6 @@ partial class PaladinRotation
 
     static partial void ModifySentinelPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = StatusHelper.RampartStatus;
         setting.TargetType = TargetType.Self;
     }
 

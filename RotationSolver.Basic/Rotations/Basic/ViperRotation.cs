@@ -106,7 +106,7 @@ public partial class ViperRotation
     /// <summary>
     /// Indicates if the player can use Reawakened.
     /// </summary>
-    public static bool HasReawakend => Player.HasStatus(true, StatusID.Reawakened) || SerpentOffering >= 50;
+    public static bool HasReawakend => Player.HasStatus(true, StatusID.ReadyToReawaken) || SerpentOffering >= 50;
 
     /// <summary>
     /// Indicates if the player has Swiftscaled.
@@ -441,7 +441,7 @@ public partial class ViperRotation
 
     static partial void ModifyReawakenPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && !UNCOILEDREADY && !TWINSREADY && !THRESHREADY && (SerpentOffering >= 50 || Player.HasStatus(true, StatusID.ReadyToReawaken));
+        setting.ActionCheck = () => NODREAD && !UNCOILEDREADY && !TWINSREADY && !THRESHREADY && HasReawakend;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
