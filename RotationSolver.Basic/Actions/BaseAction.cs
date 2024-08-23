@@ -119,7 +119,7 @@ public class BaseAction : IBaseAction
     }
 
     /// <inheritdoc/>
-    public bool CanUse(out IAction act, bool skipStatusProvideCheck = false, bool skipComboCheck = false, bool skipCastingCheck = false,
+    public bool CanUse(out IAction act, bool isLastAbility = false, bool skipStatusProvideCheck = false, bool skipComboCheck = false, bool skipCastingCheck = false,
         bool usedUp = false, bool skipAoeCheck = false, byte gcdCountForAbility = 0)
     {
         act = this!;
@@ -135,6 +135,11 @@ public class BaseAction : IBaseAction
         if (IBaseAction.AllEmpty)
         {
             usedUp = true;
+        }
+
+        if (isLastAbility)
+        {
+            if (DataCenter.NextAbilityToNextGCD > ActionManagerHelper.GetCurrentAnimationLock() + DataCenter.MinAnimationLock + 0.100) return false;
         }
 
         if (!Info.BasicCheck(skipStatusProvideCheck, skipComboCheck, skipCastingCheck)) return false;

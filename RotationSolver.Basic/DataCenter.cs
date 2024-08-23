@@ -209,7 +209,7 @@ internal static class DataCenter
     }
 
     #region GCD
-
+    public static float NextAbilityToNextGCD => DefaultGCDRemain - ActionManagerHelper.GetCurrentAnimationLock();
     public static float DefaultGCDTotal => ActionManagerHelper.GetDefaultRecastTime();
 
     public static float DefaultGCDRemain =>
@@ -520,6 +520,7 @@ internal static class DataCenter
     internal static Queue<MacroItem> Macros { get; } = new Queue<MacroItem>();
 
     #region Action Record
+    public const float MinAnimationLock = 0.6f;
 
     const int QUEUECAPACITY = 32;
     private static readonly Queue<ActionRec> _actions = new(QUEUECAPACITY);
