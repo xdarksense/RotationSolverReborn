@@ -372,6 +372,11 @@ internal partial class Configs : IPluginConfiguration
     public bool UseAdditionalConditions { get; set; } = false;
 
     #region Float
+    [UI("isLastAbilityTimer", Description = "Don't fuck with this if you dont know what it does",
+        Filter = Extra)]
+    [Range(0.100f, 0.500f, ConfigUnitType.Seconds, 0.001f)]
+    public float isLastAbilityTimer { get; set; } = 0.100f;
+
     [UI("Auto turn off RSR when combat is over more for more then...",
         Parent = nameof(AutoOffAfterCombat))]
     [Range(0, 600, ConfigUnitType.Seconds)]
