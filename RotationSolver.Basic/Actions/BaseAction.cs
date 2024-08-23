@@ -139,7 +139,7 @@ public class BaseAction : IBaseAction
 
         if (isLastAbility)
         {
-            if (DataCenter.NextAbilityToNextGCD > ActionManagerHelper.GetCurrentAnimationLock() + DataCenter.MinAnimationLock + 0.100) return false;
+            if (DataCenter.NextAbilityToNextGCD > ActionManagerHelper.GetCurrentAnimationLock() + DataCenter.MinAnimationLock + Service.Config.isLastAbilityTimer) return false;
         }
 
         if (!Info.BasicCheck(skipStatusProvideCheck, skipComboCheck, skipCastingCheck)) return false;
