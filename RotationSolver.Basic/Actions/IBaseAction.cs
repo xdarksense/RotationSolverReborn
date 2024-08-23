@@ -55,6 +55,7 @@ public interface IBaseAction : IAction
     /// Can I use this action.
     /// </summary>
     /// <param name="act">The return action</param>
+    /// <param name="isLastAbility">Use this ability as last during a GCD window?</param>
     /// <param name="skipStatusProvideCheck">Skip Status Provide Check</param>
     /// <param name="skipComboCheck">Skip Combo Check</param>
     /// <param name="skipCastingCheck">Skip Casting and Moving Check</param>
@@ -62,6 +63,6 @@ public interface IBaseAction : IAction
     /// <param name="skipAoeCheck">Skip aoe Check</param>
     /// <param name="gcdCountForAbility">the gcd count for the ability.</param>
     /// <returns>can I use it</returns>
-    bool CanUse(out IAction act, bool skipStatusProvideCheck = false, bool skipComboCheck = false, bool skipCastingCheck = false,
+    bool CanUse(out IAction act, bool isLastAbility = false, bool skipStatusProvideCheck = false, bool skipComboCheck = false, bool skipCastingCheck = false,
         bool usedUp = false, bool skipAoeCheck = false, byte gcdCountForAbility = 0);
 }
