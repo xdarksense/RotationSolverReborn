@@ -1,4 +1,4 @@
-﻿namespace RotationSolver.Basic.Rotations.Basic;
+namespace RotationSolver.Basic.Rotations.Basic;
 
 partial class ScholarRotation
 {
@@ -153,11 +153,34 @@ partial class ScholarRotation
         setting.UnlockedByQuestID = 67209;
     }
 
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.ExpedientPvE)]
-    protected override bool SpeedAbility(IAction nextGCD, out IAction? act)
+    //DT
+
+    static partial void ModifyBanefulImpactionPvE(ref ActionSetting setting)
     {
-        if (InCombat && ExpedientPvE.CanUse(out act, usedUp: true)) return true;
-        return base.SpeedAbility(nextGCD, out act);
+        setting.ActionCheck = () => Player.HasStatus(true, StatusID.ImpactImminent);
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 3,
+        };
+    }
+
+    static partial void ModifyConcitationPvE(ref ActionSetting setting)
+    {
+        
+    }
+
+    static partial void ModifySeraphismPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => DataCenter.HasPet && InCombat;
+    }
+
+    static partial void ModifyManifestationPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Player.HasStatus(true, StatusID.Seraphism);
+    }
+
+    static partial void ModifyAccessionPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Player.HasStatus(true, StatusID.Seraphism);
     }
 }
