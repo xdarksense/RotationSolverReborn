@@ -33,7 +33,7 @@ partial class ScholarRotation
 
     static partial void ModifyBioPvE(ref ActionSetting setting)
     {
-        setting.TargetStatusProvide = [StatusID.Bio];
+        setting.TargetStatusProvide = [StatusID.Bio, StatusID.BioIi, StatusID.Biolysis];
     }
 
     static partial void ModifyPhysickPvE(ref ActionSetting setting)
@@ -63,7 +63,7 @@ partial class ScholarRotation
 
     static partial void ModifyBioIiPvE(ref ActionSetting setting)
     {
-        setting.TargetStatusProvide = [StatusID.BioIi];
+        setting.TargetStatusProvide = [StatusID.Bio, StatusID.BioIi, StatusID.Biolysis];
     }
 
     static partial void ModifyAdloquiumPvE(ref ActionSetting setting)
@@ -211,7 +211,7 @@ partial class ScholarRotation
 
     static partial void ModifyBiolysisPvE(ref ActionSetting setting)
     {
-        setting.TargetStatusProvide = [StatusID.Biolysis];
+        setting.TargetStatusProvide = [StatusID.Bio, StatusID.BioIi, StatusID.Biolysis];
     }
 
     static partial void ModifyBroilIiiPvE(ref ActionSetting setting)
