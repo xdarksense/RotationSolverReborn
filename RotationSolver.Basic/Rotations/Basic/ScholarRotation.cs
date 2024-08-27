@@ -22,6 +22,7 @@ partial class ScholarRotation
     /// 
     /// </summary>
     public static float SeraphTime => SeraphTimeRaw - DataCenter.DefaultGCDRemain;
+
     #endregion
     private sealed protected override IBaseAction Raise => ResurrectionPvE;
 
@@ -70,6 +71,7 @@ partial class ScholarRotation
     static partial void ModifyConsolationPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => SeraphTime > 0;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyBioPvE(ref ActionSetting setting)
@@ -118,6 +120,7 @@ partial class ScholarRotation
     static partial void ModifyFeyBlessingPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => SeraphTime <= 0 && DataCenter.HasPet;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyAetherflowPvE(ref ActionSetting setting)
@@ -128,6 +131,7 @@ partial class ScholarRotation
     static partial void ModifyChainStratagemPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => InCombat;
+        setting.StatusProvide = [StatusID.ImpactImminent];
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
@@ -157,30 +161,33 @@ partial class ScholarRotation
 
     static partial void ModifyBanefulImpactionPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Player.HasStatus(true, StatusID.ImpactImminent);
+        setting.StatusNeed = [StatusID.ImpactImminent];
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 1,
         };
     }
 
     static partial void ModifyConcitationPvE(ref ActionSetting setting)
     {
-        
+        setting.IsFriendly = true;
     }
 
     static partial void ModifySeraphismPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => DataCenter.HasPet && InCombat;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyManifestationPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Player.HasStatus(true, StatusID.Seraphism);
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyAccessionPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Player.HasStatus(true, StatusID.Seraphism);
+        setting.IsFriendly = true;
     }
 }
