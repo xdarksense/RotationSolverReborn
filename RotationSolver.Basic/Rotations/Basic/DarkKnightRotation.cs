@@ -257,6 +257,7 @@ partial class DarkKnightRotation
 
     static partial void ModifySaltAndDarknessPvE(ref ActionSetting setting)
     {
+        setting.StatusNeed = [StatusID.SaltedEarth];
         setting.UnlockedByQuestID = 67596;
         setting.CreateConfig = () => new ActionConfig()
         {
