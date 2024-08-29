@@ -69,19 +69,26 @@ partial class ScholarRotation
     static partial void ModifyAdloquiumPvE(ref ActionSetting setting)
     {
         setting.StatusFromSelf = false;
-        setting.StatusProvide =
+        setting.TargetStatusProvide =
         [
             StatusID.EukrasianDiagnosis,
             StatusID.EukrasianPrognosis,
             StatusID.Galvanize
         ];
+        setting.IsFriendly = true;
         setting.UnlockedByQuestID = 66633;
     }
 
     static partial void ModifySuccorPvE(ref ActionSetting setting)
     {
         setting.StatusFromSelf = false;
-        setting.StatusProvide = [StatusID.Galvanize];
+        setting.StatusProvide =
+        [
+            StatusID.EukrasianDiagnosis,
+            StatusID.EukrasianPrognosis,
+            StatusID.Galvanize
+        ];
+        setting.IsFriendly = true;
         setting.UnlockedByQuestID = 66634;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -165,6 +172,7 @@ partial class ScholarRotation
 
     static partial void ModifyEmergencyTacticsPvE(ref ActionSetting setting)
     {
+        setting.StatusProvide = [StatusID.EmergencyTactics];
         setting.UnlockedByQuestID = 67211;
         setting.IsFriendly = true;
     }
@@ -281,6 +289,12 @@ partial class ScholarRotation
 
     static partial void ModifyConcitationPvE(ref ActionSetting setting)
     {
+        setting.StatusProvide =
+        [
+            StatusID.EukrasianDiagnosis,
+            StatusID.EukrasianPrognosis,
+            StatusID.Galvanize
+        ];
         setting.IsFriendly = true;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -297,12 +311,24 @@ partial class ScholarRotation
     static partial void ModifyManifestationPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Player.HasStatus(true, StatusID.Seraphism);
+        setting.TargetStatusProvide =
+        [
+            StatusID.EukrasianDiagnosis,
+            StatusID.EukrasianPrognosis,
+            StatusID.Galvanize
+        ];
         setting.IsFriendly = true;
     }
 
     static partial void ModifyAccessionPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Player.HasStatus(true, StatusID.Seraphism);
+        setting.StatusProvide =
+        [
+            StatusID.EukrasianDiagnosis,
+            StatusID.EukrasianPrognosis,
+            StatusID.Galvanize
+        ];
         setting.IsFriendly = true;
         setting.CreateConfig = () => new ActionConfig()
         {
