@@ -54,6 +54,7 @@ partial class BardRotation
         => SongEndAfter(GCDTime(gctCount, offset));
     #endregion
 
+    #region PvE
     static partial void ModifyHeavyShotPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.HawksEye_3861];
@@ -313,27 +314,62 @@ partial class BardRotation
             AoeCount = 1,
         };
     }
+    #endregion
 
+    #region PvP
     // PvP
+    static partial void ModifyPowerfulShotPvP(ref ActionSetting setting)
+    {
+        
+    }
+
     static partial void ModifyPitchPerfectPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.Repertoire];
     }
 
-    static partial void ModifySilentNocturnePvP(ref ActionSetting setting)
+    static partial void ModifyApexArrowPvP(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.Repertoire];
-    }
-
-    static partial void ModifyTheWardensPaeanPvP(ref ActionSetting setting)
-    {
-        setting.StatusProvide = [StatusID.Repertoire];
+        setting.StatusProvide = [StatusID.BlastArrowReady_3142, StatusID.FrontlinersMarch];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyBlastArrowPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.BlastArrowReady_3142];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
+
+    static partial void ModifySilentNocturnePvP(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.Repertoire];
+        setting.TargetStatusProvide = [StatusID.Silenced];
+    }
+
+    static partial void ModifyEmpyrealArrowPvP(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyRepellingShotPvP(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyTheWardensPaeanPvP(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.Repertoire];
+        setting.TargetStatusProvide = [StatusID.WardensGrace];
+        setting.TargetType = TargetType.Dispel;
+    }
+
+    #endregion
 
     /// <inheritdoc/>
     [RotationDesc(ActionID.TheWardensPaeanPvE)]
