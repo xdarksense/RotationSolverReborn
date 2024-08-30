@@ -115,7 +115,7 @@ public class BaseItem : IBaseItem
     /// <summary>
     /// Items' animation lock time.
     /// </summary>
-    public float AnimationLockTime => 1.1f;
+    public float AnimationLockTime => 0.6f;
 
     /// <summary>
     /// Is this action in action sequencer.
