@@ -79,7 +79,7 @@ partial class DarkKnightRotation
     {
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 2,
         };
     }
 
@@ -109,7 +109,7 @@ partial class DarkKnightRotation
         setting.UnlockedByQuestID = 67590;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 2,
         };
     }
 
@@ -136,7 +136,7 @@ partial class DarkKnightRotation
         setting.ComboIds = [ActionID.UnleashPvE];
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 2,
         };
     }
 
@@ -162,6 +162,10 @@ partial class DarkKnightRotation
     static partial void ModifySaltedEarthPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 67596;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyShadowstridePvE(ref ActionSetting setting)
@@ -175,7 +179,7 @@ partial class DarkKnightRotation
         setting.UnlockedByQuestID = 67598;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 2,
         };
     }
 
@@ -194,13 +198,13 @@ partial class DarkKnightRotation
         setting.ActionCheck = () => Blood >= 50 || !Player.WillStatusEnd(0, true, StatusID.Delirium_1972);
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 2,
         };
     }
 
     static partial void ModifyDeliriumPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.Delirium_1972, StatusID.BloodWeapon];
+        setting.StatusProvide = [StatusID.Delirium_1972, StatusID.BloodWeapon, StatusID.Delirium_3836];
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
@@ -281,27 +285,27 @@ partial class DarkKnightRotation
 
     static partial void ModifyScarletDeliriumPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Delirium_1972];
+        setting.StatusNeed = [StatusID.Delirium_3836];
     }
 
     static partial void ModifyComeuppancePvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Delirium_1972];
+        setting.StatusNeed = [StatusID.Delirium_3836];
         setting.ComboIds = [ActionID.ScarletDeliriumPvE];
     }
 
     static partial void ModifyTorcleaverPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Delirium_1972];
-        setting.ComboIds = [ActionID.ComeuppancePvE];
+        setting.StatusNeed = [StatusID.Delirium_3836];
+        setting.ComboIds = [ActionID.TorcleaverPvE];
     }
 
     static partial void ModifyImpalementPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Delirium_1972];
+        setting.ActionCheck = () => !Player.WillStatusEnd(0, true, StatusID.Delirium_3836);
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 2,
         };
     }
 
