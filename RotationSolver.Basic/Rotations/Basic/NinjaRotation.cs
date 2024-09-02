@@ -15,6 +15,11 @@ partial class NinjaRotation
     /// Gets the current charges for Kazematoi.
     /// </summary>
     public static byte Kazematoi => (byte)JobGauge.Kazematoi;
+
+    /// <summary>
+    /// Is enough level for Jin
+    /// </summary>
+    public static bool HasJin = IncreaseAttackSpeedTrait.EnoughLevel;
     #endregion
 
     static partial void ModifySpinningEdgePvE(ref ActionSetting setting)

@@ -63,6 +63,42 @@ partial class DarkKnightRotation
     /// <returns></returns>
     protected static bool ShadowTimeEndAfterGCD(uint gctCount = 0, float offset = 0)
         => ShadowTimeEndAfter(GCDTime(gctCount, offset));
+
+    /// <summary>
+    /// Holds the remaining amount of BloodWeapon stacks
+    /// </summary>
+    public static byte BloodWeaponStacks
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.BloodWeapon);
+            return stacks == byte.MaxValue ? (byte)3 : stacks;
+        }
+    }
+
+    /// <summary>
+    /// Holds the remaining amount of Delirium stacks
+    /// </summary>
+    public static byte DeliriumStacks
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.Delirium_3836);
+            return stacks == byte.MaxValue ? (byte)3 : stacks;
+        }
+    }
+
+    /// <summary>
+    /// Holds the remaining amount of Delirium stacks
+    /// </summary>
+    public static byte LowDeliriumStacks
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.Delirium_1972);
+            return stacks == byte.MaxValue ? (byte)3 : stacks;
+        }
+    }
     #endregion
 
     static partial void ModifyHardSlashPvE(ref ActionSetting setting)
@@ -190,12 +226,12 @@ partial class DarkKnightRotation
 
     static partial void ModifyBloodspillerPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Blood >= 50 || !Player.WillStatusEnd(0, true, StatusID.Delirium_1972);
+        setting.ActionCheck = () => Blood >= 50 || DeliriumStacks > 0 || LowDeliriumStacks > 0;
     }
 
     static partial void ModifyQuietusPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Blood >= 50 || !Player.WillStatusEnd(0, true, StatusID.Delirium_1972);
+        setting.ActionCheck = () => Blood >= 50 || DeliriumStacks > 0 || LowDeliriumStacks > 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 2,
@@ -285,19 +321,17 @@ partial class DarkKnightRotation
 
     static partial void ModifyScarletDeliriumPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Delirium_3836];
+        setting.ActionCheck = () => DeliriumStacks == 3;
     }
 
     static partial void ModifyComeuppancePvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Delirium_3836];
-        setting.ComboIds = [ActionID.ScarletDeliriumPvE];
+        setting.ActionCheck = () => DeliriumStacks == 2;
     }
 
     static partial void ModifyTorcleaverPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Delirium_3836];
-        setting.ComboIds = [ActionID.TorcleaverPvE];
+        setting.ActionCheck = () => DeliriumStacks == 1;
     }
 
     static partial void ModifyImpalementPvE(ref ActionSetting setting)
@@ -330,5 +364,13 @@ partial class DarkKnightRotation
     static partial void ModifyPlungePvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
+    }
+
+    /// <inheritdoc/>
+    public override void DisplayStatus()
+    {
+        ImGui.Text("BloodWeaponStacks: " + BloodWeaponStacks.ToString());
+        ImGui.Text("DeliriumStacks: " + DeliriumStacks.ToString());
+        ImGui.Text("LowDeliriumStacks: " + LowDeliriumStacks.ToString());
     }
 }
