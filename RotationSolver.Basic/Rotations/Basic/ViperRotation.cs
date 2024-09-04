@@ -352,7 +352,7 @@ public partial class ViperRotation
 
     static partial void ModifyHuntersDenPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DreadCombo == DreadCombo.PitOfDread && SerpentCombo == SerpentCombo.NONE; ;
+        setting.ActionCheck = () => DreadCombo == DreadCombo.PitOfDread && SerpentCombo == SerpentCombo.NONE;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -361,7 +361,7 @@ public partial class ViperRotation
 
     static partial void ModifySwiftskinsDenPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DreadCombo == DreadCombo.HuntersDen && SerpentCombo == SerpentCombo.NONE; ;
+        setting.ActionCheck = () => DreadCombo == DreadCombo.HuntersDen && SerpentCombo == SerpentCombo.NONE;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -409,7 +409,7 @@ public partial class ViperRotation
 
     static partial void ModifyUncoiledFuryPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => RattlingCoilStacks >= 1 && SerpentCombo == SerpentCombo.NONE ;
+        setting.ActionCheck = () => RattlingCoilStacks >= 1 && SerpentCombo == SerpentCombo.NONE;
         setting.StatusProvide = [StatusID.PoisedForTwinfang];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -452,7 +452,7 @@ public partial class ViperRotation
 
     static partial void ModifyFirstGenerationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 5) || (MaxAnguine == 4 && AnguineTribute == 4)) && SerpentCombo == SerpentCombo.NONE; ;
+        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 5) || (MaxAnguine == 4 && AnguineTribute == 4)) && SerpentCombo == SerpentCombo.NONE;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -461,7 +461,7 @@ public partial class ViperRotation
 
     static partial void ModifySecondGenerationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 4) || (MaxAnguine == 4 && AnguineTribute == 3)) && SerpentCombo == SerpentCombo.NONE; ;
+        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 4) || (MaxAnguine == 4 && AnguineTribute == 3)) && SerpentCombo == SerpentCombo.NONE;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -470,7 +470,7 @@ public partial class ViperRotation
 
     static partial void ModifyThirdGenerationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 3) || (MaxAnguine == 4 && AnguineTribute == 2)) && SerpentCombo == SerpentCombo.NONE; ;
+        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 3) || (MaxAnguine == 4 && AnguineTribute == 2)) && SerpentCombo == SerpentCombo.NONE;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -479,7 +479,7 @@ public partial class ViperRotation
 
     static partial void ModifyFourthGenerationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 2) || (MaxAnguine == 4 && AnguineTribute == 1)) && SerpentCombo == SerpentCombo.NONE; ;
+        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 2) || (MaxAnguine == 4 && AnguineTribute == 1)) && SerpentCombo == SerpentCombo.NONE;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
