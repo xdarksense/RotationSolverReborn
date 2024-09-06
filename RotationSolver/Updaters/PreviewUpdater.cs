@@ -2,6 +2,7 @@
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using ECommons.DalamudServices;
+using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
@@ -9,6 +10,9 @@ using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Commands;
+using Dalamud.Game.ClientState.Keys;
+using Lumina.Excel.GeneratedSheets;
+using ECommons;
 
 namespace RotationSolver.Updaters;
 
@@ -20,12 +24,43 @@ internal static class PreviewUpdater
         UpdateCancelCast();
     }
 
+    //public static byte Job => Job;
     static IDtrBarEntry? _dtrEntry;
+
     private static void UpdateEntry()
     {
         var showStr = RSCommands.EntryString;
-        if (Service.Config.ShowInfoOnDtr
-            && !string.IsNullOrEmpty(showStr))
+        var icon = Player.Job switch
+        {
+            Job.WAR => BitmapFontIcon.Warrior,
+            Job.PLD => BitmapFontIcon.Paladin,
+            Job.DRK => BitmapFontIcon.DarkKnight,
+            Job.GNB => BitmapFontIcon.Gunbreaker,
+
+            Job.AST => BitmapFontIcon.Astrologian,
+            Job.WHM => BitmapFontIcon.WhiteMage,
+            Job.SGE => BitmapFontIcon.Sage,
+            Job.SCH => BitmapFontIcon.Scholar,
+
+            Job.BLM => BitmapFontIcon.BlackMage,
+            Job.SMN => BitmapFontIcon.Summoner,
+            Job.RDM => BitmapFontIcon.RedMage,
+            Job.PCT => BitmapFontIcon.Pictomancer,
+
+            Job.MNK => BitmapFontIcon.Monk,
+            Job.SAM => BitmapFontIcon.Samurai,
+            Job.DRG => BitmapFontIcon.Dragoon,
+            Job.RPR => BitmapFontIcon.Reaper,
+            Job.NIN => BitmapFontIcon.Ninja,
+            Job.VPR => BitmapFontIcon.Viper,
+
+            Job.BRD => BitmapFontIcon.Bard,
+            Job.MCH => BitmapFontIcon.Machinist,
+            Job.DNC => BitmapFontIcon.Dancer,
+            _ => BitmapFontIcon.ExclamationRectangle,
+        };
+
+        if (Service.Config.ShowInfoOnDtr && !string.IsNullOrEmpty(showStr))
         {
             try
             {
@@ -41,9 +76,9 @@ internal static class PreviewUpdater
             if (!_dtrEntry.Shown) _dtrEntry.Shown = true;
 
             _dtrEntry.Text = new SeString(
-                new IconPayload(BitmapFontIcon.DPS),
+                new IconPayload(icon),
                 new TextPayload(showStr)
-                );
+            );
             _dtrEntry.OnClick = RSCommands.IncrementState;
         }
         else if (_dtrEntry != null && _dtrEntry.Shown)

@@ -186,8 +186,6 @@ public partial class ViperRotation
     static partial void ModifyWrithingSnapPvE(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MeleeRange;
-        setting.ActionCheck = () => SerpentCombo == SerpentCombo.NONE;
-
     }
 
     static partial void ModifySlitherPvE(ref ActionSetting setting)
@@ -409,7 +407,7 @@ public partial class ViperRotation
 
     static partial void ModifyUncoiledFuryPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => RattlingCoilStacks >= 1 && SerpentCombo == SerpentCombo.NONE;
+        setting.ActionCheck = () => RattlingCoilStacks >= 1;
         setting.StatusProvide = [StatusID.PoisedForTwinfang];
         setting.CreateConfig = () => new ActionConfig()
         {

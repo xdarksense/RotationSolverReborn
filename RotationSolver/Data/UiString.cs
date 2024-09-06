@@ -412,7 +412,7 @@ namespace RotationSolver.Data
         [Description("Speed Forced Condition")]
         ConfigWindow_Auto_SpeedConditionSet,
 
-        [Description("Limit Break Forced Condition")]
+        [Description("Limit Break Forced Condition (Unsupported)")]
         ConfigWindow_Auto_LimitBreakConditionSet,
 
         [Description("This will change the way that RSR uses actions.")]

@@ -19,6 +19,6 @@ internal class MpPotionItem : BaseItem
         item = this;
         if (!Player.Available) return false;
         if (Player.Object.MaxMp - DataCenter.CurrentMp < MaxMp) return false;
-        return base.CanUse(out item, clippingCheck);
+        return base.CanUse(out item);
     }
 }
