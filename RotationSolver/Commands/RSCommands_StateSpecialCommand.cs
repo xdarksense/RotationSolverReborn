@@ -8,7 +8,7 @@ namespace RotationSolver.Commands
 {
     public static partial class RSCommands
     {
-        private static string _stateString = "Off", _specialString = string.Empty;
+        public static string _stateString = "Off", _specialString = string.Empty;
 
         internal static string EntryString => _stateString + (DataCenter.SpecialTimeLeft < 0 ? string.Empty : $" - {_specialString}: {DataCenter.SpecialTimeLeft:F2}s");
 
@@ -22,7 +22,7 @@ namespace RotationSolver.Commands
             });
         }
 
-        private static unsafe void DoStateCommandType(StateCommandType stateType, int index = -1) => DoOneCommandType((type, role) => type.ToStateString(role), role =>
+        public static unsafe void DoStateCommandType(StateCommandType stateType, int index = -1) => DoOneCommandType((type, role) => type.ToStateString(role), role =>
         {
             if (DataCenter.State)
             {

@@ -19,5 +19,5 @@ public interface IBaseItem : IAction
     /// <param name="item"></param>
     /// <param name="clippingCheck"></param>
     /// <returns></returns>
-    bool CanUse(out IAction item, bool clippingCheck = true);
+    bool CanUse(out IAction item, bool clippingCheck = false);
 }

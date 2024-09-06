@@ -162,7 +162,7 @@ public class BaseItem : IBaseItem
     /// <param name="item"></param>
     /// <param name="clippingCheck"></param>
     /// <returns></returns>
-    public virtual unsafe bool CanUse(out IAction item, bool clippingCheck = true)
+    public virtual unsafe bool CanUse(out IAction item, bool clippingCheck = false)
     {
         item = this;
         if (_item == null) return false;
@@ -176,8 +176,6 @@ public class BaseItem : IBaseItem
         var remain = Cooldown.RecastTimeOneChargeRaw - Cooldown.RecastTimeElapsedRaw;
 
         if (remain > DataCenter.DefaultGCDRemain) return false;
-
-        if (clippingCheck && DataCenter.DefaultGCDRemain > 0) return false;
 
         if (ItemCheck != null && !ItemCheck()) return false;
 

@@ -32,6 +32,6 @@ internal class HpPotionItem : BaseItem
         if (!Player.Available) return false;
         if (Player.Object.GetHealthRatio() > Service.Config.HealthSingleAbilityHot) return false;
         if (Player.Object.MaxHp - Player.Object.CurrentHp < MaxHp) return false;
-        return base.CanUse(out item, clippingCheck);
+        return base.CanUse(out item);
     }
 }
