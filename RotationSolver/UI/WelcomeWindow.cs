@@ -23,9 +23,9 @@ namespace RotationSolver.UI
         private const ImGuiWindowFlags BaseFlags = ImGuiWindowFlags.NoCollapse
                                     | ImGuiWindowFlags.NoSavedSettings;
 #if DEBUG
-        private string _assemblyVersion = "4.0.5.5";
+        private string _assemblyVersion = "6.9.6.9"; //kekw
 #else
-        private string _assemblyVersion = typeof(RotationConfigWindow).Assembly.GetName().Version?.ToString() ?? "4.0.5.4";
+            private string _assemblyVersion = typeof(RotationConfigWindow).Assembly.GetName().Version?.ToString() ?? "4.0.5.4";
 #endif
 
         private string _lastSeenChangelog = Service.Config.LastSeenChangelog;
@@ -72,7 +72,6 @@ namespace RotationSolver.UI
                 Svc.Log.Error(ex, "Failed to get comparison");
             }
         }
-
 
         private async Task<string> GetNextMostRecentReleaseTag()
         {
@@ -149,7 +148,6 @@ namespace RotationSolver.UI
             }, windowWidth, textSize);
             ImGui.PopFont();
 
-
             ImGui.Separator();  // Separator for aesthetic or logical separation
 
             if (!Service.Config.FirstTimeSetupDone)
@@ -163,7 +161,7 @@ namespace RotationSolver.UI
                 ImGui.PopFont();
 
                 text = UiString.WelcomeWindow_FirstTime3.GetDescription();
-                ImGui.Text(text);
+                ImGui.TextWrapped(text);
                 var autoUpdate = Service.Config.AutoLoadRotations.Value;
                 if (ImGui.Checkbox(UiString.WelcomeWindow_LoadAtStartup.GetDescription(), ref autoUpdate))
                 {
@@ -237,13 +235,12 @@ namespace RotationSolver.UI
             ImGui.PopFont();
             foreach (var commit in commits)
             {
-
                 ImGui.Text($"[{commit.CommitData.CommitAuthor.Date:yyyy-MM-dd}]");
 
                 ImGui.Indent();
-                ImGui.Text($"- {commit.CommitData.Message}");
+                ImGui.TextWrapped($"- {commit.CommitData.Message}");
 
-                ImGui.Text($"By: @{commit.CommitData.CommitAuthor.Name}");
+                ImGui.TextWrapped($"By: @{commit.CommitData.CommitAuthor.Name}");
                 ImGui.Unindent();
             }
 
