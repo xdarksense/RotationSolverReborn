@@ -11,6 +11,37 @@ partial class WarriorRotation
     /// </summary>
     public static byte BeastGauge => JobGauge.BeastGauge;
 
+    /// <summary>
+    /// Holds the remaining amount of InnerRelease stacks
+    /// </summary>
+    public static byte InnerReleaseStacks
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.InnerRelease);
+            return stacks == byte.MaxValue ? (byte)3 : stacks;
+        }
+    }
+
+    /// <summary>
+    /// Holds the remaining amount of Berserk stacks
+    /// </summary>
+    public static byte BerserkStacks
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.Berserk);
+            return stacks == byte.MaxValue ? (byte)3 : stacks;
+        }
+    }
+
+    /// <inheritdoc/>
+    public override void DisplayStatus()
+    {
+        ImGui.Text("InnerReleaseStacks: " + InnerReleaseStacks.ToString());
+        ImGui.Text("BerserkStacks: " + BerserkStacks.ToString());
+    }
+
     private sealed protected override IBaseAction TankStance => DefiancePvE;
 
     static partial void ModifyHeavySwingPvE(ref ActionSetting setting)
@@ -71,7 +102,7 @@ partial class WarriorRotation
 
     static partial void ModifyInnerBeastPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => BeastGauge >= 50 || Player.HasStatus(true, StatusID.InnerRelease);
+        setting.ActionCheck = () => BeastGauge >= 50;
         setting.UnlockedByQuestID = 66586;
     }
 
@@ -101,7 +132,7 @@ partial class WarriorRotation
 
     static partial void ModifySteelCyclonePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => BeastGauge >= 50 || Player.HasStatus(true, StatusID.InnerRelease);
+        setting.ActionCheck = () => BeastGauge >= 50;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 2,
@@ -132,7 +163,7 @@ partial class WarriorRotation
 
     static partial void ModifyFellCleavePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => BeastGauge >= 50 || Player.HasStatus(true, StatusID.InnerRelease);
+        setting.ActionCheck = () => BeastGauge >= 50 || InnerReleaseStacks > 0;
         setting.UnlockedByQuestID = 66124;
         setting.StatusProvide = [StatusID.BurgeoningFury];
     }
@@ -153,7 +184,7 @@ partial class WarriorRotation
 
     static partial void ModifyDecimatePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => BeastGauge >= 50 || Player.HasStatus(true, StatusID.InnerRelease);
+        setting.ActionCheck = () => BeastGauge >= 50 || InnerReleaseStacks > 0;
         setting.UnlockedByQuestID = 66137;
         setting.CreateConfig = () => new ActionConfig()
         {
