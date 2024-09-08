@@ -6,6 +6,7 @@ using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using RotationSolver.Basic.Configuration;
+using System.Net.Mail;
 using static RotationSolver.Basic.Configuration.ConfigTypes;
 
 namespace RotationSolver.Basic.Actions;
@@ -39,24 +40,31 @@ public struct ActionTargetInfo(IBaseAction action)
     /// Is this action friendly.
     /// </summary>
     public readonly bool IsTargetFriendly => action.Setting.IsFriendly;
+    #region Target Stuff
 
-    #region Target Finder.
     private readonly IEnumerable<IBattleChara> GetCanTargets(bool skipStatusProvideCheck, TargetType type)
     {
-        var items = TargetFilter.GetObjectInRadius(DataCenter.AllTargets, Range);
-        var objs = new List<IBattleChara>(items.Count());
+        var allTargets = DataCenter.AllTargets;
+        if (allTargets == null) return Enumerable.Empty<IBattleChara>();
 
-        foreach (var obj in items)
+        var filteredTargets = TargetFilter.GetObjectInRadius(allTargets, Range);
+        var validTargets = new List<IBattleChara>(filteredTargets.Count());
+
+        foreach (var target in filteredTargets)
         {
-            if (type == TargetType.Heal && obj.GetHealthRatio() == 1) continue;
-
-            if (!GeneralCheck(obj, skipStatusProvideCheck)) continue;
-            objs.Add(obj);
+            if (type == TargetType.Heal && target.GetHealthRatio() == 1) continue;
+            if (!GeneralCheck(target, skipStatusProvideCheck)) continue;
+            validTargets.Add(target);
         }
 
         var isAuto = !DataCenter.IsManual || IsTargetFriendly;
-        return objs.Where(b => isAuto || b.GameObjectId == Svc.Targets.Target?.GameObjectId || b.GameObjectId == Player.Object.GameObjectId)
-            .Where(InViewTarget).Where(CanUseTo).Where(action.Setting.CanTarget);
+        var playerObjectId = Player.Object?.GameObjectId;
+        var targetObjectId = Svc.Targets.Target?.GameObjectId;
+
+        return validTargets.Where(b => isAuto || b.GameObjectId == targetObjectId || b.GameObjectId == playerObjectId)
+                           .Where(InViewTarget)
+                           .Where(CanUseTo)
+                           .Where(action.Setting.CanTarget);
     }
 
     private readonly List<IBattleChara> GetCanAffects(bool skipStatusProvideCheck, TargetType type)
@@ -198,8 +206,6 @@ public struct ActionTargetInfo(IBaseAction action)
                 return false;
             }
         }
-
-
         return true;
     }
 
@@ -690,16 +696,27 @@ public struct ActionTargetInfo(IBaseAction action)
 
         IBattleChara? FindHostileRaw()
         {
-            IGameObjects = DataCenter.TargetingType switch
+            if (DataCenter.IsPvP)
             {
-                TargetingType.Small => IGameObjects.OrderBy(p => p.HitboxRadius),
-                TargetingType.HighHP => IGameObjects.OrderByDescending(p => p is IBattleChara b ? b.CurrentHp : 0),
-                TargetingType.LowHP => IGameObjects.OrderBy(p => p is IBattleChara b ? b.CurrentHp : 0),
-                TargetingType.HighMaxHP => IGameObjects.OrderByDescending(p => p is IBattleChara b ? b.MaxHp : 0),
-                TargetingType.LowMaxHP => IGameObjects.OrderBy(p => p is IBattleChara b ? b.MaxHp : 0),
-                _ => IGameObjects.OrderByDescending(p => p.HitboxRadius),
-            };
-            return IGameObjects.FirstOrDefault();
+                return IGameObjects
+                    .OfType<IBattleChara>()
+                    .OrderBy(p => p.CurrentHp)
+                    .FirstOrDefault();
+            }
+            else
+            {
+                var orderedGameObjects = DataCenter.TargetingType switch
+                {
+                    TargetingType.Small => IGameObjects.OrderBy(p => p.HitboxRadius),
+                    TargetingType.HighHP => IGameObjects.OrderByDescending(p => p is IBattleChara b ? b.CurrentHp : 0),
+                    TargetingType.LowHP => IGameObjects.OrderBy(p => p is IBattleChara b ? b.CurrentHp : 0),
+                    TargetingType.HighMaxHP => IGameObjects.OrderByDescending(p => p is IBattleChara b ? b.MaxHp : 0),
+                    TargetingType.LowMaxHP => IGameObjects.OrderBy(p => p is IBattleChara b ? b.MaxHp : 0),
+                    _ => IGameObjects.OrderByDescending(p => p.HitboxRadius),
+                };
+
+                return orderedGameObjects.OfType<IBattleChara>().FirstOrDefault();
+            }
         }
 
         IBattleChara? FindBeAttackedTarget()

@@ -4,7 +4,7 @@ internal static class ReflectionHelper
 {
     internal static PropertyInfo[] GetStaticProperties<T>(this Type? type)
     {
-        if (type == null) return [];
+        if (type == null) return Array.Empty<PropertyInfo>();
 
         var props = from prop in type.GetRuntimeProperties()
                     where typeof(T).IsAssignableFrom(prop.PropertyType)
@@ -13,24 +13,22 @@ internal static class ReflectionHelper
                             && info.GetCustomAttribute<ObsoleteAttribute>() == null
                     select prop;
 
-        return props.Union(type.BaseType.GetStaticProperties<T>()).ToArray();
+        return props.Union(type.BaseType?.GetStaticProperties<T>() ?? Array.Empty<PropertyInfo>()).ToArray();
     }
 
     internal static IEnumerable<MethodInfo> GetAllMethodInfo(this Type? type)
     {
-        if (type == null) return [];
+        if (type == null) return Enumerable.Empty<MethodInfo>();
 
         var methods = from method in type.GetRuntimeMethods()
                       where !method.IsConstructor
                       select method;
 
-        return methods.Union(type.BaseType.GetAllMethodInfo());
+        return methods.Union(type.BaseType?.GetAllMethodInfo() ?? Enumerable.Empty<MethodInfo>());
     }
 
     internal static PropertyInfo? GetPropertyInfo(this Type type, string name)
     {
-        if (type == null) return null;
-
         foreach (var item in type.GetRuntimeProperties())
         {
             if (item.Name == name && item.GetMethod is MethodInfo info
@@ -50,6 +48,6 @@ internal static class ReflectionHelper
                       && !item.IsConstructor && item.ReturnType == typeof(bool)) return item;
         }
 
-        return type.BaseType.GetMethodInfo(name);
+        return type.BaseType?.GetMethodInfo(name);
     }
 }
