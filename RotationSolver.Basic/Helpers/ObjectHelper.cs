@@ -10,8 +10,6 @@ using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using Lumina.Excel.GeneratedSheets;
 using RotationSolver.Basic.Configuration;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.RegularExpressions;
 
 namespace RotationSolver.Basic.Helpers;
@@ -22,10 +20,10 @@ namespace RotationSolver.Basic.Helpers;
 public static class ObjectHelper
 {
     static readonly EventHandlerType[] _eventType =
-    [
+    {
         EventHandlerType.TreasureHuntDirector,
         EventHandlerType.Quest,
-    ];
+    };
 
     internal static BNpcBase? GetObjectNPC(this IGameObject obj)
     {
@@ -35,8 +33,10 @@ public static class ObjectHelper
 
     internal static bool CanProvoke(this IGameObject target)
     {
+        if (target == null) return false;
+
         //Removed the listed names.
-        IEnumerable<string> names = [];
+        IEnumerable<string> names = Array.Empty<string>();
         if (OtherConfiguration.NoProvokeNames.TryGetValue(Svc.ClientState.TerritoryType, out var ns1))
             names = names.Union(ns1);
 
@@ -73,77 +73,56 @@ public static class ObjectHelper
         return false;
     }
 
-    internal static bool IsAttackable(this IBattleChara IBattleChara)
+    internal static bool IsAttackable(this IBattleChara battleChara)
     {
         //Dead.
-        if (IBattleChara.CurrentHp <= 1) return false;
+        if (Service.Config.FilterOneHpInvincible && battleChara.CurrentHp <= 1) return false;
 
-        if (IBattleChara.StatusList.Any(StatusHelper.IsInvincible)) return false;
+        if (battleChara.StatusList.Any(StatusHelper.IsInvincible)) return false;
 
         if (Svc.ClientState == null) return false;
 
         //In No Hostiles Names
-        IEnumerable<string> names = [];
+        IEnumerable<string> names = Array.Empty<string>();
         if (OtherConfiguration.NoHostileNames.TryGetValue(Svc.ClientState.TerritoryType, out var ns1))
             names = names.Union(ns1);
 
-        if (names.Any(n => !string.IsNullOrEmpty(n) && new Regex(n).Match(IBattleChara.Name.TextValue).Success)) return false;
+        if (names.Any(n => !string.IsNullOrEmpty(n) && new Regex(n).Match(battleChara.Name.TextValue).Success)) return false;
 
         //Fate
         if (DataCenter.TerritoryContentType != TerritoryContentType.Eureka)
         {
-            var tarFateId = IBattleChara.FateId();
+            var tarFateId = battleChara.FateId();
             if (tarFateId != 0 && tarFateId != DataCenter.FateId) return false;
         }
 
         if (Service.Config.AddEnemyListToHostile)
         {
-            if (IBattleChara.IsInEnemiesList()) return true;
+            if (battleChara.IsInEnemiesList()) return true;
             //Only attack
             if (Service.Config.OnlyAttackInEnemyList) return false;
         }
 
         //Tar on me
-        if (IBattleChara.TargetObject == Player.Object
-        || IBattleChara.TargetObject?.OwnerId == Player.Object.GameObjectId) return true;
+        if (battleChara.TargetObject == Player.Object
+        || battleChara.TargetObject?.OwnerId == Player.Object.GameObjectId) return true;
 
         //Remove other's treasure.
-        if (IBattleChara.IsOthersPlayers()) return false;
+        if (battleChara.IsOthersPlayers()) return false;
 
-        if (IBattleChara.IsTopPriorityHostile()) return true;
+        if (battleChara.IsTopPriorityHostile()) return true;
 
         if (Service.CountDownTime > 0 || DataCenter.IsPvP) return true;
 
         return DataCenter.RightNowTargetToHostileType switch
         {
             TargetHostileType.AllTargetsCanAttack => true,
-            TargetHostileType.TargetsHaveTarget => IBattleChara.TargetObject is IBattleChara,
-            TargetHostileType.AllTargetsWhenSolo => DataCenter.PartyMembers.Length < 2 || IBattleChara.TargetObject is IBattleChara,
+            TargetHostileType.TargetsHaveTarget => battleChara.TargetObject is IBattleChara,
+            TargetHostileType.AllTargetsWhenSolo => DataCenter.PartyMembers.Length < 2 || battleChara.TargetObject is IBattleChara,
             TargetHostileType.AllTargetsWhenSoloInDuty => (DataCenter.PartyMembers.Length < 2 && Svc.Condition[ConditionFlag.BoundByDuty])
-                || IBattleChara.TargetObject is IBattleChara,
+                || battleChara.TargetObject is IBattleChara,
             _ => true,
         };
-    }
-
-
-    internal static string EncryptString(this IPlayerCharacter player)
-    {
-        if (player == null) return string.Empty;
-
-        try
-        {
-            byte[] inputByteArray = Encoding.UTF8.GetBytes(player.HomeWorld.GameData!.InternalName.ToString()
-    + " - " + player.Name.ToString() + "U6Wy.zCG");
-
-            var tmpHash = MD5.HashData(inputByteArray);
-            var retB = Convert.ToBase64String(tmpHash);
-            return retB;
-        }
-        catch (Exception ex)
-        {
-            Svc.Log.Warning(ex, "Failed to read the player's name and world.");
-            return string.Empty;
-        }
     }
 
     internal static unsafe bool IsInEnemiesList(this IBattleChara IBattleChara)
@@ -155,10 +134,14 @@ public static class ObjectHelper
         var enemy = (AddonEnemyList*)addon;
 
         var numArray = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUIModule()->GetRaptureAtkModule()->AtkModule.AtkArrayDataHolder.NumberArrays[19];
-        List<uint> list = new(enemy->EnemyCount);
+        if (numArray == null) return false;
+
+        const int baseIndex = 8;
+        const int step = 6;
+
         for (var i = 0; i < enemy->EnemyCount; i++)
         {
-            var id = (uint)numArray->IntArray[8 + i * 6];
+            var id = (uint)numArray->IntArray[baseIndex + i * step];
 
             if (IBattleChara.GameObjectId == id) return true;
         }
@@ -221,6 +204,11 @@ public static class ObjectHelper
     internal static bool IsTopPriorityHostile(this IGameObject obj)
     {
         var fateId = DataCenter.FateId;
+
+        if (obj is IBattleChara b && b.StatusList != null && b.StatusList.Any(StatusHelper.IsPriority)) return true;
+
+        if (Service.Config.ChooseAttackMark && MarkingHelper.AttackSignTargets.FirstOrDefault(id => id != 0) == (long)obj.GameObjectId) return true;
+
         //Fate
         if (Service.Config.TargetFatePriority && fateId != 0 && obj.FateId() == fateId) return true;
 
@@ -239,11 +227,6 @@ public static class ObjectHelper
             or 71224 //Other Quest
             or 71344 //Major Quest
            || obj.GetEventType() is EventHandlerType.Quest)) return true;
-
-        if (obj is IBattleChara b && b.StatusList != null && b.StatusList.Any(StatusHelper.IsPriority)) return true;
-
-        if (Service.Config.ChooseAttackMark && MarkingHelper.AttackSignTargets.FirstOrDefault(id => id != 0) == (long)obj.GameObjectId) return true;
-
 
         var npc = obj as IBattleChara;
         if (npc != null && DataCenter.PrioritizedNameIds.Contains(npc.NameId)) return true;
@@ -327,6 +310,7 @@ public static class ObjectHelper
 
     internal static unsafe bool InCombat(this IBattleChara obj)
     {
+        if (obj == null || obj.Struct() == null) return false;
         return obj.Struct()->Character.InCombat;
     }
 
@@ -355,6 +339,7 @@ public static class ObjectHelper
         if (startTime == DateTime.MinValue || timespan < CheckSpan) return float.NaN;
 
         var ratioNow = b.GetHealthRatio();
+        if (float.IsNaN(ratioNow)) return float.NaN;
 
         var ratioReduce = thatTimeRatio - ratioNow;
         if (ratioReduce <= 0) return float.NaN;
@@ -364,6 +349,7 @@ public static class ObjectHelper
 
     internal static bool IsAttacked(this IBattleChara b)
     {
+        if (b == null) return false;
         foreach (var (id, time) in DataCenter.AttackedTargets)
         {
             if (id == b.GameObjectId)

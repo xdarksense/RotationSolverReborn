@@ -295,14 +295,17 @@ internal static class DataCenter
         get
         {
             return AllTargets.Where(b =>
-            {
+            {               
+                //Not enemy.
                 if (!b.IsEnemy()) return false;
 
                 //Dead.
                 if (b.CurrentHp <= 1) return false;
 
+                //Not targetable.
                 if (!b.IsTargetable) return false;
 
+                //Invincible.
                 if (b.StatusList.Any(StatusHelper.IsInvincible)) return false;
                 return true;
             }).ToArray();
@@ -318,19 +321,21 @@ internal static class DataCenter
     {
         get
         {
+            // Ensure AllianceMembers and PartyMembers are not null
+            if (AllianceMembers == null || PartyMembers == null) return null;
+
             var deathAll = AllianceMembers.GetDeath();
             var deathParty = PartyMembers.GetDeath();
 
             if (deathParty.Any())
             {
-                var deathT = deathParty.GetJobCategory(JobRole.Tank);
+                var deathT = deathParty.GetJobCategory(JobRole.Tank).ToList();
+                var deathH = deathParty.GetJobCategory(JobRole.Healer).ToList();
 
-                if (deathT.Count() > 1)
+                if (deathT.Count > 1)
                 {
                     return deathT.FirstOrDefault();
                 }
-
-                var deathH = deathParty.GetJobCategory(JobRole.Healer);
 
                 if (deathH.Any()) return deathH.FirstOrDefault();
 
@@ -341,10 +346,11 @@ internal static class DataCenter
 
             if (deathAll.Any() && Service.Config.RaiseAll)
             {
-                var deathAllH = deathAll.GetJobCategory(JobRole.Healer);
+                var deathAllH = deathAll.GetJobCategory(JobRole.Healer).ToList();
+                var deathAllT = deathAll.GetJobCategory(JobRole.Tank).ToList();
+
                 if (deathAllH.Any()) return deathAllH.FirstOrDefault();
 
-                var deathAllT = deathAll.GetJobCategory(JobRole.Tank);
                 if (deathAllT.Any()) return deathAllT.FirstOrDefault();
 
                 return deathAll.FirstOrDefault();

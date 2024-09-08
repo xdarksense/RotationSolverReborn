@@ -4,7 +4,11 @@
     {
         public static string ToStateString(this StateCommandType stateType, JobRole role)
         {
-            if (stateType == StateCommandType.Auto)
+            if (DataCenter.IsPvP && stateType == StateCommandType.Auto)
+            {
+                return $"{stateType} (LowHP)";
+            }
+            else if (stateType == StateCommandType.Auto)
             {
                 return $"{stateType} ({DataCenter.TargetingType})";
             }

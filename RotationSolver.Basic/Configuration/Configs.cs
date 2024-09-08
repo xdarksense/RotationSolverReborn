@@ -135,6 +135,10 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig)]
     private static readonly bool _filterStopMark = true;
 
+    [ConditionBool, UI("Treat 1hp targets as invincible.",
+        Filter = TargetConfig)]
+    private static readonly bool _filterOneHPInvincible = true;
+
     [ConditionBool, UI("Teaching mode", Filter = UiInformation)]
     private static readonly bool _teachingMode = false;
 

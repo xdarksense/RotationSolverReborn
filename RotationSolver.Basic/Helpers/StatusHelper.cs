@@ -141,7 +141,7 @@ public static class StatusHelper
     public static bool NeedHealing(this IGameObject p) => p.WillStatusEndGCD(2, 0, false, NoNeedHealingStatus);
 
     /// <summary>
-    /// Will any of <paramref name="statusIDs"/> be end after <paramref name="gcdCount"/> gcds add <paramref name="offset"/> seconds?
+    /// Will any of <paramref name="statusIDs"/> end after <paramref name="gcdCount"/> GCDs plus <paramref name="offset"/> seconds?
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="gcdCount"></param>
@@ -153,7 +153,7 @@ public static class StatusHelper
         => WillStatusEnd(obj, DataCenter.GCDTime(gcdCount, offset), isFromSelf, statusIDs);
 
     /// <summary>
-    /// Will any of <paramref name="statusIDs"/> be end after <paramref name="time"/> seconds?
+    /// Will any of <paramref name="statusIDs"/> end after <paramref name="time"/> seconds?
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="time"></param>
@@ -169,7 +169,7 @@ public static class StatusHelper
     }
 
     /// <summary>
-    /// Please Do NOT use it!
+    /// Get the remaining time of the status.
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="isFromSelf"></param>
@@ -179,7 +179,7 @@ public static class StatusHelper
     {
         try
         {
-            if (DataCenter.HasApplyStatus(obj.GameObjectId, statusIDs)) return float.MaxValue;
+            if (obj == null || DataCenter.HasApplyStatus(obj.GameObjectId, statusIDs)) return float.MaxValue;
             var times = obj.StatusTimes(isFromSelf, statusIDs);
             if (times == null || !times.Any()) return 0;
             return Math.Max(0, times.Min() - DataCenter.DefaultGCDRemain);
@@ -196,7 +196,7 @@ public static class StatusHelper
     }
 
     /// <summary>
-    /// Get the stack of the status.
+    /// Get the stack count of the status.
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="isFromSelf"></param>
@@ -204,7 +204,7 @@ public static class StatusHelper
     /// <returns></returns>
     public static byte StatusStack(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
     {
-        if (DataCenter.HasApplyStatus(obj.GameObjectId, statusIDs)) return byte.MaxValue;
+        if (obj == null || DataCenter.HasApplyStatus(obj.GameObjectId, statusIDs)) return byte.MaxValue;
         var stacks = obj.StatusStacks(isFromSelf, statusIDs);
         if (stacks == null || !stacks.Any()) return 0;
         return stacks.Min();
@@ -216,7 +216,7 @@ public static class StatusHelper
     }
 
     /// <summary>
-    /// Has one status right now.
+    /// Check if the object has any of the specified statuses.
     /// </summary>
     /// <param name="obj"></param>
     /// <param name="isFromSelf"></param>
@@ -224,17 +224,17 @@ public static class StatusHelper
     /// <returns></returns>
     public static bool HasStatus(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
     {
-        if (DataCenter.HasApplyStatus(obj.GameObjectId, statusIDs)) return true;
+        if (obj == null || DataCenter.HasApplyStatus(obj.GameObjectId, statusIDs)) return true;
         return obj.GetStatus(isFromSelf, statusIDs).Any();
     }
 
     /// <summary>
-    /// Take the status Off.
+    /// Remove the specified status.
     /// </summary>
     /// <param name="status"></param>
     public static void StatusOff(StatusID status)
     {
-        if (!Player.Object?.HasStatus(false, status) ?? true) return;
+        if (Player.Object == null || !Player.Object.HasStatus(false, status)) return;
         Chat.Instance.SendMessage($"/statusoff {GetStatusName(status)}");
     }
 
@@ -245,7 +245,8 @@ public static class StatusHelper
 
     private static IEnumerable<Status> GetStatus(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
     {
-        var newEffects = statusIDs.Select(a => (uint)a);
+        // Convert statusIDs to a HashSet for faster lookups
+        var newEffects = new HashSet<uint>(statusIDs.Select(a => (uint)a));
         var allStatuses = obj.GetAllStatus(isFromSelf);
         return allStatuses.Where(status => newEffects.Contains(status.StatusId));
     }
@@ -255,13 +256,15 @@ public static class StatusHelper
         if (obj is not IBattleChara b) return Enumerable.Empty<Status>();
 
         var playerId = Player.Object?.GameObjectId ?? 0;
-        return b.StatusList.Where(status => !isFromSelf
+        // Ensure b.StatusList is not null
+        return b.StatusList?.Where(status => !isFromSelf
                                               || status.SourceId == playerId
-                                              || status.SourceObject?.OwnerId == playerId);
+                                              || status.SourceObject?.OwnerId == playerId)
+                             ?? Enumerable.Empty<Status>();
     }
 
     /// <summary>
-    /// Is status Invincible.
+    /// Check if the status is invincible.
     /// </summary>
     /// <param name="status"></param>
     /// <returns></returns>
@@ -272,7 +275,7 @@ public static class StatusHelper
     }
 
     /// <summary>
-    /// Is the status the priority one.
+    /// Check if the status is a priority.
     /// </summary>
     /// <param name="status"></param>
     /// <returns></returns>
@@ -282,7 +285,7 @@ public static class StatusHelper
     }
 
     /// <summary>
-    /// Is status needs to be dispel immediately.
+    /// Check if the status needs to be dispelled immediately.
     /// </summary>
     /// <param name="status"></param>
     /// <returns></returns>
@@ -295,7 +298,7 @@ public static class StatusHelper
     }
 
     /// <summary>
-    /// Can the status be dispel.
+    /// Check if the status can be dispelled.
     /// </summary>
     /// <param name="status"></param>
     /// <returns></returns>
