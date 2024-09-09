@@ -165,6 +165,37 @@ public partial class PictomancerRotation
     /// </summary>
     public static bool HasStarryMuse => Player.HasStatus(true, StatusID.StarryMuse);
 
+    /// <summary>
+    /// Holds the remaining amount of HammerTime stacks
+    /// </summary>
+    public static byte HammerStacks
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.HammerTime);
+            return stacks == byte.MaxValue ? (byte)3 : stacks;
+        }
+    }
+
+    /// <summary>
+    /// Holds the remaining amount of SubtractivePalette stacks
+    /// </summary>
+    public static byte SubtractiveStacks
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.SubtractivePalette);
+            return stacks == byte.MaxValue ? (byte)3 : stacks;
+        }
+    }
+
+    /// <inheritdoc/>
+    public override void DisplayStatus()
+    {
+        ImGui.Text("HammerStacks: " + HammerStacks.ToString());
+        ImGui.Text("SubtractiveStacks: " + SubtractiveStacks.ToString());
+    }
+
     #endregion
 
     static partial void ModifyFireInRedPvE(ref ActionSetting setting)
@@ -282,7 +313,7 @@ public partial class PictomancerRotation
 
     static partial void ModifyHammerStampPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => HasHammerTime;
+        setting.ActionCheck = () => HammerStacks == 3;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -387,7 +418,7 @@ public partial class PictomancerRotation
 
     static partial void ModifyHammerBrushPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => HasHammerTime;
+        setting.ActionCheck = () => HammerStacks == 2;
         setting.ComboIds = [ActionID.HammerStampPvE];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -397,7 +428,7 @@ public partial class PictomancerRotation
 
     static partial void ModifyPolishingHammerPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => HasHammerTime;
+        setting.ActionCheck = () => HammerStacks == 1;
         setting.ComboIds = [ActionID.HammerBrushPvE];
         setting.CreateConfig = () => new ActionConfig()
         {
