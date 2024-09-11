@@ -558,7 +558,7 @@ public struct ActionTargetInfo(IBaseAction action)
         IBattleChara? FindDancePartner()
         {
             //DancePartnerPriority Based on the info from The Balance Discord for Level 100
-            Job[] DancePartnerPriority = [Job.RDM, Job.PCT, Job.SAM, Job.RPR, Job.VPR, Job.MNK, Job.NIN, Job.DRG, Job.BLM, Job.RDM, Job.SMN, Job.MCH, Job.BRD, Job.DNC];
+            Job[] DancePartnerPriority = [Job.PCT, Job.SAM, Job.RPR, Job.VPR, Job.MNK, Job.NIN, Job.DRG, Job.BLM, Job.RDM, Job.SMN, Job.MCH, Job.BRD, Job.DNC];
             var PartyMembers = IGameObjects.Where(ObjectHelper.IsParty);
 
             foreach (var job in DancePartnerPriority)
