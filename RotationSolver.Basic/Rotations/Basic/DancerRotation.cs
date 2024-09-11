@@ -193,7 +193,8 @@ partial class DancerRotation
 
     static partial void ModifyClosedPositionPvE(ref ActionSetting setting)
     {
-        setting.TargetType = TargetType.Melee;
+        setting.IsFriendly = true;
+        setting.TargetType = TargetType.DancePartner;
         setting.ActionCheck = () => !AllianceMembers.Any(b => b.HasStatus(true, StatusID.ClosedPosition_2026));
     }
 

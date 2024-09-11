@@ -551,8 +551,28 @@ public struct ActionTargetInfo(IBaseAction action)
             TargetType.Range => RandomRangeTarget(IGameObjects),
             TargetType.Magical => RandomMagicalTarget(IGameObjects),
             TargetType.Physical => RandomPhysicalTarget(IGameObjects),
+            TargetType.DancePartner => FindDancePartner(),
             _ => FindHostile(),
         };
+
+        IBattleChara? FindDancePartner()
+        {
+            //DancePartnerPriority Based on the info from The Balance Discord for Level 100
+            Job[] DancePartnerPriority = [Job.PCT, Job.SAM, Job.RPR, Job.VPR, Job.MNK, Job.NIN, Job.DRG, Job.BLM, Job.RDM, Job.SMN, Job.MCH, Job.BRD, Job.DNC];
+            var PartyMembers = IGameObjects.Where(ObjectHelper.IsParty);
+
+            foreach (var job in DancePartnerPriority)
+                foreach ( var member in PartyMembers)
+                    if(member.IsJobs(job) && !member.IsDead)
+                        return member;
+
+            return RandomMeleeTarget(IGameObjects)
+                ?? RandomRangeTarget(IGameObjects)
+                ?? RandomMagicalTarget(IGameObjects)
+                ?? RandomPhysicalTarget(IGameObjects)
+                ?? null;
+
+        }
 
         IBattleChara? FindProvokeTarget()
         {
@@ -838,6 +858,7 @@ public enum TargetType : byte
     Physical,
     Magical,
     Self,
+    DancePartner,
 }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
