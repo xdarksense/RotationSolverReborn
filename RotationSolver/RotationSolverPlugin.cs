@@ -56,7 +56,12 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
                     File.ReadAllText(Svc.PluginInterface.ConfigFile.FullName))
                     ?? new Configs();
 
+                // Check version and migrate or reset if necessary
                 var newConfigs = Configs.Migrate(oldConfigs);
+                if (newConfigs.Version != Configs.CurrentVersion)
+                {
+                    newConfigs = new Configs(); // Reset to default if versions do not match
+                }
                 Service.Config = newConfigs;
             }
             else

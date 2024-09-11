@@ -5,6 +5,8 @@ partial class WhiteMageRotation
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Mind;
 
+    private protected sealed override IBaseAction Raise => RaisePvE;
+
     #region Job Gauge
     /// <summary>
     /// 
@@ -38,18 +40,44 @@ partial class WhiteMageRotation
     /// <returns></returns>
     protected static bool LilyAfterGCD(uint gcdCount = 0, float offset = 0)
         => LilyAfter(GCDTime(gcdCount, offset));
+
+    /// <summary>
+    /// Holds the remaining amount of SacredSight stacks
+    /// </summary>
+    public static byte SacredSightStacks
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.SacredSight);
+            return stacks == byte.MaxValue ? (byte)3 : stacks;
+        }
+    }
+
+    /// <inheritdoc/>
+    public override void DisplayStatus()
+    {
+        ImGui.Text("SacredSightStacks: " + SacredSightStacks.ToString());
+    }
     #endregion
 
-    private protected sealed override IBaseAction Raise => RaisePvE;
-
-    static partial void ModifyMedicaIiPvE(ref ActionSetting setting)
+    #region PvE Actions
+    static partial void ModifyStonePvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.MedicaIi, StatusID.TrueMedicaIi];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
 
+    }
+
+    static partial void ModifyCurePvE(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyAeroPvE(ref ActionSetting setting)
+    {
+        setting.TargetStatusProvide = [
+            StatusID.Aero,
+            StatusID.AeroIi,
+            StatusID.Dia,
+        ];
     }
 
     static partial void ModifyMedicaPvE(ref ActionSetting setting)
@@ -58,16 +86,32 @@ partial class WhiteMageRotation
         {
             AoeCount = 1,
         };
+    }
+
+    static partial void ModifyRaisePvE(ref ActionSetting setting)
+    {
 
     }
 
-    static partial void ModifyCureIiiPvE(ref ActionSetting setting)
+    static partial void ModifyStoneIiPvE(ref ActionSetting setting)
     {
+
+    }
+
+    static partial void ModifyCureIiPvE(ref ActionSetting setting)
+    {
+        setting.UnlockedByQuestID = 65977;
+    }
+
+    static partial void ModifyPresenceOfMindPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => InCombat;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 1,
+            TimeToKill = 10,
         };
-
+        setting.UnlockedByQuestID = 66615;
+        setting.StatusProvide = [StatusID.SacredSight];
     }
 
     static partial void ModifyRegenPvE(ref ActionSetting setting)
@@ -80,70 +124,56 @@ partial class WhiteMageRotation
         setting.UnlockedByQuestID = 66616;
     }
 
-    static partial void ModifyHolyPvE(ref ActionSetting setting)
+    static partial void ModifyCureIiiPvE(ref ActionSetting setting)
     {
-        setting.IsFriendly = false;
-        setting.UnlockedByQuestID = 66619;
-    }
-
-    static partial void ModifyHolyIiiPvE(ref ActionSetting setting)
-    {
-        setting.IsFriendly = false;
-    }
-
-    static partial void ModifyAfflatusSolacePvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => Lily > 0;
-    }
-
-    static partial void ModifyDivineBenisonPvE(ref ActionSetting setting)
-    {
-        setting.StatusProvide = [StatusID.DivineBenison];
-    }
-
-    static partial void ModifyAfflatusRapturePvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => Lily > 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
-
+        setting.UnlockedByQuestID = 66617;
     }
 
-    static partial void ModifyAeroPvE(ref ActionSetting setting)
+    static partial void ModifyAetherialShiftPvE(ref ActionSetting setting)
     {
-        setting.TargetStatusProvide =
-        [
+        setting.SpecialType = SpecialActionType.MovingForward;
+    }
+
+    static partial void ModifyHolyPvE(ref ActionSetting setting)
+    {
+        setting.IsFriendly = false;
+        setting.UnlockedByQuestID = 66619;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 3,
+        };
+    }
+
+    static partial void ModifyAeroIiPvE(ref ActionSetting setting)
+    {
+        setting.TargetStatusProvide = [
             StatusID.Aero,
             StatusID.AeroIi,
             StatusID.Dia,
         ];
     }
 
-    static partial void ModifyAfflatusMiseryPvE(ref ActionSetting setting)
+    static partial void ModifyMedicaIiPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => BloodLily == 3;
+        setting.StatusProvide = [StatusID.MedicaIi, StatusID.TrueMedicaIi, StatusID.MedicaIii];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
     }
 
-    static partial void ModifyCureIiiPvP(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.CureIiiReady];
-        setting.UnlockedByQuestID = 66617;
-    }
-
-    static partial void ModifyCureIiPvE(ref ActionSetting setting)
-    {
-        setting.UnlockedByQuestID = 65977;
-    }
-
     static partial void ModifyBenedictionPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 66620;
+    }
+
+    static partial void ModifyAfflatusSolacePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Lily > 0 && BloodLily < 3;
     }
 
     static partial void ModifyAsylumPvE(ref ActionSetting setting)
@@ -172,49 +202,88 @@ partial class WhiteMageRotation
     static partial void ModifyThinAirPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 67259;
+        setting.StatusProvide = [StatusID.ThinAir];
     }
 
     static partial void ModifyTetragrammatonPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 67261;
+    }
 
+    static partial void ModifyStoneIvPvE(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyDivineBenisonPvE(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.DivineBenison];
     }
 
     static partial void ModifyPlenaryIndulgencePvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 67954;
+        setting.StatusProvide = [StatusID.Confession];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
     }
 
-    static partial void ModifySeraphStrikePvP(ref ActionSetting setting)
+    static partial void ModifyDiaPvE(ref ActionSetting setting)
     {
-        setting.SpecialType = SpecialActionType.MovingForward;
+        setting.TargetStatusProvide = [
+            StatusID.Aero,
+            StatusID.AeroIi,
+            StatusID.Dia,
+        ];
     }
 
-    // Dawntrail changes below
-
-    static partial void ModifyPresenceOfMindPvE(ref ActionSetting setting)
+    static partial void ModifyGlarePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => !IsMoving;
+
+    }
+
+    static partial void ModifyAfflatusMiseryPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => BloodLily == 3;
         setting.CreateConfig = () => new ActionConfig()
         {
-            TimeToKill = 10,
+            AoeCount = 1,
         };
-        setting.UnlockedByQuestID = 66615;
-        setting.StatusProvide = [StatusID.SacredSight];
     }
 
-    static partial void ModifyAetherialShiftPvE(ref ActionSetting setting)
+    static partial void ModifyAfflatusRapturePvE(ref ActionSetting setting)
     {
-        setting.SpecialType = SpecialActionType.MovingForward;
+        setting.ActionCheck = () => Lily > 0 && BloodLily < 3;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyTemperancePvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Temperance, StatusID.DivineGrace];
+    }
+
+    static partial void ModifyGlareIiiPvE(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyHolyIiiPvE(ref ActionSetting setting)
+    {
+        setting.IsFriendly = false;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 3,
+        };
+    }
+
+    static partial void ModifyAquaveilPvE(ref ActionSetting setting)
+    {
+        setting.TargetStatusProvide = [StatusID.Aquaveil];
     }
 
     static partial void ModifyLiturgyOfTheBellPvE(ref ActionSetting setting)
@@ -227,7 +296,16 @@ partial class WhiteMageRotation
 
     static partial void ModifyGlareIvPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.SacredSight];
+        setting.ActionCheck = () => SacredSightStacks > 0;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyMedicaIiiPvE(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.MedicaIi, StatusID.TrueMedicaIi, StatusID.MedicaIii];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -242,4 +320,17 @@ partial class WhiteMageRotation
             AoeCount = 1,
         };
     }
+    #endregion
+
+    #region PvP Actions
+    static partial void ModifyCureIiiPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.CureIiiReady];
+    }
+
+    static partial void ModifySeraphStrikePvP(ref ActionSetting setting)
+    {
+        setting.SpecialType = SpecialActionType.MovingForward;
+    }
+    #endregion
 }

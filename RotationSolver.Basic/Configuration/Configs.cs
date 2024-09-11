@@ -24,7 +24,8 @@ internal partial class Configs : IPluginConfiguration
         List2 = "List2",
         Debug = "Debug";
 
-    public int Version { get; set; } = 10;
+    public const int CurrentVersion = 11;
+    public int Version { get; set; } = CurrentVersion;
 
     public string LastSeenChangelog { get; set; } = "0.0.0.0";
     public bool FirstTimeSetupDone { get; set; } = false;
@@ -689,19 +690,12 @@ internal partial class Configs : IPluginConfiguration
 
     public static Configs Migrate(Configs oldConfigs)
     {
-        return oldConfigs; // Disable migration until a better solution can be found.
-        //var newConfigs = new Configs();
-
-        //JObject oldJson = JObject.FromObject(oldConfigs);
-        //JObject newJson = JObject.FromObject(newConfigs);
-
-        //newJson.Merge(oldJson, new JsonMergeSettings
-        //{
-        //    MergeArrayHandling = MergeArrayHandling.Union,
-        //    MergeNullValueHandling = MergeNullValueHandling.Merge
-        //});
-
-        //var migratedConfigs = newJson.ToObject<Configs>();
-        //return migratedConfigs ?? new Configs();
+        // Implement migration logic if needed
+        if (oldConfigs.Version != CurrentVersion)
+        {
+            // Reset to default if versions do not match
+            return new Configs();
+        }
+        return oldConfigs;
     }
 }
