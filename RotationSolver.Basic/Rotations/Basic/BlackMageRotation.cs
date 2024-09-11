@@ -304,7 +304,7 @@ partial class BlackMageRotation
         setting.UnlockedByQuestID = 68128;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 2,
+            AoeCount = 3,
         };
     }
 
