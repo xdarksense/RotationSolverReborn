@@ -132,35 +132,41 @@ public class BaseAction : IBaseAction
         {
             Setting.EndSpecial = IBaseAction.ShouldEndSpecial;
         }
+
         if (IBaseAction.AllEmpty)
         {
             usedUp = true;
         }
 
-        if (isLastAbility)
-        {
-            if (DataCenter.NextAbilityToNextGCD > ActionManagerHelper.GetCurrentAnimationLock() + DataCenter.MinAnimationLock + Service.Config.isLastAbilityTimer) return false;
-        }
+        if (isLastAbility && !IsLastAbilityUsable()) return false;
 
         if (!Info.BasicCheck(skipStatusProvideCheck, skipComboCheck, skipCastingCheck)) return false;
 
         if (!Cooldown.CooldownCheck(usedUp, gcdCountForAbility)) return false;
 
+        if (Setting.SpecialType == SpecialActionType.MeleeRange && IActionHelper.IsLastAction(IActionHelper.MovingActions)) return false; // No range actions after moving.
 
-        if (Setting.SpecialType is SpecialActionType.MeleeRange
-            && IActionHelper.IsLastAction(IActionHelper.MovingActions)) return false; //No range actions after moving.
-
-        if (DataCenter.AverageTimeToKill < Config.TimeToKill) return false;
-        if (DataCenter.AverageTimeToKill < Config.TimeToUntargetable) return false;
+        if (!IsTimeToKillValid()) return false;
 
         PreviewTarget = TargetInfo.FindTarget(skipAoeCheck, skipStatusProvideCheck);
         if (PreviewTarget == null) return false;
+
         if (!IBaseAction.ActionPreview)
         {
             Target = PreviewTarget.Value;
         }
 
         return true;
+    }
+
+    private bool IsLastAbilityUsable()
+    {
+        return DataCenter.NextAbilityToNextGCD <= ActionManagerHelper.GetCurrentAnimationLock() + DataCenter.MinAnimationLock + Service.Config.isLastAbilityTimer;
+    }
+
+    private bool IsTimeToKillValid()
+    {
+        return DataCenter.AverageTimeToKill >= Config.TimeToKill && DataCenter.AverageTimeToKill >= Config.TimeToUntargetable;
     }
 
 

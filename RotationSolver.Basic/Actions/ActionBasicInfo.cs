@@ -149,82 +149,79 @@ public readonly struct ActionBasicInfo
 
     internal readonly bool BasicCheck(bool skipStatusProvideCheck, bool skipComboCheck, bool skipCastingCheck)
     {
-        if (!_action.Config.IsEnabled || !IsOnSlot) return false;
-
+        if (!IsActionEnabled() || !IsOnSlot) return false;
         if (IsLimitBreak) return true;
-
-        //Disabled.
-        if (DataCenter.DisabledActionSequencer?.Contains(ID) ?? false) return false;
-
-        if (!EnoughLevel) return false;
-        if (DataCenter.CurrentMp < MPNeed) return false;
-        if (_action.Setting.UnlockedByQuestID != 0)
-        {
-            var isUnlockQuestComplete = QuestManager.IsQuestComplete(_action.Setting.UnlockedByQuestID);
-            if (!isUnlockQuestComplete)
-            {
-                var warning = $"The action {Name} is locked by the quest {_action.Setting.UnlockedByQuestID}. Please complete this quest to learn this action.";
-                WarningHelper.AddSystemWarning(warning);
-                return false;
-            }
-        }
+        if (IsActionDisabled() || !EnoughLevel || !HasEnoughMP() || !IsQuestUnlocked()) return false;
 
         var player = Player.Object;
 
-        if (_action.Setting.StatusNeed != null)
-        {
-            if (player.WillStatusEndGCD(0, 0,
-                _action.Setting.StatusFromSelf, _action.Setting.StatusNeed)) return false;
-        }
-
-        if (_action.Setting.StatusProvide != null && !skipStatusProvideCheck)
-        {
-            if (!player.WillStatusEndGCD(_action.Config.StatusGcdCount, 0,
-                _action.Setting.StatusFromSelf, _action.Setting.StatusProvide)) return false;
-        }
-
-        if (_action.Action.ActionCategory.Row == 15)
-        {
-            if (CustomRotation.LimitBreakLevel <= 1) return false;
-        }
-
-        if (!skipComboCheck && IsGeneralGCD)
-        {
-            if (!CheckForCombo()) return false;
-        }
-
-        if (_action.Action.IsRoleAction)
-        {
-            if (!_action.Action.ClassJobCategory.Value?.DoesJobMatchCategory(DataCenter.Job) ?? false) return false;
-        }
-
-        //Need casting.
-        if (CastTime > 0 && !player.HasStatus(true,
-            [
-                StatusID.Swiftcast,
-                StatusID.Triplecast,
-                StatusID.Dualcast,
-            ])
-            && !ActionsNoNeedCasting.Contains(ID))
-        {
-            //No casting.
-            if (DataCenter.SpecialType == SpecialCommandType.NoCasting) return false;
-
-            //Is knocking back.
-            if (DateTime.Now > DataCenter.KnockbackStart && DateTime.Now < DataCenter.KnockbackFinished) return false;
-
-            if (DataCenter.NoPoslock && DataCenter.IsMoving && !skipCastingCheck) return false;
-        }
-
-        if (IsGeneralGCD && _action.Setting.StatusProvide?.Length > 0 && _action.Setting.IsFriendly
-            && IActionHelper.IsLastGCD(true, _action)
-            && DataCenter.TimeSinceLastAction.TotalSeconds < 3) return false;
-
-        if (!(_action.Setting.ActionCheck?.Invoke() ?? true)) return false;
-        if (!IBaseAction.ForceEnable && !(_action.Setting.RotationCheck?.Invoke() ?? true)) return false;
+        if (IsStatusNeeded() || IsStatusProvided(skipStatusProvideCheck)) return false;
+        if (IsLimitBreakLevelLow() || !IsComboValid(skipComboCheck) || !IsRoleActionValid()) return false;
+        if (NeedsCasting(skipCastingCheck)) return false;
+        if (IsGeneralGCD && IsStatusProvidedDuringGCD()) return false;
+        if (!IsActionCheckValid() || !IsRotationCheckValid()) return false;
 
         return true;
     }
+
+    private bool IsActionEnabled() => _action.Config.IsEnabled;
+
+    private bool IsActionDisabled() => DataCenter.DisabledActionSequencer?.Contains(ID) ?? false;
+
+    private bool HasEnoughMP() => DataCenter.CurrentMp >= MPNeed;
+
+    private bool IsQuestUnlocked()
+    {
+        if (_action.Setting.UnlockedByQuestID == 0) return true;
+        var isUnlockQuestComplete = QuestManager.IsQuestComplete(_action.Setting.UnlockedByQuestID);
+        if (!isUnlockQuestComplete)
+        {
+            var warning = $"The action {Name} is locked by the quest {_action.Setting.UnlockedByQuestID}. Please complete this quest to learn this action.";
+            WarningHelper.AddSystemWarning(warning);
+        }
+        return isUnlockQuestComplete;
+    }
+
+    private bool IsStatusNeeded()
+    {
+        var player = Player.Object;
+        return _action.Setting.StatusNeed != null && player.WillStatusEndGCD(0, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusNeed);
+    }
+
+    private bool IsStatusProvided(bool skipStatusProvideCheck)
+    {
+        var player = Player.Object;
+        return !skipStatusProvideCheck && _action.Setting.StatusProvide != null && !player.WillStatusEndGCD(_action.Config.StatusGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusProvide);
+    }
+
+    private bool IsLimitBreakLevelLow() => _action.Action.ActionCategory.Row == 15 && CustomRotation.LimitBreakLevel <= 1;
+
+    private bool IsComboValid(bool skipComboCheck) => skipComboCheck || !IsGeneralGCD || CheckForCombo();
+
+    private bool IsRoleActionValid()
+    {
+        return !_action.Action.IsRoleAction || (_action.Action.ClassJobCategory.Value?.DoesJobMatchCategory(DataCenter.Job) ?? false);
+    }
+
+    private bool IsRotationCheckValid()
+    {
+        return IBaseAction.ForceEnable || (_action.Setting.RotationCheck?.Invoke() ?? true);
+    }
+
+    private bool NeedsCasting(bool skipCastingCheck)
+    {
+        var player = Player.Object;
+        return CastTime > 0 && !player.HasStatus(true, new[] { StatusID.Swiftcast, StatusID.Triplecast, StatusID.Dualcast }) && !ActionsNoNeedCasting.Contains(ID) &&
+               (DataCenter.SpecialType == SpecialCommandType.NoCasting || (DateTime.Now > DataCenter.KnockbackStart && DateTime.Now < DataCenter.KnockbackFinished) ||
+                (DataCenter.NoPoslock && DataCenter.IsMoving && !skipCastingCheck));
+    }
+
+    private bool IsStatusProvidedDuringGCD()
+    {
+        return _action.Setting.StatusProvide?.Length > 0 && _action.Setting.IsFriendly && IActionHelper.IsLastGCD(true, _action) && DataCenter.TimeSinceLastAction.TotalSeconds < 3;
+    }
+
+    private bool IsActionCheckValid() => _action.Setting.ActionCheck?.Invoke() ?? true;
 
     private readonly bool CheckForCombo()
     {

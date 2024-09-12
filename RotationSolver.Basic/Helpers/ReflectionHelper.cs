@@ -6,14 +6,14 @@ internal static class ReflectionHelper
     {
         if (type == null) return Array.Empty<PropertyInfo>();
 
-        var props = from prop in type.GetRuntimeProperties()
-                    where typeof(T).IsAssignableFrom(prop.PropertyType)
-                            && prop.GetMethod is MethodInfo info
-                            && info.IsPublic && info.IsStatic
-                            && info.GetCustomAttribute<ObsoleteAttribute>() == null
-                    select prop;
+        var properties = from prop in type.GetRuntimeProperties()
+                         where typeof(T).IsAssignableFrom(prop.PropertyType)
+                               && prop.GetMethod is MethodInfo methodInfo
+                               && methodInfo.IsPublic && methodInfo.IsStatic
+                               && prop.GetCustomAttribute<ObsoleteAttribute>() == null
+                         select prop;
 
-        return props.Union(type.BaseType?.GetStaticProperties<T>() ?? Array.Empty<PropertyInfo>()).ToArray();
+        return properties.Union(type.BaseType?.GetStaticProperties<T>() ?? Array.Empty<PropertyInfo>()).ToArray();
     }
 
     internal static IEnumerable<MethodInfo> GetAllMethodInfo(this Type? type)
@@ -29,10 +29,13 @@ internal static class ReflectionHelper
 
     internal static PropertyInfo? GetPropertyInfo(this Type type, string name)
     {
-        foreach (var item in type.GetRuntimeProperties())
+        foreach (var property in type.GetRuntimeProperties())
         {
-            if (item.Name == name && item.GetMethod is MethodInfo info
-               && info.IsStatic) return item;
+            if (property.Name == name && property.GetMethod is MethodInfo methodInfo
+                && methodInfo.IsStatic)
+            {
+                return property;
+            }
         }
 
         return type.BaseType?.GetPropertyInfo(name);
@@ -42,10 +45,13 @@ internal static class ReflectionHelper
     {
         if (type == null) return null;
 
-        foreach (var item in type.GetRuntimeMethods())
+        foreach (var method in type.GetRuntimeMethods())
         {
-            if (item.Name == name && item.IsStatic
-                      && !item.IsConstructor && item.ReturnType == typeof(bool)) return item;
+            if (method.Name == name && method.IsStatic
+                && !method.IsConstructor && method.ReturnType == typeof(bool))
+            {
+                return method;
+            }
         }
 
         return type.BaseType?.GetMethodInfo(name);
