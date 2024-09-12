@@ -123,10 +123,6 @@ internal class OtherConfiguration
     private static string GetFilePath(string name)
     {
         var directory = Svc.PluginInterface.ConfigDirectory.FullName;
-#if DEBUG
-        var dir = @"E:\OneDrive - stu.zafu.edu.cn\PartTime\FFXIV\RotationSolver\Resources";
-        if (Directory.Exists(dir)) directory = dir;
-#endif
 
         return directory + $"\\{name}.json";
     }

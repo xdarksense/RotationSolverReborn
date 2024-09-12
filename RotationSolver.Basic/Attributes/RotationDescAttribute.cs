@@ -1,7 +1,7 @@
 ﻿namespace RotationSolver.Basic.Attributes;
 
 /// <summary>
-/// The description about the macro. If it tag at the rotation class, it means Burst. Others means the macro that this method belongs to.
+/// The description about the macro. If it tags the rotation class, it means Burst. Others mean the macro that this method belongs to.
 /// </summary>
 [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
 public class RotationDescAttribute : Attribute
@@ -65,7 +65,7 @@ public class RotationDescAttribute : Attribute
     }
 
     /// <summary>
-    /// Constructer
+    /// Constructor
     /// </summary>
     /// <param name="actions"></param>
     public RotationDescAttribute(params ActionID[] actions)
@@ -74,7 +74,7 @@ public class RotationDescAttribute : Attribute
     }
 
     /// <summary>
-    /// Constructer
+    /// Constructor
     /// </summary>
     /// <param name="desc"></param>
     /// <param name="actions"></param>
@@ -86,7 +86,6 @@ public class RotationDescAttribute : Attribute
 
     private RotationDescAttribute()
     {
-
     }
 
     internal static IEnumerable<RotationDescAttribute[]> Merge(IEnumerable<RotationDescAttribute?> rotationDescAttributes)
@@ -113,7 +112,6 @@ public class RotationDescAttribute : Attribute
             result.Actions = result.Actions.Union(attr.Actions);
         }
 
-        if (result.Type == DescType.None) return null;
-        return result;
+        return result.Type == DescType.None ? null : result;
     }
 }

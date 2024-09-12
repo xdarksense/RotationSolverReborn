@@ -10,20 +10,22 @@ namespace RotationSolver.Basic.Helpers;
 public static class ActionIdHelper
 {
     /// <summary>
-    /// Is this action cooling down.
+    /// Checks if the action is cooling down.
     /// </summary>
-    /// <param name="actionID">the action id.</param>
-    /// <returns></returns>
+    /// <param name="actionID">The action ID.</param>
+    /// <returns>True if the action is cooling down, otherwise false.</returns>
     public unsafe static bool IsCoolingDown(this ActionID actionID)
     {
-        return IsCoolingDown(actionID.GetAction().GetCoolDownGroup());
+        var action = actionID.GetAction();
+        if (action == null) return false;
+        return IsCoolingDown(action.GetCoolDownGroup());
     }
 
     /// <summary>
-    /// Is this action cooling down.
+    /// Checks if the action is cooling down.
     /// </summary>
-    /// <param name="cdGroup"></param>
-    /// <returns></returns>
+    /// <param name="cdGroup">The cooldown group.</param>
+    /// <returns>True if the action is cooling down, otherwise false.</returns>
     public unsafe static bool IsCoolingDown(byte cdGroup)
     {
         var detail = GetCoolDownDetail(cdGroup);
@@ -31,25 +33,32 @@ public static class ActionIdHelper
     }
 
     /// <summary>
-    /// The cd details
+    /// Gets the cooldown details.
     /// </summary>
-    /// <param name="cdGroup"></param>
-    /// <returns></returns>
-    public static unsafe RecastDetail* GetCoolDownDetail(byte cdGroup) => ActionManager.Instance()->GetRecastGroupDetail(cdGroup - 1);
-
-
-    private static Action GetAction(this ActionID actionID)
+    /// <param name="cdGroup">The cooldown group.</param>
+    /// <returns>A pointer to the cooldown details.</returns>
+    public static unsafe RecastDetail* GetCoolDownDetail(byte cdGroup)
     {
-        return Svc.Data.GetExcelSheet<Action>()!.GetRow((uint)actionID)!;
+        return ActionManager.Instance()->GetRecastGroupDetail(cdGroup - 1);
     }
 
     /// <summary>
-    /// The cast time.
+    /// Gets the action associated with the action ID.
     /// </summary>
-    /// <param name="actionID"></param>
-    /// <returns></returns>
+    /// <param name="actionID">The action ID.</param>
+    /// <returns>The action associated with the action ID.</returns>
+    private static Action? GetAction(this ActionID actionID)
+    {
+        return Svc.Data.GetExcelSheet<Action>()?.GetRow((uint)actionID);
+    }
+
+    /// <summary>
+    /// Gets the cast time of the action.
+    /// </summary>
+    /// <param name="actionID">The action ID.</param>
+    /// <returns>The cast time of the action in seconds.</returns>
     public unsafe static float GetCastTime(this ActionID actionID)
     {
-        return ActionManager.GetAdjustedCastTime(ActionType.Action, (uint)actionID) / 1000f; ;
+        return ActionManager.GetAdjustedCastTime(ActionType.Action, (uint)actionID) / 1000f;
     }
 }

@@ -99,6 +99,18 @@ partial class DarkKnightRotation
             return stacks == byte.MaxValue ? (byte)3 : stacks;
         }
     }
+
+    /// <inheritdoc/>
+    public override void DisplayStatus()
+    {
+        ImGui.Text("BloodWeaponStacks: " + BloodWeaponStacks.ToString());
+        ImGui.Text("DeliriumStacks: " + DeliriumStacks.ToString());
+        ImGui.Text("LowDeliriumStacks: " + LowDeliriumStacks.ToString());
+        ImGui.Text("ShadowTime: " + ShadowTime.ToString());
+        ImGui.Text("DarkSideTime: " + DarkSideTime.ToString());
+        ImGui.Text("HasDarkArts: " + HasDarkArts.ToString());
+        ImGui.Text("Blood: " + Blood.ToString());
+    }
     #endregion
 
     static partial void ModifyHardSlashPvE(ref ActionSetting setting)
@@ -364,13 +376,5 @@ partial class DarkKnightRotation
     static partial void ModifyPlungePvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
-    }
-
-    /// <inheritdoc/>
-    public override void DisplayStatus()
-    {
-        ImGui.Text("BloodWeaponStacks: " + BloodWeaponStacks.ToString());
-        ImGui.Text("DeliriumStacks: " + DeliriumStacks.ToString());
-        ImGui.Text("LowDeliriumStacks: " + LowDeliriumStacks.ToString());
     }
 }

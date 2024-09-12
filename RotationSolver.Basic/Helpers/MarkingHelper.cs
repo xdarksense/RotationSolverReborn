@@ -25,12 +25,17 @@ internal enum HeadMarker : byte
 
 internal class MarkingHelper
 {
-    internal unsafe static long GetMarker(HeadMarker index) => MarkingController.Instance()->Markers[(int)index].ObjectId;
+    internal unsafe static long GetMarker(HeadMarker index)
+    {
+        var instance = MarkingController.Instance();
+        if (instance == null) return 0;
+        return instance->Markers[(int)index].ObjectId;
+    }
 
     internal static bool HaveAttackChara => AttackSignTargets.Any(id => id != 0);
 
-    internal static long[] AttackSignTargets =>
-    [
+    internal static long[] AttackSignTargets => new long[]
+    {
         GetMarker(HeadMarker.Attack1),
         GetMarker(HeadMarker.Attack2),
         GetMarker(HeadMarker.Attack3),
@@ -39,15 +44,15 @@ internal class MarkingHelper
         GetMarker(HeadMarker.Attack6),
         GetMarker(HeadMarker.Attack7),
         GetMarker(HeadMarker.Attack8),
-    ];
+    };
 
-    internal static long[] StopTargets =>
-    [
+    internal static long[] StopTargets => new long[]
+    {
         GetMarker(HeadMarker.Stop1),
         GetMarker(HeadMarker.Stop2),
-    ];
+    };
 
-    internal unsafe static IEnumerable<IBattleChara> FilterStopCharaes(IEnumerable<IBattleChara> charas)
+    internal unsafe static IEnumerable<IBattleChara> FilterStopCharacters(IEnumerable<IBattleChara> charas)
     {
         var ids = StopTargets.Where(id => id != 0);
         return charas.Where(b => !ids.Contains((long)b.GameObjectId));

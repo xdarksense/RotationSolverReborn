@@ -1,24 +1,30 @@
 ﻿namespace RotationSolver.Basic.Attributes;
 
 /// <summary>
-/// The link to a image or web about your rotation.
+/// The link to an image or web page about your rotation.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = true)]
 public class LinkDescriptionAttribute : Attribute
 {
     /// <summary>
-    /// The description.
+    /// The link description.
     /// </summary>
-    public LinkDescription LinkDescription { get; set; }
+    public LinkDescription LinkDescription { get; }
 
     /// <summary>
-    /// Constructer.
+    /// Constructor.
     /// </summary>
-    /// <param name="url"></param>
-    /// <param name="description"></param>
+    /// <param name="url">The URL of the link.</param>
+    /// <param name="description">The description of the link.</param>
+    /// <exception cref="ArgumentException">Thrown when the URL is null or empty.</exception>
     public LinkDescriptionAttribute(string url, string description = "")
     {
-        LinkDescription = new() { Url = url, Description = description };
+        if (string.IsNullOrEmpty(url))
+        {
+            throw new ArgumentException("URL cannot be null or empty", nameof(url));
+        }
+
+        LinkDescription = new LinkDescription { Url = url, Description = description };
     }
 }
 
@@ -28,12 +34,12 @@ public class LinkDescriptionAttribute : Attribute
 public readonly record struct LinkDescription
 {
     /// <summary>
-    /// Description.
+    /// The description of the link.
     /// </summary>
     public string Description { get; init; }
 
     /// <summary>
-    /// Url.
+    /// The URL of the link.
     /// </summary>
     public string Url { get; init; }
 }

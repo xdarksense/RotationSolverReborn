@@ -40,6 +40,7 @@ partial class WarriorRotation
     {
         ImGui.Text("InnerReleaseStacks: " + InnerReleaseStacks.ToString());
         ImGui.Text("BerserkStacks: " + BerserkStacks.ToString());
+        ImGui.Text("BeastGaugeValue: " + BeastGauge.ToString());
     }
 
     private sealed protected override IBaseAction TankStance => DefiancePvE;

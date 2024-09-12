@@ -9,40 +9,43 @@ partial class WhiteMageRotation
 
     #region Job Gauge
     /// <summary>
-    /// 
+    /// Represents the number of Lily stacks.
     /// </summary>
     public static byte Lily => JobGauge.Lily;
 
     /// <summary>
-    /// 
+    /// Represents the number of Blood Lily stacks.
     /// </summary>
     public static byte BloodLily => JobGauge.BloodLily;
 
+    /// <summary>
+    /// Gets the raw Lily timer value in seconds.
+    /// </summary>
     static float LilyTimeRaw => JobGauge.LilyTimer / 1000f;
 
     /// <summary>
-    /// 
+    /// Gets the Lily timer value adjusted by the default GCD remain.
     /// </summary>
     public static float LilyTime => LilyTimeRaw + DataCenter.DefaultGCDRemain;
 
     /// <summary>
-    /// 
+    /// Determines if the Lily timer will expire after the specified time.
     /// </summary>
-    /// <param name="time"></param>
-    /// <returns></returns>
+    /// <param name="time">The time in seconds to check against the Lily timer.</param>
+    /// <returns>True if the Lily timer will expire after the specified time; otherwise, false.</returns>
     protected static bool LilyAfter(float time) => LilyTime <= time;
 
     /// <summary>
-    /// 
+    /// Determines if the Lily timer will expire after a specified number of GCDs and an optional offset.
     /// </summary>
-    /// <param name="gcdCount"></param>
-    /// <param name="offset"></param>
-    /// <returns></returns>
+    /// <param name="gcdCount">The number of GCDs to check against the Lily timer.</param>
+    /// <param name="offset">An optional offset in seconds to add to the GCD time.</param>
+    /// <returns>True if the Lily timer will expire after the specified number of GCDs and offset; otherwise, false.</returns>
     protected static bool LilyAfterGCD(uint gcdCount = 0, float offset = 0)
         => LilyAfter(GCDTime(gcdCount, offset));
 
     /// <summary>
-    /// Holds the remaining amount of SacredSight stacks
+    /// Gets the remaining number of Sacred Sight stacks.
     /// </summary>
     public static byte SacredSightStacks
     {
@@ -57,6 +60,8 @@ partial class WhiteMageRotation
     public override void DisplayStatus()
     {
         ImGui.Text("SacredSightStacks: " + SacredSightStacks.ToString());
+        ImGui.Text("LilyTime: " + LilyTime.ToString());
+        ImGui.Text("BloodLilyStacks: " + BloodLily.ToString());
     }
     #endregion
 

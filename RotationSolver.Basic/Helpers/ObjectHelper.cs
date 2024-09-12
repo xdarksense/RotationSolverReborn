@@ -6,6 +6,7 @@ using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using Lumina.Excel.GeneratedSheets;
@@ -201,40 +202,41 @@ public static class ObjectHelper
     /// <returns></returns>
     public static unsafe ObjectKind GetObjectKind(this IGameObject obj) => (ObjectKind)obj.Struct()->ObjectKind;
 
+    /// <summary>
+    /// Determines whether the specified game object is a top priority hostile target.
+    /// </summary>
+    /// <param name="obj">The game object to check.</param>
+    /// <returns>
+    /// <c>true</c> if the game object is a top priority hostile target; otherwise, <c>false</c>.
+    /// </returns>
     internal static bool IsTopPriorityHostile(this IGameObject obj)
     {
+        if (obj == null) return false;
+
         var fateId = DataCenter.FateId;
 
         if (obj is IBattleChara b && b.StatusList != null && b.StatusList.Any(StatusHelper.IsPriority)) return true;
 
         if (Service.Config.ChooseAttackMark && MarkingHelper.AttackSignTargets.FirstOrDefault(id => id != 0) == (long)obj.GameObjectId) return true;
 
-        //Fate
+        // Fate
         if (Service.Config.TargetFatePriority && fateId != 0 && obj.FateId() == fateId) return true;
 
         var icon = obj.GetNamePlateIcon();
 
-        //Hunting log and weapon.
-        if (Service.Config.TargetHuntingRelicLevePriority && icon
-            is 60092 //Hunting
-            or 60096 //Weapon
-            or 71244 //Leve
-            ) return true;
+        // Hunting log and weapon
+        if (Service.Config.TargetHuntingRelicLevePriority && icon is 60092 or 60096 or 71244) return true;
 
-        if (Service.Config.TargetQuestPriority && (icon
-            is 71204 //Main Quest
-            or 71144 //Major Quest
-            or 71224 //Other Quest
-            or 71344 //Major Quest
-           || obj.GetEventType() is EventHandlerType.Quest)) return true;
+        // Quest
+        if (Service.Config.TargetQuestPriority && (icon is 71204 or 71144 or 71224 or 71344 || obj.GetEventType() is EventHandlerType.Quest)) return true;
 
-        var npc = obj as IBattleChara;
-        if (npc != null && DataCenter.PrioritizedNameIds.Contains(npc.NameId)) return true;
+        if (obj is IBattleChara npc && DataCenter.PrioritizedNameIds.Contains(npc.NameId)) return true;
 
         return false;
     }
 
     internal static unsafe uint GetNamePlateIcon(this IGameObject obj) => obj.Struct()->NamePlateIconId;
+
     internal static unsafe EventHandlerType GetEventType(this IGameObject obj) => obj.Struct()->EventId.ContentId;
 
     internal static unsafe BattleNpcSubKind GetBattleNPCSubKind(this IGameObject obj) => (BattleNpcSubKind)obj.Struct()->SubKind;
@@ -242,12 +244,19 @@ public static class ObjectHelper
     internal static unsafe uint FateId(this IGameObject obj) => obj.Struct()->FateId;
 
     static readonly Dictionary<uint, bool> _effectRangeCheck = [];
+
+    /// <summary>
+    /// Determines whether the specified game object can be interrupted.
+    /// </summary>
+    /// <param name="o">The game object to check.</param>
+    /// <returns>
+    /// <c>true</c> if the game object can be interrupted; otherwise, <c>false</c>.
+    /// </returns>
     internal static bool CanInterrupt(this IGameObject o)
     {
         if (o is not IBattleChara b) return false;
 
         var baseCheck = b.IsCasting && b.IsCastInterruptible && b.TotalCastTime >= 2;
-
         if (!baseCheck) return false;
         if (!Service.Config.InterruptibleMoreCheck) return false;
 
@@ -256,8 +265,8 @@ public static class ObjectHelper
 
         var act = Service.GetSheet<Lumina.Excel.GeneratedSheets.Action>().GetRow(b.CastActionId);
         if (act == null) return _effectRangeCheck[id] = false;
-        if (act.CastType is 3 or 4) return _effectRangeCheck[id] = false;
-        if (act.EffectRange is > 0 and < 8) return _effectRangeCheck[id] = false;
+        if (act.CastType is 3 or 4 || (act.EffectRange is > 0 and < 8)) return _effectRangeCheck[id] = false;
+
         return _effectRangeCheck[id] = true;
     }
 
@@ -308,6 +317,13 @@ public static class ObjectHelper
         return b.GetTimeToKill() <= Service.Config.DyingTimeToKill || b.GetHealthRatio() < Service.Config.IsDyingConfig;
     }
 
+    /// <summary>
+    /// Determines whether the specified battle character is currently in combat.
+    /// </summary>
+    /// <param name="obj">The battle character to check.</param>
+    /// <returns>
+    /// <c>true</c> if the battle character is in combat; otherwise, <c>false</c>.
+    /// </returns>
     internal static unsafe bool InCombat(this IBattleChara obj)
     {
         if (obj == null || obj.Struct() == null) return false;
@@ -316,6 +332,14 @@ public static class ObjectHelper
 
     private static readonly TimeSpan CheckSpan = TimeSpan.FromSeconds(2.5);
 
+    /// <summary>
+    /// Calculates the estimated time to kill the specified battle character.
+    /// </summary>
+    /// <param name="b">The battle character to calculate the time to kill for.</param>
+    /// <param name="wholeTime">If set to <c>true</c>, calculates the total time to kill; otherwise, calculates the remaining time to kill.</param>
+    /// <returns>
+    /// The estimated time to kill the battle character in seconds, or <see cref="float.NaN"/> if the calculation cannot be performed.
+    /// </returns>
     internal static float GetTimeToKill(this IBattleChara b, bool wholeTime = false)
     {
         if (b == null) return float.NaN;
@@ -347,6 +371,13 @@ public static class ObjectHelper
         return (float)timespan.TotalSeconds / ratioReduce * (wholeTime ? 1 : ratioNow);
     }
 
+    /// <summary>
+    /// Determines if the specified battle character has been attacked within the last second.
+    /// </summary>
+    /// <param name="b">The battle character to check.</param>
+    /// <returns>
+    /// <c>true</c> if the battle character has been attacked within the last second; otherwise, <c>false</c>.
+    /// </returns>
     internal static bool IsAttacked(this IBattleChara b)
     {
         if (b == null) return false;
@@ -360,15 +391,32 @@ public static class ObjectHelper
         return false;
     }
 
+    /// <summary>
+    /// Determines if the player can see the specified game object.
+    /// </summary>
+    /// <param name="b">The game object to check visibility for.</param>
+    /// <returns>
+    /// <c>true</c> if the player can see the specified game object; otherwise, <c>false</c>.
+    /// </returns>
     internal static unsafe bool CanSee(this IGameObject b)
     {
-        var point = Player.Object.Position + Vector3.UnitY * Player.GameObject->Height;
+        var player = Player.Object;
+        if (player == null || b == null) return false;
+
+        const uint specificEnemyId = 3830; // Bioculture Node in Aetherial Chemical Research Facility
+        if (b.GameObjectId == specificEnemyId)
+        {
+            return true;
+        }
+
+        var point = player.Position + Vector3.UnitY * Player.GameObject->Height;
         var tarPt = b.Position + Vector3.UnitY * b.Struct()->Height;
         var direction = tarPt - point;
 
         int* unknown = stackalloc int[] { 0x4000, 0, 0x4000, 0 };
 
-        RaycastHit hit = default;
+        RaycastHit hit;
+        var ray = new Ray(point, direction);
 
         return !FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->BGCollisionModule
             ->RaycastMaterialFilter(&hit, &point, &direction, direction.Length(), 1, unknown);
@@ -386,30 +434,63 @@ public static class ObjectHelper
         return (float)b.CurrentHp / b.MaxHp;
     }
 
+    /// <summary>
+    /// Determines the positional relationship of the player relative to the enemy.
+    /// </summary>
+    /// <param name="enemy">The enemy game object.</param>
+    /// <returns>
+    /// An <see cref="EnemyPositional"/> value indicating whether the player is in front, at the rear, or on the flank of the enemy.
+    /// </returns>
     internal static EnemyPositional FindEnemyPositional(this IGameObject enemy)
     {
+        if (enemy == null || Player.Object == null) return EnemyPositional.None;
+
         Vector3 pPosition = enemy.Position;
         Vector2 faceVec = enemy.GetFaceVector();
 
         Vector3 dir = Player.Object.Position - pPosition;
-        Vector2 dirVec = new(dir.Z, dir.X);
+        Vector2 dirVec = new Vector2(dir.Z, dir.X);
 
         double angle = faceVec.AngleTo(dirVec);
 
-        if (angle < Math.PI / 4) return EnemyPositional.Front;
-        else if (angle > Math.PI * 3 / 4) return EnemyPositional.Rear;
+        const double frontAngle = Math.PI / 4;
+        const double rearAngle = Math.PI * 3 / 4;
+
+        if (angle < frontAngle) return EnemyPositional.Front;
+        else if (angle > rearAngle) return EnemyPositional.Rear;
         return EnemyPositional.Flank;
     }
 
+    /// <summary>
+    /// Gets the facing direction vector of the game object.
+    /// </summary>
+    /// <param name="obj">The game object.</param>
+    /// <returns>
+    /// A <see cref="Vector2"/> representing the facing direction of the game object.
+    /// </returns>
     internal static Vector2 GetFaceVector(this IGameObject obj)
     {
+        if (obj == null) return Vector2.Zero;
+
         float rotation = obj.Rotation;
-        return new((float)Math.Cos(rotation), (float)Math.Sin(rotation));
+        return new Vector2((float)Math.Cos(rotation), (float)Math.Sin(rotation));
     }
 
+    /// <summary>
+    /// Calculates the angle between two vectors.
+    /// </summary>
+    /// <param name="vec1">The first vector.</param>
+    /// <param name="vec2">The second vector.</param>
+    /// <returns>
+    /// The angle in radians between the two vectors.
+    /// </returns>
     internal static double AngleTo(this Vector2 vec1, Vector2 vec2)
     {
-        return Math.Acos(Vector2.Dot(vec1, vec2) / vec1.Length() / vec2.Length());
+        double lengthProduct = vec1.Length() * vec2.Length();
+        if (lengthProduct == 0) return 0;
+
+        double dotProduct = Vector2.Dot(vec1, vec2);
+        return Math.Acos(dotProduct / lengthProduct);
     }
 
     /// <summary>
@@ -419,12 +500,10 @@ public static class ObjectHelper
     /// <returns></returns>
     public static float DistanceToPlayer(this IGameObject? obj)
     {
-        if (obj == null) return float.MaxValue;
-        var player = Player.Object;
-        if (player == null) return float.MaxValue;
+        if (obj == null || Player.Object == null) return float.MaxValue;
 
-        var distance = Vector3.Distance(player.Position, obj.Position) - player.HitboxRadius;
-        distance -= obj.HitboxRadius;
+        var player = Player.Object;
+        var distance = Vector3.Distance(player.Position, obj.Position) - (player.HitboxRadius + obj.HitboxRadius);
         return distance;
     }
 }
