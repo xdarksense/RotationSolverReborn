@@ -313,7 +313,7 @@ public partial class PictomancerRotation
 
     static partial void ModifyHammerStampPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => HammerStacks == 3;
+        setting.ActionCheck = () => HammerStacks == 3 || (!EnhancedPictomancyIiTrait.EnoughLevel && HammerStacks > 0);
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
