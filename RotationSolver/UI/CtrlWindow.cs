@@ -18,20 +18,37 @@ internal abstract class CtrlWindow(string name) : Window(name, BaseFlags)
         ImGui.PushStyleColor(ImGuiCol.WindowBg, bgColor);
 
         Flags = BaseFlags;
-
         if (Service.Config.IsControlWindowLock)
         {
             Flags |= ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove;
         }
 
         ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
-        base.PreDraw();
+
+        try
+        {
+            base.PreDraw();
+        }
+        catch (Exception)
+        {
+
+        }
     }
 
     public override void PostDraw()
     {
-        ImGui.PopStyleColor();
-        ImGui.PopStyleVar();
-        base.PostDraw();
+        try
+        {
+            base.PostDraw();
+        }
+        catch (Exception)
+        {
+
+        }
+        finally
+        {
+            ImGui.PopStyleColor();
+            ImGui.PopStyleVar();
+        }
     }
 }

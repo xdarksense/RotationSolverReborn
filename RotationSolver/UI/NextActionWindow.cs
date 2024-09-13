@@ -3,6 +3,8 @@ using Dalamud.Interface.Windowing;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using RotationSolver.Updaters;
+using System;
+using System.Numerics;
 
 namespace RotationSolver.UI;
 
@@ -47,32 +49,45 @@ internal class NextActionWindow : Window
             * Service.Config.ControlWindowNextSizeRatio;
         DrawGcdCooldown(width, false);
 
-        var precent = 0f;
+        var percent = 0f;
 
-        var group = ActionManager.Instance()->GetRecastGroupDetail(ActionHelper.GCDCooldownGroup - 1);
+        var actionManager = ActionManager.Instance();
+        if (actionManager == null)
+        {
+            // Handle the case where actionManager is null
+            return;
+        }
+
+        var group = actionManager->GetRecastGroupDetail(ActionHelper.GCDCooldownGroup - 1);
+        if (group == null)
+        {
+            // Handle the case where group is null
+            return;
+        }
+
         if (group->Elapsed == group->Total || group->Total == 0)
         {
-            precent = 1;
+            percent = 1;
         }
         else
         {
-            precent = group->Elapsed / group->Total;
+            percent = group->Elapsed / group->Total;
             if (ActionUpdater.NextAction != ActionUpdater.NextGCDAction)
             {
-                precent++;
+                percent++;
             }
         }
 
-        ControlWindow.DrawIAction(ActionUpdater.NextAction, width, precent);
+        ControlWindow.DrawIAction(ActionUpdater.NextAction, width, percent);
     }
 
-    public static unsafe void DrawGcdCooldown(float width, bool drawTittle)
+    public static unsafe void DrawGcdCooldown(float width, bool drawTitle)
     {
         var remain = DataCenter.DefaultGCDRemain;
         var total = DataCenter.DefaultGCDTotal;
         var elapsed = DataCenter.DefaultGCDElapsed;
 
-        if (drawTittle)
+        if (drawTitle)
         {
             var str = $"{remain:F2}s / {total:F2}s";
             ImGui.SetCursorPosX(ImGui.GetCursorPosX() + width / 2 - ImGui.CalcTextSize(str).X / 2);

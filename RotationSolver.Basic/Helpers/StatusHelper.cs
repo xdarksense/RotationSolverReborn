@@ -1,6 +1,7 @@
 ﻿using Dalamud.Game.ClientState.Statuses;
 using ECommons.Automation;
 using ECommons.GameHelpers;
+using ECommons.Logging;
 using RotationSolver.Basic.Configuration;
 
 namespace RotationSolver.Basic.Helpers;
@@ -234,8 +235,30 @@ public static class StatusHelper
     /// <param name="status"></param>
     public static void StatusOff(StatusID status)
     {
-        if (Player.Object == null || !Player.Object.HasStatus(false, status)) return;
-        Chat.Instance.SendMessage($"/statusoff {GetStatusName(status)}");
+        if (Player.Object == null)
+        {
+            // Log or handle the case where Player.Object is null
+            PluginLog.Error("Player object is null. Cannot remove status.");
+            return;
+        }
+
+        if (!Player.Object.HasStatus(false, status))
+        {
+            // Log or handle the case where the player does not have the status
+            PluginLog.Error($"Player does not have the status: {GetStatusName(status)}");
+            return;
+        }
+
+        try
+        {
+            Chat.Instance.SendMessage($"/statusoff {GetStatusName(status)}");
+            PluginLog.Error($"Status {GetStatusName(status)} removed successfully.");
+        }
+        catch (Exception ex)
+        {
+            // Log the exception
+            PluginLog.Error($"Failed to remove status {GetStatusName(status)}: {ex.Message}");
+        }
     }
 
     internal static string GetStatusName(StatusID id)

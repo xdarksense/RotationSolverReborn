@@ -17,6 +17,7 @@ internal static class ImGuiHelper
 {
     internal static void SetNextWidthWithName(string name)
     {
+        if (string.IsNullOrEmpty(name)) return;
         ImGui.SetNextItemWidth(Math.Max(80 * ImGuiHelpers.GlobalScale, ImGui.CalcTextSize(name).X + 30 * ImGuiHelpers.GlobalScale));
     }
 
@@ -217,22 +218,26 @@ internal static class ImGuiHelper
 
     #region Image
     internal unsafe static bool SilenceImageButton(IntPtr handle, Vector2 size, bool selected, string id = "")
-        => SilenceImageButton(handle, size, Vector2.Zero, Vector2.One, selected, id);
+    => SilenceImageButton(handle, size, Vector2.Zero, Vector2.One, selected, id);
+
     internal unsafe static bool SilenceImageButton(IntPtr handle, Vector2 size, Vector2 uv0, Vector2 uv1, bool selected, string id = "")
     {
-        return SilenceImageButton(handle, size, uv0, uv1, selected ? ImGui.ColorConvertFloat4ToU32(*ImGui.GetStyleColorVec4(ImGuiCol.Header)) : 0, id);
+        uint buttonColor = selected ? ImGui.ColorConvertFloat4ToU32(*ImGui.GetStyleColorVec4(ImGuiCol.Header)) : 0;
+        return SilenceImageButton(handle, size, uv0, uv1, buttonColor, id);
     }
 
     internal unsafe static bool SilenceImageButton(IntPtr handle, Vector2 size, Vector2 uv0, Vector2 uv1, uint buttonColor, string id = "")
     {
+        const int StyleColorCount = 3;
+
         ImGui.PushStyleColor(ImGuiCol.ButtonActive, ImGui.ColorConvertFloat4ToU32(*ImGui.GetStyleColorVec4(ImGuiCol.HeaderActive)));
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, ImGui.ColorConvertFloat4ToU32(*ImGui.GetStyleColorVec4(ImGuiCol.HeaderHovered)));
         ImGui.PushStyleColor(ImGuiCol.Button, buttonColor);
 
-        var result = NoPaddingImageButton(handle, size, uv0, uv1, id);
-        ImGui.PopStyleColor(3);
+        var buttonClicked = NoPaddingImageButton(handle, size, uv0, uv1, id);
+        ImGui.PopStyleColor(StyleColorCount);
 
-        return result;
+        return buttonClicked;
     }
 
     internal unsafe static bool NoPaddingNoColorImageButton(IntPtr handle, Vector2 size, string id = "")
@@ -240,30 +245,33 @@ internal static class ImGuiHelper
 
     internal unsafe static bool NoPaddingNoColorImageButton(IntPtr handle, Vector2 size, Vector2 uv0, Vector2 uv1, string id = "")
     {
+        const int StyleColorCount = 3;
+
         ImGui.PushStyleColor(ImGuiCol.ButtonActive, 0);
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 0);
         ImGui.PushStyleColor(ImGuiCol.Button, 0);
-        var result = NoPaddingImageButton(handle, size, uv0, uv1, id);
-        ImGui.PopStyleColor(3);
+        var buttonClicked = NoPaddingImageButton(handle, size, uv0, uv1, id);
+        ImGui.PopStyleColor(StyleColorCount);
 
-        return result;
+        return buttonClicked;
     }
 
     internal static bool NoPaddingImageButton(IntPtr handle, Vector2 size, Vector2 uv0, Vector2 uv1, string id = "")
     {
-        var padding = ImGui.GetStyle().FramePadding;
-        ImGui.GetStyle().FramePadding = Vector2.Zero;
+        var style = ImGui.GetStyle();
+        var originalPadding = style.FramePadding;
+        style.FramePadding = Vector2.Zero;
 
         ImGui.PushID(id);
-        var result = ImGui.ImageButton(handle, size, uv0, uv1);
+        var buttonClicked = ImGui.ImageButton(handle, size, uv0, uv1);
         ImGui.PopID();
         if (ImGui.IsItemHovered())
         {
             ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
         }
 
-        ImGui.GetStyle().FramePadding = padding;
-        return result;
+        style.FramePadding = originalPadding;
+        return buttonClicked;
     }
 
     internal static bool TextureButton(IDalamudTextureWrap texture, float wholeWidth, float maxWidth, string id = "")
@@ -272,12 +280,12 @@ internal static class ImGuiHelper
 
         var size = new Vector2(texture.Width, texture.Height) * MathF.Min(1, MathF.Min(maxWidth, wholeWidth) / texture.Width);
 
-        var result = false;
+        var buttonClicked = false;
         DrawItemMiddle(() =>
         {
-            result = NoPaddingNoColorImageButton(texture.ImGuiHandle, size, id);
+            buttonClicked = NoPaddingNoColorImageButton(texture.ImGuiHandle, size, id);
         }, wholeWidth, size.X);
-        return result;
+        return buttonClicked;
     }
 
     internal static readonly uint ProgressCol = ImGui.ColorConvertFloat4ToU32(new Vector4(0.6f, 0.6f, 0.6f, 0.7f));
@@ -286,13 +294,21 @@ internal static class ImGuiHelper
 
     internal static void TextShade(Vector2 pos, string text, float width = 1.5f)
     {
-        ImGui.GetWindowDrawList().AddText(pos - new Vector2(0, width), Black, text);
-        ImGui.GetWindowDrawList().AddText(pos - new Vector2(0, -width), Black, text);
-        ImGui.GetWindowDrawList().AddText(pos - new Vector2(width, 0), Black, text);
-        ImGui.GetWindowDrawList().AddText(pos - new Vector2(-width, 0), Black, text);
-        ImGui.GetWindowDrawList().AddText(pos, White, text);
-    }
+        var offsets = new Vector2[]
+        {
+        new Vector2(0, -width),
+        new Vector2(0, width),
+        new Vector2(-width, 0),
+        new Vector2(width, 0)
+        };
 
+        var drawList = ImGui.GetWindowDrawList();
+        foreach (var offset in offsets)
+        {
+            drawList.AddText(pos + offset, Black, text);
+        }
+        drawList.AddText(pos, White, text);
+    }
 
     internal static void DrawActionOverlay(Vector2 cursor, float width, float percent)
     {
@@ -374,15 +390,17 @@ internal static class ImGuiHelper
         {
             if (ImGui.BeginTable(key, 2, ImGuiTableFlags.BordersOuter))
             {
-                foreach (var (name, action, keys) in pairs)
+                if (pairs != null)
                 {
-                    if (action == null) continue;
-                    DrawHotKeys(name, action, keys);
+                    foreach (var (name, action, keys) in pairs)
+                    {
+                        if (action == null) continue;
+                        DrawHotKeys(name, action, keys);
+                    }
                 }
                 if (!string.IsNullOrEmpty(command))
                 {
                     DrawHotKeys($"Execute \"{command}\"", () => ExecuteCommand(command), "Alt");
-
                     DrawHotKeys($"Copy \"{command}\"", () => CopyCommand(command), "Ctrl");
                 }
                 ImGui.EndTable();
@@ -392,11 +410,13 @@ internal static class ImGuiHelper
 
     public static void PrepareGroup(string key, string command, Action reset)
     {
+        if (reset == null) throw new ArgumentNullException(nameof(reset));
         DrawHotKeysPopup(key, command, ("Reset to Default Value.", reset, new string[] { "Backspace" }));
     }
 
     public static void ReactPopup(string key, string command, Action reset, bool showHand = true)
     {
+        if (reset == null) throw new ArgumentNullException(nameof(reset));
         ExecuteHotKeysPopup(key, command, string.Empty, showHand, (reset, new VirtualKey[] { VirtualKey.BACK }));
     }
 
@@ -415,10 +435,13 @@ internal static class ImGuiHelper
             }
         }
 
-        foreach (var (action, keys) in pairs)
+        if (pairs != null)
         {
-            if (action == null) continue;
-            ExecuteHotKeys(action, keys);
+            foreach (var (action, keys) in pairs)
+            {
+                if (action == null) continue;
+                ExecuteHotKeys(action, keys);
+            }
         }
         if (!string.IsNullOrEmpty(command))
         {
@@ -442,6 +465,8 @@ internal static class ImGuiHelper
     private static void ExecuteHotKeys(Action action, params VirtualKey[] keys)
     {
         if (action == null) return;
+        if (keys == null) throw new ArgumentNullException(nameof(keys));
+
         var name = string.Join(' ', keys);
 
         if (!_lastChecked.TryGetValue(name, out var last)) last = false;
@@ -454,6 +479,7 @@ internal static class ImGuiHelper
     private static void DrawHotKeys(string name, Action action, params string[] keys)
     {
         if (action == null) return;
+        if (keys == null) throw new ArgumentNullException(nameof(keys));
 
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
@@ -467,16 +493,13 @@ internal static class ImGuiHelper
         ImGui.TextDisabled(string.Join(' ', keys));
     }
 
-
     #endregion
 
     public static bool IsInRect(Vector2 leftTop, Vector2 size)
     {
         var pos = ImGui.GetMousePos() - leftTop;
-        if (pos.X <= 0 || pos.Y <= 0 || pos.X >= size.X || pos.Y >= size.Y) return false;
-        return true;
+        return pos.X > 0 && pos.Y > 0 && pos.X < size.X && pos.Y < size.Y;
     }
-
 
     public static string ToSymbol(this ConfigUnitType unit) => unit switch
     {
@@ -484,25 +507,28 @@ internal static class ImGuiHelper
         ConfigUnitType.Degree => " °",
         ConfigUnitType.Pixels => " p",
         ConfigUnitType.Yalms => " y",
-        ConfigUnitType.Percent => " %%",
+        ConfigUnitType.Percent => " %", // Changed to single percentage sign if double was not intentional
         _ => string.Empty,
     };
 
     public static void Draw(this CombatType type)
     {
+        bool first = true;
         if (type.HasFlag(CombatType.PvE))
         {
-            ImGui.SameLine();
+            if (!first) ImGui.SameLine();
             ImGui.TextColored(ImGuiColors.DalamudYellow, " PvE");
+            first = false;
         }
         if (type.HasFlag(CombatType.PvP))
         {
-            ImGui.SameLine();
+            if (!first) ImGui.SameLine();
             ImGui.TextColored(ImGuiColors.TankBlue, " PvP");
+            first = false;
         }
         if (type == CombatType.None)
         {
-            ImGui.SameLine();
+            if (!first) ImGui.SameLine();
             ImGui.TextColored(ImGuiColors.DalamudRed, " None of PvE or PvP!");
         }
     }

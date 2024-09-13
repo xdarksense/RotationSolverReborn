@@ -130,13 +130,14 @@ internal static class ActionUpdater
     static DateTime _startCombatTime = DateTime.MinValue;
     private static void UpdateCombatTime()
     {
-        var last = DataCenter.InCombat;
+        var lastInCombat = DataCenter.InCombat;
         DataCenter.InCombat = Svc.Condition[ConditionFlag.InCombat];
-        if (!last && DataCenter.InCombat)
+
+        if (!lastInCombat && DataCenter.InCombat)
         {
             _startCombatTime = DateTime.Now;
         }
-        else if (last && !DataCenter.InCombat)
+        else if (lastInCombat && !DataCenter.InCombat)
         {
             _startCombatTime = DateTime.MinValue;
 
@@ -146,14 +147,9 @@ internal static class ActionUpdater
             }
         }
 
-        if (_startCombatTime == DateTime.MinValue)
-        {
-            DataCenter.CombatTimeRaw = 0;
-        }
-        else
-        {
-            DataCenter.CombatTimeRaw = (float)(DateTime.Now - _startCombatTime).TotalSeconds;
-        }
+        DataCenter.CombatTimeRaw = _startCombatTime == DateTime.MinValue
+            ? 0
+            : (float)(DateTime.Now - _startCombatTime).TotalSeconds;
     }
 
     //private static unsafe void UpdateWeaponTime()

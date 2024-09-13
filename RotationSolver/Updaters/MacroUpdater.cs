@@ -11,23 +11,17 @@ internal static class MacroUpdater
             DoingMacro = macro;
         }
 
-        if (DoingMacro != null)
+        if (DoingMacro == null) return;
+
+        if (DoingMacro.IsRunning)
         {
-            if (DoingMacro.IsRunning)
+            if (DoingMacro.EndUseMacro())
             {
-                if (DoingMacro.EndUseMacro())
-                {
-                    DoingMacro = null;
-                }
-                else
-                {
-                    return;
-                }
+                DoingMacro = null;
             }
-            else
-            {
-                DoingMacro.StartUseMacro();
-            }
+            return;
         }
+
+        DoingMacro.StartUseMacro();
     }
 }
