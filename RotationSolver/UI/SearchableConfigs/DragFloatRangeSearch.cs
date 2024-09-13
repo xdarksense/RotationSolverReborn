@@ -59,8 +59,12 @@ internal class DragFloatRangeSearch : Searchable
         var maxValue = MaxValue;
         ImGui.SetNextItemWidth(Scale * DRAG_WIDTH);
 
+        // Cache the hash code to avoid multiple calls
+        var hashCode = GetHashCode();
+
+        // Draw the drag float range control
         if (ImGui.DragFloatRange2(
-            $"##Config_{ID}{GetHashCode()}",
+            $"##Config_{ID}{hashCode}",
             ref minValue,
             ref maxValue,
             Speed,
@@ -70,17 +74,24 @@ internal class DragFloatRangeSearch : Searchable
             Unit == ConfigUnitType.Percent ? $"{maxValue * 100:F1}{Unit.ToSymbol()}" : $"{maxValue:F2}{Unit.ToSymbol()}"
         ))
         {
+            // Ensure MinValue is less than or equal to MaxValue
             MinValue = Math.Min(minValue, maxValue);
             MaxValue = Math.Max(minValue, maxValue);
         }
 
+        // Show tooltip if item is hovered
         if (ImGui.IsItemHovered()) ShowTooltip();
 
+        // Draw job icon if applicable
         if (IsJob) DrawJobIcon();
         ImGui.SameLine();
+
+        // Set text color if specified
         if (Color != 0) ImGui.PushStyleColor(ImGuiCol.Text, Color);
         ImGui.TextWrapped(Name);
         if (Color != 0) ImGui.PopStyleColor();
+
+        // Show tooltip if item is hovered
         if (ImGui.IsItemHovered()) ShowTooltip(false);
     }
 }

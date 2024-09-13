@@ -3,25 +3,28 @@ using ECommons.DalamudServices;
 
 namespace RotationSolver.UI;
 
-internal class CollapsingHeaderGroup()
+internal class CollapsingHeaderGroup
 {
-    private readonly Dictionary<Func<string>, Action> _headers = [];
+    private readonly Dictionary<Func<string>, Action> _headers = new Dictionary<Func<string>, Action>();
     private int _openedIndex = -1;
 
     public float HeaderSize { get; set; } = 24;
 
-    public CollapsingHeaderGroup(Dictionary<Func<string>, Action> headers) : this()
+    public CollapsingHeaderGroup(Dictionary<Func<string>, Action> headers)
     {
-        _headers = headers;
+        _headers = headers ?? throw new ArgumentNullException(nameof(headers));
     }
 
     public void AddCollapsingHeader(Func<string> name, Action action)
     {
+        if (name == null) throw new ArgumentNullException(nameof(name));
+        if (action == null) throw new ArgumentNullException(nameof(action));
         _headers.Add(name, action);
     }
 
     public void RemoveCollapsingHeader(Func<string> name)
     {
+        if (name == null) throw new ArgumentNullException(nameof(name));
         _headers.Remove(name);
     }
 
@@ -69,7 +72,7 @@ internal class CollapsingHeaderGroup()
             }
             catch (Exception ex)
             {
-                Svc.Log.Warning(ex, "Something wrong with header drawing.");
+                Svc.Log.Warning(ex, "An error occurred while drawing the header.");
             }
         }
     }

@@ -28,14 +28,21 @@ internal class RotationConfigFloat : RotationConfigBase
 
     public override bool DoCommand(IRotationConfigSet set, string str)
     {
+        if (str == null) return false;
         if (!base.DoCommand(set, str)) return false;
+
+        // Ensure the string has sufficient length before slicing
+        if (str.Length <= Name.Length) return false;
 
         string numStr = str[Name.Length..].Trim();
 
-        if (float.TryParse(numStr, out _))
+        // Parse the float value and set it
+        if (float.TryParse(numStr, out float parsedValue))
         {
-            Value = numStr.ToString();
+            Value = parsedValue.ToString(); // Convert float to string
+            return true;
         }
-        return true;
+
+        return false;
     }
 }

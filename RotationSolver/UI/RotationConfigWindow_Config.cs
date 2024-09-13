@@ -214,6 +214,11 @@ public partial class RotationConfigWindow
     #endregion
 
     #region Auto
+    private const int HeaderSize = 18;
+
+    /// <summary>
+    /// Draws the auto section of the configuration window.
+    /// </summary>
     private static void DrawAuto()
     {
         ImGui.TextWrapped(UiString.ConfigWindow_Auto_Description.GetDescription());
@@ -221,19 +226,25 @@ public partial class RotationConfigWindow
     }
 
     private static readonly CollapsingHeaderGroup _autoHeader = new(new()
-{
-    { UiString.ConfigWindow_Auto_ActionUsage.GetDescription, () =>
-        {
-            ImGui.TextWrapped(UiString.ConfigWindow_Auto_ActionUsage_Description.GetDescription());
-            ImGui.Separator();
+    {
+        { UiString.ConfigWindow_Auto_ActionUsage.GetDescription, () =>
+            {
+                ImGui.TextWrapped(UiString.ConfigWindow_Auto_ActionUsage_Description.GetDescription());
+                ImGui.Separator();
 
-            _allSearchable.DrawItems(Configs.AutoActionUsage);
-        }
-    },
-    { UiString.ConfigWindow_Auto_HealingCondition.GetDescription, DrawHealingActionCondition },
-    { UiString.ConfigWindow_Auto_StateCondition.GetDescription, () => _autoState?.Draw() },
-});
+                _allSearchable.DrawItems(Configs.AutoActionUsage);
+            }
+        },
+        { UiString.ConfigWindow_Auto_HealingCondition.GetDescription, DrawHealingActionCondition },
+        { UiString.ConfigWindow_Auto_StateCondition.GetDescription, () => _autoState?.Draw() },
+    })
+    {
+        HeaderSize = HeaderSize,
+    };
 
+    /// <summary>
+    /// Draws the healing action condition section.
+    /// </summary>
     private static void DrawHealingActionCondition()
     {
         ImGui.TextWrapped(UiString.ConfigWindow_Auto_HealingCondition_Description.GetDescription());
@@ -243,63 +254,55 @@ public partial class RotationConfigWindow
     }
 
     private static readonly CollapsingHeaderGroup _autoState = new(new()
-{
     {
-        UiString.ConfigWindow_Auto_HealAreaConditionSet.GetDescription,
-        () => DataCenter.RightSet.HealAreaConditionSet?.DrawMain(DataCenter.RightNowRotation)
-    },
+        {
+            UiString.ConfigWindow_Auto_HealAreaConditionSet.GetDescription,
+            () => DataCenter.RightSet.HealAreaConditionSet?.DrawMain(DataCenter.RightNowRotation)
+        },
+        {
+            UiString.ConfigWindow_Auto_HealSingleConditionSet.GetDescription,
+            () => DataCenter.RightSet.HealSingleConditionSet?.DrawMain(DataCenter.RightNowRotation)
+        },
+        {
+            UiString.ConfigWindow_Auto_DefenseAreaConditionSet.GetDescription,
+            () => DataCenter.RightSet.DefenseAreaConditionSet?.DrawMain(DataCenter.RightNowRotation)
+        },
+        {
+            UiString.ConfigWindow_Auto_DefenseSingleConditionSet.GetDescription,
+            () => DataCenter.RightSet.DefenseSingleConditionSet?.DrawMain(DataCenter.RightNowRotation)
+        },
+        {
+            UiString.ConfigWindow_Auto_DispelStancePositionalConditionSet.GetDescription,
+            () => DataCenter.RightSet.DispelStancePositionalConditionSet?.DrawMain(DataCenter.RightNowRotation)
+        },
+        {
+            UiString.ConfigWindow_Auto_RaiseShirkConditionSet.GetDescription,
+            () => DataCenter.RightSet.RaiseShirkConditionSet?.DrawMain(DataCenter.RightNowRotation)
+        },
+        {
+            UiString.ConfigWindow_Auto_MoveForwardConditionSet.GetDescription,
+            () => DataCenter.RightSet.MoveForwardConditionSet?.DrawMain(DataCenter.RightNowRotation)
+        },
+        {
+            UiString.ConfigWindow_Auto_MoveBackConditionSet.GetDescription,
+            () => DataCenter.RightSet.MoveBackConditionSet?.DrawMain(DataCenter.RightNowRotation)
+        },
+        {
+            UiString.ConfigWindow_Auto_AntiKnockbackConditionSet.GetDescription,
+            () => DataCenter.RightSet.AntiKnockbackConditionSet?.DrawMain(DataCenter.RightNowRotation)
+        },
+        {
+            UiString.ConfigWindow_Auto_SpeedConditionSet.GetDescription,
+            () => DataCenter.RightSet.SpeedConditionSet?.DrawMain(DataCenter.RightNowRotation)
+        },
+        {
+            UiString.ConfigWindow_Auto_LimitBreakConditionSet.GetDescription,
+            () => DataCenter.RightSet.LimitBreakConditionSet?.DrawMain(DataCenter.RightNowRotation)
+        },
+    })
     {
-        UiString.ConfigWindow_Auto_HealSingleConditionSet.GetDescription,
-        () => DataCenter.RightSet.HealSingleConditionSet?.DrawMain(DataCenter.RightNowRotation)
-    },
-    {
-        UiString.ConfigWindow_Auto_DefenseAreaConditionSet.GetDescription,
-        () => DataCenter.RightSet.DefenseAreaConditionSet?.DrawMain(DataCenter.RightNowRotation)
-    },
-    {
-        UiString.ConfigWindow_Auto_DefenseSingleConditionSet.GetDescription,
-        () => DataCenter.RightSet.DefenseSingleConditionSet?.DrawMain(DataCenter.RightNowRotation)
-    },
-    {
-        UiString.ConfigWindow_Auto_DispelStancePositionalConditionSet.GetDescription,
-        () => DataCenter.RightSet.DispelStancePositionalConditionSet?.DrawMain(DataCenter.RightNowRotation)
-    },
-    {
-        UiString.ConfigWindow_Auto_RaiseShirkConditionSet.GetDescription,
-        () => DataCenter.RightSet.RaiseShirkConditionSet?.DrawMain(DataCenter.RightNowRotation)
-    },
-    {
-        UiString.ConfigWindow_Auto_MoveForwardConditionSet.GetDescription,
-        () => DataCenter.RightSet.MoveForwardConditionSet?.DrawMain(DataCenter.RightNowRotation)
-    },
-    {
-        UiString.ConfigWindow_Auto_MoveBackConditionSet.GetDescription,
-        () => DataCenter.RightSet.MoveBackConditionSet?.DrawMain(DataCenter.RightNowRotation)
-    },
-    {
-        UiString.ConfigWindow_Auto_AntiKnockbackConditionSet.GetDescription,
-        () => DataCenter.RightSet.AntiKnockbackConditionSet?.DrawMain(DataCenter.RightNowRotation)
-    },
-    {
-        UiString.ConfigWindow_Auto_SpeedConditionSet.GetDescription,
-        () => DataCenter.RightSet.SpeedConditionSet?.DrawMain(DataCenter.RightNowRotation)
-    },
-    {
-        UiString.ConfigWindow_Auto_LimitBreakConditionSet.GetDescription,
-        () => DataCenter.RightSet.LimitBreakConditionSet?.DrawMain(DataCenter.RightNowRotation)
-    },
-})
-    {
-        HeaderSize = 18,
+        HeaderSize = HeaderSize,
     };
-
-    private static void DrawAutoActionCondition()
-    {
-        ImGui.TextWrapped(UiString.ConfigWindow_Auto_ActionCondition_Description.GetDescription());
-        ImGui.Separator();
-
-        _allSearchable.DrawItems(Configs.AutoActionCondition);
-    }
     #endregion
 
     #region Target

@@ -9,33 +9,47 @@ internal class AutoHealCheckBox(PropertyInfo property, params ISearchable[] othe
         {
             _healthAreaAbility,
             _healthAreaAbilityHot,
-            _healthAreaSpell ,
-            _healthAreaSpellHot ,
-            _healthSingleAbility ,
-            _healthSingleAbilityHot ,
-            _healthSingleSpell ,
-            _healthSingleSpellHot ,
+            _healthAreaSpell,
+            _healthAreaSpellHot,
+            _healthSingleAbility,
+            _healthSingleAbilityHot,
+            _healthSingleSpell,
+            _healthSingleSpellHot,
         }).ToArray())
 {
     private readonly ISearchable[] _otherChildren = otherChildren;
 
+    // Static fields for health-related properties
     private static readonly DragFloatSearch
-        _healthAreaAbility = new(typeof(Configs).GetRuntimeProperty(nameof(Configs.HealthAreaAbility))!),
-        _healthAreaAbilityHot = new(typeof(Configs).GetRuntimeProperty(nameof(Configs.HealthAreaAbilityHot))!),
-        _healthAreaSpell = new(typeof(Configs).GetRuntimeProperty(nameof(Configs.HealthAreaSpell))!),
-        _healthAreaSpellHot = new(typeof(Configs).GetRuntimeProperty(nameof(Configs.HealthAreaSpellHot))!),
-        _healthSingleAbility = new(typeof(Configs).GetRuntimeProperty(nameof(Configs.HealthSingleAbility))!),
-        _healthSingleAbilityHot = new(typeof(Configs).GetRuntimeProperty(nameof(Configs.HealthSingleAbilityHot))!),
-        _healthSingleSpell = new(typeof(Configs).GetRuntimeProperty(nameof(Configs.HealthSingleSpell))!),
-        _healthSingleSpellHot = new(typeof(Configs).GetRuntimeProperty(nameof(Configs.HealthSingleSpellHot))!);
+        _healthAreaAbility = CreateDragFloatSearch(nameof(Configs.HealthAreaAbility)),
+        _healthAreaAbilityHot = CreateDragFloatSearch(nameof(Configs.HealthAreaAbilityHot)),
+        _healthAreaSpell = CreateDragFloatSearch(nameof(Configs.HealthAreaSpell)),
+        _healthAreaSpellHot = CreateDragFloatSearch(nameof(Configs.HealthAreaSpellHot)),
+        _healthSingleAbility = CreateDragFloatSearch(nameof(Configs.HealthSingleAbility)),
+        _healthSingleAbilityHot = CreateDragFloatSearch(nameof(Configs.HealthSingleAbilityHot)),
+        _healthSingleSpell = CreateDragFloatSearch(nameof(Configs.HealthSingleSpell)),
+        _healthSingleSpellHot = CreateDragFloatSearch(nameof(Configs.HealthSingleSpellHot));
+
+    // Method to create DragFloatSearch instances with null checks
+    private static DragFloatSearch CreateDragFloatSearch(string propertyName)
+    {
+        var property = typeof(Configs).GetRuntimeProperty(propertyName);
+        if (property == null)
+        {
+            throw new ArgumentException($"Property '{propertyName}' not found in Configs.");
+        }
+        return new DragFloatSearch(property);
+    }
 
     protected override void DrawChildren()
     {
+        // Draw other children
         foreach (var child in _otherChildren)
         {
             child.Draw();
         }
 
+        // Draw health-related properties in a table
         if (ImGui.BeginTable("Healing things", 3, ImGuiTableFlags.Borders
             | ImGuiTableFlags.Resizable
             | ImGuiTableFlags.SizingStretchProp))
@@ -52,56 +66,26 @@ internal class AutoHealCheckBox(PropertyInfo property, params ISearchable[] othe
             ImGui.TableNextColumn();
             ImGui.TableHeader(UiString.HotTargets.GetDescription());
 
-            ImGui.TableNextRow();
-            ImGui.TableNextColumn();
-            ImGui.Text(UiString.HpAoe0Gcd.GetDescription());
-
-            ImGui.TableNextColumn();
-
-            _healthAreaAbility?.Draw();
-
-            ImGui.TableNextColumn();
-
-            _healthAreaAbilityHot?.Draw();
-
-            ImGui.TableNextRow();
-            ImGui.TableNextColumn();
-            ImGui.Text(UiString.HpAoeGcd.GetDescription());
-
-            ImGui.TableNextColumn();
-
-            _healthAreaSpell?.Draw();
-
-
-            ImGui.TableNextColumn();
-
-            _healthAreaSpellHot?.Draw();
-
-            ImGui.TableNextRow();
-            ImGui.TableNextColumn();
-            ImGui.Text(UiString.HpSingle0Gcd.GetDescription());
-
-            ImGui.TableNextColumn();
-
-            _healthSingleAbility?.Draw();
-
-            ImGui.TableNextColumn();
-
-            _healthSingleAbilityHot?.Draw();
-
-            ImGui.TableNextRow();
-            ImGui.TableNextColumn();
-            ImGui.Text(UiString.HpSingleGcd.GetDescription());
-
-            ImGui.TableNextColumn();
-
-            _healthSingleSpell?.Draw();
-
-            ImGui.TableNextColumn();
-
-            _healthSingleSpellHot?.Draw();
+            DrawHealthRow(UiString.HpAoe0Gcd.GetDescription(), _healthAreaAbility, _healthAreaAbilityHot);
+            DrawHealthRow(UiString.HpAoeGcd.GetDescription(), _healthAreaSpell, _healthAreaSpellHot);
+            DrawHealthRow(UiString.HpSingle0Gcd.GetDescription(), _healthSingleAbility, _healthSingleAbilityHot);
+            DrawHealthRow(UiString.HpSingleGcd.GetDescription(), _healthSingleSpell, _healthSingleSpellHot);
 
             ImGui.EndTable();
         }
+    }
+
+    // Helper method to draw a row in the health table
+    private void DrawHealthRow(string description, DragFloatSearch normalTarget, DragFloatSearch hotTarget)
+    {
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
+        ImGui.Text(description);
+
+        ImGui.TableNextColumn();
+        normalTarget?.Draw();
+
+        ImGui.TableNextColumn();
+        hotTarget?.Draw();
     }
 }

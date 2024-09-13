@@ -12,10 +12,17 @@ internal class ColorEditSearch(PropertyInfo property) : Searchable(property)
     {
         var value = Value;
         ImGui.SetNextItemWidth(DRAG_WIDTH * 1.5f * Scale);
-        if (ImGui.ColorEdit4($"{Name}##Config_{ID}{GetHashCode()}", ref value))
+
+        // Cache the hash code to avoid multiple calls
+        var hashCode = GetHashCode();
+
+        // Draw the color edit control
+        if (ImGui.ColorEdit4($"{Name}##Config_{ID}{hashCode}", ref value))
         {
             Value = value;
         }
+
+        // Show tooltip if item is hovered
         if (ImGui.IsItemHovered()) ShowTooltip();
     }
 }
