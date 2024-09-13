@@ -27,6 +27,15 @@ partial class DancerRotation
     /// </summary>
     public static byte CompletedSteps => JobGauge.CompletedSteps;
 
+    /// <inheritdoc/>
+    public override void DisplayStatus()
+    {
+        ImGui.Text("IsDancing: " + IsDancing.ToString());
+        ImGui.Text("Esprit: " + Esprit.ToString());
+        ImGui.Text("Feathers: " + Feathers.ToString());
+        ImGui.Text("CompletedSteps: " + CompletedSteps.ToString());
+    }
+
     static partial void ModifyCascadePvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.SilkenSymmetry];

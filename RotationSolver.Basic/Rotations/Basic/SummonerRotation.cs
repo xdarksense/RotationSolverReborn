@@ -117,15 +117,27 @@ partial class SummonerRotation
     /// 
     /// </summary>
     private static bool HasSummon => DataCenter.HasPet && SummonTimeEndAfterGCD();
-    #endregion
 
     /// <inheritdoc/>
     public override void DisplayStatus()
     {
-        ImGui.Text("AttunmentTime: " + AttunmentTimeRaw.ToString());
-        ImGui.Text("SummonTime: " + SummonTimeRaw.ToString());
-        ImGui.Text("Pet: " + DataCenter.HasPet.ToString());
+        ImGui.Text("CanHealSingleSpell: " + CanHealSingleSpell.ToString());
+        ImGui.Text("InBahamut: " + InBahamut.ToString());
+        ImGui.Text("InSolarBahamut: " + InSolarBahamut.ToString());
+        ImGui.Text("InPhoenix: " + InPhoenix.ToString());
+        ImGui.Text("HasAetherflowStacks: " + HasAetherflowStacks.ToString());
+        ImGui.Text("Attunement: " + Attunement.ToString());
+        ImGui.Text("IsIfritReady: " + IsIfritReady.ToString());
+        ImGui.Text("IsTitanReady: " + IsTitanReady.ToString());
+        ImGui.Text("IsGarudaReady: " + IsGarudaReady.ToString());
+        ImGui.Text("InIfrit: " + InIfrit.ToString());
+        ImGui.Text("InTitan: " + InTitan.ToString());
+        ImGui.Text("InGaruda: " + InGaruda.ToString());
+        ImGui.Text("SummonTime: " + SummonTime.ToString());
+        ImGui.Text("AttunmentTime: " + AttunmentTime.ToString());
+        ImGui.Text("HasSummon: " + HasSummon.ToString());
     }
+    #endregion
 
     static partial void ModifySummonRubyPvE(ref ActionSetting setting)
     {

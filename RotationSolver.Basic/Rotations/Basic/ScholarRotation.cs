@@ -23,6 +23,13 @@ partial class ScholarRotation
     /// </summary>
     public static float SeraphTime => SeraphTimeRaw - DataCenter.DefaultGCDRemain;
 
+    /// <inheritdoc/>
+    public override void DisplayStatus()
+    {
+        ImGui.Text("FairyGauge: " + FairyGauge.ToString());
+        ImGui.Text("HasAetherflow: " + HasAetherflow.ToString());
+        ImGui.Text("SeraphTime: " + SeraphTime.ToString());
+    }
     #endregion
     private sealed protected override IBaseAction Raise => ResurrectionPvE;
 

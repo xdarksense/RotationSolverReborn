@@ -44,6 +44,16 @@ partial class SageRotation
     /// <returns></returns>
     protected static bool AddersgallEndAfterGCD(uint gctCount = 0, float offset = 0)
         => AddersgallEndAfter(GCDTime(gctCount, offset));
+
+    /// <inheritdoc/>
+    public override void DisplayStatus()
+    {
+        ImGui.Text("HasEukrasia: " + HasEukrasia.ToString());
+        ImGui.Text("Addersgall: " + Addersgall.ToString());
+        ImGui.Text("Addersting: " + Addersting.ToString());
+        ImGui.Text("AddersgallTime: " + AddersgallTime.ToString());
+        ImGui.Text("AddersgallTimerRaw: " + AddersgallTimerRaw.ToString());
+    }
     #endregion
 
     private protected sealed override IBaseAction Raise => EgeiroPvE;

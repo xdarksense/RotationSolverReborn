@@ -52,6 +52,18 @@ partial class BardRotation
     /// <returns></returns>
     protected static bool SongEndAfterGCD(uint gctCount = 0, float offset = 0)
         => SongEndAfter(GCDTime(gctCount, offset));
+
+    /// <inheritdoc/>
+    public override void DisplayStatus()
+    {
+        ImGui.Text("Repertoire: " + Repertoire.ToString());
+        ImGui.Text("Song: " + Song.ToString());
+        ImGui.Text("LastSong: " + LastSong.ToString());
+        ImGui.Text("SoulVoice: " + SoulVoice.ToString());
+        ImGui.Text("SongTimeRaw: " + SongTimeRaw.ToString());
+        ImGui.Text("SongTime: " + SongTime.ToString());
+        ImGui.Text("BloodletterMax: " + BloodletterMax.ToString());
+    }
     #endregion
 
     #region PvE

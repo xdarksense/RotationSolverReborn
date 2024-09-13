@@ -23,7 +23,13 @@ partial class AstrologianRotation
     ///  Can use Umbral or Astral draw, active draw matching what the next draw will be, ASTRAL, UMBRAL
     /// </summary>
     protected static DrawType ActiveDraw => JobGauge.ActiveDraw;
-
+    /// <inheritdoc/>
+    public override void DisplayStatus()
+    {
+        ImGui.Text($"DrawnCard: {string.Join(", ", DrawnCard)}");
+        ImGui.Text($"DrawnCrownCard: {DrawnCrownCard}");
+        ImGui.Text($"ActiveDraw: {ActiveDraw}");
+    }
     #endregion
 
 

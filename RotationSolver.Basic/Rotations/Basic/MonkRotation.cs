@@ -44,6 +44,19 @@ partial class MonkRotation
     /// Gets the amount of available Coeurl Fury stacks.
     /// </summary>
     public static int CoeurlFury => JobGauge.CoeurlFury;
+
+    /// <inheritdoc/>
+    public override void DisplayStatus()
+    {
+        ImGui.Text($"CoeurlFury: {CoeurlFury}");
+        ImGui.Text($"RaptorFury: {RaptorFury}");
+        ImGui.Text($"OpoOpoFury: {OpoOpoFury}");
+        ImGui.Text($"NoNadi: {NoNadi}");
+        ImGui.Text($"HasLunar: {HasLunar}");
+        ImGui.Text($"HasSolar: {HasSolar}");
+        ImGui.Text($"Chakra: {Chakra}");
+        ImGui.Text($"BeastChakras: {string.Join(", ", BeastChakras)}");
+    }
     #endregion
 
     static partial void ModifyBootshinePvE(ref ActionSetting setting)

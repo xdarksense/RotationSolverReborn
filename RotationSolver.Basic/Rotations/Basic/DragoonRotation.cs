@@ -41,6 +41,15 @@ partial class DragoonRotation
     protected static bool LOTDEndAfterGCD(uint gctCount = 0, float offset = 0)
         => LOTDEndAfter(GCDTime(gctCount, offset));
 
+    /// <inheritdoc/>
+    public override void DisplayStatus()
+    {
+        ImGui.Text("EyeCount: " + EyeCount.ToString());
+        ImGui.Text("FocusCount: " + FocusCount.ToString());
+        ImGui.Text("LOTDTimeRaw: " + LOTDTimeRaw.ToString());
+        ImGui.Text("LOTDTime: " + LOTDTime.ToString());
+    }
+
     //Job
 
     static partial void ModifyTrueThrustPvE(ref ActionSetting setting)

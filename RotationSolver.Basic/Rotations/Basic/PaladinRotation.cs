@@ -42,6 +42,18 @@ partial class PaladinRotation
     /// Gets the current level of the Oath gauge.
     /// </summary>
     public static byte OathGauge => JobGauge.OathGauge;
+
+    /// <inheritdoc/>
+    public override void DisplayStatus()
+    {
+        ImGui.Text("RequiescatStacks: " + RequiescatStacks.ToString());
+        ImGui.Text("OathGauge: " + OathGauge.ToString());
+        ImGui.Text("HasDivineMight: " + HasDivineMight.ToString());
+        ImGui.Text("HasFightOrFlight: " + HasFightOrFlight.ToString());
+        ImGui.Text("CanHealAreaAbility: " + CanHealAreaAbility.ToString());
+        ImGui.Text("CanHealSingleSpell: " + CanHealSingleSpell.ToString());
+    }
+
     #endregion
 
     private protected sealed override IBaseAction TankStance => IronWillPvE;

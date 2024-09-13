@@ -28,6 +28,16 @@ partial class RedMageRotation
     /// Is <see cref="WhiteMana"/> larger than <see cref="BlackMana"/>
     /// </summary>
     public static bool IsWhiteManaLargerThanBlackMana => WhiteMana > BlackMana;
+
+    /// <inheritdoc/>
+    public override void DisplayStatus()
+    {
+        ImGui.Text("WhiteMana: " + WhiteMana.ToString());
+        ImGui.Text("BlackMana: " + BlackMana.ToString());
+        ImGui.Text("ManaStacks: " + ManaStacks.ToString());
+        ImGui.Text("IsWhiteManaLargerThanBlackMana: " + IsWhiteManaLargerThanBlackMana.ToString());
+        ImGui.Text("CanHealSingleSpell: " + CanHealSingleSpell.ToString());
+    }
     #endregion
 
     private static readonly StatusID[] SwiftcastStatus = [.. StatusHelper.SwiftcastStatus, StatusID.Acceleration];
