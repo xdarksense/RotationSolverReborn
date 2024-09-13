@@ -18,7 +18,6 @@ using Lumina.Excel.GeneratedSheets;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Data;
 using RotationSolver.Helpers;
-
 using RotationSolver.UI.SearchableConfigs;
 using RotationSolver.UI.SearchableSettings;
 using RotationSolver.Updaters;
@@ -1697,7 +1696,6 @@ public partial class RotationConfigWindow : Window
         style.ItemSpacing = spacing;
     }
 
-
     private static void DrawRotationsLibraries()
     {
         if (!Service.Config.RotationLibs.Any(string.IsNullOrEmpty))
@@ -1737,7 +1735,6 @@ public partial class RotationConfigWindow : Window
                     .Where(s => s.CanDispel)
                     .ToArray();
 
-
     private static Status[]? _allStatus = null;
     internal static Status[] AllStatus
         => _allStatus ??= Service.GetSheet<Status>()
@@ -1751,22 +1748,27 @@ public partial class RotationConfigWindow : Window
                     .Where(a => !string.IsNullOrEmpty(a.Name) && !a.IsPvP && !a.IsPlayerAction
                     && a.ClassJob.Value == null && a.Cast100ms > 0)
                     .ToArray();
+
     private static Status[]? _badStatus = null;
+    private const int BadStatusCategory = 2;
     internal static Status[] BadStatus
         => _badStatus ??= Service.GetSheet<Status>()
-                    .Where(s => s.StatusCategory == 2 && s.Icon != 0)
+                    .Where(s => s.StatusCategory == BadStatusCategory && s.Icon != 0)
                     .ToArray();
+
     private static void DrawList()
     {
         ImGui.TextWrapped(UiString.ConfigWindow_List_Description.GetDescription());
         _idsHeader?.Draw();
     }
+
     private static readonly CollapsingHeaderGroup _idsHeader = new(new()
     {
         { UiString.ConfigWindow_List_Statuses.GetDescription, DrawListStatuses},
         { () => Service.Config.UseDefenseAbility ? UiString.ConfigWindow_List_Actions.GetDescription() : string.Empty, DrawListActions},
         { UiString.ConfigWindow_List_Territories.GetDescription, DrawListTerritories},
     });
+
     private static void DrawListStatuses()
     {
         ImGui.SetNextItemWidth(ImGui.GetWindowWidth());
@@ -1793,30 +1795,28 @@ public partial class RotationConfigWindow : Window
             ImGui.TableNextRow();
 
             ImGui.TableNextColumn();
-
             ImGui.TextWrapped(UiString.ConfigWindow_List_InvincibilityDesc.GetDescription());
             DrawStatusList(nameof(OtherConfiguration.InvincibleStatus), OtherConfiguration.InvincibleStatus, AllStatus);
 
             ImGui.TableNextColumn();
-
             ImGui.TextWrapped(UiString.ConfigWindow_List_PriorityDesc.GetDescription());
             DrawStatusList(nameof(OtherConfiguration.PriorityStatus), OtherConfiguration.PriorityStatus, AllStatus);
 
             ImGui.TableNextColumn();
-
             ImGui.TextWrapped(UiString.ConfigWindow_List_DangerousStatusDesc.GetDescription());
             DrawStatusList(nameof(OtherConfiguration.DangerousStatus), OtherConfiguration.DangerousStatus, AllDispelStatus);
 
             ImGui.TableNextColumn();
-
             ImGui.TextWrapped(UiString.ConfigWindow_List_NoCastingStatusDesc.GetDescription());
             DrawStatusList(nameof(OtherConfiguration.NoCastingStatus), OtherConfiguration.NoCastingStatus, BadStatus);
-
         }
     }
 
     private static void FromClipBoardButton(HashSet<uint> items)
     {
+        const string CopyErrorMessage = "Failed to copy the values to the clipboard.";
+        const string PasteErrorMessage = "Failed to copy the values from the clipboard.";
+
         if (ImGui.Button(UiString.ConfigWindow_Actions_Copy.GetDescription()))
         {
             try
@@ -1825,7 +1825,7 @@ public partial class RotationConfigWindow : Window
             }
             catch (Exception ex)
             {
-                Svc.Log.Warning(ex, "Failed to copy the values to the clipboard.");
+                Svc.Log.Warning(ex, CopyErrorMessage);
             }
         }
 
@@ -1835,14 +1835,18 @@ public partial class RotationConfigWindow : Window
         {
             try
             {
-                foreach (var aId in JsonConvert.DeserializeObject<uint[]>(ImGui.GetClipboardText())!)
+                var clipboardText = ImGui.GetClipboardText();
+                if (clipboardText != null)
                 {
-                    items.Add(aId);
+                    foreach (var aId in JsonConvert.DeserializeObject<uint[]>(clipboardText) ?? Array.Empty<uint>())
+                    {
+                        items.Add(aId);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                Svc.Log.Warning(ex, "Failed to copy the values from the clipboard.");
+                Svc.Log.Warning(ex, PasteErrorMessage);
             }
             finally
             {
@@ -1855,13 +1859,17 @@ public partial class RotationConfigWindow : Window
     static string _statusSearching = string.Empty;
     private static void DrawStatusList(string name, HashSet<uint> statuses, Status[] allStatus)
     {
+        const float IconWidth = 24f;
+        const float IconHeight = 32f;
+        const uint DefaultNotLoadId = 10100;
+
         ImGui.PushID(name);
         FromClipBoardButton(statuses);
 
         uint removeId = 0;
-        uint notLoadId = 10100;
+        uint notLoadId = DefaultNotLoadId;
 
-        var popupId = "Rotation Solver Popup" + name;
+        var popupId = $"Rotation Solver Popup{name}";
 
         StatusPopUp(popupId, allStatus, ref _statusSearching, status =>
         {
@@ -1869,7 +1877,7 @@ public partial class RotationConfigWindow : Window
             OtherConfiguration.Save();
         }, notLoadId);
 
-        var count = Math.Max(1, (int)MathF.Floor(ImGui.GetColumnWidth() / (24 * Scale + ImGui.GetStyle().ItemSpacing.X)));
+        var count = Math.Max(1, (int)MathF.Floor(ImGui.GetColumnWidth() / (IconWidth * Scale + ImGui.GetStyle().ItemSpacing.X)));
         var index = 0;
 
         if (IconSet.GetTexture(16220, out var text))
@@ -1878,7 +1886,7 @@ public partial class RotationConfigWindow : Window
             {
                 ImGui.SameLine();
             }
-            if (ImGuiHelper.NoPaddingNoColorImageButton(text.ImGuiHandle, new Vector2(24, 32) * Scale, name))
+            if (ImGuiHelper.NoPaddingNoColorImageButton(text.ImGuiHandle, new Vector2(IconWidth, IconHeight) * Scale, name))
             {
                 if (!ImGui.IsPopupOpen(popupId)) ImGui.OpenPopup(popupId);
             }
@@ -1887,13 +1895,13 @@ public partial class RotationConfigWindow : Window
 
         foreach (var status in statuses.Select(a => Service.GetSheet<Status>().GetRow(a))
             .Where(a => a != null)
-            .OrderByDescending(s => SearchableCollection.Similarity(s!.Name + " " + s.RowId.ToString(), _statusSearching)))
+            .OrderByDescending(s => SearchableCollection.Similarity($"{s!.Name} {s.RowId}", _statusSearching)))
         {
             void Delete() => removeId = status.RowId;
 
-            var key = "Status" + status!.RowId.ToString();
+            var key = $"Status{status!.RowId}";
 
-            ImGuiHelper.DrawHotKeysPopup(key, string.Empty, (UiString.ConfigWindow_List_Remove.GetDescription(), Delete, ["Delete"]));
+            ImGuiHelper.DrawHotKeysPopup(key, string.Empty, (UiString.ConfigWindow_List_Remove.GetDescription(), Delete, new[] { "Delete" }));
 
             if (IconSet.GetTexture(status.Icon, out var texture, notLoadId))
             {
@@ -1901,10 +1909,10 @@ public partial class RotationConfigWindow : Window
                 {
                     ImGui.SameLine();
                 }
-                ImGuiHelper.NoPaddingNoColorImageButton(texture.ImGuiHandle, new Vector2(24, 32) * Scale, "Status" + status.RowId.ToString());
+                ImGuiHelper.NoPaddingNoColorImageButton(texture.ImGuiHandle, new Vector2(IconWidth, IconHeight) * Scale, $"Status{status.RowId}");
 
                 ImGuiHelper.ExecuteHotKeysPopup(key, string.Empty, $"{status.Name} ({status.RowId})", false,
-                    (Delete, [VirtualKey.DELETE]));
+                    (Delete, new[] { VirtualKey.DELETE }));
             }
         }
 
@@ -1918,22 +1926,26 @@ public partial class RotationConfigWindow : Window
 
     internal static void StatusPopUp(string popupId, Status[] allStatus, ref string searching, Action<Status> clicked, uint notLoadId = 10100, float size = 32)
     {
+        const float InputWidth = 200f;
+        const float ChildHeight = 400f;
+        const int InputTextLength = 128;
+
         using var popup = ImRaii.Popup(popupId);
         if (popup)
         {
-            ImGui.SetNextItemWidth(200 * Scale);
-            ImGui.InputTextWithHint("##Searching the status", UiString.ConfigWindow_List_StatusNameOrId.GetDescription(), ref searching, 128);
+            ImGui.SetNextItemWidth(InputWidth * Scale);
+            ImGui.InputTextWithHint("##Searching the status", UiString.ConfigWindow_List_StatusNameOrId.GetDescription(), ref searching, InputTextLength);
 
             ImGui.Spacing();
 
-            using var child = ImRaii.Child("Rotation Solver Reborn Add Status", new Vector2(-1, 400 * Scale));
+            using var child = ImRaii.Child("Rotation Solver Reborn Add Status", new Vector2(-1, ChildHeight * Scale));
             if (child)
             {
                 var count = Math.Max(1, (int)MathF.Floor(ImGui.GetWindowWidth() / (size * 3 / 4 * Scale + ImGui.GetStyle().ItemSpacing.X)));
                 var index = 0;
 
                 var searchingKey = searching;
-                foreach (var status in allStatus.OrderByDescending(s => SearchableCollection.Similarity(s.Name + " " + s.RowId.ToString(), searchingKey)))
+                foreach (var status in allStatus.OrderByDescending(s => SearchableCollection.Similarity($"{s.Name} {s.RowId}", searchingKey)))
                 {
                     if (IconSet.GetTexture(status.Icon, out var texture, notLoadId))
                     {
@@ -1941,7 +1953,7 @@ public partial class RotationConfigWindow : Window
                         {
                             ImGui.SameLine();
                         }
-                        if (ImGuiHelper.NoPaddingNoColorImageButton(texture.ImGuiHandle, new Vector2(size * 3 / 4, size) * Scale, "Adding" + status.RowId.ToString()))
+                        if (ImGuiHelper.NoPaddingNoColorImageButton(texture.ImGuiHandle, new Vector2(size * 3 / 4, size) * Scale, $"Adding{status.RowId}"))
                         {
                             clicked?.Invoke(status);
                             ImGui.CloseCurrentPopup();
@@ -1980,11 +1992,8 @@ public partial class RotationConfigWindow : Window
             DrawActionsList(nameof(OtherConfiguration.HostileCastingTank), OtherConfiguration.HostileCastingTank);
 
             ImGui.TableNextColumn();
-
             _allSearchable.DrawItems(Configs.List);
-
             ImGui.TextWrapped(UiString.ConfigWindow_List_HostileCastingAreaDesc.GetDescription());
-
             DrawActionsList(nameof(OtherConfiguration.HostileCastingArea), OtherConfiguration.HostileCastingArea);
 
             ImGui.TableNextColumn();
@@ -1995,14 +2004,18 @@ public partial class RotationConfigWindow : Window
     }
 
     private static string _actionSearching = string.Empty;
+
     private static void DrawActionsList(string name, HashSet<uint> actions)
     {
+        const float InputWidth = 200f;
+        const float ChildHeight = 400f;
+
         ImGui.PushID(name);
         uint removeId = 0;
 
-        var popupId = "Rotation Solver Reborn Action Popup" + name;
+        var popupId = $"Rotation Solver Reborn Action Popup{name}";
 
-        if (ImGui.Button(UiString.ConfigWindow_List_AddAction.GetDescription() + "##" + name))
+        if (ImGui.Button($"{UiString.ConfigWindow_List_AddAction.GetDescription()}##{name}"))
         {
             if (!ImGui.IsPopupOpen(popupId)) ImGui.OpenPopup(popupId);
         }
@@ -2014,17 +2027,17 @@ public partial class RotationConfigWindow : Window
 
         foreach (var action in actions.Select(a => Service.GetSheet<GAction>().GetRow(a))
             .Where(a => a != null)
-            .OrderByDescending(s => SearchableCollection.Similarity(s!.Name + " " + s.RowId.ToString(), _actionSearching)))
+            .OrderByDescending(s => SearchableCollection.Similarity($"{s!.Name} {s.RowId}", _actionSearching)))
         {
             void Reset() => removeId = action.RowId;
 
-            var key = "Action" + action!.RowId.ToString();
+            var key = $"Action{action!.RowId}";
 
-            ImGuiHelper.DrawHotKeysPopup(key, string.Empty, (UiString.ConfigWindow_List_Remove.GetDescription(), Reset, ["Delete"]));
+            ImGuiHelper.DrawHotKeysPopup(key, string.Empty, (UiString.ConfigWindow_List_Remove.GetDescription(), Reset, new[] { "Delete" }));
 
             ImGui.Selectable($"{action.Name} ({action.RowId})");
 
-            ImGuiHelper.ExecuteHotKeysPopup(key, string.Empty, string.Empty, false, (Reset, [VirtualKey.DELETE]));
+            ImGuiHelper.ExecuteHotKeysPopup(key, string.Empty, string.Empty, false, (Reset, new[] { VirtualKey.DELETE }));
         }
 
         if (removeId != 0)
@@ -2036,15 +2049,15 @@ public partial class RotationConfigWindow : Window
         using var popup = ImRaii.Popup(popupId);
         if (popup)
         {
-            ImGui.SetNextItemWidth(200 * Scale);
+            ImGui.SetNextItemWidth(InputWidth * Scale);
             ImGui.InputTextWithHint("##Searching the action pop up", UiString.ConfigWindow_List_ActionNameOrId.GetDescription(), ref _actionSearching, 128);
 
             ImGui.Spacing();
 
-            using var child = ImRaii.Child("Rotation Solver Add action", new Vector2(-1, 400 * Scale));
+            using var child = ImRaii.Child("Rotation Solver Add action", new Vector2(-1, ChildHeight * Scale));
             if (child)
             {
-                foreach (var action in AllActions.OrderByDescending(s => SearchableCollection.Similarity(s.Name + " " + s.RowId.ToString(), _actionSearching)))
+                foreach (var action in AllActions.OrderByDescending(s => SearchableCollection.Similarity($"{s.Name} {s.RowId}", _actionSearching)))
                 {
                     var selected = ImGui.Selectable($"{action.Name} ({action.RowId})");
                     if (ImGui.IsItemHovered())
@@ -2115,7 +2128,6 @@ public partial class RotationConfigWindow : Window
             ImGui.TableNextRow();
 
             ImGui.TableNextColumn();
-
             ImGui.TextWrapped(UiString.ConfigWindow_List_NoHostileDesc.GetDescription());
 
             var width = ImGui.GetColumnWidth() - ImGuiEx.CalcIconSize(FontAwesomeIcon.Ban).X - ImGui.GetStyle().ItemSpacing.X - 10 * Scale;
@@ -2125,7 +2137,7 @@ public partial class RotationConfigWindow : Window
                 OtherConfiguration.NoHostileNames[territoryId] = libs = [];
             }
 
-            //Add one.
+            // Add one.
             if (!libs.Any(string.IsNullOrEmpty))
             {
                 OtherConfiguration.NoHostileNames[territoryId] = [.. libs, string.Empty];
@@ -2155,7 +2167,6 @@ public partial class RotationConfigWindow : Window
                 OtherConfiguration.SaveNoHostileNames();
             }
             ImGui.TableNextColumn();
-
             ImGui.TextWrapped(UiString.ConfigWindow_List_NoProvokeDesc.GetDescription());
 
             width = ImGui.GetColumnWidth() - ImGuiEx.CalcIconSize(FontAwesomeIcon.Ban).X - ImGui.GetStyle().ItemSpacing.X - 10 * Scale;
@@ -2164,16 +2175,18 @@ public partial class RotationConfigWindow : Window
             {
                 OtherConfiguration.NoProvokeNames[territoryId] = libs = [];
             }
-            //Add one.
+
+            // Add one.
             if (!libs.Any(string.IsNullOrEmpty))
             {
                 OtherConfiguration.NoProvokeNames[territoryId] = [.. libs, string.Empty];
             }
+
             removeIndex = -1;
             for (int i = 0; i < libs.Length; i++)
             {
                 ImGui.SetNextItemWidth(width);
-                if (ImGui.InputTextWithHint($"##Rotation Solver Reborn Territory Provoke Name {i}", UiString.ConfigWindow_List_NoProvokeName.ToString(), ref libs[i], 1024))
+                if (ImGui.InputTextWithHint($"##Rotation Solver Reborn Territory Provoke Name {i}", UiString.ConfigWindow_List_NoProvokeName.GetDescription(), ref libs[i], 1024))
                 {
                     OtherConfiguration.NoProvokeNames[territoryId] = libs;
                     OtherConfiguration.SaveNoProvokeNames();
@@ -2211,13 +2224,12 @@ public partial class RotationConfigWindow : Window
 
                     RaycastHit hit = default;
 
-                    OtherConfiguration.BeneficialPositions[territoryId]
-                    =
+                    OtherConfiguration.BeneficialPositions[territoryId] =
                     [
                         .. pts,
-                        Framework.Instance()->BGCollisionModule
-                            ->RaycastMaterialFilter(&hit, pointPtr, directionPtr, 20, 1, unknown) ? hit.Point : point,
-                    ];
+                    Framework.Instance()->BGCollisionModule
+                        ->RaycastMaterialFilter(&hit, pointPtr, directionPtr, 20, 1, unknown) ? hit.Point : point,
+                ];
                     OtherConfiguration.SaveBeneficialPositions();
                 }
 
@@ -2253,12 +2265,13 @@ public partial class RotationConfigWindow : Window
 
     internal static void DrawContentFinder(ContentFinderCondition? content)
     {
+        const float MaxWidth = 480f;
         var badge = content?.Image;
         if (badge != null && badge.Value != 0
             && IconSet.GetTexture(badge.Value, out var badgeTexture))
         {
             var wholeWidth = ImGui.GetWindowWidth();
-            var size = new Vector2(badgeTexture.Width, badgeTexture.Height) * MathF.Min(1, MathF.Min(480, wholeWidth) / badgeTexture.Width);
+            var size = new Vector2(badgeTexture.Width, badgeTexture.Height) * MathF.Min(1, MathF.Min(MaxWidth, wholeWidth) / badgeTexture.Width);
 
             ImGuiHelper.DrawItemMiddle(() =>
             {
@@ -2276,22 +2289,23 @@ public partial class RotationConfigWindow : Window
 
         _debugHeader?.Draw();
     }
+
     private static readonly CollapsingHeaderGroup _debugHeader = new(new()
-    {
-        {() => DataCenter.RightNowRotation != null ? "Rotation" : string.Empty, DrawDebugRotationStatus},
-        {() =>"Status", DrawStatus },
-        {() =>"Party", DrawParty },
-        {() =>"Target Data", DrawTargetData },
-        {() =>"Next Action", DrawNextAction },
-        {() =>"Last Action", DrawLastAction },
-        {() =>"Others", DrawOthers },
-        {() =>"Effect",  () =>
-            {
-                ImGui.Text(Watcher.ShowStrSelf);
-                ImGui.Separator();
-                ImGui.Text(DataCenter.Role.ToString());
-            } },
-        });
+{
+    {() => DataCenter.RightNowRotation != null ? "Rotation" : string.Empty, DrawDebugRotationStatus},
+    {() => "Status", DrawStatus },
+    {() => "Party", DrawParty },
+    {() => "Target Data", DrawTargetData },
+    {() => "Next Action", DrawNextAction },
+    {() => "Last Action", DrawLastAction },
+    {() => "Others", DrawOthers },
+    {() => "Effect", () =>
+        {
+            ImGui.Text(Watcher.ShowStrSelf);
+            ImGui.Separator();
+            ImGui.Text(DataCenter.Role.ToString());
+        } },
+});
 
     private static void DrawDebugRotationStatus()
     {
@@ -2302,21 +2316,21 @@ public partial class RotationConfigWindow : Window
     {
         if ((IntPtr)FateManager.Instance() != IntPtr.Zero)
         {
-            ImGui.Text("Fate: " + DataCenter.FateId.ToString());
+            ImGui.Text($"Fate: {DataCenter.FateId}");
         }
-        ImGui.Text("Height: " + Player.Character->CalculateHeight().ToString());
-        ImGui.Text("Moving: " + DataCenter.IsMoving.ToString());
-        ImGui.Text("Stop Moving: " + DataCenter.StopMovingRaw.ToString());
+        ImGui.Text($"Height: {Player.Character->CalculateHeight()}");
+        ImGui.Text($"Moving: {DataCenter.IsMoving}");
+        ImGui.Text($"Stop Moving: {DataCenter.StopMovingRaw}");
 
-        ImGui.Text("TerritoryType: " + DataCenter.TerritoryContentType.ToString());
-        ImGui.Text("DPSTaken: " + DataCenter.DPSTaken.ToString());
+        ImGui.Text($"TerritoryType: {DataCenter.TerritoryContentType}");
+        ImGui.Text($"DPSTaken: {DataCenter.DPSTaken}");
 
-        ImGui.Text("Have pet: " + DataCenter.HasPet.ToString());
-        ImGui.Text("Hostile Near Count: " + DataCenter.NumberOfHostilesInRange.ToString());
-        ImGui.Text("Hostile Near Count Max Range: " + DataCenter.NumberOfHostilesInMaxRange.ToString());
-        ImGui.Text("Have Companion: " + DataCenter.HasCompanion.ToString());
-        ImGui.Text("MP: " + DataCenter.CurrentMp.ToString());
-        ImGui.Text("Count Down: " + Service.CountDownTime.ToString());
+        ImGui.Text($"Have pet: {DataCenter.HasPet}");
+        ImGui.Text($"Hostile Near Count: {DataCenter.NumberOfHostilesInRange}");
+        ImGui.Text($"Hostile Near Count Max Range: {DataCenter.NumberOfHostilesInMaxRange}");
+        ImGui.Text($"Have Companion: {DataCenter.HasCompanion}");
+        ImGui.Text($"MP: {DataCenter.CurrentMp}");
+        ImGui.Text($"Count Down: {Service.CountDownTime}");
 
         foreach (var status in Player.Object.StatusList)
         {
@@ -2324,12 +2338,13 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"{status.GameData.Name}: {status.StatusId} From: {source}");
         }
     }
+
     private static unsafe void DrawParty()
     {
-        ImGui.Text("Party: " + DataCenter.PartyMembers.Length.ToString());
-        ImGui.Text("Alliance: " + DataCenter.AllianceMembers.Length.ToString());
+        ImGui.Text($"Party: {DataCenter.PartyMembers.Length}");
+        ImGui.Text($"Alliance: {DataCenter.AllianceMembers.Length}");
 
-        ImGui.Text("PartyMembersAverHP: " + DataCenter.PartyMembersAverHP.ToString());
+        ImGui.Text($"PartyMembersAverHP: {DataCenter.PartyMembersAverHP}");
 
         ImGui.Text($"Your combat state: {DataCenter.InCombat}");
         ImGui.Text($"Your character combat: {Player.Object.InCombat()}");
@@ -2342,55 +2357,58 @@ public partial class RotationConfigWindow : Window
 
     private static unsafe void DrawTargetData()
     {
-        if (Svc.Targets.Target != null)
-        {
-            ImGui.Text("Height: " + Svc.Targets.Target.Struct()->Height.ToString());
-            ImGui.Text("Kind: " + Svc.Targets.Target.GetObjectKind().ToString());
-            ImGui.Text("SubKind: " + Svc.Targets.Target.GetBattleNPCSubKind().ToString());
-            var owner = Svc.Objects.SearchById(Svc.Targets.Target.OwnerId);
-            if (owner != null)
-            {
-                ImGui.Text("Owner: " + owner.Name.ToString());
-            }
-        }
-        if (Svc.Targets.Target is IBattleChara b)
-        {
-            ImGui.Text("HP: " + b.CurrentHp + " / " + b.MaxHp);
-            ImGui.Text("TTK: " + b.GetTimeToKill().ToString());
-            ImGui.Text("Is Boss TTK: " + b.IsBossFromTTK().ToString());
-            ImGui.Text("Is Boss Icon: " + b.IsBossFromIcon().ToString());
-            ImGui.Text("Rank: " + b.GetObjectNPC()?.Rank.ToString() ?? string.Empty);
-            ImGui.Text("Has Positional: " + b.HasPositional().ToString());
-            ImGui.Text("Is Dying: " + b.IsDying().ToString());
-            ImGui.Text("EventType: " + b.GetEventType().ToString());
-            ImGui.Text("NamePlate: " + b.GetNamePlateIcon().ToString());
-            ImGui.Text("StatusFlags: " + b.StatusFlags.ToString());
-            ImGui.Text("InView: " + Svc.GameGui.WorldToScreen(b.Position, out _).ToString());
-            ImGui.Text("Name Id: " + b.NameId.ToString());
-            ImGui.Text("Data Id: " + b.DataId.ToString());
-            ImGui.Text("Targetable: " + b.Struct()->Character.GameObject.TargetableStatus.ToString());
+        var target = Svc.Targets.Target;
+        if (target == null) return;
 
-            var npc = b.GetObjectNPC();
+        ImGui.Text($"Height: {target.Struct()->Height}");
+        ImGui.Text($"Kind: {target.GetObjectKind()}");
+        ImGui.Text($"SubKind: {target.GetBattleNPCSubKind()}");
+
+        var owner = Svc.Objects.SearchById(target.OwnerId);
+        if (owner != null)
+        {
+            ImGui.Text($"Owner: {owner.Name}");
+        }
+
+        if (target is IBattleChara battleChara)
+        {
+            ImGui.Text($"HP: {battleChara.CurrentHp} / {battleChara.MaxHp}");
+            ImGui.Text($"TTK: {battleChara.GetTimeToKill()}");
+            ImGui.Text($"Is Boss TTK: {battleChara.IsBossFromTTK()}");
+            ImGui.Text($"Is Boss Icon: {battleChara.IsBossFromIcon()}");
+            ImGui.Text($"Rank: {battleChara.GetObjectNPC()?.Rank.ToString() ?? string.Empty}");
+            ImGui.Text($"Has Positional: {battleChara.HasPositional()}");
+            ImGui.Text($"Is Dying: {battleChara.IsDying()}");
+            ImGui.Text($"EventType: {battleChara.GetEventType()}");
+            ImGui.Text($"NamePlate: {battleChara.GetNamePlateIcon()}");
+            ImGui.Text($"StatusFlags: {battleChara.StatusFlags}");
+            ImGui.Text($"InView: {Svc.GameGui.WorldToScreen(battleChara.Position, out _)}");
+            ImGui.Text($"Name Id: {battleChara.NameId}");
+            ImGui.Text($"Data Id: {battleChara.DataId}");
+            ImGui.Text($"Targetable: {battleChara.Struct()->Character.GameObject.TargetableStatus}");
+
+            var npc = battleChara.GetObjectNPC();
             if (npc != null)
             {
-                ImGui.Text("Unknown12: " + npc.Unknown12.ToString());
+                ImGui.Text($"Unknown12: {npc.Unknown12}");
 
-                //ImGui.Text("Unknown15: " + npc.Unknown15.ToString());
-                //ImGui.Text("Unknown18: " + npc.Unknown18.ToString());
-                //ImGui.Text("Unknown19: " + npc.Unknown19.ToString());
-                //ImGui.Text("Unknown20: " + npc.Unknown20.ToString());
-                //ImGui.Text("Unknown21: " + npc.Unknown21.ToString());
+                // Uncomment these lines if needed
+                // ImGui.Text($"Unknown15: {npc.Unknown15}");
+                // ImGui.Text($"Unknown18: {npc.Unknown18}");
+                // ImGui.Text($"Unknown19: {npc.Unknown19}");
+                // ImGui.Text($"Unknown20: {npc.Unknown20}");
+                // ImGui.Text($"Unknown21: {npc.Unknown21}");
             }
 
-            foreach (var status in b.StatusList)
+            foreach (var status in battleChara.StatusList)
             {
                 var source = status.SourceId == Player.Object.GameObjectId ? "You" : Svc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
                 ImGui.Text($"{status.GameData.Name}: {status.StatusId} From: {source}");
             }
         }
 
-        ImGui.Text("All: " + DataCenter.AllTargets.Count().ToString());
-        ImGui.Text("Hostile: " + DataCenter.AllHostileTargets.Length.ToString());
+        ImGui.Text($"All: {DataCenter.AllTargets.Count()}");
+        ImGui.Text($"Hostile: {DataCenter.AllHostileTargets.Length}");
         foreach (var item in DataCenter.AllHostileTargets)
         {
             ImGui.Text(item.Name.ToString());
@@ -2403,12 +2421,12 @@ public partial class RotationConfigWindow : Window
         ImGui.Text(DataCenter.SpecialType.ToString());
 
         ImGui.Text(ActionUpdater.NextAction?.Name ?? "null");
-        ImGui.Text("GCD Total: " + DataCenter.DefaultGCDTotal.ToString());
-        ImGui.Text("GCD Remain: " + DataCenter.DefaultGCDRemain.ToString());
-        ImGui.Text("GCD Elapsed: " + DataCenter.DefaultGCDElapsed.ToString());
-        ImGui.Text("Calculated Action Ahead: " + DataCenter.CalculatedActionAhead.ToString());
-        ImGui.Text("Actual Action Ahead: " + DataCenter.ActionAhead.ToString());
-        ImGui.Text("Animation Lock Delay: " + ActionManagerHelper.GetCurrentAnimationLock().ToString());
+        ImGui.Text($"GCD Total: {DataCenter.DefaultGCDTotal}");
+        ImGui.Text($"GCD Remain: {DataCenter.DefaultGCDRemain}");
+        ImGui.Text($"GCD Elapsed: {DataCenter.DefaultGCDElapsed}");
+        ImGui.Text($"Calculated Action Ahead: {DataCenter.CalculatedActionAhead}");
+        ImGui.Text($"Actual Action Ahead: {DataCenter.ActionAhead}");
+        ImGui.Text($"Animation Lock Delay: {ActionManagerHelper.GetCurrentAnimationLock()}");
     }
 
     private static void DrawLastAction()
@@ -2419,19 +2437,17 @@ public partial class RotationConfigWindow : Window
         DrawAction(DataCenter.LastComboAction, nameof(DataCenter.LastComboAction));
     }
 
-    private static unsafe void DrawOthers()
+    private static void DrawOthers()
     {
-        ImGui.Text("Combat Time: " + (DataCenter.CombatTimeRaw).ToString());
-        ImGui.Text("Limit Break: " + CustomRotation.LimitBreakLevel.ToString());
+        ImGui.Text($"Combat Time: {DataCenter.CombatTimeRaw}");
+        ImGui.Text($"Limit Break: {CustomRotation.LimitBreakLevel}");
     }
 
     private static void DrawAction(ActionID id, string type)
     {
         ImGui.Text($"{type}: {id}");
     }
-    #endregion
 
-    #region Child
     private static bool BeginChild(string str_id, Vector2 size)
     {
         if (IsFailed()) return false;
