@@ -1450,7 +1450,7 @@ public partial class RotationConfigWindow : Window
 
     private static IAction? _activeAction;
 
-    private static readonly CollapsingHeaderGroup _actionsList = new()
+    private static readonly CollapsingHeaderGroup _actionsList = new CollapsingHeaderGroup(new Dictionary<Func<string>, System.Action>())
     {
         HeaderSize = 18,
     };

@@ -133,12 +133,18 @@ internal static class ConditionDrawer
 
     public static bool DrawDragFloat(ConfigUnitType type, string name, ref float value, string tooltip = "")
     {
+        // Display the value with appropriate formatting based on the unit type
         ImGui.SameLine();
         var show = type == ConfigUnitType.Percent ? $"{value * 100:F1}{type.ToSymbol()}" : $"{value:F2}{type.ToSymbol()}";
 
+        // Set the width for the next item
         ImGui.SetNextItemWidth(Math.Max(50 * ImGuiHelpers.GlobalScale, ImGui.CalcTextSize(show).X));
+
+        // Draw the appropriate control based on the unit type
         var result = type == ConfigUnitType.Percent ? ImGui.SliderFloat(name, ref value, 0, 1, show)
             : ImGui.DragFloat(name, ref value, 0.1f, 0, 0, show);
+
+        // Append the type description to the tooltip if it is not null or empty
         if (!string.IsNullOrEmpty(tooltip))
         {
             tooltip += "\n";
@@ -388,7 +394,7 @@ internal static class ConditionDrawer
         ImGui.SameLine();
     }
 
-    private static readonly CollapsingHeaderGroup _actionsList = new()
+    private static readonly CollapsingHeaderGroup _actionsList = new CollapsingHeaderGroup(new Dictionary<Func<string>, Action>())
     {
         HeaderSize = 12,
     };

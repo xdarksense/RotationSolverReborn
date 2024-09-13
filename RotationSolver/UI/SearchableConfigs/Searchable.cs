@@ -185,27 +185,43 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
 
     public unsafe void Draw()
     {
-        var filter = (DataCenter.IsPvP) ? PvPFilter : PvEFilter;
+        // Determine the appropriate filter based on the context (PvP or PvE)
+        var filter = DataCenter.IsPvP ? PvPFilter : PvEFilter;
 
+        // Check if the filter allows drawing
         if (!filter.CanDraw)
         {
+            // If no jobs are available in the filter, return early
             if (!filter.AllJobs.Any())
             {
                 return;
             }
 
+            // Get the text color for disabled text
             var textColor = *ImGui.GetStyleColorVec4(ImGuiCol.Text);
 
+            // Push the disabled text color style
             ImGui.PushStyleColor(ImGuiCol.Text, *ImGui.GetStyleColorVec4(ImGuiCol.TextDisabled));
 
+            // Calculate the cursor position
             var cursor = ImGui.GetCursorPos() + ImGui.GetWindowPos() - new Vector2(ImGui.GetScrollX(), ImGui.GetScrollY());
-            ImGui.TextWrapped(Name);
+
+            // Ensure Name is not null before using it
+            if (!string.IsNullOrEmpty(Name))
+            {
+                ImGui.TextWrapped(Name);
+            }
+
+            // Pop the disabled text color style
             ImGui.PopStyleColor();
 
-            var step = ImGui.CalcTextSize(Name);
+            // Calculate the text size and item rectangle size
+            var step = ImGui.CalcTextSize(Name ?? string.Empty);
             var size = ImGui.GetItemRectSize();
             var height = step.Y / 2;
             var wholeWidth = step.X;
+
+            // Draw lines to indicate disabled state
             while (height < size.Y)
             {
                 var pt = cursor + new Vector2(0, height);
@@ -214,12 +230,15 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
                 wholeWidth -= size.X;
             }
 
+            // Show a tooltip with the filter description
             ImguiTooltips.HoveredTooltip(filter.Description);
             return;
         }
 
+        // Draw the main content
         DrawMain();
 
+        // Prepare the group for the popup menu
         ImGuiHelper.PrepareGroup(Popup_Key, Command, () => ResetToDefault());
     }
 
@@ -229,7 +248,7 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
     protected void ShowTooltip(bool showHand = true)
     {
         var showDesc = !string.IsNullOrEmpty(Description);
-        if (showDesc || Tooltips != null && Tooltips.Length > 0)
+        if (showDesc || (Tooltips != null && Tooltips.Length > 0))
         {
             ImguiTooltips.ShowTooltip(() =>
             {
@@ -243,10 +262,13 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
                 }
                 var wholeWidth = ImGui.GetWindowWidth();
 
-                if (Tooltips != null) foreach (var tooltip in Tooltips)
+                if (Tooltips != null)
+                {
+                    foreach (var tooltip in Tooltips)
                     {
                         RotationConfigWindow.DrawLinkDescription(tooltip, wholeWidth, false);
                     }
+                }
             });
         }
 
@@ -267,6 +289,9 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
     public virtual void ResetToDefault()
     {
         var v = _property.GetValue(Service.ConfigDefault);
-        _property.SetValue(Service.Config, v);
+        if (v != null)
+        {
+            _property.SetValue(Service.Config, v);
+        }
     }
 }

@@ -10,7 +10,6 @@ using RotationSolver.Basic.Configuration;
 using RotationSolver.Commands;
 using RotationSolver.Data;
 
-
 namespace RotationSolver.UI;
 
 internal static class ImGuiHelper
@@ -507,7 +506,7 @@ internal static class ImGuiHelper
         ConfigUnitType.Degree => " °",
         ConfigUnitType.Pixels => " p",
         ConfigUnitType.Yalms => " y",
-        ConfigUnitType.Percent => " %", // Changed to single percentage sign if double was not intentional
+        ConfigUnitType.Percent => " %%",
         _ => string.Empty,
     };
 

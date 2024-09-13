@@ -39,6 +39,7 @@ internal class DragIntRangeSearch : Searchable
             Value = v;
         }
     }
+
     protected int MaxValue
     {
         get => Value.Y;
@@ -52,6 +53,7 @@ internal class DragIntRangeSearch : Searchable
 
     public DragIntRangeSearch(PropertyInfo property) : base(property)
     {
+        // Retrieve the RangeAttribute from the property
         var range = _property.GetCustomAttribute<RangeAttribute>();
         Min = (int?)range?.MinValue ?? 0;
         Max = (int?)range?.MaxValue ?? 1;
@@ -63,17 +65,30 @@ internal class DragIntRangeSearch : Searchable
     {
         var minValue = MinValue;
         var maxValue = MaxValue;
+
+        // Set the width of the drag control
         ImGui.SetNextItemWidth(Scale * DRAG_WIDTH);
-        if (ImGui.DragIntRange2($"##Config_{ID}{GetHashCode()}", ref minValue, ref maxValue, Speed, Min, Max))
+
+        // Cache the hash code to avoid multiple calls
+        var hashCode = GetHashCode();
+
+        // Draw the integer range drag control
+        if (ImGui.DragIntRange2($"##Config_{ID}{hashCode}", ref minValue, ref maxValue, Speed, Min, Max))
         {
             MinValue = Math.Min(minValue, maxValue);
             MaxValue = Math.Max(minValue, maxValue);
         }
+
+        // Show tooltip if item is hovered
         if (ImGui.IsItemHovered()) ShowTooltip();
 
+        // Draw job icon if IsJob is true
         if (IsJob) DrawJobIcon();
+
         ImGui.SameLine();
         ImGui.TextWrapped(Name);
+
+        // Show tooltip if item is hovered
         if (ImGui.IsItemHovered()) ShowTooltip(false);
     }
 }

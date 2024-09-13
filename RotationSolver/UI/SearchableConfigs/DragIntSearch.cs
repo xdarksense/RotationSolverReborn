@@ -8,33 +8,80 @@ internal class DragIntSearch : Searchable
 
     protected int Value
     {
-        get => (int)_property.GetValue(Service.Config)!;
-        set => _property.SetValue(Service.Config, value);
+        get
+        {
+            // Retrieve the current value of the property
+            var value = _property.GetValue(Service.Config);
+
+            // Ensure the value is not null before casting to int
+            if (value == null)
+            {
+                throw new InvalidOperationException("The property value cannot be null.");
+            }
+
+            return (int)value;
+        }
+        set
+        {
+            // Set the property value
+            _property.SetValue(Service.Config, value);
+        }
     }
 
     public DragIntSearch(PropertyInfo property) : base(property)
     {
+        // Retrieve the RangeAttribute from the property
         var range = _property.GetCustomAttribute<RangeAttribute>();
+
+        // Set the minimum value, defaulting to 0 if the attribute is not present
         Min = range != null ? (int)range.MinValue : 0;
+
+        // Set the maximum value, defaulting to 1 if the attribute is not present
         Max = range != null ? (int)range.MaxValue : 1;
+
+        // Set the speed, defaulting to 0.001f if the attribute is not present
         Speed = range?.Speed ?? 0.001f;
     }
 
     protected override void DrawMain()
     {
+        // Retrieve the current value of the property
         var value = Value;
 
+        // Set the width for the next item
         ImGui.SetNextItemWidth(Scale * DRAG_WIDTH);
-        if (ImGui.DragInt($"##Config_{ID}{GetHashCode()}", ref value, Speed, Min, Max))
+
+        // Cache the hash code to avoid multiple calls to GetHashCode
+        var hashCode = GetHashCode();
+
+        // Draw the drag integer control
+        if (ImGui.DragInt($"##Config_{ID}{hashCode}", ref value, Speed, Min, Max))
         {
+            // Update the property value if it has changed
             Value = value;
         }
 
-        if (ImGui.IsItemHovered()) ShowTooltip();
+        // Show tooltip if the item is hovered
+        if (ImGui.IsItemHovered())
+        {
+            ShowTooltip();
+        }
 
-        if (IsJob) DrawJobIcon();
+        // Draw job icon if applicable
+        if (IsJob)
+        {
+            DrawJobIcon();
+        }
+
+        // Draw the name of the property
         ImGui.SameLine();
-        ImGui.TextWrapped(Name);
-        if (ImGui.IsItemHovered()) ShowTooltip(false);
+        ImGui.TextWrapped(Name ?? string.Empty);
+
+        // Show tooltip if the item is hovered
+        if (ImGui.IsItemHovered())
+        {
+            ShowTooltip(false);
+        }
     }
+
 }

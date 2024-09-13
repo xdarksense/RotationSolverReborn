@@ -58,7 +58,6 @@ internal class CheckBoxSearchCondition(PropertyInfo property, params ISearchable
             set => _condition.Disable = value;
         }
 
-
         protected override ConditionSet GetCondition()
         {
             return DataCenter.RightSet.GetDisableCondition(_condition.Key);
@@ -108,7 +107,6 @@ internal class CheckBoxSearchCondition(PropertyInfo property, params ISearchable
         base.DrawMiddle();
     }
 }
-
 
 internal class CheckBoxSearchNoCondition(PropertyInfo property, params ISearchable[] children)
     : CheckBoxSearch(property, children)
