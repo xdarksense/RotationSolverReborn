@@ -110,6 +110,42 @@ public partial class PictomancerRotation
 
     #endregion
 
+    /// <inheritdoc/>
+    public override void DisplayStatus()
+    {
+        ImGui.Text($"PaletteGauge: {PaletteGauge}");
+        ImGui.Text($"Paint: {Paint}");
+        ImGui.Text($"CreatureMotifDrawn: {CreatureMotifDrawn}");
+        ImGui.Text($"WeaponMotifDrawn: {WeaponMotifDrawn}");
+        ImGui.Text($"LandscapeMotifDrawn: {LandscapeMotifDrawn}");
+        ImGui.Text($"MooglePortraitReady: {MooglePortraitReady}");
+        ImGui.Text($"MadeenPortraitReady: {MadeenPortraitReady}");
+        ImGui.Text($"CreatureFlags: {CreatureFlags}");
+        ImGui.Text($"isPomMotifReady: {isPomMotifReady}");
+        ImGui.Text($"isWingMotifReady: {isWingMotifReady}");
+        ImGui.Text($"isClawMotifReady: {isClawMotifReady}");
+        ImGui.Text($"isMawMotifReady: {isMawMotifReady}");
+        ImGui.Text($"CanvasFlags: {CanvasFlags}");
+        ImGui.Text($"isPomMuseReady: {isPomMuseReady}");
+        ImGui.Text($"isWingMuseReady: {isWingMuseReady}");
+        ImGui.Text($"isClawMuseReady: {isClawMuseReady}");
+        ImGui.Text($"isMawMuseReady: {isMawMuseReady}");
+        ImGui.Text($"isHammerMuseReady: {isHammerMuseReady}");
+        ImGui.Text($"isStarryMuseReady: {isStarryMuseReady}");
+        ImGui.Text($"MaxStrikingMuse: {MaxStrikingMuse}");
+        ImGui.Text($"Level100: {Level100}");
+        ImGui.Text($"HasSubtractivePalette: {HasSubtractivePalette}");
+        ImGui.Text($"HasAetherhues: {HasAetherhues}");
+        ImGui.Text($"HasAetherhues2: {HasAetherhues2}");
+        ImGui.Text($"HasSubtractiveSpectrum: {HasSubtractiveSpectrum}");
+        ImGui.Text($"HasHyperphantasia: {HasHyperphantasia}");
+        ImGui.Text($"HasHammerTime: {HasHammerTime}");
+        ImGui.Text($"HasMonochromeTones: {HasMonochromeTones}");
+        ImGui.Text($"HasStarryMuse: {HasStarryMuse}");
+        ImGui.Text($"HammerStacks: {HammerStacks}");
+        ImGui.Text($"SubtractiveStacks: {SubtractiveStacks}");
+    }
+
     #region Job States
 
     /// <summary>
@@ -187,13 +223,6 @@ public partial class PictomancerRotation
             byte stacks = Player.StatusStack(true, StatusID.SubtractivePalette);
             return stacks == byte.MaxValue ? (byte)3 : stacks;
         }
-    }
-
-    /// <inheritdoc/>
-    public override void DisplayStatus()
-    {
-        ImGui.Text("HammerStacks: " + HammerStacks.ToString());
-        ImGui.Text("SubtractiveStacks: " + SubtractiveStacks.ToString());
     }
 
     #endregion

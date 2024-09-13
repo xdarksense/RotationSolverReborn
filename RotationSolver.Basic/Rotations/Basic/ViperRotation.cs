@@ -59,6 +59,45 @@ public partial class ViperRotation
     /// Gets Max stacks of Anguine Tribute.
     /// </summary>
     public static byte MaxAnguine => EnhancedSerpentsLineageTrait.EnoughLevel ? (byte)5 : (byte)4;
+
+    /// <inheritdoc/>
+    public override void DisplayStatus()
+    {
+        ImGui.Text("RattlingCoilStacks: " + RattlingCoilStacks.ToString());
+        ImGui.Text("MaxRattling: " + MaxRattling.ToString());
+        ImGui.Text("SerpentOffering: " + SerpentOffering.ToString());
+        ImGui.Text("AnguineTribute: " + AnguineTribute.ToString());
+        ImGui.Text("DreadCombo: " + DreadCombo.ToString());
+        ImGui.Text("NODREAD: " + NODREAD.ToString());
+        ImGui.Text("SerpentCombo: " + SerpentCombo.ToString());
+        ImGui.Text("TWINSREADY: " + TWINSREADY.ToString());
+        ImGui.Text("THRESHREADY: " + THRESHREADY.ToString());
+        ImGui.Text("UNCOILEDREADY: " + UNCOILEDREADY.ToString());
+        ImGui.Text("MaxAnguine: " + MaxAnguine.ToString());
+        ImGui.Text("HasSteel: " + HasSteel.ToString());
+        ImGui.Text("HasReavers: " + HasReavers.ToString());
+        ImGui.Text("NoHone: " + NoHone.ToString());
+        ImGui.Text("HasHind: " + HasHind.ToString());
+        ImGui.Text("HasFlank: " + HasFlank.ToString());
+        ImGui.Text("HasBane: " + HasBane.ToString());
+        ImGui.Text("HasSting: " + HasSting.ToString());
+        ImGui.Text("HasNoVenom: " + HasNoVenom.ToString());
+        ImGui.Text("HasReawakend: " + HasReawakend.ToString());
+        ImGui.Text("IsSwift: " + IsSwift.ToString());
+        ImGui.Text("IsHunter: " + IsHunter.ToString());
+        ImGui.Text("SwiftTime: " + SwiftTime.ToString());
+        ImGui.Text("HuntersTime: " + HuntersTime.ToString());
+        ImGui.Text("HasHunterVenom: " + HasHunterVenom.ToString());
+        ImGui.Text("HasSwiftVenom: " + HasSwiftVenom.ToString());
+        ImGui.Text("HasFellHuntersVenom: " + HasFellHuntersVenom.ToString());
+        ImGui.Text("HasFellskinsVenom: " + HasFellskinsVenom.ToString());
+        ImGui.Text("HasGrimHunter: " + HasGrimHunter.ToString());
+        ImGui.Text("HasGrimSkin: " + HasGrimSkin.ToString());
+        ImGui.Text("HasPoisedFang: " + HasPoisedFang.ToString());
+        ImGui.Text("HasPoisedBlood: " + HasPoisedBlood.ToString());
+        ImGui.Text("HunterLessThanSwift: " + HunterLessThanSwift.ToString());
+        ImGui.Text("SwiftLessThanHunter: " + SwiftLessThanHunter.ToString());
+    }
     #endregion
 
     #region Statuses
@@ -177,8 +216,6 @@ public partial class ViperRotation
     /// Indicates that Swiftscaled is ending before Hunters Instinct.
     /// </summary>
     public static bool SwiftLessThanHunter => Player.StatusTime(true, StatusID.Swiftscaled) < Player.StatusTime(true, StatusID.HuntersInstinct);
-
-
     #endregion
 
     #region Actions

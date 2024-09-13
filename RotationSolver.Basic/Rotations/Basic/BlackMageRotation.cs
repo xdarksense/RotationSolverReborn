@@ -137,6 +137,26 @@ partial class BlackMageRotation
         }
     }
 
+    /// <inheritdoc/>
+    public override void DisplayStatus()
+    {
+        ImGui.Text("HasFire: " + HasFire.ToString());
+        ImGui.Text("HasThunder: " + HasThunder.ToString());
+        ImGui.Text("IsPolyglotStacksMaxed: " + IsPolyglotStacksMaxed.ToString());
+        ImGui.Text("UmbralIceStacks: " + UmbralIceStacks.ToString());
+        ImGui.Text("AstralFireStacks: " + AstralFireStacks.ToString());
+        ImGui.Text("AstralSoulStacks: " + AstralSoulStacks.ToString());
+        ImGui.Text("PolyglotStacks: " + PolyglotStacks.ToString());
+        ImGui.Text("UmbralHearts: " + UmbralHearts.ToString());
+        ImGui.Text("IsParadoxActive: " + IsParadoxActive.ToString());
+        ImGui.Text("UmbralIceStacks: " + UmbralIceStacks.ToString());
+        ImGui.Text("InUmbralIce: " + InUmbralIce.ToString());
+        ImGui.Text("InAstralFire: " + InAstralFire.ToString());
+        ImGui.Text("IsEnochianActive: " + IsEnochianActive.ToString());
+        ImGui.Text("EnochianTimeRaw: " + EnochianTimeRaw.ToString());
+        ImGui.Text("EnochianTime: " + EnochianTime.ToString());
+    }
+
     static partial void ModifyBlizzardPvE(ref ActionSetting setting)
     {
 

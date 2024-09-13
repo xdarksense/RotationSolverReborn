@@ -48,6 +48,17 @@ partial class MachinistRotation
     /// <returns></returns>
     protected static bool OverheatedEndAfterGCD(uint gctCount = 0, float offset = 0)
         => OverheatedEndAfter(GCDTime(gctCount, offset));
+
+    /// <inheritdoc/>
+    public override void DisplayStatus()
+    {
+        ImGui.Text("IsOverheated: " + IsOverheated.ToString());
+        ImGui.Text("Heat: " + Heat.ToString());
+        ImGui.Text("Battery: " + Battery.ToString());
+        ImGui.Text("LastSummonBatteryPower: " + LastSummonBatteryPower.ToString());
+        ImGui.Text("OverheatTimeRemainingRaw: " + OverheatTimeRemainingRaw.ToString());
+        ImGui.Text("OverheatTime: " + OverheatTime.ToString());
+    }
     #endregion
 
     static partial void ModifySplitShotPvE(ref ActionSetting setting)

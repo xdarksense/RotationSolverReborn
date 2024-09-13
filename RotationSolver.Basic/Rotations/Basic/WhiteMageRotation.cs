@@ -62,6 +62,7 @@ partial class WhiteMageRotation
         ImGui.Text("SacredSightStacks: " + SacredSightStacks.ToString());
         ImGui.Text("LilyTime: " + LilyTime.ToString());
         ImGui.Text("BloodLilyStacks: " + BloodLily.ToString());
+        ImGui.Text("Lily: " + Lily.ToString());
     }
     #endregion
 

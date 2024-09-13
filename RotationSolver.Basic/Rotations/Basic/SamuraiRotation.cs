@@ -60,6 +60,25 @@ partial class SamuraiRotation
     public static bool IsMoonTimeLessThanFlower
         => Player.StatusTime(true, StatusID.Fugetsu) < Player.StatusTime(true, StatusID.Fuka);
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HaveMeikyoShisui => Player.HasStatus(true, StatusID.MeikyoShisui);
+
+    /// <inheritdoc/>
+    public override void DisplayStatus()
+    {
+        ImGui.Text("HasSetsu: " + HasSetsu.ToString());
+        ImGui.Text("HasGetsu: " + HasGetsu.ToString());
+        ImGui.Text("HasKa: " + HasKa.ToString());
+        ImGui.Text("Kenki: " + Kenki.ToString());
+        ImGui.Text("MeditationStacks: " + MeditationStacks.ToString());
+        ImGui.Text("Kaeshi: " + Kaeshi.ToString());
+        ImGui.Text("SenCount: " + SenCount.ToString());
+        ImGui.Text("HasMoon: " + HasMoon.ToString());
+        ImGui.Text("HasFlower: " + HasFlower.ToString());
+        ImGui.Text("HaveMeikyoShisui: " + HaveMeikyoShisui.ToString());
+    }
     #endregion
 
     #region PvE Actions

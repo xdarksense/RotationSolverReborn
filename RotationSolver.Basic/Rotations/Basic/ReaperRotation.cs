@@ -55,6 +55,21 @@ partial class ReaperRotation
     /// 
     /// </summary>
     public static byte VoidShroud => JobGauge.VoidShroud;
+
+    /// <inheritdoc/>
+    public override void DisplayStatus()
+    {
+        ImGui.Text("HasEnshrouded: " + HasEnshrouded.ToString());
+        ImGui.Text("HasSoulReaver: " + HasSoulReaver.ToString());
+        ImGui.Text("HasExecutioner: " + HasExecutioner.ToString());
+        ImGui.Text("HasIdealHost: " + HasIdealHost.ToString());
+        ImGui.Text("HasOblatio: " + HasOblatio.ToString());
+        ImGui.Text("HasPerfectioParata: " + HasPerfectioParata.ToString());
+        ImGui.Text("Soul: " + Soul.ToString());
+        ImGui.Text("Shroud: " + Shroud.ToString());
+        ImGui.Text("LemureShroud: " + LemureShroud.ToString());
+        ImGui.Text("VoidShroud: " + VoidShroud.ToString());
+    }
     #endregion
 
     static partial void ModifySlicePvE(ref ActionSetting setting)

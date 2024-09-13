@@ -31,6 +31,14 @@ partial class GunbreakerRotation
     /// 
     /// </summary>
     public static byte MaxAmmo => CartridgeChargeIiTrait.EnoughLevel ? (byte)3 : (byte)2;
+
+    /// <inheritdoc/>
+    public override void DisplayStatus()
+    {
+        ImGui.Text("Ammo: " + Ammo.ToString());
+        ImGui.Text("AmmoComboStep: " + AmmoComboStep.ToString());
+        ImGui.Text("MaxAmmo: " + MaxAmmo.ToString());
+    }
     #endregion
 
 

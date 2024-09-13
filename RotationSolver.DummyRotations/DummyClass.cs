@@ -169,9 +169,5 @@ namespace RotationSolver.DummyRotations
         }
 
         #endregion
-
-        #region Extra Methods
-        private static bool HaveMeikyoShisui => Player.HasStatus(true, StatusID.MeikyoShisui);
-        #endregion
     }
 }

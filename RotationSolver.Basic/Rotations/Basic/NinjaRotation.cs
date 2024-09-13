@@ -19,7 +19,33 @@ partial class NinjaRotation
     /// <summary>
     /// Is enough level for Jin
     /// </summary>
-    public static bool HasJin = IncreaseAttackSpeedTrait.EnoughLevel;
+    public static bool HasJin => IncreaseAttackSpeedTrait.EnoughLevel;
+
+    /// <summary>
+    /// Determines if Trick Attack is in its effective period.
+    /// </summary>
+    public bool InTrickAttack => (KunaisBanePvE.Cooldown.IsCoolingDown || TrickAttackPvE.Cooldown.IsCoolingDown) && (!KunaisBanePvE.Cooldown.ElapsedAfter(17) || !TrickAttackPvE.Cooldown.ElapsedAfter(17));
+    
+    /// <summary>
+    /// Determines if Mug is in its effective period.
+    /// </summary>
+    public bool InMug => MugPvE.Cooldown.IsCoolingDown && !MugPvE.Cooldown.ElapsedAfter(19);
+    
+    /// <summary>
+    /// Checks if no ninjutsu action is currently selected or if the Rabbit Medium has been invoked.
+    /// </summary>
+    public static bool NoNinjutsu => AdjustId(ActionID.NinjutsuPvE) is ActionID.NinjutsuPvE or ActionID.RabbitMediumPvE;
+
+    /// <inheritdoc/>
+    public override void DisplayStatus()
+    {
+        ImGui.Text($"Ninki: {Ninki}");
+        ImGui.Text($"Kazematoi: {Kazematoi}");
+        ImGui.Text($"HasJin: {HasJin}");
+        ImGui.Text($"InTrickAttack: {InTrickAttack}");
+        ImGui.Text($"InMug: {InMug}");
+        ImGui.Text($"NoNinjutsu: {NoNinjutsu}");
+    }
     #endregion
 
     static partial void ModifySpinningEdgePvE(ref ActionSetting setting)
