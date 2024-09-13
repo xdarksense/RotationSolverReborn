@@ -209,19 +209,27 @@ internal static class DataCenter
     }
 
     #region GCD
+    // Returns the time remaining until the next GCD (Global Cooldown) after considering the current animation lock.
     public static float NextAbilityToNextGCD => DefaultGCDRemain - ActionManagerHelper.GetCurrentAnimationLock();
+
+    // Returns the total duration of the default GCD.
     public static float DefaultGCDTotal => ActionManagerHelper.GetDefaultRecastTime();
 
+    // Returns the remaining time for the default GCD by subtracting the elapsed time from the total recast time.
     public static float DefaultGCDRemain =>
         ActionManagerHelper.GetDefaultRecastTime() - ActionManagerHelper.GetDefaultRecastTimeElapsed();
 
+    // Returns the elapsed time since the start of the default GCD.
     public static float DefaultGCDElapsed => ActionManagerHelper.GetDefaultRecastTimeElapsed();
 
+    // Returns the action ahead time, which can be overridden by a configuration setting.
     public static float ActionAhead =>
         Service.Config.OverrideActionAheadTimer ? Service.Config.Action4Head : CalculatedActionAhead;
 
+    // Returns the calculated action ahead time as 25% of the total GCD time.
     public static float CalculatedActionAhead => DefaultGCDTotal * 0.25f;
 
+    // Calculates the total GCD time for a given number of GCDs and an optional offset.
     public static float GCDTime(uint gcdCount = 0, float offset = 0)
         => ActionManagerHelper.GetDefaultRecastTime() * gcdCount + offset;
 
@@ -268,17 +276,22 @@ internal static class DataCenter
     {
         get
         {
+            // If the raid start time is not set, return 0.
             if (_startRaidTime == DateTime.MinValue) return 0;
+
+            // Calculate and return the total seconds elapsed since the raid started.
             return (float)(DateTime.Now - _startRaidTime).TotalSeconds;
         }
         set
         {
+            // If the provided value is negative, reset the raid start time.
             if (value < 0)
             {
                 _startRaidTime = DateTime.MinValue;
             }
             else
             {
+                // Set the raid start time to the current time minus the provided value in seconds.
                 _startRaidTime = DateTime.Now - TimeSpan.FromSeconds(value);
             }
         }
@@ -295,18 +308,20 @@ internal static class DataCenter
         get
         {
             return AllTargets.Where(b =>
-            {               
-                //Not enemy.
+            {
+                // Check if the target is an enemy.
                 if (!b.IsEnemy()) return false;
 
-                //Dead.
+                // Check if the target is dead.
                 if (b.CurrentHp <= 1) return false;
 
-                //Not targetable.
+                // Check if the target is targetable.
                 if (!b.IsTargetable) return false;
 
-                //Invincible.
+                // Check if the target is invincible.
                 if (b.StatusList.Any(StatusHelper.IsInvincible)) return false;
+
+                // If all checks pass, the target is considered hostile.
                 return true;
             }).ToArray();
         }
@@ -429,7 +444,13 @@ internal static class DataCenter
     {
         get
         {
-            var validTimes = AllHostileTargets.Select(b => b.GetTimeToKill()).Where(v => !float.IsNaN(v)).ToList();
+            // Select the time to kill for each hostile target and filter out NaN values.
+            var validTimes = AllHostileTargets
+                .Select(b => b.GetTimeToKill())
+                .Where(v => !float.IsNaN(v))
+                .ToList();
+
+            // If there are valid times, return the average; otherwise, return 0.
             return validTimes.Any() ? validTimes.Average() : 0;
         }
     }
@@ -484,34 +505,48 @@ internal static class DataCenter
 
     private static float GetPartyMemberHPRatio(IBattleChara member)
     {
+        // Check if the member is null and return 0 if true.
         if (member == null) return 0;
 
-        if (!DataCenter.InEffectTime
-            || !DataCenter.HealHP.TryGetValue(member.GameObjectId, out var hp))
+        // Check if the current time is not within the effect time or if the member's HP is not in the HealHP dictionary.
+        if (!DataCenter.InEffectTime || !DataCenter.HealHP.TryGetValue(member.GameObjectId, out var hp))
         {
+            // Return the ratio of the member's current HP to their max HP.
             return (float)member.CurrentHp / member.MaxHp;
         }
 
+        // Get the member's current HP.
         var rightHp = member.CurrentHp;
         if (rightHp > 0)
         {
+            // Try to get the last recorded HP for the member from the _lastHp dictionary.
             if (!_lastHp.TryGetValue(member.GameObjectId, out var lastHp)) lastHp = rightHp;
 
+            // Check if the difference between the current HP and the last recorded HP equals the healed HP.
             if (rightHp - lastHp == hp)
             {
+                // Remove the member's entry from the HealHP dictionary and return the current HP ratio.
                 DataCenter.HealHP.Remove(member.GameObjectId);
                 return (float)member.CurrentHp / member.MaxHp;
             }
 
+            // Return the minimum of 1 and the ratio of the sum of healed HP and current HP to the max HP.
             return Math.Min(1, (hp + rightHp) / (float)member.MaxHp);
         }
 
+        // Return the ratio of the member's current HP to their max HP if the current HP is 0 or less.
         return (float)member.CurrentHp / member.MaxHp;
     }
 
     public static IEnumerable<float> PartyMembersHP => RefinedHP.Values.Where(r => r > 0);
-    public static float PartyMembersMinHP => PartyMembersHP.Any() ? PartyMembersHP.Min() : 0;
-    public static float PartyMembersAverHP => PartyMembersHP.Any() ? PartyMembersHP.Average() : 0;
+
+    public static float PartyMembersMinHP => PartyMembersHP.Any()
+        ? PartyMembersHP.Min()
+        : 0;
+
+    public static float PartyMembersAverHP => PartyMembersHP.Any()
+        ? PartyMembersHP.Average()
+        : 0;
 
     public static float PartyMembersDifferHP => PartyMembersHP.Any()
         ? (float)Math.Sqrt(PartyMembersHP.Average(d => Math.Pow(d - PartyMembersAverHP, 2)))
@@ -683,23 +718,31 @@ internal static class DataCenter
 
     private static bool IsHostileCastingBase(IBattleChara h, Func<Action, bool> check)
     {
-        if (h == null) return false; // Check if h is null
+        // Check if h is null
+        if (h == null) return false;
 
+        // Check if the hostile character is casting
         if (!h.IsCasting) return false;
 
+        // Check if the cast is interruptible
         if (h.IsCastInterruptible) return false;
+
+        // Calculate the time since the cast started
         var last = h.TotalCastTime - h.CurrentCastTime;
         var t = last - DataCenter.DefaultGCDTotal;
 
-        if (!(h.TotalCastTime > 2.5 &&
-              t > 0 && t < DataCenter.GCDTime(2))) return false;
+        // Check if the total cast time is greater than 2.5 seconds and if the calculated time is within a valid range
+        if (!(h.TotalCastTime > 2.5 && t > 0 && t < DataCenter.GCDTime(2))) return false;
 
+        // Get the action sheet
         var actionSheet = Service.GetSheet<Action>();
         if (actionSheet == null) return false; // Check if actionSheet is null
 
+        // Get the action being cast
         var action = actionSheet.GetRow(h.CastActionId);
         if (action == null) return false; // Check if action is null
 
+        // Invoke the check function on the action and return the result
         return check?.Invoke(action) ?? false; // Check if check is null
     }
 }

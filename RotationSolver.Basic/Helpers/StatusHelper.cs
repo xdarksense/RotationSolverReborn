@@ -244,8 +244,6 @@ public static class StatusHelper
 
         if (!Player.Object.HasStatus(false, status))
         {
-            // Log or handle the case where the player does not have the status
-            PluginLog.Error($"Player does not have the status: {GetStatusName(status)}");
             return;
         }
 
@@ -254,6 +252,7 @@ public static class StatusHelper
             Chat.Instance.SendMessage($"/statusoff {GetStatusName(status)}");
             PluginLog.Error($"Status {GetStatusName(status)} removed successfully.");
         }
+
         catch (Exception ex)
         {
             // Log the exception

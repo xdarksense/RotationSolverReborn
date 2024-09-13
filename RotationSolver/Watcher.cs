@@ -55,15 +55,16 @@ public static class Watcher
             if (source == null) return;
             if (source is not IBattleChara battle) return;
             if (battle is IPlayerCharacter) return;
-            if (battle.SubKind == 9) return; // Friend!
+            const int FriendSubKind = 9;
+            if (battle.SubKind == FriendSubKind) return; // Friend!
             if (Svc.Objects.SearchById(battle.GameObjectId) is IPlayerCharacter) return;
 
             var damageRatio = set.TargetEffects
                 .Where(e => e.TargetID == Player.Object.GameObjectId)
                 .SelectMany(e => new EffectEntry[]
-                {
-                    e[0], e[1], e[2], e[3], e[4], e[5], e[6], e[7]
-                })
+            {
+                e[0], e[1], e[2], e[3], e[4], e[5], e[6], e[7]
+            })
                 .Where(e => e.type == ActionEffectType.Damage)
                 .Sum(e => (float)e.value / Player.Object.MaxHp);
 
@@ -139,8 +140,6 @@ public static class Watcher
             var action = set.Action;
             var tar = set.Target;
 
-            if (tar == null || action == null) return;
-
             // Record
             DataCenter.AddActionRec(action);
             ShowStrSelf = set.ToString();
@@ -159,19 +158,30 @@ public static class Watcher
             {
                 if (!effect.GetSpecificTypeEffect(ActionEffectType.Damage, out _)) continue;
 
+                // Check if the target is already in the attacked targets list
                 if (DataCenter.AttackedTargets.Any(i => i.id == effect.TargetID)) continue;
 
-                if (DataCenter.AttackedTargets.Count >= DataCenter.ATTACKED_TARGETS_COUNT)
+                // Ensure the current target is not dequeued
+                while (DataCenter.AttackedTargets.Count >= DataCenter.ATTACKED_TARGETS_COUNT)
                 {
+                    var oldestTarget = DataCenter.AttackedTargets.Peek();
+                    if (oldestTarget.id == effect.TargetID)
+                    {
+                        // If the oldest target is the current target, break the loop to avoid dequeuing it
+                        break;
+                    }
                     DataCenter.AttackedTargets.Dequeue();
                 }
+
+                // Enqueue the new target
                 DataCenter.AttackedTargets.Enqueue((effect.TargetID, DateTime.Now));
             }
 
             // Macro
+            var regexOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
             foreach (var item in Service.Config.Events)
             {
-                if (!new Regex(item.Name).Match(action.Name).Success) continue;
+                if (!new Regex(item.Name, regexOptions).Match(action.Name).Success) continue;
                 if (item.AddMacro(tar)) break;
             }
         }
