@@ -10,19 +10,41 @@ public abstract class DrawingHighlightHotbarBase : IDisposable
     /// </summary>
     public virtual bool Enable { get; set; } = true;
 
+    private bool _disposed;
+    private readonly object _disposeLock = new();
+
+    protected DrawingHighlightHotbarBase()
+    {
+        RotationSolverPlugin._drawingElements.Add(this);
+    }
+
     public void Dispose()
     {
-        if (_disposed) return;
-        _disposed = true;
-
-        RotationSolverPlugin._drawingElements.Remove(this);
+        Dispose(true);
         GC.SuppressFinalize(this);
     }
 
-    internal IEnumerable<IDrawing2D> To2DMain()
+    protected virtual void Dispose(bool disposing)
     {
-        if (!Enable) return new List<IDrawing2D>();
-        return To2D();
+        if (_disposed) return;
+
+        lock (_disposeLock)
+        {
+            if (_disposed) return;
+
+            if (disposing)
+            {
+                RotationSolverPlugin._drawingElements.Remove(this);
+            }
+
+            _disposed = true;
+        }
+    }
+
+    internal async Task<IEnumerable<IDrawing2D>> To2DMain()
+    {
+        if (!Enable) return Array.Empty<IDrawing2D>();
+        return await Task.FromResult(To2D());
     }
 
     internal void UpdateOnFrameMain()
@@ -31,17 +53,10 @@ public abstract class DrawingHighlightHotbarBase : IDisposable
         UpdateOnFrame();
     }
 
-    protected DrawingHighlightHotbarBase()
-    {
-        RotationSolverPlugin._drawingElements.Add(this);
-    }
-
     private protected abstract IEnumerable<IDrawing2D> To2D();
 
     /// <summary> 
     /// The things that it should update on every frame. 
     /// </summary>
     protected abstract void UpdateOnFrame();
-
-    private bool _disposed;
 }

@@ -24,7 +24,7 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
         : this()
     {
         Color = color;
-        HotbarIDs = new(ids);
+        HotbarIDs = new HashSet<HotbarID>(ids);
     }
 
     /// <summary> </summary>
@@ -33,10 +33,10 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
         if (_texture != null) return;
         var tex = Svc.Data?.GetFile<TexFile>("ui/uld/icona_frame_hr1.tex");
         if (tex == null) return;
-        byte[] imageData = tex.ImageData;
-        byte[] array = new byte[imageData.Length];
+        var imageData = tex.ImageData;
+        var array = new byte[imageData.Length];
 
-        for (int i = 0; i < imageData.Length; i += 4)
+        for (var i = 0; i < imageData.Length; i += 4)
         {
             array[i] = array[i + 1] = array[i + 2] = byte.MaxValue;
             array[i + 3] = imageData[i + 3];
@@ -49,13 +49,13 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
     public Vector4 Color { get; set; } = new Vector4(0.8f, 0.5f, 0.3f, 1);
 
     /// <summary> The action ids that </summary>
-    public HashSet<HotbarID> HotbarIDs { get; } = [];
+    public HashSet<HotbarID> HotbarIDs { get; } = new();
 
     private protected override unsafe IEnumerable<IDrawing2D> To2D()
     {
-        if (_texture == null) return [];
+        if (_texture == null) return Array.Empty<IDrawing2D>();
 
-        List<IDrawing2D> result = [];
+        var result = new List<IDrawing2D>();
 
         var hotBarIndex = 0;
         foreach (var intPtr in GetAddons<AddonActionBar>()
@@ -91,7 +91,7 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
                     if ((nint)iconAddon != nint.Zero && IsVisible(&iconAddon->AtkResNode))
                     {
                         AtkResNode node = default;
-                        HotbarSlot bar = hotBar.Slots[slotIndex];
+                        var bar = hotBar.Slots[slotIndex];
 
                         if (isCrossBar)
                         {
@@ -140,7 +140,7 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
 
     private static unsafe IEnumerable<nint> GetAddons<T>() where T : struct
     {
-        if (typeof(T).GetCustomAttribute<Addon>() is not Addon on) return [];
+        if (typeof(T).GetCustomAttribute<Addon>() is not Addon on) return Array.Empty<nint>();
 
         return on.AddonIdentifiers
             .Select(str => Svc.GameGui.GetAddonByName(str, 1))

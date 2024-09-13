@@ -37,7 +37,8 @@ internal class OverlayWindow : Window
 
     public override void Draw()
     {
-        if (!HotbarHighlightManager.Enable || Svc.ClientState == null || Svc.ClientState.LocalPlayer == null) return;
+        if (!HotbarHighlightManager.Enable || Svc.ClientState == null || Svc.ClientState.LocalPlayer == null)
+            return;
 
         ImGui.GetStyle().AntiAliasedFill = false;
 
@@ -48,19 +49,22 @@ internal class OverlayWindow : Window
                 HotbarHighlightManager._drawingElements2D = HotbarHighlightManager.To2DAsync().Result;
             }
 
-            foreach (var item in HotbarHighlightManager._drawingElements2D.OrderBy(drawing =>
+            if (HotbarHighlightManager._drawingElements2D != null)
             {
-                if (drawing is PolylineDrawing poly)
+                foreach (var item in HotbarHighlightManager._drawingElements2D.OrderBy(drawing =>
                 {
-                    return poly._thickness == 0 ? 0 : 1;
-                }
-                else
+                    if (drawing is PolylineDrawing poly)
+                    {
+                        return poly._thickness == 0 ? 0 : 1;
+                    }
+                    else
+                    {
+                        return 2;
+                    }
+                }))
                 {
-                    return 2;
+                    item.Draw();
                 }
-            }))
-            {
-                item.Draw();
             }
         }
         catch (Exception ex)

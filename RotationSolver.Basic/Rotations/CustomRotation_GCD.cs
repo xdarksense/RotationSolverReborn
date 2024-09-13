@@ -27,6 +27,8 @@ partial class CustomRotation
 
         if (RaiseSpell(out act, false)) return act;
 
+        if (Service.Config.RaisePlayerByCasting && SwiftcastPvE.Cooldown.IsCoolingDown && RaiseSpell(out act, true)) return act;
+
         IBaseAction.TargetOverride = null;
 
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.MoveForward)
@@ -106,12 +108,6 @@ partial class CustomRotation
             }
         }
 
-        IBaseAction.TargetOverride = TargetType.Death;
-
-        if (Service.Config.RaisePlayerByCasting && SwiftcastPvE.Cooldown.IsCoolingDown && RaiseSpell(out act, true)) return act;
-
-        IBaseAction.TargetOverride = null;
-
         return null;
     }
 
@@ -132,12 +128,15 @@ partial class CustomRotation
 
     private bool RaiseSpell(out IAction? act, bool mustUse)
     {
+        act = null;
+
+        // Check if the command status has the Raise flag
         if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
         {
             if (RaiseGCD(out act) || RaiseAction(out act, false)) return true;
         }
 
-        act = null;
+        // Check if the auto status has the Raise flag
         if (!DataCenter.AutoStatus.HasFlag(AutoStatus.Raise)) return false;
 
         if (RaiseGCD(out act)) return true;
@@ -170,6 +169,7 @@ partial class CustomRotation
 
         bool RaiseAction(out IAction act, bool ignoreCastingCheck)
         {
+            // Check if the player has enough MP to cast Raise
             if (Player.CurrentMp > Service.Config.LessMPNoRaise && (Raise?.CanUse(out act, skipCastingCheck: ignoreCastingCheck) ?? false)) return true;
 
             act = null!;
@@ -196,6 +196,13 @@ partial class CustomRotation
     /// <returns></returns>
     protected virtual bool DispelGCD(out IAction? act)
     {
+        act = null;
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
+        {
+
+            if (Role is JobRole.Healer && HasSwift) return false;
+        }
+
         if (EsunaPvE.CanUse(out act)) return true;
         if (DataCenter.RightNowDutyRotation?.DispelGCD(out act) ?? false) return true;
         return false;
@@ -216,6 +223,12 @@ partial class CustomRotation
 
         if (StandardissueElixirPvP.CanUse(out act)) return true;
         #endregion
+        act = null;
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
+        {
+
+            if (Role is JobRole.Healer && HasSwift) return false;
+        }
 
         if (DataCenter.RightNowDutyRotation?.EmergencyGCD(out act) ?? false) return true;
 
@@ -230,6 +243,13 @@ partial class CustomRotation
     [RotationDesc(DescType.MoveForwardGCD)]
     protected virtual bool MoveForwardGCD(out IAction? act)
     {
+        act = null;
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
+        {
+
+            if (Role is JobRole.Healer && HasSwift) return false;
+        }
+
         if (DataCenter.RightNowDutyRotation?.MoveForwardGCD(out act) ?? false) return true;
         act = null; return false;
     }
@@ -254,6 +274,13 @@ partial class CustomRotation
     [RotationDesc(DescType.HealAreaGCD)]
     protected virtual bool HealAreaGCD(out IAction? act)
     {
+        act = null;
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
+        {
+
+            if (Role is JobRole.Healer && HasSwift) return false;
+        }
+
         if (DataCenter.RightNowDutyRotation?.HealAreaGCD(out act) ?? false) return true;
         act = null!; return false;
     }
@@ -266,6 +293,13 @@ partial class CustomRotation
     [RotationDesc(DescType.DefenseSingleGCD)]
     protected virtual bool DefenseSingleGCD(out IAction? act)
     {
+        act = null;
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
+        {
+
+            if (Role is JobRole.Healer && HasSwift) return false;
+        }
+
         if (DataCenter.RightNowDutyRotation?.DefenseSingleGCD(out act) ?? false) return true;
         act = null!; return false;
     }
@@ -278,6 +312,14 @@ partial class CustomRotation
     [RotationDesc(DescType.DefenseAreaGCD)]
     protected virtual bool DefenseAreaGCD(out IAction? act)
     {
+        act = null;
+
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
+        {
+
+            if (Role is JobRole.Healer && HasSwift) return false;
+        }
+
         if (DataCenter.RightNowDutyRotation?.DefenseAreaGCD(out act) ?? false) return true;
         act = null; return false;
     }
@@ -289,6 +331,14 @@ partial class CustomRotation
     /// <returns></returns>
     protected virtual bool GeneralGCD(out IAction? act)
     {
+        act = null;
+
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
+        {
+
+            if (Role is JobRole.Healer && HasSwift) return false;
+        }
+
         if (DataCenter.RightNowDutyRotation?.GeneralGCD(out act) ?? false) return true;
         act = null; return false;
     }

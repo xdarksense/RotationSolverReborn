@@ -3,18 +3,26 @@ using System.ComponentModel;
 
 namespace RotationSolver.UI;
 
+/// <summary>
+/// Attribute to mark tabs that should be skipped.
+/// </summary>
 [AttributeUsage(AttributeTargets.Field)]
 internal class TabSkipAttribute : Attribute
 {
-
 }
 
+/// <summary>
+/// Attribute to specify an icon for a tab.
+/// </summary>
 [AttributeUsage(AttributeTargets.Field)]
 internal class TabIconAttribute : Attribute
 {
     public uint Icon { get; set; }
 }
 
+/// <summary>
+/// Enum representing different tabs in the rotation config window.
+/// </summary>
 internal enum RotationConfigWindowTab : byte
 {
     [TabSkip] About,
@@ -38,7 +46,7 @@ internal enum RotationConfigWindowTab : byte
     [Description("General Action usage and control")]
     [TabIcon(Icon = 29)] Auto,
 
-    [Description("Targetting settings")]
+    [Description("Targeting settings")]
     [TabIcon(Icon = 16)] Target,
 
     [Description("Features that are not core to RSR but are helpful")]
@@ -48,6 +56,9 @@ internal enum RotationConfigWindowTab : byte
     [TabIcon(Icon = 5)] Debug,
 }
 
+/// <summary>
+/// Struct representing an incompatible plugin.
+/// </summary>
 public struct IncompatiblePlugin
 {
     public string Name { get; set; }
@@ -55,19 +66,26 @@ public struct IncompatiblePlugin
     public string Url { get; set; }
     public string Features { get; set; }
 
+    /// <summary>
+    /// Checks if the plugin is installed.
+    /// </summary>
     [JsonIgnore]
     public readonly bool IsInstalled
     {
         get
         {
             var name = this.Name;
-            return Svc.PluginInterface.InstalledPlugins.Any(x => (x.Name.Contains(name) || x.InternalName.Contains(name)) && x.IsLoaded);
+            return Svc.PluginInterface.InstalledPlugins.Any(x =>
+                (x.Name.Contains(name) || x.InternalName.Contains(name)) && x.IsLoaded);
         }
     }
 
     public CompatibleType Type { get; set; }
 }
 
+/// <summary>
+/// Enum representing different types of compatibility issues.
+/// </summary>
 [Flags]
 public enum CompatibleType : byte
 {

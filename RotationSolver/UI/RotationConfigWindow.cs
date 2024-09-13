@@ -20,6 +20,7 @@ using RotationSolver.Data;
 using RotationSolver.Helpers;
 
 using RotationSolver.UI.SearchableConfigs;
+using RotationSolver.UI.SearchableSettings;
 using RotationSolver.Updaters;
 using System.Diagnostics;
 using GAction = Lumina.Excel.GeneratedSheets.Action;
@@ -403,29 +404,40 @@ public partial class RotationConfigWindow : Window
     private void DrawRotationIcon(ICustomRotation rotation, float iconSize)
     {
         var cursor = ImGui.GetCursorPos();
-        if (rotation.GetTexture(out var jobIcon) && ImGuiHelper.SilenceImageButton(jobIcon.ImGuiHandle,
-            Vector2.One * iconSize, _activeTab == RotationConfigWindowTab.Rotation))
+
+        // Check if the rotation texture is available
+        if (rotation.GetTexture(out var jobIcon) && ImGuiHelper.SilenceImageButton(jobIcon.ImGuiHandle, Vector2.One * iconSize, _activeTab == RotationConfigWindowTab.Rotation))
         {
             _activeTab = RotationConfigWindowTab.Rotation;
-            _searchResults = [];
+            _searchResults = Array.Empty<ISearchable>(); // Corrected type
         }
+
+        // Show tooltip if the item is hovered
         if (ImGui.IsItemHovered())
         {
             ImguiTooltips.ShowTooltip(() =>
             {
-                ImGui.Text(rotation.Name + $" ({rotation.GetType().GetCustomAttribute<RotationAttribute>()!.Name})");
-                rotation.GetType().GetCustomAttribute<RotationAttribute>()!.Type.Draw();
-                if (!string.IsNullOrEmpty(rotation.Description))
+                var rotationType = rotation.GetType();
+                var rotationAttribute = rotationType.GetCustomAttribute<RotationAttribute>();
+
+                if (rotationAttribute != null)
                 {
-                    ImGui.Text(rotation.Description);
+                    ImGui.Text($"{rotation.Name} ({rotationAttribute.Name})");
+                    rotationAttribute.Type.Draw();
+
+                    if (!string.IsNullOrEmpty(rotation.Description))
+                    {
+                        ImGui.Text(rotation.Description);
+                    }
                 }
             });
         }
 
-        if (IconSet.GetTexture(rotation.GetType().GetCustomAttribute<RotationAttribute>()!.Type.GetIcon(), out var texture))
+        // Check if the icon texture is available
+        var rotationTypeAttribute = rotation.GetType().GetCustomAttribute<RotationAttribute>();
+        if (rotationTypeAttribute != null && IconSet.GetTexture(rotationTypeAttribute.Type.GetIcon(), out var texture))
         {
             ImGui.SetCursorPos(cursor + Vector2.One * iconSize / 2);
-
             ImGui.Image(texture.ImGuiHandle, Vector2.One * iconSize / 2);
         }
     }
@@ -435,7 +447,13 @@ public partial class RotationConfigWindow : Window
         ImGui.SetNextItemWidth(comboSize);
         const string popUp = "Rotation Solver Select Rotation";
 
-        var rot = rotation.GetType().GetCustomAttribute<RotationAttribute>()!;
+        var rot = rotation.GetType().GetCustomAttribute<RotationAttribute>();
+        if (rot == null)
+        {
+            // Handle the case where the attribute is not found
+            ImGui.Text("Rotation attribute not found.");
+            return;
+        }
 
         using (var color = ImRaii.PushColor(ImGuiCol.Text, rotation.GetColor()))
         {
@@ -451,7 +469,8 @@ public partial class RotationConfigWindow : Window
             {
                 foreach (var r in rotations)
                 {
-                    var rAttr = r.GetCustomAttribute<RotationAttribute>()!;
+                    var rAttr = r.GetCustomAttribute<RotationAttribute>();
+                    if (rAttr == null) continue;
 
                     if (IconSet.GetTexture(rAttr.Type.GetIcon(), out var texture))
                     {
@@ -460,7 +479,7 @@ public partial class RotationConfigWindow : Window
                         {
                             ImguiTooltips.ShowTooltip(() =>
                             {
-                                rotation.GetType().GetCustomAttribute<RotationAttribute>()!.Type.Draw();
+                                rotation.GetType().GetCustomAttribute<RotationAttribute>()?.Type.Draw();
                             });
                         }
                     }
@@ -497,12 +516,17 @@ public partial class RotationConfigWindow : Window
 
     private void DrawBody()
     {
+        // Adjust cursor position
         ImGui.SetCursorPos(ImGui.GetCursorPos() + Vector2.One * 8 * Scale);
+
+        // Create a child window for the body content
         using var child = ImRaii.Child("Rotation Solver Body", -Vector2.One);
         if (child)
         {
+            // Check if there are search results to display
             if (_searchResults != null && _searchResults.Length != 0)
             {
+                // Display search results header
                 using (var font = ImRaii.PushFont(FontManager.GetFont(18)))
                 {
                     using var color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudYellow));
@@ -511,6 +535,7 @@ public partial class RotationConfigWindow : Window
 
                 ImGui.Spacing();
 
+                // Display each search result
                 foreach (var searchable in _searchResults)
                 {
                     searchable?.Draw();
@@ -518,6 +543,7 @@ public partial class RotationConfigWindow : Window
             }
             else
             {
+                // Display content based on the active tab
                 switch (_activeTab)
                 {
                     case RotationConfigWindowTab.About:
@@ -563,6 +589,11 @@ public partial class RotationConfigWindow : Window
                     case RotationConfigWindowTab.Debug:
                         DrawDebug();
                         break;
+
+                    default:
+                        // Handle unexpected tab values
+                        ImGui.Text("Unknown tab selected.");
+                        break;
                 }
             }
         }
@@ -570,13 +601,14 @@ public partial class RotationConfigWindow : Window
 
     #region About
     private static readonly SortedList<uint, string> CountStringPair = new()
-    {
-        { 100_000, UiString.ConfigWindow_About_Clicking100k.GetDescription() },
-        { 500_000, UiString.ConfigWindow_About_Clicking500k.GetDescription() },
-    };
+{
+    { 100_000, UiString.ConfigWindow_About_Clicking100k.GetDescription() },
+    { 500_000, UiString.ConfigWindow_About_Clicking500k.GetDescription() },
+};
 
     private static void DrawAbout()
     {
+        // Draw the punchline with a specific font and color
         using (var font = ImRaii.PushFont(FontManager.GetFont(18)))
         {
             using var color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudYellow));
@@ -585,15 +617,20 @@ public partial class RotationConfigWindow : Window
 
         ImGui.Spacing();
 
+        // Draw the description
         ImGui.TextWrapped(UiString.ConfigWindow_About_Description.GetDescription());
 
         ImGui.Spacing();
+
+        // Draw the warning with a specific color
         using (var color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudOrange)))
         {
             ImGui.TextWrapped(UiString.ConfigWindow_About_Warning.GetDescription());
         }
 
         var width = ImGui.GetWindowWidth();
+
+        // Draw the Discord link button
         if (IconSet.GetTexture("https://discordapp.com/api/guilds/1064448004498653245/embed.png?style=banner2", out var icon) && ImGuiHelper.TextureButton(icon, width, width))
         {
             Util.OpenLink("https://discord.gg/p54TZMPnC9");
@@ -602,14 +639,15 @@ public partial class RotationConfigWindow : Window
         var clickingCount = OtherConfiguration.RotationSolverRecord.ClickingCount;
         if (clickingCount > 0)
         {
+            // Draw the clicking count with a specific color
             using var color = ImRaii.PushColor(ImGuiCol.Text, new Vector4(0.2f, 0.6f, 0.95f, 1));
-            var countStr = string.Format(UiString.ConfigWindow_About_ClickingCount.GetDescription(),
-                clickingCount);
+            var countStr = string.Format(UiString.ConfigWindow_About_ClickingCount.GetDescription(), clickingCount);
             ImGuiHelper.DrawItemMiddle(() =>
             {
                 ImGui.TextWrapped(countStr);
             }, width, ImGui.CalcTextSize(countStr).X);
 
+            // Draw the appropriate message based on the clicking count
             foreach (var pair in CountStringPair.Reverse())
             {
                 if (clickingCount >= pair.Key)
@@ -623,15 +661,17 @@ public partial class RotationConfigWindow : Window
                 }
             }
         }
+
+        // Draw the about headers
         _aboutHeaders.Draw();
     }
 
     private static readonly CollapsingHeaderGroup _aboutHeaders = new(new()
     {
-        { UiString.ConfigWindow_About_Macros.GetDescription, DrawAboutMacros},
-        { UiString.ConfigWindow_About_Compatibility.GetDescription, DrawAboutCompatibility},
-        { UiString.ConfigWindow_About_Links.GetDescription, DrawAboutLinks},
-        { UiString.ConfigWindow_About_Warnings.GetDescription, DrawAboutWarnings},
+        { UiString.ConfigWindow_About_Macros.GetDescription, DrawAboutMacros },
+        { UiString.ConfigWindow_About_Compatibility.GetDescription, DrawAboutCompatibility },
+        { UiString.ConfigWindow_About_Links.GetDescription, DrawAboutLinks },
+        { UiString.ConfigWindow_About_Warnings.GetDescription, DrawAboutWarnings },
     });
 
     private static void DrawAboutWarnings()
@@ -670,48 +710,61 @@ public partial class RotationConfigWindow : Window
 
     private static void DrawAboutMacros()
     {
+        // Adjust item spacing for better layout
         using var style = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0f, 5f));
 
-        StateCommandType.Auto.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
-        StateCommandType.Manual.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
-        StateCommandType.Off.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
+        // Display command help for different state commands
+        DisplayCommandHelp(StateCommandType.Auto);
+        DisplayCommandHelp(StateCommandType.Manual);
+        DisplayCommandHelp(StateCommandType.Off);
 
-        OtherCommandType.NextAction.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
+        // Display command help for other commands
+        DisplayCommandHelp(OtherCommandType.NextAction);
 
         ImGui.NewLine();
 
-        SpecialCommandType.EndSpecial.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
-        SpecialCommandType.HealArea.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
-        SpecialCommandType.HealSingle.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
-        SpecialCommandType.DefenseArea.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
-        SpecialCommandType.DefenseSingle.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
-        SpecialCommandType.MoveForward.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
-        SpecialCommandType.MoveBack.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
-        SpecialCommandType.Speed.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
-        SpecialCommandType.DispelStancePositional.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
-        SpecialCommandType.RaiseShirk.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
-        SpecialCommandType.AntiKnockback.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
-        SpecialCommandType.Burst.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
-        SpecialCommandType.LimitBreak.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
-        SpecialCommandType.NoCasting.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
+        // Display command help for special commands
+        DisplayCommandHelp(SpecialCommandType.EndSpecial);
+        DisplayCommandHelp(SpecialCommandType.HealArea);
+        DisplayCommandHelp(SpecialCommandType.HealSingle);
+        DisplayCommandHelp(SpecialCommandType.DefenseArea);
+        DisplayCommandHelp(SpecialCommandType.DefenseSingle);
+        DisplayCommandHelp(SpecialCommandType.MoveForward);
+        DisplayCommandHelp(SpecialCommandType.MoveBack);
+        DisplayCommandHelp(SpecialCommandType.Speed);
+        DisplayCommandHelp(SpecialCommandType.DispelStancePositional);
+        DisplayCommandHelp(SpecialCommandType.RaiseShirk);
+        DisplayCommandHelp(SpecialCommandType.AntiKnockback);
+        DisplayCommandHelp(SpecialCommandType.Burst);
+        DisplayCommandHelp(SpecialCommandType.LimitBreak);
+        DisplayCommandHelp(SpecialCommandType.NoCasting);
+    }
+
+    // Helper method to display command help
+    private static void DisplayCommandHelp<T>(T commandType) where T : Enum
+    {
+        commandType.DisplayCommandHelp(getHelp: Data.EnumExtensions.GetDescription);
     }
 
     private static void DrawAboutCompatibility()
     {
+        // Display the compatibility description
         ImGui.TextWrapped(UiString.ConfigWindow_About_Compatibility_Description.GetDescription());
 
         ImGui.Spacing();
 
         var iconSize = 40 * Scale;
 
+        // Create a table to display incompatible plugins
         using var table = ImRaii.Table("Incompatible plugin", 5, ImGuiTableFlags.BordersInner
-        | ImGuiTableFlags.Resizable
-        | ImGuiTableFlags.SizingStretchProp);
+            | ImGuiTableFlags.Resizable
+            | ImGuiTableFlags.SizingStretchProp);
         if (table)
         {
             ImGui.TableSetupScrollFreeze(0, 1);
             ImGui.TableNextRow(ImGuiTableRowFlags.Headers);
 
+            // Set up table headers
             ImGui.TableNextColumn();
             ImGui.TableHeader("Name");
 
@@ -727,7 +780,11 @@ public partial class RotationConfigWindow : Window
             ImGui.TableNextColumn();
             ImGui.TableHeader("Installed");
 
-            foreach (var item in DownloadHelper.IncompatiblePlugins ?? [])
+            // Ensure that IncompatiblePlugins is not null
+            var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
+
+            // Iterate over each incompatible plugin and display its details
+            foreach (var item in incompatiblePlugins)
             {
                 ImGui.TableNextRow();
                 ImGui.TableNextColumn();
@@ -736,8 +793,9 @@ public partial class RotationConfigWindow : Window
 
                 ImGui.TableNextColumn();
 
-                var icon = item.Icon;
-                if (string.IsNullOrEmpty(icon)) icon = "https://raw.githubusercontent.com/goatcorp/DalamudAssets/master/UIRes/defaultIcon.png";
+                var icon = string.IsNullOrEmpty(item.Icon)
+                    ? "https://raw.githubusercontent.com/goatcorp/DalamudAssets/master/UIRes/defaultIcon.png"
+                    : item.Icon;
 
                 if (IconSet.GetTexture(icon, out var texture))
                 {
@@ -751,22 +809,7 @@ public partial class RotationConfigWindow : Window
                 ImGui.TextWrapped(item.Features);
 
                 ImGui.TableNextColumn();
-
-                if (item.Type.HasFlag(CompatibleType.Skill_Usage))
-                {
-                    ImGui.TextColored(ImGuiColors.DalamudYellow, CompatibleType.Skill_Usage.GetDescription().Replace('_', ' '));
-                    ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Compatibility_Mistake.GetDescription());
-                }
-                if (item.Type.HasFlag(CompatibleType.Skill_Selection))
-                {
-                    ImGui.TextColored(ImGuiColors.DalamudOrange, CompatibleType.Skill_Selection.GetDescription().Replace('_', ' '));
-                    ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Compatibility_Mislead.GetDescription());
-                }
-                if (item.Type.HasFlag(CompatibleType.Crash))
-                {
-                    ImGui.TextColored(ImGuiColors.DalamudRed, CompatibleType.Crash.GetDescription().Replace('_', ' '));
-                    ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Compatibility_Crash.GetDescription());
-                }
+                DisplayPluginType(item.Type);
 
                 ImGui.TableNextColumn();
                 ImGui.Text(item.IsInstalled ? "Yes" : "No");
@@ -774,22 +817,62 @@ public partial class RotationConfigWindow : Window
         }
     }
 
+    // Helper method to display plugin type with appropriate colors and tooltips
+    private static void DisplayPluginType(CompatibleType type)
+    {
+        if (type.HasFlag(CompatibleType.Skill_Usage))
+        {
+            ImGui.TextColored(ImGuiColors.DalamudYellow, CompatibleType.Skill_Usage.GetDescription().Replace('_', ' '));
+            ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Compatibility_Mistake.GetDescription());
+        }
+        if (type.HasFlag(CompatibleType.Skill_Selection))
+        {
+            ImGui.TextColored(ImGuiColors.DalamudOrange, CompatibleType.Skill_Selection.GetDescription().Replace('_', ' '));
+            ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Compatibility_Mislead.GetDescription());
+        }
+        if (type.HasFlag(CompatibleType.Crash))
+        {
+            ImGui.TextColored(ImGuiColors.DalamudRed, CompatibleType.Crash.GetDescription().Replace('_', ' '));
+            ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Compatibility_Crash.GetDescription());
+        }
+    }
+
     private static void DrawAboutLinks()
     {
         var width = ImGui.GetWindowWidth();
 
-        if (IconSet.GetTexture("https://GitHub-readme-stats.vercel.app/api/pin/?username=FFXIV-CombatReborn&repo=RotationSolverReborn&theme=dark", out var icon) && ImGuiHelper.TextureButton(icon, width, width))
+        // Display GitHub link button
+        if (IconSet.GetTexture("https://GitHub-readme-stats.vercel.app/api/pin/?username=FFXIV-CombatReborn&repo=RotationSolverReborn&theme=dark", out var icon))
         {
-            Util.OpenLink($"https://GitHub.com/{Service.USERNAME}/{Service.REPO}");
+            if (ImGuiHelper.TextureButton(icon, width, width))
+            {
+                Util.OpenLink($"https://GitHub.com/{Service.USERNAME}/{Service.REPO}");
+            }
+        }
+        else
+        {
+            // Handle the case where the texture is not found
+            ImGui.Text("Failed to load GitHub icon.");
         }
 
+        ImGui.Spacing();
+
+        // Display button to open the configuration folder
         var text = UiString.ConfigWindow_About_OpenConfigFolder.GetDescription();
         var textWidth = ImGuiHelpers.GetButtonSize(text).X;
         ImGuiHelper.DrawItemMiddle(() =>
         {
             if (ImGui.Button(text))
             {
-                Process.Start("explorer.exe", Svc.PluginInterface.ConfigDirectory.FullName);
+                try
+                {
+                    Process.Start("explorer.exe", Svc.PluginInterface.ConfigDirectory.FullName);
+                }
+                catch (Exception ex)
+                {
+                    // Handle the exception (e.g., log it or display an error message)
+                    ImGui.TextColored(ImGuiColors.DalamudRed, $"Failed to open config folder: {ex.Message}");
+                }
             }
         }, width, textWidth);
     }

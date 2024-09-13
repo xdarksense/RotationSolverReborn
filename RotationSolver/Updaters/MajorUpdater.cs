@@ -28,16 +28,16 @@ internal static class MajorUpdater
         && !Svc.Condition[ConditionFlag.LoggingOut]
         && Player.Available;
 
-    static bool _work;
-    static Exception? _threadException;
-    static DateTime _lastUpdatedWork = DateTime.Now;
-    static DateTime _warningsLastDisplayed = DateTime.MinValue;
+    private static bool _work;
+    private static Exception? _threadException;
+    private static DateTime _lastUpdatedWork = DateTime.Now;
+    private static DateTime _warningsLastDisplayed = DateTime.MinValue;
 
     private unsafe static void FrameworkUpdate(IFramework framework)
     {
-        //HotbarHighlightDrawerManager.HotbarIDs.Clear();
         HotbarHighlightManager.HotbarIDs.Clear();
         RotationSolverPlugin.UpdateDisplayWindow();
+
         if (!IsValid)
         {
             ActionUpdater.ClearNextAction();
@@ -45,47 +45,23 @@ internal static class MajorUpdater
             return;
         }
 
-        if (DataCenter.SystemWarnings.Any())
-        {
-            foreach (var warning in DataCenter.SystemWarnings)
-            {
-                if ((warning.Value + new TimeSpan(0, 10, 0)) < DateTime.Now)
-                {
-                    DataCenter.SystemWarnings.Remove(warning.Key);
-                    continue;
-                }
-            }
-            if (_warningsLastDisplayed + new TimeSpan(0, 10, 0) < DateTime.Now)
-            {
-                _warningsLastDisplayed = DateTime.Now;
-#pragma warning disable 0436
-                WarningHelper.ShowWarning("System warnings are present.");
-            }
-        }
+        HandleSystemWarnings();
 
         try
         {
             PreviewUpdater.UpdatePreview();
             UpdateHighlight();
-
-            // Just sets a local variable, I don't think this is used or needed for anything
-            //if (Service.Config.TeachingMode && ActionUpdater.NextAction != null)
-            //{
-            //    //Sprint action id is 3 however the id in hot bar is 4.
-            //    var id = ActionUpdater.NextAction.AdjustedID;
-            //}
-
             ActionUpdater.UpdateActionInfo();
 
             var canDoAction = ActionUpdater.CanDoAction();
             MovingUpdater.UpdateCanMove(canDoAction);
+
             if (canDoAction)
             {
                 RSCommands.DoAction();
             }
 
             MacroUpdater.UpdateMacro();
-
             CloseWindow();
             OpenChest();
         }
@@ -98,6 +74,32 @@ internal static class MajorUpdater
             }
         }
 
+        HandleWorkUpdate();
+    }
+
+    private static void HandleSystemWarnings()
+    {
+        if (DataCenter.SystemWarnings.Any())
+        {
+            foreach (var warning in DataCenter.SystemWarnings)
+            {
+                if ((warning.Value + TimeSpan.FromMinutes(10)) < DateTime.Now)
+                {
+                    DataCenter.SystemWarnings.Remove(warning.Key);
+                }
+            }
+
+            if (_warningsLastDisplayed + TimeSpan.FromMinutes(10) < DateTime.Now)
+            {
+                _warningsLastDisplayed = DateTime.Now;
+#pragma warning disable 0436
+                WarningHelper.ShowWarning("System warnings are present.");
+            }
+        }
+    }
+
+    private static void HandleWorkUpdate()
+    {
         try
         {
             if (_work) return;
@@ -124,13 +126,12 @@ internal static class MajorUpdater
 
     private static XivChatEntry BuildWarningChatEntry()
     {
-        DalamudLinkPayload linkPayload = Svc.PluginInterface.AddChatLinkHandler(3, OpenWarningChatHandler);
-        XivChatEntry entry = new()
+        var linkPayload = Svc.PluginInterface.AddChatLinkHandler(3, OpenWarningChatHandler);
+        return new XivChatEntry
         {
             Message = new SeString(new TextPayload("RotationSolver Reborn: System warnings are present. Click here to view."), linkPayload),
             Type = XivChatType.ErrorMessage,
         };
-        return entry;
     }
 
     private static void OpenWarningChatHandler(uint arg1, SeString @string)
@@ -141,38 +142,20 @@ internal static class MajorUpdater
         }
     }
 
-    /// <summary>
-    /// <br>Updates next to-be highlighted action/item on the hotbar</br>
-    /// Returns early if <seealso cref="ActionUpdater.NextAction"/> is not an <seealso cref="IAction"/> OR if the config 'TeachingMode' is off.
-    /// </summary>
     private static void UpdateHighlight()
     {
         if (!Service.Config.TeachingMode || ActionUpdater.NextAction is not IAction nextAction) return;
-        HotbarID? hotbar = null;
 
-        if (nextAction is IBaseItem item)
+        HotbarID? hotbar = nextAction switch
         {
-            hotbar = new(HotbarSlotType.Item, item.ID); // TODO: Test items, might need to be changed to 'AdjustedID'.  Update: Items don't seem to work for me :(
-        }
-        else if (nextAction is IBaseAction baseAction)
-        {
-            if (baseAction.Action.ActionCategory.Row is 10 or 11)//System Action.
-            {
-                var gAct = Svc.Data.GetExcelSheet<GeneralAction>()?.FirstOrDefault(g => g.Action.Row == baseAction.ID);
+            IBaseItem item => new HotbarID(HotbarSlotType.Item, item.ID),
+            IBaseAction baseAction when baseAction.Action.ActionCategory.Row is 10 or 11 => Svc.Data.GetExcelSheet<GeneralAction>()?.FirstOrDefault(g => g.Action.Row == baseAction.ID) is GeneralAction gAct ? new HotbarID(HotbarSlotType.GeneralAction, gAct.RowId) : null,
+            IBaseAction baseAction => new HotbarID(HotbarSlotType.Action, baseAction.AdjustedID),
+            _ => null
+        };
 
-                if (gAct != null)
-                {
-                    hotbar = new(HotbarSlotType.GeneralAction, gAct.RowId);
-                }
-            }
-            else
-            {
-                hotbar = new HotbarID(HotbarSlotType.Action, baseAction.AdjustedID);
-            }
-        }
         if (hotbar.HasValue)
         {
-            //HotbarHighlightDrawerManager.HotbarIDs.Add(hotbar.Value);
             HotbarHighlightManager.HotbarIDs.Add(hotbar.Value);
         }
     }
@@ -192,17 +175,16 @@ internal static class MajorUpdater
     public static void Enable()
     {
         ActionSequencerUpdater.Enable(Svc.PluginInterface.ConfigDirectory.FullName + "\\Conditions");
-
         Svc.Framework.Update += FrameworkUpdate;
     }
 
-    static Exception? _innerException;
+    private static Exception? _innerException;
     private static void UpdateWork()
     {
         var waitingTime = (DateTime.Now - _lastUpdatedWork).TotalMilliseconds;
         if (waitingTime > 100)
         {
-            Svc.Log.Warning($"The time for completing a running cycle for RS is {waitingTime:F2} ms, try disabling the option \"{"UseWorkTask"}\" to get better performance or check your other running plugins for one of them using too many resources and try disabling that.");
+            Svc.Log.Warning($"The time for completing a running cycle for RS is {waitingTime:F2} ms, try disabling the option \"UseWorkTask\" to get better performance or check your other running plugins for one of them using too many resources and try disabling that.");
         }
 
         if (!IsValid)
@@ -221,6 +203,7 @@ internal static class MajorUpdater
             }
 
             RotationUpdater.UpdateRotation();
+
             if (DataCenter.IsActivated())
             {
                 TargetUpdater.UpdateTarget();
@@ -229,7 +212,6 @@ internal static class MajorUpdater
             }
 
             RSCommands.UpdateRotationState();
-            //HotbarHighlightDrawerManager.UpdateSettings();
             HotbarHighlightManager.UpdateSettings();
         }
         catch (Exception ex)

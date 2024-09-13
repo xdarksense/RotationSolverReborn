@@ -17,22 +17,34 @@ internal static class ImguiTooltips
 
     const string TOOLTIP_ID = "RotationSolver Tooltips";
 
+    /// <summary>
+    /// Displays a tooltip when the item is hovered.
+    /// </summary>
+    /// <param name="text">The text to display in the tooltip.</param>
     public static void HoveredTooltip(string? text)
     {
         if (!ImGui.IsItemHovered()) return;
         ShowTooltip(text);
     }
 
+    /// <summary>
+    /// Displays a tooltip with the specified text.
+    /// </summary>
+    /// <param name="text">The text to display in the tooltip.</param>
     public static void ShowTooltip(string? text)
     {
         if (string.IsNullOrEmpty(text)) return;
         ShowTooltip(() => ImGui.Text(text));
     }
 
+    /// <summary>
+    /// Displays a tooltip with the specified action.
+    /// </summary>
+    /// <param name="act">The action to perform to render the tooltip content.</param>
     public static void ShowTooltip(Action act)
     {
         if (act == null) return;
-        if (!Service.Config.ShowTooltips) return;
+        if (Service.Config == null || !Service.Config.ShowTooltips) return;
 
         ImGui.SetNextWindowBgAlpha(1);
 

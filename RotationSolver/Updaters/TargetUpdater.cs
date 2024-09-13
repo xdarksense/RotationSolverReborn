@@ -2,20 +2,22 @@
 
 internal static partial class TargetUpdater
 {
-    static readonly ObjectListDelay<IBattleChara>
+    private static readonly ObjectListDelay<IBattleChara>
         _raisePartyTargets = new(() => Service.Config.RaiseDelay),
         _raiseAllTargets = new(() => Service.Config.RaiseDelay);
+
+    private static DateTime _lastUpdateTimeToKill = DateTime.MinValue;
+    private static readonly TimeSpan TimeToKillUpdateInterval = TimeSpan.FromSeconds(0.5);
+
     internal static void UpdateTarget()
     {
         UpdateTimeToKill();
     }
 
-    private static DateTime _lastUpdateTimeToKill = DateTime.MinValue;
-    private static readonly TimeSpan _timeToKillSpan = TimeSpan.FromSeconds(0.5);
     private static void UpdateTimeToKill()
     {
         var now = DateTime.Now;
-        if (now - _lastUpdateTimeToKill < _timeToKillSpan) return;
+        if (now - _lastUpdateTimeToKill < TimeToKillUpdateInterval) return;
         _lastUpdateTimeToKill = now;
 
         if (DataCenter.RecordedHP.Count >= DataCenter.HP_RECORD_TIME)
@@ -23,7 +25,10 @@ internal static partial class TargetUpdater
             DataCenter.RecordedHP.Dequeue();
         }
 
-        DataCenter.RecordedHP.Enqueue((now, new SortedList<ulong, float>(DataCenter.AllTargets.Where(b => b != null && b.CurrentHp != 0).ToDictionary(b => b.GameObjectId, b => b.GetHealthRatio()))));
-    }
+        var currentHPs = DataCenter.AllTargets
+            .Where(b => b.CurrentHp != 0)
+            .ToDictionary(b => b.GameObjectId, b => b.GetHealthRatio());
 
+        DataCenter.RecordedHP.Enqueue((now, new SortedList<ulong, float>(currentHPs)));
+    }
 }
