@@ -2405,6 +2405,8 @@ public partial class RotationConfigWindow : Window
         ImGui.Text(DataCenter.SpecialType.ToString());
 
         ImGui.Text(ActionUpdater.NextAction?.Name ?? "null");
+        ImGui.Text($"LastAbilityorNot: {DataCenter.LastAbilityorNot}");
+        ImGui.Text($"FirstAbilityorNot: {DataCenter.FirstAbilityorNot}");
         ImGui.Text($"GCD Total: {DataCenter.DefaultGCDTotal}");
         ImGui.Text($"GCD Remain: {DataCenter.DefaultGCDRemain}");
         ImGui.Text($"GCD Elapsed: {DataCenter.DefaultGCDElapsed}");

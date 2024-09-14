@@ -98,29 +98,43 @@ internal static class MajorUpdater
         }
     }
 
+    private static readonly object _workLock = new object();
+
     private static void HandleWorkUpdate()
     {
         try
         {
-            if (_work) return;
-            if (DateTime.Now - _lastUpdatedWork < TimeSpan.FromSeconds(Service.Config.MinUpdatingTime))
-                return;
+            lock (_workLock)
+            {
+                if (_work) return;
+                if (DateTime.Now - _lastUpdatedWork < TimeSpan.FromSeconds(Service.Config.MinUpdatingTime))
+                    return;
 
-            _work = true;
-            _lastUpdatedWork = DateTime.Now;
+                _work = true;
+                _lastUpdatedWork = DateTime.Now;
+            }
 
             if (Service.Config.UseWorkTask)
             {
-                Task.Run(UpdateWork);
+                Task.Run(UpdateWork).ContinueWith(t =>
+                {
+                    if (t.Exception != null)
+                    {
+                        Svc.Log.Error(t.Exception, "Worker Task Exception");
+                    }
+                    _work = false;
+                }, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
             }
             else
             {
                 UpdateWork();
+                _work = false;
             }
         }
         catch (Exception ex)
         {
-            Svc.Log.Error(ex, "Worker Exception");
+            Svc.Log.Error(ex, "Worker Exception in HandleWorkUpdate");
+            _work = false;
         }
     }
 

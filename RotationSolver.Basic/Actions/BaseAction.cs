@@ -119,7 +119,7 @@ public class BaseAction : IBaseAction
     }
 
     /// <inheritdoc/>
-    public bool CanUse(out IAction act, bool isLastAbility = false, bool skipStatusProvideCheck = false, bool skipComboCheck = false, bool skipCastingCheck = false,
+    public bool CanUse(out IAction act, bool isLastAbility = false, bool isFirstAbility = false, bool skipStatusProvideCheck = false, bool skipComboCheck = false, bool skipCastingCheck = false,
         bool usedUp = false, bool skipAoeCheck = false, byte gcdCountForAbility = 0)
     {
         act = this!;
@@ -139,6 +139,7 @@ public class BaseAction : IBaseAction
         }
 
         if (isLastAbility && !IsLastAbilityUsable()) return false;
+        if (isFirstAbility && !IsFirstAbilityUsable()) return false;
 
         if (!Info.BasicCheck(skipStatusProvideCheck, skipComboCheck, skipCastingCheck)) return false;
 
@@ -161,7 +162,12 @@ public class BaseAction : IBaseAction
 
     private bool IsLastAbilityUsable()
     {
-        return DataCenter.NextAbilityToNextGCD <= ActionManagerHelper.GetCurrentAnimationLock() + DataCenter.MinAnimationLock + Service.Config.isLastAbilityTimer;
+        return DataCenter.NextAbilityToNextGCD <= ActionManagerHelper.GetCurrentAnimationLock() + Service.Config.isLastAbilityTimer;
+    }
+
+    private bool IsFirstAbilityUsable()
+    {
+        return DataCenter.NextAbilityToNextGCD >= ActionManagerHelper.GetCurrentAnimationLock() + Service.Config.isFirstAbilityTimer;
     }
 
     private bool IsTimeToKillValid()
