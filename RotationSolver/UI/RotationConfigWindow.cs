@@ -72,6 +72,7 @@ public partial class RotationConfigWindow : Window
                 {
                     DrawSideBar();
                 }
+
                 catch (Exception ex)
                 {
                     Svc.Log.Warning(ex, "Something wrong with sideBar");
@@ -83,10 +84,12 @@ public partial class RotationConfigWindow : Window
                 {
                     DrawBody();
                 }
+
                 catch (Exception ex)
                 {
                     Svc.Log.Warning(ex, "Something wrong with body");
                 }
+
             }
 
         }
@@ -136,64 +139,73 @@ public partial class RotationConfigWindow : Window
         }
     }
 
-    private void DrawConditionSet()
+    private void DrawErrorZone()
     {
-        var set = DataCenter.RightSet;
+        var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
 
-        const string popUpId = "Right Set Popup";
-        if (ImGui.Selectable(set.Name, false, ImGuiSelectableFlags.None, new Vector2(0, 20)))
-        {
-            ImGui.OpenPopup(popUpId);
-        }
-        ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_ConditionSetDesc.GetDescription());
+        bool hasIncompatiblePlugin = incompatiblePlugins.Any(item =>
+            (item.Name == "XIV Combo" || item.Name == "XIV Combo Expanded" || item.Name == "XIVSlothCombo") && item.IsInstalled);
 
-        using var popup = ImRaii.Popup(popUpId);
-        if (popup)
+        if (hasIncompatiblePlugin)
         {
-            var combos = DataCenter.ConditionSets;
-            for (int i = 0; i < combos.Length; i++)
+            string message = "Disable incompatible plugin";
+            foreach (var plugin in incompatiblePlugins)
             {
-                void DeleteFile()
+                if (plugin.IsInstalled)
                 {
-                    ActionSequencerUpdater.Delete(combos[i].Name);
-                }
-
-                if (combos[i].Name == set.Name)
-                {
-                    ImGuiHelper.SetNextWidthWithName(set.Name);
-                    ImGui.InputText("##MajorConditionSet", ref set.Name, 100);
-                }
-                else
-                {
-                    var key = "Condition Set At " + i.ToString();
-                    ImGuiHelper.DrawHotKeysPopup(key, string.Empty, (UiString.ConfigWindow_List_Remove.GetDescription(), DeleteFile, ["Delete"]));
-
-                    if (ImGui.Selectable(combos[i].Name))
+                    if (plugin.Name == "XIV Combo")
                     {
-                        Service.Config.ActionSequencerIndex = i;
+                        message = "Disable XIV Combo plugin";
+                        break;
                     }
-
-                    ImGuiHelper.ExecuteHotKeysPopup(key, string.Empty, string.Empty, false,
-                        (DeleteFile, [VirtualKey.DELETE]));
+                    else if (plugin.Name == "XIV Combo Expanded")
+                    {
+                        message = "Disable XIV Combo Expanded plugin";
+                        break;
+                    }
+                    else if (plugin.Name == "XIVSlothCombo")
+                    {
+                        message = "Disable XIVSlothCombo plugin";
+                        break;
+                    }
                 }
             }
 
-            ImGui.PushFont(UiBuilder.IconFont);
-
-            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.HealerGreen);
-            if (ImGui.Selectable(FontAwesomeIcon.Plus.ToIconString()))
+            float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
+            using (var color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudOrange)))
             {
-                ActionSequencerUpdater.AddNew();
+                ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
+                ImGui.Text(message);
+                ImGui.PopTextWrapPos(); // Reset text wrapping position
             }
-            ImGui.PopStyleColor();
+        }
 
-            if (ImGui.Selectable(FontAwesomeIcon.FileDownload.ToIconString()))
+        else if (DataCenter.SystemWarnings.Any())
+        {
+            using var table = ImRaii.Table("System Warnings", 2, ImGuiTableFlags.BordersInner);
+            if (table)
             {
-                ActionSequencerUpdater.LoadFiles();
+                foreach (var warning in DataCenter.SystemWarnings)
+                {
+                    float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
+                    using (var color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudOrange)))
+                    {
+                        ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
+                        ImGui.Text(warning.Value.ToString());
+                        ImGui.PopTextWrapPos(); // Reset text wrapping position
+                    }
+                }
             }
+        }
 
-            ImGui.PopFont();
-            ImguiTooltips.HoveredTooltip(UiString.ActionSequencer_Load.GetDescription());
+        else
+        {
+            float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
+            {
+                ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
+                ImGui.Text("Errors appear here");
+                ImGui.PopTextWrapPos(); // Reset text wrapping position
+            }
         }
     }
 
@@ -215,7 +227,7 @@ public partial class RotationConfigWindow : Window
             if (wholeWidth > JOB_ICON_WIDTH * Scale)
             {
                 DrawDutyRotation();
-                DrawConditionSet();
+                DrawErrorZone();
 
                 ImGui.Separator();
                 ImGui.Spacing();
@@ -303,6 +315,7 @@ public partial class RotationConfigWindow : Window
             ImGuiHelper.DrawItemMiddle(() =>
             {
                 var cursor = ImGui.GetCursorPos();
+
                 if (ImGuiHelper.SilenceImageButton(overlay.ImGuiHandle, Vector2.One * size,
                     _activeTab == RotationConfigWindowTab.About, "About Icon"))
                 {
@@ -381,13 +394,13 @@ public partial class RotationConfigWindow : Window
             {
                 DrawRotationIcon(rotation, iconSize);
 
-                ImGui.Spacing();
+                ImGui.SameLine();
 
                 using var group = ImRaii.Group();
 
                 DrawRotationCombo(comboSize, rotations, rotation, gameVersion);
                 ImGui.TextDisabled(slash);
-                ImGui.Spacing();
+                ImGui.SameLine();
 
                 if (drawCenter)
                 {
@@ -403,21 +416,6 @@ public partial class RotationConfigWindow : Window
     private void DrawRotationIcon(ICustomRotation rotation, float iconSize)
     {
         var cursor = ImGui.GetCursorPos();
-
-        // Check for incompatible plugins
-        var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
-
-        bool hasIncompatiblePlugin = incompatiblePlugins.Any(item =>
-            (item.Name == "XIVCombo" || item.Name == "XIV Combo Expanded" || item.Name == "XIVSlothCombo") && item.IsInstalled);
-
-        if (hasIncompatiblePlugin)
-        {
-            float wrapWidth = 200.0f; // Set the desired wrap width here
-            ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + wrapWidth); // Set text wrapping position
-            ImGui.Text("Disable incompatible plugin dumbass");
-            ImGui.PopTextWrapPos(); // Reset text wrapping position
-            return;
-        }
 
         // Check if the rotation texture is available
         if (rotation.GetTexture(out var jobIcon) && ImGuiHelper.SilenceImageButton(jobIcon.ImGuiHandle, Vector2.One * iconSize, _activeTab == RotationConfigWindowTab.Rotation))
@@ -436,7 +434,6 @@ public partial class RotationConfigWindow : Window
 
                 if (rotationAttribute != null)
                 {
-                    ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + iconSize); // Set text wrapping position
                     ImGui.Text($"{rotation.Name} ({rotationAttribute.Name})");
                     rotationAttribute.Type.Draw();
 
@@ -444,7 +441,6 @@ public partial class RotationConfigWindow : Window
                     {
                         ImGui.Text(rotation.Description);
                     }
-                    ImGui.PopTextWrapPos(); // Reset text wrapping position
                 }
             });
         }
@@ -687,42 +683,7 @@ public partial class RotationConfigWindow : Window
         { UiString.ConfigWindow_About_Macros.GetDescription, DrawAboutMacros },
         { UiString.ConfigWindow_About_Compatibility.GetDescription, DrawAboutCompatibility },
         { UiString.ConfigWindow_About_Links.GetDescription, DrawAboutLinks },
-        { UiString.ConfigWindow_About_Warnings.GetDescription, DrawAboutWarnings },
     });
-
-    private static void DrawAboutWarnings()
-    {
-        if (DataCenter.SystemWarnings.Any())
-        {
-            using var table = ImRaii.Table("System Warnings", 2, ImGuiTableFlags.BordersInner);
-            if (table)
-            {
-                ImGui.TableSetupScrollFreeze(0, 1);
-                ImGui.TableNextRow(ImGuiTableRowFlags.Headers);
-
-                ImGui.TableNextColumn();
-                ImGui.TableHeader(UiString.ConfigWindow_About_Warnings_Time.GetDescription());
-
-                ImGui.TableNextColumn();
-                ImGui.TableHeader(UiString.ConfigWindow_About_Warnings_Warning.GetDescription());
-
-                foreach (var warning in DataCenter.SystemWarnings)
-                {
-                    ImGui.TableNextRow();
-                    ImGui.TableNextColumn();
-
-                    ImGui.Text(warning.Value.ToString());
-
-                    ImGui.TableNextColumn();
-                    ImGui.TextWrapped(warning.Key);
-                }
-            }
-        }
-        else
-        {
-            ImGui.Text("No warnings present. Happy rotating!");
-        }
-    }
 
     private static void DrawAboutMacros()
     {
@@ -794,7 +755,7 @@ public partial class RotationConfigWindow : Window
             ImGui.TableHeader("Type");
 
             ImGui.TableNextColumn();
-            ImGui.TableHeader("Is Enabled");
+            ImGui.TableHeader("Installed");
 
             // Ensure that IncompatiblePlugins is not null
             var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
@@ -849,6 +810,11 @@ public partial class RotationConfigWindow : Window
         if (type.HasFlag(CompatibleType.Crash))
         {
             ImGui.TextColored(ImGuiColors.DalamudRed, CompatibleType.Crash.GetDescription().Replace('_', ' '));
+            ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Compatibility_Crash.GetDescription());
+        }
+        if (type.HasFlag(CompatibleType.Broken))
+        {
+            ImGui.TextColored(ImGuiColors.DalamudViolet, CompatibleType.Broken.GetDescription().Replace('_', ' '));
             ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Compatibility_Crash.GetDescription());
         }
     }
@@ -2278,7 +2244,6 @@ public partial class RotationConfigWindow : Window
             }
         }
     }
-    #endregion
 
     internal static void DrawContentFinder(ContentFinderCondition? content)
     {
@@ -2296,6 +2261,8 @@ public partial class RotationConfigWindow : Window
             }, wholeWidth, size.X);
         }
     }
+
+    #endregion
 
     #region Debug
     private static void DrawDebug()
