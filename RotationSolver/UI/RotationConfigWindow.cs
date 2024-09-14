@@ -381,13 +381,13 @@ public partial class RotationConfigWindow : Window
             {
                 DrawRotationIcon(rotation, iconSize);
 
-                ImGui.SameLine();
+                ImGui.Spacing();
 
                 using var group = ImRaii.Group();
 
                 DrawRotationCombo(comboSize, rotations, rotation, gameVersion);
                 ImGui.TextDisabled(slash);
-                ImGui.SameLine();
+                ImGui.Spacing();
 
                 if (drawCenter)
                 {
@@ -403,6 +403,21 @@ public partial class RotationConfigWindow : Window
     private void DrawRotationIcon(ICustomRotation rotation, float iconSize)
     {
         var cursor = ImGui.GetCursorPos();
+
+        // Check for incompatible plugins
+        var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
+
+        bool hasIncompatiblePlugin = incompatiblePlugins.Any(item =>
+            (item.Name == "XIVCombo" || item.Name == "XIV Combo Expanded" || item.Name == "XIVSlothCombo") && item.IsInstalled);
+
+        if (hasIncompatiblePlugin)
+        {
+            float wrapWidth = 200.0f; // Set the desired wrap width here
+            ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + wrapWidth); // Set text wrapping position
+            ImGui.Text("Disable incompatible plugin dumbass");
+            ImGui.PopTextWrapPos(); // Reset text wrapping position
+            return;
+        }
 
         // Check if the rotation texture is available
         if (rotation.GetTexture(out var jobIcon) && ImGuiHelper.SilenceImageButton(jobIcon.ImGuiHandle, Vector2.One * iconSize, _activeTab == RotationConfigWindowTab.Rotation))
@@ -421,6 +436,7 @@ public partial class RotationConfigWindow : Window
 
                 if (rotationAttribute != null)
                 {
+                    ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + iconSize); // Set text wrapping position
                     ImGui.Text($"{rotation.Name} ({rotationAttribute.Name})");
                     rotationAttribute.Type.Draw();
 
@@ -428,6 +444,7 @@ public partial class RotationConfigWindow : Window
                     {
                         ImGui.Text(rotation.Description);
                     }
+                    ImGui.PopTextWrapPos(); // Reset text wrapping position
                 }
             });
         }
@@ -777,7 +794,7 @@ public partial class RotationConfigWindow : Window
             ImGui.TableHeader("Type");
 
             ImGui.TableNextColumn();
-            ImGui.TableHeader("Installed");
+            ImGui.TableHeader("Is Enabled");
 
             // Ensure that IncompatiblePlugins is not null
             var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
