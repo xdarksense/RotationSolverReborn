@@ -131,13 +131,13 @@ partial class CustomRotation
         }
         IBaseAction.ShouldEndSpecial = false;
 
-        if (GeneralUsingAbility(role, nextGCD, out act)) return true;
-
         if (HasHostilesInRange && AttackAbility(nextGCD, out act)) return true;
+
         if (GeneralAbility(nextGCD, out act)) return true;
 
         if (UseMpPotion(nextGCD, out act)) return true;
 
+        if (GeneralUsingAbility(role, nextGCD, out act)) return true;
         //Run!
         if (DataCenter.AutoStatus.HasFlag(AutoStatus.Speed))
         {
@@ -156,6 +156,7 @@ partial class CustomRotation
                 break;
 
             case JobRole.Melee:
+                if (Job == ECommons.ExcelServices.Job.VPR) break;
                 if (LegSweepPvE.CanUse(out act)) return true;
                 break;
 
@@ -184,6 +185,7 @@ partial class CustomRotation
         {
             case JobRole.Tank:
             case JobRole.Melee:
+                if (Job == ECommons.ExcelServices.Job.VPR) break;
                 if (ArmsLengthPvE.CanUse(out act)) return true;
                 break;
             case JobRole.Healer:
@@ -233,6 +235,7 @@ partial class CustomRotation
                 break;
 
             case JobRole.Melee:
+                if (Job == ECommons.ExcelServices.Job.VPR) break;
                 if (SecondWindPvE.CanUse(out act)) return true;
                 if (BloodbathPvE.CanUse(out act)) return true;
                 break;
