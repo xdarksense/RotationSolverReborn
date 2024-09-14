@@ -1,11 +1,13 @@
 ﻿using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Colors;
+using Dalamud.Interface.Utility.Raii;
 using ECommons.ImGuiMethods;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Configuration.Conditions;
 using RotationSolver.Data;
 
 using RotationSolver.UI.SearchableSettings;
+using RotationSolver.Updaters;
 
 namespace RotationSolver.UI;
 
@@ -189,6 +191,63 @@ public partial class RotationConfigWindow
 
     private static void DrawBasicOthers()
     {
+        var set = DataCenter.RightSet;
+
+        const string popUpId = "Right Set Popup";
+        if (ImGui.Selectable(set.Name, false, ImGuiSelectableFlags.None, new Vector2(0, 20)))
+        {
+            ImGui.OpenPopup(popUpId);
+        }
+        ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_ConditionSetDesc.GetDescription());
+
+        using var popup = ImRaii.Popup(popUpId);
+        if (popup)
+        {
+            var combos = DataCenter.ConditionSets;
+            for (int i = 0; i < combos.Length; i++)
+            {
+                void DeleteFile()
+                {
+                    ActionSequencerUpdater.Delete(combos[i].Name);
+                }
+
+                if (combos[i].Name == set.Name)
+                {
+                    ImGuiHelper.SetNextWidthWithName(set.Name);
+                    ImGui.InputText("##MajorConditionSet", ref set.Name, 100);
+                }
+                else
+                {
+                    var key = "Condition Set At " + i.ToString();
+                    ImGuiHelper.DrawHotKeysPopup(key, string.Empty, (UiString.ConfigWindow_List_Remove.GetDescription(), DeleteFile, ["Delete"]));
+
+                    if (ImGui.Selectable(combos[i].Name))
+                    {
+                        Service.Config.ActionSequencerIndex = i;
+                    }
+
+                    ImGuiHelper.ExecuteHotKeysPopup(key, string.Empty, string.Empty, false,
+                        (DeleteFile, [VirtualKey.DELETE]));
+                }
+            }
+
+            ImGui.PushFont(UiBuilder.IconFont);
+
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.HealerGreen);
+            if (ImGui.Selectable(FontAwesomeIcon.Plus.ToIconString()))
+            {
+                ActionSequencerUpdater.AddNew();
+            }
+            ImGui.PopStyleColor();
+
+            if (ImGui.Selectable(FontAwesomeIcon.FileDownload.ToIconString()))
+            {
+                ActionSequencerUpdater.LoadFiles();
+            }
+
+            ImGui.PopFont();
+            ImguiTooltips.HoveredTooltip(UiString.ActionSequencer_Load.GetDescription());
+        }
         _allSearchable.DrawItems(Configs.BasicParams);
     }
     #endregion
