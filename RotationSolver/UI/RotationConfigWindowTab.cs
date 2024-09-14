@@ -76,7 +76,7 @@ public struct IncompatiblePlugin
         {
             var name = this.Name;
             return Svc.PluginInterface.InstalledPlugins.Any(x =>
-                (x.Name.Contains(name) || x.InternalName.Contains(name)) && x.IsLoaded);
+                (x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase)) && x.IsLoaded);
         }
     }
 
@@ -92,4 +92,5 @@ public enum CompatibleType : byte
     Skill_Usage = 1 << 0,
     Skill_Selection = 1 << 1,
     Crash = 1 << 2,
+    Broken = 1 << 3,
 }
