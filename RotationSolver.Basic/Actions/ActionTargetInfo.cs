@@ -907,30 +907,16 @@ public struct ActionTargetInfo(IBaseAction action)
 
         IBattleChara? FindHostileRaw()
         {
-            if (DataCenter.IsPvP)
+            IGameObjects = DataCenter.TargetingType switch
             {
-                var orderedGameObjects = DataCenter.TargetingType switch
-                {
-                    TargetingType.LowMaxHP => IGameObjects.OrderBy(p => p is IBattleChara b ? b.MaxHp : 0),
-                    _ => IGameObjects.OrderBy(p => p is IBattleChara b ? b.MaxHp : 0),
-                };
-
-                return orderedGameObjects.OfType<IBattleChara>().FirstOrDefault();
-            }
-            else
-            {
-                var orderedGameObjects = DataCenter.TargetingType switch
-                {
-                    TargetingType.Small => IGameObjects.OrderBy(p => p.HitboxRadius),
-                    TargetingType.HighHP => IGameObjects.OrderByDescending(p => p is IBattleChara b ? b.CurrentHp : 0),
-                    TargetingType.LowHP => IGameObjects.OrderBy(p => p is IBattleChara b ? b.CurrentHp : 0),
-                    TargetingType.HighMaxHP => IGameObjects.OrderByDescending(p => p is IBattleChara b ? b.MaxHp : 0),
-                    TargetingType.LowMaxHP => IGameObjects.OrderBy(p => p is IBattleChara b ? b.MaxHp : 0),
-                    _ => IGameObjects.OrderByDescending(p => p.HitboxRadius),
-                };
-
-                return orderedGameObjects.OfType<IBattleChara>().FirstOrDefault();
-            }
+                TargetingType.Small => IGameObjects.OrderBy(p => p.HitboxRadius),
+                TargetingType.HighHP => IGameObjects.OrderByDescending(p => p is IBattleChara b ? b.CurrentHp : 0),
+                TargetingType.LowHP => IGameObjects.OrderBy(p => p is IBattleChara b ? b.CurrentHp : 0),
+                TargetingType.HighMaxHP => IGameObjects.OrderByDescending(p => p is IBattleChara b ? b.MaxHp : 0),
+                TargetingType.LowMaxHP => IGameObjects.OrderBy(p => p is IBattleChara b ? b.MaxHp : 0),
+                _ => IGameObjects.OrderByDescending(p => p.HitboxRadius),
+            };
+            return IGameObjects.FirstOrDefault();
         }
 
         IBattleChara? FindBeAttackedTarget()

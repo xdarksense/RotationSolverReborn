@@ -82,9 +82,11 @@ public class BaseAction : IBaseAction
         {
             if (!Service.Config.RotationActionConfig.TryGetValue(ID, out var value))
             {
-                Service.Config.RotationActionConfig[ID] = value
-                    = Setting.CreateConfig?.Invoke() ?? new();
-                if (Action.ClassJob.Value?.GetJobRole() == JobRole.Tank)
+                value = Setting.CreateConfig?.Invoke() ?? new ActionConfig();
+                Service.Config.RotationActionConfig[ID] = value;
+
+                var classJob = Action.ClassJob.Value;
+                if (classJob != null && classJob.GetJobRole() == JobRole.Tank)
                 {
                     value.AoeCount = 2;
                 }
@@ -120,9 +122,9 @@ public class BaseAction : IBaseAction
 
     /// <inheritdoc/>
     public bool CanUse(out IAction act, bool isLastAbility = false, bool isFirstAbility = false, bool skipStatusProvideCheck = false, bool skipComboCheck = false, bool skipCastingCheck = false,
-        bool usedUp = false, bool skipAoeCheck = false, byte gcdCountForAbility = 0)
+    bool usedUp = false, bool skipAoeCheck = false, byte gcdCountForAbility = 0)
     {
-        act = this!;
+        act = this;
 
         if (IBaseAction.ActionPreview)
         {
@@ -187,18 +189,29 @@ public class BaseAction : IBaseAction
             if (adjustId != ID) return false;
             if (!target.Position.HasValue) return false;
 
-            var loc = target.Position.HasValue ? target.Position.Value : Vector3.Zero;
+            var loc = target.Position.Value;
+
+            if (Player.Object == null || ActionManager.Instance() == null)
+            {
+                return false;
+            }
 
             return ActionManager.Instance()->UseActionLocation(ActionType.Action, ID, Player.Object.GameObjectId, &loc);
         }
-        else if (Svc.Objects.SearchById(target.Target?.GameObjectId
-            ?? Player.Object?.GameObjectId ?? 0) == null)
-        {
-            return false;
-        }
         else
         {
-            return ActionManager.Instance()->UseAction(ActionType.Action, adjustId, target.Target?.GameObjectId ?? 0);
+            var targetId = target.Target?.GameObjectId ?? Player.Object?.GameObjectId ?? 0;
+            if (Svc.Objects.SearchById(targetId) == null)
+            {
+                return false;
+            }
+
+            if (ActionManager.Instance() == null)
+            {
+                return false;
+            }
+
+            return ActionManager.Instance()->UseAction(ActionType.Action, adjustId, targetId);
         }
     }
 
