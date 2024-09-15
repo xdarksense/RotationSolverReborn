@@ -90,6 +90,16 @@ public static class ObjectHelper
 
         if (names.Any(n => !string.IsNullOrEmpty(n) && new Regex(n).Match(battleChara.Name.TextValue).Success)) return false;
 
+        // Fetch prioritized target names
+        if (OtherConfiguration.PrioTargetNames.TryGetValue(Svc.ClientState.TerritoryType, out var prioTargetNames))
+        {
+            // If the target's name matches any prioritized names, it is attackable
+            if (prioTargetNames.Any(n => !string.IsNullOrEmpty(n) && new Regex(n).Match(battleChara.Name.TextValue).Success))
+            {
+                return true;
+            }
+        }
+
         //Fate
         if (DataCenter.TerritoryContentType != TerritoryContentType.Eureka)
         {
@@ -115,8 +125,7 @@ public static class ObjectHelper
 
         if (Service.CountDownTime > 0 || DataCenter.IsPvP) return true;
 
-        return DataCenter.RightNowTargetToHostileType switch
-        {
+        return DataCenter.RightNowTargetToHostileType switch {
             TargetHostileType.AllTargetsCanAttack => true,
             TargetHostileType.TargetsHaveTarget => battleChara.TargetObject is IBattleChara,
             TargetHostileType.AllTargetsWhenSolo => DataCenter.PartyMembers.Length < 2 || battleChara.TargetObject is IBattleChara,

@@ -266,6 +266,39 @@ partial class CustomRotation
     [Description("Is in the high-end duty")]
     public static bool IsInHighEndDuty => DataCenter.IsInHighEndDuty;
 
+    #region UnComment if adding this is ok, Love ~~ Kirbo
+
+    ///// <summary>
+    ///// Is player in UCoB duty.
+    ///// </summary>
+    //[Description("Is in UCoB duty")]
+    //public static bool IsInUCoB => DataCenter.IsInUCoB;
+
+    ///// <summary>
+    ///// Is player in UwU duty.
+    ///// </summary>
+    //[Description("Is in UwU duty")]
+    //public static bool IsInUwU => DataCenter.IsInUwU;
+
+    ///// <summary>
+    ///// Is player in TEA duty.
+    ///// </summary>
+    //[Description("Is in TEA duty")]
+    //public static bool IsInTEA => DataCenter.IsInTEA;
+
+    ///// <summary>
+    ///// Is player in DSR duty.
+    ///// </summary>
+    //[Description("Is in DSR duty")]
+    //public static bool IsInDSR => DataCenter.IsInDSR;
+
+    ///// <summary>
+    ///// Is player in TOP duty.
+    ///// </summary>
+    //[Description("Is in TOP duty")]
+    //public static bool IsInTOP => DataCenter.IsInTOP;
+    #endregion
+
     /// <summary>
     /// Is player in duty.
     /// </summary>

@@ -112,6 +112,15 @@ internal static class DataCenter
 
     public static bool IsInHighEndDuty => ContentFinder?.HighEndDuty ?? false;
 
+    #region UnComment if adding this is ok, Love ~~ Kirbo
+    //public static ushort TerritoryID => Svc.ClientState.TerritoryType;
+    //public static bool IsInUCoB => TerritoryID == 733;
+    //public static bool IsInUwU => TerritoryID == 777;
+    //public static bool IsInTEA => TerritoryID == 887;
+    //public static bool IsInDSR => TerritoryID == 968;
+    //public static bool IsInTOP => TerritoryID == 1122;
+    #endregion
+
     public static TerritoryContentType TerritoryContentType =>
         (TerritoryContentType)(ContentFinder?.ContentType?.Value?.RowId ?? 0);
 
