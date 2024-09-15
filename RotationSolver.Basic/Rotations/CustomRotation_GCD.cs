@@ -203,7 +203,7 @@ partial class CustomRotation
             if (Role is JobRole.Healer && HasSwift) return false;
         }
 
-        if (EsunaPvE.CanUse(out act)) return true;
+        if (!HasSwift && EsunaPvE.CanUse(out act)) return true;
         if (DataCenter.RightNowDutyRotation?.DispelGCD(out act) ?? false) return true;
         return false;
     }
