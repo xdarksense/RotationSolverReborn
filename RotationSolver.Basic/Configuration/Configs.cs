@@ -176,7 +176,7 @@ internal partial class Configs : IPluginConfiguration
         PvEFilter = JobFilterType.NoHealer, PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _useHealWhenNotAHealer = true;
 
-    [ConditionBool, UI("Target allies for friendly actions.", Description = "If this is disabled, RSR will only softtarget allies for heals, shields, etc.",
+    [ConditionBool, UI("Hard Target enemies for hostile actions", Description = "If this is disabled, RSR will only softtarget allies for heals, shields, etc.",
         Filter = TargetConfig, Section = 3)]
     private static readonly bool _switchTargetFriendly = false;
 

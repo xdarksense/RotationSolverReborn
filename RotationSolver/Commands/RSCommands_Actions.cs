@@ -40,6 +40,7 @@ public static partial class RSCommands
 
         return true;
     }
+
     internal static DateTime _lastUsedTime = DateTime.MinValue;
     internal static uint _lastActionID;
     public static void DoAction()
