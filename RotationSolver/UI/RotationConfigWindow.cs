@@ -180,18 +180,18 @@ public partial class RotationConfigWindow : Window
             }
         }
 
-        else if (DataCenter.SystemWarnings.Any())
+        else if (DataCenter.SystemWarnings != null && DataCenter.SystemWarnings.Any())
         {
             using var table = ImRaii.Table("System Warnings", 2, ImGuiTableFlags.BordersInner);
             if (table)
             {
+                float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
                 foreach (var warning in DataCenter.SystemWarnings)
                 {
-                    float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
                     using (var color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudOrange)))
                     {
                         ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
-                        ImGui.Text(warning.Value.ToString());
+                        ImGui.TextWrapped(warning.Value.ToString());
                         ImGui.PopTextWrapPos(); // Reset text wrapping position
                     }
                 }
@@ -201,11 +201,9 @@ public partial class RotationConfigWindow : Window
         else
         {
             float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
-            {
-                ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
-                ImGui.Text("Errors appear here");
-                ImGui.PopTextWrapPos(); // Reset text wrapping position
-            }
+            ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
+            ImGui.Text("Errors appear here");
+            ImGui.PopTextWrapPos(); // Reset text wrapping position
         }
     }
 

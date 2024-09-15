@@ -4,10 +4,18 @@
     {
         internal static bool AddSystemWarning(string warning)
         {
-            if (!DataCenter.SystemWarnings.ContainsKey(warning))
+            if (DataCenter.SystemWarnings == null)
             {
-                DataCenter.SystemWarnings.Add(warning, DateTime.Now);
-                return true;
+                throw new InvalidOperationException("SystemWarnings dictionary is not initialized.");
+            }
+
+            lock (DataCenter.SystemWarnings)
+            {
+                if (!DataCenter.SystemWarnings.ContainsKey(warning))
+                {
+                    DataCenter.SystemWarnings.Add(warning, DateTime.Now);
+                    return true;
+                }
             }
             return false;
         }

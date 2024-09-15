@@ -1,23 +1,25 @@
 ﻿using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Game.Text.SeStringHandling.Payloads;
 using ECommons.DalamudServices;
+using System.Collections.Concurrent;
 
 namespace RotationSolver.Basic.Helpers;
 
 public static class WarningHelper
 {
-    private static readonly Queue<string> _showWarnings = new();
+    private static readonly ConcurrentQueue<string> _showWarnings = new();
     private static bool _run = false;
+    private static readonly object _lock = new();
 
-    public static SeString RS_String => new(new IconPayload(BitmapFontIcon.DPS),
+    public static SeString RS_String => new(new IconPayload(BitmapFontIcon.ExclamationRectangle),
               RotationSolverPlugin.OpenLinkPayload,
               new UIForegroundPayload(31),
-              new TextPayload("Rotation Solver"),
+              new TextPayload("Rotation Solver Reborn"),
               UIForegroundPayload.UIForegroundOff,
               RawPayload.LinkTerminator,
               new TextPayload(": "));
 
-    public static SeString Close_String => new(new IconPayload(BitmapFontIcon.DoNotDisturb), RotationSolverPlugin.HideWarningLinkPayload!,
+    public static SeString Close_String => new(new IconPayload(BitmapFontIcon.DoNotDisturb), RotationSolverPlugin.HideWarningLinkPayload ?? throw new InvalidOperationException("HideWarningLinkPayload is null"),
               new UIForegroundPayload(2),
               new TextPayload("(Hide Warning)"),
               UIForegroundPayload.UIForegroundOff,
@@ -44,10 +46,13 @@ public static class WarningHelper
             _showWarnings.Enqueue(message);
         }
 
-        if (!_run)
+        lock (_lock)
         {
-            _run = true;
-            Task.Run(RunShowError);
+            if (!_run)
+            {
+                _run = true;
+                Task.Run(RunShowError);
+            }
         }
     }
 
@@ -68,6 +73,10 @@ public static class WarningHelper
             Svc.Toasts.ShowError(message);
             await Task.Delay(3000);
         }
-        _run = false;
+
+        lock (_lock)
+        {
+            _run = false;
+        }
     }
 }
