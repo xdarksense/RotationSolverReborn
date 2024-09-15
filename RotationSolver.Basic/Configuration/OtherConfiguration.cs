@@ -10,6 +10,7 @@ internal class OtherConfiguration
 
     public static SortedList<uint, float> AnimationLockTime = [];
 
+    public static Dictionary<uint, string[]> PrioTargetNames = [];
     public static Dictionary<uint, string[]> NoHostileNames = [];
     public static Dictionary<uint, string[]> NoProvokeNames = [];
     public static Dictionary<uint, Vector3[]> BeneficialPositions = [];
@@ -31,6 +32,7 @@ internal class OtherConfiguration
         Task.Run(() => InitOne(ref DangerousStatus, nameof(DangerousStatus)));
         Task.Run(() => InitOne(ref PriorityStatus, nameof(PriorityStatus)));
         Task.Run(() => InitOne(ref InvincibleStatus, nameof(InvincibleStatus)));
+        Task.Run(() => InitOne(ref PrioTargetNames, nameof(PrioTargetNames)));
         Task.Run(() => InitOne(ref NoHostileNames, nameof(NoHostileNames)));
         Task.Run(() => InitOne(ref NoProvokeNames, nameof(NoProvokeNames)));
         Task.Run(() => InitOne(ref AnimationLockTime, nameof(AnimationLockTime)));
@@ -49,6 +51,7 @@ internal class OtherConfiguration
             await SavePriorityStatus();
             await SaveDangerousStatus();
             await SaveInvincibleStatus();
+            await SavePrioTargetNames();
             await SaveNoHostileNames();
             await SaveAnimationLockTime();
             await SaveHostileCastingArea();
@@ -108,6 +111,11 @@ internal class OtherConfiguration
     public static Task SaveInvincibleStatus()
     {
         return Task.Run(() => Save(InvincibleStatus, nameof(InvincibleStatus)));
+    }
+
+    public static Task SavePrioTargetNames()
+    {
+        return Task.Run(() => Save(PrioTargetNames, nameof(PrioTargetNames)));
     }
 
     public static Task SaveNoHostileNames()

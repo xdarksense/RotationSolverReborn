@@ -42,8 +42,7 @@ public partial class RotationConfigWindow : Window
     {
         SizeCondition = ImGuiCond.FirstUseEver;
         Size = new Vector2(740f, 490f);
-        SizeConstraints = new WindowSizeConstraints()
-        {
+        SizeConstraints = new WindowSizeConstraints() {
             MinimumSize = new Vector2(250, 300),
             MaximumSize = new Vector2(5000, 5000),
         };
@@ -2091,7 +2090,7 @@ public partial class RotationConfigWindow : Window
 
         DrawContentFinder(DataCenter.ContentFinder);
 
-        using var table = ImRaii.Table("Rotation Solver List Territories", 3, ImGuiTableFlags.BordersInner | ImGuiTableFlags.Resizable | ImGuiTableFlags.SizingStretchSame);
+        using var table = ImRaii.Table("Rotation Solver List Territories", 4, ImGuiTableFlags.BordersInner | ImGuiTableFlags.Resizable | ImGuiTableFlags.SizingStretchSame);
         if (table)
         {
             ImGui.TableSetupScrollFreeze(0, 1);
@@ -2099,6 +2098,9 @@ public partial class RotationConfigWindow : Window
 
             ImGui.TableNextColumn();
             ImGui.TableHeader(UiString.ConfigWindow_List_NoHostile.GetDescription());
+
+            ImGui.TableNextColumn();
+            ImGui.TableHeader(UiString.ConfigWindow_List_PrioTarget.GetDescription());
 
             ImGui.TableNextColumn();
             ImGui.TableHeader(UiString.ConfigWindow_List_NoProvoke.GetDescription());
@@ -2147,6 +2149,65 @@ public partial class RotationConfigWindow : Window
                 OtherConfiguration.NoHostileNames[territoryId] = [.. list];
                 OtherConfiguration.SaveNoHostileNames();
             }
+
+
+
+
+            // Begin new column for Prioritized Target Names
+            ImGui.TableNextColumn();
+            ImGui.TextWrapped(UiString.ConfigWindow_List_PrioTargetDesc.GetDescription());
+
+            width = ImGui.GetColumnWidth() - ImGuiEx.CalcIconSize(FontAwesomeIcon.Ban).X - ImGui.GetStyle().ItemSpacing.X - 10 * Scale;
+
+            // Check if PrioritizedNames for the current territory exists
+            if (!OtherConfiguration.PrioTargetNames.TryGetValue(territoryId, out var prioNames))
+            {
+                // Initialize it as an empty list
+                OtherConfiguration.PrioTargetNames[territoryId] = prioNames = [];
+            }
+
+            // Add an empty entry if none exists
+            if (!prioNames.Any(string.IsNullOrEmpty))
+            {
+                OtherConfiguration.PrioTargetNames[territoryId] = [.. prioNames, string.Empty];
+            }
+
+            // Variable to track if we need to remove any entry
+            removeIndex = -1;
+
+            // Loop over each prioritized name to render input fields
+            for (int i = 0; i < prioNames.Length; i++)
+            {
+                ImGui.SetNextItemWidth(width);
+
+                // Render input field for prioritized name with a placeholder hint
+                if (ImGui.InputTextWithHint($"##Rotation Solver Prioritized Target Name {i}", UiString.ConfigWindow_List_PrioTargetName.GetDescription(), ref prioNames[i], 1024))
+                {
+                    // If input changes, update the list
+                    OtherConfiguration.PrioTargetNames[territoryId] = prioNames;
+                    OtherConfiguration.SavePrioTargetNames();
+                }
+                ImGui.SameLine();
+
+                // Render a button to remove a name
+                if (ImGuiEx.IconButton(FontAwesomeIcon.Ban, $"##Rotation Solver Remove Prioritized Target Name {i}"))
+                {
+                    removeIndex = i;
+                }
+            }
+
+            // If a remove button was clicked, remove the corresponding entry
+            if (removeIndex > -1)
+            {
+                var list = prioNames.ToList();
+                list.RemoveAt(removeIndex);
+                OtherConfiguration.PrioTargetNames[territoryId] = [.. list];
+                OtherConfiguration.SavePrioTargetNames();
+            }
+
+
+
+
             ImGui.TableNextColumn();
             ImGui.TextWrapped(UiString.ConfigWindow_List_NoProvokeDesc.GetDescription());
 
