@@ -126,8 +126,6 @@ public class BaseAction : IBaseAction
     {
         act = this;
 
-        if (DataCenter.DefaultGCDRemain != 0 && act.AnimationLockTime > DataCenter.DefaultGCDRemain ) return false;
-
         if (IBaseAction.ActionPreview)
         {
             skipCastingCheck = true;
