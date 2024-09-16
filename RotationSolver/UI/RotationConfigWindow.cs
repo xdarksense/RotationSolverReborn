@@ -42,7 +42,8 @@ public partial class RotationConfigWindow : Window
     {
         SizeCondition = ImGuiCond.FirstUseEver;
         Size = new Vector2(740f, 490f);
-        SizeConstraints = new WindowSizeConstraints() {
+        SizeConstraints = new WindowSizeConstraints()
+        {
             MinimumSize = new Vector2(250, 300),
             MaximumSize = new Vector2(5000, 5000),
         };
@@ -1775,15 +1776,31 @@ public partial class RotationConfigWindow : Window
             ImGui.TableNextRow(ImGuiTableRowFlags.Headers);
 
             ImGui.TableNextColumn();
+            if (ImGui.Button("Reset and Update Invuln Status List"))
+            {
+                OtherConfiguration.ResetInvincibleStatus();
+            }
             ImGui.TableHeader(UiString.ConfigWindow_List_Invincibility.GetDescription());
 
             ImGui.TableNextColumn();
+            if (ImGui.Button("Reset and Update Priority Status List"))
+            {
+                OtherConfiguration.ResetPriorityStatus();
+            }
             ImGui.TableHeader(UiString.ConfigWindow_List_Priority.GetDescription());
 
             ImGui.TableNextColumn();
+            if (ImGui.Button("Reset and Update Dispell Debuff List"))
+            {
+                OtherConfiguration.ResetDangerousStatus();
+            }
             ImGui.TableHeader(UiString.ConfigWindow_List_DangerousStatus.GetDescription());
 
             ImGui.TableNextColumn();
+            if (ImGui.Button("Reset and Update No Casting Status List"))
+            {
+                OtherConfiguration.ResetNoCastingStatus();
+            }
             ImGui.TableHeader(UiString.ConfigWindow_List_NoCastingStatus.GetDescription());
 
             ImGui.TableNextRow();
@@ -1971,12 +1988,24 @@ public partial class RotationConfigWindow : Window
             ImGui.TableNextRow(ImGuiTableRowFlags.Headers);
 
             ImGui.TableNextColumn();
+            if (ImGui.Button("Reset and Update Tankbuster List"))
+            {
+                OtherConfiguration.ResetHostileCastingTank();
+            }
             ImGui.TableHeader(UiString.ConfigWindow_List_HostileCastingTank.GetDescription());
 
             ImGui.TableNextColumn();
+            if (ImGui.Button("Reset and Update AOE List"))
+            {
+                OtherConfiguration.ResetHostileCastingArea();
+            }
             ImGui.TableHeader(UiString.ConfigWindow_List_HostileCastingArea.GetDescription());
 
             ImGui.TableNextColumn();
+            if (ImGui.Button("Reset and Update Knockback List"))
+            {
+                OtherConfiguration.ResetHostileCastingKnockback();
+            }
             ImGui.TableHeader(UiString.ConfigWindow_List_HostileCastingKnockback.GetDescription());
 
             ImGui.TableNextRow();

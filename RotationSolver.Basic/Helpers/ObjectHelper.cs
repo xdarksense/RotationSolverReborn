@@ -125,7 +125,8 @@ public static class ObjectHelper
 
         if (Service.CountDownTime > 0 || DataCenter.IsPvP) return true;
 
-        return DataCenter.RightNowTargetToHostileType switch {
+        return DataCenter.RightNowTargetToHostileType switch
+        {
             TargetHostileType.AllTargetsCanAttack => true,
             TargetHostileType.TargetsHaveTarget => battleChara.TargetObject is IBattleChara,
             TargetHostileType.AllTargetsWhenSolo => DataCenter.PartyMembers.Length < 2 || battleChara.TargetObject is IBattleChara,

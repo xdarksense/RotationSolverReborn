@@ -684,7 +684,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
     private static IBattleChara? FindTargetByType(IEnumerable<IBattleChara> IGameObjects, TargetType type, float healRatio, SpecialActionType actionType)
     {
-        
+
         if (IGameObjects == null) return null;
 
         if (type == TargetType.Self) return Player.Object;
