@@ -40,4 +40,16 @@ public enum TargetingType
     /// </summary>
     [Description("Low Max HP")]
     LowMaxHP,
+
+    /// <summary>
+    /// Find the target that is nearest.
+    /// </summary>
+    [Description("Nearest")]
+    Nearest,
+
+    /// <summary>
+    /// Find the target that is farthest.
+    /// </summary>
+    [Description("Farthest")]
+    Farthest,
 }

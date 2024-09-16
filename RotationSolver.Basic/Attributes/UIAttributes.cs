@@ -1,54 +1,62 @@
 ﻿namespace RotationSolver.Basic.Attributes;
 
 /// <summary>
-/// The attribute for the ui configs.
+/// The attribute for the UI configs.
 /// </summary>
-/// <param name="name"></param>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-public class UIAttribute(string name) : Attribute
+public class UIAttribute : Attribute
 {
     /// <summary>
-    /// The name of this config.
+    /// Initializes a new instance of the <see cref="UIAttribute"/> class.
     /// </summary>
-    public string Name => name;
+    /// <param name="name">The name of this config.</param>
+    public UIAttribute(string name)
+    {
+        Name = name;
+    }
 
     /// <summary>
-    /// The description about this ui item.
+    /// Gets the name of this config.
+    /// </summary>
+    public string Name { get; }
+
+    /// <summary>
+    /// Gets or sets the description about this UI item.
     /// </summary>
     public string Description { get; set; } = "";
 
     /// <summary>
-    /// The parent of this ui item.
+    /// Gets or sets the parent of this UI item.
     /// </summary>
     public string Parent { get; set; } = "";
 
     /// <summary>
-    /// The filter to get this ui item.
+    /// Gets or sets the filter to get this UI item.
     /// </summary>
     public string Filter { get; set; } = "";
 
     /// <summary>
-    /// The order of this item.
+    /// Gets or sets the order of this item.
     /// </summary>
     public byte Order { get; set; } = 0;
 
     /// <summary>
-    /// The section of this item.
+    /// Gets or sets the section of this item.
     /// </summary>
     public byte Section { get; set; } = 0;
 
     /// <summary>
-    /// The action id 
+    /// Gets or sets the action ID.
     /// </summary>
     public ActionID Action { get; set; }
 
     /// <summary>
-    /// The filter for the pvp.
+    /// Gets or sets the filter for PvP.
     /// </summary>
     public JobFilterType PvPFilter { get; set; }
 
     /// <summary>
-    /// The filter for the pve.
+    /// Gets or sets the filter for PvE.
     /// </summary>
     public JobFilterType PvEFilter { get; set; }
 }
@@ -71,6 +79,7 @@ public enum JobFilterType : byte
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 internal class JobConfigAttribute : Attribute
 {
+    public JobConfigAttribute() { }
 }
 
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]

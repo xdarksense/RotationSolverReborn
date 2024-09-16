@@ -109,9 +109,8 @@ internal partial class Configs : IPluginConfiguration
         Parent = nameof(AddEnemyListToHostile))]
     private static readonly bool _onlyAttackInEnemyList = false;
 
-    [ConditionBool, UI("Use Gemdraughts/Tinctures/Pots", Description = "This is the RSR control and still requires Gemdraughts/Tinctures/Pots to be programed in rotation by the rotation writers.",
-        Filter = AutoActionUsage)]
-    private static readonly bool _useTinctures = false;
+    [JobConfig, UI("Gemdraughts/Tinctures/Pots", Filter = AutoActionUsage, PvPFilter = JobFilterType.NoJob)]
+    private readonly TinctureUseType _TinctureType = TinctureUseType.Nowhere;
 
     [ConditionBool, UI("Automatically use Anti-Knockback role actions (Arms Length, Surecast)", Filter = AutoActionUsage)]
     private static readonly bool _useKnockback = true;

@@ -25,7 +25,15 @@ partial class CustomRotation
     {
         act = null;
 
-        if (!(HostileTarget?.IsDummy() ?? false) && !DataCenter.IsInHighEndDuty) return false;
+        bool isHostileTargetDummy = HostileTarget?.IsDummy() ?? false;
+        bool isInHighEndDuty = DataCenter.IsInHighEndDuty;
+
+        if (!isHostileTargetDummy && !isInHighEndDuty && DataCenter.RightNowTinctureUseType == TinctureUseType.InHighEndDuty)
+        {
+            return false;
+        }
+
+        if (DataCenter.RightNowTinctureUseType == TinctureUseType.Nowhere) return false;
 
         foreach (var medicine in Medicines)
         {

@@ -172,6 +172,7 @@ internal static class DataCenter
     }
 
     public static TargetHostileType RightNowTargetToHostileType => Service.Config.HostileType;
+    public static TinctureUseType RightNowTinctureUseType => Service.Config.TinctureType;
 
     public static unsafe ActionID LastComboAction => (ActionID)ActionManager.Instance()->Combo.Action;
     public static unsafe float ComboTime => ActionManager.Instance()->Combo.Timer;
