@@ -25,32 +25,68 @@ internal enum HeadMarker : byte
 
 internal class MarkingHelper
 {
+    private static readonly object _lock = new object();
+
     internal unsafe static long GetMarker(HeadMarker index)
     {
         var instance = MarkingController.Instance();
-        if (instance == null) return 0;
+        if (instance == null || instance->Markers == null) return 0;
         return instance->Markers[(int)index].ObjectId;
     }
 
     internal static bool HaveAttackChara => AttackSignTargets.Any(id => id != 0);
 
-    internal static long[] AttackSignTargets => new long[]
+    private static long[]? _attackSignTargets;
+    internal static long[] AttackSignTargets
     {
-        GetMarker(HeadMarker.Attack1),
-        GetMarker(HeadMarker.Attack2),
-        GetMarker(HeadMarker.Attack3),
-        GetMarker(HeadMarker.Attack4),
-        GetMarker(HeadMarker.Attack5),
-        GetMarker(HeadMarker.Attack6),
-        GetMarker(HeadMarker.Attack7),
-        GetMarker(HeadMarker.Attack8),
-    };
+        get
+        {
+            if (_attackSignTargets == null)
+            {
+                lock (_lock)
+                {
+                    if (_attackSignTargets == null)
+                    {
+                        _attackSignTargets = new long[]
+                        {
+                            GetMarker(HeadMarker.Attack1),
+                            GetMarker(HeadMarker.Attack2),
+                            GetMarker(HeadMarker.Attack3),
+                            GetMarker(HeadMarker.Attack4),
+                            GetMarker(HeadMarker.Attack5),
+                            GetMarker(HeadMarker.Attack6),
+                            GetMarker(HeadMarker.Attack7),
+                            GetMarker(HeadMarker.Attack8),
+                        };
+                    }
+                }
+            }
+            return _attackSignTargets;
+        }
+    }
 
-    internal static long[] StopTargets => new long[]
+    private static long[]? _stopTargets;
+    internal static long[] StopTargets
     {
-        GetMarker(HeadMarker.Stop1),
-        GetMarker(HeadMarker.Stop2),
-    };
+        get
+        {
+            if (_stopTargets == null)
+            {
+                lock (_lock)
+                {
+                    if (_stopTargets == null)
+                    {
+                        _stopTargets = new long[]
+                        {
+                            GetMarker(HeadMarker.Stop1),
+                            GetMarker(HeadMarker.Stop2),
+                        };
+                    }
+                }
+            }
+            return _stopTargets;
+        }
+    }
 
     internal unsafe static IEnumerable<IBattleChara> FilterStopCharacters(IEnumerable<IBattleChara> charas)
     {

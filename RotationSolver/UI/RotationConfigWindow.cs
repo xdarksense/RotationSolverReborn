@@ -201,7 +201,7 @@ public partial class RotationConfigWindow : Window
         {
             float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
             ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
-            ImGui.Text("Errors appear here");
+            ImGui.Text("Errors: None");
             ImGui.PopTextWrapPos(); // Reset text wrapping position
         }
     }

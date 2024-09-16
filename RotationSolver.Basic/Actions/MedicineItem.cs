@@ -55,5 +55,5 @@ internal class MedicineItem : BaseItem
         };
     }
 
-    protected override bool CanUseThis => Service.Config.UseTinctures;
+    protected override bool CanUseThis => DataCenter.RightNowTinctureUseType == TinctureUseType.Anywhere || DataCenter.RightNowTinctureUseType == TinctureUseType.InHighEndDuty;
 }
