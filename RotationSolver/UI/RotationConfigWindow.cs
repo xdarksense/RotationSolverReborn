@@ -179,24 +179,38 @@ public partial class RotationConfigWindow : Window
             }
         }
 
-        else if (DataCenter.SystemWarnings != null && DataCenter.SystemWarnings.Any())
+        if (DataCenter.SystemWarnings != null && DataCenter.SystemWarnings.Any())
         {
-            using var table = ImRaii.Table("System Warnings", 2, ImGuiTableFlags.BordersInner);
-            if (table)
+            float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
+            var warningsToRemove = new List<string>();
+
+            foreach (var warning in DataCenter.SystemWarnings.Keys)
             {
-                float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
-                foreach (var warning in DataCenter.SystemWarnings)
+                using (var color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudOrange)))
                 {
-                    using (var color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudOrange)))
+                    ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
+
+                    // Calculate the required height for the button
+                    var textSize = ImGui.CalcTextSize(warning, availableWidth);
+                    float lineHeight = ImGui.GetTextLineHeight();
+                    int lineCount = (int)Math.Ceiling(textSize.X / availableWidth);
+                    float buttonHeight = lineHeight * lineCount + ImGui.GetStyle().FramePadding.Y * 2;
+
+                    if (ImGui.Button(warning, new Vector2(availableWidth, buttonHeight)))
                     {
-                        ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
-                        ImGui.TextWrapped(warning.Value.ToString());
-                        ImGui.PopTextWrapPos(); // Reset text wrapping position
+                        warningsToRemove.Add(warning);
                     }
+
+                    ImGui.PopTextWrapPos(); // Reset text wrapping position
                 }
             }
-        }
 
+            // Remove warnings that were cleared
+            foreach (var warning in warningsToRemove)
+            {
+                DataCenter.SystemWarnings.Remove(warning);
+            }
+        }
         else
         {
             float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
@@ -2331,6 +2345,12 @@ public partial class RotationConfigWindow : Window
         if (!Player.Available || !Service.Config.InDebug) return;
 
         _debugHeader?.Draw();
+
+        // Add a button to test adding a system warning
+        if (ImGui.Button("Add Test Warning"))
+        {
+            WarningHelper.AddSystemWarning("This is a test warning.");
+        }
     }
 
     private static readonly CollapsingHeaderGroup _debugHeader = new(new()

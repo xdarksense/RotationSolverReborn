@@ -188,22 +188,28 @@ internal static class RotationUpdater
     private static CustomRotationGroup[] LoadCustomRotationGroup(List<Assembly> assemblies)
     {
         var rotationList = new List<Type>();
+
         foreach (var assembly in assemblies)
         {
             foreach (var type in TryGetTypes(assembly))
             {
+                var apiAttribute = type.GetCustomAttribute<ApiAttribute>();
+                var info = assembly.GetInfo();
+                var authorName = info.Author ?? "Unknown Author";
+
                 if (type.GetInterfaces().Contains(typeof(ICustomRotation))
-                    && !type.IsAbstract && !type.IsInterface && type.GetConstructor([]) != null
-                    && type.GetCustomAttribute<ApiAttribute>()?.ApiVersion == Service.ApiVersion)
+                    && !type.IsAbstract && !type.IsInterface && type.GetConstructor(Type.EmptyTypes) != null)
                 {
-                    rotationList.Add(type);
+                    if (apiAttribute?.ApiVersion == Service.ApiVersion)
+                    {
+                        rotationList.Add(type);
+                    }
+                    else
+                    {
+                        var warning = $"Failed to load rotation {type.Assembly.GetName().Name} by {authorName} due to API update";
+                        WarningHelper.AddSystemWarning(warning);
+                    }
                 }
-                //else if (type.GetInterfaces().Contains(typeof(ICustomRotation))
-                //    && !type.IsAbstract && !type.IsInterface && type.GetConstructor([]) != null)
-                //{
-                //    var name = type.GetCustomAttribute<RotationAttribute>()?.Name ?? "Unknown";
-                //    Svc.Chat.PrintError($"Failed to load rotation {name} from assembly {assembly}");
-                //}
             }
         }
 
@@ -216,7 +222,7 @@ internal static class RotationUpdater
             var jobId = attr.Jobs[0];
             if (!rotationGroups.TryGetValue(jobId, out var value))
             {
-                value = [];
+                value = new List<Type>();
                 rotationGroups.Add(jobId, value);
             }
 
@@ -233,7 +239,7 @@ internal static class RotationUpdater
                 rotations));
         }
 
-        return [.. result];
+        return result.ToArray();
     }
 
 

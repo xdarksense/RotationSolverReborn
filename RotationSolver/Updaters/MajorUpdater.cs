@@ -81,19 +81,19 @@ internal static class MajorUpdater
     {
         if (DataCenter.SystemWarnings.Any())
         {
+            var warningsToRemove = new List<string>();
+
             foreach (var warning in DataCenter.SystemWarnings)
             {
                 if ((warning.Value + TimeSpan.FromMinutes(10)) < DateTime.Now)
                 {
-                    DataCenter.SystemWarnings.Remove(warning.Key);
+                    warningsToRemove.Add(warning.Key);
                 }
             }
 
-            if (_warningsLastDisplayed + TimeSpan.FromMinutes(10) < DateTime.Now)
+            foreach (var warningKey in warningsToRemove)
             {
-                _warningsLastDisplayed = DateTime.Now;
-#pragma warning disable 0436
-                WarningHelper.ShowWarning("System warnings are present.");
+                DataCenter.SystemWarnings.Remove(warningKey);
             }
         }
     }
@@ -178,11 +178,11 @@ internal static class MajorUpdater
     {
         if (!Svc.PluginInterface.InstalledPlugins.Any(p => p.InternalName == "Avarice"))
         {
-            UiString.AvariceWarning.GetDescription().ShowWarning(0);
+            WarningHelper.AddSystemWarning(UiString.AvariceWarning.GetDescription());
         }
         if (!Svc.PluginInterface.InstalledPlugins.Any(p => p.InternalName == "TextToTalk"))
         {
-            UiString.TextToTalkWarning.GetDescription().ShowWarning(0);
+            WarningHelper.AddSystemWarning(UiString.TextToTalkWarning.GetDescription());
         }
     }
 
