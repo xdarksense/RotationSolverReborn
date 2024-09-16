@@ -2349,6 +2349,7 @@ public partial class RotationConfigWindow : Window
         // Add a button to test adding a system warning
         if (ImGui.Button("Add Test Warning"))
         {
+#pragma warning disable CS0436
             WarningHelper.AddSystemWarning("This is a test warning.");
         }
     }
