@@ -3,8 +3,6 @@ using Dalamud.Interface.Windowing;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using RotationSolver.Updaters;
-using System;
-using System.Numerics;
 
 namespace RotationSolver.UI;
 

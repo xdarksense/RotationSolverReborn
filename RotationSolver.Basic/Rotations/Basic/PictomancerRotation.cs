@@ -96,8 +96,8 @@ public partial class PictomancerRotation
     /// Is Hammer ready
     /// </summary>
     public static bool isHammerMuseReady => ((byte)JobGauge.CanvasFlags & 16) == 16 || ((byte)JobGauge.CanvasFlags & 17) == 17 || ((byte)JobGauge.CanvasFlags & 18) == 18 || ((byte)JobGauge.CanvasFlags & 20) == 20
-        || ((byte)JobGauge.CanvasFlags & 24) == 24 || ((byte)JobGauge.CanvasFlags & 48) == 48 || ((byte)JobGauge.CanvasFlags & 49) == 49 
-        || ((byte)JobGauge.CanvasFlags & 50) == 50 || ((byte)JobGauge.CanvasFlags & 52) == 52 
+        || ((byte)JobGauge.CanvasFlags & 24) == 24 || ((byte)JobGauge.CanvasFlags & 48) == 48 || ((byte)JobGauge.CanvasFlags & 49) == 49
+        || ((byte)JobGauge.CanvasFlags & 50) == 50 || ((byte)JobGauge.CanvasFlags & 52) == 52
         || ((byte)JobGauge.CanvasFlags & 56) == 56;
 
     /// <summary>
@@ -266,7 +266,7 @@ public partial class PictomancerRotation
 
     static partial void ModifyCreatureMotifPvE(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyLivingMusePvE(ref ActionSetting setting)
@@ -332,12 +332,12 @@ public partial class PictomancerRotation
 
     static partial void ModifyWeaponMotifPvE(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifySteelMusePvE(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyHammerStampPvE(ref ActionSetting setting)
@@ -413,12 +413,12 @@ public partial class PictomancerRotation
 
     static partial void ModifyLandscapeMotifPvE(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyScenicMusePvE(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyStarrySkyMotifPvE(ref ActionSetting setting)

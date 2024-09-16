@@ -6,7 +6,6 @@ using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Rotations.Duties;
 using RotationSolver.Data;
 using RotationSolver.Helpers;
-using System;
 
 
 namespace RotationSolver.Updaters;
@@ -327,6 +326,7 @@ internal static class RotationUpdater
         }
         catch (Exception ex)
         {
+            WarningHelper.AddSystemWarning($"Failed to download from {url} Please check VPN");
             Svc.Log.Error(ex, $"Failed to download from {url}");
         }
         return false;
@@ -351,6 +351,7 @@ internal static class RotationUpdater
         }
         catch (Exception ex)
         {
+            WarningHelper.AddSystemWarning("Failed to load " + filePath);
             Svc.Log.Warning(ex, "Failed to load " + filePath);
         }
         return null;
@@ -498,6 +499,7 @@ internal static class RotationUpdater
             }
             catch (Exception ex)
             {
+                WarningHelper.AddSystemWarning($"Failed to create the rotation: {t.Name}");
                 Svc.Log.Error(ex, $"Failed to create the rotation: {t.Name}");
                 return null;
             }
@@ -536,6 +538,7 @@ internal static class RotationUpdater
             }
             catch (Exception ex)
             {
+                WarningHelper.AddSystemWarning($"Failed to create the rotation: {t.Name}");
                 Svc.Log.Error(ex, $"Failed to create the rotation: {t.Name}");
                 return null;
             }

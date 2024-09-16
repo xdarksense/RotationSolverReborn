@@ -22,7 +22,7 @@ public sealed class TestingRotation : PictomancerRotation
     [RotationDesc]
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
-        
+
         return base.MoveForwardAbility(nextGCD, out act);
     }
 
@@ -71,7 +71,7 @@ public sealed class TestingRotation : PictomancerRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        
+
         return base.AttackAbility(nextGCD, out act);
     }
     #endregion
@@ -80,37 +80,37 @@ public sealed class TestingRotation : PictomancerRotation
 
     protected override bool MoveForwardGCD(out IAction? act)
     {
-       
+
         return base.MoveForwardGCD(out act);
     }
 
     protected override bool DefenseAreaGCD(out IAction? act)
     {
-        
+
         return base.DefenseAreaGCD(out act);
     }
 
     protected override bool DefenseSingleGCD(out IAction? act)
     {
-        
+
         return base.DefenseSingleGCD(out act);
     }
 
     protected override bool HealAreaGCD(out IAction? act)
     {
-        
+
         return base.HealAreaGCD(out act);
     }
 
     protected override bool HealSingleGCD(out IAction? act)
     {
-        
+
         return base.HealSingleGCD(out act);
     }
 
     protected override bool GeneralGCD(out IAction? act)
     {
-        
+
         return base.GeneralGCD(out act);
     }
 

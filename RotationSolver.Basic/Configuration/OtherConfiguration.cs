@@ -63,34 +63,23 @@ internal class OtherConfiguration
             await SaveHostileCastingKnockback();
         });
     }
-
-    private static Task SaveHostileCastingKnockback()
+#region Action Tab
+    public static void ResetHostileCastingArea()
     {
-        return Task.Run(() => Save(HostileCastingKnockback, nameof(HostileCastingKnockback)));
+        InitOne(ref HostileCastingArea, nameof(HostileCastingArea), true, true);
+        SaveHostileCastingArea().Wait();
     }
 
-    public static Task SaveNoCastingStatus()
+    public static void ResetHostileCastingTank()
     {
-        return Task.Run(() => Save(NoCastingStatus, nameof(NoCastingStatus)));
+        InitOne(ref HostileCastingTank, nameof(HostileCastingTank), true, true);
+        SaveHostileCastingTank().Wait();
     }
 
-    public static Task SavePriorityStatus()
+    public static void ResetHostileCastingKnockback()
     {
-        return Task.Run(() => Save(PriorityStatus, nameof(PriorityStatus)));
-    }
-
-    public static Task SaveRotationSolverRecord()
-    {
-        return Task.Run(() => Save(RotationSolverRecord, nameof(RotationSolverRecord)));
-    }
-    public static Task SaveNoProvokeNames()
-    {
-        return Task.Run(() => Save(NoProvokeNames, nameof(NoProvokeNames)));
-    }
-
-    public static Task SaveBeneficialPositions()
-    {
-        return Task.Run(() => Save(BeneficialPositions, nameof(BeneficialPositions)));
+        InitOne(ref HostileCastingKnockback, nameof(HostileCastingKnockback), true, true);
+        SaveHostileCastingKnockback().Wait();
     }
 
     public static Task SaveHostileCastingArea()
@@ -103,14 +92,71 @@ internal class OtherConfiguration
         return Task.Run(() => Save(HostileCastingTank, nameof(HostileCastingTank)));
     }
 
-    public static Task SaveDangerousStatus()
+    private static Task SaveHostileCastingKnockback()
     {
-        return Task.Run(() => Save(DangerousStatus, nameof(DangerousStatus)));
+        return Task.Run(() => Save(HostileCastingKnockback, nameof(HostileCastingKnockback)));
+    }
+    #endregion
+
+    #region Status Tab
+
+    public static void ResetPriorityStatus()
+    {
+        InitOne(ref PriorityStatus, nameof(PriorityStatus), true, true);
+        SavePriorityStatus().Wait();
+    }
+
+    public static void ResetInvincibleStatus()
+    {
+        InitOne(ref InvincibleStatus, nameof(InvincibleStatus), true, true);
+        SaveInvincibleStatus().Wait();
+    }
+
+    public static void ResetDangerousStatus()
+    {
+        InitOne(ref DangerousStatus, nameof(DangerousStatus), true, true);
+        SaveDangerousStatus().Wait();
+    }
+
+    public static void ResetNoCastingStatus()
+    {
+        InitOne(ref NoCastingStatus, nameof(NoCastingStatus), true, true);
+        SaveNoCastingStatus().Wait();
+    }
+
+    public static Task SavePriorityStatus()
+    {
+        return Task.Run(() => Save(PriorityStatus, nameof(PriorityStatus)));
     }
 
     public static Task SaveInvincibleStatus()
     {
         return Task.Run(() => Save(InvincibleStatus, nameof(InvincibleStatus)));
+    }
+
+    public static Task SaveDangerousStatus()
+    {
+        return Task.Run(() => Save(DangerousStatus, nameof(DangerousStatus)));
+    }
+
+    public static Task SaveNoCastingStatus()
+    {
+        return Task.Run(() => Save(NoCastingStatus, nameof(NoCastingStatus)));
+    }
+
+    #endregion
+    public static Task SaveRotationSolverRecord()
+    {
+        return Task.Run(() => Save(RotationSolverRecord, nameof(RotationSolverRecord)));
+    }
+    public static Task SaveNoProvokeNames()
+    {
+        return Task.Run(() => Save(NoProvokeNames, nameof(NoProvokeNames)));
+    }
+
+    public static Task SaveBeneficialPositions()
+    {
+        return Task.Run(() => Save(BeneficialPositions, nameof(BeneficialPositions)));
     }
 
     public static Task SavePrioTargetNames()
@@ -154,21 +200,24 @@ internal class OtherConfiguration
         }
     }
 
-    private static void InitOne<T>(ref T value, string name, bool download = true)
+    private static void InitOne<T>(ref T value, string name, bool download = true, bool forceDownload = false)
     {
         var path = GetFilePath(name);
-        if (File.Exists(path))
+        Svc.Log.Info($"Initializing {name} from {path}");
+
+        if (File.Exists(path) && !forceDownload)
         {
             try
             {
                 value = JsonConvert.DeserializeObject<T>(File.ReadAllText(path))!;
+                Svc.Log.Info($"Loaded {name} from local file.");
             }
             catch (Exception ex)
             {
-                Svc.Log.Warning(ex, $"Failed to load {name}.");
+                Svc.Log.Warning(ex, $"Failed to load {name} from local file.");
             }
         }
-        else if (download)
+        else if (download || forceDownload)
         {
             try
             {
@@ -179,15 +228,16 @@ internal class OtherConfiguration
                 value = JsonConvert.DeserializeObject<T>(str, new JsonSerializerSettings()
                 {
                     MissingMemberHandling = MissingMemberHandling.Error,
-                    Error = delegate (object sender, Newtonsoft.Json.Serialization.ErrorEventArgs args)
+                    Error = delegate (object? sender, Newtonsoft.Json.Serialization.ErrorEventArgs args) // Allow sender to be null
                     {
                         args.ErrorContext.Handled = true;
                     }
-                    !
                 })!;
+                Svc.Log.Info($"Downloaded and loaded {name} from GitHub.");
             }
-            catch
+            catch (Exception ex)
             {
+                Svc.Log.Warning(ex, $"Failed to download {name} from GitHub.");
                 SavePath(value, path);
             }
         }
