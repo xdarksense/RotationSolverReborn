@@ -102,57 +102,31 @@ internal static class MajorUpdater
 
     private static void HandleWorkUpdate()
     {
+        var now = DateTime.Now;
         try
         {
             lock (_workLock)
             {
-                if (_work) return;
-                if (DateTime.Now - _lastUpdatedWork < TimeSpan.FromSeconds(Service.Config.MinUpdatingTime))
+                if (_work || (now - _lastUpdatedWork < TimeSpan.FromSeconds(Service.Config.MinUpdatingTime)))
                     return;
 
                 _work = true;
-                _lastUpdatedWork = DateTime.Now;
+                _lastUpdatedWork = now;
             }
 
-            if (Service.Config.UseWorkTask)
+            Task.Run(UpdateWork).ContinueWith(t =>
             {
-                Task.Run(UpdateWork).ContinueWith(t =>
+                if (t.Exception != null)
                 {
-                    if (t.Exception != null)
-                    {
-                        Svc.Log.Error(t.Exception, "Worker Task Exception");
-                    }
-                    _work = false;
-                }, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
-            }
-            else
-            {
-                UpdateWork();
+                    Svc.Log.Error(t.Exception, "Worker Task Exception");
+                }
                 _work = false;
-            }
+            }, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
         }
         catch (Exception ex)
         {
             Svc.Log.Error(ex, "Worker Exception in HandleWorkUpdate");
             _work = false;
-        }
-    }
-
-    private static XivChatEntry BuildWarningChatEntry()
-    {
-        var linkPayload = Svc.PluginInterface.AddChatLinkHandler(3, OpenWarningChatHandler);
-        return new XivChatEntry
-        {
-            Message = new SeString(new TextPayload("RotationSolver Reborn: System warnings are present. Click here to view."), linkPayload),
-            Type = XivChatType.ErrorMessage,
-        };
-    }
-
-    private static void OpenWarningChatHandler(uint arg1, SeString @string)
-    {
-        if (arg1 == 3)
-        {
-            RotationSolverPlugin.OpenConfigWindow();
         }
     }
 
@@ -178,10 +152,12 @@ internal static class MajorUpdater
     {
         if (!Svc.PluginInterface.InstalledPlugins.Any(p => p.InternalName == "Avarice"))
         {
+#pragma warning disable CS0436
             WarningHelper.AddSystemWarning(UiString.AvariceWarning.GetDescription());
         }
         if (!Svc.PluginInterface.InstalledPlugins.Any(p => p.InternalName == "TextToTalk"))
         {
+#pragma warning disable CS0436
             WarningHelper.AddSystemWarning(UiString.TextToTalkWarning.GetDescription());
         }
     }
@@ -195,7 +171,8 @@ internal static class MajorUpdater
     private static Exception? _innerException;
     private static void UpdateWork()
     {
-        var waitingTime = (DateTime.Now - _lastUpdatedWork).TotalMilliseconds;
+        var now = DateTime.Now;
+        var waitingTime = (now - _lastUpdatedWork).TotalMilliseconds;
         if (waitingTime > 100)
         {
             Svc.Log.Warning($"The time for completing a running cycle for RS is {waitingTime:F2} ms, try disabling the option \"UseWorkTask\" to get better performance or check your other running plugins for one of them using too many resources and try disabling that.");
@@ -236,8 +213,10 @@ internal static class MajorUpdater
                 Svc.Log.Error(ex, "Inner Worker Exception");
             }
         }
-
-        _work = false;
+        finally
+        {
+            _work = false;
+        }
     }
 
     static DateTime _closeWindowTime = DateTime.Now;
