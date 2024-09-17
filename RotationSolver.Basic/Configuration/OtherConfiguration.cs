@@ -63,17 +63,18 @@ internal class OtherConfiguration
             await SaveHostileCastingKnockback();
         });
     }
-#region Action Tab
-    public static void ResetHostileCastingArea()
-    {
-        InitOne(ref HostileCastingArea, nameof(HostileCastingArea), true, true);
-        SaveHostileCastingArea().Wait();
-    }
+    #region Action Tab
 
     public static void ResetHostileCastingTank()
     {
         InitOne(ref HostileCastingTank, nameof(HostileCastingTank), true, true);
         SaveHostileCastingTank().Wait();
+    }
+
+    public static void ResetHostileCastingArea()
+    {
+        InitOne(ref HostileCastingArea, nameof(HostileCastingArea), true, true);
+        SaveHostileCastingArea().Wait();
     }
 
     public static void ResetHostileCastingKnockback()
@@ -82,14 +83,14 @@ internal class OtherConfiguration
         SaveHostileCastingKnockback().Wait();
     }
 
-    public static Task SaveHostileCastingArea()
-    {
-        return Task.Run(() => Save(HostileCastingArea, nameof(HostileCastingArea)));
-    }
-
     public static Task SaveHostileCastingTank()
     {
         return Task.Run(() => Save(HostileCastingTank, nameof(HostileCastingTank)));
+    }
+
+    public static Task SaveHostileCastingArea()
+    {
+        return Task.Run(() => Save(HostileCastingArea, nameof(HostileCastingArea)));
     }
 
     private static Task SaveHostileCastingKnockback()
@@ -184,22 +185,6 @@ internal class OtherConfiguration
     private static void Save<T>(T value, string name)
         => SavePath(value, GetFilePath(name));
 
-    private static void SavePath<T>(T value, string path)
-    {
-        try
-        {
-            File.WriteAllText(path,
-            JsonConvert.SerializeObject(value, Formatting.Indented, new JsonSerializerSettings()
-            {
-                TypeNameHandling = TypeNameHandling.None,
-            }));
-        }
-        catch (Exception ex)
-        {
-            Svc.Log.Warning(ex, $"Failed to save the file to {path}");
-        }
-    }
-
     private static void InitOne<T>(ref T value, string name, bool download = true, bool forceDownload = false)
     {
         var path = GetFilePath(name);
@@ -212,40 +197,103 @@ internal class OtherConfiguration
                 value = JsonConvert.DeserializeObject<T>(File.ReadAllText(path))!;
                 Svc.Log.Info($"Loaded {name} from local file.");
             }
+            catch (JsonReaderException ex)
+            {
+                Svc.Log.Warning(ex, $"Failed to load {name} from local file due to JSON format error.");
+                HandleCorruptedFile(ref value, name, path, download);
+            }
             catch (Exception ex)
             {
                 Svc.Log.Warning(ex, $"Failed to load {name} from local file.");
+                value = Activator.CreateInstance<T>();
+                SavePath(value, path);
             }
         }
         else if (download || forceDownload)
         {
-            try
-            {
-                using var client = new HttpClient();
-                var str = client.GetStringAsync($"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Resources/{name}.json").Result;
-
-                File.WriteAllText(path, str);
-                value = JsonConvert.DeserializeObject<T>(str, new JsonSerializerSettings()
-                {
-                    MissingMemberHandling = MissingMemberHandling.Error,
-                    Error = delegate (object? sender, Newtonsoft.Json.Serialization.ErrorEventArgs args) // Allow sender to be null
-                    {
-                        args.ErrorContext.Handled = true;
-                    }
-                })!;
-                Svc.Log.Info($"Downloaded and loaded {name} from GitHub.");
-            }
-            catch (Exception ex)
-            {
-                Svc.Log.Warning(ex, $"Failed to download {name} from GitHub.");
-                SavePath(value, path);
-            }
+            DownloadAndInitialize(ref value, name, path);
         }
         else
         {
+            value = Activator.CreateInstance<T>();
             SavePath(value, path);
         }
     }
+
+    private static void HandleCorruptedFile<T>(ref T value, string name, string path, bool download)
+    {
+        if (download)
+        {
+            Svc.Log.Info($"Attempting to re-download {name} due to corrupted local file.");
+            DownloadAndInitialize(ref value, name, path);
+        }
+        else
+        {
+            value = Activator.CreateInstance<T>();
+            SavePath(value, path);
+        }
+    }
+
+    private static void DownloadAndInitialize<T>(ref T value, string name, string path)
+    {
+        try
+        {
+            using var client = new HttpClient();
+            var str = client.GetStringAsync($"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Resources/{name}.json").Result;
+
+            Svc.Log.Info($"Downloaded JSON for {name}: {str}");
+
+            value = JsonConvert.DeserializeObject<T>(str, new JsonSerializerSettings()
+            {
+                MissingMemberHandling = MissingMemberHandling.Error,
+                Error = delegate (object? sender, Newtonsoft.Json.Serialization.ErrorEventArgs args) // Allow sender to be null
+                {
+                    Svc.Log.Warning($"Deserialization error: {args.ErrorContext.Error.Message}");
+                    args.ErrorContext.Handled = true;
+                }
+            })!;
+
+            if (value == null)
+            {
+                Svc.Log.Warning($"Deserialized value for {name} is null.");
+                value = Activator.CreateInstance<T>();
+            }
+
+            File.WriteAllText(path, str);
+            Svc.Log.Info($"Downloaded and loaded {name} from GitHub.");
+        }
+        catch (Exception ex)
+        {
+            Svc.Log.Warning(ex, $"Failed to download {name} from GitHub.");
+            value = Activator.CreateInstance<T>();
+            SavePath(value, path);
+        }
+    }
+
+    private static void SavePath<T>(T value, string path)
+    {
+        try
+        {
+            var json = JsonConvert.SerializeObject(value, Formatting.Indented, new JsonSerializerSettings()
+            {
+                TypeNameHandling = TypeNameHandling.None,
+            });
+
+            if (json == "null")
+            {
+                Svc.Log.Warning($"Attempted to save null value to {path}. Initialization might have failed.");
+            }
+            else
+            {
+                File.WriteAllText(path, json);
+            }
+        }
+        catch (Exception ex)
+        {
+            Svc.Log.Warning(ex, $"Failed to save the file to {path}");
+        }
+    }
+
 }
 #pragma warning restore CA2211
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

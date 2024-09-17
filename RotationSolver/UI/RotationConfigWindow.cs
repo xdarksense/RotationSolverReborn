@@ -2062,6 +2062,9 @@ public partial class RotationConfigWindow : Window
 
     private static void DrawActionsList(string name, HashSet<uint> actions)
     {
+        // Initialize actions to an empty HashSet if it is null
+        actions ??= new HashSet<uint>();
+
         const float InputWidth = 200f;
         const float ChildHeight = 400f;
 
