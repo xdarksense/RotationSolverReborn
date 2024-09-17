@@ -212,6 +212,19 @@ public partial class RotationConfigWindow : Window
                 DataCenter.SystemWarnings.Remove(warning);
             }
         }
+
+        if (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
+    Player.Job == Job.LTW || Player.Job == Job.WVR || Player.Job == Job.ALC || Player.Job == Job.CUL ||
+    Player.Job == Job.MIN || Player.Job == Job.FSH || Player.Job == Job.BTN)
+        {
+            float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
+            ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudOrange); // Set text color to DalamudOrange
+            ImGui.Text("You are on an unsupported class (Crafter/Gatherer)");
+            ImGui.PopStyleColor(); // Reset text color
+            ImGui.PopTextWrapPos(); // Reset text wrapping position
+        }
+
         else
         {
             float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
@@ -348,7 +361,10 @@ public partial class RotationConfigWindow : Window
         }
 
         var rotation = DataCenter.RightNowRotation;
-        if (rotation == null)
+
+        if (rotation == null && !(Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
+            Player.Job == Job.LTW || Player.Job == Job.WVR || Player.Job == Job.ALC || Player.Job == Job.CUL ||
+            Player.Job == Job.MIN || Player.Job == Job.FSH || Player.Job == Job.BTN))
         {
             ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudOrange);
             var text = UiString.ConfigWindow_NoRotation.GetDescription();
@@ -362,66 +378,82 @@ public partial class RotationConfigWindow : Window
             return;
         }
 
+        if (rotation == null && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
+            Player.Job == Job.LTW || Player.Job == Job.WVR || Player.Job == Job.ALC || Player.Job == Job.CUL ||
+            Player.Job == Job.MIN || Player.Job == Job.FSH || Player.Job == Job.BTN))
+        {
+            float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
+            ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudOrange); // Set text color to DalamudOrange
+            ImGui.Text(":(");
+            ImGui.PopStyleColor(); // Reset text color
+            ImGui.PopTextWrapPos(); // Reset text wrapping position
+            return;
+        }
+
         var rotations = RotationUpdater.CustomRotations.FirstOrDefault(i => i.ClassJobIds.Contains((Job)(Player.Object?.ClassJob.Id ?? 0)))?.Rotations ?? [];
 
-        var rot = rotation.GetType().GetCustomAttribute<RotationAttribute>();
-
-        if (rot == null) return;
-
-        if (DataCenter.IsPvP)
+        if (rotation != null)
         {
-            rotations = rotations.Where(r => r.GetCustomAttribute<RotationAttribute>()?.Type.HasFlag(CombatType.PvP) ?? false).ToArray();
-        }
-        else
-        {
-            rotations = rotations.Where(r => r.GetCustomAttribute<RotationAttribute>()?.Type.HasFlag(CombatType.PvE) ?? false).ToArray();
-        }
+            var rot = rotation.GetType().GetCustomAttribute<RotationAttribute>();
 
-        var iconSize = Math.Max(Scale * MIN_COLUMN_WIDTH, Math.Min(wholeWidth, Scale * JOB_ICON_WIDTH));
-        var comboSize = ImGui.CalcTextSize(rot.Name).X;
+            if (rot == null) return;
 
-        const string slash = " - ";
-        var gameVersionSize = ImGui.CalcTextSize(slash + rot.GameVersion).X + ImGui.GetStyle().ItemSpacing.X;
-        var gameVersion = UiString.ConfigWindow_Helper_GameVersion.GetDescription() + ": ";
-        var drawCenter = ImGui.CalcTextSize(slash + gameVersion + rot.GameVersion).X + iconSize + ImGui.GetStyle().ItemSpacing.X * 3 < wholeWidth;
-        if (drawCenter) gameVersionSize += ImGui.CalcTextSize(gameVersion).X + ImGui.GetStyle().ItemSpacing.X;
-
-        var horizonalWholeWidth = Math.Max(comboSize, gameVersionSize) + iconSize + ImGui.GetStyle().ItemSpacing.X;
-
-        if (horizonalWholeWidth > wholeWidth)
-        {
-            ImGuiHelper.DrawItemMiddle(() =>
+            if (DataCenter.IsPvP)
             {
-                DrawRotationIcon(rotation, iconSize);
-            }, wholeWidth, iconSize);
-
-            if (Scale * JOB_ICON_WIDTH < wholeWidth)
-            {
-                DrawRotationCombo(comboSize, rotations, rotation, gameVersion);
+                rotations = rotations.Where(r => r.GetCustomAttribute<RotationAttribute>()?.Type.HasFlag(CombatType.PvP) ?? false).ToArray();
             }
-        }
-        else
-        {
-            ImGuiHelper.DrawItemMiddle(() =>
+            else
             {
-                DrawRotationIcon(rotation, iconSize);
+                rotations = rotations.Where(r => r.GetCustomAttribute<RotationAttribute>()?.Type.HasFlag(CombatType.PvE) ?? false).ToArray();
+            }
 
-                ImGui.SameLine();
+            var iconSize = Math.Max(Scale * MIN_COLUMN_WIDTH, Math.Min(wholeWidth, Scale * JOB_ICON_WIDTH));
+            var comboSize = ImGui.CalcTextSize(rot.Name).X;
 
-                using var group = ImRaii.Group();
+            const string slash = " - ";
+            var gameVersionSize = ImGui.CalcTextSize(slash + rot.GameVersion).X + ImGui.GetStyle().ItemSpacing.X;
+            var gameVersion = UiString.ConfigWindow_Helper_GameVersion.GetDescription() + ": ";
+            var drawCenter = ImGui.CalcTextSize(slash + gameVersion + rot.GameVersion).X + iconSize + ImGui.GetStyle().ItemSpacing.X * 3 < wholeWidth;
+            if (drawCenter) gameVersionSize += ImGui.CalcTextSize(gameVersion).X + ImGui.GetStyle().ItemSpacing.X;
 
-                DrawRotationCombo(comboSize, rotations, rotation, gameVersion);
-                ImGui.TextDisabled(slash);
-                ImGui.SameLine();
+            var horizonalWholeWidth = Math.Max(comboSize, gameVersionSize) + iconSize + ImGui.GetStyle().ItemSpacing.X;
 
-                if (drawCenter)
+            if (horizonalWholeWidth > wholeWidth)
+            {
+                ImGuiHelper.DrawItemMiddle(() =>
                 {
-                    ImGui.TextDisabled(gameVersion);
-                    ImGui.SameLine();
-                }
-                ImGui.Text(rot.GameVersion);
+                    DrawRotationIcon(rotation, iconSize);
+                }, wholeWidth, iconSize);
 
-            }, wholeWidth, horizonalWholeWidth);
+                if (Scale * JOB_ICON_WIDTH < wholeWidth)
+                {
+                    DrawRotationCombo(comboSize, rotations, rotation, gameVersion);
+                }
+            }
+            else
+            {
+                ImGuiHelper.DrawItemMiddle(() =>
+                {
+                    DrawRotationIcon(rotation, iconSize);
+
+                    ImGui.SameLine();
+
+                    using var group = ImRaii.Group();
+
+                    DrawRotationCombo(comboSize, rotations, rotation, gameVersion);
+                    ImGui.TextDisabled(slash);
+                    ImGui.SameLine();
+
+                    if (drawCenter)
+                    {
+                        ImGui.TextDisabled(gameVersion);
+                        ImGui.SameLine();
+                    }
+                    ImGui.Text(rot.GameVersion);
+
+                }, wholeWidth, horizonalWholeWidth);
+            }
         }
     }
 
