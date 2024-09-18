@@ -1,15 +1,18 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.ClientState.Objects.Types;
 using ECommons.DalamudServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.GeneratedSheets2;
 using RotationSolver.Basic.Configuration;
 using System.Text.RegularExpressions;
 
@@ -26,10 +29,10 @@ public static class ObjectHelper
         EventHandlerType.Quest,
     };
 
-    internal static BNpcBase? GetObjectNPC(this IGameObject obj)
+    internal static Lumina.Excel.GeneratedSheets.BNpcBase? GetObjectNPC(this IGameObject obj)
     {
         if (obj == null) return null;
-        return Service.GetSheet<BNpcBase>().GetRow(obj.DataId);
+        return Service.GetSheet<Lumina.Excel.GeneratedSheets.BNpcBase>().GetRow(obj.DataId);
     }
 
     internal static bool CanProvoke(this IGameObject target)
@@ -90,16 +93,6 @@ public static class ObjectHelper
 
         if (names.Any(n => !string.IsNullOrEmpty(n) && new Regex(n).Match(battleChara.Name.TextValue).Success)) return false;
 
-        // Fetch prioritized target names
-        if (OtherConfiguration.PrioTargetNames.TryGetValue(Svc.ClientState.TerritoryType, out var prioTargetNames))
-        {
-            // If the target's name matches any prioritized names, it is attackable
-            if (prioTargetNames.Any(n => !string.IsNullOrEmpty(n) && new Regex(n).Match(battleChara.Name.TextValue).Success))
-            {
-                return true;
-            }
-        }
-
         //Fate
         if (DataCenter.TerritoryContentType != TerritoryContentType.Eureka)
         {
@@ -118,7 +111,6 @@ public static class ObjectHelper
         if (battleChara.TargetObject == Player.Object
         || battleChara.TargetObject?.OwnerId == Player.Object.GameObjectId) return true;
 
-        //Remove other's treasure.
         if (battleChara.IsOthersPlayers()) return false;
 
         if (battleChara.IsTopPriorityHostile()) return true;
@@ -168,11 +160,13 @@ public static class ObjectHelper
         && (!(DataCenter.IsPvP) && obj is IPlayerCharacter
         || ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, obj.Struct()));
 
-    internal static bool IsParty(this IGameObject IGameObject)
+    internal static bool IsParty(this IGameObject gameObject)
     {
-        if (IGameObject.GameObjectId == Player.Object.GameObjectId) return true;
-        if (Svc.Party.Any(p => p.GameObject?.GameObjectId == IGameObject.GameObjectId)) return true;
-        if (IGameObject.SubKind == 9) return true;
+        if (gameObject == null) return false;
+        if (gameObject.GameObjectId == Player.Object.GameObjectId) return true;
+        if (Svc.Party.Any(p => p.GameObject?.GameObjectId == gameObject.GameObjectId)) return true;
+        if (gameObject.SubKind == 9) return true;
+        if (gameObject.GetNameplateKind() == NameplateKind.FriendlyBattleNPC) return true;
         return false;
     }
 
@@ -225,6 +219,16 @@ public static class ObjectHelper
 
         var fateId = DataCenter.FateId;
 
+        // Fetch prioritized target names
+        if (OtherConfiguration.PrioTargetNames.TryGetValue(Svc.ClientState.TerritoryType, out var prioTargetNames))
+        {
+            // If the target's name matches any prioritized names, it is attackable
+            if (obj is IBattleChara bpnc && prioTargetNames.Any(n => !string.IsNullOrEmpty(n) && new Regex(n).Match(bpnc.Name.TextValue).Success))
+            {
+                return true;
+            }
+        }
+
         if (obj is IBattleChara b && b.StatusList != null && b.StatusList.Any(StatusHelper.IsPriority)) return true;
 
         if (Service.Config.ChooseAttackMark && MarkingHelper.AttackSignTargets.FirstOrDefault(id => id != 0) == (long)obj.GameObjectId) return true;
@@ -236,11 +240,21 @@ public static class ObjectHelper
 
         // Hunting log and weapon
         if (Service.Config.TargetHuntingRelicLevePriority && icon is 60092 or 60096 or 71244) return true;
+        //60092 Hunt Target
+        //60096 Relic Weapon
+        //71244 Leve Target
 
         // Quest
         if (Service.Config.TargetQuestPriority && (icon is 71204 or 71144 or 71224 or 71344 || obj.GetEventType() is EventHandlerType.Quest)) return true;
+        //71204 Main Quest
+        //71144 Major Quest
+        //71224 Other Quest
+        //71344 Major Quest
 
         if (obj is IBattleChara npc && DataCenter.PrioritizedNameIds.Contains(npc.NameId)) return true;
+
+        // Check if the object is a BattleNpcPart
+        if (Service.Config.PrioEnemyParts && obj.GetBattleNPCSubKind() == BattleNpcSubKind.BattleNpcPart) return true;
 
         return false;
     }

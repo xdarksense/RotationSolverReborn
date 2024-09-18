@@ -1,12 +1,12 @@
 ﻿namespace RotationSolver.Basic.Configuration.RotationConfig;
 
 /// <summary>
-/// The config set about this config..
+/// Represents a set of rotation configurations.
 /// </summary>
 public interface IRotationConfigSet : IEnumerable<IRotationConfig>
 {
     /// <summary>
-    /// The configs.
+    /// Gets the collection of rotation configurations.
     /// </summary>
     HashSet<IRotationConfig> Configs { get; }
 }

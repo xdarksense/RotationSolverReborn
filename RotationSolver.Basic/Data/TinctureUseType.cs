@@ -12,9 +12,9 @@ public enum TinctureUseType : byte
     Nowhere,
 
     /// <summary>
-    /// Only use tinctures in high end duties.
+    /// Only use tinctures in high-end duties.
     /// </summary>
-    [Description("Use Gemdraughts/Tinctures/Pots In High End Duties")]
+    [Description("Use Gemdraughts/Tinctures/Pots in High-End Duties")]
     InHighEndDuty,
 
     /// <summary>

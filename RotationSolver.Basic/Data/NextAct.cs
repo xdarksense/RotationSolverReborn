@@ -1,8 +1,8 @@
 ﻿namespace RotationSolver.Basic.Data;
 
 /// <summary>
-/// The Command of the next action.
+/// Represents the command for the next action.
 /// </summary>
-/// <param name="Act">the actio it self.</param>
-/// <param name="DeadTime">When to stop</param>
+/// <param name="Act">The action itself.</param>
+/// <param name="DeadTime">The time when the action should stop.</param>
 public record NextAct(IAction Act, DateTime DeadTime);

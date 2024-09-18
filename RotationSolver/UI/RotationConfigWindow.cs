@@ -2513,6 +2513,10 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"InView: {Svc.GameGui.WorldToScreen(battleChara.Position, out _)}");
             ImGui.Text($"Name Id: {battleChara.NameId}");
             ImGui.Text($"Data Id: {battleChara.DataId}");
+            ImGui.Text($"EnemyPositional: {battleChara.FindEnemyPositional()}");
+            ImGui.Text($"NameplateKind: {battleChara.GetNameplateKind()}");
+            ImGui.Text($"BattleNPCSubKind: {battleChara.GetBattleNPCSubKind()}");
+            ImGui.Text($"IsTopPriorityHostile: {battleChara.IsTopPriorityHostile()}");
             ImGui.Text($"Targetable: {battleChara.Struct()->Character.GameObject.TargetableStatus}");
 
             var npc = battleChara.GetObjectNPC();

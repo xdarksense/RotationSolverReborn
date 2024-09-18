@@ -38,7 +38,7 @@ partial class CustomRotation
         }
         catch (Exception? ex)
         {
-            WhyNotValid = $"Failed to invoke the next action,please contact to \"{{0}}\".";
+            WhyNotValid = "Failed to invoke the next action, please contact support.";
 
             while (ex != null)
             {
@@ -56,6 +56,17 @@ partial class CustomRotation
     {
         ActionMoveForwardGCD = MoveForwardGCD(out var act) ? act : null;
 
+        UpdateHealingActions(role, out act);
+        UpdateDefenseActions(out act);
+        UpdateDispelAndRaiseActions(role, out act);
+        UpdatePositionalActions(role, out act);
+        UpdateMovementActions(out act);
+    }
+
+    private void UpdateHealingActions(JobRole role, out IAction? act)
+    {
+        act = null; // Ensure 'act' is assigned before any return
+
         if (!DataCenter.HPNotFull && role == JobRole.Healer)
         {
             ActionHealAreaGCD = ActionHealAreaAbility = ActionHealSingleGCD = ActionHealSingleAbility = null;
@@ -68,18 +79,32 @@ partial class CustomRotation
             ActionHealAreaAbility = HealAreaAbility(AddlePvE, out act) ? act : null;
             ActionHealSingleAbility = HealSingleAbility(AddlePvE, out act) ? act : null;
         }
+    }
+
+    private void UpdateDefenseActions(out IAction? act)
+    {
+        act = null; // Ensure 'act' is assigned before any return
 
         IBaseAction.TargetOverride = TargetType.BeAttacked;
         ActionDefenseAreaGCD = DefenseAreaGCD(out act) ? act : null;
         ActionDefenseSingleGCD = DefenseSingleGCD(out act) ? act : null;
         IBaseAction.TargetOverride = null;
 
+        ActionDefenseAreaAbility = DefenseAreaAbility(AddlePvE, out act) ? act : null;
+        ActionDefenseSingleAbility = DefenseSingleAbility(AddlePvE, out act) ? act : null;
+    }
+
+    private void UpdateDispelAndRaiseActions(JobRole role, out IAction? act)
+    {
+        act = null; // Ensure 'act' is assigned before any return
+
+        IBaseAction.TargetOverride = TargetType.Death;
+
         ActionDispelStancePositionalGCD = role switch
         {
             JobRole.Healer => DataCenter.DispelTarget != null && DispelGCD(out act) ? act : null,
             _ => null,
         };
-        IBaseAction.TargetOverride = TargetType.Death;
 
         ActionRaiseShirkGCD = role switch
         {
@@ -87,10 +112,12 @@ partial class CustomRotation
             _ => null,
         };
 
-        IBaseAction.TargetOverride = TargetType.BeAttacked;
-        ActionDefenseAreaAbility = DefenseAreaAbility(AddlePvE, out act) ? act : null;
-        ActionDefenseSingleAbility = DefenseSingleAbility(AddlePvE, out act) ? act : null;
         IBaseAction.TargetOverride = null;
+    }
+
+    private void UpdatePositionalActions(JobRole role, out IAction? act)
+    {
+        act = null; // Ensure 'act' is assigned before any return
 
         ActionDispelStancePositionalAbility = role switch
         {
@@ -104,44 +131,22 @@ partial class CustomRotation
             JobRole.Tank => ShirkPvE.CanUse(out act) ? act : null,
             _ => null,
         };
+
         ActionAntiKnockbackAbility = AntiKnockback(role, AddlePvE, out act) ? act : null;
+    }
+
+    private void UpdateMovementActions(out IAction? act)
+    {
+        act = null; // Ensure 'act' is assigned before any return
 
         IBaseAction.TargetOverride = TargetType.Move;
         var movingTarget = MoveForwardAbility(AddlePvE, out act);
         IBaseAction.TargetOverride = null;
         ActionMoveForwardAbility = movingTarget ? act : null;
 
-        //TODO: that is too complex! 
         if (movingTarget && act is IBaseAction a)
         {
-            if (a.PreviewTarget.HasValue && a.PreviewTarget.Value.Target != Player
-                && a.PreviewTarget.Value.Target != null)
-            {
-                var dir = Player.Position - a.PreviewTarget.Value.Position;
-                var length = dir?.Length() ?? 0;
-                if (length != 0 && dir.HasValue)
-                {
-                    var d = dir.Value / length;
-
-                    MoveTarget = a.PreviewTarget.Value.Position + d * MathF.Min(length, Player.HitboxRadius + a.PreviewTarget.Value.Target.HitboxRadius);
-                }
-                else
-                {
-                    MoveTarget = a.PreviewTarget.Value.Position;
-                }
-            }
-            else
-            {
-                if ((ActionID)a.ID == ActionID.EnAvantPvE)
-                {
-                    var dir = new Vector3(MathF.Sin(Player.Rotation), 0, MathF.Cos(Player.Rotation));
-                    MoveTarget = Player.Position + dir * 10;
-                }
-                else
-                {
-                    MoveTarget = a.PreviewTarget?.Position == a.PreviewTarget?.Target?.Position ? null : a.PreviewTarget?.Position;
-                }
-            }
+            UpdateMoveTarget(a);
         }
         else
         {
@@ -152,34 +157,83 @@ partial class CustomRotation
         ActionSpeedAbility = SpeedAbility(AddlePvE, out act) ? act : null;
     }
 
+    private void UpdateMoveTarget(IBaseAction a)
+    {
+        if (a.PreviewTarget.HasValue && a.PreviewTarget.Value.Target != Player
+            && a.PreviewTarget.Value.Target != null)
+        {
+            var dir = Player.Position - a.PreviewTarget.Value.Position;
+            var length = dir?.Length() ?? 0;
+            if (length != 0 && dir.HasValue)
+            {
+                var d = dir.Value / length;
+                MoveTarget = a.PreviewTarget.Value.Position + d * MathF.Min(length, Player.HitboxRadius + a.PreviewTarget.Value.Target.HitboxRadius);
+            }
+            else
+            {
+                MoveTarget = a.PreviewTarget.Value.Position;
+            }
+        }
+        else
+        {
+            if ((ActionID)a.ID == ActionID.EnAvantPvE)
+            {
+                var dir = new Vector3(MathF.Sin(Player.Rotation), 0, MathF.Cos(Player.Rotation));
+                MoveTarget = Player.Position + dir * 10; // Consider defining 10 as a constant
+            }
+            else
+            {
+                MoveTarget = a.PreviewTarget?.Position == a.PreviewTarget?.Target?.Position ? null : a.PreviewTarget?.Position;
+            }
+        }
+    }
+
     private IAction? Invoke(out IAction? gcdAction)
     {
+        // Initialize the output parameter
+        gcdAction = null;
+
+        // Reset special action flags
         IBaseAction.ShouldEndSpecial = false;
         IBaseAction.IgnoreClipping = true;
 
+        // Check for countdown and return the appropriate action if not in combat
         var countDown = Service.CountDownTime;
         if (countDown > 0 && !DataCenter.InCombat)
         {
-            gcdAction = null;
             return CountDownAction(countDown);
         }
+
+        // Reset target override
         IBaseAction.TargetOverride = null;
 
+        // Attempt to get the GCD action
         gcdAction = GCD();
         IBaseAction.IgnoreClipping = false;
 
+        // If a GCD action is available, determine if it can be used or if an ability should be used instead
         if (gcdAction != null)
         {
-            if (ActionHelper.CanUseGCD) return gcdAction;
+            if (ActionHelper.CanUseGCD)
+            {
+                return gcdAction;
+            }
 
-            if (Ability(gcdAction, out var ability)) return ability;
+            if (Ability(gcdAction, out var ability))
+            {
+                return ability;
+            }
 
             return gcdAction;
         }
         else
         {
+            // If no GCD action is available, attempt to use an ability
             IBaseAction.IgnoreClipping = true;
-            if (Ability(AddlePvE, out var ability)) return ability;
+            if (Ability(AddlePvE, out var ability))
+            {
+                return ability;
+            }
             IBaseAction.IgnoreClipping = false;
 
             return null;

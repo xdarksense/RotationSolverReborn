@@ -122,10 +122,14 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Automatically use MP Potions", Description = "Experimental.",
         Filter = AutoActionUsage)]
     private static readonly bool _useMpPotions = false;
-
+    
     [ConditionBool, UI("Prioritize mob/object targets with attack markers",
         Filter = TargetConfig)]
     private static readonly bool _chooseAttackMark = true;
+
+    [ConditionBool, UI("Prioritize enemy parts (i.e. Titan's Heart)",
+        Filter = TargetConfig)]
+    private static readonly bool _prioEnemyParts = true;
 
     [ConditionBool, UI("Allow the use of AOEs against priority-marked targets.",
         Parent = nameof(ChooseAttackMark))]
@@ -330,7 +334,7 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Use beneficial AoE actions when moving.", Parent = nameof(UseGroundBeneficialAbility))]
     private static readonly bool _useGroundBeneficialAbilityWhenMoving = false;
 
-    [ConditionBool, UI("Target all for friendly actions (include passerby)",
+    [ConditionBool, UI("Heal/Rez players in other alliances.",
         Filter = TargetConfig, Section = 3)]
     private static readonly bool _targetAllForFriendly = false;
 

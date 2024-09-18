@@ -19,24 +19,25 @@ partial class CustomRotation
         {
             action.Setting.IsFriendly = action.TargetInfo.EffectRange > 5;
         }
-        //TODO: better target type check. (NoNeed?)
+        // TODO: better target type check. (NoNeed?)
     }
 
     #region Role Actions
 
     static partial void ModifyTrueNorthPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.TrueNorth];
+        setting.StatusProvide = new[] { StatusID.TrueNorth };
     }
+
     static partial void ModifyAddlePvE(ref ActionSetting setting)
     {
-        setting.TargetStatusProvide = [StatusID.Addle];
+        setting.TargetStatusProvide = new[] { StatusID.Addle };
         setting.StatusFromSelf = false;
     }
 
     static partial void ModifySwiftcastPvE(ref ActionSetting setting)
     {
-        //setting.StatusProvide = StatusHelper.SwiftcastStatus;
+        // setting.StatusProvide = StatusHelper.SwiftcastStatus;
     }
 
     static partial void ModifyEsunaPvE(ref ActionSetting setting)
@@ -67,7 +68,7 @@ partial class CustomRotation
     static partial void ModifyFeintPvE(ref ActionSetting setting)
     {
         setting.StatusFromSelf = false;
-        setting.TargetStatusProvide = [StatusID.Feint];
+        setting.TargetStatusProvide = new[] { StatusID.Feint };
     }
 
     static partial void ModifyLowBlowPvE(ref ActionSetting setting)
@@ -96,13 +97,14 @@ partial class CustomRotation
 
     static partial void ModifySprintPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.SprintPenalty, StatusID.Dualcast];
+        setting.StatusProvide = new[] { StatusID.SprintPenalty, StatusID.Dualcast };
     }
 
     static partial void ModifyIsleSprintPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.Dualcast];
+        setting.StatusProvide = new[] { StatusID.Dualcast };
     }
+
     #endregion
 
     #region PvP
@@ -129,7 +131,7 @@ partial class CustomRotation
 
     static partial void ModifySprintPvP(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.Sprint_1342];
+        setting.StatusProvide = new[] { StatusID.Sprint_1342 };
         setting.IsFriendly = true;
     }
 
@@ -157,23 +159,23 @@ partial class CustomRotation
     /// <summary>
     /// All traits of this action.
     /// </summary>
-    public virtual IBaseTrait[] AllTraits { get; } = [];
+    public virtual IBaseTrait[] AllTraits { get; } = Array.Empty<IBaseTrait>();
 
-    PropertyInfo[]? _allBools;
+    private PropertyInfo[]? _allBools;
 
     /// <summary>
     /// All bools of this rotation.
     /// </summary>
     public PropertyInfo[] AllBools => _allBools ??= GetType().GetStaticProperties<bool>();
 
-    PropertyInfo[]? _allBytes;
+    private PropertyInfo[]? _allBytes;
 
     /// <summary>
     /// All bytes or integers of this rotation.
     /// </summary>
     public PropertyInfo[] AllBytesOrInt => _allBytes ??= GetType().GetStaticProperties<byte>().Union(GetType().GetStaticProperties<int>()).ToArray();
 
-    PropertyInfo[]? _allFloats;
+    private PropertyInfo[]? _allFloats;
 
     /// <summary>
     /// All floats of this rotation.

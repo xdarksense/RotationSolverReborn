@@ -1,40 +1,40 @@
 ﻿namespace RotationSolver.Basic.Configuration.RotationConfig;
 
 /// <summary>
-/// The single config of rotation.
+/// Represents a single configuration setting for rotation.
 /// </summary>
 public interface IRotationConfig
 {
     /// <summary>
-    /// The name of this setting.
+    /// Gets the name of this setting.
     /// </summary>
     string Name { get; }
 
     /// <summary>
-    /// The showing name about this.
+    /// Gets the display name of this setting.
     /// </summary>
     string DisplayName { get; }
 
     /// <summary>
-    /// Default Value for this configuration.
+    /// Gets the default value for this configuration.
     /// </summary>
     string DefaultValue { get; }
 
     /// <summary>
-    /// Type of this config, pvp, pve, or both.
+    /// Gets the type of this configuration, indicating whether it is for PvP, PvE, or both.
     /// </summary>
     CombatType Type { get; }
 
     /// <summary>
-    /// The value.
+    /// Gets or sets the current value of this configuration.
     /// </summary>
     string Value { get; set; }
 
     /// <summary>
-    /// Happened when it is on the command.
+    /// Executes a command to update the configuration.
     /// </summary>
-    /// <param name="set"></param>
-    /// <param name="str"></param>
-    /// <returns></returns>
+    /// <param name="set">The rotation config set.</param>
+    /// <param name="str">The command string.</param>
+    /// <returns><c>true</c> if the command was executed successfully; otherwise, <c>false</c>.</returns>
     bool DoCommand(IRotationConfigSet set, string str);
 }

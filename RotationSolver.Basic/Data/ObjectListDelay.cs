@@ -5,23 +5,27 @@ namespace RotationSolver.Basic.Data;
 /// <summary>
 /// A class to delay the object list checking.
 /// </summary>
-/// <typeparam name="T"></typeparam>
-/// <remarks>
-/// Constructer.
-/// </remarks>
-/// <param name="getRange"></param>
-public class ObjectListDelay<T>(Func<(float min, float max)> getRange)
-    : IEnumerable<T> where T : IGameObject
+/// <typeparam name="T">The type of objects in the list.</typeparam>
+public class ObjectListDelay<T> : IEnumerable<T> where T : IGameObject
 {
-    IEnumerable<T> _list = [];
-    readonly Func<(float min, float max)> _getRange = getRange;
-    SortedList<ulong, DateTime> _revealTime = [];
-    readonly Random _ran = new(DateTime.Now.Millisecond);
+    private IEnumerable<T> _list = new List<T>();
+    private readonly Func<(float min, float max)> _getRange;
+    private SortedList<ulong, DateTime> _revealTime = new();
+    private readonly Random _ran = new(DateTime.Now.Millisecond);
 
     /// <summary>
-    /// The default creator from the config.
+    /// Initializes a new instance of the <see cref="ObjectListDelay{T}"/> class.
     /// </summary>
-    /// <param name="getRange">the way to get the config.</param>
+    /// <param name="getRange">The function to get the range of delay times.</param>
+    public ObjectListDelay(Func<(float min, float max)> getRange)
+    {
+        _getRange = getRange;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ObjectListDelay{T}"/> class.
+    /// </summary>
+    /// <param name="getRange">The function to get the range of delay times as a <see cref="Vector2"/>.</param>
     public ObjectListDelay(Func<Vector2> getRange)
         : this(() =>
         {
@@ -29,13 +33,12 @@ public class ObjectListDelay<T>(Func<(float min, float max)> getRange)
             return (vec.X, vec.Y);
         })
     {
-
     }
 
     /// <summary>
-    /// The delayed list.
+    /// Delays the list of objects.
     /// </summary>
-    /// <param name="originData"></param>
+    /// <param name="originData">The original list of objects.</param>
     public void Delay(IEnumerable<T> originData)
     {
         var outList = new List<T>(originData.Count());
@@ -63,9 +66,10 @@ public class ObjectListDelay<T>(Func<(float min, float max)> getRange)
     }
 
     /// <summary>
-    /// Enumerator.
+    /// Returns an enumerator that iterates through the collection.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>An enumerator that can be used to iterate through the collection.</returns>
     public IEnumerator<T> GetEnumerator() => _list.GetEnumerator();
+
     IEnumerator IEnumerable.GetEnumerator() => _list.GetEnumerator();
 }

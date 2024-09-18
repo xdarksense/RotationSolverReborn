@@ -8,7 +8,7 @@ partial class CustomRotation
         var act = DataCenter.CommandNextAction;
 
         IBaseAction.ForceEnable = true;
-        if (act is IBaseAction a && a != null && a.Info.IsRealGCD
+        if (act is IBaseAction a && a.Info.IsRealGCD
             && a.CanUse(out _, usedUp: true, skipAoeCheck: true)) return act;
         IBaseAction.ForceEnable = false;
 
@@ -111,15 +111,14 @@ partial class CustomRotation
         return null;
     }
 
+
     private bool UseLimitBreak(out IAction? act)
     {
         act = null;
 
         return LimitBreakLevel switch
         {
-            1 => ((DataCenter.IsPvP)
-                ? LimitBreakPvP?.CanUse(out act, skipAoeCheck: true)
-                : LimitBreak1?.CanUse(out act, skipAoeCheck: true)) ?? false,
+            1 => (DataCenter.IsPvP ? LimitBreakPvP?.CanUse(out act, skipAoeCheck: true) : LimitBreak1?.CanUse(out act, skipAoeCheck: true)) ?? false,
             2 => LimitBreak2?.CanUse(out act, skipAoeCheck: true) ?? false,
             3 => LimitBreak3?.CanUse(out act, skipAoeCheck: true) ?? false,
             _ => false,
@@ -130,38 +129,27 @@ partial class CustomRotation
     {
         act = null;
 
-        // Check if the command status has the Raise flag
         if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
         {
             if (RaiseGCD(out act) || RaiseAction(out act, false)) return true;
         }
 
-        // Check if the auto status has the Raise flag
         if (!DataCenter.AutoStatus.HasFlag(AutoStatus.Raise)) return false;
 
         if (RaiseGCD(out act)) return true;
 
         if (RaiseAction(out act, true))
         {
-            if (HasSwift)
+            if (HasSwift) return true;
+
+            if (Service.Config.RaisePlayerBySwift && !SwiftcastPvE.Cooldown.IsCoolingDown && SwiftcastPvE.CanUse(out act))
             {
                 return true;
             }
-            else if (Service.Config.RaisePlayerBySwift && !SwiftcastPvE.Cooldown.IsCoolingDown)
+
+            if (mustUse && !IsMoving)
             {
-                if (SwiftcastPvE.CanUse(out act))
-                {
-                    return true;
-                }
-            }
-            else if (mustUse)
-            {
-                var action = act;
-                if (!IsMoving)
-                {
-                    act = action;
-                    return true;
-                }
+                return true;
             }
         }
 
@@ -169,7 +157,6 @@ partial class CustomRotation
 
         bool RaiseAction(out IAction act, bool ignoreCastingCheck)
         {
-            // Check if the player has enough MP to cast Raise
             if (Player.CurrentMp > Service.Config.LessMPNoRaise && (Raise?.CanUse(out act, skipCastingCheck: ignoreCastingCheck) ?? false)) return true;
 
             act = null!;
@@ -177,12 +164,11 @@ partial class CustomRotation
         }
     }
 
-
     /// <summary>
-    /// The gcd for raising.
+    /// Attempts to use the Raise GCD action.
     /// </summary>
-    /// <param name="act">the action.</param>
-    /// <returns></returns>
+    /// <param name="act">The action to be performed.</param>
+    /// <returns>True if the action can be used; otherwise, false.</returns>
     protected virtual bool RaiseGCD(out IAction? act)
     {
         if (DataCenter.RightNowDutyRotation?.RaiseGCD(out act) ?? false) return true;
@@ -190,18 +176,14 @@ partial class CustomRotation
     }
 
     /// <summary>
-    /// The gcd for dispeling.
+    /// Attempts to use the Dispel GCD action.
     /// </summary>
-    /// <param name="act">the action.</param>
-    /// <returns></returns>
+    /// <param name="act">The action to be performed.</param>
+    /// <returns>True if the action can be used; otherwise, false.</returns>
     protected virtual bool DispelGCD(out IAction? act)
     {
         act = null;
-        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
-        {
-
-            if (Role is JobRole.Healer && HasSwift) return false;
-        }
+        if (ShouldSkipAction()) return false;
 
         if (!HasSwift && EsunaPvE.CanUse(out act)) return true;
         if (DataCenter.RightNowDutyRotation?.DispelGCD(out act) ?? false) return true;
@@ -209,26 +191,20 @@ partial class CustomRotation
     }
 
     /// <summary>
-    /// The emergency gcd with highest priority.
+    /// Attempts to use the Emergency GCD action.
     /// </summary>
-    /// <param name="act"></param>
-    /// <returns></returns>
+    /// <param name="act">The action to be performed.</param>
+    /// <returns>True if the action can be used; otherwise, false.</returns>
     protected virtual bool EmergencyGCD(out IAction? act)
     {
         #region PvP
-        if (GuardPvP.CanUse(out act)
-            && (Player.GetHealthRatio() <= Service.Config.HealthForGuard
-            || DataCenter.CommandStatus.HasFlag(AutoStatus.Raise | AutoStatus.Shirk))) return true;
-
+        if (GuardPvP.CanUse(out act) && (Player.GetHealthRatio() <= Service.Config.HealthForGuard || DataCenter.CommandStatus.HasFlag(AutoStatus.Raise | AutoStatus.Shirk))) return true;
 
         if (StandardissueElixirPvP.CanUse(out act)) return true;
         #endregion
-        act = null;
-        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
-        {
 
-            if (Role is JobRole.Healer && HasSwift) return false;
-        }
+        act = null;
+        if (ShouldSkipAction()) return false;
 
         if (DataCenter.RightNowDutyRotation?.EmergencyGCD(out act) ?? false) return true;
 
@@ -236,29 +212,25 @@ partial class CustomRotation
     }
 
     /// <summary>
-    /// Moving forward GCD.
+    /// Attempts to use the Move Forward GCD action.
     /// </summary>
-    /// <param name="act"></param>
-    /// <returns></returns>
+    /// <param name="act">The action to be performed.</param>
+    /// <returns>True if the action can be used; otherwise, false.</returns>
     [RotationDesc(DescType.MoveForwardGCD)]
     protected virtual bool MoveForwardGCD(out IAction? act)
     {
         act = null;
-        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
-        {
-
-            if (Role is JobRole.Healer && HasSwift) return false;
-        }
+        if (ShouldSkipAction()) return false;
 
         if (DataCenter.RightNowDutyRotation?.MoveForwardGCD(out act) ?? false) return true;
         act = null; return false;
     }
 
     /// <summary>
-    /// Heal single GCD.
+    /// Attempts to use the Heal Single GCD action.
     /// </summary>
-    /// <param name="act"></param>
-    /// <returns></returns>
+    /// <param name="act">The action to be performed.</param>
+    /// <returns>True if the action can be used; otherwise, false.</returns>
     [RotationDesc(DescType.HealSingleGCD)]
     protected virtual bool HealSingleGCD(out IAction? act)
     {
@@ -267,79 +239,66 @@ partial class CustomRotation
     }
 
     /// <summary>
-    /// Heal area GCD.
+    /// Attempts to use the Heal Area GCD action.
     /// </summary>
-    /// <param name="act"></param>
-    /// <returns></returns>
+    /// <param name="act">The action to be performed.</param>
+    /// <returns>True if the action can be used; otherwise, false.</returns>
     [RotationDesc(DescType.HealAreaGCD)]
     protected virtual bool HealAreaGCD(out IAction? act)
     {
         act = null;
-        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
-        {
-
-            if (Role is JobRole.Healer && HasSwift) return false;
-        }
+        if (ShouldSkipAction()) return false;
 
         if (DataCenter.RightNowDutyRotation?.HealAreaGCD(out act) ?? false) return true;
         act = null!; return false;
     }
 
     /// <summary>
-    /// Defense single gcd.
+    /// Attempts to use the Defense Single GCD action.
     /// </summary>
-    /// <param name="act"></param>
-    /// <returns></returns>
+    /// <param name="act">The action to be performed.</param>
+    /// <returns>True if the action can be used; otherwise, false.</returns>
     [RotationDesc(DescType.DefenseSingleGCD)]
     protected virtual bool DefenseSingleGCD(out IAction? act)
     {
         act = null;
-        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
-        {
-
-            if (Role is JobRole.Healer && HasSwift) return false;
-        }
+        if (ShouldSkipAction()) return false;
 
         if (DataCenter.RightNowDutyRotation?.DefenseSingleGCD(out act) ?? false) return true;
         act = null!; return false;
     }
 
     /// <summary>
-    /// Defense area gcd.
+    /// Attempts to use the Defense Area GCD action.
     /// </summary>
-    /// <param name="act"></param>
-    /// <returns></returns>
+    /// <param name="act">The action to be performed.</param>
+    /// <returns>True if the action can be used; otherwise, false.</returns>
     [RotationDesc(DescType.DefenseAreaGCD)]
     protected virtual bool DefenseAreaGCD(out IAction? act)
     {
         act = null;
-
-        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
-        {
-
-            if (Role is JobRole.Healer && HasSwift) return false;
-        }
+        if (ShouldSkipAction()) return false;
 
         if (DataCenter.RightNowDutyRotation?.DefenseAreaGCD(out act) ?? false) return true;
         act = null; return false;
     }
 
     /// <summary>
-    /// General GCD.
+    /// Attempts to use the General GCD action.
     /// </summary>
-    /// <param name="act"></param>
-    /// <returns></returns>
+    /// <param name="act">The action to be performed.</param>
+    /// <returns>True if the action can be used; otherwise, false.</returns>
     protected virtual bool GeneralGCD(out IAction? act)
     {
         act = null;
-
-        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
-        {
-
-            if (Role is JobRole.Healer && HasSwift) return false;
-        }
+        if (ShouldSkipAction()) return false;
 
         if (DataCenter.RightNowDutyRotation?.GeneralGCD(out act) ?? false) return true;
         act = null; return false;
+    }
+
+    private bool ShouldSkipAction()
+    {
+        return DataCenter.CommandStatus.HasFlag(AutoStatus.Raise) && Role is JobRole.Healer && HasSwift;
     }
 }

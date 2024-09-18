@@ -1,12 +1,12 @@
 ﻿namespace RotationSolver.Basic.Configuration;
 
 /// <summary>
-/// To save the special actions.
+/// Represents information about a special action event.
 /// </summary>
 public class ActionEventInfo : MacroInfo
 {
     /// <summary>
-    /// Action Name.
+    /// Gets or sets the name of the action.
     /// </summary>
-    public string Name = string.Empty;
+    public string Name { get; set; } = string.Empty;
 }
