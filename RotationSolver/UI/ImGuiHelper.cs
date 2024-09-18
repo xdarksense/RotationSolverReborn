@@ -61,27 +61,47 @@ internal static class ImGuiHelper
 
     public static void DisplayMacro(this MacroInfo info)
     {
+        // Set the width for the next item
         ImGui.SetNextItemWidth(50);
+
+        // Display a draggable integer input for the macro index
         if (ImGui.DragInt($"{UiString.ConfigWindow_Events_MacroIndex.GetDescription()}##MacroIndex{info.GetHashCode()}",
             ref info.MacroIndex, 1, -1, 99))
         {
-            Service.Config.Save();
+            // Save the configuration if the value changes
+            try
+            {
+                Service.Config.Save();
+            }
+            catch (Exception ex)
+            {
+                Svc.Log.Warning(ex, "Failed to save configuration.");
+            }
         }
 
+        // Display a checkbox for the shared macro option
         ImGui.SameLine();
-
         if (ImGui.Checkbox($"{UiString.ConfigWindow_Events_ShareMacro.GetDescription()}##ShareMacro{info.GetHashCode()}",
             ref info.IsShared))
         {
-            Service.Config.Save();
+            // Save the configuration if the value changes
+            try
+            {
+                Service.Config.Save();
+            }
+            catch (Exception ex)
+            {
+                Svc.Log.Warning(ex, "Failed to save configuration.");
+            }
         }
     }
 
     public static void DisplayEvent(this ActionEventInfo info)
     {
-        if (ImGui.InputText($"{UiString.ConfigWindow_Events_ActionName.GetDescription()}##ActionName{info.GetHashCode()}",
-            ref info.Name, 100))
+        var name = info.Name;
+        if (ImGui.InputText($"{UiString.ConfigWindow_Events_ActionName.GetDescription()}##ActionName{info.GetHashCode()}", ref name, 100))
         {
+            info.Name = name;
             Service.Config.Save();
         }
 

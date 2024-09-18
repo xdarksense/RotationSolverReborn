@@ -32,23 +32,13 @@ internal class DragIntRangeSearch : Searchable
     protected int MinValue
     {
         get => Value.X;
-        set
-        {
-            var v = Value;
-            v.X = value;
-            Value = v;
-        }
+        set => Value = Value.WithX(value);
     }
 
     protected int MaxValue
     {
         get => Value.Y;
-        set
-        {
-            var v = Value;
-            v.Y = value;
-            Value = v;
-        }
+        set => Value = Value.WithY(value);
     }
 
     public DragIntRangeSearch(PropertyInfo property) : base(property)

@@ -6,25 +6,25 @@
 public enum BeneficialAreaStrategy : byte
 {
     /// <summary>
-    /// On predefined location
+    /// Should use predefined location.
     /// </summary>
     [Description("On predefined location")]
     OnLocations,
 
     /// <summary>
-    /// Only on predefined location
+    /// Should use only predefined location.
     /// </summary>
     [Description("Only on predefined location")]
     OnlyOnLocations,
 
     /// <summary>
-    /// On target
+    /// Should use target.
     /// </summary>
     [Description("On target")]
     OnTarget,
 
     /// <summary>
-    /// On the calculated location
+    /// Should use the calculated location.
     /// </summary>
     [Description("On the calculated location")]
     OnCalculated,

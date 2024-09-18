@@ -2,51 +2,68 @@ namespace RotationSolver.Basic.Rotations;
 
 partial class CustomRotation
 {
+    /// <summary>
+    /// Determines if an ability can be used based on various conditions.
+    /// </summary>
+    /// <param name="nextGCD">The next GCD action.</param>
+    /// <param name="act">The resulting action.</param>
+    /// <returns>True if an ability can be used; otherwise, false.</returns>
     private bool Ability(IAction nextGCD, out IAction? act)
     {
         act = DataCenter.CommandNextAction;
 
         IBaseAction.ForceEnable = true;
-        if (act is IBaseAction a && a != null && !a.Info.IsRealGCD && a.CanUse(out _,
-            usedUp: true, skipAoeCheck: true)) return true;
+        if (act is IBaseAction a && a != null && !a.Info.IsRealGCD && a.CanUse(out _, usedUp: true, skipAoeCheck: true))
+        {
+            return true;
+        }
         IBaseAction.ForceEnable = false;
 
-        if (act is IBaseItem i && i.CanUse(out _, true)) return true;
+        if (act is IBaseItem i && i.CanUse(out _, true))
+        {
+            return true;
+        }
 
         if (!Service.Config.UseAbility || Player.TotalCastTime > 0)
         {
-            act = null!;
+            act = null;
             return false;
         }
 
-        if (EmergencyAbility(nextGCD, out act)) return true;
+        if (EmergencyAbility(nextGCD, out act))
+        {
+            return true;
+        }
+
         var role = DataCenter.Role;
 
         IBaseAction.TargetOverride = TargetType.Interrupt;
-
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.Interrupt)
-            && MyInterruptAbility(role, nextGCD, out act)) return true;
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.Interrupt) && MyInterruptAbility(role, nextGCD, out act))
+        {
+            return true;
+        }
 
         IBaseAction.TargetOverride = TargetType.Tank;
         IBaseAction.ShouldEndSpecial = true;
-
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.Shirk)
-            && ShirkPvE.CanUse(out act)) return true;
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.Shirk) && ShirkPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         IBaseAction.TargetOverride = null;
-
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.TankStance)
-            && (TankStance?.CanUse(out act) ?? false)) return true;
-
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.AntiKnockback)
-            && AntiKnockback(role, nextGCD, out act)) return true;
-
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.Positional))
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.TankStance) && (TankStance?.CanUse(out act) ?? false))
         {
-            if (TrueNorthPvE.Cooldown.CurrentCharges > 0 && !IsLastAbility(true, TrueNorthPvE))
-            {
-                if (TrueNorthPvE.CanUse(out act, skipComboCheck: true, usedUp: true)) return true;
-            }
+            return true;
+        }
+
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.AntiKnockback) && AntiKnockback(role, nextGCD, out act))
+        {
+            return true;
+        }
+
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.Positional) && TrueNorthPvE.Cooldown.CurrentCharges > 0 && !IsLastAbility(true, TrueNorthPvE) && TrueNorthPvE.CanUse(out act, skipComboCheck: true, usedUp: true))
+        {
+            return true;
         }
 
         IBaseAction.TargetOverride = TargetType.Heal;
@@ -55,100 +72,141 @@ partial class CustomRotation
         if (DataCenter.CommandStatus.HasFlag(AutoStatus.HealAreaAbility))
         {
             IBaseAction.AllEmpty = true;
-            if (HealAreaAbility(nextGCD, out act)) return true;
+            if (HealAreaAbility(nextGCD, out act))
+            {
+                return true;
+            }
             IBaseAction.AllEmpty = false;
         }
-        if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealAreaAbility)
-            && CanHealAreaAbility)
+
+        if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealAreaAbility) && CanHealAreaAbility)
         {
             IBaseAction.AutoHealCheck = true;
-            if (HealAreaAbility(nextGCD, out act)) return true;
+            if (HealAreaAbility(nextGCD, out act))
+            {
+                return true;
+            }
             IBaseAction.AutoHealCheck = false;
         }
+
         if (DataCenter.CommandStatus.HasFlag(AutoStatus.HealSingleAbility))
         {
             IBaseAction.AllEmpty = true;
-            if (HealSingleAbility(nextGCD, out act)) return true;
+            if (HealSingleAbility(nextGCD, out act))
+            {
+                return true;
+            }
             IBaseAction.AllEmpty = false;
         }
-        if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealSingleAbility)
-            && CanHealSingleAbility)
+
+        if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealSingleAbility) && CanHealSingleAbility)
         {
             IBaseAction.AutoHealCheck = true;
-            if (HealSingleAbility(nextGCD, out act)) return true;
+            if (HealSingleAbility(nextGCD, out act))
+            {
+                return true;
+            }
             IBaseAction.AutoHealCheck = false;
         }
 
         IBaseAction.TargetOverride = null;
         IBaseAction.ShouldEndSpecial = true;
 
-        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Speed)
-            && SpeedAbility(nextGCD, out act)) return true;
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Speed) && SpeedAbility(nextGCD, out act))
+        {
+            return true;
+        }
 
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.Provoke))
         {
-            if (!HasTankStance && (TankStance?.CanUse(out act) ?? false)) return true;
+            if (!HasTankStance && (TankStance?.CanUse(out act) ?? false))
+            {
+                return true;
+            }
 
             IBaseAction.TargetOverride = TargetType.Provoke;
-
-            if (ProvokePvE.CanUse(out act)) return true;
-            if (ProvokeAbility(nextGCD, out act)) return true;
+            if (ProvokePvE.CanUse(out act) || ProvokeAbility(nextGCD, out act))
+            {
+                return true;
+            }
         }
 
         IBaseAction.TargetOverride = TargetType.BeAttacked;
 
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseArea))
         {
-            if (DefenseAreaAbility(nextGCD, out act)) return true;
-            if (role is JobRole.Melee or JobRole.RangedPhysical or JobRole.RangedMagical)
+            if (DefenseAreaAbility(nextGCD, out act) || (role is JobRole.Melee or JobRole.RangedPhysical or JobRole.RangedMagical && DefenseSingleAbility(nextGCD, out act)))
             {
-                if (DefenseSingleAbility(nextGCD, out act)) return true;
+                return true;
             }
         }
 
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseSingle))
         {
-            if (DefenseSingleAbility(nextGCD, out act)) return true;
-            if (!DataCenter.IsHostileCastingToTank
-                && ArmsLengthPvE.CanUse(out act)) return true;
+            if (DefenseSingleAbility(nextGCD, out act) || (!DataCenter.IsHostileCastingToTank && ArmsLengthPvE.CanUse(out act)))
+            {
+                return true;
+            }
         }
 
         IBaseAction.TargetOverride = null;
 
         IBaseAction.AllEmpty = true;
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.MoveForward)
-            && Player != null
-            && !Player.HasStatus(true, StatusID.Bind)
-            && MoveForwardAbility(nextGCD, out act)) return true;
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.MoveForward) && Player != null && !Player.HasStatus(true, StatusID.Bind) && MoveForwardAbility(nextGCD, out act))
+        {
+            return true;
+        }
 
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.MoveBack)
-                && MoveBackAbility(nextGCD, out act)) return true;
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.MoveBack) && MoveBackAbility(nextGCD, out act))
+        {
+            return true;
+        }
         IBaseAction.AllEmpty = false;
 
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.HealSingleAbility))
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.HealSingleAbility) && UseHpPotion(nextGCD, out act))
         {
-            if (UseHpPotion(nextGCD, out act)) return true;
+            return true;
         }
         IBaseAction.ShouldEndSpecial = false;
 
-        if (HasHostilesInRange && AttackAbility(nextGCD, out act)) return true;
-
-        if (GeneralAbility(nextGCD, out act)) return true;
-
-        if (UseMpPotion(nextGCD, out act)) return true;
-
-        if (GeneralUsingAbility(role, nextGCD, out act)) return true;
-        //Run!
-        if (DataCenter.AutoStatus.HasFlag(AutoStatus.Speed))
+        if (HasHostilesInRange && AttackAbility(nextGCD, out act))
         {
-            if (SpeedAbility(nextGCD, out act)) return true;
+            return true;
+        }
+
+        if (GeneralAbility(nextGCD, out act))
+        {
+            return true;
+        }
+
+        if (UseMpPotion(nextGCD, out act))
+        {
+            return true;
+        }
+
+        if (GeneralUsingAbility(role, nextGCD, out act))
+        {
+            return true;
+        }
+
+        if (DataCenter.AutoStatus.HasFlag(AutoStatus.Speed) && SpeedAbility(nextGCD, out act))
+        {
+            return true;
         }
 
         return false;
     }
 
+    /// <summary>
+    /// Determines if an interrupt ability can be used based on the job role.
+    /// </summary>
+    /// <param name="role">The job role of the player.</param>
+    /// <param name="nextGCD">The next GCD action.</param>
+    /// <param name="act">The resulting action.</param>
+    /// <returns>True if the interrupt ability can be used; otherwise, false.</returns>
     private bool MyInterruptAbility(JobRole role, IAction nextGCD, out IAction? act)
     {
+        act = null;
         switch (role)
         {
             case JobRole.Tank:
@@ -163,24 +221,37 @@ partial class CustomRotation
             case JobRole.RangedPhysical:
                 if (HeadGrazePvE.CanUse(out act)) return true;
                 break;
+
+            default:
+                // Handle unexpected job roles if necessary
+                break;
         }
         return InterruptAbility(nextGCD, out act);
     }
 
     /// <summary>
-    /// 
+    /// Determines if an interrupt ability can be used.
     /// </summary>
-    /// <param name="act"></param>
-    /// <param name="nextGCD"></param>
-    /// <returns></returns>
+    /// <param name="nextGCD">The next GCD action.</param>
+    /// <param name="act">The resulting action.</param>
+    /// <returns>True if the interrupt ability can be used; otherwise, false.</returns>
     protected virtual bool InterruptAbility(IAction nextGCD, out IAction? act)
     {
         if (DataCenter.RightNowDutyRotation?.InterruptAbility(nextGCD, out act) ?? false) return true;
-        act = null; return false;
+        act = null;
+        return false;
     }
 
+    /// <summary>
+    /// Determines if an anti-knockback ability can be used based on the job role.
+    /// </summary>
+    /// <param name="role">The job role of the player.</param>
+    /// <param name="nextGCD">The next GCD action.</param>
+    /// <param name="act">The resulting action.</param>
+    /// <returns>True if an anti-knockback ability can be used; otherwise, false.</returns>
     private bool AntiKnockback(JobRole role, IAction nextGCD, out IAction? act)
     {
+        act = null;
         switch (role)
         {
             case JobRole.Tank:
@@ -195,36 +266,47 @@ partial class CustomRotation
             case JobRole.RangedPhysical:
                 if (ArmsLengthPvE.CanUse(out act)) return true;
                 break;
+            default:
+                // Handle unexpected job roles if necessary
+                break;
         }
 
         return AntiKnockbackAbility(nextGCD, out act);
     }
 
     /// <summary>
-    /// 
+    /// Determines if an anti-knockback ability can be used.
     /// </summary>
-    /// <param name="act"></param>
-    /// <param name="nextGCD"></param>
-    /// <returns></returns>
+    /// <param name="nextGCD">The next GCD action.</param>
+    /// <param name="act">The resulting action.</param>
+    /// <returns>True if the anti-knockback ability can be used; otherwise, false.</returns>
     protected virtual bool AntiKnockbackAbility(IAction nextGCD, out IAction? act)
     {
         if (DataCenter.RightNowDutyRotation?.AntiKnockbackAbility(nextGCD, out act) ?? false) return true;
-        act = null; return false;
+        act = null;
+        return false;
     }
 
     /// <summary>
-    /// 
+    /// Determines if a provoke ability can be used.
     /// </summary>
-    /// <param name="act"></param>
-    /// <param name="nextGCD"></param>
-    /// <returns></returns>
+    /// <param name="nextGCD">The next GCD action.</param>
+    /// <param name="act">The resulting action.</param>
+    /// <returns>True if the provoke ability can be used; otherwise, false.</returns>
     protected virtual bool ProvokeAbility(IAction nextGCD, out IAction? act)
     {
         if (DataCenter.RightNowDutyRotation?.ProvokeAbility(nextGCD, out act) ?? false) return true;
-        act = null; return false;
+        act = null;
+        return false;
     }
 
-
+    /// <summary>
+    /// Determines if a general ability can be used based on the job role.
+    /// </summary>
+    /// <param name="role">The job role of the player.</param>
+    /// <param name="nextGCD">The next GCD action.</param>
+    /// <param name="act">The resulting action.</param>
+    /// <returns>True if a general ability can be used; otherwise, false.</returns>
     private bool GeneralUsingAbility(JobRole role, IAction nextGCD, out IAction? act)
     {
         act = null;
@@ -249,130 +331,149 @@ partial class CustomRotation
             case JobRole.RangedPhysical:
                 if (SecondWindPvE.CanUse(out act)) return true;
                 break;
+
+            default:
+                // Handle unexpected job roles if necessary
+                break;
         }
         return false;
     }
 
 
     /// <summary>
-    /// It got the highest priority among abilities. 
+    /// Determines if an emergency ability can be used.
     /// </summary>
-    /// <param name="nextGCD">The next gcd action.</param>
-    /// <param name="act">Result action.</param>
-    //<returns>Can we use it.</returns>
+    /// <param name="nextGCD">The next GCD action.</param>
+    /// <param name="act">The resulting action.</param>
+    /// <returns>True if the emergency ability can be used; otherwise, false.</returns>
     protected virtual bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
         if (nextGCD is BaseAction action)
         {
             if (Role is JobRole.RangedMagical &&
-            action.Info.CastTime >= 5 && SwiftcastPvE.CanUse(out act, isFirstAbility: true)) return true;
-
+                action.Info.CastTime >= 5 && SwiftcastPvE.CanUse(out act, isFirstAbility: true))
+            {
+                return true;
+            }
         }
 
         if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
         {
-
-            if (Role is JobRole.Healer && SwiftcastPvE.CanUse(out act, isFirstAbility: true)) return true;
+            if (Role is JobRole.Healer && SwiftcastPvE.CanUse(out act, isFirstAbility: true))
+            {
+                return true;
+            }
         }
 
-        if (DataCenter.RightNowDutyRotation?.EmergencyAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.RightNowDutyRotation?.EmergencyAbility(nextGCD, out act) ?? false)
+        {
+            return true;
+        }
 
         #region PvP
-        if (GuardPvP.CanUse(out act)
-            && (Player.GetHealthRatio() <= Service.Config.HealthForGuard
-            || DataCenter.CommandStatus.HasFlag(AutoStatus.Raise | AutoStatus.Shirk))) return true;
+        if (GuardPvP.CanUse(out act) &&
+            (Player.GetHealthRatio() <= Service.Config.HealthForGuard ||
+             DataCenter.CommandStatus.HasFlag(AutoStatus.Raise | AutoStatus.Shirk)))
+        {
+            return true;
+        }
         #endregion
 
+        act = null;
         return false;
     }
 
     /// <summary>
-    /// The ability that makes character moving forward.
+    /// The ability that makes the character move forward.
     /// </summary>
-    /// <param name="act">Result action.</param>
-    /// <param name="nextGCD">The next gcd action.</param>
-    /// <returns>Can we use it.</returns>
+    /// <param name="nextGCD">The next GCD action.</param>
+    /// <param name="act">The resulting action.</param>
+    /// <returns>True if the ability can be used; otherwise, false.</returns>
     [RotationDesc(DescType.MoveForwardAbility)]
     protected virtual bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
         if (DataCenter.RightNowDutyRotation?.MoveForwardAbility(nextGCD, out act) ?? false) return true;
-        act = null; return false;
+        act = null;
+        return false;
     }
 
     /// <summary>
-    /// The ability that makes character moving Back.
+    /// The ability that makes the character move back.
     /// </summary>
-    /// <param name="act">Result action.</param>
-    /// <param name="nextGCD">The next gcd action.</param>
-    /// <returns>Can we use it.</returns>
+    /// <param name="nextGCD">The next GCD action.</param>
+    /// <param name="act">The resulting action.</param>
+    /// <returns>True if the ability can be used; otherwise, false.</returns>
     [RotationDesc(DescType.MoveBackAbility)]
     protected virtual bool MoveBackAbility(IAction nextGCD, out IAction? act)
     {
         if (DataCenter.RightNowDutyRotation?.MoveBackAbility(nextGCD, out act) ?? false) return true;
-        act = null; return false;
+        act = null;
+        return false;
     }
 
     /// <summary>
-    /// The ability that heals single character.
+    /// The ability that heals a single character.
     /// </summary>
-    /// <param name="act">Result action.</param>
-    /// <param name="nextGCD">The next gcd action.</param>
-    /// <returns>Can we use it.</returns>
+    /// <param name="nextGCD">The next GCD action.</param>
+    /// <param name="act">The resulting action.</param>
+    /// <returns>True if the ability can be used; otherwise, false.</returns>
     [RotationDesc(DescType.HealSingleAbility)]
     protected virtual bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
         if (RecuperatePvP.CanUse(out act)) return true;
         if (DataCenter.RightNowDutyRotation?.HealSingleAbility(nextGCD, out act) ?? false) return true;
-        act = null; return false;
+        act = null;
+        return false;
     }
 
     /// <summary>
-    /// The ability that heals area.
+    /// The ability that heals an area.
     /// </summary>
-    /// <param name="act">Result action.</param>
-    /// <param name="nextGCD">The next gcd action.</param>
-    /// <returns>Can we use it.</returns>
+    /// <param name="nextGCD">The next GCD action.</param>
+    /// <param name="act">The resulting action.</param>
+    /// <returns>True if the ability can be used; otherwise, false.</returns>
     [RotationDesc(DescType.HealAreaAbility)]
     protected virtual bool HealAreaAbility(IAction nextGCD, out IAction? act)
     {
         if (DataCenter.RightNowDutyRotation?.HealAreaAbility(nextGCD, out act) ?? false) return true;
-        act = null; return false;
+        act = null;
+        return false;
     }
 
     /// <summary>
-    /// The ability that defenses single character.
+    /// The ability that defends a single character.
     /// </summary>
-    /// <param name="act">Result action.</param>
-    /// <param name="nextGCD">The next gcd action.</param>
-    /// <returns>Can we use it.</returns>
+    /// <param name="nextGCD">The next GCD action.</param>
+    /// <param name="act">The resulting action.</param>
+    /// <returns>True if the ability can be used; otherwise, false.</returns>
     [RotationDesc(DescType.DefenseSingleAbility)]
     protected virtual bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
         if (DataCenter.RightNowDutyRotation?.DefenseSingleAbility(nextGCD, out act) ?? false) return true;
-        act = null; return false;
+        act = null;
+        return false;
     }
 
     /// <summary>
-    /// The ability that defense area.
+    /// The ability that defends an area.
     /// </summary>
-    /// <param name="act">Result action.</param>
-    /// <param name="nextGCD">The next gcd action.</param>
-    /// <returns>Can we use it.</returns>
-
+    /// <param name="nextGCD">The next GCD action.</param>
+    /// <param name="act">The resulting action.</param>
+    /// <returns>True if the ability can be used; otherwise, false.</returns>
     [RotationDesc(DescType.DefenseAreaAbility)]
     protected virtual bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
         if (DataCenter.RightNowDutyRotation?.DefenseAreaAbility(nextGCD, out act) ?? false) return true;
-        act = null; return false;
+        act = null;
+        return false;
     }
 
     /// <summary>
-    /// The ability that speeds your character up.
+    /// The ability that speeds up the character.
     /// </summary>
-    /// <param name="act">Result action.</param>
-    /// <param name="nextGCD">The next gcd action.</param>
-    /// <returns>Can we use it.</returns>
-
+    /// <param name="nextGCD">The next GCD action.</param>
+    /// <param name="act">The resulting action.</param>
+    /// <returns>True if the ability can be used; otherwise, false.</returns>
     [RotationDesc(DescType.SpeedAbility)]
     [RotationDesc(ActionID.SprintPvE)]
     protected virtual bool SpeedAbility(IAction nextGCD, out IAction? act)
@@ -382,31 +483,33 @@ partial class CustomRotation
         if (SprintPvE.CanUse(out act)) return true;
 
         if (DataCenter.RightNowDutyRotation?.SpeedAbility(nextGCD, out act) ?? false) return true;
+        act = null;
         return false;
     }
 
     /// <summary>
-    /// The ability that can be done anywhere.
+    /// The ability that can be used anywhere.
     /// </summary>
-    /// <param name="act">Result action.</param>
-    /// <param name="nextGCD">The next gcd action.</param>
-    /// <returns>Can we use it.</returns>
-
+    /// <param name="nextGCD">The next GCD action.</param>
+    /// <param name="act">The resulting action.</param>
+    /// <returns>True if the ability can be used; otherwise, false.</returns>
     protected virtual bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
         if (DataCenter.RightNowDutyRotation?.GeneralAbility(nextGCD, out act) ?? false) return true;
-        act = null; return false;
+        act = null;
+        return false;
     }
 
     /// <summary>
-    /// The ability that attacks some enemy.
+    /// The ability that attacks an enemy.
     /// </summary>
-    /// <param name="act">Result action.</param>
-    /// <param name="nextGCD">The next gcd action.</param>
-    /// <returns>Can we use it.</returns>
+    /// <param name="nextGCD">The next GCD action.</param>
+    /// <param name="act">The resulting action.</param>
+    /// <returns>True if the ability can be used; otherwise, false.</returns>
     protected virtual bool AttackAbility(IAction nextGCD, out IAction? act)
     {
         if (DataCenter.RightNowDutyRotation?.AttackAbility(nextGCD, out act) ?? false) return true;
-        act = null; return false;
+        act = null;
+        return false;
     }
 }

@@ -4,18 +4,30 @@ using Lumina.Excel.GeneratedSheets;
 
 namespace RotationSolver.Basic.Rotations;
 
+/// <summary>
+/// Represents a custom rotation for a specific job.
+/// </summary>
 partial class CustomRotation : ICustomRotation
 {
     private Job? _job = null;
+    private JobRole? _role = null;
+    private string? _name = null;
+    private readonly IRotationConfigSet _configs;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="CustomRotation"/> class.
+    /// </summary>
+    private protected CustomRotation()
+    {
+        IconID = IconSet.GetJobIcon(this.Job);
+        _configs = new RotationConfigSet(this);
+    }
 
     /// <inheritdoc/>
     public Job Job => _job ??= this.GetType().GetCustomAttribute<JobsAttribute>()?.Jobs[0] ?? Job.ADV;
 
-    private JobRole? _role = null;
-
     /// <inheritdoc/>
     public JobRole Role => _role ??= Svc.Data.GetExcelSheet<ClassJob>()!.GetRow((uint)Job)!.GetJobRole();
-    private string? _name = null;
 
     /// <inheritdoc/>
     public string Name
@@ -25,8 +37,7 @@ partial class CustomRotation : ICustomRotation
             if (_name != null) return _name;
 
             var classJob = Svc.Data.GetExcelSheet<ClassJob>()?.GetRow((uint)Job)!;
-
-            return _name = classJob.Abbreviation + " - " + classJob.Name;
+            return _name = $"{classJob.Abbreviation} - {classJob.Name}";
         }
     }
 
@@ -49,8 +60,6 @@ partial class CustomRotation : ICustomRotation
 
     /// <inheritdoc/>
     public uint IconID { get; }
-
-    private readonly IRotationConfigSet _configs;
 
     /// <inheritdoc/>
     IRotationConfigSet ICustomRotation.Configs => _configs;
@@ -113,51 +122,46 @@ partial class CustomRotation : ICustomRotation
     public IAction? ActionAntiKnockbackAbility { get; private set; }
 
     /// <summary>
-    /// Is this action valid.
+    /// Gets a value indicating whether this rotation is valid.
     /// </summary>
     [Description("Is this rotation valid")]
     public bool IsValid { get; private set; } = true;
 
     /// <summary>
-    /// Why this action is not valid.
+    /// Gets the reason why this rotation is not valid.
     /// </summary>
     public string WhyNotValid { get; private set; } = string.Empty;
 
     /// <summary>
-    /// Should show the status to the users.
+    /// Gets a value indicating whether to show the status to the users.
     /// </summary>
     [Description("Show the status")]
     public virtual bool ShowStatus => false;
-
-    private protected CustomRotation()
-    {
-        IconID = IconSet.GetJobIcon(this.Job);
-        _configs = new RotationConfigSet(this);
-    }
 
     /// <inheritdoc/>
     public override string ToString() => this.GetType().GetCustomAttribute<RotationAttribute>()?.Name ?? this.GetType().Name;
 
     /// <summary>
-    /// Update your customized field.
+    /// Updates the custom fields.
     /// </summary>
     protected virtual void UpdateInfo() { }
 
     /// <summary>
-    /// Some extra display things.
+    /// Displays extra status information.
     /// </summary>
     public virtual void DisplayStatus()
     {
-        ImGui.TextWrapped($"If you want to Display some extra information on this panel. Please override {nameof(DisplayStatus)} method!");
+        ImGui.TextWrapped($"If you want to display some extra information on this panel, please override the {nameof(DisplayStatus)} method!");
     }
 
     /// <summary>
-    /// The things on territory changed.
+    /// Handles actions when the territory changes.
     /// </summary>
     public virtual void OnTerritoryChanged() { }
 
     /// <summary>
-    /// Creates a system warning to display to the end-user
+    /// Creates a system warning to display to the end-user.
     /// </summary>
+    /// <param name="warning">The warning message.</param>
     public void CreateSystemWarning(string warning) => WarningHelper.AddSystemWarning(warning);
 }

@@ -3,7 +3,7 @@
 /// <summary>
 /// The bozja action.
 /// </summary>
-[DutyTerritory(920, 975)] //TODO: the bozja territory ids!
+[DutyTerritory(920, 975)] // TODO: Verify the bozja territory IDs.
 public abstract class BozjaRotation : DutyRotation
 {
 }
@@ -14,84 +14,84 @@ partial class DutyRotation
     {
         setting.TargetType = TargetType.Physical;
         setting.StatusFromSelf = false;
-        setting.TargetStatusNeed = [StatusID.MagicalAversion];
-        setting.TargetStatusProvide = [StatusID.LostSpellforge, StatusID.LostSteelsting];
+        setting.TargetStatusNeed = new[] { StatusID.MagicalAversion };
+        setting.TargetStatusProvide = new[] { StatusID.LostSpellforge, StatusID.LostSteelsting };
     }
 
     static partial void ModifyLostSteelstingPvE(ref ActionSetting setting)
     {
         setting.TargetType = TargetType.Magical;
         setting.StatusFromSelf = false;
-        setting.TargetStatusNeed = [StatusID.PhysicalAversion];
-        setting.TargetStatusProvide = [StatusID.LostSpellforge, StatusID.LostSteelsting];
+        setting.TargetStatusNeed = new[] { StatusID.PhysicalAversion };
+        setting.TargetStatusProvide = new[] { StatusID.LostSpellforge, StatusID.LostSteelsting };
     }
 
     static partial void ModifyLostRampagePvE(ref ActionSetting setting)
     {
         setting.StatusFromSelf = false;
-        setting.TargetStatusNeed = [StatusID.PhysicalAversion];
-        setting.StatusProvide = [StatusID.LostRampage];
+        setting.TargetStatusNeed = new[] { StatusID.PhysicalAversion };
+        setting.StatusProvide = new[] { StatusID.LostRampage };
     }
 
     static partial void ModifyLostBurstPvE(ref ActionSetting setting)
     {
         setting.StatusFromSelf = false;
-        setting.TargetStatusNeed = [StatusID.MagicalAversion];
-        setting.StatusProvide = [StatusID.LostBurst];
+        setting.TargetStatusNeed = new[] { StatusID.MagicalAversion };
+        setting.StatusProvide = new[] { StatusID.LostBurst };
     }
 
     static partial void ModifyLostBloodRagePvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.LostBravery];
+        setting.StatusProvide = new[] { StatusID.LostBravery };
     }
 
     static partial void ModifyLostProtectPvE(ref ActionSetting setting)
     {
         setting.StatusFromSelf = false;
-        setting.TargetStatusProvide = [StatusID.LostProtect, StatusID.LostProtectIi];
+        setting.TargetStatusProvide = new[] { StatusID.LostProtect, StatusID.LostProtectIi };
     }
 
     static partial void ModifyLostProtectIiPvE(ref ActionSetting setting)
     {
         setting.StatusFromSelf = false;
-        setting.TargetStatusProvide = [StatusID.LostProtectIi];
+        setting.TargetStatusProvide = new[] { StatusID.LostProtectIi };
     }
 
     static partial void ModifyLostShellPvE(ref ActionSetting setting)
     {
         setting.StatusFromSelf = false;
-        setting.TargetStatusProvide = [StatusID.LostShell, StatusID.LostShellIi];
+        setting.TargetStatusProvide = new[] { StatusID.LostShell, StatusID.LostShellIi };
     }
 
     static partial void ModifyLostShellIiPvE(ref ActionSetting setting)
     {
         setting.StatusFromSelf = false;
-        setting.TargetStatusProvide = [StatusID.LostShellIi];
+        setting.TargetStatusProvide = new[] { StatusID.LostShellIi };
     }
 
     static partial void ModifyLostBubblePvE(ref ActionSetting setting)
     {
         setting.StatusFromSelf = false;
-        setting.TargetStatusProvide = [StatusID.LostBubble];
+        setting.TargetStatusProvide = new[] { StatusID.LostBubble };
     }
 
     static partial void ModifyLostStoneskinPvE(ref ActionSetting setting)
     {
-        setting.TargetStatusProvide = [StatusID.Stoneskin];
+        setting.TargetStatusProvide = new[] { StatusID.Stoneskin };
     }
 
     static partial void ModifyLostStoneskinIiPvE(ref ActionSetting setting)
     {
-        setting.TargetStatusProvide = [StatusID.Stoneskin];
+        setting.TargetStatusProvide = new[] { StatusID.Stoneskin };
     }
 
     static partial void ModifyLostFlareStarPvE(ref ActionSetting setting)
     {
-        setting.TargetStatusProvide = [StatusID.LostFlareStar];
+        setting.TargetStatusProvide = new[] { StatusID.LostFlareStar };
     }
 
     static partial void ModifyLostSeraphStrikePvE(ref ActionSetting setting)
     {
-        setting.TargetStatusProvide = [StatusID.ClericStance_2484];
+        setting.TargetStatusProvide = new[] { StatusID.ClericStance_2484 };
     }
 }

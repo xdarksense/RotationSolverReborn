@@ -1,12 +1,12 @@
 ﻿namespace RotationSolver.Basic.Traits;
 
 /// <summary>
-/// Trait.
+/// Represents a trait with an ID, level requirements, and texture properties.
 /// </summary>
 public interface IBaseTrait : IEnoughLevel, ITexture
 {
     /// <summary>
-    /// Traid ID
+    /// Gets the ID of the trait.
     /// </summary>
     uint ID { get; }
 }

@@ -1,9 +1,9 @@
 ﻿namespace RotationSolver.Basic.Configuration
 {
     /// <summary>
-    /// Various types used in the configuration.
+    /// Contains various types used in the configuration.
     /// </summary>
-    public class ConfigTypes
+    public static class ConfigTypes
     {
         /// <summary>
         /// The type of AoE actions to use.

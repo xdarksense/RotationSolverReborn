@@ -1,89 +1,89 @@
 ﻿namespace RotationSolver.Basic.Data;
 
 /// <summary>
-/// The Type of description.
+/// The type of description.
 /// </summary>
 public enum DescType : byte
 {
     /// <summary>
-    /// 
+    /// No description.
     /// </summary>
     None,
 
     /// <summary>
-    /// 
+    /// Burst actions.
     /// </summary>
     [Description("Burst Actions")]
     BurstActions,
 
     /// <summary>
-    /// Area Heal GCDs
+    /// Area heal GCDs.
     /// </summary>
     [Description("Heal Area GCD")]
     HealAreaGCD,
 
     /// <summary>
-    /// Area Heal oGCDs
+    /// Area heal oGCDs.
     /// </summary>
     [Description("Heal Area Ability")]
     HealAreaAbility,
 
     /// <summary>
-    /// Single Target Heal GCDs
+    /// Single target heal GCDs.
     /// </summary>
     [Description("Heal Single GCD")]
     HealSingleGCD,
 
     /// <summary>
-    /// Single Target Heal oGCDs
+    /// Single target heal oGCDs.
     /// </summary>
     [Description("Heal Single Ability")]
     HealSingleAbility,
 
     /// <summary>
-    /// Area Defensive GCDs (Sheilds, mitigation, etc)
+    /// Area defensive GCDs (shields, mitigation, etc).
     /// </summary>
     [Description("Defense Area GCD")]
     DefenseAreaGCD,
 
     /// <summary>
-    /// Area Defensive oGCDs (Sheilds, mitigation, etc)
+    /// Area defensive oGCDs (shields, mitigation, etc).
     /// </summary>
     [Description("Defense Area Ability")]
     DefenseAreaAbility,
 
     /// <summary>
-    /// Single Target Defensive GCDs (Sheilds, mitigation, etc)
+    /// Single target defensive GCDs (shields, mitigation, etc).
     /// </summary>
     [Description("Defense Single GCD")]
     DefenseSingleGCD,
 
     /// <summary>
-    /// Single Target Defensive oGCDs (Sheilds, mitigation, etc)
+    /// Single target defensive oGCDs (shields, mitigation, etc).
     /// </summary>
     [Description("Defense Single Ability")]
     DefenseSingleAbility,
 
     /// <summary>
-    /// 
+    /// Move forward GCD.
     /// </summary>
     [Description("Move Forward GCD")]
     MoveForwardGCD,
 
     /// <summary>
-    /// 
+    /// Move forward ability.
     /// </summary>
     [Description("Move Forward Ability")]
     MoveForwardAbility,
 
     /// <summary>
-    /// 
+    /// Move back ability.
     /// </summary>
     [Description("Move Back Ability")]
     MoveBackAbility,
 
     /// <summary>
-    /// 
+    /// Speed ability.
     /// </summary>
     [Description("Speed Ability")]
     SpeedAbility,

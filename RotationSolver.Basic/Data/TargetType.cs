@@ -18,25 +18,25 @@ public enum TargetingType
     Small,
 
     /// <summary>
-    /// Find the target whose hp is highest.
+    /// Find the target whose HP is highest.
     /// </summary>
     [Description("High HP")]
     HighHP,
 
     /// <summary>
-    /// Find the target whose hp is lowest.
+    /// Find the target whose HP is lowest.
     /// </summary>
     [Description("Low HP")]
     LowHP,
 
     /// <summary>
-    /// Find the target whose max hp is highest.
+    /// Find the target whose max HP is highest.
     /// </summary>
     [Description("High Max HP")]
     HighMaxHP,
 
     /// <summary>
-    /// Find the target whose max hp is lowest.
+    /// Find the target whose max HP is lowest.
     /// </summary>
     [Description("Low Max HP")]
     LowMaxHP,

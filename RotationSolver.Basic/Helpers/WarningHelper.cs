@@ -1,4 +1,6 @@
-﻿namespace RotationSolver.Basic.Helpers
+﻿using ECommons.Logging;
+
+namespace RotationSolver.Basic.Helpers
 {
     internal static class WarningHelper
     {
@@ -6,15 +8,25 @@
         {
             if (DataCenter.SystemWarnings == null)
             {
+                // Log the error before throwing the exception
+                PluginLog.Error("SystemWarnings dictionary is not initialized.");
                 throw new InvalidOperationException("SystemWarnings dictionary is not initialized.");
             }
 
             lock (DataCenter.SystemWarnings)
             {
-                if (!DataCenter.SystemWarnings.ContainsKey(warning))
+                try
                 {
-                    DataCenter.SystemWarnings.Add(warning, DateTime.Now);
-                    return true;
+                    if (!DataCenter.SystemWarnings.ContainsKey(warning))
+                    {
+                        DataCenter.SystemWarnings.Add(warning, DateTime.Now);
+                        return true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log the exception
+                    PluginLog.Error($"Failed to add system warning: {ex.Message}");
                 }
             }
             return false;

@@ -112,14 +112,12 @@ internal static class DataCenter
 
     public static bool IsInHighEndDuty => ContentFinder?.HighEndDuty ?? false;
 
-    #region UnComment if adding this is ok, Love ~~ Kirbo
-    //public static ushort TerritoryID => Svc.ClientState.TerritoryType;
-    //public static bool IsInUCoB => TerritoryID == 733;
-    //public static bool IsInUwU => TerritoryID == 777;
-    //public static bool IsInTEA => TerritoryID == 887;
-    //public static bool IsInDSR => TerritoryID == 968;
-    //public static bool IsInTOP => TerritoryID == 1122;
-    #endregion
+    public static ushort TerritoryID => Svc.ClientState.TerritoryType;
+    public static bool IsInUCoB => TerritoryID == 733;
+    public static bool IsInUwU => TerritoryID == 777;
+    public static bool IsInTEA => TerritoryID == 887;
+    public static bool IsInDSR => TerritoryID == 968;
+    public static bool IsInTOP => TerritoryID == 1122;
 
     public static TerritoryContentType TerritoryContentType =>
         (TerritoryContentType)(ContentFinder?.ContentType?.Value?.RowId ?? 0);
@@ -315,6 +313,30 @@ internal static class DataCenter
     public unsafe static IBattleChara[] AllianceMembers => AllTargets.Where(ObjectHelper.IsAlliance)
         .Where(b => b.Character()->CharacterData.OnlineStatus != 15 && b.IsTargetable).ToArray();
 
+    public static unsafe IBattleChara[] FriendlyNPCMembers
+    {
+        get
+        {
+            try
+            {
+                // Ensure Svc.Objects is not null
+                if (Svc.Objects == null)
+                {
+                    Svc.Log.Error("Svc.Objects is null");
+                    return Array.Empty<IBattleChara>();
+                }
+
+                // Filter and return friendly NPC members
+                return AllTargets.Where(obj => obj.GetNameplateKind() == NameplateKind.FriendlyBattleNPC).Where(b => b.IsTargetable).ToArray();
+            }
+            catch (Exception ex)
+            {
+                Svc.Log.Error($"Error in get_FriendlyNPCMembers: {ex.Message}");
+                return Array.Empty<IBattleChara>();
+            }
+        }
+    }
+
     public static IBattleChara[] AllHostileTargets
     {
         get
@@ -386,18 +408,21 @@ internal static class DataCenter
             return null;
         }
     }
-
+    
     public static IBattleChara? DispelTarget
     {
         get
         {
             var weakenPeople =
                 DataCenter.PartyMembers.Where(o => o is IBattleChara b && b.StatusList.Any(StatusHelper.CanDispel));
+            var weakenNPC =
+                DataCenter.FriendlyNPCMembers.Where(o => o is IBattleChara b && b.StatusList.Any(StatusHelper.CanDispel));
             var dyingPeople =
                 weakenPeople.Where(o => o is IBattleChara b && b.StatusList.Any(StatusHelper.IsDangerous));
 
             return dyingPeople.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault()
-                   ?? weakenPeople.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault();
+                   ?? weakenPeople.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault() 
+                   ?? weakenNPC.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault();
         }
     }
 
@@ -517,57 +542,68 @@ internal static class DataCenter
 
     private static float GetPartyMemberHPRatio(IBattleChara member)
     {
-        // Check if the member is null and return 0 if true.
-        if (member == null) return 0;
+        if (member == null) throw new ArgumentNullException(nameof(member));
 
-        // Check if the current time is not within the effect time or if the member's HP is not in the HealHP dictionary.
-        if (!DataCenter.InEffectTime || !DataCenter.HealHP.TryGetValue(member.GameObjectId, out var hp))
+        if (!DataCenter.InEffectTime || !DataCenter.HealHP.TryGetValue(member.GameObjectId, out var healedHp))
         {
-            // Return the ratio of the member's current HP to their max HP.
             return (float)member.CurrentHp / member.MaxHp;
         }
 
-        // Get the member's current HP.
-        var rightHp = member.CurrentHp;
-        if (rightHp > 0)
+        var currentHp = member.CurrentHp;
+        if (currentHp > 0)
         {
-            // Try to get the last recorded HP for the member from the _lastHp dictionary.
-            if (!_lastHp.TryGetValue(member.GameObjectId, out var lastHp)) lastHp = rightHp;
-
-            // Check if the difference between the current HP and the last recorded HP equals the healed HP.
-            if (rightHp - lastHp == hp)
+            if (!_lastHp.TryGetValue(member.GameObjectId, out var lastHp))
             {
-                // Remove the member's entry from the HealHP dictionary and return the current HP ratio.
-                DataCenter.HealHP.Remove(member.GameObjectId);
-                return (float)member.CurrentHp / member.MaxHp;
+                lastHp = currentHp;
             }
 
-            // Return the minimum of 1 and the ratio of the sum of healed HP and current HP to the max HP.
-            return Math.Min(1, (hp + rightHp) / (float)member.MaxHp);
+            if (currentHp - lastHp == healedHp)
+            {
+                DataCenter.HealHP.Remove(member.GameObjectId);
+                return (float)currentHp / member.MaxHp;
+            }
+
+            return Math.Min(1, (healedHp + currentHp) / (float)member.MaxHp);
         }
 
-        // Return the ratio of the member's current HP to their max HP if the current HP is 0 or less.
-        return (float)member.CurrentHp / member.MaxHp;
+        return (float)currentHp / member.MaxHp;
     }
 
     public static IEnumerable<float> PartyMembersHP => RefinedHP.Values.Where(r => r > 0);
 
-    public static float PartyMembersMinHP => PartyMembersHP.Any()
-        ? PartyMembersHP.Min()
-        : 0;
+    public static float PartyMembersMinHP
+    {
+        get
+        {
+            var partyMembersHP = PartyMembersHP.ToList();
+            return partyMembersHP.Any() ? partyMembersHP.Min() : 0;
+        }
+    }
 
-    public static float PartyMembersAverHP => PartyMembersHP.Any()
-        ? PartyMembersHP.Average()
-        : 0;
+    public static float PartyMembersAverHP
+    {
+        get
+        {
+            var partyMembersHP = PartyMembersHP.ToList();
+            return partyMembersHP.Any() ? partyMembersHP.Average() : 0;
+        }
+    }
 
-    public static float PartyMembersDifferHP => PartyMembersHP.Any()
-        ? (float)Math.Sqrt(PartyMembersHP.Average(d => Math.Pow(d - PartyMembersAverHP, 2)))
-        : 0;
+    public static float PartyMembersDifferHP
+    {
+        get
+        {
+            var partyMembersHP = PartyMembersHP.ToList();
+            if (!partyMembersHP.Any()) return 0;
+
+            var averageHP = partyMembersHP.Average();
+            return (float)Math.Sqrt(partyMembersHP.Average(d => Math.Pow(d - averageHP, 2)));
+        }
+    }
 
     public static bool HPNotFull => PartyMembersMinHP < 1;
 
     public static uint CurrentMp => Math.Min(10000, Player.Object.CurrentMp + MPGain);
-
     #endregion
 
     internal static Queue<MacroItem> Macros { get; } = new Queue<MacroItem>();
@@ -743,8 +779,8 @@ internal static class DataCenter
         var last = h.TotalCastTime - h.CurrentCastTime;
         var t = last - DataCenter.DefaultGCDTotal;
 
-        // Check if the total cast time is greater than 2.5 seconds and if the calculated time is within a valid range
-        if (!(h.TotalCastTime > 2.5 && t > 0 && t < DataCenter.GCDTime(2))) return false;
+        // Check if the total cast time is greater than the minimum cast time and if the calculated time is within a valid range
+        if (!(h.TotalCastTime > DataCenter.DefaultGCDTotal && t > 0 && t < DataCenter.GCDTime(1))) return false;
 
         // Get the action sheet
         var actionSheet = Service.GetSheet<Action>();

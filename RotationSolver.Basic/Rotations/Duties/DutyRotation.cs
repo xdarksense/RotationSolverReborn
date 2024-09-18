@@ -1,6 +1,9 @@
 ﻿namespace RotationSolver.Basic.Rotations.Duties;
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
+/// <summary>
+/// Represents the base class for duty rotations.
+/// </summary>
 partial class DutyRotation : IDisposable
 {
     #region GCD
@@ -119,13 +122,22 @@ partial class DutyRotation : IDisposable
 
     #endregion
 
+    /// <summary>
+    /// Releases all resources used by the <see cref="DutyRotation"/> class.
+    /// </summary>
     public void Dispose()
     {
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    /// Gets the hostile target.
+    /// </summary>
     public IBattleChara? HostileTarget => DataCenter.HostileTarget;
 
+    /// <summary>
+    /// Gets all actions available in the duty rotation.
+    /// </summary>
     internal IAction[] AllActions
     {
         get
@@ -133,9 +145,7 @@ partial class DutyRotation : IDisposable
             var properties = this.GetType().GetRuntimeProperties()
                 .Where(p => DataCenter.DutyActions.Contains(p.GetCustomAttribute<IDAttribute>()?.ID ?? uint.MaxValue));
 
-            if (properties == null || !properties.Any()) return [];
-
-            return [.. properties.Select(p => (IAction)p.GetValue(this)!)];
+            return properties.Select(p => (IAction)p.GetValue(this)!).ToArray();
         }
     }
 }

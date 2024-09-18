@@ -39,7 +39,13 @@ public static class ActionIdHelper
     /// <returns>A pointer to the cooldown details.</returns>
     public static unsafe RecastDetail* GetCoolDownDetail(byte cdGroup)
     {
-        return ActionManager.Instance()->GetRecastGroupDetail(cdGroup - 1);
+        var actionManager = ActionManager.Instance();
+        if (actionManager == null)
+        {
+            Svc.Log.Error("ActionManager.Instance() returned null.");
+            return null;
+        }
+        return actionManager->GetRecastGroupDetail(cdGroup - 1);
     }
 
     /// <summary>

@@ -1,22 +1,22 @@
 ﻿namespace RotationSolver.Basic.Data;
 
 /// <summary>
-/// The Category of the status.
+/// The category of the status.
 /// </summary>
 public enum StatusCategory : byte
 {
     /// <summary>
-    /// None
+    /// No specific category.
     /// </summary>
     None = 0,
 
     /// <summary>
-    /// 
+    /// A beneficial status effect.
     /// </summary>
     Beneficial = 1,
 
     /// <summary>
-    /// 
+    /// A detrimental status effect.
     /// </summary>
     Detrimental = 2,
 }

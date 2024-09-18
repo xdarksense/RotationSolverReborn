@@ -1,92 +1,91 @@
 ﻿using ECommons.ExcelServices;
 using RotationSolver.Basic.Traits;
-
 namespace RotationSolver.Basic.Rotations;
 
 /// <summary>
-/// The custom rotation.
+/// Represents a custom rotation with various properties and methods.
 /// </summary>
 public interface ICustomRotation : ITexture
 {
     /// <summary>
-    /// The average count of not recommend members using.
+    /// Gets the average count of non-recommended members using this rotation.
     /// </summary>
     double AverageCountOfLastUsing { get; }
 
     /// <summary>
-    /// The max count of not recommend members using.
+    /// Gets the maximum count of non-recommended members using this rotation.
     /// </summary>
     int MaxCountOfLastUsing { get; }
 
     /// <summary>
-    /// The average count of not recommend members using.
+    /// Gets the average count of non-recommended members using this rotation during combat time.
     /// </summary>
     double AverageCountOfCombatTimeUsing { get; }
 
     /// <summary>
-    /// The max count of not recommend members using.
+    /// Gets the maximum count of non-recommended members using this rotation during combat time.
     /// </summary>
     int MaxCountOfCombatTimeUsing { get; }
 
     /// <summary>
-    /// Whether show the status in the formal page.
+    /// Gets a value indicating whether to show the status on the formal page.
     /// </summary>
     bool ShowStatus { get; }
 
     /// <summary>
-    /// Is this rotation valid.
+    /// Gets a value indicating whether this rotation is valid.
     /// </summary>
     bool IsValid { get; }
 
     /// <summary>
-    /// Why this rotation is not valid.
+    /// Gets the reason why this rotation is not valid.
     /// </summary>
     string WhyNotValid { get; }
 
     /// <summary>
-    /// Job
+    /// Gets the job associated with this rotation.
     /// </summary>
     Job Job { get; }
 
     /// <summary>
-    /// 
+    /// Gets the role associated with this rotation.
     /// </summary>
     JobRole Role { get; }
 
     internal IRotationConfigSet Configs { get; }
 
     /// <summary>
-    /// The type of medicine.
+    /// Gets the type of medicine associated with this rotation.
     /// </summary>
     MedicineType MedicineType { get; }
 
     /// <summary>
-    /// All base action.
+    /// Gets all base actions associated with this rotation.
     /// </summary>
     IBaseAction[] AllBaseActions { get; }
 
     /// <summary>
-    /// All action including base and item.
+    /// Gets all actions, including base and item actions, associated with this rotation.
     /// </summary>
     IAction[] AllActions { get; }
 
     /// <summary>
-    /// All traits.
+    /// Gets all traits associated with this rotation.
     /// </summary>
     IBaseTrait[] AllTraits { get; }
 
     /// <summary>
-    /// All bool properties.
+    /// Gets all boolean properties associated with this rotation.
     /// </summary>
     PropertyInfo[] AllBools { get; }
 
     /// <summary>
-    /// All byte properties.
+    /// Gets all byte or integer properties associated with this rotation.
     /// </summary>
     PropertyInfo[] AllBytesOrInt { get; }
 
     /// <summary>
-    /// All time methods.
+    /// Gets all float properties associated with this rotation.
     /// </summary>
     PropertyInfo[] AllFloats { get; }
 
@@ -110,26 +109,26 @@ public interface ICustomRotation : ITexture
     internal IAction? ActionAntiKnockbackAbility { get; }
 
     /// <summary>
-    /// Try to use this rotation.
+    /// Tries to use this rotation.
     /// </summary>
-    /// <param name="newAction">the next action.</param>
-    /// <param name="gcdAction">the next gcd action.</param>
-    /// <returns>succeed</returns>
+    /// <param name="newAction">The next action.</param>
+    /// <param name="gcdAction">The next GCD action.</param>
+    /// <returns>True if the rotation was successfully invoked; otherwise, false.</returns>
     bool TryInvoke(out IAction? newAction, out IAction? gcdAction);
 
     /// <summary>
-    /// This is an <seealso cref="ImGui"/> method for display the rotation status on Window.
+    /// Displays the rotation status on the window.
     /// </summary>
     void DisplayStatus();
 
     /// <summary>
-    /// It occur when territory changed or rotation changed.
+    /// Occurs when the territory changes or the rotation changes.
     /// </summary>
     void OnTerritoryChanged();
 
     /// <summary>
-    /// Creates a system warning to display to the end-user
+    /// Creates a system warning to display to the end-user.
     /// </summary>
-    /// <param name="warning">The warning to display</param>
+    /// <param name="warning">The warning to display.</param>
     void CreateSystemWarning(string warning);
 }

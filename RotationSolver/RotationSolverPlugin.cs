@@ -44,7 +44,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
     {
         ECommonsMain.Init(pluginInterface, this, ECommons.Module.DalamudReflector, ECommons.Module.ObjectFunctions);
         ThreadLoadImageHandler.TryGetIconTextureWrap(0, true, out _);
-        IconSet.InIt();
+        IconSet.Init();
 
         _dis.Add(new Service());
         try

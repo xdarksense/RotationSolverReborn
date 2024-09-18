@@ -4,6 +4,9 @@ using Lumina.Excel.GeneratedSheets;
 
 namespace RotationSolver.Basic.Configuration.Conditions;
 
+/// <summary>
+/// Represents a condition based on the target.
+/// </summary>
 [Description("Target Condition")]
 internal class TargetCondition : DelayCondition
 {
@@ -21,23 +24,20 @@ internal class TargetCondition : DelayCondition
 
     public string CastingActionName = string.Empty;
 
+    /// <summary>
+    /// Checks if the condition is true inside the rotation.
+    /// </summary>
+    /// <param name="rotation">The custom rotation instance.</param>
+    /// <returns><c>true</c> if the condition is met; otherwise, <c>false</c>.</returns>
     protected override bool IsTrueInside(ICustomRotation rotation)
     {
-        IBattleChara? tar;
-        if (_action != null)
+        IBattleChara? tar = _action?.TargetInfo.FindTarget(true, false)?.Target ?? TargetType switch
         {
-            tar = _action.TargetInfo.FindTarget(true, false)?.Target;
-        }
-        else
-        {
-            tar = TargetType switch
-            {
-                TargetType.Target => Svc.Targets.Target as IBattleChara,
-                TargetType.HostileTarget => DataCenter.HostileTarget,
-                TargetType.Player => Player.Object,
-                _ => null,
-            };
-        }
+            TargetType.Target => Svc.Targets.Target as IBattleChara,
+            TargetType.HostileTarget => DataCenter.HostileTarget,
+            TargetType.Player => Player.Object,
+            _ => null,
+        };
 
         if (TargetConditionType == TargetConditionType.IsNull)
         {
@@ -46,160 +46,117 @@ internal class TargetCondition : DelayCondition
 
         if (tar == null) return false;
 
-        var result = false;
-
-        switch (TargetConditionType)
+        return TargetConditionType switch
         {
-            case TargetConditionType.HasStatus:
-                result = tar.HasStatus(FromSelf, StatusId);
-                break;
+            TargetConditionType.HasStatus => tar.HasStatus(FromSelf, StatusId),
+            TargetConditionType.IsBossFromTTK => tar.IsBossFromTTK(),
+            TargetConditionType.IsBossFromIcon => tar.IsBossFromIcon(),
+            TargetConditionType.IsDying => tar.IsDying(),
+            TargetConditionType.InCombat => tar.InCombat(),
+            TargetConditionType.Distance => CheckDistance(tar),
+            TargetConditionType.StatusEnd => !tar.WillStatusEnd(DistanceOrTime, FromSelf, StatusId),
+            TargetConditionType.StatusEndGCD => !tar.WillStatusEndGCD((uint)GCD, DistanceOrTime, FromSelf, StatusId),
+            TargetConditionType.TimeToKill => CheckTimeToKill(tar),
+            TargetConditionType.CastingAction => CheckCastingAction(tar),
+            TargetConditionType.CastingActionTime => CheckCastingActionTime(tar),
+            TargetConditionType.HP => CheckHP(tar),
+            TargetConditionType.HPRatio => CheckHPRatio(tar),
+            TargetConditionType.MP => CheckMP(tar),
+            TargetConditionType.TargetName => CheckTargetName(tar),
+            _ => false,
+        };
+    }
 
-            case TargetConditionType.IsBossFromTTK:
-                result = tar.IsBossFromTTK();
-                break;
+    private bool CheckDistance(IBattleChara tar)
+    {
+        return Param2 switch
+        {
+            0 => tar.DistanceToPlayer() > DistanceOrTime,
+            1 => tar.DistanceToPlayer() < DistanceOrTime,
+            2 => tar.DistanceToPlayer() == DistanceOrTime,
+            _ => false,
+        };
+    }
 
-            case TargetConditionType.IsBossFromIcon:
-                result = tar.IsBossFromIcon();
-                break;
+    private bool CheckTimeToKill(IBattleChara tar)
+    {
+        return Param2 switch
+        {
+            0 => tar.GetTimeToKill() > DistanceOrTime,
+            1 => tar.GetTimeToKill() < DistanceOrTime,
+            2 => tar.GetTimeToKill() == DistanceOrTime,
+            _ => false,
+        };
+    }
 
-            case TargetConditionType.IsDying:
-                result = tar.IsDying();
-                break;
-
-            case TargetConditionType.InCombat:
-                result = tar.InCombat();
-                break;
-
-            case TargetConditionType.Distance:
-                switch (Param2)
-                {
-                    case 0:
-                        result = tar.DistanceToPlayer() > DistanceOrTime;
-                        break;
-                    case 1:
-                        result = tar.DistanceToPlayer() < DistanceOrTime;
-                        break;
-                    case 2:
-                        result = tar.DistanceToPlayer() == DistanceOrTime;
-                        break;
-                }
-                break;
-
-            case TargetConditionType.StatusEnd:
-                result = !tar.WillStatusEnd(DistanceOrTime, FromSelf, StatusId);
-                break;
-
-            case TargetConditionType.StatusEndGCD:
-                result = !tar.WillStatusEndGCD((uint)GCD, DistanceOrTime, FromSelf, StatusId);
-                break;
-
-            case TargetConditionType.TimeToKill:
-                switch (Param2)
-                {
-                    case 0:
-                        result = tar.GetTimeToKill() > DistanceOrTime;
-                        break;
-                    case 1:
-                        result = tar.GetTimeToKill() < DistanceOrTime;
-                        break;
-                    case 2:
-                        result = tar.GetTimeToKill() == DistanceOrTime;
-                        break;
-                }
-                break;
-
-            case TargetConditionType.CastingAction:
-                if (string.IsNullOrEmpty(CastingActionName) || tar.CastActionId == 0)
-                {
-                    result = false;
-                    break;
-                }
-
-                var castName = Service.GetSheet<Lumina.Excel.GeneratedSheets.Action>().GetRow(tar.CastActionId)?.Name.ToString();
-
-                result = CastingActionName == castName;
-                break;
-
-            case TargetConditionType.CastingActionTime:
-
-                if (!tar.IsCasting || tar.CastActionId == 0)
-                {
-                    result = false;
-                    break;
-                }
-
-                float castTime = tar.TotalCastTime - tar.CurrentCastTime;
-
-                switch (Param2)
-                {
-                    case 0:
-                        result = castTime > DistanceOrTime + DataCenter.DefaultGCDRemain;
-                        break;
-                    case 1:
-                        result = castTime < DistanceOrTime + DataCenter.DefaultGCDRemain;
-                        break;
-                    case 2:
-                        result = castTime == DistanceOrTime + DataCenter.DefaultGCDRemain;
-                        break;
-                }
-                break;
-
-            case TargetConditionType.HP:
-                switch (Param2)
-                {
-                    case 0:
-                        result = tar.CurrentHp > GCD;
-                        break;
-                    case 1:
-                        result = tar.CurrentHp < GCD;
-                        break;
-                    case 2:
-                        result = tar.CurrentHp == GCD;
-                        break;
-                }
-                break;
-
-            case TargetConditionType.HPRatio:
-                switch (Param2)
-                {
-                    case 0:
-                        result = tar.GetHealthRatio() > DistanceOrTime;
-                        break;
-                    case 1:
-                        result = tar.GetHealthRatio() < DistanceOrTime;
-                        break;
-                    case 2:
-                        result = tar.GetHealthRatio() == DistanceOrTime;
-                        break;
-                }
-                break;
-
-            case TargetConditionType.MP:
-                switch (Param2)
-                {
-                    case 0:
-                        result = tar.CurrentMp > GCD;
-                        break;
-                    case 1:
-                        result = tar.CurrentMp < GCD;
-                        break;
-                    case 2:
-                        result = tar.CurrentMp == GCD;
-                        break;
-                }
-                break;
-
-            case TargetConditionType.TargetName:
-                if (string.IsNullOrEmpty(CastingActionName))
-                {
-                    result = false;
-                    break;
-                }
-                result = tar.Name.TextValue == CastingActionName;
-                break;
+    private bool CheckCastingAction(IBattleChara tar)
+    {
+        if (string.IsNullOrEmpty(CastingActionName) || tar.CastActionId == 0)
+        {
+            return false;
         }
 
-        return result;
+        var castName = Service.GetSheet<Lumina.Excel.GeneratedSheets.Action>().GetRow(tar.CastActionId)?.Name.ToString();
+        return CastingActionName == castName;
+    }
+
+    private bool CheckCastingActionTime(IBattleChara tar)
+    {
+        if (!tar.IsCasting || tar.CastActionId == 0)
+        {
+            return false;
+        }
+
+        float castTime = tar.TotalCastTime - tar.CurrentCastTime;
+        return Param2 switch
+        {
+            0 => castTime > DistanceOrTime + DataCenter.DefaultGCDRemain,
+            1 => castTime < DistanceOrTime + DataCenter.DefaultGCDRemain,
+            2 => castTime == DistanceOrTime + DataCenter.DefaultGCDRemain,
+            _ => false,
+        };
+    }
+
+    private bool CheckHP(IBattleChara tar)
+    {
+        return Param2 switch
+        {
+            0 => tar.CurrentHp > GCD,
+            1 => tar.CurrentHp < GCD,
+            2 => tar.CurrentHp == GCD,
+            _ => false,
+        };
+    }
+
+    private bool CheckHPRatio(IBattleChara tar)
+    {
+        return Param2 switch
+        {
+            0 => tar.GetHealthRatio() > DistanceOrTime,
+            1 => tar.GetHealthRatio() < DistanceOrTime,
+            2 => tar.GetHealthRatio() == DistanceOrTime,
+            _ => false,
+        };
+    }
+
+    private bool CheckMP(IBattleChara tar)
+    {
+        return Param2 switch
+        {
+            0 => tar.CurrentMp > GCD,
+            1 => tar.CurrentMp < GCD,
+            2 => tar.CurrentMp == GCD,
+            _ => false,
+        };
+    }
+
+    private bool CheckTargetName(IBattleChara tar)
+    {
+        if (string.IsNullOrEmpty(CastingActionName))
+        {
+            return false;
+        }
+        return tar.Name.TextValue == CastingActionName;
     }
 }
 

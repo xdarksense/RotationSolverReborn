@@ -1,25 +1,37 @@
 ﻿namespace RotationSolver.Basic.Data;
 
 /// <summary>
-/// Off set the whole bool
+/// Represents a delay in changing a boolean value.
 /// </summary>
-/// <param name="getDelay"></param>
-public struct OffsetDelay(Func<float> getDelay)
+public struct OffsetDelay
 {
-    bool _lastValue = false;
-    bool _nowValue = false;
-    readonly Queue<DateTime> _changeTimes = new();
+    private bool _lastValue;
+    private bool _nowValue;
+    private readonly Queue<DateTime> _changeTimes;
+    private readonly Func<float> _getDelay;
 
     /// <summary>
-    /// 
+    /// Initializes a new instance of the <see cref="OffsetDelay"/> struct.
     /// </summary>
-    public readonly Func<float> GetDelay => getDelay;
+    /// <param name="getDelay">A function that returns the delay in seconds.</param>
+    public OffsetDelay(Func<float> getDelay)
+    {
+        _lastValue = false;
+        _nowValue = false;
+        _changeTimes = new Queue<DateTime>();
+        _getDelay = getDelay ?? throw new ArgumentNullException(nameof(getDelay));
+    }
 
     /// <summary>
-    /// Delay the value to change.
+    /// Gets the function that returns the delay in seconds.
     /// </summary>
-    /// <param name="originData"></param>
-    /// <returns></returns>
+    public Func<float> GetDelay => _getDelay;
+
+    /// <summary>
+    /// Delays the change of the boolean value.
+    /// </summary>
+    /// <param name="originData">The original boolean value.</param>
+    /// <returns>The delayed boolean value.</returns>
     public bool Delay(bool originData)
     {
         if (originData != _lastValue)

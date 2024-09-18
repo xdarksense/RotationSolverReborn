@@ -2,15 +2,15 @@
 using Action = Lumina.Excel.GeneratedSheets.Action;
 
 /// <summary>
-/// Action Record
+/// Represents an action record.
 /// </summary>
-/// <param name="UsedTime">Action used time.</param>
+/// <param name="UsedTime">The time the action was used.</param>
 /// <param name="Action">The action.</param>
 public record ActionRec(DateTime UsedTime, Action Action);
 
 /// <summary>
-/// Time that got damage.
+/// Represents a record of damage received.
 /// </summary>
-/// <param name="ReceiveTime">the time.</param>
-/// <param name="Ratio">ratio of hp.</param>
+/// <param name="ReceiveTime">The time the damage was received.</param>
+/// <param name="Ratio">The ratio of HP lost.</param>
 public record DamageRec(DateTime ReceiveTime, float Ratio);

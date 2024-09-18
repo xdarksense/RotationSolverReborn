@@ -6,25 +6,25 @@
 public enum TargetHostileType : byte
 {
     /// <summary>
-    /// All targets.
+    /// All targets that are in range for any abilities (Tanks/Autoduty).
     /// </summary>
     [Description("All targets that are in range for any abilities (Tanks/Autoduty)")]
     AllTargetsCanAttack,
 
     /// <summary>
-    /// Have target.
+    /// Previously engaged targets (Non-Tanks).
     /// </summary>
     [Description("Previously engaged targets (Non-Tanks)")]
     TargetsHaveTarget,
 
     /// <summary>
-    /// All targets when solo .
+    /// All targets when solo in duty, or previously engaged.
     /// </summary>
     [Description("All targets when solo in duty, or previously engaged.")]
     AllTargetsWhenSoloInDuty,
 
     /// <summary>
-    /// All targets when solo.
+    /// All targets when solo, or previously engaged.
     /// </summary>
     [Description("All targets when solo, or previously engaged.")]
     AllTargetsWhenSolo,
