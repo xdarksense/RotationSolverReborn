@@ -39,7 +39,7 @@ internal static class ActionHelper
     /// <returns><c>true</c> if the action is a real GCD action; otherwise, <c>false</c>.</returns>
     internal static bool IsRealGCD(this Action action)
     {
-        return action.IsGeneralGCD() || action.AdditionalCooldownGroup == GCDCooldownGroup;
+        return action.CooldownGroup == GCDCooldownGroup || action.AdditionalCooldownGroup == GCDCooldownGroup;
     }
 
     /// <summary>
@@ -49,7 +49,7 @@ internal static class ActionHelper
     /// <returns>The cooldown group.</returns>
     internal static byte GetCoolDownGroup(this Action action)
     {
-        var group = action.IsGeneralGCD() ? action.AdditionalCooldownGroup : action.CooldownGroup;
+        var group = action.CooldownGroup == GCDCooldownGroup ? action.AdditionalCooldownGroup : action.CooldownGroup;
         return group == 0 ? GCDCooldownGroup : group;
     }
 
@@ -63,8 +63,12 @@ internal static class ActionHelper
         var cate = action.ClassJobCategory?.Value;
         if (cate != null)
         {
-            var inJob = (bool?)cate.GetType().GetProperty(DataCenter.Job.ToString())?.GetValue(cate);
-            return inJob.GetValueOrDefault(true);
+            var property = cate.GetType().GetProperty(DataCenter.Job.ToString());
+            if (property != null)
+            {
+                var inJob = (bool?)property.GetValue(cate);
+                return inJob.GetValueOrDefault(true);
+            }
         }
         return true;
     }
@@ -76,8 +80,7 @@ internal static class ActionHelper
     {
         get
         {
-            var maxAhead = DataCenter.ActionAhead;
-            return DataCenter.DefaultGCDRemain <= maxAhead;
+            return DataCenter.DefaultGCDRemain <= DataCenter.ActionAhead;
         }
     }
 }

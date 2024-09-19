@@ -17,8 +17,7 @@ public static class ActionIdHelper
     public unsafe static bool IsCoolingDown(this ActionID actionID)
     {
         var action = actionID.GetAction();
-        if (action == null) return false;
-        return IsCoolingDown(action.GetCoolDownGroup());
+        return action != null && IsCoolingDown(action.GetCoolDownGroup());
     }
 
     /// <summary>

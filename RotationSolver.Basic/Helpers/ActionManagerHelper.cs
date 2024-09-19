@@ -29,8 +29,7 @@ namespace RotationSolver.Basic.Helpers
             var actionManager = GetActionManager();
             if (actionManager == null) return DefaultAnimationLock;
 
-            var animationLockRaw = ((IntPtr)actionManager + AnimationLockOffset);
-            return *(float*)animationLockRaw;
+            return *(float*)((byte*)actionManager + AnimationLockOffset);
         }
 
         /// <summary>
@@ -42,9 +41,7 @@ namespace RotationSolver.Basic.Helpers
         public static unsafe float GetRecastTime(ActionType type, uint id)
         {
             var actionManager = GetActionManager();
-            if (actionManager == null) return 0;
-
-            return actionManager->GetRecastTime(type, id);
+            return actionManager == null ? 0 : actionManager->GetRecastTime(type, id);
         }
 
         /// <summary>
@@ -65,9 +62,7 @@ namespace RotationSolver.Basic.Helpers
         public static unsafe float GetRecastTimeElapsed(ActionType type, uint id)
         {
             var actionManager = GetActionManager();
-            if (actionManager == null) return 0;
-
-            return actionManager->GetRecastTimeElapsed(type, id);
+            return actionManager == null ? 0 : actionManager->GetRecastTimeElapsed(type, id);
         }
 
         /// <summary>

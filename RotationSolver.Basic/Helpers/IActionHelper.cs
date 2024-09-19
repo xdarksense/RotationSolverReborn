@@ -30,8 +30,7 @@ public static class IActionHelper
     /// <returns>True if the last GCD action matches any of the provided actions, otherwise false.</returns>
     internal static bool IsLastGCD(bool isAdjust, params IAction[] actions)
     {
-        if (actions == null) return false;
-        return IsLastGCD(GetIDFromActions(isAdjust, actions));
+        return actions != null && IsLastGCD(GetIDFromActions(isAdjust, actions));
     }
 
     /// <summary>
@@ -52,8 +51,7 @@ public static class IActionHelper
     /// <returns>True if the last ability matches any of the provided actions, otherwise false.</returns>
     internal static bool IsLastAbility(bool isAdjust, params IAction[] actions)
     {
-        if (actions == null) return false;
-        return IsLastAbility(GetIDFromActions(isAdjust, actions));
+        return actions != null && IsLastAbility(GetIDFromActions(isAdjust, actions));
     }
 
     /// <summary>
@@ -74,8 +72,7 @@ public static class IActionHelper
     /// <returns>True if the last action matches any of the provided actions, otherwise false.</returns>
     internal static bool IsLastAction(bool isAdjust, params IAction[] actions)
     {
-        if (actions == null) return false;
-        return IsLastAction(GetIDFromActions(isAdjust, actions));
+        return actions != null && IsLastAction(GetIDFromActions(isAdjust, actions));
     }
 
     /// <summary>
@@ -97,8 +94,7 @@ public static class IActionHelper
     /// <returns>True if the action is the same as any of the provided actions, otherwise false.</returns>
     public static bool IsTheSameTo(this IAction action, bool isAdjust, params IAction[] actions)
     {
-        if (actions == null) return false;
-        return action.IsTheSameTo(GetIDFromActions(isAdjust, actions));
+        return actions != null && action.IsTheSameTo(GetIDFromActions(isAdjust, actions));
     }
 
     /// <summary>
@@ -109,8 +105,7 @@ public static class IActionHelper
     /// <returns>True if the action is the same as any of the provided action IDs, otherwise false.</returns>
     public static bool IsTheSameTo(this IAction action, params ActionID[] actions)
     {
-        if (action == null || actions == null) return false;
-        return IsActionID((ActionID)action.AdjustedID, actions);
+        return action != null && actions != null && IsActionID((ActionID)action.AdjustedID, actions);
     }
 
     /// <summary>
@@ -121,8 +116,7 @@ public static class IActionHelper
     /// <returns>True if the action ID matches any of the provided action IDs, otherwise false.</returns>
     private static bool IsActionID(ActionID id, params ActionID[] ids)
     {
-        if (ids == null) return false;
-        return ids.Contains(id);
+        return ids != null && ids.Contains(id);
     }
 
     /// <summary>
@@ -134,6 +128,11 @@ public static class IActionHelper
     private static ActionID[] GetIDFromActions(bool isAdjust, params IAction[] actions)
     {
         if (actions == null) return Array.Empty<ActionID>();
-        return actions.Select(a => isAdjust ? (ActionID)a.AdjustedID : (ActionID)a.ID).ToArray();
+        var result = new ActionID[actions.Length];
+        for (int i = 0; i < actions.Length; i++)
+        {
+            result[i] = isAdjust ? (ActionID)actions[i].AdjustedID : (ActionID)actions[i].ID;
+        }
+        return result;
     }
 }

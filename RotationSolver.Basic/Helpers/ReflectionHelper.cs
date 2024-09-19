@@ -15,14 +15,15 @@
         {
             if (type == null) return Array.Empty<PropertyInfo>();
 
-            var properties = from prop in type.GetRuntimeProperties()
-                             where typeof(T).IsAssignableFrom(prop.PropertyType)
-                                   && prop.GetMethod is MethodInfo methodInfo
-                                   && methodInfo.IsPublic && methodInfo.IsStatic
-                                   && prop.GetCustomAttribute<ObsoleteAttribute>() == null
-                             select prop;
+            var properties = type.GetRuntimeProperties()
+                                 .Where(prop => typeof(T).IsAssignableFrom(prop.PropertyType)
+                                            && prop.GetMethod is MethodInfo methodInfo
+                                            && methodInfo.IsPublic && methodInfo.IsStatic
+                                            && prop.GetCustomAttribute<ObsoleteAttribute>() == null)
+                                 .ToArray();
 
-            return properties.Union(type.BaseType?.GetStaticProperties<T>() ?? Array.Empty<PropertyInfo>()).ToArray();
+            var baseProperties = type.BaseType?.GetStaticProperties<T>() ?? Array.Empty<PropertyInfo>();
+            return properties.Concat(baseProperties).ToArray();
         }
 
         /// <summary>
@@ -34,11 +35,12 @@
         {
             if (type == null) return Enumerable.Empty<MethodInfo>();
 
-            var methods = from method in type.GetRuntimeMethods()
-                          where !method.IsConstructor
-                          select method;
+            var methods = type.GetRuntimeMethods()
+                              .Where(method => !method.IsConstructor)
+                              .ToArray();
 
-            return methods.Union(type.BaseType?.GetAllMethodInfo() ?? Enumerable.Empty<MethodInfo>());
+            var baseMethods = type.BaseType?.GetAllMethodInfo() ?? Enumerable.Empty<MethodInfo>();
+            return methods.Concat(baseMethods);
         }
 
         /// <summary>
@@ -49,16 +51,10 @@
         /// <returns>The property information if found, otherwise null.</returns>
         internal static PropertyInfo? GetPropertyInfo(this Type type, string name)
         {
-            foreach (var property in type.GetRuntimeProperties())
-            {
-                if (property.Name == name && property.GetMethod is MethodInfo methodInfo
-                    && methodInfo.IsStatic)
-                {
-                    return property;
-                }
-            }
+            var property = type.GetRuntimeProperties()
+                               .FirstOrDefault(prop => prop.Name == name && prop.GetMethod is MethodInfo methodInfo && methodInfo.IsStatic);
 
-            return type.BaseType?.GetPropertyInfo(name);
+            return property ?? type.BaseType?.GetPropertyInfo(name);
         }
 
         /// <summary>
@@ -71,16 +67,10 @@
         {
             if (type == null) return null;
 
-            foreach (var method in type.GetRuntimeMethods())
-            {
-                if (method.Name == name && method.IsStatic
-                    && !method.IsConstructor && method.ReturnType == typeof(bool))
-                {
-                    return method;
-                }
-            }
+            var method = type.GetRuntimeMethods()
+                             .FirstOrDefault(m => m.Name == name && m.IsStatic && !m.IsConstructor && m.ReturnType == typeof(bool));
 
-            return type.BaseType?.GetMethodInfo(name);
+            return method ?? type.BaseType?.GetMethodInfo(name);
         }
     }
 }
