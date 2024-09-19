@@ -75,21 +75,24 @@ public static class ObjectHelper
 
     internal static bool IsAttackable(this IBattleChara battleChara)
     {
-        //Dead.
+        // Dead.
         if (Service.Config.FilterOneHpInvincible && battleChara.CurrentHp <= 1) return false;
 
         if (battleChara.StatusList.Any(StatusHelper.IsInvincible)) return false;
 
         if (Svc.ClientState == null) return false;
 
-        //In No Hostiles Names
+        // In No Hostiles Names
         IEnumerable<string> names = Array.Empty<string>();
-        if (OtherConfiguration.NoHostileNames.TryGetValue(Svc.ClientState.TerritoryType, out var ns1))
+        if (OtherConfiguration.NoHostileNames != null &&
+            OtherConfiguration.NoHostileNames.TryGetValue(Svc.ClientState.TerritoryType, out var ns1))
+        {
             names = names.Union(ns1);
+        }
 
         if (names.Any(n => !string.IsNullOrEmpty(n) && new Regex(n).Match(battleChara.Name.TextValue).Success)) return false;
 
-        //Fate
+        // Fate
         if (DataCenter.TerritoryContentType != TerritoryContentType.Eureka)
         {
             var tarFateId = battleChara.FateId();
@@ -99,13 +102,13 @@ public static class ObjectHelper
         if (Service.Config.AddEnemyListToHostile)
         {
             if (battleChara.IsInEnemiesList()) return true;
-            //Only attack
+            // Only attack
             if (Service.Config.OnlyAttackInEnemyList) return false;
         }
 
-        //Tar on me
+        // Tar on me
         if (battleChara.TargetObject == Player.Object
-        || battleChara.TargetObject?.OwnerId == Player.Object.GameObjectId) return true;
+            || battleChara.TargetObject?.OwnerId == Player.Object.GameObjectId) return true;
 
         if (battleChara.IsOthersPlayers()) return false;
 
