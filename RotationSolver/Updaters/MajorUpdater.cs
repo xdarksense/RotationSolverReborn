@@ -68,6 +68,9 @@ internal static class MajorUpdater
             {
                 _threadException = ex;
                 Svc.Log.Error(ex, "Main Thread Exception");
+                if (Service.Config.InDebug)
+#pragma warning disable CS0436
+                    WarningHelper.AddSystemWarning("Main Thread Exception");
             }
         }
 
@@ -97,7 +100,7 @@ internal static class MajorUpdater
 
     private static readonly object _workLock = new object();
 
-    private static async void HandleWorkUpdate()
+    private static void HandleWorkUpdate()
     {
         var now = DateTime.Now;
         try
@@ -111,27 +114,25 @@ internal static class MajorUpdater
                 _lastUpdatedWork = now;
             }
 
-            // Ensure UpdateWork runs on the main game thread
-            await Task.Run(() =>
+            Task.Run(UpdateWork).ContinueWith(t =>
             {
-                try
+                if (t.Exception != null)
                 {
-                    UpdateWork();
+                    Svc.Log.Error(t.Exception, "Worker Task Exception");
+                    if (Service.Config.InDebug)
+#pragma warning disable CS0436
+                        WarningHelper.AddSystemWarning("Worker Task Exception");
                 }
-                catch (Exception ex)
-                {
-                    Svc.Log.Error(ex, "Worker Task Exception");
-                }
-                finally
-                {
-                    _work = false;
-                }
-            });
+                _work = false;
+            }, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
         }
         catch (Exception ex)
         {
             Svc.Log.Error(ex, "Worker Exception in HandleWorkUpdate");
             _work = false;
+            if (Service.Config.InDebug)
+#pragma warning disable CS0436
+                WarningHelper.AddSystemWarning("Worker Exception in HandleWorkUpdate");
         }
     }
 
@@ -174,6 +175,9 @@ internal static class MajorUpdater
         catch (Exception ex)
         {
             Svc.Log.Error(ex, "Inner Worker Exception");
+            if (Service.Config.InDebug)
+#pragma warning disable CS0436
+                WarningHelper.AddSystemWarning("Inner Worker Exception");
         }
         finally
         {
