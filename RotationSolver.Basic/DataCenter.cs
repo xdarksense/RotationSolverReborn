@@ -218,7 +218,7 @@ internal static class DataCenter
 
     #region GCD
     // Returns the time remaining until the next GCD (Global Cooldown) after considering the current animation lock.
-    public static float NextAbilityToNextGCD => DefaultGCDRemain - ActionManagerHelper.GetCurrentAnimationLock();
+    public static float NextAbilityToNextGCD => DefaultGCDRemain - Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock);
 
     // Returns the total duration of the default GCD.
     public static float DefaultGCDTotal => ActionManagerHelper.GetDefaultRecastTime();
@@ -241,8 +241,8 @@ internal static class DataCenter
     public static float GCDTime(uint gcdCount = 0, float offset = 0)
         => ActionManagerHelper.GetDefaultRecastTime() * gcdCount + offset;
 
-    public static bool LastAbilityorNot => DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD <= ActionManagerHelper.GetCurrentAnimationLock() + Service.Config.isLastAbilityTimer);
-    public static bool FirstAbilityorNot => DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD >= ActionManagerHelper.GetCurrentAnimationLock() + Service.Config.isFirstAbilityTimer);
+    public static bool LastAbilityorNot => DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD <= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.isLastAbilityTimer);
+    public static bool FirstAbilityorNot => DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD >= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.isFirstAbilityTimer);
     #endregion
 
 

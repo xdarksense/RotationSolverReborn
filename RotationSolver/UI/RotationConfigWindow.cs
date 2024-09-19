@@ -2449,6 +2449,7 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Height: {Player.Character->CalculateHeight()}");
         ImGui.Text($"Moving: {DataCenter.IsMoving}");
         ImGui.Text($"Stop Moving: {DataCenter.StopMovingRaw}");
+        ImGui.Text($"CountDownTime: {Service.CountDownTime}");
 
         ImGui.Text($"TerritoryType: {DataCenter.TerritoryContentType}");
         ImGui.Text($"DPSTaken: {DataCenter.DPSTaken}");
