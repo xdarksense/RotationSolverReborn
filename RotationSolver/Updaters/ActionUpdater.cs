@@ -223,7 +223,7 @@ internal static class ActionUpdater
         if (nextAction == null) return false;
 
         //Skip when casting
-        if (Player.Object.TotalCastTime - DataCenter.ActionAhead > 0) return false;
+        if (Player.Object.TotalCastTime - Service.Config.Action4Head > 0) return false;
 
         //GCD
         var canUseGCD = ActionHelper.CanUseGCD;
