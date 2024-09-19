@@ -313,7 +313,7 @@ partial class CustomRotation
     /// Time from next ability to next GCD
     /// </summary>
     [Description("Time from next ability to next GCD")]
-    public static float NextAbilityToNextGCD => DataCenter.DefaultGCDRemain;
+    public static float NextAbilityToNextGCD => DataCenter.DefaultGCDRemain - Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock);
 
     /// <summary>
     /// Treats one action as another.

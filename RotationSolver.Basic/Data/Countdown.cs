@@ -1,4 +1,5 @@
-﻿using FFXIVClientStructs.FFXIV.Client.System.Framework;
+﻿using ECommons.DalamudServices;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using System.Runtime.InteropServices;
 
@@ -41,8 +42,6 @@ public unsafe struct Countdown
         }
     }
 
-    private static readonly RandomDelay _delay = new(() => Service.Config.CountdownDelay);
-
     /// <summary>
     /// Gets the remaining time of the countdown.
     /// </summary>
@@ -51,7 +50,13 @@ public unsafe struct Countdown
         get
         {
             var inst = Instance;
-            return _delay.Delay(inst->Active != 0) ? inst->Timer : 0;
+            if (inst == null)
+            {
+                return 0;
+            }
+
+            var remainingTime = inst->Active != 0 ? inst->Timer : 0;
+            return remainingTime;
         }
     }
 }

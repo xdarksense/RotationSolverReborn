@@ -201,13 +201,6 @@ namespace RotationSolver.Commands
                 CancelState();
             }
 
-            // Holds state if countdown is running and setting is enabled
-            else if (Service.Config.StartOnCountdown && Service.CountDownTime == 0 && _lastCountdownTime > 0.2f)
-            {
-                _lastCountdownTime = 0;
-                CancelState();
-            }
-
             // Auto manual on being attacked by someone.
             else if (Service.Config.StartOnAttackedBySomeone
                 && target != null
@@ -227,10 +220,21 @@ namespace RotationSolver.Commands
                 if (!DataCenter.State)
                 {
                     if (Service.Config.CountdownStartsManualMode)
+                    {
                         DoStateCommandType(StateCommandType.Manual);
+                    }
                     else
+                    {
                         DoStateCommandType(StateCommandType.Auto);
+                    }
                 }
+            }
+
+            // Holds state if countdown is running and setting is enabled
+            else if (Service.Config.StartOnCountdown && Service.CountDownTime == 0 && _lastCountdownTime > 0.2f)
+            {
+                _lastCountdownTime = 0;
+                CancelState();
             }
 
             // Cancel when after combat.
@@ -261,5 +265,6 @@ namespace RotationSolver.Commands
                 }
             }
         }
+
     }
 }

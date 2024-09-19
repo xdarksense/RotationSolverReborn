@@ -158,11 +158,11 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig, Section = 2)]
     private static readonly bool _moveAreaActionFarthest = false;
 
-    [ConditionBool, UI("Auto mode activation delay on countdown start",
+    [ConditionBool, UI("Activate auto mode when countdown starts",
         Filter = BasicAutoSwitch, Section = 1)]
     private static readonly bool _startOnCountdown = true;
 
-    [ConditionBool, UI("Countdown will start manual mode instead of auto mode",
+    [ConditionBool, UI("Start manual mode instead of auto mode when countdown starts",
                Parent = nameof(StartOnCountdown))]
     private static readonly bool _countdownStartsManualMode = false;
 
@@ -508,11 +508,6 @@ internal partial class Configs : IPluginConfiguration
     [UI("Downtime healing delay range.", Parent = nameof(HealWhenNothingTodo))]
     [Range(0, 5, ConfigUnitType.Seconds, 0.05f)]
     public Vector2 HealWhenNothingTodoDelay { get; set; } = new(0.5f, 1);
-
-    [UI("The random delay between which auto mode activation on countdown varies.",
-        Parent = nameof(StartOnCountdown))]
-    [Range(0, 3, ConfigUnitType.Seconds, 0.002f)]
-    public Vector2 CountdownDelay { get; set; } = new(0.5f, 1);
 
     [UI("Auto Heal delay range",
     Parent = nameof(AutoHeal))]
