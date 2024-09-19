@@ -408,7 +408,7 @@ internal static class DataCenter
             return null;
         }
     }
-    
+
     public static IBattleChara? DispelTarget
     {
         get
@@ -421,7 +421,7 @@ internal static class DataCenter
                 weakenPeople.Where(o => o is IBattleChara b && b.StatusList.Any(StatusHelper.IsDangerous));
 
             return dyingPeople.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault()
-                   ?? weakenPeople.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault() 
+                   ?? weakenPeople.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault()
                    ?? weakenNPC.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault();
         }
     }

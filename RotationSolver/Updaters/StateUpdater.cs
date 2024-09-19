@@ -116,19 +116,14 @@ internal static class StateUpdater
 
                 if (DataCenter.Role == JobRole.Healer || DataCenter.Job == ECommons.ExcelServices.Job.PLD) // Help defense.
                 {
-                    bool isPartyMemberUnderAttack = DataCenter.PartyMembers.Any(tank =>
+                    if (DataCenter.PartyMembers.Any((tank) =>
                     {
                         var attackingTankObj = DataCenter.AllHostileTargets.Where(t => t.TargetObjectId == tank.GameObjectId);
-                        return attackingTankObj.Count() == 1 && DataCenter.IsHostileCastingToTank;
-                    });
 
-                    bool isFriendlyNPCUnderAttack = DataCenter.FriendlyNPCMembers.Any(npc =>
-                    {
-                        var attackingNpcObj = DataCenter.AllHostileTargets.Where(t => t.TargetObjectId == npc.GameObjectId);
-                        return attackingNpcObj.Count() == 1 && DataCenter.IsHostileCastingToTank;
-                    });
+                        if (attackingTankObj.Count() != 1) return false;
 
-                    if (isPartyMemberUnderAttack || isFriendlyNPCUnderAttack)
+                        return DataCenter.IsHostileCastingToTank;
+                    }))
                     {
                         status |= AutoStatus.DefenseSingle;
                     }
