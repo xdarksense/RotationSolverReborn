@@ -111,16 +111,18 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         ClientState_TerritoryChanged(Svc.ClientState.TerritoryType);
 
 
-        static async void DutyState_DutyCompleted(object? sender, ushort e)
+        static void DutyState_DutyCompleted(object? sender, ushort e)
         {
-            await Task.Delay(new Random().Next(4000, 6000));
-
-            Service.Config.DutyEnd.AddMacro();
-
-            if (Service.Config.AutoOffWhenDutyCompleted)
+            var delay = TimeSpan.FromSeconds(new Random().Next(4, 6));
+            Svc.Framework.RunOnTick(() =>
             {
-                RSCommands.CancelState();
-            }
+                Service.Config.DutyEnd.AddMacro();
+
+                if (Service.Config.AutoOffWhenDutyCompleted)
+                {
+                    RSCommands.CancelState();
+                }
+            }, delay);
         }
 
         static void ClientState_TerritoryChanged(ushort id)
