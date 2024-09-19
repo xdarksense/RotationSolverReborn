@@ -111,18 +111,72 @@ internal static class MajorUpdater
                 _lastUpdatedWork = now;
             }
 
-            Task.Run(UpdateWork).ContinueWith(t =>
+            // Ensure UpdateWork runs on the main game thread
+            Svc.Framework.RunOnFrameworkThread(() =>
             {
-                if (t.Exception != null)
+                try
                 {
-                    Svc.Log.Error(t.Exception, "Worker Task Exception");
+                    UpdateWork();
                 }
-                _work = false;
-            }, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
+                catch (Exception ex)
+                {
+                    Svc.Log.Error(ex, "Worker Task Exception");
+                }
+                finally
+                {
+                    _work = false;
+                }
+            });
         }
         catch (Exception ex)
         {
             Svc.Log.Error(ex, "Worker Exception in HandleWorkUpdate");
+            _work = false;
+        }
+    }
+
+    private static void UpdateWork()
+    {
+        var now = DateTime.Now;
+        var waitingTime = (now - _lastUpdatedWork).TotalMilliseconds;
+        if (waitingTime > 100)
+        {
+            Svc.Log.Warning($"The time for completing a running cycle for RS is {waitingTime:F2} ms, try disabling the option \"UseWorkTask\" to get better performance or check your other running plugins for one of them using too many resources and try disabling that.");
+        }
+
+        if (!IsValid)
+        {
+            ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
+            return;
+        }
+
+        try
+        {
+            StateUpdater.UpdateState();
+
+            if (Service.Config.AutoReloadRotations)
+            {
+                RotationUpdater.LocalRotationWatcher();
+            }
+
+            RotationUpdater.UpdateRotation();
+
+            if (DataCenter.IsActivated())
+            {
+                TargetUpdater.UpdateTarget();
+                ActionSequencerUpdater.UpdateActionSequencerAction();
+                ActionUpdater.UpdateNextAction();
+            }
+
+            RSCommands.UpdateRotationState();
+            HotbarHighlightManager.UpdateSettings();
+        }
+        catch (Exception ex)
+        {
+            Svc.Log.Error(ex, "Inner Worker Exception");
+        }
+        finally
+        {
             _work = false;
         }
     }
@@ -166,55 +220,6 @@ internal static class MajorUpdater
     }
 
     private static Exception? _innerException;
-    private static void UpdateWork()
-    {
-        var now = DateTime.Now;
-        var waitingTime = (now - _lastUpdatedWork).TotalMilliseconds;
-        if (waitingTime > 100)
-        {
-            Svc.Log.Warning($"The time for completing a running cycle for RS is {waitingTime:F2} ms, try disabling the option \"UseWorkTask\" to get better performance or check your other running plugins for one of them using too many resources and try disabling that.");
-        }
-
-        if (!IsValid)
-        {
-            ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
-            return;
-        }
-
-        try
-        {
-            StateUpdater.UpdateState();
-
-            if (Service.Config.AutoReloadRotations)
-            {
-                RotationUpdater.LocalRotationWatcher();
-            }
-
-            RotationUpdater.UpdateRotation();
-
-            if (DataCenter.IsActivated())
-            {
-                TargetUpdater.UpdateTarget();
-                ActionSequencerUpdater.UpdateActionSequencerAction();
-                ActionUpdater.UpdateNextAction();
-            }
-
-            RSCommands.UpdateRotationState();
-            HotbarHighlightManager.UpdateSettings();
-        }
-        catch (Exception ex)
-        {
-            if (_innerException != ex)
-            {
-                _innerException = ex;
-                Svc.Log.Error(ex, "Inner Worker Exception");
-            }
-        }
-        finally
-        {
-            _work = false;
-        }
-    }
 
     static DateTime _closeWindowTime = DateTime.Now;
     private unsafe static void CloseWindow()
