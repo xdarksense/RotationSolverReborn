@@ -97,7 +97,7 @@ internal static class MajorUpdater
 
     private static readonly object _workLock = new object();
 
-    private static void HandleWorkUpdate()
+    private static async void HandleWorkUpdate()
     {
         var now = DateTime.Now;
         try
@@ -112,7 +112,7 @@ internal static class MajorUpdater
             }
 
             // Ensure UpdateWork runs on the main game thread
-            Svc.Framework.RunOnFrameworkThread(() =>
+            await Task.Run(() =>
             {
                 try
                 {
