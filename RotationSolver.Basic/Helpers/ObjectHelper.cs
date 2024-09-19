@@ -160,13 +160,22 @@ public static class ObjectHelper
         && (!(DataCenter.IsPvP) && obj is IPlayerCharacter
         || ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, obj.Struct()));
 
+    private static readonly object _lock = new object();
+
     internal static bool IsParty(this IGameObject gameObject)
     {
         if (gameObject == null) return false;
-        if (gameObject.GameObjectId == Player.Object.GameObjectId) return true;
-        if (Svc.Party.Any(p => p.GameObject?.GameObjectId == gameObject.GameObjectId)) return true;
-        if (gameObject.SubKind == 9) return true;
-        if (gameObject.GetNameplateKind() == NameplateKind.FriendlyBattleNPC) return true;
+
+        // Use a lock to ensure thread safety
+        lock (_lock)
+        {
+            // Accessing Player.Object and Svc.Party within the lock to ensure thread safety
+            if (gameObject.GameObjectId == Player.Object?.GameObjectId) return true;
+            if (Svc.Party.Any(p => p.GameObject?.GameObjectId == gameObject.GameObjectId)) return true;
+            if (gameObject.SubKind == 9) return true;
+            if (gameObject.GetNameplateKind() == NameplateKind.FriendlyBattleNPC) return true;
+        }
+
         return false;
     }
 
