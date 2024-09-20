@@ -1,4 +1,5 @@
-﻿using Action = Lumina.Excel.GeneratedSheets.Action;
+﻿using System.Collections.Concurrent;
+using Action = Lumina.Excel.GeneratedSheets.Action;
 
 namespace RotationSolver.Basic.Helpers;
 
@@ -53,6 +54,8 @@ internal static class ActionHelper
         return group == 0 ? GCDCooldownGroup : group;
     }
 
+    private static readonly ConcurrentDictionary<(Type, string), PropertyInfo?> PropertyCache = new();
+
     /// <summary>
     /// Determines whether the specified action is in the current job.
     /// </summary>
@@ -63,13 +66,16 @@ internal static class ActionHelper
         var cate = action.ClassJobCategory?.Value;
         if (cate != null)
         {
-            var property = cate.GetType().GetProperty(DataCenter.Job.ToString());
+            var jobName = DataCenter.Job.ToString();
+            var property = PropertyCache.GetOrAdd((cate.GetType(), jobName), key => key.Item1.GetProperty(key.Item2));
+
             if (property != null)
             {
                 var inJob = (bool?)property.GetValue(cate);
                 return inJob.GetValueOrDefault(true);
             }
         }
+
         return true;
     }
 
@@ -78,9 +84,6 @@ internal static class ActionHelper
     /// </summary>
     internal static bool CanUseGCD
     {
-        get
-        {
-            return DataCenter.DefaultGCDRemain <= DataCenter.ActionAhead;
-        }
+        get { return DataCenter.DefaultGCDRemain <= DataCenter.ActionAhead; }
     }
 }

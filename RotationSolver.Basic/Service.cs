@@ -1,4 +1,5 @@
-﻿using Dalamud.Utility.Signatures;
+﻿using System.Collections.Concurrent;
+using Dalamud.Utility.Signatures;
 using ECommons.DalamudServices;
 using FFXIVClientStructs.Attributes;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -86,17 +87,23 @@ internal class Service : IDisposable
     /// <returns>The adjusted action ID.</returns>
     public static unsafe uint GetAdjustedActionId(uint id)
         => ActionManager.Instance()->GetAdjustedActionId(id);
+    
+    
+    private static readonly ConcurrentDictionary<Type, Addon?> AddonCache = new();
 
     /// <summary>
     /// Gets the addons of the specified type.
     /// </summary>
     /// <typeparam name="T">The type of the addon.</typeparam>
     /// <returns>A collection of addon pointers.</returns>
-    public unsafe static IEnumerable<IntPtr> GetAddons<T>() where T : struct
+    public static IEnumerable<IntPtr> GetAddons<T>() where T : struct
     {
-        if (typeof(T).GetCustomAttribute<Addon>() is not Addon on) return Array.Empty<nint>();
+        // Check the cache for the attribute or add it if not present
+        var addon = AddonCache.GetOrAdd(typeof(T), t => t.GetCustomAttribute<Addon>());
 
-        return on.AddonIdentifiers
+        if (addon is null) return Array.Empty<nint>();
+
+        return addon.AddonIdentifiers
             .Select(str => Svc.GameGui.GetAddonByName(str, 1))
             .Where(ptr => ptr != IntPtr.Zero);
     }
