@@ -37,10 +37,10 @@ public struct OffsetDelay
         if (originData != _lastValue)
         {
             _lastValue = originData;
-            _changeTimes.Enqueue(DateTime.Now + TimeSpan.FromSeconds(GetDelay()));
+            _changeTimes.Enqueue(DateTime.UtcNow + TimeSpan.FromSeconds(GetDelay()));
         }
 
-        if (_changeTimes.TryPeek(out var time) && time < DateTime.Now)
+        if (_changeTimes.TryPeek(out var time) && time < DateTime.UtcNow)
         {
             _changeTimes.Dequeue();
             _nowValue = !_nowValue;
