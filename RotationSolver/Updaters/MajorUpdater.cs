@@ -25,9 +25,8 @@ internal static class MajorUpdater
         && !Svc.Condition[ConditionFlag.LoggingOut]
         && Player.Available;
 
-    private static bool _work;
     private static Exception? _threadException;
-    private static DateTime _lastUpdatedWork = DateTime.Now;
+    private static DateTime _lastUpdatedWork = DateTime.UtcNow;
     private static DateTime _warningsLastDisplayed = DateTime.MinValue;
 
     private unsafe static void FrameworkUpdate(IFramework framework)
@@ -98,17 +97,14 @@ internal static class MajorUpdater
         }
     }
 
-    private static readonly object _workLock = new object();
-
     private static void HandleWorkUpdate()
     {
         var now = DateTime.UtcNow;
         try
         {
-            if (_work || (now - _lastUpdatedWork < TimeSpan.FromSeconds(Service.Config.MinUpdatingTime)))
+            if (now - _lastUpdatedWork < TimeSpan.FromSeconds(Service.Config.MinUpdatingTime))
                 return;
 
-            _work = true;
             _lastUpdatedWork = now;
 
             try
@@ -122,15 +118,10 @@ internal static class MajorUpdater
 #pragma warning disable CS0436
                     WarningHelper.AddSystemWarning("Worker Task Exception");
             }
-            finally
-            {
-                _work = false;
-            }
         }
         catch (Exception ex)
         {
             Svc.Log.Error(ex, "Worker Exception in HandleWorkUpdate");
-            _work = false;
             if (Service.Config.InDebug)
 #pragma warning disable CS0436
                 WarningHelper.AddSystemWarning("Worker Exception in HandleWorkUpdate");
@@ -172,10 +163,6 @@ internal static class MajorUpdater
             if (Service.Config.InDebug)
 #pragma warning disable CS0436
                 WarningHelper.AddSystemWarning("Inner Worker Exception");
-        }
-        finally
-        {
-            _work = false;
         }
     }
 

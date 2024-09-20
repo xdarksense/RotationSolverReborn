@@ -24,7 +24,7 @@ internal partial class Configs : IPluginConfiguration
         List2 = "List2",
         Debug = "Debug";
 
-    public const int CurrentVersion = 11;
+    public const int CurrentVersion = 12;
     public int Version { get; set; } = CurrentVersion;
 
     public string LastSeenChangelog { get; set; } = "0.0.0.0";

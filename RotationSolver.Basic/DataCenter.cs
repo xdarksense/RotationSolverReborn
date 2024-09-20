@@ -237,7 +237,7 @@ internal static class DataCenter
         Service.Config.OverrideActionAheadTimer ? Service.Config.Action4Head : CalculatedActionAhead;
 
     // Returns the calculated action ahead time as 25% of the total GCD time.
-    public static float CalculatedActionAhead => DefaultGCDTotal * 0.25f;
+    public static float CalculatedActionAhead => Math.Min(DefaultGCDTotal * 0.25f, DataCenter.MinAnimationLock);
 
     // Calculates the total GCD time for a given number of GCDs and an optional offset.
     public static float GCDTime(uint gcdCount = 0, float offset = 0)

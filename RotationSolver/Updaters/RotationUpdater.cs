@@ -509,25 +509,36 @@ internal static class RotationUpdater
     private static void UpdateCustomRotation()
     {
         var nowJob = (Job)Player.Object.ClassJob.Id;
+        Svc.Log.Information($"Current Job: {nowJob}");
 
         foreach (var group in CustomRotations)
         {
             if (!group.ClassJobIds.Contains(nowJob)) continue;
+            Svc.Log.Information($"Found matching group for job: {nowJob}");
 
             var rotation = GetChosenRotation(group);
+            Svc.Log.Information($"Chosen Rotation: {rotation?.Name}");
+
             if (rotation != DataCenter.RightNowRotation?.GetType())
             {
                 var instance = GetRotation(rotation);
-                instance?.OnTerritoryChanged();
+                if (instance == null)
+                {
+                    Svc.Log.Error($"Failed to create instance for rotation: {rotation?.Name}");
+                    continue;
+                }
+
+                instance.OnTerritoryChanged();
                 DataCenter.RightNowRotation = instance;
             }
-            RightRotationActions = DataCenter.RightNowRotation?.AllActions ?? [];
+
+            RightRotationActions = DataCenter.RightNowRotation?.AllActions ?? Array.Empty<IAction>();
             return;
         }
 
         CustomRotation.MoveTarget = null;
         DataCenter.RightNowRotation = null;
-        RightRotationActions = [];
+        RightRotationActions = Array.Empty<IAction>();
 
         static ICustomRotation? GetRotation(Type? t)
         {
