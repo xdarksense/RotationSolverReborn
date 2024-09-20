@@ -571,7 +571,7 @@ internal partial class Configs : IPluginConfiguration
 
     [UI("The minimum time between updating RSR information. (Setting too low will negatively effect framerate, setting too high will lead to poor performance)",
         Filter = BasicTimer)]
-    [JobConfig, Range(0.001f, 0.3f, ConfigUnitType.Seconds, 0.001f)]
+    [JobConfig, Range(0, 0.3f, ConfigUnitType.Seconds, 0.002f)]
     public float MinUpdatingTime { get; set; } = 0.01f;
 
     [UI("The HP for using Guard.",

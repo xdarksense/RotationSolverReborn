@@ -79,13 +79,13 @@ internal static class DataCenter
                                       || Svc.GamepadState.Raw(Dalamud.Game.ClientState.GamePad.GamepadButtons.R1) >=
                                       0.5f;
 
-    internal static DateTime EffectTime { private get; set; } = DateTime.UtcNow;
-    internal static DateTime EffectEndTime { private get; set; } = DateTime.UtcNow;
+    internal static DateTime EffectTime { private get; set; } = DateTime.Now;
+    internal static DateTime EffectEndTime { private get; set; } = DateTime.Now;
 
     internal const int ATTACKED_TARGETS_COUNT = 48;
     internal static Queue<(ulong id, DateTime time)> AttackedTargets { get; } = new(ATTACKED_TARGETS_COUNT);
 
-    internal static bool InEffectTime => DateTime.UtcNow >= EffectTime && DateTime.UtcNow <= EffectEndTime;
+    internal static bool InEffectTime => DateTime.Now >= EffectTime && DateTime.Now <= EffectEndTime;
     internal static Dictionary<ulong, uint> HealHP { get; set; } = [];
     internal static Dictionary<ulong, uint> ApplyStatus { get; set; } = [];
     internal static uint MPGain { get; set; }
@@ -139,7 +139,7 @@ internal static class DataCenter
             var next = NextActs.FirstOrDefault();
 
             while (next != null && NextActs.Count > 0 &&
-                   (next.DeadTime < DateTime.UtcNow || IActionHelper.IsLastAction(true, next.Act)))
+                   (next.DeadTime < DateTime.Now || IActionHelper.IsLastAction(true, next.Act)))
             {
                 NextActs.RemoveAt(0);
                 next = NextActs.FirstOrDefault();
@@ -156,7 +156,7 @@ internal static class DataCenter
     internal static void AddCommandAction(IAction act, double time)
     {
         var index = NextActs.FindIndex(i => i.Act.ID == act.ID);
-        var newItem = new NextAct(act, DateTime.UtcNow.AddSeconds(time));
+        var newItem = new NextAct(act, DateTime.Now.AddSeconds(time));
         if (index < 0)
         {
             NextActs.Add(newItem);
@@ -251,7 +251,7 @@ internal static class DataCenter
     public static uint[] DutyActions { get; internal set; } = new uint[2];
 
     static DateTime _specialStateStartTime = DateTime.MinValue;
-    private static double SpecialTimeElapsed => (DateTime.UtcNow - _specialStateStartTime).TotalSeconds;
+    private static double SpecialTimeElapsed => (DateTime.Now - _specialStateStartTime).TotalSeconds;
     public static double SpecialTimeLeft => Service.Config.SpecialDuration - SpecialTimeElapsed;
 
     static SpecialCommandType _specialType = SpecialCommandType.EndSpecial;
@@ -262,7 +262,7 @@ internal static class DataCenter
         set
         {
             _specialType = value;
-            _specialStateStartTime = value == SpecialCommandType.EndSpecial ? DateTime.MinValue : DateTime.UtcNow;
+            _specialStateStartTime = value == SpecialCommandType.EndSpecial ? DateTime.MinValue : DateTime.Now;
         }
     }
 
@@ -290,7 +290,7 @@ internal static class DataCenter
             if (_startRaidTime == DateTime.MinValue) return 0;
 
             // Calculate and return the total seconds elapsed since the raid started.
-            return (float)(DateTime.UtcNow - _startRaidTime).TotalSeconds;
+            return (float)(DateTime.Now - _startRaidTime).TotalSeconds;
         }
         set
         {
@@ -302,7 +302,7 @@ internal static class DataCenter
             else
             {
                 // Set the raid start time to the current time minus the provided value in seconds.
-                _startRaidTime = DateTime.UtcNow - TimeSpan.FromSeconds(value);
+                _startRaidTime = DateTime.Now - TimeSpan.FromSeconds(value);
             }
         }
     }
@@ -516,11 +516,11 @@ internal static class DataCenter
                 Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent] ||
                 Svc.Condition[ConditionFlag.Jumping61])
             {
-                _petLastSeen = DateTime.UtcNow;
+                _petLastSeen = DateTime.Now;
                 return true;
             }
 
-            if (!hasPet && _petLastSeen.AddSeconds(3) < DateTime.UtcNow)
+            if (!hasPet && _petLastSeen.AddSeconds(3) < DateTime.Now)
             {
                 return false;
             }
@@ -621,7 +621,7 @@ internal static class DataCenter
         {
             try
             {
-                var recs = _damages.Where(r => DateTime.UtcNow - r.ReceiveTime < TimeSpan.FromMilliseconds(5));
+                var recs = _damages.Where(r => DateTime.Now - r.ReceiveTime < TimeSpan.FromMilliseconds(5));
 
                 if (!recs.Any()) return 0;
 
@@ -639,8 +639,8 @@ internal static class DataCenter
     }
 
     public static ActionRec[] RecordActions => _actions.Reverse().ToArray();
-    private static DateTime _timeLastActionUsed = DateTime.UtcNow;
-    public static TimeSpan TimeSinceLastAction => DateTime.UtcNow - _timeLastActionUsed;
+    private static DateTime _timeLastActionUsed = DateTime.Now;
+    public static TimeSpan TimeSinceLastAction => DateTime.Now - _timeLastActionUsed;
 
     public static ActionID LastAction { get; private set; } = 0;
 
@@ -673,7 +673,7 @@ internal static class DataCenter
             _actions.Dequeue();
         }
 
-        _timeLastActionUsed = DateTime.UtcNow;
+        _timeLastActionUsed = DateTime.Now;
         _actions.Enqueue(new ActionRec(_timeLastActionUsed, act));
     }
 
@@ -682,7 +682,7 @@ internal static class DataCenter
         LastAction = 0;
         LastGCD = 0;
         LastAbility = 0;
-        _timeLastActionUsed = DateTime.UtcNow;
+        _timeLastActionUsed = DateTime.Now;
         _actions.Clear();
 
         MapEffects.Clear();
@@ -697,7 +697,7 @@ internal static class DataCenter
             _damages.Dequeue();
         }
 
-        _damages.Enqueue(new DamageRec(DateTime.UtcNow, damageRatio));
+        _damages.Enqueue(new DamageRec(DateTime.Now, damageRatio));
     }
 
     internal static DateTime KnockbackFinished { get; set; } = DateTime.MinValue;

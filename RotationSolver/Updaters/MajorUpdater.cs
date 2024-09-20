@@ -223,6 +223,8 @@ internal static class MajorUpdater
         Svc.Framework.Update += FrameworkUpdate;
     }
 
+    private static Exception? _innerException;
+
     static DateTime _closeWindowTime = DateTime.Now;
     private unsafe static void CloseWindow()
     {

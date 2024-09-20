@@ -20,7 +20,7 @@ internal static class RotationHelper
         var name = assembly.GetName().Name;
         var location = assembly.Location;
         var company = assembly.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company;
-        var assemblyInfo = new AssemblyInfo(name, company, location, string.Empty, company, name, DateTime.UtcNow);
+        var assemblyInfo = new AssemblyInfo(name, company, location, string.Empty, company, name, DateTime.Now);
 
         _assemblyInfos[assembly] = assemblyInfo;
 
@@ -70,7 +70,7 @@ internal static class RotationHelper
             link?.Donate,
             link?.UserName,
             link?.Repository,
-            DateTime.UtcNow);
+            DateTime.Now);
 
         var existingAssembly = GetAssemblyFromPath(filePath);
         if (existingAssembly != null)

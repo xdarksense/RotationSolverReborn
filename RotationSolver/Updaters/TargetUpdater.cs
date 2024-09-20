@@ -16,7 +16,7 @@ internal static partial class TargetUpdater
 
     private static void UpdateTimeToKill()
     {
-        var now = DateTime.UtcNow;
+        var now = DateTime.Now;
         if (now - _lastUpdateTimeToKill < TimeToKillUpdateInterval) return;
         _lastUpdateTimeToKill = now;
 
