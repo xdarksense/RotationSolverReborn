@@ -102,7 +102,7 @@ internal static class MajorUpdater
 
     private static void HandleWorkUpdate()
     {
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
         try
         {
             lock (_workLock)
@@ -138,7 +138,7 @@ internal static class MajorUpdater
 
     private static void UpdateWork()
     {
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
         var waitingTime = (now - _lastUpdatedWork).TotalMilliseconds;
         if (waitingTime > 100)
         {

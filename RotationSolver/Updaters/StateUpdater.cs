@@ -6,12 +6,12 @@ internal static class StateUpdater
 {
     private static bool CanUseHealAction =>
         //PvP
-        (DataCenter.IsPvP)
+        DataCenter.IsPvP
         //Job
-        || (DataCenter.Role == JobRole.Healer || Service.Config.UseHealWhenNotAHealer)
+        || ((DataCenter.Role == JobRole.Healer || Service.Config.UseHealWhenNotAHealer)
         && Service.Config.AutoHeal
-        && (DataCenter.InCombat && CustomRotation.IsLongerThan(Service.Config.AutoHealTimeToKill)
-            || Service.Config.HealOutOfCombat);
+        && ((DataCenter.InCombat && CustomRotation.IsLongerThan(Service.Config.AutoHealTimeToKill))
+            || Service.Config.HealOutOfCombat));
 
     public static void UpdateState()
     {
@@ -19,7 +19,7 @@ internal static class StateUpdater
         DataCenter.AutoStatus = StatusFromAutomatic();
     }
 
-    static RandomDelay
+    static readonly RandomDelay
         _healDelay1 = new(() => Service.Config.HealDelay),
         _healDelay2 = new(() => Service.Config.HealDelay),
         _healDelay3 = new(() => Service.Config.HealDelay),
@@ -29,12 +29,12 @@ internal static class StateUpdater
     {
         AutoStatus status = AutoStatus.None;
 
-        if (DataCenter.DeathTarget is not null)
+        if (DataCenter.DeathTarget != null)
         {
             status |= AutoStatus.Raise;
         }
 
-        if (DataCenter.Role is JobRole.Melee && ActionUpdater.NextGCDAction != null
+        if (DataCenter.Role == JobRole.Melee && ActionUpdater.NextGCDAction != null
             && Service.Config.AutoUseTrueNorth)
         {
             var id = ActionUpdater.NextGCDAction.ID;
@@ -116,13 +116,11 @@ internal static class StateUpdater
 
                 if (DataCenter.Role == JobRole.Healer || DataCenter.Job == ECommons.ExcelServices.Job.PLD) // Help defense.
                 {
-                    if (DataCenter.PartyMembers.Any((tank) =>
+                    if (DataCenter.PartyMembers.Any(tank =>
                     {
                         var attackingTankObj = DataCenter.AllHostileTargets.Where(t => t.TargetObjectId == tank.GameObjectId);
 
-                        if (attackingTankObj.Count() != 1) return false;
-
-                        return DataCenter.IsHostileCastingToTank;
+                        return attackingTankObj.Count() == 1 && DataCenter.IsHostileCastingToTank;
                     }))
                     {
                         status |= AutoStatus.DefenseSingle;
@@ -170,7 +168,7 @@ internal static class StateUpdater
                 status |= AutoStatus.Dispel;
             }
             else if (!DataCenter.HasHostilesInRange || Service.Config.DispelAll
-            || (DataCenter.IsPvP))
+            || DataCenter.IsPvP)
             {
                 status |= AutoStatus.Dispel;
             }
@@ -195,27 +193,24 @@ internal static class StateUpdater
 
         return status;
     }
+
     static float GetHealingOfTimeRatio(IBattleChara target, params StatusID[] statusIds)
     {
-        const float buffWholeTime = 15;
-
-        var buffTime = target.StatusTime(false, statusIds);
-
-        return Math.Min(1, buffTime / buffWholeTime);
+        const float buffWholeTime = 15f;
+        return Math.Min(1f, target.StatusTime(false, statusIds) / buffWholeTime);
     }
 
-    static int ShouldHealSingle(StatusID[] hotStatus, float healSingle, float healSingleHot) => DataCenter.PartyMembers.Count(p => ShouldHealSingle(p, hotStatus, healSingle, healSingleHot));
+    static int ShouldHealSingle(StatusID[] hotStatus, float healSingle, float healSingleHot)
+    {
+        return DataCenter.PartyMembers.Count(p => ShouldHealSingle(p, hotStatus, healSingle, healSingleHot));
+    }
 
     static bool ShouldHealSingle(IBattleChara target, StatusID[] hotStatus, float healSingle, float healSingleHot)
     {
-        if (target == null) return false;
+        if (target == null || target.GetHealthRatio() == 0 || !target.NeedHealing())
+            return false;
 
-        var ratio = GetHealingOfTimeRatio(target, hotStatus);
-
-        var h = target.GetHealthRatio();
-        if (h == 0 || !target.NeedHealing()) return false;
-
-        return h < Lerp(healSingle, healSingleHot, ratio);
+        return target.GetHealthRatio() < Lerp(healSingle, healSingleHot, GetHealingOfTimeRatio(target, hotStatus));
     }
 
     static float Lerp(float a, float b, float ratio)
@@ -227,17 +222,12 @@ internal static class StateUpdater
     {
         var status = DataCenter.SpecialType switch
         {
-            SpecialCommandType.HealArea => AutoStatus.HealAreaSpell
-                                | AutoStatus.HealAreaAbility,
-            SpecialCommandType.HealSingle => AutoStatus.HealSingleSpell
-                                | AutoStatus.HealSingleAbility,
+            SpecialCommandType.HealArea => AutoStatus.HealAreaSpell | AutoStatus.HealAreaAbility,
+            SpecialCommandType.HealSingle => AutoStatus.HealSingleSpell | AutoStatus.HealSingleAbility,
             SpecialCommandType.DefenseArea => AutoStatus.DefenseArea,
             SpecialCommandType.DefenseSingle => AutoStatus.DefenseSingle,
-            SpecialCommandType.DispelStancePositional => AutoStatus.Dispel
-                                | AutoStatus.TankStance
-                                | AutoStatus.Positional,
-            SpecialCommandType.RaiseShirk => AutoStatus.Raise
-                                | AutoStatus.Shirk,
+            SpecialCommandType.DispelStancePositional => AutoStatus.Dispel | AutoStatus.TankStance | AutoStatus.Positional,
+            SpecialCommandType.RaiseShirk => AutoStatus.Raise | AutoStatus.Shirk,
             SpecialCommandType.MoveForward => AutoStatus.MoveForward,
             SpecialCommandType.MoveBack => AutoStatus.MoveBack,
             SpecialCommandType.AntiKnockback => AutoStatus.AntiKnockback,
@@ -251,9 +241,7 @@ internal static class StateUpdater
         AddStatus(ref status, AutoStatus.HealSingleSpell | AutoStatus.HealSingleAbility, DataCenter.RightSet.HealSingleConditionSet);
         AddStatus(ref status, AutoStatus.DefenseArea, DataCenter.RightSet.DefenseAreaConditionSet);
         AddStatus(ref status, AutoStatus.DefenseSingle, DataCenter.RightSet.DefenseSingleConditionSet);
-
-        AddStatus(ref status, AutoStatus.Dispel | AutoStatus.TankStance | AutoStatus.Positional,
-            DataCenter.RightSet.DispelStancePositionalConditionSet);
+        AddStatus(ref status, AutoStatus.Dispel | AutoStatus.TankStance | AutoStatus.Positional, DataCenter.RightSet.DispelStancePositionalConditionSet);
         AddStatus(ref status, AutoStatus.Raise | AutoStatus.Shirk, DataCenter.RightSet.RaiseShirkConditionSet);
         AddStatus(ref status, AutoStatus.MoveForward, DataCenter.RightSet.MoveForwardConditionSet);
         AddStatus(ref status, AutoStatus.MoveBack, DataCenter.RightSet.MoveBackConditionSet);
@@ -263,6 +251,7 @@ internal static class StateUpdater
         {
             status |= AutoStatus.Burst;
         }
+
         AddStatus(ref status, AutoStatus.Speed, DataCenter.RightSet.SpeedConditionSet);
         AddStatus(ref status, AutoStatus.LimitBreak, DataCenter.RightSet.LimitBreakConditionSet);
 
@@ -276,8 +265,9 @@ internal static class StateUpdater
 
     private static void AddStatus(ref AutoStatus status, AutoStatus flag, Func<bool> getValue)
     {
-        if (status.HasFlag(flag) | !getValue()) return;
-
-        status |= flag;
+        if (!status.HasFlag(flag) && getValue())
+        {
+            status |= flag;
+        }
     }
 }
