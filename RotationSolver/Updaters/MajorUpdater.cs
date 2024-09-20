@@ -1,8 +1,5 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
-using Dalamud.Game.Text;
-using Dalamud.Game.Text.SeStringHandling;
-using Dalamud.Game.Text.SeStringHandling.Payloads;
 using Dalamud.Plugin.Services;
 using ECommons.DalamudServices;
 using ECommons.GameHelpers;
@@ -28,9 +25,8 @@ internal static class MajorUpdater
         && !Svc.Condition[ConditionFlag.LoggingOut]
         && Player.Available;
 
-    private static bool _work;
     private static Exception? _threadException;
-    private static DateTime _lastUpdatedWork = DateTime.Now;
+    private static DateTime _lastUpdatedWork = DateTime.UtcNow;
     private static DateTime _warningsLastDisplayed = DateTime.MinValue;
 
     private unsafe static void FrameworkUpdate(IFramework framework)
@@ -71,6 +67,9 @@ internal static class MajorUpdater
             {
                 _threadException = ex;
                 Svc.Log.Error(ex, "Main Thread Exception");
+                if (Service.Config.InDebug)
+#pragma warning disable CS0436
+                    WarningHelper.AddSystemWarning("Main Thread Exception");
             }
         }
 
@@ -81,126 +80,56 @@ internal static class MajorUpdater
     {
         if (DataCenter.SystemWarnings.Any())
         {
+            var warningsToRemove = new List<string>();
+
             foreach (var warning in DataCenter.SystemWarnings)
             {
                 if ((warning.Value + TimeSpan.FromMinutes(10)) < DateTime.Now)
                 {
-                    DataCenter.SystemWarnings.Remove(warning.Key);
+                    warningsToRemove.Add(warning.Key);
                 }
             }
 
-            if (_warningsLastDisplayed + TimeSpan.FromMinutes(10) < DateTime.Now)
+            foreach (var warningKey in warningsToRemove)
             {
-                _warningsLastDisplayed = DateTime.Now;
-#pragma warning disable 0436
-                WarningHelper.ShowWarning("System warnings are present.");
+                DataCenter.SystemWarnings.Remove(warningKey);
             }
         }
     }
 
-    private static readonly object _workLock = new object();
-
     private static void HandleWorkUpdate()
     {
+        var now = DateTime.UtcNow;
         try
         {
-            lock (_workLock)
-            {
-                if (_work) return;
-                if (DateTime.Now - _lastUpdatedWork < TimeSpan.FromSeconds(Service.Config.MinUpdatingTime))
-                    return;
+            if (now - _lastUpdatedWork < TimeSpan.FromSeconds(Service.Config.MinUpdatingTime))
+                return;
 
-                _work = true;
-                _lastUpdatedWork = DateTime.Now;
-            }
+            _lastUpdatedWork = now;
 
-            if (Service.Config.UseWorkTask)
-            {
-                Task.Run(UpdateWork).ContinueWith(t =>
-                {
-                    if (t.Exception != null)
-                    {
-                        Svc.Log.Error(t.Exception, "Worker Task Exception");
-                    }
-                    _work = false;
-                }, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
-            }
-            else
+            try
             {
                 UpdateWork();
-                _work = false;
+            }
+            catch (Exception tEx)
+            {
+                Svc.Log.Error(tEx, "Worker Task Exception");
+                if (Service.Config.InDebug)
+#pragma warning disable CS0436
+                    WarningHelper.AddSystemWarning("Worker Task Exception");
             }
         }
         catch (Exception ex)
         {
             Svc.Log.Error(ex, "Worker Exception in HandleWorkUpdate");
-            _work = false;
+            if (Service.Config.InDebug)
+#pragma warning disable CS0436
+                WarningHelper.AddSystemWarning("Worker Exception in HandleWorkUpdate");
         }
     }
 
-    private static XivChatEntry BuildWarningChatEntry()
-    {
-        var linkPayload = Svc.PluginInterface.AddChatLinkHandler(3, OpenWarningChatHandler);
-        return new XivChatEntry
-        {
-            Message = new SeString(new TextPayload("RotationSolver Reborn: System warnings are present. Click here to view."), linkPayload),
-            Type = XivChatType.ErrorMessage,
-        };
-    }
-
-    private static void OpenWarningChatHandler(uint arg1, SeString @string)
-    {
-        if (arg1 == 3)
-        {
-            RotationSolverPlugin.OpenConfigWindow();
-        }
-    }
-
-    private static void UpdateHighlight()
-    {
-        if (!Service.Config.TeachingMode || ActionUpdater.NextAction is not IAction nextAction) return;
-
-        HotbarID? hotbar = nextAction switch
-        {
-            IBaseItem item => new HotbarID(HotbarSlotType.Item, item.ID),
-            IBaseAction baseAction when baseAction.Action.ActionCategory.Row is 10 or 11 => Svc.Data.GetExcelSheet<GeneralAction>()?.FirstOrDefault(g => g.Action.Row == baseAction.ID) is GeneralAction gAct ? new HotbarID(HotbarSlotType.GeneralAction, gAct.RowId) : null,
-            IBaseAction baseAction => new HotbarID(HotbarSlotType.Action, baseAction.AdjustedID),
-            _ => null
-        };
-
-        if (hotbar.HasValue)
-        {
-            HotbarHighlightManager.HotbarIDs.Add(hotbar.Value);
-        }
-    }
-
-    private static void ShowWarning()
-    {
-        if (!Svc.PluginInterface.InstalledPlugins.Any(p => p.InternalName == "Avarice"))
-        {
-            UiString.AvariceWarning.GetDescription().ShowWarning(0);
-        }
-        if (!Svc.PluginInterface.InstalledPlugins.Any(p => p.InternalName == "TextToTalk"))
-        {
-            UiString.TextToTalkWarning.GetDescription().ShowWarning(0);
-        }
-    }
-
-    public static void Enable()
-    {
-        ActionSequencerUpdater.Enable(Svc.PluginInterface.ConfigDirectory.FullName + "\\Conditions");
-        Svc.Framework.Update += FrameworkUpdate;
-    }
-
-    private static Exception? _innerException;
     private static void UpdateWork()
     {
-        var waitingTime = (DateTime.Now - _lastUpdatedWork).TotalMilliseconds;
-        if (waitingTime > 100)
-        {
-            Svc.Log.Warning($"The time for completing a running cycle for RS is {waitingTime:F2} ms, try disabling the option \"UseWorkTask\" to get better performance or check your other running plugins for one of them using too many resources and try disabling that.");
-        }
-
         if (!IsValid)
         {
             ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
@@ -230,14 +159,49 @@ internal static class MajorUpdater
         }
         catch (Exception ex)
         {
-            if (_innerException != ex)
-            {
-                _innerException = ex;
-                Svc.Log.Error(ex, "Inner Worker Exception");
-            }
+            Svc.Log.Error(ex, "Inner Worker Exception");
+            if (Service.Config.InDebug)
+#pragma warning disable CS0436
+                WarningHelper.AddSystemWarning("Inner Worker Exception");
         }
+    }
 
-        _work = false;
+    private static void UpdateHighlight()
+    {
+        if (!Service.Config.TeachingMode || ActionUpdater.NextAction is not IAction nextAction) return;
+
+        HotbarID? hotbar = nextAction switch
+        {
+            IBaseItem item => new HotbarID(HotbarSlotType.Item, item.ID),
+            IBaseAction baseAction when baseAction.Action.ActionCategory.Row is 10 or 11 => Svc.Data.GetExcelSheet<GeneralAction>()?.FirstOrDefault(g => g.Action.Row == baseAction.ID) is GeneralAction gAct ? new HotbarID(HotbarSlotType.GeneralAction, gAct.RowId) : null,
+            IBaseAction baseAction => new HotbarID(HotbarSlotType.Action, baseAction.AdjustedID),
+            _ => null
+        };
+
+        if (hotbar.HasValue)
+        {
+            HotbarHighlightManager.HotbarIDs.Add(hotbar.Value);
+        }
+    }
+
+    private static void ShowWarning()
+    {
+        if (!Svc.PluginInterface.InstalledPlugins.Any(p => p.InternalName == "Avarice"))
+        {
+#pragma warning disable CS0436
+            WarningHelper.AddSystemWarning(UiString.AvariceWarning.GetDescription());
+        }
+        if (!Svc.PluginInterface.InstalledPlugins.Any(p => p.InternalName == "TextToTalk"))
+        {
+#pragma warning disable CS0436
+            WarningHelper.AddSystemWarning(UiString.TextToTalkWarning.GetDescription());
+        }
+    }
+
+    public static void Enable()
+    {
+        ActionSequencerUpdater.Enable(Svc.PluginInterface.ConfigDirectory.FullName + "\\Conditions");
+        Svc.Framework.Update += FrameworkUpdate;
     }
 
     static DateTime _closeWindowTime = DateTime.Now;

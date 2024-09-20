@@ -17,8 +17,7 @@ public static class ActionIdHelper
     public unsafe static bool IsCoolingDown(this ActionID actionID)
     {
         var action = actionID.GetAction();
-        if (action == null) return false;
-        return IsCoolingDown(action.GetCoolDownGroup());
+        return action != null && IsCoolingDown(action.GetCoolDownGroup());
     }
 
     /// <summary>
@@ -39,7 +38,13 @@ public static class ActionIdHelper
     /// <returns>A pointer to the cooldown details.</returns>
     public static unsafe RecastDetail* GetCoolDownDetail(byte cdGroup)
     {
-        return ActionManager.Instance()->GetRecastGroupDetail(cdGroup - 1);
+        var actionManager = ActionManager.Instance();
+        if (actionManager == null)
+        {
+            Svc.Log.Error("ActionManager.Instance() returned null.");
+            return null;
+        }
+        return actionManager->GetRecastGroupDetail(cdGroup - 1);
     }
 
     /// <summary>

@@ -10,6 +10,7 @@ internal class OtherConfiguration
 
     public static SortedList<uint, float> AnimationLockTime = [];
 
+    public static Dictionary<uint, string[]> PrioTargetNames = [];
     public static Dictionary<uint, string[]> NoHostileNames = [];
     public static Dictionary<uint, string[]> NoProvokeNames = [];
     public static Dictionary<uint, Vector3[]> BeneficialPositions = [];
@@ -31,6 +32,7 @@ internal class OtherConfiguration
         Task.Run(() => InitOne(ref DangerousStatus, nameof(DangerousStatus)));
         Task.Run(() => InitOne(ref PriorityStatus, nameof(PriorityStatus)));
         Task.Run(() => InitOne(ref InvincibleStatus, nameof(InvincibleStatus)));
+        Task.Run(() => InitOne(ref PrioTargetNames, nameof(PrioTargetNames)));
         Task.Run(() => InitOne(ref NoHostileNames, nameof(NoHostileNames)));
         Task.Run(() => InitOne(ref NoProvokeNames, nameof(NoProvokeNames)));
         Task.Run(() => InitOne(ref AnimationLockTime, nameof(AnimationLockTime)));
@@ -49,6 +51,7 @@ internal class OtherConfiguration
             await SavePriorityStatus();
             await SaveDangerousStatus();
             await SaveInvincibleStatus();
+            await SavePrioTargetNames();
             await SaveNoHostileNames();
             await SaveAnimationLockTime();
             await SaveHostileCastingArea();
@@ -60,15 +63,65 @@ internal class OtherConfiguration
             await SaveHostileCastingKnockback();
         });
     }
+    #region Action Tab
+    public static void ResetHostileCastingArea()
+    {
+        InitOne(ref HostileCastingArea, nameof(HostileCastingArea), true, true);
+        SaveHostileCastingArea().Wait();
+    }
+
+    public static void ResetHostileCastingTank()
+    {
+        InitOne(ref HostileCastingTank, nameof(HostileCastingTank), true, true);
+        SaveHostileCastingTank().Wait();
+    }
+
+    public static void ResetHostileCastingKnockback()
+    {
+        InitOne(ref HostileCastingKnockback, nameof(HostileCastingKnockback), true, true);
+        SaveHostileCastingKnockback().Wait();
+    }
+
+    public static Task SaveHostileCastingArea()
+    {
+        return Task.Run(() => Save(HostileCastingArea, nameof(HostileCastingArea)));
+    }
+
+    public static Task SaveHostileCastingTank()
+    {
+        return Task.Run(() => Save(HostileCastingTank, nameof(HostileCastingTank)));
+    }
 
     private static Task SaveHostileCastingKnockback()
     {
         return Task.Run(() => Save(HostileCastingKnockback, nameof(HostileCastingKnockback)));
     }
+    #endregion
 
-    public static Task SaveNoCastingStatus()
+    #region Status Tab
+
+    public static void ResetPriorityStatus()
     {
-        return Task.Run(() => Save(NoCastingStatus, nameof(NoCastingStatus)));
+        InitOne(ref PriorityStatus, nameof(PriorityStatus), true, true);
+        SavePriorityStatus().Wait();
+    }
+
+    public static void ResetInvincibleStatus()
+    {
+        InitOne(ref InvincibleStatus, nameof(InvincibleStatus), true, true);
+        SaveInvincibleStatus().Wait();
+    }
+
+    public static void ResetDangerousStatus()
+    {
+        InitOne(ref DangerousStatus, nameof(DangerousStatus), true, true);
+        SaveDangerousStatus().Wait();
+    }
+
+    public static void ResetNoCastingStatus()
+    {
+        InitOne(ref NoCastingStatus, nameof(NoCastingStatus), true, true);
+        SaveNoCastingStatus().Wait();
     }
 
     public static Task SavePriorityStatus()
@@ -76,6 +129,22 @@ internal class OtherConfiguration
         return Task.Run(() => Save(PriorityStatus, nameof(PriorityStatus)));
     }
 
+    public static Task SaveInvincibleStatus()
+    {
+        return Task.Run(() => Save(InvincibleStatus, nameof(InvincibleStatus)));
+    }
+
+    public static Task SaveDangerousStatus()
+    {
+        return Task.Run(() => Save(DangerousStatus, nameof(DangerousStatus)));
+    }
+
+    public static Task SaveNoCastingStatus()
+    {
+        return Task.Run(() => Save(NoCastingStatus, nameof(NoCastingStatus)));
+    }
+
+    #endregion
     public static Task SaveRotationSolverRecord()
     {
         return Task.Run(() => Save(RotationSolverRecord, nameof(RotationSolverRecord)));
@@ -90,24 +159,9 @@ internal class OtherConfiguration
         return Task.Run(() => Save(BeneficialPositions, nameof(BeneficialPositions)));
     }
 
-    public static Task SaveHostileCastingArea()
+    public static Task SavePrioTargetNames()
     {
-        return Task.Run(() => Save(HostileCastingArea, nameof(HostileCastingArea)));
-    }
-
-    public static Task SaveHostileCastingTank()
-    {
-        return Task.Run(() => Save(HostileCastingTank, nameof(HostileCastingTank)));
-    }
-
-    public static Task SaveDangerousStatus()
-    {
-        return Task.Run(() => Save(DangerousStatus, nameof(DangerousStatus)));
-    }
-
-    public static Task SaveInvincibleStatus()
-    {
-        return Task.Run(() => Save(InvincibleStatus, nameof(InvincibleStatus)));
+        return Task.Run(() => Save(PrioTargetNames, nameof(PrioTargetNames)));
     }
 
     public static Task SaveNoHostileNames()
@@ -146,21 +200,24 @@ internal class OtherConfiguration
         }
     }
 
-    private static void InitOne<T>(ref T value, string name, bool download = true)
+    private static void InitOne<T>(ref T value, string name, bool download = true, bool forceDownload = false)
     {
         var path = GetFilePath(name);
-        if (File.Exists(path))
+        Svc.Log.Info($"Initializing {name} from {path}");
+
+        if (File.Exists(path) && !forceDownload)
         {
             try
             {
                 value = JsonConvert.DeserializeObject<T>(File.ReadAllText(path))!;
+                Svc.Log.Info($"Loaded {name} from local file.");
             }
             catch (Exception ex)
             {
-                Svc.Log.Warning(ex, $"Failed to load {name}.");
+                Svc.Log.Warning(ex, $"Failed to load {name} from local file.");
             }
         }
-        else if (download)
+        else if (download || forceDownload)
         {
             try
             {
@@ -171,15 +228,16 @@ internal class OtherConfiguration
                 value = JsonConvert.DeserializeObject<T>(str, new JsonSerializerSettings()
                 {
                     MissingMemberHandling = MissingMemberHandling.Error,
-                    Error = delegate (object sender, Newtonsoft.Json.Serialization.ErrorEventArgs args)
+                    Error = delegate (object? sender, Newtonsoft.Json.Serialization.ErrorEventArgs args) // Allow sender to be null
                     {
                         args.ErrorContext.Handled = true;
                     }
-                    !
                 })!;
+                Svc.Log.Info($"Downloaded and loaded {name} from GitHub.");
             }
-            catch
+            catch (Exception ex)
             {
+                Svc.Log.Warning(ex, $"Failed to download {name} from GitHub.");
                 SavePath(value, path);
             }
         }

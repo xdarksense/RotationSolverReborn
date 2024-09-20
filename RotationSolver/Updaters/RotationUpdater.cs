@@ -6,7 +6,6 @@ using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Rotations.Duties;
 using RotationSolver.Data;
 using RotationSolver.Helpers;
-using System;
 
 
 namespace RotationSolver.Updaters;
@@ -188,22 +187,28 @@ internal static class RotationUpdater
     private static CustomRotationGroup[] LoadCustomRotationGroup(List<Assembly> assemblies)
     {
         var rotationList = new List<Type>();
+
         foreach (var assembly in assemblies)
         {
             foreach (var type in TryGetTypes(assembly))
             {
+                var apiAttribute = type.GetCustomAttribute<ApiAttribute>();
+                var info = assembly.GetInfo();
+                var authorName = info.Author ?? "Unknown Author";
+
                 if (type.GetInterfaces().Contains(typeof(ICustomRotation))
-                    && !type.IsAbstract && !type.IsInterface && type.GetConstructor([]) != null
-                    && type.GetCustomAttribute<ApiAttribute>()?.ApiVersion == Service.ApiVersion)
+                    && !type.IsAbstract && !type.IsInterface && type.GetConstructor(Type.EmptyTypes) != null)
                 {
-                    rotationList.Add(type);
+                    if (apiAttribute?.ApiVersion == Service.ApiVersion)
+                    {
+                        rotationList.Add(type);
+                    }
+                    else
+                    {
+                        var warning = $"Failed to load rotation {type.Assembly.GetName().Name} by {authorName} due to API update";
+                        WarningHelper.AddSystemWarning(warning);
+                    }
                 }
-                //else if (type.GetInterfaces().Contains(typeof(ICustomRotation))
-                //    && !type.IsAbstract && !type.IsInterface && type.GetConstructor([]) != null)
-                //{
-                //    var name = type.GetCustomAttribute<RotationAttribute>()?.Name ?? "Unknown";
-                //    Svc.Chat.PrintError($"Failed to load rotation {name} from assembly {assembly}");
-                //}
             }
         }
 
@@ -216,7 +221,7 @@ internal static class RotationUpdater
             var jobId = attr.Jobs[0];
             if (!rotationGroups.TryGetValue(jobId, out var value))
             {
-                value = [];
+                value = new List<Type>();
                 rotationGroups.Add(jobId, value);
             }
 
@@ -233,7 +238,7 @@ internal static class RotationUpdater
                 rotations));
         }
 
-        return [.. result];
+        return result.ToArray();
     }
 
 
@@ -321,6 +326,7 @@ internal static class RotationUpdater
         }
         catch (Exception ex)
         {
+            WarningHelper.AddSystemWarning($"Failed to download from {url} Please check VPN");
             Svc.Log.Error(ex, $"Failed to download from {url}");
         }
         return false;
@@ -345,6 +351,7 @@ internal static class RotationUpdater
         }
         catch (Exception ex)
         {
+            WarningHelper.AddSystemWarning("Failed to load " + filePath);
             Svc.Log.Warning(ex, "Failed to load " + filePath);
         }
         return null;
@@ -492,6 +499,7 @@ internal static class RotationUpdater
             }
             catch (Exception ex)
             {
+                WarningHelper.AddSystemWarning($"Failed to create the rotation: {t.Name}");
                 Svc.Log.Error(ex, $"Failed to create the rotation: {t.Name}");
                 return null;
             }
@@ -501,25 +509,36 @@ internal static class RotationUpdater
     private static void UpdateCustomRotation()
     {
         var nowJob = (Job)Player.Object.ClassJob.Id;
+        Svc.Log.Information($"Current Job: {nowJob}");
 
         foreach (var group in CustomRotations)
         {
             if (!group.ClassJobIds.Contains(nowJob)) continue;
+            Svc.Log.Information($"Found matching group for job: {nowJob}");
 
             var rotation = GetChosenRotation(group);
+            Svc.Log.Information($"Chosen Rotation: {rotation?.Name}");
+
             if (rotation != DataCenter.RightNowRotation?.GetType())
             {
                 var instance = GetRotation(rotation);
-                instance?.OnTerritoryChanged();
+                if (instance == null)
+                {
+                    Svc.Log.Error($"Failed to create instance for rotation: {rotation?.Name}");
+                    continue;
+                }
+
+                instance.OnTerritoryChanged();
                 DataCenter.RightNowRotation = instance;
             }
-            RightRotationActions = DataCenter.RightNowRotation?.AllActions ?? [];
+
+            RightRotationActions = DataCenter.RightNowRotation?.AllActions ?? Array.Empty<IAction>();
             return;
         }
 
         CustomRotation.MoveTarget = null;
         DataCenter.RightNowRotation = null;
-        RightRotationActions = [];
+        RightRotationActions = Array.Empty<IAction>();
 
         static ICustomRotation? GetRotation(Type? t)
         {
@@ -530,6 +549,7 @@ internal static class RotationUpdater
             }
             catch (Exception ex)
             {
+                WarningHelper.AddSystemWarning($"Failed to create the rotation: {t.Name}");
                 Svc.Log.Error(ex, $"Failed to create the rotation: {t.Name}");
                 return null;
             }

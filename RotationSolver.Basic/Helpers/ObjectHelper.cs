@@ -9,7 +9,6 @@ using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
-using Lumina.Excel.GeneratedSheets;
 using RotationSolver.Basic.Configuration;
 using System.Text.RegularExpressions;
 
@@ -26,10 +25,9 @@ public static class ObjectHelper
         EventHandlerType.Quest,
     };
 
-    internal static BNpcBase? GetObjectNPC(this IGameObject obj)
+    internal static Lumina.Excel.GeneratedSheets.BNpcBase? GetObjectNPC(this IGameObject obj)
     {
-        if (obj == null) return null;
-        return Service.GetSheet<BNpcBase>().GetRow(obj.DataId);
+        return obj == null ? null : Service.GetSheet<Lumina.Excel.GeneratedSheets.BNpcBase>().GetRow(obj.DataId);
     }
 
     internal static bool CanProvoke(this IGameObject target)
@@ -37,15 +35,15 @@ public static class ObjectHelper
         if (target == null) return false;
 
         //Removed the listed names.
-        IEnumerable<string> names = Array.Empty<string>();
         if (OtherConfiguration.NoProvokeNames.TryGetValue(Svc.ClientState.TerritoryType, out var ns1))
-            names = names.Union(ns1);
+        {
+            var names = ns1.Where(n => !string.IsNullOrEmpty(n) && new Regex(n).Match(target.Name.ToString()).Success);
+            if (names.Any()) return false;
+        }
 
-        if (names.Any(n => !string.IsNullOrEmpty(n) && new Regex(n).Match(target.Name.ToString()).Success)) return false;
-
-        //Target can move or two big and has a target
+        //Target can move or too big and has a target
         if ((target.GetObjectNPC()?.Unknown12 == 0 || target.HitboxRadius >= 5)
-        && (target.TargetObject?.IsValid() ?? false))
+            && (target.TargetObject?.IsValid() ?? false))
         {
             //the target is not a tank role
             if (Svc.Objects.SearchById(target.TargetObjectId) is IBattleChara battle
@@ -60,37 +58,33 @@ public static class ObjectHelper
 
     internal static bool HasPositional(this IGameObject obj)
     {
-        if (obj == null) return false;
-        return !(obj.GetObjectNPC()?.Unknown10 ?? false);
+        return obj != null && !(obj.GetObjectNPC()?.Unknown10 ?? false);
     }
 
     internal static unsafe bool IsOthersPlayers(this IGameObject obj)
     {
         //SpecialType but no NamePlateIcon
-        if (_eventType.Contains(obj.GetEventType()))
-        {
-            return obj.GetNamePlateIcon() == 0;
-        }
-        return false;
+        return _eventType.Contains(obj.GetEventType()) && obj.GetNamePlateIcon() == 0;
     }
 
     internal static bool IsAttackable(this IBattleChara battleChara)
     {
-        //Dead.
+        // Dead.
         if (Service.Config.FilterOneHpInvincible && battleChara.CurrentHp <= 1) return false;
 
         if (battleChara.StatusList.Any(StatusHelper.IsInvincible)) return false;
 
         if (Svc.ClientState == null) return false;
 
-        //In No Hostiles Names
-        IEnumerable<string> names = Array.Empty<string>();
-        if (OtherConfiguration.NoHostileNames.TryGetValue(Svc.ClientState.TerritoryType, out var ns1))
-            names = names.Union(ns1);
+        // In No Hostiles Names
+        if (OtherConfiguration.NoHostileNames != null &&
+            OtherConfiguration.NoHostileNames.TryGetValue(Svc.ClientState.TerritoryType, out var ns1))
+        {
+            var names = ns1.Where(n => !string.IsNullOrEmpty(n) && new Regex(n).Match(battleChara.Name.TextValue).Success);
+            if (names.Any()) return false;
+        }
 
-        if (names.Any(n => !string.IsNullOrEmpty(n) && new Regex(n).Match(battleChara.Name.TextValue).Success)) return false;
-
-        //Fate
+        // Fate
         if (DataCenter.TerritoryContentType != TerritoryContentType.Eureka)
         {
             var tarFateId = battleChara.FateId();
@@ -100,15 +94,14 @@ public static class ObjectHelper
         if (Service.Config.AddEnemyListToHostile)
         {
             if (battleChara.IsInEnemiesList()) return true;
-            //Only attack
+            // Only attack
             if (Service.Config.OnlyAttackInEnemyList) return false;
         }
 
-        //Tar on me
+        // Tar on me
         if (battleChara.TargetObject == Player.Object
-        || battleChara.TargetObject?.OwnerId == Player.Object.GameObjectId) return true;
+            || battleChara.TargetObject?.OwnerId == Player.Object.GameObjectId) return true;
 
-        //Remove other's treasure.
         if (battleChara.IsOthersPlayers()) return false;
 
         if (battleChara.IsTopPriorityHostile()) return true;
@@ -158,11 +151,22 @@ public static class ObjectHelper
         && (!(DataCenter.IsPvP) && obj is IPlayerCharacter
         || ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, obj.Struct()));
 
-    internal static bool IsParty(this IGameObject IGameObject)
+    private static readonly object _lock = new object();
+
+    internal static bool IsParty(this IGameObject gameObject)
     {
-        if (IGameObject.GameObjectId == Player.Object.GameObjectId) return true;
-        if (Svc.Party.Any(p => p.GameObject?.GameObjectId == IGameObject.GameObjectId)) return true;
-        if (IGameObject.SubKind == 9) return true;
+        if (gameObject == null) return false;
+
+        // Use a lock to ensure thread safety
+        lock (_lock)
+        {
+            // Accessing Player.Object and Svc.Party within the lock to ensure thread safety
+            if (gameObject.GameObjectId == Player.Object?.GameObjectId) return true;
+            if (Svc.Party.Any(p => p.GameObject?.GameObjectId == gameObject.GameObjectId)) return true;
+            if (gameObject.SubKind == 9) return true;
+            //if (gameObject.GetNameplateKind() == NameplateKind.FriendlyBattleNPC) return true;
+        }
+
         return false;
     }
 
@@ -173,16 +177,10 @@ public static class ObjectHelper
 
     internal static bool IsDeathToRaise(this IGameObject obj)
     {
-        if (obj == null) return false;
-        if (!obj.IsDead) return false;
+        if (obj == null || !obj.IsDead || !obj.IsTargetable) return false;
         if (obj is IBattleChara b && b.CurrentHp != 0) return false;
-
-        if (!obj.IsTargetable) return false;
-
         if (obj.HasStatus(false, StatusID.Raise)) return false;
-
         if (!Service.Config.RaiseBrinkOfDeath && obj.HasStatus(false, StatusID.BrinkOfDeath)) return false;
-
         if (DataCenter.AllianceMembers.Any(c => c.CastTargetObjectId == obj.GameObjectId)) return false;
 
         return true;
@@ -190,9 +188,7 @@ public static class ObjectHelper
 
     internal static bool IsAlive(this IGameObject obj)
     {
-        if (obj is IBattleChara b && b.CurrentHp <= 1) return false;
-        if (!obj.IsTargetable) return false;
-        return true;
+        return obj is not IBattleChara b || b.CurrentHp > 1 && obj.IsTargetable;
     }
 
     /// <summary>
@@ -215,6 +211,16 @@ public static class ObjectHelper
 
         var fateId = DataCenter.FateId;
 
+        // Fetch prioritized target names
+        if (OtherConfiguration.PrioTargetNames.TryGetValue(Svc.ClientState.TerritoryType, out var prioTargetNames))
+        {
+            // If the target's name matches any prioritized names, it is attackable
+            if (obj is IBattleChara bpnc && prioTargetNames.Any(n => !string.IsNullOrEmpty(n) && new Regex(n).Match(bpnc.Name.TextValue).Success))
+            {
+                return true;
+            }
+        }
+
         if (obj is IBattleChara b && b.StatusList != null && b.StatusList.Any(StatusHelper.IsPriority)) return true;
 
         if (Service.Config.ChooseAttackMark && MarkingHelper.AttackSignTargets.FirstOrDefault(id => id != 0) == (long)obj.GameObjectId) return true;
@@ -226,11 +232,21 @@ public static class ObjectHelper
 
         // Hunting log and weapon
         if (Service.Config.TargetHuntingRelicLevePriority && icon is 60092 or 60096 or 71244) return true;
+        //60092 Hunt Target
+        //60096 Relic Weapon
+        //71244 Leve Target
 
         // Quest
         if (Service.Config.TargetQuestPriority && (icon is 71204 or 71144 or 71224 or 71344 || obj.GetEventType() is EventHandlerType.Quest)) return true;
+        //71204 Main Quest
+        //71144 Major Quest
+        //71224 Other Quest
+        //71344 Major Quest
 
         if (obj is IBattleChara npc && DataCenter.PrioritizedNameIds.Contains(npc.NameId)) return true;
+
+        // Check if the object is a BattleNpcPart
+        if (Service.Config.PrioEnemyParts && obj.GetBattleNPCSubKind() == BattleNpcSubKind.BattleNpcPart) return true;
 
         return false;
     }
@@ -243,7 +259,7 @@ public static class ObjectHelper
 
     internal static unsafe uint FateId(this IGameObject obj) => obj.Struct()->FateId;
 
-    static readonly Dictionary<uint, bool> _effectRangeCheck = [];
+    static readonly Dictionary<uint, bool> _effectRangeCheck = new();
 
     /// <summary>
     /// Determines whether the specified game object can be interrupted.
@@ -284,10 +300,9 @@ public static class ObjectHelper
         if (obj.IsDummy()) return true;
 
         //Fate
-        if (obj.GetTimeToKill(true) >= Service.Config.BossTimeToKill) return true;
-
-        return false;
+        return obj.GetTimeToKill(true) >= Service.Config.BossTimeToKill;
     }
+
     /// <summary>
     /// Is target a boss depends on the icon.
     /// </summary>
@@ -300,9 +315,8 @@ public static class ObjectHelper
         if (obj.IsDummy()) return true;
 
         //Icon
-        if (obj.GetObjectNPC()?.Rank is 1 or 2 /*or 4*/ or 6) return true;
-
-        return false;
+        var npc = obj.GetObjectNPC();
+        return npc?.Rank is 1 or 2 or 6;
     }
 
     /// <summary>
@@ -312,8 +326,7 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsDying(this IBattleChara b)
     {
-        if (b == null) return false;
-        if (b.IsDummy()) return false;
+        if (b == null || b.IsDummy()) return false;
         return b.GetTimeToKill() <= Service.Config.DyingTimeToKill || b.GetHealthRatio() < Service.Config.IsDyingConfig;
     }
 
@@ -381,11 +394,12 @@ public static class ObjectHelper
     internal static bool IsAttacked(this IBattleChara b)
     {
         if (b == null) return false;
+        var now = DateTime.Now;
         foreach (var (id, time) in DataCenter.AttackedTargets)
         {
             if (id == b.GameObjectId)
             {
-                return DateTime.Now - time > TimeSpan.FromSeconds(1);
+                return now - time <= TimeSpan.FromSeconds(1);
             }
         }
         return false;
@@ -506,4 +520,5 @@ public static class ObjectHelper
         var distance = Vector3.Distance(player.Position, obj.Position) - (player.HitboxRadius + obj.HitboxRadius);
         return distance;
     }
+
 }

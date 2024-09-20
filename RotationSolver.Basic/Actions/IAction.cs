@@ -1,43 +1,43 @@
 ﻿namespace RotationSolver.Basic.Actions;
 
 /// <summary>
-/// The action.
+/// Represents an action that can be performed.
 /// </summary>
 public interface IAction : ITexture, IEnoughLevel
 {
     /// <summary>
-    /// ID of this action.
+    /// Gets the ID of this action.
     /// </summary>
     uint ID { get; }
 
     /// <summary>
-    /// The adjusted Id of this action.
+    /// Gets the adjusted ID of this action.
     /// </summary>
     uint AdjustedID { get; }
 
     /// <summary>
-    /// The animation lock time of this action.
+    /// Gets the animation lock time of this action.
     /// </summary>
     float AnimationLockTime { get; }
 
     /// <summary>
-    /// The key of sorting this action.
+    /// Gets the key used for sorting this action.
     /// </summary>
     uint SortKey { get; }
 
     /// <summary>
-    /// Is in cd window.
+    /// Gets or sets a value indicating whether this action is in the cooldown window.
     /// </summary>
     bool IsInCooldown { get; set; }
 
     /// <summary>
-    /// The cd information.
+    /// Gets the cooldown information for this action.
     /// </summary>
     ICooldown Cooldown { get; }
 
     /// <summary>
-    /// How to use.
+    /// Uses the action.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>True if the action was successfully used; otherwise, false.</returns>
     bool Use();
 }

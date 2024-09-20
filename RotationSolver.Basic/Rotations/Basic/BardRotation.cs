@@ -332,7 +332,7 @@ partial class BardRotation
     // PvP
     static partial void ModifyPowerfulShotPvP(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyPitchPerfectPvP(ref ActionSetting setting)

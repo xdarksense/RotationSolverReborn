@@ -1,14 +1,17 @@
 ﻿namespace RotationSolver.Basic;
 
 /// <summary>
-/// The interface about Enough Level.
+/// Represents an entity that can determine if the player's level is sufficient for an action.
 /// </summary>
 public interface IEnoughLevel
 {
     /// <summary>
-    /// Player's level is enough for this action's usage.
+    /// Gets a value indicating whether the player's level is sufficient for this action's usage.
     /// </summary>
     bool EnoughLevel { get; }
 
-    internal byte Level { get; }
+    /// <summary>
+    /// Gets the required level for the action.
+    /// </summary>
+    byte Level { get; }
 }

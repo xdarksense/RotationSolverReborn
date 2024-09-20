@@ -7,49 +7,49 @@
 public enum CanUseOption : byte
 {
     /// <summary>
-    /// None.
+    /// No options specified.
     /// </summary>
     None,
 
     /// <summary>
-    /// Skip Status Provide Check
+    /// Skip status provide check.
     /// </summary>
-    [Description("Skip Status Provide Check")]
+    [Description("Skip status provide check")]
     SkipStatusProvideCheck = 1 << 0,
 
     /// <summary>
-    /// Skip Combo Check
+    /// Skip combo check.
     /// </summary>
-    [Description("Skip Combo Check")]
+    [Description("Skip combo check")]
     SkipComboCheck = 1 << 1,
 
     /// <summary>
-    /// Skip Casting and Moving Check
+    /// Skip casting and moving check.
     /// </summary>
-    [Description("Skip Casting and Moving Check")]
+    [Description("Skip casting and moving check")]
     SkipCastingCheck = 1 << 2,
 
     /// <summary>
     /// Indicates that all stacks should be used up.
     /// </summary>
-    [Description("Is it used up all stacks")]
+    [Description("Use up all stacks")]
     UsedUp = 1 << 3,
 
     /// <summary>
-    /// Is it on the last ability
+    /// Indicates that the action is the last ability.
     /// </summary>
-    [Description("Is it on the last ability")]
+    [Description("On the last ability")]
     OnLastAbility = 1 << 4,
 
     /// <summary>
-    /// Skip clipping Check
+    /// Skip clipping check.
     /// </summary>
-    [Description("Skip clipping Check")]
+    [Description("Skip clipping check")]
     SkipClippingCheck = 1 << 5,
 
     /// <summary>
-    /// Skip aoe Check
+    /// Skip AoE check.
     /// </summary>
-    [Description("Skip aoe Check")]
+    [Description("Skip AoE check")]
     SkipAoeCheck = 1 << 6,
 }

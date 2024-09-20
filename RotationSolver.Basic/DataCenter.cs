@@ -112,6 +112,13 @@ internal static class DataCenter
 
     public static bool IsInHighEndDuty => ContentFinder?.HighEndDuty ?? false;
 
+    public static ushort TerritoryID => Svc.ClientState.TerritoryType;
+    public static bool IsInUCoB => TerritoryID == 733;
+    public static bool IsInUwU => TerritoryID == 777;
+    public static bool IsInTEA => TerritoryID == 887;
+    public static bool IsInDSR => TerritoryID == 968;
+    public static bool IsInTOP => TerritoryID == 1122;
+
     public static TerritoryContentType TerritoryContentType =>
         (TerritoryContentType)(ContentFinder?.ContentType?.Value?.RowId ?? 0);
 
@@ -163,6 +170,7 @@ internal static class DataCenter
     }
 
     public static TargetHostileType RightNowTargetToHostileType => Service.Config.HostileType;
+    public static TinctureUseType RightNowTinctureUseType => Service.Config.TinctureType;
 
     public static unsafe ActionID LastComboAction => (ActionID)ActionManager.Instance()->Combo.Action;
     public static unsafe float ComboTime => ActionManager.Instance()->Combo.Timer;
@@ -175,6 +183,8 @@ internal static class DataCenter
             {
                 Service.Config.TargetingTypes.Add(TargetingType.LowHP);
                 Service.Config.TargetingTypes.Add(TargetingType.HighHP);
+                Service.Config.TargetingTypes.Add(TargetingType.Small);
+                Service.Config.TargetingTypes.Add(TargetingType.Big);
                 Service.Config.Save();
             }
 
@@ -210,7 +220,7 @@ internal static class DataCenter
 
     #region GCD
     // Returns the time remaining until the next GCD (Global Cooldown) after considering the current animation lock.
-    public static float NextAbilityToNextGCD => DefaultGCDRemain - ActionManagerHelper.GetCurrentAnimationLock();
+    public static float NextAbilityToNextGCD => DefaultGCDRemain - Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock);
 
     // Returns the total duration of the default GCD.
     public static float DefaultGCDTotal => ActionManagerHelper.GetDefaultRecastTime();
@@ -227,16 +237,15 @@ internal static class DataCenter
         Service.Config.OverrideActionAheadTimer ? Service.Config.Action4Head : CalculatedActionAhead;
 
     // Returns the calculated action ahead time as 25% of the total GCD time.
-    public static float CalculatedActionAhead => DefaultGCDTotal * 0.25f;
+    public static float CalculatedActionAhead => Math.Min(DefaultGCDTotal * 0.25f, DataCenter.MinAnimationLock);
 
     // Calculates the total GCD time for a given number of GCDs and an optional offset.
     public static float GCDTime(uint gcdCount = 0, float offset = 0)
         => ActionManagerHelper.GetDefaultRecastTime() * gcdCount + offset;
 
-    public static bool LastAbilityorNot => DataCenter.NextAbilityToNextGCD <= ActionManagerHelper.GetCurrentAnimationLock() + Service.Config.isLastAbilityTimer;
-    public static bool FirstAbilityorNot => DataCenter.NextAbilityToNextGCD >= ActionManagerHelper.GetCurrentAnimationLock() + Service.Config.isFirstAbilityTimer;
+    public static bool LastAbilityorNot => DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD <= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.isLastAbilityTimer);
+    public static bool FirstAbilityorNot => DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD >= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.isFirstAbilityTimer);
     #endregion
-
 
     public static uint[] BluSlots { get; internal set; } = new uint[24];
 
@@ -304,6 +313,30 @@ internal static class DataCenter
 
     public unsafe static IBattleChara[] AllianceMembers => AllTargets.Where(ObjectHelper.IsAlliance)
         .Where(b => b.Character()->CharacterData.OnlineStatus != 15 && b.IsTargetable).ToArray();
+
+    public static unsafe IBattleChara[] FriendlyNPCMembers
+    {
+        get
+        {
+            try
+            {
+                // Ensure Svc.Objects is not null
+                if (Svc.Objects == null)
+                {
+                    Svc.Log.Error("Svc.Objects is null");
+                    return Array.Empty<IBattleChara>();
+                }
+
+                // Filter and return friendly NPC members
+                return AllTargets.Where(obj => obj.GetNameplateKind() == NameplateKind.FriendlyBattleNPC).Where(b => b.IsTargetable).ToArray();
+            }
+            catch (Exception ex)
+            {
+                Svc.Log.Error($"Error in get_FriendlyNPCMembers: {ex.Message}");
+                return Array.Empty<IBattleChara>();
+            }
+        }
+    }
 
     public static IBattleChara[] AllHostileTargets
     {
@@ -383,11 +416,14 @@ internal static class DataCenter
         {
             var weakenPeople =
                 DataCenter.PartyMembers.Where(o => o is IBattleChara b && b.StatusList.Any(StatusHelper.CanDispel));
+            var weakenNPC =
+                DataCenter.FriendlyNPCMembers.Where(o => o is IBattleChara b && b.StatusList.Any(StatusHelper.CanDispel));
             var dyingPeople =
                 weakenPeople.Where(o => o is IBattleChara b && b.StatusList.Any(StatusHelper.IsDangerous));
 
             return dyingPeople.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault()
-                   ?? weakenPeople.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault();
+                   ?? weakenPeople.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault()
+                   ?? weakenNPC.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault();
         }
     }
 
@@ -507,57 +543,68 @@ internal static class DataCenter
 
     private static float GetPartyMemberHPRatio(IBattleChara member)
     {
-        // Check if the member is null and return 0 if true.
-        if (member == null) return 0;
+        if (member == null) throw new ArgumentNullException(nameof(member));
 
-        // Check if the current time is not within the effect time or if the member's HP is not in the HealHP dictionary.
-        if (!DataCenter.InEffectTime || !DataCenter.HealHP.TryGetValue(member.GameObjectId, out var hp))
+        if (!DataCenter.InEffectTime || !DataCenter.HealHP.TryGetValue(member.GameObjectId, out var healedHp))
         {
-            // Return the ratio of the member's current HP to their max HP.
             return (float)member.CurrentHp / member.MaxHp;
         }
 
-        // Get the member's current HP.
-        var rightHp = member.CurrentHp;
-        if (rightHp > 0)
+        var currentHp = member.CurrentHp;
+        if (currentHp > 0)
         {
-            // Try to get the last recorded HP for the member from the _lastHp dictionary.
-            if (!_lastHp.TryGetValue(member.GameObjectId, out var lastHp)) lastHp = rightHp;
-
-            // Check if the difference between the current HP and the last recorded HP equals the healed HP.
-            if (rightHp - lastHp == hp)
+            if (!_lastHp.TryGetValue(member.GameObjectId, out var lastHp))
             {
-                // Remove the member's entry from the HealHP dictionary and return the current HP ratio.
-                DataCenter.HealHP.Remove(member.GameObjectId);
-                return (float)member.CurrentHp / member.MaxHp;
+                lastHp = currentHp;
             }
 
-            // Return the minimum of 1 and the ratio of the sum of healed HP and current HP to the max HP.
-            return Math.Min(1, (hp + rightHp) / (float)member.MaxHp);
+            if (currentHp - lastHp == healedHp)
+            {
+                DataCenter.HealHP.Remove(member.GameObjectId);
+                return (float)currentHp / member.MaxHp;
+            }
+
+            return Math.Min(1, (healedHp + currentHp) / (float)member.MaxHp);
         }
 
-        // Return the ratio of the member's current HP to their max HP if the current HP is 0 or less.
-        return (float)member.CurrentHp / member.MaxHp;
+        return (float)currentHp / member.MaxHp;
     }
 
     public static IEnumerable<float> PartyMembersHP => RefinedHP.Values.Where(r => r > 0);
 
-    public static float PartyMembersMinHP => PartyMembersHP.Any()
-        ? PartyMembersHP.Min()
-        : 0;
+    public static float PartyMembersMinHP
+    {
+        get
+        {
+            var partyMembersHP = PartyMembersHP.ToList();
+            return partyMembersHP.Any() ? partyMembersHP.Min() : 0;
+        }
+    }
 
-    public static float PartyMembersAverHP => PartyMembersHP.Any()
-        ? PartyMembersHP.Average()
-        : 0;
+    public static float PartyMembersAverHP
+    {
+        get
+        {
+            var partyMembersHP = PartyMembersHP.ToList();
+            return partyMembersHP.Any() ? partyMembersHP.Average() : 0;
+        }
+    }
 
-    public static float PartyMembersDifferHP => PartyMembersHP.Any()
-        ? (float)Math.Sqrt(PartyMembersHP.Average(d => Math.Pow(d - PartyMembersAverHP, 2)))
-        : 0;
+    public static float PartyMembersDifferHP
+    {
+        get
+        {
+            var partyMembersHP = PartyMembersHP.ToList();
+            if (!partyMembersHP.Any()) return 0;
+
+            var averageHP = partyMembersHP.Average();
+            return (float)Math.Sqrt(partyMembersHP.Average(d => Math.Pow(d - averageHP, 2)));
+        }
+    }
 
     public static bool HPNotFull => PartyMembersMinHP < 1;
 
     public static uint CurrentMp => Math.Min(10000, Player.Object.CurrentMp + MPGain);
-
     #endregion
 
     internal static Queue<MacroItem> Macros { get; } = new Queue<MacroItem>();
@@ -681,6 +728,8 @@ internal static class DataCenter
     private static bool IsCastingVfx(Func<VfxNewData, bool> isVfx)
     {
         if (isVfx == null) return false;
+        if (DataCenter.VfxNewData == null) return false;
+
         try
         {
             foreach (var item in DataCenter.VfxNewData.Reverse())
@@ -691,8 +740,9 @@ internal static class DataCenter
                 }
             }
         }
-        catch
+        catch (Exception ex)
         {
+            Svc.Log.Error(ex, "Exception in IsCastingVfx");
         }
 
         return false;
@@ -702,6 +752,9 @@ internal static class DataCenter
     {
         return IsHostileCastingBase(h, (act) =>
         {
+            Svc.Log.Information($"Checking action {act.RowId} for hostile casting tank.");
+            Svc.Log.Information($"HostileCastingTank contains {act.RowId}: {OtherConfiguration.HostileCastingTank.Contains(act.RowId)}");
+            Svc.Log.Information($"CastTargetObjectId: {h.CastTargetObjectId}, TargetObjectId: {h.TargetObjectId}");
             return OtherConfiguration.HostileCastingTank.Contains(act.RowId)
                    || h.CastTargetObjectId == h.TargetObjectId;
         });
@@ -733,8 +786,9 @@ internal static class DataCenter
         var last = h.TotalCastTime - h.CurrentCastTime;
         var t = last - DataCenter.DefaultGCDTotal;
 
-        // Check if the total cast time is greater than 2.5 seconds and if the calculated time is within a valid range
-        if (!(h.TotalCastTime > 2.5 && t > 0 && t < DataCenter.GCDTime(2))) return false;
+        Svc.Log.Information($"TotalCastTime: {h.TotalCastTime}, CurrentCastTime: {h.CurrentCastTime}, DefaultGCDTotal: {DataCenter.DefaultGCDTotal}, t: {t}");
+        // Check if the total cast time is greater than the minimum cast time and if the calculated time is within a valid range
+        if (!(h.TotalCastTime > DataCenter.DefaultGCDTotal && t > 0 && t < DataCenter.GCDTime(1))) return false;
 
         // Get the action sheet
         var actionSheet = Service.GetSheet<Action>();
@@ -743,6 +797,8 @@ internal static class DataCenter
         // Get the action being cast
         var action = actionSheet.GetRow(h.CastActionId);
         if (action == null) return false; // Check if action is null
+
+        Svc.Log.Information($"Action ID: {action.RowId}, Action Name: {action.Name}");
 
         // Invoke the check function on the action and return the result
         return check?.Invoke(action) ?? false; // Check if check is null

@@ -1,7 +1,7 @@
 ﻿namespace RotationSolver.Basic.Data;
 
 /// <summary>
-/// The type of the combat
+/// The type of the combat.
 /// </summary>
 [Flags]
 public enum CombatType : byte
@@ -27,8 +27,16 @@ public enum CombatType : byte
     Both = PvP | PvE,
 }
 
-internal static class ConbatTypeExtension
+/// <summary>
+/// Extension methods for the CombatType enum.
+/// </summary>
+internal static class CombatTypeExtension
 {
+    /// <summary>
+    /// Gets the icon associated with the combat type.
+    /// </summary>
+    /// <param name="type">The combat type.</param>
+    /// <returns>The icon identifier.</returns>
     public static uint GetIcon(this CombatType type) => type switch
     {
         CombatType.Both => 61540u,

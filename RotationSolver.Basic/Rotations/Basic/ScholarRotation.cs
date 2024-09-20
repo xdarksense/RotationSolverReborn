@@ -29,6 +29,7 @@ partial class ScholarRotation
         ImGui.Text("FairyGauge: " + FairyGauge.ToString());
         ImGui.Text("HasAetherflow: " + HasAetherflow.ToString());
         ImGui.Text("SeraphTime: " + SeraphTime.ToString());
+        ImGui.Text("Has Fairy Out: " + DataCenter.HasPet.ToString());
     }
     #endregion
     private sealed protected override IBaseAction Raise => ResurrectionPvE;
@@ -58,7 +59,7 @@ partial class ScholarRotation
         setting.IsFriendly = true;
     }
 
-    static partial void ModifyWhisperingDawnPvE(ref ActionSetting setting)
+    static partial void ModifyWhisperingDawnPvE_16537(ref ActionSetting setting)
     {
         setting.ActionCheck = () => DataCenter.HasPet;
         setting.IsFriendly = true;

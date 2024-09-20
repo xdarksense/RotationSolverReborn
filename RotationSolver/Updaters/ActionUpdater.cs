@@ -12,7 +12,7 @@ internal static class ActionUpdater
 {
     internal static DateTime AutoCancelTime { get; set; } = DateTime.MinValue;
 
-    static RandomDelay _GCDDelay = new(() => Service.Config.WeaponDelay);
+    static readonly RandomDelay _GCDDelay = new(() => Service.Config.WeaponDelay);
 
     internal static IAction? NextAction { get; set; }
 
@@ -23,8 +23,10 @@ internal static class ActionUpdater
         get => _nextGCDAction;
         set
         {
-            if (_nextGCDAction == value) return;
-            _nextGCDAction = value;
+            if (_nextGCDAction != value)
+            {
+                _nextGCDAction = value;
+            }
         }
     }
 
@@ -45,11 +47,7 @@ internal static class ActionUpdater
                 && customRotation.TryInvoke(out var newAction, out var gcdAction))
             {
                 NextAction = newAction;
-
-                if (gcdAction is IBaseAction GcdAction)
-                {
-                    NextGCDAction = GcdAction;
-                }
+                NextGCDAction = gcdAction as IBaseAction;
                 return;
             }
         }
@@ -63,15 +61,10 @@ internal static class ActionUpdater
         NextAction = NextGCDAction = null;
     }
 
-    private static List<uint> actionOverrideList = new List<uint>();
+    private static List<uint> actionOverrideList = new();
 
     private static void SetAction(uint id)
     {
-        if (actionOverrideList == null)
-        {
-            actionOverrideList = Svc.PluginInterface.GetOrCreateData("Avarice.ActionOverride", () => new List<uint>());
-        }
-
         if (actionOverrideList.Count == 0)
         {
             actionOverrideList.Add(id);
@@ -91,11 +84,13 @@ internal static class ActionUpdater
         UpdateMoving();
         UpdateMPTimer();
     }
+
     private unsafe static void UpdateSlots()
     {
+        var actionManager = ActionManager.Instance();
         for (int i = 0; i < DataCenter.BluSlots.Length; i++)
         {
-            DataCenter.BluSlots[i] = ActionManager.Instance()->GetActiveBlueMageActionInSlot(i);
+            DataCenter.BluSlots[i] = actionManager->GetActiveBlueMageActionInSlot(i);
         }
         for (ushort i = 0; i < DataCenter.DutyActions.Length; i++)
         {
@@ -117,14 +112,9 @@ internal static class ActionUpdater
             _stopMovingTime = DateTime.MinValue;
         }
 
-        if (_stopMovingTime == DateTime.MinValue)
-        {
-            DataCenter.StopMovingRaw = 0;
-        }
-        else
-        {
-            DataCenter.StopMovingRaw = (float)(DateTime.Now - _stopMovingTime).TotalSeconds;
-        }
+        DataCenter.StopMovingRaw = _stopMovingTime == DateTime.MinValue
+            ? 0
+            : (float)(DateTime.Now - _stopMovingTime).TotalSeconds;
     }
 
     static DateTime _startCombatTime = DateTime.MinValue;
@@ -151,28 +141,6 @@ internal static class ActionUpdater
             ? 0
             : (float)(DateTime.Now - _startCombatTime).TotalSeconds;
     }
-
-    //private static unsafe void UpdateWeaponTime()
-    //{
-    //    var player = Player.Object;
-    //    if (player == null) return;
-
-    //    var instance = ActionManager.Instance();
-
-    //    var castTotal = player.TotalCastTime;
-
-    //    var weaponTotal = instance->GetRecastTime(ActionType.Action, 11);
-    //    if (castTotal > 0) castTotal += 0.1f;
-    //    if (player.IsCasting) weaponTotal = Math.Max(castTotal, weaponTotal);
-
-    //    DataCenter.WeaponElapsed = instance->GetRecastTimeElapsed(ActionType.Action, 11);
-    //    DataCenter.WeaponRemain = DataCenter.WeaponElapsed == 0 ? player.TotalCastTime - player.CurrentCastTime
-    //        : Math.Max(weaponTotal - DataCenter.WeaponElapsed, player.TotalCastTime - player.CurrentCastTime);
-
-    //    //Casting time.
-    //    if (DataCenter.WeaponElapsed < 0.3) DataCenter.CastingTotal = castTotal;
-    //    if (weaponTotal > 0 && DataCenter.WeaponElapsed > 0.2) DataCenter.WeaponTotal = weaponTotal;
-    //}
 
     static uint _lastMP = 0;
     static DateTime _lastMPUpdate = DateTime.Now;
@@ -215,25 +183,17 @@ internal static class ActionUpdater
             || Svc.Condition[ConditionFlag.Swimming]
             || Svc.Condition[ConditionFlag.Unconscious]
             || Svc.Condition[ConditionFlag.MeldingMateria]
-            || ActionManager.Instance()->ActionQueued && NextAction != null
-                && ActionManager.Instance()->QueuedActionId != NextAction.AdjustedID
+            || (ActionManager.Instance()->ActionQueued && NextAction != null
+                && ActionManager.Instance()->QueuedActionId != NextAction.AdjustedID)
             || Player.Object.CurrentHp == 0) return false;
 
         var nextAction = NextAction;
         if (nextAction == null) return false;
 
         //Skip when casting
-        if (Player.Object.TotalCastTime - Service.Config.Action4Head > 0) return false;
+        if (Player.Object.TotalCastTime - DataCenter.ActionAhead > 0) return false;
 
         //GCD
-        var canUseGCD = ActionHelper.CanUseGCD;
-        if (canUseGCD)
-        {
-            return RSCommands.CanDoAnAction(true);
-        }
-        else
-        {
-            return RSCommands.CanDoAnAction(false);
-        }
+        return RSCommands.CanDoAnAction(ActionHelper.CanUseGCD);
     }
 }

@@ -10,9 +10,6 @@ using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Commands;
-using Dalamud.Game.ClientState.Keys;
-using Lumina.Excel.GeneratedSheets;
-using ECommons;
 
 namespace RotationSolver.Updaters;
 

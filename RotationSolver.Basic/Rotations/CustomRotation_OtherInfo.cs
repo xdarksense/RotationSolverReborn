@@ -267,6 +267,36 @@ partial class CustomRotation
     public static bool IsInHighEndDuty => DataCenter.IsInHighEndDuty;
 
     /// <summary>
+    /// Is player in UCoB duty.
+    /// </summary>
+    [Description("Is in UCoB duty")]
+    public static bool IsInUCoB => DataCenter.IsInUCoB;
+
+    /// <summary>
+    /// Is player in UwU duty.
+    /// </summary>
+    [Description("Is in UwU duty")]
+    public static bool IsInUwU => DataCenter.IsInUwU;
+
+    /// <summary>
+    /// Is player in TEA duty.
+    /// </summary>
+    [Description("Is in TEA duty")]
+    public static bool IsInTEA => DataCenter.IsInTEA;
+
+    /// <summary>
+    /// Is player in DSR duty.
+    /// </summary>
+    [Description("Is in DSR duty")]
+    public static bool IsInDSR => DataCenter.IsInDSR;
+
+    /// <summary>
+    /// Is player in TOP duty.
+    /// </summary>
+    [Description("Is in TOP duty")]
+    public static bool IsInTOP => DataCenter.IsInTOP;
+
+    /// <summary>
     /// Is player in duty.
     /// </summary>
     [Description("Is player in duty")]
@@ -283,7 +313,7 @@ partial class CustomRotation
     /// Time from next ability to next GCD
     /// </summary>
     [Description("Time from next ability to next GCD")]
-    public static float NextAbilityToNextGCD => DataCenter.DefaultGCDRemain;
+    public static float NextAbilityToNextGCD => DataCenter.DefaultGCDRemain - Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock);
 
     /// <summary>
     /// Treats one action as another.

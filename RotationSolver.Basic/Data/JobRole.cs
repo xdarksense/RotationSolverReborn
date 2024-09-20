@@ -9,49 +9,50 @@ namespace RotationSolver.Basic.Data;
 public enum JobRole : byte
 {
     /// <summary>
-    /// 
+    /// No specific role.
     /// </summary>
     None = 0,
 
     /// <summary>
-    /// 
+    /// Tank role.
     /// </summary>
     Tank = 1,
 
     /// <summary>
-    /// 
+    /// Melee role.
     /// </summary>
     Melee = 2,
 
+    // Uncomment and document if needed in the future.
     ///// <summary>
-    ///// 
+    ///// Ranged role.
     ///// </summary>
     //Ranged = 3,
 
     /// <summary>
-    /// 
+    /// Healer role.
     /// </summary>
     Healer = 4,
 
     /// <summary>
-    /// 
+    /// Ranged physical role.
     /// </summary>
     RangedPhysical = 5,
 
     /// <summary>
-    /// 
+    /// Ranged magical role.
     /// </summary>
     RangedMagical = 6,
 
-    ///// <summary>
-    ///// 
-    ///// </summary>
-    //DiscipleOfTheLand = 7,
+    /// <summary>
+    /// Disciple of the Land role.
+    /// </summary>
+    DiscipleOfTheLand = 7,
 
-    ///// <summary>
-    ///// 
-    ///// </summary>
-    //DiscipleOfTheHand = 8,
+    /// <summary>
+    /// Disciple of the Hand role.
+    /// </summary>
+    DiscipleOfTheHand = 8,
 }
 
 /// <summary>
@@ -60,10 +61,10 @@ public enum JobRole : byte
 public static class JobRoleExtension
 {
     /// <summary>
-    /// Get job role from class.
+    /// Gets the job role from a class.
     /// </summary>
-    /// <param name="job"></param>
-    /// <returns></returns>
+    /// <param name="job">The class job.</param>
+    /// <returns>The job role.</returns>
     public static JobRole GetJobRole(this ClassJob job)
     {
         var role = (JobRole)job.Role;
@@ -74,8 +75,9 @@ public static class JobRoleExtension
             {
                 30 => JobRole.RangedPhysical,
                 31 => JobRole.RangedMagical,
-                //32 => JobRole.DiscipleOfTheLand,
-                //33 => JobRole.DiscipleOfTheHand,
+                // Uncomment and document if needed in the future.
+                32 => JobRole.DiscipleOfTheLand,
+                33 => JobRole.DiscipleOfTheHand,
                 _ => JobRole.None,
             };
         }
@@ -83,10 +85,10 @@ public static class JobRoleExtension
     }
 
     /// <summary>
-    /// Get Jobs from role.
+    /// Gets the jobs from a role.
     /// </summary>
-    /// <param name="role"></param>
-    /// <returns></returns>
+    /// <param name="role">The job role.</param>
+    /// <returns>An array of jobs corresponding to the role.</returns>
     public static Job[] ToJobs(this JobRole role)
     {
         return role switch

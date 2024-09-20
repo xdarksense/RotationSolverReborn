@@ -2,16 +2,37 @@
 
 namespace RotationSolver.Basic.Configuration.RotationConfig;
 
-internal abstract class RotationConfigBase
-    : IRotationConfig
+/// <summary>
+/// Base class for rotation configuration.
+/// </summary>
+internal abstract class RotationConfigBase : IRotationConfig
 {
-    readonly PropertyInfo _property;
-    readonly ICustomRotation _rotation;
+    private readonly PropertyInfo _property;
+    private readonly ICustomRotation _rotation;
+
+    /// <summary>
+    /// Gets the name of the configuration.
+    /// </summary>
     public string Name { get; }
+
+    /// <summary>
+    /// Gets the default value of the configuration.
+    /// </summary>
     public string DefaultValue { get; }
+
+    /// <summary>
+    /// Gets the display name of the configuration.
+    /// </summary>
     public string DisplayName { get; }
+
+    /// <summary>
+    /// Gets the combat type of the configuration.
+    /// </summary>
     public CombatType Type { get; }
 
+    /// <summary>
+    /// Gets or sets the value of the configuration.
+    /// </summary>
     public string Value
     {
         get
@@ -26,10 +47,15 @@ internal abstract class RotationConfigBase
         }
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RotationConfigBase"/> class.
+    /// </summary>
+    /// <param name="rotation">The custom rotation instance.</param>
+    /// <param name="property">The property information.</param>
     protected RotationConfigBase(ICustomRotation rotation, PropertyInfo property)
     {
-        _property = property;
-        _rotation = rotation;
+        _property = property ?? throw new ArgumentNullException(nameof(property));
+        _rotation = rotation ?? throw new ArgumentNullException(nameof(rotation));
 
         Name = property.Name;
         DefaultValue = property.GetValue(rotation)?.ToString() ?? string.Empty;
@@ -45,13 +71,17 @@ internal abstract class RotationConfigBase
             Type = CombatType.None;
         }
 
-        //Set Up
+        // Set up initial value
         if (Service.Config.RotationConfigurations.TryGetValue(Name, out var value))
         {
             SetValue(value);
         }
     }
 
+    /// <summary>
+    /// Sets the value of the property.
+    /// </summary>
+    /// <param name="value">The value to set.</param>
     private void SetValue(string value)
     {
         var type = _property.PropertyType;
@@ -68,6 +98,12 @@ internal abstract class RotationConfigBase
         }
     }
 
+    /// <summary>
+    /// Changes the type of the value.
+    /// </summary>
+    /// <param name="value">The value to change.</param>
+    /// <param name="type">The target type.</param>
+    /// <returns>The converted value.</returns>
     private static object ChangeType(string value, Type type)
     {
         if (type.IsEnum)
@@ -82,7 +118,17 @@ internal abstract class RotationConfigBase
         return Convert.ChangeType(value, type);
     }
 
+    /// <summary>
+    /// Executes a command.
+    /// </summary>
+    /// <param name="set">The rotation config set.</param>
+    /// <param name="str">The command string.</param>
+    /// <returns><c>true</c> if the command was executed; otherwise, <c>false</c>.</returns>
     public virtual bool DoCommand(IRotationConfigSet set, string str) => str.StartsWith(Name);
 
+    /// <summary>
+    /// Returns a string that represents the current object.
+    /// </summary>
+    /// <returns>A string that represents the current object.</returns>
     public override string ToString() => Value;
 }

@@ -24,7 +24,7 @@ internal partial class Configs : IPluginConfiguration
         List2 = "List2",
         Debug = "Debug";
 
-    public const int CurrentVersion = 11;
+    public const int CurrentVersion = 12;
     public int Version { get; set; } = CurrentVersion;
 
     public string LastSeenChangelog { get; set; } = "0.0.0.0";
@@ -109,9 +109,8 @@ internal partial class Configs : IPluginConfiguration
         Parent = nameof(AddEnemyListToHostile))]
     private static readonly bool _onlyAttackInEnemyList = false;
 
-    [ConditionBool, UI("Use Gemdraughts/Tinctures/Pots", Description = "This is the RSR control and still requires Gemdraughts/Tinctures/Pots to be programed in rotation by the rotation writers.",
-        Filter = AutoActionUsage)]
-    private static readonly bool _useTinctures = false;
+    [JobConfig, UI("Gemdraughts/Tinctures/Pots", Filter = AutoActionUsage, PvPFilter = JobFilterType.NoJob)]
+    private readonly TinctureUseType _TinctureType = TinctureUseType.Nowhere;
 
     [ConditionBool, UI("Automatically use Anti-Knockback role actions (Arms Length, Surecast)", Filter = AutoActionUsage)]
     private static readonly bool _useKnockback = true;
@@ -123,10 +122,14 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Automatically use MP Potions", Description = "Experimental.",
         Filter = AutoActionUsage)]
     private static readonly bool _useMpPotions = false;
-
+    
     [ConditionBool, UI("Prioritize mob/object targets with attack markers",
         Filter = TargetConfig)]
     private static readonly bool _chooseAttackMark = true;
+
+    [ConditionBool, UI("Prioritize enemy parts (i.e. Titan's Heart)",
+        Filter = TargetConfig)]
+    private static readonly bool _prioEnemyParts = true;
 
     [ConditionBool, UI("Allow the use of AOEs against priority-marked targets.",
         Parent = nameof(ChooseAttackMark))]
@@ -155,11 +158,11 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig, Section = 2)]
     private static readonly bool _moveAreaActionFarthest = false;
 
-    [ConditionBool, UI("Auto mode activation delay on countdown start",
+    [ConditionBool, UI("Activate auto mode when countdown starts",
         Filter = BasicAutoSwitch, Section = 1)]
     private static readonly bool _startOnCountdown = true;
 
-    [ConditionBool, UI("Countdown will start manual mode instead of auto mode",
+    [ConditionBool, UI("Start manual mode instead of auto mode when countdown starts",
                Parent = nameof(StartOnCountdown))]
     private static readonly bool _countdownStartsManualMode = false;
 
@@ -331,7 +334,7 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Use beneficial AoE actions when moving.", Parent = nameof(UseGroundBeneficialAbility))]
     private static readonly bool _useGroundBeneficialAbilityWhenMoving = false;
 
-    [ConditionBool, UI("Target all for friendly actions (include passerby)",
+    [ConditionBool, UI("Heal/Rez players in other alliances.",
         Filter = TargetConfig, Section = 3)]
     private static readonly bool _targetAllForFriendly = false;
 
@@ -379,13 +382,13 @@ internal partial class Configs : IPluginConfiguration
     #region Float
     [UI("isLastAbilityTimer", Description = "Don't fuck with this if you dont know what it does",
         Filter = Extra)]
-    [Range(0.100f, 0.500f, ConfigUnitType.Seconds, 0.001f)]
-    public float isLastAbilityTimer { get; set; } = 0.100f;
+    [Range(0.100f, 2.500f, ConfigUnitType.Seconds, 0.001f)]
+    public float isLastAbilityTimer { get; set; } = 0.800f;
 
     [UI("isFirstAbilityTimer", Description = "Don't fuck with this if you dont know what it does",
         Filter = Extra)]
-    [Range(0.100f, 1.500f, ConfigUnitType.Seconds, 0.001f)]
-    public float isFirstAbilityTimer { get; set; } = 0.500f;
+    [Range(0.100f, 2.500f, ConfigUnitType.Seconds, 0.001f)]
+    public float isFirstAbilityTimer { get; set; } = 0.600f;
 
     [UI("Auto turn off RSR when combat is over more for more then...",
         Parent = nameof(AutoOffAfterCombat))]
@@ -505,11 +508,6 @@ internal partial class Configs : IPluginConfiguration
     [UI("Downtime healing delay range.", Parent = nameof(HealWhenNothingTodo))]
     [Range(0, 5, ConfigUnitType.Seconds, 0.05f)]
     public Vector2 HealWhenNothingTodoDelay { get; set; } = new(0.5f, 1);
-
-    [UI("The random delay between which auto mode activation on countdown varies.",
-        Parent = nameof(StartOnCountdown))]
-    [Range(0, 3, ConfigUnitType.Seconds, 0.002f)]
-    public Vector2 CountdownDelay { get; set; } = new(0.5f, 1);
 
     [UI("Auto Heal delay range",
     Parent = nameof(AutoHeal))]

@@ -28,9 +28,9 @@ public unsafe class MacroItem(IGameObject? target, RaptureMacroModule.Macro* mac
     public bool IsRunning { get; private set; }
 
     /// <summary>
-    /// Start running the macro.
+    /// Starts running the macro.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>True if the macro started successfully; otherwise, false.</returns>
     public bool StartUseMacro()
     {
         if (RaptureShellModule.Instance()->MacroCurrentLine > -1) return false;
@@ -44,9 +44,9 @@ public unsafe class MacroItem(IGameObject? target, RaptureMacroModule.Macro* mac
     }
 
     /// <summary>
-    /// End this macro.
+    /// Ends the macro.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>True if the macro ended successfully; otherwise, false.</returns>
     public bool EndUseMacro()
     {
         if (RaptureShellModule.Instance()->MacroCurrentLine > -1) return false;

@@ -25,12 +25,12 @@ partial class NinjaRotation
     /// Determines if Trick Attack is in its effective period.
     /// </summary>
     public bool InTrickAttack => (KunaisBanePvE.Cooldown.IsCoolingDown || TrickAttackPvE.Cooldown.IsCoolingDown) && (!KunaisBanePvE.Cooldown.ElapsedAfter(17) || !TrickAttackPvE.Cooldown.ElapsedAfter(17));
-    
+
     /// <summary>
     /// Determines if Mug is in its effective period.
     /// </summary>
     public bool InMug => MugPvE.Cooldown.IsCoolingDown && !MugPvE.Cooldown.ElapsedAfter(19);
-    
+
     /// <summary>
     /// Checks if no ninjutsu action is currently selected or if the Rabbit Medium has been invoked.
     /// </summary>

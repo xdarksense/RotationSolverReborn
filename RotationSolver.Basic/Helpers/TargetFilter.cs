@@ -15,14 +15,19 @@ public static class TargetFilter
     /// </summary>
     /// <param name="charas">The list of characters.</param>
     /// <returns>The dead characters.</returns>
-    public static IEnumerable<IBattleChara> GetDeath(this IEnumerable<IBattleChara> charas) => charas.Where(item =>
+    public static IEnumerable<IBattleChara> GetDeath(this IEnumerable<IBattleChara> charas)
     {
-        if (item == null || !item.IsDead || item.CurrentHp != 0 || !item.IsTargetable) return false;
-        if (item.HasStatus(false, StatusID.Raise)) return false;
-        if (!Service.Config.RaiseBrinkOfDeath && item.HasStatus(false, StatusID.BrinkOfDeath)) return false;
-        if (DataCenter.AllianceMembers.Any(c => c.CastTargetObjectId == item.GameObjectId)) return false;
-        return true;
-    });
+        if (charas == null) return Enumerable.Empty<IBattleChara>();
+
+        return charas.Where(item =>
+        {
+            if (item == null || !item.IsDead || item.CurrentHp != 0 || !item.IsTargetable) return false;
+            if (item.HasStatus(false, StatusID.Raise)) return false;
+            if (!Service.Config.RaiseBrinkOfDeath && item.HasStatus(false, StatusID.BrinkOfDeath)) return false;
+            if (DataCenter.AllianceMembers.Any(c => c.CastTargetObjectId == item.GameObjectId)) return false;
+            return true;
+        });
+    }
 
     /// <summary>
     /// Get the specific roles members.
@@ -32,10 +37,11 @@ public static class TargetFilter
     /// <returns>The objects that match the roles.</returns>
     public static IEnumerable<IBattleChara> GetJobCategory(this IEnumerable<IBattleChara> objects, params JobRole[] roles)
     {
-        var validJobs = roles.SelectMany(role => Service.GetSheet<ClassJob>()
+        if (objects == null || roles == null || roles.Length == 0) return Enumerable.Empty<IBattleChara>();
+
+        var validJobs = new HashSet<byte>(roles.SelectMany(role => Service.GetSheet<ClassJob>()
             .Where(job => role == job.GetJobRole())
-            .Select(job => (byte)job.RowId))
-            .ToHashSet();
+            .Select(job => (byte)job.RowId)));
 
         return objects.Where(obj => obj.IsJobs(validJobs));
     }
@@ -48,6 +54,8 @@ public static class TargetFilter
     /// <returns>True if the object is of the specified role, otherwise false.</returns>
     public static bool IsJobCategory(this IGameObject obj, JobRole role)
     {
+        if (obj == null) return false;
+
         var validJobs = new HashSet<byte>(Service.GetSheet<ClassJob>()
             .Where(job => role == job.GetJobRole())
             .Select(job => (byte)job.RowId));
@@ -63,6 +71,8 @@ public static class TargetFilter
     /// <returns>True if the object is in the valid jobs, otherwise false.</returns>
     public static bool IsJobs(this IGameObject obj, params Job[] validJobs)
     {
+        if (obj == null || validJobs == null || validJobs.Length == 0) return false;
+
         return obj.IsJobs(new HashSet<byte>(validJobs.Select(j => (byte)(uint)j)));
     }
 
@@ -81,5 +91,9 @@ public static class TargetFilter
     /// <param name="radius">The radius to filter by.</param>
     /// <returns>The objects within the radius.</returns>
     public static IEnumerable<T> GetObjectInRadius<T>(this IEnumerable<T> objects, float radius) where T : IGameObject
-        => objects.Where(o => o.DistanceToPlayer() <= radius);
+    {
+        if (objects == null) return Enumerable.Empty<T>();
+
+        return objects.Where(o => o.DistanceToPlayer() <= radius);
+    }
 }

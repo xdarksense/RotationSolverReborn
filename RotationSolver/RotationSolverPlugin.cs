@@ -44,7 +44,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
     {
         ECommonsMain.Init(pluginInterface, this, ECommons.Module.DalamudReflector, ECommons.Module.ObjectFunctions);
         ThreadLoadImageHandler.TryGetIconTextureWrap(0, true, out _);
-        IconSet.InIt();
+        IconSet.Init();
 
         _dis.Add(new Service());
         try
@@ -111,16 +111,18 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         ClientState_TerritoryChanged(Svc.ClientState.TerritoryType);
 
 
-        static async void DutyState_DutyCompleted(object? sender, ushort e)
+        static void DutyState_DutyCompleted(object? sender, ushort e)
         {
-            await Task.Delay(new Random().Next(4000, 6000));
-
-            Service.Config.DutyEnd.AddMacro();
-
-            if (Service.Config.AutoOffWhenDutyCompleted)
+            var delay = TimeSpan.FromSeconds(new Random().Next(4, 6));
+            Svc.Framework.RunOnTick(() =>
             {
-                RSCommands.CancelState();
-            }
+                Service.Config.DutyEnd.AddMacro();
+
+                if (Service.Config.AutoOffWhenDutyCompleted)
+                {
+                    RSCommands.CancelState();
+                }
+            }, delay);
         }
 
         static void ClientState_TerritoryChanged(ushort id)
@@ -148,8 +150,9 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
             if (DataCenter.IsInHighEndDuty)
             {
-                string.Format(UiString.HighEndWarning.GetDescription(),
-                    DataCenter.ContentFinderName).ShowWarning();
+                var warning = string.Format(UiString.HighEndWarning.GetDescription(), DataCenter.ContentFinderName);
+#pragma warning disable CS0436
+                WarningHelper.AddSystemWarning(warning);
             }
         }
 
@@ -178,13 +181,6 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
             await DownloadHelper.DownloadAsync();
             if (Service.Config.AutoLoadRotations) await RotationUpdater.GetAllCustomRotationsAsync(DownloadOption.Download);
         });
-
-#if DEBUG
-        if (Player.Available)
-        {
-            //_ = XIVPainterMain.ShowOff();
-        }
-#endif
     }
 
     private void OnDraw()
