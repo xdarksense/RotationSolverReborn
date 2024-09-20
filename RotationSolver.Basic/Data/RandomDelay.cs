@@ -21,9 +21,9 @@ public struct RandomDelay
     /// <param name="getRange">A function that returns the range of delay times.</param>
     public RandomDelay(Func<(float min, float max)> getRange)
     {
-        _startDelayTime = DateTime.UtcNow;
+        _startDelayTime = DateTime.Now;
         _delayTime = -1;
-        _ran = new Random(DateTime.UtcNow.Millisecond);
+        _ran = new Random(DateTime.Now.Millisecond);
         _lastValue = false;
         GetRange = getRange ?? throw new ArgumentNullException(nameof(getRange));
     }
@@ -62,11 +62,11 @@ public struct RandomDelay
         if (_delayTime < 0 && !_lastValue)
         {
             _lastValue = true;
-            _startDelayTime = DateTime.UtcNow;
+            _startDelayTime = DateTime.Now;
             _delayTime = min + (float)_ran.NextDouble() * (max - min);
         }
         // Time's up
-        else if ((DateTime.UtcNow - _startDelayTime).TotalSeconds >= _delayTime)
+        else if ((DateTime.Now - _startDelayTime).TotalSeconds >= _delayTime)
         {
             _delayTime = -1;
             return true;
