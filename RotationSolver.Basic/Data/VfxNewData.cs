@@ -31,13 +31,13 @@ internal readonly struct VfxNewData
     {
         ObjectId = objectId;
         Path = path;
-        Time = DateTime.UtcNow;
+        Time = DateTime.Now;
     }
 
     /// <summary>
     /// Gets the duration since the VFX data was created.
     /// </summary>
-    public TimeSpan TimeDuration => DateTime.UtcNow - Time;
+    public TimeSpan TimeDuration => DateTime.Now - Time;
 
     /// <summary>
     /// Returns a string that represents the current object.

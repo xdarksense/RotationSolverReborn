@@ -48,7 +48,7 @@ internal static class MovingUpdater
             }
 
             //Action
-            var action = DateTime.UtcNow - RSCommands._lastUsedTime < TimeSpan.FromMilliseconds(100)
+            var action = DateTime.Now - RSCommands._lastUsedTime < TimeSpan.FromMilliseconds(100)
                 ? (ActionID)RSCommands._lastActionID
                 : doNextAction ? (ActionID)(ActionUpdater.NextAction?.AdjustedID ?? 0) : 0;
 
