@@ -164,7 +164,7 @@ public static class ObjectHelper
             if (gameObject.GameObjectId == Player.Object?.GameObjectId) return true;
             if (Svc.Party.Any(p => p.GameObject?.GameObjectId == gameObject.GameObjectId)) return true;
             if (gameObject.SubKind == 9) return true;
-            if (gameObject.GetNameplateKind() == NameplateKind.FriendlyBattleNPC) return true;
+            //if (gameObject.GetNameplateKind() == NameplateKind.FriendlyBattleNPC) return true;
         }
 
         return false;
