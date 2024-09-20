@@ -5,6 +5,7 @@ using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Fate;
 using Lumina.Excel.GeneratedSheets;
 using RotationSolver.Basic.Configuration;
@@ -533,6 +534,13 @@ internal static class DataCenter
     public static unsafe bool HasCompanion => (IntPtr)Player.BattleChara != IntPtr.Zero
                                               && (IntPtr)CharacterManager.Instance()->LookupBuddyByOwnerObject(
                                                   Player.BattleChara) != IntPtr.Zero;
+
+    public static unsafe BattleChara* GetCompanion()
+    {
+        if(HasCompanion)
+            return CharacterManager.Instance()->LookupBuddyByOwnerObject(Player.BattleChara);
+        return null;
+    }
 
     #region HP
 
