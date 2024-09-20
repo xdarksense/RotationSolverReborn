@@ -84,15 +84,15 @@ partial class CustomRotation
         if (Service.Config.HealWhenNothingTodo && InCombat)
         {
             // Please don't tell me someone's fps is less than 1!!
-            if (DateTime.Now - _nextTimeToHeal > TimeSpan.FromSeconds(1))
+            if (DateTime.UtcNow - _nextTimeToHeal > TimeSpan.FromSeconds(1))
             {
                 var min = Service.Config.HealWhenNothingTodoDelay.X;
                 var max = Service.Config.HealWhenNothingTodoDelay.Y;
-                _nextTimeToHeal = DateTime.Now + TimeSpan.FromSeconds(new Random().NextDouble() * (max - min) + min);
+                _nextTimeToHeal = DateTime.UtcNow + TimeSpan.FromSeconds(new Random().NextDouble() * (max - min) + min);
             }
-            else if (_nextTimeToHeal < DateTime.Now)
+            else if (_nextTimeToHeal < DateTime.UtcNow)
             {
-                _nextTimeToHeal = DateTime.Now;
+                _nextTimeToHeal = DateTime.UtcNow;
 
                 if (PartyMembersMinHP < Service.Config.HealWhenNothingTodoBelow)
                 {
