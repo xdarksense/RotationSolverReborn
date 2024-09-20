@@ -105,26 +105,27 @@ internal static class MajorUpdater
         var now = DateTime.UtcNow;
         try
         {
-            lock (_workLock)
-            {
-                if (_work || (now - _lastUpdatedWork < TimeSpan.FromSeconds(Service.Config.MinUpdatingTime)))
-                    return;
+            if (_work || (now - _lastUpdatedWork < TimeSpan.FromSeconds(Service.Config.MinUpdatingTime)))
+                return;
 
-                _work = true;
-                _lastUpdatedWork = now;
+            _work = true;
+            _lastUpdatedWork = now;
+
+            try
+            {
+                UpdateWork();
             }
-
-            Task.Run(UpdateWork).ContinueWith(t =>
+            catch (Exception tEx)
             {
-                if (t.Exception != null)
-                {
-                    Svc.Log.Error(t.Exception, "Worker Task Exception");
-                    if (Service.Config.InDebug)
+                Svc.Log.Error(tEx, "Worker Task Exception");
+                if (Service.Config.InDebug)
 #pragma warning disable CS0436
-                        WarningHelper.AddSystemWarning("Worker Task Exception");
-                }
+                    WarningHelper.AddSystemWarning("Worker Task Exception");
+            }
+            finally
+            {
                 _work = false;
-            }, TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously);
+            }
         }
         catch (Exception ex)
         {
@@ -138,13 +139,6 @@ internal static class MajorUpdater
 
     private static void UpdateWork()
     {
-        var now = DateTime.UtcNow;
-        var waitingTime = (now - _lastUpdatedWork).TotalMilliseconds;
-        if (waitingTime > 100)
-        {
-            Svc.Log.Warning($"The time for completing a running cycle for RS is {waitingTime:F2} ms, try disabling the option \"UseWorkTask\" to get better performance or check your other running plugins for one of them using too many resources and try disabling that.");
-        }
-
         if (!IsValid)
         {
             ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
@@ -222,8 +216,6 @@ internal static class MajorUpdater
         ActionSequencerUpdater.Enable(Svc.PluginInterface.ConfigDirectory.FullName + "\\Conditions");
         Svc.Framework.Update += FrameworkUpdate;
     }
-
-    private static Exception? _innerException;
 
     static DateTime _closeWindowTime = DateTime.Now;
     private unsafe static void CloseWindow()
