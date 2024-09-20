@@ -56,7 +56,7 @@ public enum JobRole : byte
 }
 
 /// <summary>
-/// Extension methods for the JobRole enum.
+/// The extension of the job.
 /// </summary>
 public static class JobRoleExtension
 {
@@ -67,11 +67,6 @@ public static class JobRoleExtension
     /// <returns>The job role.</returns>
     public static JobRole GetJobRole(this ClassJob job)
     {
-        if (job == null)
-        {
-            throw new ArgumentNullException(nameof(job));
-        }
-
         var role = (JobRole)job.Role;
 
         if (role is (JobRole)3 or JobRole.None)
@@ -98,12 +93,12 @@ public static class JobRoleExtension
     {
         return role switch
         {
-            JobRole.Tank => new[] { Job.WAR, Job.PLD, Job.DRK, Job.GNB },
-            JobRole.Healer => new[] { Job.WHM, Job.SCH, Job.AST, Job.SGE },
-            JobRole.Melee => new[] { Job.MNK, Job.DRG, Job.NIN, Job.SAM, Job.RPR, Job.VPR },
-            JobRole.RangedPhysical => new[] { Job.BRD, Job.MCH, Job.DNC },
-            JobRole.RangedMagical => new[] { Job.BLM, Job.SMN, Job.RDM, Job.BLU, Job.PCT },
-            _ => Array.Empty<Job>(),
+            JobRole.Tank => [Job.WAR, Job.PLD, Job.DRK, Job.GNB],
+            JobRole.Healer => [Job.WHM, Job.SCH, Job.AST, Job.SGE],
+            JobRole.Melee => [Job.MNK, Job.DRG, Job.NIN, Job.SAM, Job.RPR, Job.VPR],
+            JobRole.RangedPhysical => [Job.BRD, Job.MCH, Job.DNC],
+            JobRole.RangedMagical => [Job.BLM, Job.SMN, Job.RDM, Job.BLU, Job.PCT],
+            _ => [],
         };
     }
 }
