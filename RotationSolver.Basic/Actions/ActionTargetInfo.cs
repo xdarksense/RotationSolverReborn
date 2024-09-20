@@ -453,10 +453,12 @@ public struct ActionTargetInfo(IBaseAction action)
                 if (pts.Length == 0)
                 {
                     if (DataCenter.TerritoryContentType == TerritoryContentType.Trials ||
-                        DataCenter.TerritoryContentType == TerritoryContentType.Raids &&
-                        DataCenter.AllianceMembers.Count(p => p is IPlayerCharacter) == 8)
+                        (DataCenter.TerritoryContentType == TerritoryContentType.Raids &&
+                        DataCenter.AllianceMembers.Count(p => p is IPlayerCharacter) == 8))
                     {
-                        pts = pts.Concat(new[] { Vector3.Zero, new Vector3(100, 0, 100) }).ToArray();
+                        var fallbackPoints = new[] { Vector3.Zero, new Vector3(100, 0, 100) };
+                        var closestFallback = fallbackPoints.MinBy(p => Vector3.Distance(player.Position, p));
+                        pts = pts.Concat(new[] { closestFallback }).ToArray();
                     }
                 }
 
@@ -465,7 +467,7 @@ public struct ActionTargetInfo(IBaseAction action)
                     var closest = pts.MinBy(p => Vector3.Distance(player.Position, p));
                     var random = new Random();
                     var rotation = random.NextDouble() * Math.Tau;
-                    var radius = random.NextDouble() * 1;
+                    var radius = random.NextDouble();
                     closest.X += (float)(Math.Sin(rotation) * radius);
                     closest.Z += (float)(Math.Cos(rotation) * radius);
                     if (Vector3.Distance(player.Position, closest) < player.HitboxRadius + EffectRange)
@@ -519,6 +521,7 @@ public struct ActionTargetInfo(IBaseAction action)
             }
         }
     }
+
 
     /// <summary>
     /// Gets the characters that are affected within the specified range from a given point.

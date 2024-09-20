@@ -363,11 +363,18 @@ public partial class RotationConfigWindow : Window
         var rotation = DataCenter.RightNowRotation;
 
         if (rotation == null && !(Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
-            Player.Job == Job.LTW || Player.Job == Job.WVR || Player.Job == Job.ALC || Player.Job == Job.CUL ||
-            Player.Job == Job.MIN || Player.Job == Job.FSH || Player.Job == Job.BTN))
+        Player.Job == Job.LTW || Player.Job == Job.WVR || Player.Job == Job.ALC || Player.Job == Job.CUL ||
+        Player.Job == Job.MIN || Player.Job == Job.FSH || Player.Job == Job.BTN))
         {
             ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudOrange);
+
             var text = UiString.ConfigWindow_NoRotation.GetDescription();
+            if (text == null)
+            {
+                Svc.Log.Error("UiString.ConfigWindow_NoRotation.GetDescription() returned null.");
+                return;
+            }
+
             var textWidth = ImGuiHelpers.GetButtonSize(text).X;
             ImGuiHelper.DrawItemMiddle(() =>
             {
@@ -2453,7 +2460,9 @@ public partial class RotationConfigWindow : Window
 
         ImGui.Text($"TerritoryType: {DataCenter.TerritoryContentType}");
         ImGui.Text($"DPSTaken: {DataCenter.DPSTaken}");
-
+        ImGui.Text($"IsHostileCastingToTank: {DataCenter.IsHostileCastingToTank}");
+        ImGui.Text($"RightNowRotation: {DataCenter.RightNowRotation}");
+        ImGui.Text($"Job: {DataCenter.Job}");
         ImGui.Text($"Have pet: {DataCenter.HasPet}");
         ImGui.Text($"Hostile Near Count: {DataCenter.NumberOfHostilesInRange}");
         ImGui.Text($"Hostile Near Count Max Range: {DataCenter.NumberOfHostilesInMaxRange}");
@@ -2563,7 +2572,7 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Actual Action Ahead: {DataCenter.ActionAhead}");
         ImGui.Text($"Animation Lock Delay: {ActionManagerHelper.GetCurrentAnimationLock()}");
     }
-
+    
     private static void DrawLastAction()
     {
         DrawAction(DataCenter.LastAction, nameof(DataCenter.LastAction));
