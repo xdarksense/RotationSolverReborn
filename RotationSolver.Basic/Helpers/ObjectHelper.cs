@@ -166,12 +166,14 @@ public static class ObjectHelper
             if (Svc.Party.Any(p => p.GameObject?.GameObjectId == gameObject.GameObjectId)) return true;
             if (gameObject.SubKind == 9) return true;
 
-            //Add Player Chocobo Companion to Party List
+            // Add Player Chocobo Companion to Party List
             unsafe
             {
-                BattleChara? CompanionChocobo = *DataCenter.GetCompanion();
-                if (CompanionChocobo != null)
+                BattleChara* companionChocobo = DataCenter.GetCompanion();
+                if (companionChocobo != null)
+                {
                     return true;
+                }
             }
 
             if (Service.Config.FriendlyBattleNpcHeal && gameObject.GetNameplateKind() == NameplateKind.FriendlyBattleNPC) return true;

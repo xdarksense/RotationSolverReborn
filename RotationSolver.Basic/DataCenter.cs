@@ -531,15 +531,30 @@ internal static class DataCenter
         }
     }
 
-    public static unsafe bool HasCompanion => (IntPtr)Player.BattleChara != IntPtr.Zero
-                                              && (IntPtr)CharacterManager.Instance()->LookupBuddyByOwnerObject(
-                                                  Player.BattleChara) != IntPtr.Zero;
+    public static unsafe bool HasCompanion
+    {
+        get
+        {
+            var playerBattleChara = Player.BattleChara;
+            if (playerBattleChara == null) return false;
+
+            var characterManager = CharacterManager.Instance();
+            if (characterManager == null) return false;
+
+            var companion = characterManager->LookupBuddyByOwnerObject(playerBattleChara);
+            return (IntPtr)companion != IntPtr.Zero;
+        }
+    }
 
     public static unsafe BattleChara* GetCompanion()
     {
-        if(HasCompanion)
-            return CharacterManager.Instance()->LookupBuddyByOwnerObject(Player.BattleChara);
-        return null;
+        var playerBattleChara = Player.BattleChara;
+        if (playerBattleChara == null) return null;
+
+        var characterManager = CharacterManager.Instance();
+        if (characterManager == null) return null;
+
+        return characterManager->LookupBuddyByOwnerObject(playerBattleChara);
     }
 
     #region HP
