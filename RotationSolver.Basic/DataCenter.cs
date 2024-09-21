@@ -80,13 +80,13 @@ internal static class DataCenter
                                       || Svc.GamepadState.Raw(Dalamud.Game.ClientState.GamePad.GamepadButtons.R1) >=
                                       0.5f;
 
-    internal static DateTime EffectTime { private get; set; } = DateTime.Now;
-    internal static DateTime EffectEndTime { private get; set; } = DateTime.Now;
+    internal static DateTime EffectTime { private get; set; } = DateTime.UtcNow;
+    internal static DateTime EffectEndTime { private get; set; } = DateTime.UtcNow;
 
-    internal const int ATTACKED_TARGETS_COUNT = 48;
-    internal static Queue<(ulong id, DateTime time)> AttackedTargets { get; } = new(ATTACKED_TARGETS_COUNT);
+    internal static int AttackedTargetsCount { get; set; } = Service.Config.internalAttackTargetCount;
+    internal static Queue<(ulong id, DateTime time)> AttackedTargets { get; } = new(AttackedTargetsCount);
 
-    internal static bool InEffectTime => DateTime.Now >= EffectTime && DateTime.Now <= EffectEndTime;
+    internal static bool InEffectTime => DateTime.UtcNow >= EffectTime && DateTime.UtcNow <= EffectEndTime;
     internal static Dictionary<ulong, uint> HealHP { get; set; } = [];
     internal static Dictionary<ulong, uint> ApplyStatus { get; set; } = [];
     internal static uint MPGain { get; set; }
@@ -140,7 +140,7 @@ internal static class DataCenter
             var next = NextActs.FirstOrDefault();
 
             while (next != null && NextActs.Count > 0 &&
-                   (next.DeadTime < DateTime.Now || IActionHelper.IsLastAction(true, next.Act)))
+                   (next.DeadTime < DateTime.UtcNow || IActionHelper.IsLastAction(true, next.Act)))
             {
                 NextActs.RemoveAt(0);
                 next = NextActs.FirstOrDefault();
@@ -157,7 +157,7 @@ internal static class DataCenter
     internal static void AddCommandAction(IAction act, double time)
     {
         var index = NextActs.FindIndex(i => i.Act.ID == act.ID);
-        var newItem = new NextAct(act, DateTime.Now.AddSeconds(time));
+        var newItem = new NextAct(act, DateTime.UtcNow.AddSeconds(time));
         if (index < 0)
         {
             NextActs.Add(newItem);
@@ -222,14 +222,14 @@ internal static class DataCenter
     #region GCD
     // Returns the time remaining until the next GCD (Global Cooldown) after considering the current animation lock.
     public static float NextAbilityToNextGCD => DefaultGCDRemain - Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock);
-
+    
     // Returns the total duration of the default GCD.
     public static float DefaultGCDTotal => ActionManagerHelper.GetDefaultRecastTime();
 
     // Returns the remaining time for the default GCD by subtracting the elapsed time from the total recast time.
     public static float DefaultGCDRemain =>
         ActionManagerHelper.GetDefaultRecastTime() - ActionManagerHelper.GetDefaultRecastTimeElapsed();
-
+    
     // Returns the elapsed time since the start of the default GCD.
     public static float DefaultGCDElapsed => ActionManagerHelper.GetDefaultRecastTimeElapsed();
 
@@ -253,7 +253,7 @@ internal static class DataCenter
     public static uint[] DutyActions { get; internal set; } = new uint[2];
 
     static DateTime _specialStateStartTime = DateTime.MinValue;
-    private static double SpecialTimeElapsed => (DateTime.Now - _specialStateStartTime).TotalSeconds;
+    private static double SpecialTimeElapsed => (DateTime.UtcNow - _specialStateStartTime).TotalSeconds;
     public static double SpecialTimeLeft => Service.Config.SpecialDuration - SpecialTimeElapsed;
 
     static SpecialCommandType _specialType = SpecialCommandType.EndSpecial;
@@ -264,7 +264,7 @@ internal static class DataCenter
         set
         {
             _specialType = value;
-            _specialStateStartTime = value == SpecialCommandType.EndSpecial ? DateTime.MinValue : DateTime.Now;
+            _specialStateStartTime = value == SpecialCommandType.EndSpecial ? DateTime.MinValue : DateTime.UtcNow;
         }
     }
 
@@ -292,7 +292,7 @@ internal static class DataCenter
             if (_startRaidTime == DateTime.MinValue) return 0;
 
             // Calculate and return the total seconds elapsed since the raid started.
-            return (float)(DateTime.Now - _startRaidTime).TotalSeconds;
+            return (float)(DateTime.UtcNow - _startRaidTime).TotalSeconds;
         }
         set
         {
@@ -304,7 +304,7 @@ internal static class DataCenter
             else
             {
                 // Set the raid start time to the current time minus the provided value in seconds.
-                _startRaidTime = DateTime.Now - TimeSpan.FromSeconds(value);
+                _startRaidTime = DateTime.UtcNow - TimeSpan.FromSeconds(value);
             }
         }
     }
@@ -518,11 +518,11 @@ internal static class DataCenter
                 Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent] ||
                 Svc.Condition[ConditionFlag.Jumping61])
             {
-                _petLastSeen = DateTime.Now;
+                _petLastSeen = DateTime.UtcNow;
                 return true;
             }
 
-            if (!hasPet && _petLastSeen.AddSeconds(3) < DateTime.Now)
+            if (!hasPet && _petLastSeen.AddSeconds(3) < DateTime.UtcNow)
             {
                 return false;
             }
@@ -630,7 +630,7 @@ internal static class DataCenter
         {
             try
             {
-                var recs = _damages.Where(r => DateTime.Now - r.ReceiveTime < TimeSpan.FromMilliseconds(5));
+                var recs = _damages.Where(r => DateTime.UtcNow - r.ReceiveTime < TimeSpan.FromMilliseconds(5));
 
                 if (!recs.Any()) return 0;
 
@@ -648,8 +648,8 @@ internal static class DataCenter
     }
 
     public static ActionRec[] RecordActions => _actions.Reverse().ToArray();
-    private static DateTime _timeLastActionUsed = DateTime.Now;
-    public static TimeSpan TimeSinceLastAction => DateTime.Now - _timeLastActionUsed;
+    private static DateTime _timeLastActionUsed = DateTime.UtcNow;
+    public static TimeSpan TimeSinceLastAction => DateTime.UtcNow - _timeLastActionUsed;
 
     public static ActionID LastAction { get; private set; } = 0;
 
@@ -682,7 +682,7 @@ internal static class DataCenter
             _actions.Dequeue();
         }
 
-        _timeLastActionUsed = DateTime.Now;
+        _timeLastActionUsed = DateTime.UtcNow;
         _actions.Enqueue(new ActionRec(_timeLastActionUsed, act));
     }
 
@@ -691,7 +691,7 @@ internal static class DataCenter
         LastAction = 0;
         LastGCD = 0;
         LastAbility = 0;
-        _timeLastActionUsed = DateTime.Now;
+        _timeLastActionUsed = DateTime.UtcNow;
         _actions.Clear();
 
         MapEffects.Clear();
@@ -706,7 +706,7 @@ internal static class DataCenter
             _damages.Dequeue();
         }
 
-        _damages.Enqueue(new DamageRec(DateTime.Now, damageRatio));
+        _damages.Enqueue(new DamageRec(DateTime.UtcNow, damageRatio));
     }
 
     internal static DateTime KnockbackFinished { get; set; } = DateTime.MinValue;
@@ -760,9 +760,6 @@ internal static class DataCenter
     {
         return IsHostileCastingBase(h, (act) =>
         {
-            Svc.Log.Information($"Checking action {act.RowId} for hostile casting tank.");
-            Svc.Log.Information($"HostileCastingTank contains {act.RowId}: {OtherConfiguration.HostileCastingTank.Contains(act.RowId)}");
-            Svc.Log.Information($"CastTargetObjectId: {h.CastTargetObjectId}, TargetObjectId: {h.TargetObjectId}");
             return OtherConfiguration.HostileCastingTank.Contains(act.RowId)
                    || h.CastTargetObjectId == h.TargetObjectId;
         });
@@ -794,7 +791,6 @@ internal static class DataCenter
         var last = h.TotalCastTime - h.CurrentCastTime;
         var t = last - DataCenter.DefaultGCDTotal;
 
-        Svc.Log.Information($"TotalCastTime: {h.TotalCastTime}, CurrentCastTime: {h.CurrentCastTime}, DefaultGCDTotal: {DataCenter.DefaultGCDTotal}, t: {t}");
         // Check if the total cast time is greater than the minimum cast time and if the calculated time is within a valid range
         if (!(h.TotalCastTime > DataCenter.DefaultGCDTotal && t > 0 && t < DataCenter.GCDTime(1))) return false;
 
@@ -805,8 +801,6 @@ internal static class DataCenter
         // Get the action being cast
         var action = actionSheet.GetRow(h.CastActionId);
         if (action == null) return false; // Check if action is null
-
-        Svc.Log.Information($"Action ID: {action.RowId}, Action Name: {action.Name}");
 
         // Invoke the check function on the action and return the result
         return check?.Invoke(action) ?? false; // Check if check is null

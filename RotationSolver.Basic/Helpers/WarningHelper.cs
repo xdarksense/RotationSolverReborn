@@ -20,7 +20,7 @@ namespace RotationSolver.Basic.Helpers
                 {
                     try
                     {
-                        systemWarnings.Add(warning, DateTime.Now);
+                        systemWarnings.Add(warning, DateTime.UtcNow);
                         return true;
                     }
                     catch (Exception ex)

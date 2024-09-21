@@ -2457,6 +2457,7 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Moving: {DataCenter.IsMoving}");
         ImGui.Text($"Stop Moving: {DataCenter.StopMovingRaw}");
         ImGui.Text($"CountDownTime: {Service.CountDownTime}");
+        ImGui.Text($"Combo Time: {DataCenter.ComboTime}");
 
         ImGui.Text($"TerritoryType: {DataCenter.TerritoryContentType}");
         ImGui.Text($"DPSTaken: {DataCenter.DPSTaken}");

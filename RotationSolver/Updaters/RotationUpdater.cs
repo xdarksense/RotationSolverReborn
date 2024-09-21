@@ -364,7 +364,7 @@ internal static class RotationUpdater
     // It also has a check to ensure it's not running too frequently, to avoid hurting the FPS of the game.
     public static void LocalRotationWatcher()
     {
-        if (DateTime.Now < LastRunTime.AddSeconds(2))
+        if (DateTime.UtcNow < LastRunTime.AddSeconds(2))
         {
             return;
         }
@@ -397,7 +397,7 @@ internal static class RotationUpdater
             });
         }
 
-        LastRunTime = DateTime.Now;
+        LastRunTime = DateTime.UtcNow;
     }
 
     public static Type[] TryGetTypes(Assembly assembly)
@@ -509,22 +509,20 @@ internal static class RotationUpdater
     private static void UpdateCustomRotation()
     {
         var nowJob = (Job)Player.Object.ClassJob.Id;
-        Svc.Log.Information($"Current Job: {nowJob}");
-
         foreach (var group in CustomRotations)
         {
             if (!group.ClassJobIds.Contains(nowJob)) continue;
-            Svc.Log.Information($"Found matching group for job: {nowJob}");
 
             var rotation = GetChosenRotation(group);
-            Svc.Log.Information($"Chosen Rotation: {rotation?.Name}");
 
             if (rotation != DataCenter.RightNowRotation?.GetType())
             {
                 var instance = GetRotation(rotation);
                 if (instance == null)
                 {
+#if DEBUG
                     Svc.Log.Error($"Failed to create instance for rotation: {rotation?.Name}");
+#endif
                     continue;
                 }
 
@@ -549,8 +547,9 @@ internal static class RotationUpdater
             }
             catch (Exception ex)
             {
-                WarningHelper.AddSystemWarning($"Failed to create the rotation: {t.Name}");
+#if DEBUG
                 Svc.Log.Error(ex, $"Failed to create the rotation: {t.Name}");
+#endif
                 return null;
             }
         }

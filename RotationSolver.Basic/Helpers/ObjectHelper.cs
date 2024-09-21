@@ -174,7 +174,8 @@ public static class ObjectHelper
                     return true;
             }
 
-            //if (gameObject.GetNameplateKind() == NameplateKind.FriendlyBattleNPC) return true;
+            if (Service.Config.FriendlyBattleNpcHeal && gameObject.GetNameplateKind() == NameplateKind.FriendlyBattleNPC) return true;
+
         }
 
         return false;
@@ -231,7 +232,7 @@ public static class ObjectHelper
             }
         }
 
-        if (obj is IBattleChara b && b.StatusList != null && b.StatusList.Any(StatusHelper.IsPriority)) return true;
+        if (obj is IBattleChara b && b.StatusList?.Any(StatusHelper.IsPriority) == true) return true;
 
         if (Service.Config.ChooseAttackMark && MarkingHelper.AttackSignTargets.FirstOrDefault(id => id != 0) == (long)obj.GameObjectId) return true;
 
@@ -382,7 +383,7 @@ public static class ObjectHelper
             }
         }
 
-        var timespan = DateTime.Now - startTime;
+        var timespan = DateTime.UtcNow - startTime;
         if (startTime == DateTime.MinValue || timespan < CheckSpan) return float.NaN;
 
         var ratioNow = b.GetHealthRatio();
@@ -404,7 +405,7 @@ public static class ObjectHelper
     internal static bool IsAttacked(this IBattleChara b)
     {
         if (b == null) return false;
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
         foreach (var (id, time) in DataCenter.AttackedTargets)
         {
             if (id == b.GameObjectId)
