@@ -61,7 +61,7 @@ partial class ScholarRotation
 
     static partial void ModifyWhisperingDawnPvE_16537(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DataCenter.HasPet;
+        setting.ActionCheck = () => DataCenter.HasPet && !Player.HasStatus(true, StatusID.Dissipation);
         setting.IsFriendly = true;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -109,9 +109,9 @@ partial class ScholarRotation
 
     }
 
-    static partial void ModifyFeyIlluminationPvE(ref ActionSetting setting)
+    static partial void ModifyFeyIlluminationPvE_16538(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DataCenter.HasPet;
+        setting.ActionCheck = () => DataCenter.HasPet && !Player.HasStatus(true, StatusID.Dissipation);
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -243,7 +243,7 @@ partial class ScholarRotation
 
     static partial void ModifyFeyBlessingPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SeraphTime <= 0 && DataCenter.HasPet;
+        setting.ActionCheck = () => SeraphTime <= 0 && DataCenter.HasPet && !Player.HasStatus(true, StatusID.Dissipation);
         setting.IsFriendly = true;
     }
 
@@ -312,7 +312,7 @@ partial class ScholarRotation
 
     static partial void ModifySeraphismPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DataCenter.HasPet && InCombat;
+        setting.ActionCheck = () => DataCenter.HasPet && InCombat && !Player.HasStatus(true, StatusID.Dissipation);
         setting.IsFriendly = true;
     }
 
