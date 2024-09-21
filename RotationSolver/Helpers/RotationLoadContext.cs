@@ -59,7 +59,9 @@ internal class RotationLoadContext(DirectoryInfo? directoryInfo)
         var pdbPath = Path.ChangeExtension(filePath, ".pdb");
         if (!File.Exists(pdbPath))
         {
+#if DEBUG
             Svc.Log.Information($"Failed to find {pdbPath}");
+#endif
             return LoadFromStream(file);
         }
         using var pdbFile = File.Open(pdbPath, FileMode.Open, FileAccess.Read, FileShare.Read);
