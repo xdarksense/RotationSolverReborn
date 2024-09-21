@@ -752,9 +752,6 @@ internal static class DataCenter
     {
         return IsHostileCastingBase(h, (act) =>
         {
-            Svc.Log.Information($"Checking action {act.RowId} for hostile casting tank.");
-            Svc.Log.Information($"HostileCastingTank contains {act.RowId}: {OtherConfiguration.HostileCastingTank.Contains(act.RowId)}");
-            Svc.Log.Information($"CastTargetObjectId: {h.CastTargetObjectId}, TargetObjectId: {h.TargetObjectId}");
             return OtherConfiguration.HostileCastingTank.Contains(act.RowId)
                    || h.CastTargetObjectId == h.TargetObjectId;
         });
@@ -786,7 +783,6 @@ internal static class DataCenter
         var last = h.TotalCastTime - h.CurrentCastTime;
         var t = last - DataCenter.DefaultGCDTotal;
 
-        Svc.Log.Information($"TotalCastTime: {h.TotalCastTime}, CurrentCastTime: {h.CurrentCastTime}, DefaultGCDTotal: {DataCenter.DefaultGCDTotal}, t: {t}");
         // Check if the total cast time is greater than the minimum cast time and if the calculated time is within a valid range
         if (!(h.TotalCastTime > DataCenter.DefaultGCDTotal && t > 0 && t < DataCenter.GCDTime(1))) return false;
 
@@ -797,8 +793,6 @@ internal static class DataCenter
         // Get the action being cast
         var action = actionSheet.GetRow(h.CastActionId);
         if (action == null) return false; // Check if action is null
-
-        Svc.Log.Information($"Action ID: {action.RowId}, Action Name: {action.Name}");
 
         // Invoke the check function on the action and return the result
         return check?.Invoke(action) ?? false; // Check if check is null

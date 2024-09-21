@@ -24,7 +24,9 @@ public static class DownloadHelper
         {
 #pragma warning disable 0436
             WarningHelper.AddSystemWarning($"Failed to load downloading List because: {ex.Message}");
+#if DEBUG
             Svc.Log.Information(ex, "Failed to load downloading List.");
+#endif
             return default;
         }
     }
