@@ -5,6 +5,7 @@ using ECommons.DalamudServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Client.UI;
@@ -164,7 +165,17 @@ public static class ObjectHelper
             if (gameObject.GameObjectId == Player.Object?.GameObjectId) return true;
             if (Svc.Party.Any(p => p.GameObject?.GameObjectId == gameObject.GameObjectId)) return true;
             if (gameObject.SubKind == 9) return true;
+
+            //Add Player Chocobo Companion to Party List
+            unsafe
+            {
+                BattleChara? CompanionChocobo = *DataCenter.GetCompanion();
+                if (CompanionChocobo != null)
+                    return true;
+            }
+
             if (Service.Config.FriendlyBattleNpcHeal && gameObject.GetNameplateKind() == NameplateKind.FriendlyBattleNPC) return true;
+
         }
 
         return false;
