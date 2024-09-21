@@ -169,11 +169,9 @@ public static class ObjectHelper
             // Add Player Chocobo Companion to Party List
             unsafe
             {
-                BattleChara* companionChocobo = DataCenter.GetCompanion();
-                if (companionChocobo != null)
-                {
+                BattleChara companionChocobo = *DataCenter.GetCompanion();
+                if (&companionChocobo != null && companionChocobo.GetGameObjectId() == gameObject.GameObjectId)
                     return true;
-                }
             }
 
             if (Service.Config.FriendlyBattleNpcHeal && gameObject.GetNameplateKind() == NameplateKind.FriendlyBattleNPC) return true;
