@@ -390,6 +390,11 @@ internal partial class Configs : IPluginConfiguration
     [Range(0.100f, 2.500f, ConfigUnitType.Seconds, 0.001f)]
     public float isFirstAbilityTimer { get; set; } = 0.600f;
 
+    [UI("Max Attack Target Count Tracking", Description = "Don't fuck with this if you dont know what it does",
+        Filter = Extra)]
+    [Range(8, 100, ConfigUnitType.None, 1)]
+    public int internalAttackTargetCount { get; set; } = 48;
+
     [UI("Auto turn off RSR when combat is over more for more then...",
         Parent = nameof(AutoOffAfterCombat))]
     [Range(0, 600, ConfigUnitType.Seconds)]
@@ -461,6 +466,10 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Heal party members when not in combat.",
         Filter = HealingActionCondition, Section = 3)]
     private static readonly bool _healOutOfCombat = false;
+
+    [ConditionBool, UI("Heal solo instance NPCs. (Experimental)",
+        Filter = HealingActionCondition, Section = 3)]
+    private static readonly bool _friendlyBattleNPCHeal = false;
 
     [ConditionBool, UI("Heal party members with GCD if there is nothing to do in combat.",
         Filter = HealingActionCondition, Section = 3)]

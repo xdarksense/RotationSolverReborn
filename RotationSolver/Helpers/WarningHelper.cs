@@ -10,7 +10,7 @@ public static class WarningHelper
         }
         if (!DataCenter.SystemWarnings.ContainsKey(message))
         {
-            DataCenter.SystemWarnings.Add(message, DateTime.Now);
+            DataCenter.SystemWarnings.Add(message, DateTime.UtcNow);
         }
     }
 }

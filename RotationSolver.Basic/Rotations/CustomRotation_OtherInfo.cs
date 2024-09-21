@@ -496,6 +496,26 @@ partial class CustomRotation
     }
 
     /// <summary>
+    /// How long is remaining on the Combo Timer.
+    /// <br>WARNING: Do not make this method the main logic of your rotation.</br>
+    /// </summary>
+    [Description("Combo time")]
+    public static float LiveComboTime
+    {
+        get
+        {
+            try
+            {
+                return DataCenter.ComboTime;
+            }
+            catch (Exception)
+            {
+                return 0f;
+            }
+        }
+    }
+
+    /// <summary>
     /// <br>WARNING: Do Not make this method the main of your rotation.</br>
     /// </summary>
     /// <param name="GCD"></param>

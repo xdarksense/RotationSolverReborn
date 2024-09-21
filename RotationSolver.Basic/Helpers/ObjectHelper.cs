@@ -164,7 +164,7 @@ public static class ObjectHelper
             if (gameObject.GameObjectId == Player.Object?.GameObjectId) return true;
             if (Svc.Party.Any(p => p.GameObject?.GameObjectId == gameObject.GameObjectId)) return true;
             if (gameObject.SubKind == 9) return true;
-            //if (gameObject.GetNameplateKind() == NameplateKind.FriendlyBattleNPC) return true;
+            if (Service.Config.FriendlyBattleNpcHeal && gameObject.GetNameplateKind() == NameplateKind.FriendlyBattleNPC) return true;
         }
 
         return false;
@@ -372,7 +372,7 @@ public static class ObjectHelper
             }
         }
 
-        var timespan = DateTime.Now - startTime;
+        var timespan = DateTime.UtcNow - startTime;
         if (startTime == DateTime.MinValue || timespan < CheckSpan) return float.NaN;
 
         var ratioNow = b.GetHealthRatio();
@@ -394,7 +394,7 @@ public static class ObjectHelper
     internal static bool IsAttacked(this IBattleChara b)
     {
         if (b == null) return false;
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
         foreach (var (id, time) in DataCenter.AttackedTargets)
         {
             if (id == b.GameObjectId)

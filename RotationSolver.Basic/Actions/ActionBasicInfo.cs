@@ -212,7 +212,7 @@ public readonly struct ActionBasicInfo
     {
         var player = Player.Object;
         return CastTime > 0 && !player.HasStatus(true, new[] { StatusID.Swiftcast, StatusID.Triplecast, StatusID.Dualcast }) && !ActionsNoNeedCasting.Contains(ID) &&
-               (DataCenter.SpecialType == SpecialCommandType.NoCasting || (DateTime.Now > DataCenter.KnockbackStart && DateTime.Now < DataCenter.KnockbackFinished) ||
+               (DataCenter.SpecialType == SpecialCommandType.NoCasting || (DateTime.UtcNow > DataCenter.KnockbackStart && DateTime.UtcNow < DataCenter.KnockbackFinished) ||
                 (DataCenter.NoPoslock && DataCenter.IsMoving && !skipCastingCheck));
     }
 
