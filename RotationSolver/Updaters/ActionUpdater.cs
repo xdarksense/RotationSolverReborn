@@ -12,8 +12,6 @@ internal static class ActionUpdater
 {
     internal static DateTime AutoCancelTime { get; set; } = DateTime.MinValue;
 
-    static readonly RandomDelay _GCDDelay = new(() => Service.Config.WeaponDelay);
-
     internal static IAction? NextAction { get; set; }
 
     private static IBaseAction? _nextGCDAction;
@@ -105,7 +103,7 @@ internal static class ActionUpdater
         DataCenter.IsMoving = AgentMap.Instance()->IsPlayerMoving > 0;
         if (last && !DataCenter.IsMoving)
         {
-            _stopMovingTime = DateTime.Now;
+            _stopMovingTime = DateTime.UtcNow;
         }
         else if (DataCenter.IsMoving)
         {
@@ -114,7 +112,7 @@ internal static class ActionUpdater
 
         DataCenter.StopMovingRaw = _stopMovingTime == DateTime.MinValue
             ? 0
-            : (float)(DateTime.Now - _stopMovingTime).TotalSeconds;
+            : (float)(DateTime.UtcNow - _stopMovingTime).TotalSeconds;
     }
 
     static DateTime _startCombatTime = DateTime.MinValue;
@@ -125,7 +123,7 @@ internal static class ActionUpdater
 
         if (!lastInCombat && DataCenter.InCombat)
         {
-            _startCombatTime = DateTime.Now;
+            _startCombatTime = DateTime.UtcNow;
         }
         else if (lastInCombat && !DataCenter.InCombat)
         {
@@ -133,19 +131,19 @@ internal static class ActionUpdater
 
             if (Service.Config.AutoOffAfterCombat)
             {
-                AutoCancelTime = DateTime.Now.AddSeconds(Service.Config.AutoOffAfterCombatTime);
+                AutoCancelTime = DateTime.UtcNow.AddSeconds(Service.Config.AutoOffAfterCombatTime);
             }
         }
 
         DataCenter.CombatTimeRaw = _startCombatTime == DateTime.MinValue
             ? 0
-            : (float)(DateTime.Now - _startCombatTime).TotalSeconds;
+            : (float)(DateTime.UtcNow - _startCombatTime).TotalSeconds;
     }
 
     static uint _lastMP = 0;
-    static DateTime _lastMPUpdate = DateTime.Now;
+    static DateTime _lastMPUpdate = DateTime.UtcNow;
 
-    internal static float MPUpdateElapsed => (float)(DateTime.Now - _lastMPUpdate).TotalSeconds % 3;
+    internal static float MPUpdateElapsed => (float)(DateTime.UtcNow - _lastMPUpdate).TotalSeconds % 3;
 
     private static void UpdateMPTimer()
     {
@@ -160,7 +158,7 @@ internal static class ActionUpdater
 
         if (_lastMP < player.CurrentMp)
         {
-            _lastMPUpdate = DateTime.Now;
+            _lastMPUpdate = DateTime.UtcNow;
         }
         _lastMP = player.CurrentMp;
     }

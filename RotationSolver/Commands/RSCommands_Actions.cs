@@ -37,9 +37,9 @@ namespace RotationSolver.Commands
             if (!Player.Available) return false;
 
             // Do not click the button in random time.
-            if (DateTime.Now - _lastClickTime < TimeSpan.FromMilliseconds(new Random().Next(
+            if (DateTime.UtcNow - _lastClickTime < TimeSpan.FromMilliseconds(new Random().Next(
                 (int)(Service.Config.ClickingDelay.X * 1000), (int)(Service.Config.ClickingDelay.Y * 1000)))) return false;
-            _lastClickTime = DateTime.Now;
+            _lastClickTime = DateTime.UtcNow;
 
             if (!isGCD && ActionUpdater.NextAction is IBaseAction act1 && act1.Info.IsRealGCD) return false;
 
@@ -73,7 +73,7 @@ namespace RotationSolver.Commands
                 OtherConfiguration.RotationSolverRecord.ClickingCount++;
 
                 _lastActionID = nextAction.AdjustedID;
-                _lastUsedTime = DateTime.Now;
+                _lastUsedTime = DateTime.UtcNow;
 
                 if (nextAction is BaseAction act)
                 {
@@ -239,7 +239,7 @@ namespace RotationSolver.Commands
 
             // Cancel when after combat.
             else if (ActionUpdater.AutoCancelTime != DateTime.MinValue
-                && DateTime.Now > ActionUpdater.AutoCancelTime)
+                && DateTime.UtcNow > ActionUpdater.AutoCancelTime)
             {
                 CancelState();
                 ActionUpdater.AutoCancelTime = DateTime.MinValue;
