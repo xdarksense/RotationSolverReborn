@@ -1,4 +1,5 @@
 ﻿using Dalamud.Game.ClientState.Keys;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
@@ -213,9 +214,11 @@ public partial class RotationConfigWindow : Window
             }
         }
 
-        if (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
-    Player.Job == Job.LTW || Player.Job == Job.WVR || Player.Job == Job.ALC || Player.Job == Job.CUL ||
-    Player.Job == Job.MIN || Player.Job == Job.FSH || Player.Job == Job.BTN)
+        IPlayerCharacter localPlayer = Player.Object;
+
+        if (localPlayer != null && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
+        Player.Job == Job.LTW || Player.Job == Job.WVR || Player.Job == Job.ALC || Player.Job == Job.CUL ||
+        Player.Job == Job.MIN || Player.Job == Job.FSH || Player.Job == Job.BTN))
         {
             float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
             ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically

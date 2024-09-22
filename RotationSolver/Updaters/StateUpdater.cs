@@ -158,56 +158,7 @@ internal static class StateUpdater
                     }
                 }
 
-                else if (DataCenter.Job == ECommons.ExcelServices.Job.PLD) // PLD Specific defensive abilties.
-                {
-                    if (DataCenter.PartyMembers.Any((tank) =>
-                    {
-                        var attackingTankObj = DataCenter.AllHostileTargets.Where(t => t.TargetObjectId == tank.GameObjectId);
-
-                        if (attackingTankObj.Count() != 1) return false;
-
-                        return DataCenter.IsHostileCastingToTank;
-                    }))
-                    {
-                        if (Service.Config.InDebug)
-                        {
-                            Svc.Log.Information("Triggering DefenseSingle for Healer/PLD.");
-                        }
-                        status |= AutoStatus.DefenseSingle;
-                    }
-
-                    var movingHere = (float)DataCenter.NumberOfHostilesInRange / DataCenter.NumberOfHostilesInMaxRange > 0.3f;
-
-                    var tarOnMe = DataCenter.AllHostileTargets.Where(t => t.DistanceToPlayer() <= 3
-                    && t.TargetObject == Player.Object);
-                    var tarOnMeCount = tarOnMe.Count();
-                    var attackedCount = tarOnMe.Count(ObjectHelper.IsAttacked);
-                    var attacked = (float)attackedCount / tarOnMeCount > 0.7f;
-
-                    //A lot targets are targeting on me.
-                    if (tarOnMeCount >= Service.Config.AutoDefenseNumber
-                        && Player.Object.GetHealthRatio() <= Service.Config.HealthForAutoDefense
-                        && movingHere && attacked)
-                    {
-                        if (Service.Config.InDebug)
-                        {
-                            Svc.Log.Information("Triggering DefenseSingle for Tank.");
-                        }
-                        status |= AutoStatus.DefenseSingle;
-                    }
-
-                    //Big damage casting action.
-                    if (DataCenter.IsHostileCastingToTank)
-                    {
-                        if (Service.Config.InDebug)
-                        {
-                            Svc.Log.Information("Triggering DefenseSingle for Tank (Hostile Casting).");
-                        }
-                        status |= AutoStatus.DefenseSingle;
-                    }
-                }
-
-                else if (DataCenter.Role == JobRole.Tank || DataCenter.Job == ECommons.ExcelServices.Job.PLD) // Tank defensive abilties.
+                if (DataCenter.Role == JobRole.Tank) // Tank defensive abilties.
                 {
                     var movingHere = (float)DataCenter.NumberOfHostilesInRange / DataCenter.NumberOfHostilesInMaxRange > 0.3f;
 
