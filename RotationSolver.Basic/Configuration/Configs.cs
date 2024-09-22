@@ -471,6 +471,10 @@ internal partial class Configs : IPluginConfiguration
         Filter = HealingActionCondition, Section = 3)]
     private static readonly bool _friendlyBattleNPCHeal = false;
 
+    [ConditionBool, UI("Heal/Dance partner your chocobo. (Experimental)",
+        Filter = HealingActionCondition, Section = 3)]
+    private static readonly bool _chocoboPartyMember = false;
+
     [ConditionBool, UI("Heal party members with GCD if there is nothing to do in combat.",
         Filter = HealingActionCondition, Section = 3)]
     private static readonly bool _healWhenNothingTodo = true;
