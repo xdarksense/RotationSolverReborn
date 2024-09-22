@@ -1,4 +1,5 @@
-﻿using ECommons.GameHelpers;
+﻿using ECommons.DalamudServices;
+using ECommons.GameHelpers;
 using RotationSolver.Basic.Configuration.Conditions;
 
 namespace RotationSolver.Updaters;
@@ -84,18 +85,34 @@ internal static class StateUpdater
 
             if (_healDelay1.Delay(canHealAreaAbility))
             {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("Triggering HealAreaAbility.");
+                }
                 status |= AutoStatus.HealAreaAbility;
             }
             if (_healDelay2.Delay(canHealAreaSpell))
             {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("Triggering HealAreaSpell.");
+                }
                 status |= AutoStatus.HealAreaSpell;
             }
             if (_healDelay3.Delay(canHealSingleAbility))
             {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("Triggering HealSingleAbility.");
+                }
                 status |= AutoStatus.HealSingleAbility;
             }
             if (_healDelay4.Delay(canHealSingleSpell))
             {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("Triggering HealSingleSpell.");
+                }
                 status |= AutoStatus.HealSingleSpell;
             }
         }
@@ -106,15 +123,23 @@ internal static class StateUpdater
             {
                 if (DataCenter.IsHostileCastingAOE)
                 {
+                    if (Service.Config.InDebug)
+                    {
+                        Svc.Log.Information("Triggering DefenseArea.");
+                    }
                     status |= AutoStatus.DefenseArea;
                 }
 
                 if (DataCenter.AreHostilesCastingKnockback && Service.Config.UseKnockback)
                 {
+                    if (Service.Config.InDebug)
+                    {
+                        Svc.Log.Information("Triggering AntiKnockback.");
+                    }
                     status |= AutoStatus.AntiKnockback;
                 }
 
-                if (DataCenter.Role == JobRole.Healer || DataCenter.Job == ECommons.ExcelServices.Job.PLD) // Help defense.
+                if (DataCenter.Role == JobRole.Healer) // Healers protecting Tanks.
                 {
                     if (DataCenter.PartyMembers.Any((tank) =>
                     {
@@ -125,10 +150,64 @@ internal static class StateUpdater
                         return DataCenter.IsHostileCastingToTank;
                     }))
                     {
+                        if (Service.Config.InDebug)
+                        {
+                            Svc.Log.Information("Triggering DefenseSingle for Healer/PLD.");
+                        }
                         status |= AutoStatus.DefenseSingle;
                     }
                 }
-                else if (DataCenter.Role == JobRole.Tank) // defense self.
+
+                else if (DataCenter.Job == ECommons.ExcelServices.Job.PLD) // PLD Specific defensive abilties.
+                {
+                    if (DataCenter.PartyMembers.Any((tank) =>
+                    {
+                        var attackingTankObj = DataCenter.AllHostileTargets.Where(t => t.TargetObjectId == tank.GameObjectId);
+
+                        if (attackingTankObj.Count() != 1) return false;
+
+                        return DataCenter.IsHostileCastingToTank;
+                    }))
+                    {
+                        if (Service.Config.InDebug)
+                        {
+                            Svc.Log.Information("Triggering DefenseSingle for Healer/PLD.");
+                        }
+                        status |= AutoStatus.DefenseSingle;
+                    }
+
+                    var movingHere = (float)DataCenter.NumberOfHostilesInRange / DataCenter.NumberOfHostilesInMaxRange > 0.3f;
+
+                    var tarOnMe = DataCenter.AllHostileTargets.Where(t => t.DistanceToPlayer() <= 3
+                    && t.TargetObject == Player.Object);
+                    var tarOnMeCount = tarOnMe.Count();
+                    var attackedCount = tarOnMe.Count(ObjectHelper.IsAttacked);
+                    var attacked = (float)attackedCount / tarOnMeCount > 0.7f;
+
+                    //A lot targets are targeting on me.
+                    if (tarOnMeCount >= Service.Config.AutoDefenseNumber
+                        && Player.Object.GetHealthRatio() <= Service.Config.HealthForAutoDefense
+                        && movingHere && attacked)
+                    {
+                        if (Service.Config.InDebug)
+                        {
+                            Svc.Log.Information("Triggering DefenseSingle for Tank.");
+                        }
+                        status |= AutoStatus.DefenseSingle;
+                    }
+
+                    //Big damage casting action.
+                    if (DataCenter.IsHostileCastingToTank)
+                    {
+                        if (Service.Config.InDebug)
+                        {
+                            Svc.Log.Information("Triggering DefenseSingle for Tank (Hostile Casting).");
+                        }
+                        status |= AutoStatus.DefenseSingle;
+                    }
+                }
+
+                else if (DataCenter.Role == JobRole.Tank || DataCenter.Job == ECommons.ExcelServices.Job.PLD) // Tank defensive abilties.
                 {
                     var movingHere = (float)DataCenter.NumberOfHostilesInRange / DataCenter.NumberOfHostilesInMaxRange > 0.3f;
 
@@ -143,12 +222,20 @@ internal static class StateUpdater
                         && Player.Object.GetHealthRatio() <= Service.Config.HealthForAutoDefense
                         && movingHere && attacked)
                     {
+                        if (Service.Config.InDebug)
+                        {
+                            Svc.Log.Information("Triggering DefenseSingle for Tank.");
+                        }
                         status |= AutoStatus.DefenseSingle;
                     }
 
                     //Big damage casting action.
                     if (DataCenter.IsHostileCastingToTank)
                     {
+                        if (Service.Config.InDebug)
+                        {
+                            Svc.Log.Information("Triggering DefenseSingle for Tank (Hostile Casting).");
+                        }
                         status |= AutoStatus.DefenseSingle;
                     }
                 }
@@ -159,6 +246,10 @@ internal static class StateUpdater
                 || DataCenter.AllianceMembers.Count(o => o.IsJobCategory(JobRole.Tank)) < 2)
                 && DataCenter.ProvokeTarget != null)
             {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("Provoke");
+                }
                 status |= AutoStatus.Provoke;
             }
         }

@@ -30,10 +30,13 @@ public static class ObjectHelper
     {
         return obj == null ? null : Service.GetSheet<Lumina.Excel.GeneratedSheets.BNpcBase>().GetRow(obj.DataId);
     }
-
+    
     internal static bool CanProvoke(this IGameObject target)
     {
         if (target == null) return false;
+
+        // Assuming DataCenter.FateId is an ID, not an IGameObject
+        if (target.DataId == DataCenter.FateId) return false;
 
         //Removed the listed names.
         if (OtherConfiguration.NoProvokeNames.TryGetValue(Svc.ClientState.TerritoryType, out var ns1))
