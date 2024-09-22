@@ -410,7 +410,7 @@ public static class ObjectHelper
     internal static bool IsAttacked(this IBattleChara b)
     {
         if (b == null) return false;
-        var now = DateTime.UtcNow;
+        var now = DateTime.Now;
         foreach (var (id, time) in DataCenter.AttackedTargets)
         {
             if (id == b.GameObjectId)
