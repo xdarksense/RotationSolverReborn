@@ -436,7 +436,7 @@ internal partial class Configs : IPluginConfiguration
         PvEFilter = JobFilterType.None)]
     private static readonly bool _raisePlayerBySwift = true;
 
-    [ConditionBool, UI("Raise any player in range (even if they are not in your party)",
+    [ConditionBool, UI("Raise any player in range in Alliance Raids)",
         Filter = HealingActionCondition, Section = 2,
         PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _raiseAll = false;

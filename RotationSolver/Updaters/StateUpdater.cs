@@ -85,34 +85,18 @@ internal static class StateUpdater
 
             if (_healDelay1.Delay(canHealAreaAbility))
             {
-                if (Service.Config.InDebug)
-                {
-                    Svc.Log.Information("Triggering HealAreaAbility.");
-                }
                 status |= AutoStatus.HealAreaAbility;
             }
             if (_healDelay2.Delay(canHealAreaSpell))
             {
-                if (Service.Config.InDebug)
-                {
-                    Svc.Log.Information("Triggering HealAreaSpell.");
-                }
                 status |= AutoStatus.HealAreaSpell;
             }
             if (_healDelay3.Delay(canHealSingleAbility))
             {
-                if (Service.Config.InDebug)
-                {
-                    Svc.Log.Information("Triggering HealSingleAbility.");
-                }
                 status |= AutoStatus.HealSingleAbility;
             }
             if (_healDelay4.Delay(canHealSingleSpell))
             {
-                if (Service.Config.InDebug)
-                {
-                    Svc.Log.Information("Triggering HealSingleSpell.");
-                }
                 status |= AutoStatus.HealSingleSpell;
             }
         }
@@ -123,19 +107,11 @@ internal static class StateUpdater
             {
                 if (DataCenter.IsHostileCastingAOE)
                 {
-                    if (Service.Config.InDebug)
-                    {
-                        Svc.Log.Information("Triggering DefenseArea.");
-                    }
                     status |= AutoStatus.DefenseArea;
                 }
 
                 if (DataCenter.AreHostilesCastingKnockback && Service.Config.UseKnockback)
                 {
-                    if (Service.Config.InDebug)
-                    {
-                        Svc.Log.Information("Triggering AntiKnockback.");
-                    }
                     status |= AutoStatus.AntiKnockback;
                 }
 
@@ -150,10 +126,6 @@ internal static class StateUpdater
                         return DataCenter.IsHostileCastingToTank;
                     }))
                     {
-                        if (Service.Config.InDebug)
-                        {
-                            Svc.Log.Information("Triggering DefenseSingle for Healer/PLD.");
-                        }
                         status |= AutoStatus.DefenseSingle;
                     }
                 }
@@ -173,20 +145,12 @@ internal static class StateUpdater
                         && Player.Object.GetHealthRatio() <= Service.Config.HealthForAutoDefense
                         && movingHere && attacked)
                     {
-                        if (Service.Config.InDebug)
-                        {
-                            Svc.Log.Information("Triggering DefenseSingle for Tank.");
-                        }
                         status |= AutoStatus.DefenseSingle;
                     }
 
                     //Big damage casting action.
                     if (DataCenter.IsHostileCastingToTank)
                     {
-                        if (Service.Config.InDebug)
-                        {
-                            Svc.Log.Information("Triggering DefenseSingle for Tank (Hostile Casting).");
-                        }
                         status |= AutoStatus.DefenseSingle;
                     }
                 }
@@ -197,10 +161,6 @@ internal static class StateUpdater
                 || DataCenter.AllianceMembers.Count(o => o.IsJobCategory(JobRole.Tank)) < 2)
                 && DataCenter.ProvokeTarget != null)
             {
-                if (Service.Config.InDebug)
-                {
-                    Svc.Log.Information("Provoke");
-                }
                 status |= AutoStatus.Provoke;
             }
         }

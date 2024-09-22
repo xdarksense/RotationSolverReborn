@@ -70,6 +70,7 @@ partial class MachinistRotation
         ImGui.Text("LastSummonBatteryPower: " + LastSummonBatteryPower.ToString());
         ImGui.Text("OverheatTimeRemainingRaw: " + OverheatTimeRemainingRaw.ToString());
         ImGui.Text("OverheatTime: " + OverheatTime.ToString());
+        ImGui.Text("OverheatedStacks: " + OverheatedStacks.ToString());
     }
     #endregion
 
