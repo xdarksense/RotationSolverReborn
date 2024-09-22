@@ -149,6 +149,31 @@ public readonly struct ActionCooldownInfo : ICooldown
         => HasOneCharge || RecastTimeRemainOneCharge <= remain;
 
     /// <summary>
+    /// Determines whether the action will have the specified number of charges after the given GCD count and offset.
+    /// </summary>
+    /// <param name="charges">The number of charges.</param>
+    /// <param name="gcdCount">The GCD count.</param>
+    /// <param name="offset">The offset.</param>
+    /// <returns>True if the action will have the specified number of charges; otherwise, false.</returns>
+    public bool WillHaveXChargesGCD(uint charges, uint gcdCount = 0, float offset = 0)
+        => WillHaveXCharges(charges, DataCenter.GCDTime(gcdCount, offset));
+
+    /// <summary>
+    /// Determines whether the action will have the specified number of charges after the given remaining time.
+    /// </summary>
+    /// <param name="charges">The number of charges.</param>
+    /// <param name="remain">The remaining time.</param>
+    /// <returns>True if the action will have the specified number of charges; otherwise, false.</returns>
+    public bool WillHaveXCharges(uint charges, float remain)
+    {
+        if (charges <= CurrentCharges)
+            return true;
+
+        float requiredTime = (charges - CurrentCharges) * RecastTimeOneChargeRaw;
+        return RecastTimeRemainOneCharge <= remain - requiredTime;
+    }
+
+    /// <summary>
     /// Determines whether the action was just used after the specified time.
     /// </summary>
     /// <param name="time">The time.</param>
