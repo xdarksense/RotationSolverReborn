@@ -83,7 +83,7 @@ internal static class DataCenter
     internal static DateTime EffectTime { private get; set; } = DateTime.UtcNow;
     internal static DateTime EffectEndTime { private get; set; } = DateTime.UtcNow;
 
-    internal static int AttackedTargetsCount { get; set; } = Service.Config.internalAttackTargetCount;
+    internal static int AttackedTargetsCount { get; set; } = 48;
     internal static Queue<(ulong id, DateTime time)> AttackedTargets { get; } = new(AttackedTargetsCount);
 
     internal static bool InEffectTime => DateTime.UtcNow >= EffectTime && DateTime.UtcNow <= EffectEndTime;

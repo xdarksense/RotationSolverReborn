@@ -34,11 +34,11 @@ internal static class ConfigurationHelper
 
     public static readonly uint[] BadStatus =
     [
-        583, //No items.
-        581, //Unable to use.
-        579, //Between Area
-        574, //Job
-        573, //没学会 ?
+        583, // No items
+        581, // Unable to use
+        579, // Between Area
+        574, // Job
+        573, // Not learned
     ];
 
     public static VirtualKey ToVirtual(this ConsoleModifiers modifiers)

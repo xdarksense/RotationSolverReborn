@@ -1763,32 +1763,36 @@ public partial class RotationConfigWindow : Window
     #endregion 
 
     #region List
-    private static Status[]? _allDispelStatus = null;
-    internal static Status[] AllDispelStatus
-        => _allDispelStatus ??= Service.GetSheet<Status>()
-                    .Where(s => s.CanDispel)
-                    .ToArray();
+    private static readonly Lazy<Status[]> _allDispelStatus = new(() =>
+    Service.GetSheet<Status>()
+        .Where(s => s.CanDispel)
+        .ToArray());
 
-    private static Status[]? _allStatus = null;
-    internal static Status[] AllStatus
-        => _allStatus ??= Service.GetSheet<Status>()
-                    .Where(s => !s.CanDispel && !s.LockMovement && !s.IsGaze && !s.IsFcBuff
-                        && !string.IsNullOrEmpty(s.Name.ToString()) && s.Icon != 0)
-                    .ToArray();
+    internal static Status[] AllDispelStatus => _allDispelStatus.Value;
 
-    private static GAction[]? _allActions = null;
-    internal static GAction[] AllActions
-        => _allActions ??= Service.GetSheet<GAction>()
-                    .Where(a => !string.IsNullOrEmpty(a.Name) && !a.IsPvP && !a.IsPlayerAction
-                    && a.ClassJob.Value == null && a.Cast100ms > 0)
-                    .ToArray();
+    private static readonly Lazy<Status[]> _allStatus = new(() =>
+        Service.GetSheet<Status>()
+            .Where(s => !s.CanDispel && !s.LockMovement && !s.IsGaze && !s.IsFcBuff
+                && !string.IsNullOrEmpty(s.Name.ToString()) && s.Icon != 0)
+            .ToArray());
 
-    private static Status[]? _badStatus = null;
+    internal static Status[] AllStatus => _allStatus.Value;
+
+    private static readonly Lazy<GAction[]> _allActions = new(() =>
+        Service.GetSheet<GAction>()
+            .Where(a => !string.IsNullOrEmpty(a.Name) && !a.IsPvP && !a.IsPlayerAction
+                && a.ClassJob.Value == null && a.Cast100ms > 0)
+            .ToArray());
+
+    internal static GAction[] AllActions => _allActions.Value;
+
     private const int BadStatusCategory = 2;
-    internal static Status[] BadStatus
-        => _badStatus ??= Service.GetSheet<Status>()
-                    .Where(s => s.StatusCategory == BadStatusCategory && s.Icon != 0)
-                    .ToArray();
+    private static readonly Lazy<Status[]> _badStatus = new(() =>
+        Service.GetSheet<Status>()
+            .Where(s => s.StatusCategory == BadStatusCategory && s.Icon != 0)
+            .ToArray());
+
+    internal static Status[] BadStatus => _badStatus.Value;
 
     private static void DrawList()
     {
@@ -2458,6 +2462,8 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Stop Moving: {DataCenter.StopMovingRaw}");
         ImGui.Text($"CountDownTime: {Service.CountDownTime}");
         ImGui.Text($"Combo Time: {DataCenter.ComboTime}");
+        ImGui.Text($"Merged Status: {DataCenter.MergedStatus}");
+        ImGui.Text($"TargetingType: {DataCenter.TargetingType}");
 
         ImGui.Text($"TerritoryType: {DataCenter.TerritoryContentType}");
         ImGui.Text($"DPSTaken: {DataCenter.DPSTaken}");
