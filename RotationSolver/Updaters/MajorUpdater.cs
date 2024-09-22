@@ -73,7 +73,7 @@ internal static class MajorUpdater
             }
         }
 
-        HandleWorkUpdate();
+        HandleWorkUpdateAsync().ConfigureAwait(false);
     }
 
     private static void HandleSystemWarnings()
@@ -97,34 +97,35 @@ internal static class MajorUpdater
         }
     }
 
-    private static void HandleWorkUpdate()
+    private static async Task HandleWorkUpdateAsync()
     {
         var now = DateTime.UtcNow;
+        if (now - _lastUpdatedWork < TimeSpan.FromSeconds(Service.Config.MinUpdatingTime))
+            return;
+
+        _lastUpdatedWork = now;
+
         try
         {
-            if (now - _lastUpdatedWork < TimeSpan.FromSeconds(Service.Config.MinUpdatingTime))
-                return;
-
-            _lastUpdatedWork = now;
-
-            try
+            if (Service.Config.FrameworkStyle == FrameworkStyle.WorkTask)
+            {
+                await Task.Run(() => UpdateWork());
+            }
+            else if (Service.Config.FrameworkStyle == FrameworkStyle.RunOnTick)
+            {
+                await Svc.Framework.RunOnTick(() => UpdateWork());
+            }
+            else if (Service.Config.FrameworkStyle == FrameworkStyle.MainThread)
             {
                 UpdateWork();
             }
-            catch (Exception tEx)
-            {
-                Svc.Log.Error(tEx, "Worker Task Exception");
-                if (Service.Config.InDebug)
-#pragma warning disable CS0436
-                    WarningHelper.AddSystemWarning("Worker Task Exception");
-            }
         }
-        catch (Exception ex)
+        catch (Exception tEx)
         {
-            Svc.Log.Error(ex, "Worker Exception in HandleWorkUpdate");
+            Svc.Log.Error(tEx, "Worker Task Exception");
             if (Service.Config.InDebug)
 #pragma warning disable CS0436
-                WarningHelper.AddSystemWarning("Worker Exception in HandleWorkUpdate");
+                WarningHelper.AddSystemWarning("Inner Worker Exception");
         }
     }
 

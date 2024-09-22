@@ -189,9 +189,9 @@ internal partial class Configs : IPluginConfiguration
         PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _interruptibleMoreCheck = true;
 
-    [ConditionBool, UI("Use work task for acceleration. (EXPERIMENTAL, WILL CAUSE CRASHES AND OTHER ISSUES)",
+    [UI("Framework Update Method (Experimental: Changing this off of game thread will cause crashes)",
         Filter = BasicParams)]
-    private static readonly bool _useWorkTask = false;
+    public FrameworkStyle FrameworkStyle { get; set; } = FrameworkStyle.MainThread;
 
     [ConditionBool, UI("Stop casting if the target dies.", Filter = Extra)]
     private static readonly bool _useStopCasting = false;
