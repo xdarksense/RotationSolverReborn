@@ -324,20 +324,24 @@ internal static class DataCenter
                 // Ensure Svc.Objects is not null
                 if (Svc.Objects == null)
                 {
-                    Svc.Log.Error("Svc.Objects is null");
                     return Array.Empty<IBattleChara>();
                 }
 
-                // Filter and return friendly NPC members
-                return AllTargets.Where(obj => obj.GetNameplateKind() == NameplateKind.FriendlyBattleNPC).Where(b => b.IsTargetable).ToArray();
+                // Filter and cast objects safely
+                return Svc.Objects
+                    .Where(obj => obj != null && obj.ObjectKind == ObjectKind.BattleNpc && obj.GetNameplateKind() == NameplateKind.FriendlyBattleNPC)
+                    .OfType<IBattleChara>()
+                    .ToArray();
             }
             catch (Exception ex)
             {
+                // Log the exception for debugging purposes
                 Svc.Log.Error($"Error in get_FriendlyNPCMembers: {ex.Message}");
                 return Array.Empty<IBattleChara>();
             }
         }
     }
+
 
     public static IBattleChara[] AllHostileTargets
     {
