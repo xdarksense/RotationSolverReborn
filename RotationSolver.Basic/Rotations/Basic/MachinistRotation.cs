@@ -15,6 +15,18 @@ partial class MachinistRotation
     /// 
     /// </summary>
     public static byte Heat => JobGauge.Heat;
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    public static byte OverheatedStacks
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.Overheated);
+            return stacks == byte.MaxValue ? (byte)5 : stacks;
+        }
+    }
 
     /// <summary>
     /// 
@@ -151,7 +163,7 @@ partial class MachinistRotation
     {
         setting.TargetStatusProvide = [StatusID.Wildfire];
         setting.StatusProvide = [StatusID.Wildfire_1946];
-        setting.ActionCheck = () => Heat >= 50 || Player.HasStatus(true, StatusID.Hypercharged);
+        setting.ActionCheck = () => Heat >= 50 || Player.HasStatus(true, StatusID.Hypercharged) || OverheatedStacks == 5;
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
