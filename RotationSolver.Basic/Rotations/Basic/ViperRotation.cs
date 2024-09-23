@@ -368,12 +368,12 @@ public partial class ViperRotation
 
     static partial void ModifyHuntersCoilPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DreadCombo == DreadCombo.Dreadwinder && SerpentCombo == SerpentCombo.NONE;
+        setting.ActionCheck = () => (DreadCombo == DreadCombo.Dreadwinder || DreadCombo == DreadCombo.SwiftskinsCoil) && SerpentCombo == SerpentCombo.NONE;
     }
 
     static partial void ModifySwiftskinsCoilPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DreadCombo == DreadCombo.HuntersCoil && SerpentCombo == SerpentCombo.NONE;
+        setting.ActionCheck = () => (DreadCombo == DreadCombo.Dreadwinder || DreadCombo == DreadCombo.HuntersCoil) && SerpentCombo == SerpentCombo.NONE;
     }
 
     static partial void ModifyVicepitPvE(ref ActionSetting setting)
