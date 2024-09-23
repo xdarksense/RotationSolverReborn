@@ -474,7 +474,7 @@ public static class ObjectHelper
     /// <returns>
     /// An <see cref="EnemyPositional"/> value indicating whether the player is in front, at the rear, or on the flank of the enemy.
     /// </returns>
-    internal static EnemyPositional FindEnemyPositional(this IGameObject enemy)
+    public static EnemyPositional FindEnemyPositional(this IGameObject enemy)
     {
         if (enemy == null || Player.Object == null) return EnemyPositional.None;
 

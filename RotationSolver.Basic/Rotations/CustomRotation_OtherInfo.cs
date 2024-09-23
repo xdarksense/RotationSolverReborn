@@ -116,6 +116,24 @@ partial class CustomRotation
     /// </summary>
     protected static IBattleChara? HostileTarget => DataCenter.HostileTarget;
 
+
+    /// <summary>
+    /// Is player in position to hit the positional?
+    /// </summary>
+    /// <param name="positional"> Which Positional? "Flank" or "Rear"?</param>
+    /// <param name="enemy"></param>
+    /// <returns></returns>
+    public static bool CanHitPositional(EnemyPositional positional, IBattleChara enemy)
+    {
+        if (enemy == null) return false;
+
+        EnemyPositional enemy_positional = enemy.FindEnemyPositional();
+        
+        if (enemy_positional == positional)
+            return true;
+        return false;
+    }
+
     /// <summary>
     /// Is there any hostile target in range? 25 for ranged jobs and healer, 3 for melee and tank.
     /// </summary>
