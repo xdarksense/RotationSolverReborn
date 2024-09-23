@@ -44,39 +44,59 @@ partial class CustomRotation
         }
 
         IBaseAction.TargetOverride = TargetType.Tank;
-        IBaseAction.ShouldEndSpecial = true;
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Shirk))
+        {
+            IBaseAction.ShouldEndSpecial = true;
+        }
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.Shirk) && ShirkPvE.CanUse(out act))
         {
             return true;
         }
+        IBaseAction.ShouldEndSpecial = false;
 
         IBaseAction.TargetOverride = null;
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.TankStance))
+        {
+            IBaseAction.ShouldEndSpecial = true;
+        }
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.TankStance) && (TankStance?.CanUse(out act) ?? false))
         {
             return true;
         }
+        IBaseAction.ShouldEndSpecial = false;
 
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.AntiKnockback))
+        {
+            IBaseAction.ShouldEndSpecial = true;
+        }
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.AntiKnockback) && AntiKnockback(role, nextGCD, out act))
         {
             return true;
         }
+        IBaseAction.ShouldEndSpecial = false;
 
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Positional))
+        {
+            IBaseAction.ShouldEndSpecial = true;
+        }
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.Positional) && TrueNorthPvE.Cooldown.CurrentCharges > 0 && !IsLastAbility(true, TrueNorthPvE) && TrueNorthPvE.CanUse(out act, skipComboCheck: true, usedUp: true))
         {
             return true;
         }
+        IBaseAction.ShouldEndSpecial = false;
 
         IBaseAction.TargetOverride = TargetType.Heal;
-        IBaseAction.ShouldEndSpecial = false;
 
         if (DataCenter.CommandStatus.HasFlag(AutoStatus.HealAreaAbility))
         {
             IBaseAction.AllEmpty = true;
+            IBaseAction.ShouldEndSpecial = true;
             if (HealAreaAbility(nextGCD, out act))
             {
                 return true;
             }
             IBaseAction.AllEmpty = false;
+            IBaseAction.ShouldEndSpecial = false;
         }
 
         if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealAreaAbility) && CanHealAreaAbility)
@@ -92,11 +112,13 @@ partial class CustomRotation
         if (DataCenter.CommandStatus.HasFlag(AutoStatus.HealSingleAbility))
         {
             IBaseAction.AllEmpty = true;
+            IBaseAction.ShouldEndSpecial = true;
             if (HealSingleAbility(nextGCD, out act))
             {
                 return true;
             }
             IBaseAction.AllEmpty = false;
+            IBaseAction.ShouldEndSpecial = false;
         }
 
         if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealSingleAbility) && CanHealSingleAbility)
@@ -110,13 +132,21 @@ partial class CustomRotation
         }
 
         IBaseAction.TargetOverride = null;
-        IBaseAction.ShouldEndSpecial = true;
 
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Speed))
+        {
+            IBaseAction.ShouldEndSpecial = true;
+        }
         if (DataCenter.CommandStatus.HasFlag(AutoStatus.Speed) && SpeedAbility(nextGCD, out act))
         {
             return true;
         }
+        IBaseAction.ShouldEndSpecial = false;
 
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Provoke))
+        {
+            IBaseAction.ShouldEndSpecial = true;
+        }
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.Provoke))
         {
             if (!HasTankStance && (TankStance?.CanUse(out act) ?? false))
@@ -130,9 +160,14 @@ partial class CustomRotation
                 return true;
             }
         }
+        IBaseAction.ShouldEndSpecial = false;
 
         IBaseAction.TargetOverride = TargetType.BeAttacked;
 
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.DefenseArea))
+        {
+            IBaseAction.ShouldEndSpecial = true;
+        }
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseArea))
         {
             if (DefenseAreaAbility(nextGCD, out act) || (role is JobRole.Melee or JobRole.RangedPhysical or JobRole.RangedMagical && DefenseSingleAbility(nextGCD, out act)))
@@ -140,7 +175,12 @@ partial class CustomRotation
                 return true;
             }
         }
+        IBaseAction.ShouldEndSpecial = false;
 
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.DefenseSingle))
+        {
+            IBaseAction.ShouldEndSpecial = true;
+        }
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseSingle))
         {
             if (DefenseSingleAbility(nextGCD, out act) || (!DataCenter.IsHostileCastingToTank && ArmsLengthPvE.CanUse(out act)))
@@ -148,21 +188,36 @@ partial class CustomRotation
                 return true;
             }
         }
+        IBaseAction.ShouldEndSpecial = false;
 
         IBaseAction.TargetOverride = null;
 
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.MoveForward))
+        {
+            IBaseAction.ShouldEndSpecial = true;
+        }
         IBaseAction.AllEmpty = true;
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.MoveForward) && Player != null && !Player.HasStatus(true, StatusID.Bind) && MoveForwardAbility(nextGCD, out act))
         {
             return true;
         }
+        IBaseAction.ShouldEndSpecial = false;
 
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.MoveBack))
+        {
+            IBaseAction.ShouldEndSpecial = true;
+        }
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.MoveBack) && MoveBackAbility(nextGCD, out act))
         {
             return true;
         }
+        IBaseAction.ShouldEndSpecial = false;
         IBaseAction.AllEmpty = false;
 
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.HealSingleAbility))
+        {
+            IBaseAction.ShouldEndSpecial = true;
+        }
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.HealSingleAbility) && UseHpPotion(nextGCD, out act))
         {
             return true;
