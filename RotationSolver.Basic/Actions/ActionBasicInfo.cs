@@ -166,7 +166,7 @@ public readonly struct ActionBasicInfo
 
     private bool IsActionEnabled() => _action.Config.IsEnabled;
 
-    private bool IsActionDisabled() => DataCenter.DisabledActionSequencer?.Contains(ID) ?? false;
+    private bool IsActionDisabled() => !IBaseAction.ForceEnable && (DataCenter.DisabledActionSequencer?.Contains(ID) ?? false); 
 
     private bool HasEnoughMP() => DataCenter.CurrentMp >= MPNeed;
 
