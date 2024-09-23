@@ -111,7 +111,11 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Automatically use MP Potions", Description = "Experimental.",
         Filter = AutoActionUsage)]
     private static readonly bool _useMpPotions = false;
-    
+
+    [JobConfig, UI("MP threshold under which to use Lucid Dreaming", Filter = AutoActionUsage)]
+    [Range(0, 10000, ConfigUnitType.None)]
+    public int LucidDreamingMpThreshold { get; set; } = 6000;
+
     [ConditionBool, UI("Prioritize mob/object targets with attack markers",
         Filter = TargetConfig)]
     private static readonly bool _chooseAttackMark = true;
