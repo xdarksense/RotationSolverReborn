@@ -5,7 +5,7 @@ namespace RotationSolver.Basic.Data;
 /// <summary>
 /// Represents new VFX data.
 /// </summary>
-internal readonly struct VfxNewData
+public readonly struct VfxNewData
 {
     /// <summary>
     /// Gets the object ID.
@@ -43,5 +43,5 @@ internal readonly struct VfxNewData
     /// Returns a string that represents the current object.
     /// </summary>
     /// <returns>A string that represents the current object.</returns>
-    public override string ToString() => $"Object Effect: {Svc.Objects.SearchById(ObjectId)?.Name ?? "Object"}: {Path}";
+    public override string ToString() => $"Object Effect: {Svc.Objects.SearchById(ObjectId)?.Name ?? "Object"}: {Path}, {TimeDuration.TotalSeconds}";
 }

@@ -12,6 +12,7 @@ using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.ImGuiMethods;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Fate;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
@@ -2479,6 +2480,27 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"TargetingType: {DataCenter.TargetingType}");
         ImGui.Text($"DeathTarget: {DataCenter.DeathTarget}");
 
+
+        // VFX info
+        ImGui.Text("VFX Data:");
+        foreach (var item in DataCenter.VfxDataQueue)
+        {
+            ImGui.Text(item.ToString());
+        }
+
+        // Check and display VFX casting status
+        ImGui.Text($"Is Casting Tank VFX: {DataCenter.IsCastingTankVfx()}");
+        ImGui.Text($"Is Casting Area VFX: {DataCenter.IsCastingAreaVfx()}");
+
+        // Check and display VFX casting status
+        ImGui.Text("Casting Vfx:");
+        var filteredVfx = DataCenter.VfxDataQueue
+            .Where(s => s.Path.StartsWith("vfx/lockon/eff/coshare") && s.TimeDuration.TotalSeconds is > 1 and < 5);
+        foreach (var vfx in filteredVfx)
+        {
+            ImGui.Text($"Path: {vfx.Path}");
+        }
+
         // Display dead party members
         var deadPartyMembers = DataCenter.PartyMembers.GetDeath();
         if (deadPartyMembers.Any())
@@ -2639,7 +2661,7 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Actual Action Ahead: {DataCenter.ActionAhead}");
         ImGui.Text($"Animation Lock Delay: {ActionManagerHelper.GetCurrentAnimationLock()}");
     }
-    
+
     private static void DrawLastAction()
     {
         DrawAction(DataCenter.LastAction, nameof(DataCenter.LastAction));

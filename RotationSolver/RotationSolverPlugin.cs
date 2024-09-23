@@ -17,6 +17,7 @@ using RotationSolver.UI;
 using RotationSolver.UI.HighlightTeachingMode;
 using RotationSolver.UI.HighlightTeachingMode.ElementSpecial;
 using RotationSolver.Updaters;
+using static FFXIVClientStructs.FFXIV.Client.UI.Agent.AgentPartyMember.Delegates;
 using WelcomeWindow = RotationSolver.UI.WelcomeWindow;
 
 namespace RotationSolver;

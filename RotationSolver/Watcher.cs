@@ -21,24 +21,10 @@ public static class Watcher
 
         ActionEffect.ActionEffectEvent += ActionFromEnemy;
         ActionEffect.ActionEffectEvent += ActionFromSelf;
-        MapEffect.Init((a1, position, param1, param2) =>
-        {
-            if (DataCenter.MapEffects.Count >= 64)
-            {
-                DataCenter.MapEffects.TryDequeue(out _);
-            }
-
-            var effect = new MapEffectData(position, param1, param2);
-            DataCenter.MapEffects.Enqueue(effect);
-#if DEBUG
-            Svc.Log.Debug(effect.ToString());
-#endif
-        });
     }
 
     public static void Disable()
     {
-        MapEffect.Dispose();
         ActionEffect.ActionEffectEvent -= ActionFromEnemy;
         ActionEffect.ActionEffectEvent -= ActionFromSelf;
     }
