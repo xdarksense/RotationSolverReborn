@@ -936,6 +936,16 @@ public partial class RotationConfigWindow : Window
             var author = info.Author;
             if (string.IsNullOrEmpty(author)) author = "Author";
 
+            // Display relevant debugging information
+            var frameworkStyle = Service.Config.FrameworkStyle;
+            ImGui.Text($"Current FrameworkStyle: {frameworkStyle}");
+
+            // Add a button to copy the WhyNotValid string to the clipboard
+            if (ImGui.Button("Copy Error Message"))
+            {
+                ImGui.SetClipboardText(rotation.WhyNotValid);
+            }
+
             using var color = ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DPSRed);
             ImGui.TextWrapped(string.Format(rotation.WhyNotValid, author));
         }
