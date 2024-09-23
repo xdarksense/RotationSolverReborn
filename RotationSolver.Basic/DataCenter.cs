@@ -329,7 +329,7 @@ internal static class DataCenter
 
                 // Filter and cast objects safely
                 return Svc.Objects
-                    .Where(obj => obj != null && obj.ObjectKind == ObjectKind.BattleNpc && obj.GetNameplateKind() == NameplateKind.FriendlyBattleNPC)
+                    .Where(obj => obj != null && obj.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc && (obj.GetNameplateKind() == NameplateKind.FriendlyBattleNPC || obj.GetBattleNPCSubKind() == BattleNpcSubKind.NpcPartyMember))
                     .OfType<IBattleChara>()
                     .ToArray();
             }
@@ -381,6 +381,7 @@ internal static class DataCenter
 
             var deathAll = AllianceMembers.GetDeath();
             var deathParty = PartyMembers.GetDeath();
+            var deathNPC = FriendlyNPCMembers.GetDeath();
 
             if (deathParty.Any())
             {
@@ -409,6 +410,23 @@ internal static class DataCenter
                 if (deathAllT.Any()) return deathAllT.FirstOrDefault();
 
                 return deathAll.FirstOrDefault();
+            }
+
+            if (deathNPC.Any() && Service.Config.FriendlyPartyNpcHeal)
+            {
+                var deathNPCT = deathNPC.GetJobCategory(JobRole.Tank).ToList();
+                var deathNPCH = deathNPC.GetJobCategory(JobRole.Healer).ToList();
+
+                if (deathNPCT.Count > 1)
+                {
+                    return deathNPCT.FirstOrDefault();
+                }
+
+                if (deathNPCH.Any()) return deathNPCH.FirstOrDefault();
+
+                if (deathNPCT.Any()) return deathNPCT.FirstOrDefault();
+
+                return deathNPC.FirstOrDefault();
             }
 
             return null;

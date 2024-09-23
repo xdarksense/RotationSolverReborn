@@ -436,7 +436,7 @@ internal partial class Configs : IPluginConfiguration
         PvEFilter = JobFilterType.None)]
     private static readonly bool _raisePlayerBySwift = true;
 
-    [ConditionBool, UI("Raise any player in range in Alliance Raids)",
+    [ConditionBool, UI("Raise any player in range in Alliance Raids",
         Filter = HealingActionCondition, Section = 2,
         PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _raiseAll = false;
@@ -470,6 +470,10 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Heal solo instance NPCs. (Experimental)",
         Filter = HealingActionCondition, Section = 3)]
     private static readonly bool _friendlyBattleNPCHeal = false;
+
+    [ConditionBool, UI("Heal and raise Party NPCs.",
+        Filter = HealingActionCondition, Section = 3)]
+    private static readonly bool _friendlyPartyNPCHeal = false;
 
     [ConditionBool, UI("Heal/Dance partner your chocobo. (Experimental)",
         Filter = HealingActionCondition, Section = 3)]

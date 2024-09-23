@@ -2477,6 +2477,52 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Combo Time: {DataCenter.ComboTime}");
         ImGui.Text($"Merged Status: {DataCenter.MergedStatus}");
         ImGui.Text($"TargetingType: {DataCenter.TargetingType}");
+        ImGui.Text($"DeathTarget: {DataCenter.DeathTarget}");
+
+        // Display dead party members
+        var deadPartyMembers = DataCenter.PartyMembers.GetDeath();
+        if (deadPartyMembers.Any())
+        {
+            ImGui.Text("Dead Party Members:");
+            foreach (var member in deadPartyMembers)
+            {
+                ImGui.Text($"- {member.Name}");
+            }
+        }
+        else
+        {
+            ImGui.Text("Dead Party Members: None");
+        }
+
+        // Display all party members
+        var partyMembers = DataCenter.PartyMembers;
+        if (partyMembers.Any())
+        {
+            ImGui.Text("Party Members:");
+            foreach (var member in partyMembers)
+            {
+                ImGui.Text($"- {member.Name}");
+            }
+        }
+        else
+        {
+            ImGui.Text("Party Members: None");
+        }
+
+        // Display all party members
+        var friendlyNPCMembers = DataCenter.FriendlyNPCMembers;
+        if (friendlyNPCMembers.Any())
+        {
+            ImGui.Text("Friendly NPC Members:");
+            foreach (var member in friendlyNPCMembers)
+            {
+                ImGui.Text($"- {member.Name}");
+            }
+        }
+        else
+        {
+            ImGui.Text("Friendly NPC Members: None");
+        }
 
         ImGui.Text($"TerritoryType: {DataCenter.TerritoryContentType}");
         ImGui.Text($"DPSTaken: {DataCenter.DPSTaken}");
@@ -2537,6 +2583,7 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"Rank: {battleChara.GetObjectNPC()?.Rank.ToString() ?? string.Empty}");
             ImGui.Text($"Has Positional: {battleChara.HasPositional()}");
             ImGui.Text($"Is Dying: {battleChara.IsDying()}");
+            ImGui.Text($"Is Party: {battleChara.IsParty()}");
             ImGui.Text($"EventType: {battleChara.GetEventType()}");
             ImGui.Text($"NamePlate: {battleChara.GetNamePlateIcon()}");
             ImGui.Text($"StatusFlags: {battleChara.StatusFlags}");

@@ -167,7 +167,7 @@ public static class ObjectHelper
             // Accessing Player.Object and Svc.Party within the lock to ensure thread safety
             if (gameObject.GameObjectId == Player.Object?.GameObjectId) return true;
             if (Svc.Party.Any(p => p.GameObject?.GameObjectId == gameObject.GameObjectId)) return true;
-            if (gameObject.SubKind == 9) return true;
+            if (Service.Config.FriendlyPartyNpcHeal && gameObject.GetBattleNPCSubKind() == BattleNpcSubKind.NpcPartyMember) return true;
 
             // Check if ChocoboPartyMember is enabled
             if (Service.Config.ChocoboPartyMember)
@@ -186,7 +186,6 @@ public static class ObjectHelper
             if (Service.Config.FriendlyBattleNpcHeal && gameObject.GetNameplateKind() == NameplateKind.FriendlyBattleNPC) return true;
 
         }
-
         return false;
     }
 
