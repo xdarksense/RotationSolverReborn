@@ -381,7 +381,11 @@ public static class ObjectHelper
 
         DateTime startTime = DateTime.MinValue;
         float thatTimeRatio = 0;
-        foreach (var (time, hpRatios) in DataCenter.RecordedHP)
+
+        // Create a copy of the RecordedHP collection to avoid modification during enumeration
+        var recordedHPCopy = DataCenter.RecordedHP.ToList();
+
+        foreach (var (time, hpRatios) in recordedHPCopy)
         {
             if (hpRatios.TryGetValue(objectId, out var ratio) && ratio != 1)
             {

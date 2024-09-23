@@ -31,9 +31,7 @@ internal static class DataCenter
     internal static List<uint> PrioritizedNameIds { get; set; } = new();
     internal static List<uint> BlacklistedNameIds { get; set; } = new();
 
-    internal static Queue<MapEffectData> MapEffects { get; } = new(64);
-    internal static Queue<ObjectEffectData> ObjectEffects { get; } = new(64);
-    internal static Queue<VfxNewData> VfxNewData { get; } = new(64);
+    internal static Queue<VfxNewData> VfxDataQueue { get; } = new(64);
 
     /// <summary>
     /// This one never be null.
@@ -731,9 +729,7 @@ internal static class DataCenter
         _timeLastActionUsed = DateTime.UtcNow;
         _actions.Clear();
 
-        MapEffects.Clear();
-        ObjectEffects.Clear();
-        VfxNewData.Clear();
+        VfxDataQueue.Clear();
     }
 
     internal static void AddDamageRec(float damageRatio)
@@ -753,7 +749,7 @@ internal static class DataCenter
 
     internal static SortedList<string, string> AuthorHashes { get; set; } = [];
 
-    private static bool IsCastingTankVfx()
+    public static bool IsCastingTankVfx()
     {
         return IsCastingVfx(s =>
         {
@@ -765,19 +761,19 @@ internal static class DataCenter
         });
     }
 
-    private static bool IsCastingAreaVfx()
+    public static bool IsCastingAreaVfx()
     {
         return IsCastingVfx(s => s.Path.StartsWith("vfx/lockon/eff/coshare"));
     }
 
-    private static bool IsCastingVfx(Func<VfxNewData, bool> isVfx)
+    public static bool IsCastingVfx(Func<VfxNewData, bool> isVfx)
     {
         if (isVfx == null) return false;
-        if (DataCenter.VfxNewData == null) return false;
+        if (DataCenter.VfxDataQueue == null) return false;
 
         try
         {
-            foreach (var item in DataCenter.VfxNewData.Reverse())
+            foreach (var item in DataCenter.VfxDataQueue.Reverse())
             {
                 if (item.TimeDuration.TotalSeconds is > 1 and < 5)
                 {
@@ -793,7 +789,7 @@ internal static class DataCenter
         return false;
     }
 
-    private static bool IsHostileCastingTank(IBattleChara h)
+    public static bool IsHostileCastingTank(IBattleChara h)
     {
         return IsHostileCastingBase(h, (act) =>
         {
@@ -802,7 +798,7 @@ internal static class DataCenter
         });
     }
 
-    private static bool IsHostileCastingArea(IBattleChara h)
+    public static bool IsHostileCastingArea(IBattleChara h)
     {
         return IsHostileCastingBase(h, (act) => { return OtherConfiguration.HostileCastingArea.Contains(act.RowId); });
     }
@@ -813,7 +809,7 @@ internal static class DataCenter
             (act) => act != null && OtherConfiguration.HostileCastingKnockback.Contains(act.RowId));
     }
 
-    private static bool IsHostileCastingBase(IBattleChara h, Func<Action, bool> check)
+    public static bool IsHostileCastingBase(IBattleChara h, Func<Action, bool> check)
     {
         // Check if h is null
         if (h == null) return false;
