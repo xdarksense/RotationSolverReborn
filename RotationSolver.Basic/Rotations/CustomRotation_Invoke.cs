@@ -197,46 +197,60 @@ partial class CustomRotation
         IBaseAction.ShouldEndSpecial = false;
         IBaseAction.IgnoreClipping = true;
 
-        // Check for countdown and return the appropriate action if not in combat
-        var countDown = Service.CountDownTime;
-        if (countDown > 0 && !DataCenter.InCombat)
+        try
         {
-            return CountDownAction(countDown);
-        }
-
-        // Reset target override
-        IBaseAction.TargetOverride = null;
-
-        // Attempt to get the GCD action
-        gcdAction = GCD();
-        IBaseAction.IgnoreClipping = false;
-
-        // If a GCD action is available, determine if it can be used or if an ability should be used instead
-        if (gcdAction != null)
-        {
-            if (ActionHelper.CanUseGCD)
+            // Check for countdown and return the appropriate action if not in combat
+            var countDown = Service.CountDownTime;
+            if (countDown > 0 && !DataCenter.InCombat)
             {
-                return gcdAction;
+                return CountDownAction(countDown);
             }
 
-            if (Ability(gcdAction, out var ability))
-            {
-                return ability;
-            }
+            // Reset target override
+            IBaseAction.TargetOverride = null;
 
-            return gcdAction;
-        }
-        else
-        {
-            // If no GCD action is available, attempt to use an ability
-            IBaseAction.IgnoreClipping = true;
-            if (Ability(AddlePvE, out var ability))
-            {
-                return ability;
-            }
+            // Attempt to get the GCD action
+            gcdAction = GCD();
             IBaseAction.IgnoreClipping = false;
 
+            // If a GCD action is available, determine if it can be used or if an ability should be used instead
+            if (gcdAction != null)
+            {
+                if (ActionHelper.CanUseGCD)
+                {
+                    return gcdAction;
+                }
+
+                if (Ability(gcdAction, out var ability))
+                {
+                    return ability;
+                }
+
+                return gcdAction;
+            }
+            else
+            {
+                // If no GCD action is available, attempt to use an ability
+                IBaseAction.IgnoreClipping = true;
+                if (Ability(AddlePvE, out var ability))
+                {
+                    return ability;
+                }
+                IBaseAction.IgnoreClipping = false;
+
+                return null;
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log the exception or handle it as needed
+            Console.WriteLine($"Exception in Invoke method: {ex.Message}");
             return null;
+        }
+        finally
+        {
+            // Ensure IgnoreClipping is reset
+            IBaseAction.IgnoreClipping = false;
         }
     }
 

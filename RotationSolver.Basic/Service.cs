@@ -87,8 +87,8 @@ internal class Service : IDisposable
     /// <returns>The adjusted action ID.</returns>
     public static unsafe uint GetAdjustedActionId(uint id)
         => ActionManager.Instance()->GetAdjustedActionId(id);
-    
-    
+
+
     private static readonly ConcurrentDictionary<Type, Addon?> AddonCache = new();
 
     /// <summary>
