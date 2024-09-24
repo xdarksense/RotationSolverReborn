@@ -1,4 +1,6 @@
-﻿namespace RotationSolver.Basic.Rotations;
+﻿using ECommons.DalamudServices;
+
+namespace RotationSolver.Basic.Rotations;
 
 partial class CustomRotation
 {
@@ -46,6 +48,10 @@ partial class CustomRotation
                 if (!string.IsNullOrEmpty(ex.StackTrace)) WhyNotValid += "\n" + ex.StackTrace;
                 ex = ex.InnerException;
             }
+
+            // Log the exception details
+            Svc.Log.Error(WhyNotValid);
+
             IsValid = false;
         }
 
@@ -67,17 +73,27 @@ partial class CustomRotation
     {
         act = null; // Ensure 'act' is assigned before any return
 
-        if (!DataCenter.HPNotFull && role == JobRole.Healer)
+        try
         {
-            ActionHealAreaGCD = ActionHealAreaAbility = ActionHealSingleGCD = ActionHealSingleAbility = null;
-        }
-        else
-        {
-            ActionHealAreaGCD = HealAreaGCD(out act) ? act : null;
-            ActionHealSingleGCD = HealSingleGCD(out act) ? act : null;
+            if (!DataCenter.HPNotFull && role == JobRole.Healer)
+            {
+                ActionHealAreaGCD = ActionHealAreaAbility = ActionHealSingleGCD = ActionHealSingleAbility = null;
+            }
+            else
+            {
+                ActionHealAreaGCD = HealAreaGCD(out act) ? act : null;
+                ActionHealSingleGCD = HealSingleGCD(out act) ? act : null;
 
-            ActionHealAreaAbility = HealAreaAbility(AddlePvE, out act) ? act : null;
-            ActionHealSingleAbility = HealSingleAbility(AddlePvE, out act) ? act : null;
+                ActionHealAreaAbility = HealAreaAbility(AddlePvE, out act) ? act : null;
+                ActionHealSingleAbility = HealSingleAbility(AddlePvE, out act) ? act : null;
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log the exception or handle it as needed
+            Svc.Log.Error($"Exception in UpdateHealingActions method: {ex.Message}");
+            // Optionally, set actions to null in case of an exception
+            ActionHealAreaGCD = ActionHealAreaAbility = ActionHealSingleGCD = ActionHealSingleAbility = null;
         }
     }
 

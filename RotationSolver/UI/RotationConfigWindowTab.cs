@@ -54,6 +54,9 @@ internal enum RotationConfigWindowTab : byte
 
     [Description("Debug stuff for developers and rotation writers. Please do not leave this enabled.")]
     [TabIcon(Icon = 5)] Debug,
+
+    [Description("Specific Autoduty related settings and information")]
+    [TabIcon(Icon = 4)] AutoDuty,
 }
 
 /// <summary>
