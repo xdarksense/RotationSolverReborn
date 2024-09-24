@@ -1,6 +1,7 @@
 ﻿using Dalamud.Configuration;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
+using System.Collections.Concurrent;
 using static RotationSolver.Basic.Configuration.ConfigTypes;
 
 namespace RotationSolver.Basic.Configuration;
@@ -689,15 +690,15 @@ internal partial class Configs : IPluginConfiguration
     #endregion
 
     [JobConfig]
-    private readonly Dictionary<uint, ActionConfig> _rotationActionConfig = [];
+    private readonly ConcurrentDictionary<uint, ActionConfig> _rotationActionConfig = new ConcurrentDictionary<uint, ActionConfig>();
 
     [JobConfig]
-    private readonly Dictionary<uint, ItemConfig> _rotationItemConfig = [];
+    private readonly ConcurrentDictionary<uint, ItemConfig> _rotationItemConfig = new ConcurrentDictionary<uint, ItemConfig>();
 
     [JobChoiceConfig]
-    private readonly Dictionary<string, string> _rotationConfigurations = [];
+    private readonly ConcurrentDictionary<string, string> _rotationConfigurations = new ConcurrentDictionary<string, string>();
 
-    public Dictionary<uint, string> DutyRotationChoice { get; set; } = [];
+    public ConcurrentDictionary<uint, string> DutyRotationChoice = new ConcurrentDictionary<uint, string>();
 
     public void Save()
     {

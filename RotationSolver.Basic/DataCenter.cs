@@ -326,10 +326,13 @@ internal static class DataCenter
                 }
 
                 // Filter and cast objects safely
-                return Svc.Objects
-                    .Where(obj => obj != null && obj.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.BattleNpc && (obj.GetNameplateKind() == NameplateKind.FriendlyBattleNPC || obj.GetBattleNPCSubKind() == BattleNpcSubKind.NpcPartyMember))
+                var friendlyNpcs = Svc.Objects
+                    .Where(obj => obj != null && obj.ObjectKind == ObjectKind.BattleNpc)
+                    .Where(obj => obj.GetNameplateKind() == NameplateKind.FriendlyBattleNPC || obj.GetBattleNPCSubKind() == BattleNpcSubKind.NpcPartyMember)
                     .OfType<IBattleChara>()
                     .ToArray();
+
+                return friendlyNpcs;
             }
             catch (Exception ex)
             {
