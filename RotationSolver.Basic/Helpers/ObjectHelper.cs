@@ -167,7 +167,7 @@ public static class ObjectHelper
             // Accessing Player.Object and Svc.Party within the lock to ensure thread safety
             if (gameObject.GameObjectId == Player.Object?.GameObjectId) return true;
             if (Svc.Party.Any(p => p.GameObject?.GameObjectId == gameObject.GameObjectId)) return true;
-            if (Service.Config.FriendlyPartyNpcHeal && gameObject.GetBattleNPCSubKind() == BattleNpcSubKind.NpcPartyMember) return true;
+            if (Service.Config.FriendlyPartyNpcHealRaise && gameObject.GetBattleNPCSubKind() == BattleNpcSubKind.NpcPartyMember) return true;
 
             // Check if ChocoboPartyMember is enabled
             if (Service.Config.ChocoboPartyMember)

@@ -410,7 +410,7 @@ internal static class DataCenter
                 return deathAll.FirstOrDefault();
             }
 
-            if (deathNPC.Any() && Service.Config.FriendlyPartyNpcHeal)
+            if (deathNPC.Any() && Service.Config.FriendlyPartyNpcHealRaise)
             {
                 var deathNPCT = deathNPC.GetJobCategory(JobRole.Tank).ToList();
                 var deathNPCH = deathNPC.GetJobCategory(JobRole.Healer).ToList();
