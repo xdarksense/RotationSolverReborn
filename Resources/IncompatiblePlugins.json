@@ -1,5 +1,12 @@
 [
   {
+    "Name": "AutoDuty",
+    "Icon": "https://raw.githubusercontent.com/ffxivcode/AutoDuty/refs/heads/master/logo.png",
+    "Url": "https://github.com/ffxivcode/AutoDuty",
+    "Features": "Rotation state issues, sometimes causes BMR/vbm autorotation to be enabled at the same time.",
+    "Type": 1
+  },
+  {
     "Name": "XIV Combo",
     "Icon": "https://raw.githubusercontent.com/MKhayle/XIVComboExpanded/master/res/icon.png",
     "Url": "https://github.com/attickdoor/XivComboPlugin",
