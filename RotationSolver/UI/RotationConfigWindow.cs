@@ -11,8 +11,8 @@ using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.ImGuiMethods;
+using ExCSS;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Fate;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
@@ -297,7 +297,16 @@ public partial class RotationConfigWindow : Window
 
             foreach (var item in Enum.GetValues<RotationConfigWindowTab>())
             {
+                var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
+
+                // Skip the tab if it has the TabSkipAttribute
                 if (item.GetAttribute<TabSkipAttribute>() != null) continue;
+
+                // Check if the "AutoDuty" plugin is installed
+                bool isAutoDutyInstalled = incompatiblePlugins.Any(plugin => plugin.IsInstalled && plugin.Name == "AutoDuty");
+
+                // Skip the "AutoDuty" tab if the plugin is not installed
+                if (item == RotationConfigWindowTab.AutoDuty && !isAutoDutyInstalled) continue;
 
                 if (IconSet.GetTexture(item.GetAttribute<TabIconAttribute>()?.Icon ?? 0, out var icon) && wholeWidth <= JOB_ICON_WIDTH * Scale)
                 {
@@ -330,6 +339,12 @@ public partial class RotationConfigWindow : Window
                         var desc = item.GetDescription();
                         if (!string.IsNullOrEmpty(desc)) ImguiTooltips.ShowTooltip(desc);
                     }
+                }
+
+                // Add a separator after the "Debug" tab
+                if (item == RotationConfigWindowTab.Debug)
+                {
+                    ImGui.Separator();
                 }
             }
         }
@@ -613,6 +628,11 @@ public partial class RotationConfigWindow : Window
                 // Display content based on the active tab
                 switch (_activeTab)
                 {
+
+                    case RotationConfigWindowTab.AutoDuty:
+                        DrawAutoduty();
+                        break;
+
                     case RotationConfigWindowTab.About:
                         DrawAbout();
                         break;
@@ -913,6 +933,149 @@ public partial class RotationConfigWindow : Window
             }
         }, width, textWidth);
     }
+    #endregion
+
+    #region Autoduty
+
+    private void DrawAutoduty()
+    {
+
+        ImGui.TextWrapped("This is a gentle reminder that RSR is not a botting tool, and while I have taken steps to help it work better with Autoduty please keep that in mind");
+        ImGui.Spacing();
+        ImGui.TextWrapped("This menu is mostly for troubleshooting purposes and is a good first step to share to get assistance.");
+        ImGui.Spacing();
+        ImGui.TextWrapped("Below are relevant settings and their current states for RSR to work well with AutoDuty mode.");
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+        // Display the current HostileType
+        ImGui.TextWrapped($"Current Targeting Mode: {GetHostileTypeDescription(DataCenter.RightNowTargetToHostileType)}");
+
+        // Add a button to change the targeting to AllTargetsCanAttack (type 0) aka Autoduty Mode
+        if (ImGui.Button("Change Targeting to Autoduty Mode"))
+        {
+            SetTargetingType(TargetHostileType.AllTargetsCanAttack);
+        }
+
+        // Display the current NPC Heal/Raise Support status
+        ImGui.TextWrapped($"NPC Heal/Raise Support Enabled: {Service.Config.FriendlyPartyNpcHealRaise}");
+        if (ImGui.Button("Enable NPC Heal/Raise Support"))
+        {
+            Service.Config.FriendlyPartyNpcHealRaise.Value = true;
+        }
+        ImGui.Spacing();
+        // Display the Auto Load Rotations status
+        ImGui.TextWrapped($"Auto Load Rotations: {Service.Config.AutoLoadRotations}");
+        if (ImGui.Button("Enable Auto Loading Rotations"))
+        {
+            Service.Config.AutoLoadRotations.Value = true;
+        }
+        ImGui.Spacing();
+        // Display the Download Custom Rotations status
+        ImGui.TextWrapped($"Download Custom Rotations: {Service.Config.DownloadCustomRotations}");
+        if (ImGui.Button("Enable Downloading Custom Rotations"))
+        {
+            Service.Config.AutoLoadRotations.Value = true;
+        }
+        ImGui.Spacing();
+        // Display the Auto Off Between Area status
+        ImGui.TextWrapped($"Auto Off Between Areas: {Service.Config.AutoOffBetweenArea}");
+        if (ImGui.Button("Disable Auto Off Between Areas"))
+        {
+            Service.Config.AutoOffBetweenArea.Value = false;
+        }
+        ImGui.Spacing();
+        // Display the Auto Off Cut Scene status
+        ImGui.TextWrapped($"Auto Off During Cutscenes: {Service.Config.AutoOffCutScene}");
+        if (ImGui.Button("Disable Auto Off During Cutscenes"))
+        {
+            Service.Config.AutoOffCutScene.Value = false;
+        }
+        ImGui.Spacing();
+        // Display the Auto Off After Combat Time status
+        ImGui.TextWrapped($"Auto Off After Combat: {Service.Config.AutoOffAfterCombat}");
+        if (ImGui.Button("Disable Auto Off After Combat"))
+        {
+            Service.Config.AutoOffAfterCombat.Value = false;
+        }
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+        ImGui.TextWrapped($"Below are plugins used by Autoduty and their current states");
+        ImGui.Spacing();
+
+        // Create a new list of AutoDutyPlugin objects
+        var pluginsToCheck = new List<IncompatiblePlugin>
+    {
+        new IncompatiblePlugin { Name = "AutoDuty" },
+        new IncompatiblePlugin { Name = "vnavmesh" },
+        new IncompatiblePlugin { Name = "BossMod Reborn" },
+        new IncompatiblePlugin { Name = "Boss Mod" },
+        new IncompatiblePlugin { Name = "Avarice" },
+        new IncompatiblePlugin { Name = "Deliveroo" },
+        new IncompatiblePlugin { Name = "AutoRetainer" },
+        new IncompatiblePlugin { Name = "SkipCutscene" },
+        new IncompatiblePlugin { Name = "AntiAfkKick" },
+        // Add more plugins as needed
+    };
+
+        // Check if "Boss Mod" and "BossMod Reborn" are installed
+        bool isBossModInstalled = pluginsToCheck.Any(plugin => plugin.Name == "Boss Mod" && plugin.IsInstalled);
+        bool isBossModRebornInstalled = pluginsToCheck.Any(plugin => plugin.Name == "BossMod Reborn" && plugin.IsInstalled);
+
+        // Iterate through the list and check if each plugin is installed
+        foreach (var plugin in pluginsToCheck)
+        {
+            // Only display information about "Boss Mod" if it is installed
+            if (plugin.Name == "Boss Mod" && !isBossModInstalled)
+            {
+                continue;
+            }
+
+            bool isInstalled = plugin.IsInstalled;
+
+            // Determine the color and text for "Boss Mod"
+            Vector4 color;
+            string text;
+            if (plugin.Name == "Boss Mod" && isBossModInstalled && isBossModRebornInstalled)
+            {
+                color = ImGuiColors.DalamudYellow; // Display "Boss Mod" in yellow if both are installed
+                text = $"{plugin.Name} is {(isInstalled ? "installed and enabled" : "not enabled")}. Both Boss Mods cannot be installed and enabled at the same time. Please disable Boss Mod.";
+            }
+            else
+            {
+                color = isInstalled ? ImGuiColors.ParsedGreen : ImGuiColors.DalamudRed;
+                text = $"{plugin.Name} is {(isInstalled ? "installed and enabled" : "not enabled")}";
+            }
+
+            // Display the result using ImGui with text wrapping
+            ImGui.PushStyleColor(ImGuiCol.Text, color);
+            ImGui.TextWrapped(text);
+            ImGui.PopStyleColor();
+            ImGui.Spacing();
+        }
+    }
+
+    private string GetHostileTypeDescription(TargetHostileType type)
+    {
+        return type switch
+        {
+            TargetHostileType.AllTargetsCanAttack => "All Targets Can Attack aka Tank/Autoduty Mode",
+            TargetHostileType.TargetsHaveTarget => "Targets Have A Target",
+            TargetHostileType.AllTargetsWhenSoloInDuty => "All Targets When Solo In Duty",
+            TargetHostileType.AllTargetsWhenSolo => "All Targets When Solo",
+            _ => "Unknown Target Type"
+        };
+    }
+
+    // Method to set the targeting type
+    private void SetTargetingType(TargetHostileType type)
+    {
+        Service.Config.HostileType = type;
+        // Add any additional logic needed when changing the targeting type
+        Svc.Log.Information($"Targeting type changed to: {type}");
+    }
+
     #endregion
 
     #region Rotation
