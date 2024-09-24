@@ -3,6 +3,8 @@
 partial class CustomRotation
 {
     private static DateTime _nextTimeToHeal = DateTime.MinValue;
+    private static readonly Random _random = new Random();
+
     private IAction? GCD()
     {
         var act = DataCenter.CommandNextAction;
@@ -12,100 +14,114 @@ partial class CustomRotation
             && a.CanUse(out _, usedUp: true, skipAoeCheck: true)) return act;
         IBaseAction.ForceEnable = false;
 
-        IBaseAction.ShouldEndSpecial = true;
-
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.LimitBreak)
-            && UseLimitBreak(out act)) return act;
-
-        IBaseAction.ShouldEndSpecial = false;
-
-        if (EmergencyGCD(out act)) return act;
-
-        IBaseAction.ShouldEndSpecial = true;
-
-        IBaseAction.TargetOverride = TargetType.Death;
-
-        if (RaiseSpell(out act, false)) return act;
-
-        if (Service.Config.RaisePlayerByCasting && SwiftcastPvE.Cooldown.IsCoolingDown && RaiseSpell(out act, true)) return act;
-
-        IBaseAction.TargetOverride = null;
-
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.MoveForward)
-            && MoveForwardGCD(out act))
+        try
         {
-            if (act is IBaseAction b && ObjectHelper.DistanceToPlayer(b.Target.Target) > 5) return act;
-        }
+            IBaseAction.ShouldEndSpecial = true;
 
-        IBaseAction.TargetOverride = TargetType.Heal;
+            if (DataCenter.MergedStatus.HasFlag(AutoStatus.LimitBreak)
+                && UseLimitBreak(out act)) return act;
 
-        if (DataCenter.CommandStatus.HasFlag(AutoStatus.HealAreaSpell))
-        {
-            if (HealAreaGCD(out act)) return act;
-        }
-        if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealAreaSpell)
-            && CanHealAreaSpell)
-        {
-            IBaseAction.AutoHealCheck = true;
-            if (HealAreaGCD(out act)) return act;
-            IBaseAction.AutoHealCheck = false;
-        }
-        if (DataCenter.CommandStatus.HasFlag(AutoStatus.HealSingleSpell)
-            && CanHealSingleSpell)
-        {
-            if (HealSingleGCD(out act)) return act;
-        }
-        if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealSingleSpell))
-        {
-            IBaseAction.AutoHealCheck = true;
-            if (HealSingleGCD(out act)) return act;
-            IBaseAction.AutoHealCheck = false;
-        }
+            IBaseAction.ShouldEndSpecial = false;
 
-        IBaseAction.TargetOverride = null;
+            if (EmergencyGCD(out act)) return act;
 
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseArea)
-            && DefenseAreaGCD(out act)) return act;
+            IBaseAction.ShouldEndSpecial = true;
 
-        IBaseAction.TargetOverride = TargetType.BeAttacked;
+            IBaseAction.TargetOverride = TargetType.Death;
 
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseSingle)
-            && DefenseSingleGCD(out act)) return act;
+            if (RaiseSpell(out act, false)) return act;
 
-        IBaseAction.TargetOverride = TargetType.Dispel;
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.Dispel)
-            && DispelGCD(out act)) return act;
+            if (Service.Config.RaisePlayerByCasting && SwiftcastPvE.Cooldown.IsCoolingDown && RaiseSpell(out act, true)) return act;
 
-        IBaseAction.ShouldEndSpecial = false;
-        IBaseAction.TargetOverride = null;
+            IBaseAction.TargetOverride = null;
 
-        if (GeneralGCD(out var action)) return action;
-
-        if (Service.Config.HealWhenNothingTodo && InCombat)
-        {
-            // Please don't tell me someone's fps is less than 1!!
-            if (DateTime.UtcNow - _nextTimeToHeal > TimeSpan.FromSeconds(1))
+            if (DataCenter.MergedStatus.HasFlag(AutoStatus.MoveForward)
+                && MoveForwardGCD(out act))
             {
-                var min = Service.Config.HealWhenNothingTodoDelay.X;
-                var max = Service.Config.HealWhenNothingTodoDelay.Y;
-                _nextTimeToHeal = DateTime.UtcNow + TimeSpan.FromSeconds(new Random().NextDouble() * (max - min) + min);
+                if (act is IBaseAction b && ObjectHelper.DistanceToPlayer(b.Target.Target) > 5) return act;
             }
-            else if (_nextTimeToHeal < DateTime.UtcNow)
+
+            IBaseAction.TargetOverride = TargetType.Heal;
+
+            if (DataCenter.CommandStatus.HasFlag(AutoStatus.HealAreaSpell))
             {
-                _nextTimeToHeal = DateTime.UtcNow;
+                if (HealAreaGCD(out act)) return act;
+            }
+            if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealAreaSpell)
+                && CanHealAreaSpell)
+            {
+                IBaseAction.AutoHealCheck = true;
+                if (HealAreaGCD(out act)) return act;
+                IBaseAction.AutoHealCheck = false;
+            }
+            if (DataCenter.CommandStatus.HasFlag(AutoStatus.HealSingleSpell)
+                && CanHealSingleSpell)
+            {
+                if (HealSingleGCD(out act)) return act;
+            }
+            if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealSingleSpell))
+            {
+                IBaseAction.AutoHealCheck = true;
+                if (HealSingleGCD(out act)) return act;
+                IBaseAction.AutoHealCheck = false;
+            }
 
-                if (PartyMembersMinHP < Service.Config.HealWhenNothingTodoBelow)
+            IBaseAction.TargetOverride = null;
+
+            if (DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseArea)
+                && DefenseAreaGCD(out act)) return act;
+
+            IBaseAction.TargetOverride = TargetType.BeAttacked;
+
+            if (DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseSingle)
+                && DefenseSingleGCD(out act)) return act;
+
+            IBaseAction.TargetOverride = TargetType.Dispel;
+            if (DataCenter.MergedStatus.HasFlag(AutoStatus.Dispel)
+                && DispelGCD(out act)) return act;
+
+            IBaseAction.ShouldEndSpecial = false;
+            IBaseAction.TargetOverride = null;
+
+            if (GeneralGCD(out var action)) return action;
+
+            if (Service.Config.HealWhenNothingTodo && InCombat)
+            {
+                // Please don't tell me someone's fps is less than 1!!
+                if (DateTime.UtcNow - _nextTimeToHeal > TimeSpan.FromSeconds(1))
                 {
-                    IBaseAction.TargetOverride = TargetType.Heal;
+                    var min = Service.Config.HealWhenNothingTodoDelay.X;
+                    var max = Service.Config.HealWhenNothingTodoDelay.Y;
+                    _nextTimeToHeal = DateTime.UtcNow + TimeSpan.FromSeconds(_random.NextDouble() * (max - min) + min);
+                }
+                else if (_nextTimeToHeal < DateTime.UtcNow)
+                {
+                    _nextTimeToHeal = DateTime.UtcNow;
 
-                    if (DataCenter.PartyMembersDifferHP < Service.Config.HealthDifference
-                        && DataCenter.PartyMembersHP.Count(i => i < 1) > 2
-                        && HealAreaGCD(out act)) return act;
-                    if (HealSingleGCD(out act)) return act;
+                    if (PartyMembersMinHP < Service.Config.HealWhenNothingTodoBelow)
+                    {
+                        IBaseAction.TargetOverride = TargetType.Heal;
 
-                    IBaseAction.TargetOverride = null;
+                        if (DataCenter.PartyMembersDifferHP < Service.Config.HealthDifference
+                            && DataCenter.PartyMembersHP.Count(i => i < 1) > 2
+                            && HealAreaGCD(out act)) return act;
+                        if (HealSingleGCD(out act)) return act;
+
+                        IBaseAction.TargetOverride = null;
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            // Log the exception or handle it as needed
+            Console.WriteLine($"Exception in GCD method: {ex.Message}");
+        }
+        finally
+        {
+            // Ensure these are reset
+            IBaseAction.ShouldEndSpecial = false;
+            IBaseAction.TargetOverride = null;
         }
 
         return null;

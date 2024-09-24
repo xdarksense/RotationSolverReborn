@@ -11,6 +11,7 @@ using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using RotationSolver.Basic.Configuration;
+using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 
 namespace RotationSolver.Basic.Helpers;
@@ -285,7 +286,7 @@ public static class ObjectHelper
 
     internal static unsafe uint FateId(this IGameObject obj) => obj.Struct()->FateId;
 
-    static readonly Dictionary<uint, bool> _effectRangeCheck = new();
+    static readonly ConcurrentDictionary<uint, bool> _effectRangeCheck = new();
 
     /// <summary>
     /// Determines whether the specified game object can be interrupted.
