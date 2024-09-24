@@ -473,7 +473,7 @@ internal partial class Configs : IPluginConfiguration
 
     [ConditionBool, UI("Heal and raise Party NPCs.",
         Filter = HealingActionCondition, Section = 3)]
-    private static readonly bool _friendlyPartyNPCHeal = false;
+    private static readonly bool _friendlyPartyNPCHealRaise = true;
 
     [ConditionBool, UI("Heal/Dance partner your chocobo. (Experimental)",
         Filter = HealingActionCondition, Section = 3)]
