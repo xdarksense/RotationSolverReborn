@@ -433,7 +433,7 @@ namespace RotationSolver.Data
         [Description("Hostile")]
         ConfigWindow_List_Hostile,
 
-        [Description("Enemy targeting logic. Adding more options cycles them when using /rotation Auto.")]
+        [Description("Enemy targeting logic. Adding more options cycles them when using /rotation Auto.\nUse /rotation Settings TargetingTypes add <option> to add,\n/rotation Settings TargetingTypes remove <option> to remove,\nand /rotation Settings TargetingTypes removeall to remove all options.")]
         ConfigWindow_Param_HostileDesc,
 
         [Description("Move Up")]

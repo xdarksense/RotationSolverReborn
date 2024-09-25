@@ -41,9 +41,12 @@ namespace RotationSolver.Commands
                     {
                         if (index == -1)
                         {
+                            // Increment the TargetingIndex to cycle through the TargetingTypes
                             index = Service.Config.TargetingIndex + 1;
                         }
+                        // Ensure the index wraps around if it exceeds the number of TargetingTypes
                         index %= Service.Config.TargetingTypes.Count;
+                        // Update the TargetingIndex in the configuration
                         Service.Config.TargetingIndex = index;
                     }
                 }
