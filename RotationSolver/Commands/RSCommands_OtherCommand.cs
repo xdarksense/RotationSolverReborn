@@ -39,12 +39,25 @@ public static partial class RSCommands
 
     private static void DoSettingCommand(string str)
     {
-        var strs = str.Split(' ');
-        var settingName = strs[0];
-        var value = strs.LastOrDefault();
-        if (settingName == null || value == null)
+        var strs = str.Split(' ', 3);
+        if (strs.Length < 2)
         {
             Svc.Chat.PrintError("Invalid setting command format.");
+            return;
+        }
+
+        var settingName = strs[0];
+        var command = strs.Length > 1 ? string.Join(' ', strs.Skip(1)) : null;
+
+        if (string.IsNullOrEmpty(settingName))
+        {
+            Svc.Chat.PrintError("Invalid setting command format.");
+            return;
+        }
+
+        if (settingName.Equals("TargetingTypes", StringComparison.OrdinalIgnoreCase))
+        {
+            HandleTargetingTypesCommand(settingName, command);
             return;
         }
 
@@ -62,7 +75,7 @@ public static partial class RSCommands
 
             if (type.IsEnum)
             {
-                valueParsedSuccessfully = Enum.TryParse(type, value, ignoreCase: true, out var parsedEnum);
+                valueParsedSuccessfully = Enum.TryParse(type, command, ignoreCase: true, out var parsedEnum);
                 if (valueParsedSuccessfully)
                 {
                     convertedValue = parsedEnum;
@@ -72,7 +85,7 @@ public static partial class RSCommands
             {
                 try
                 {
-                    convertedValue = Convert.ChangeType(value, type);
+                    convertedValue = Convert.ChangeType(command, type);
                 }
                 catch
                 {
@@ -104,10 +117,8 @@ public static partial class RSCommands
 
             if (convertedValue == null)
             {
-#if DEBUG
-                Svc.Chat.Print("Failed to parse the value.");
-#endif
-                continue;
+                Svc.Chat.PrintError("Failed to parse the value.");
+                return;
             }
 
             if (property.PropertyType == typeof(ConditionBoolean))
@@ -118,16 +129,86 @@ public static partial class RSCommands
             }
 
             property.SetValue(Service.Config, convertedValue);
-            value = convertedValue.ToString();
+            command = convertedValue.ToString();
 
-            Svc.Chat.Print(string.Format(UiString.CommandsChangeSettingsValue.GetDescription(), property.Name, value));
+            Svc.Chat.Print(string.Format(UiString.CommandsChangeSettingsValue.GetDescription(), property.Name, command));
 
             return;
         }
 
-        Svc.Chat.PrintError(UiString.CommandsCannotFindConfig.GetDescription());
+        Svc.Chat.PrintError("Failed to find the config in this rotation, please check it.");
     }
 
+    private static void HandleTargetingTypesCommand(string settingName, string? command)
+    {
+        if (string.IsNullOrEmpty(command))
+        {
+            Svc.Chat.PrintError("Invalid command for TargetingTypes.");
+            return;
+        }
+
+        var commandParts = command.Split(' ', 2);
+        if (commandParts.Length < 1)
+        {
+            Svc.Chat.PrintError("Invalid command format for TargetingTypes.");
+            return;
+        }
+
+        var action = commandParts[0];
+        var value = commandParts.Length > 1 ? commandParts[1] : null;
+
+        switch (action.ToLower())
+        {
+            case "add":
+                if (string.IsNullOrEmpty(value) || !Enum.TryParse(typeof(TargetingType), value, true, out var parsedEnumAdd))
+                {
+                    Svc.Chat.PrintError("Invalid TargetingType value.");
+                    return;
+                }
+
+                var targetingTypeAdd = (TargetingType)parsedEnumAdd;
+                if (!Service.Config.TargetingTypes.Contains(targetingTypeAdd))
+                {
+                    Service.Config.TargetingTypes.Add(targetingTypeAdd);
+                    Svc.Chat.Print($"Added {targetingTypeAdd} to TargetingTypes.");
+                }
+                else
+                {
+                    Svc.Chat.Print($"{targetingTypeAdd} is already in TargetingTypes.");
+                }
+                break;
+
+            case "remove":
+                if (string.IsNullOrEmpty(value) || !Enum.TryParse(typeof(TargetingType), value, true, out var parsedEnumRemove))
+                {
+                    Svc.Chat.PrintError("Invalid TargetingType value.");
+                    return;
+                }
+
+                var targetingTypeRemove = (TargetingType)parsedEnumRemove;
+                if (Service.Config.TargetingTypes.Contains(targetingTypeRemove))
+                {
+                    Service.Config.TargetingTypes.Remove(targetingTypeRemove);
+                    Svc.Chat.Print($"Removed {targetingTypeRemove} from TargetingTypes.");
+                }
+                else
+                {
+                    Svc.Chat.Print($"{targetingTypeRemove} is not in TargetingTypes.");
+                }
+                break;
+
+            case "removeall":
+                Service.Config.TargetingTypes.Clear();
+                Svc.Chat.Print("Removed all TargetingTypes.");
+                break;
+
+            default:
+                Svc.Chat.PrintError("Invalid action for TargetingTypes.");
+                break;
+        }
+
+        Service.Config.Save();
+    }
 
     private static Enum GetNextEnumValue(Enum currentEnumValue)
     {
@@ -159,14 +240,21 @@ public static partial class RSCommands
 
     private static void DoActionCommand(string str)
     {
-        var strs = str.Split('-');
-
-        if (strs != null && strs.Length == 2 && double.TryParse(strs[1], out var time))
+        var lastHyphenIndex = str.LastIndexOf('-');
+        if (lastHyphenIndex == -1 || lastHyphenIndex == str.Length - 1)
         {
-            var actName = strs[0];
+            Svc.Chat.PrintError(UiString.CommandsInsertActionFailure.GetDescription());
+            return;
+        }
+
+        var actName = str.Substring(0, lastHyphenIndex).Trim();
+        var timeStr = str.Substring(lastHyphenIndex + 1).Trim();
+
+        if (double.TryParse(timeStr, out var time))
+        {
             foreach (var iAct in RotationUpdater.RightRotationActions)
             {
-                if (actName == iAct.Name)
+                if (actName.Equals(iAct.Name, StringComparison.OrdinalIgnoreCase))
                 {
                     DataCenter.AddCommandAction(iAct, time);
 
