@@ -6,6 +6,8 @@ using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using RotationSolver.Basic.Configuration;
+using RotationSolver.Basic.Helpers;
+using static FFXIVClientStructs.FFXIV.Client.Game.Character.ActionEffectHandler;
 using static RotationSolver.Basic.Configuration.ConfigTypes;
 
 namespace RotationSolver.Basic.Actions;
@@ -129,8 +131,14 @@ public struct ActionTargetInfo(IBaseAction action)
         if (Service.Config.OnlyAttackInVisionCone && Player.Object != null)
         {
             Vector3 dir = gameObject.Position - Player.Object.Position;
-            Vector2 dirVec = new(dir.Z, dir.X);
-            double angle = Player.Object.GetFaceVector().AngleTo(dirVec);
+            Vector3 faceVec = Player.Object.GetFaceVector();
+            dir = Vector3.Normalize(dir);
+            faceVec = Vector3.Normalize(faceVec);
+
+            // Calculate the angle between the direction vector and the facing vector
+            double dotProduct = Vector3.Dot(faceVec, dir);
+            double angle = Math.Acos(dotProduct);
+
             if (angle > Math.PI * Service.Config.AngleOfVisionCone / 360)
             {
                 return false;
@@ -183,7 +191,7 @@ public struct ActionTargetInfo(IBaseAction action)
     {
         if (!gameObject.IsTargetable) return false;
 
-        if (!Service.Config.TargetAllForFriendly && gameObject.IsAlliance() && !gameObject.IsParty())
+        if (Service.Config.RaiseType == RaiseType.PartyOnly && gameObject.IsAlliance() && !gameObject.IsParty())
         {
             return false;
         }
@@ -709,7 +717,7 @@ public struct ActionTargetInfo(IBaseAction action)
                     }
                     else if (IGameObjects != null)
                     {
-                        IGameObjects = IGameObjects.Where(t => t.DistanceToPlayer() < 1);
+                        IGameObjects = IGameObjects.Where(t => t.DistanceToPlayer() < Service.Config.DistanceForMoving);
                     }
                 }
                 break;
@@ -811,8 +819,6 @@ public struct ActionTargetInfo(IBaseAction action)
 
         IBattleChara? FindTargetForMoving()
         {
-            const float DISTANCE_TO_MOVE = 3;
-
             if (Service.Config == null || Player.Object == null || IGameObjects == null)
             {
                 return null;
@@ -827,7 +833,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
                 var tars = IGameObjects.Where(t =>
                 {
-                    if (t.DistanceToPlayer() < DISTANCE_TO_MOVE) return false;
+                    if (t.DistanceToPlayer() > Service.Config.DistanceForMoving) return false;
 
                     if (!Svc.GameGui.WorldToScreen(t.Position, out var scrPos)) return false;
 
@@ -848,12 +854,11 @@ public struct ActionTargetInfo(IBaseAction action)
 
                 var tars = IGameObjects.Where(t =>
                 {
-                    if (t.DistanceToPlayer() < DISTANCE_TO_MOVE) return false;
+                    if (t.DistanceToPlayer() > Service.Config.DistanceForMoving) return false;
 
                     var dir = t.Position - pPosition;
-                    var dirVec = new Vector2(dir.Z, dir.X);
-                    var angle = faceVec.AngleTo(dirVec);
-                    return angle <= Math.PI * Service.Config.MoveTargetAngle / 360;
+                    var angle = Vector3.Dot(faceVec, Vector3.Normalize(dir));
+                    return angle >= Math.Cos(Math.PI * Service.Config.MoveTargetAngle / 360);
                 }).OrderByDescending(ObjectHelper.DistanceToPlayer);
 
                 return tars.FirstOrDefault();

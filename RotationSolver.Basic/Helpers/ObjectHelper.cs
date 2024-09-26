@@ -155,6 +155,7 @@ public static class ObjectHelper
         && (!(DataCenter.IsPvP) && obj is IPlayerCharacter
         || ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, obj.Struct()));
 
+
     private static readonly object _lock = new object();
 
     internal static bool IsParty(this IGameObject gameObject)
@@ -469,12 +470,15 @@ public static class ObjectHelper
         if (enemy == null || Player.Object == null) return EnemyPositional.None;
 
         Vector3 pPosition = enemy.Position;
-        Vector2 faceVec = enemy.GetFaceVector();
+        Vector3 faceVec = enemy.GetFaceVector();
 
         Vector3 dir = Player.Object.Position - pPosition;
-        Vector2 dirVec = new Vector2(dir.Z, dir.X);
+        dir = Vector3.Normalize(dir);
+        faceVec = Vector3.Normalize(faceVec);
 
-        double angle = faceVec.AngleTo(dirVec);
+        // Calculate the angle between the direction vector and the facing vector
+        double dotProduct = Vector3.Dot(faceVec, dir);
+        double angle = Math.Acos(dotProduct);
 
         const double frontAngle = Math.PI / 4;
         const double rearAngle = Math.PI * 3 / 4;
@@ -489,14 +493,14 @@ public static class ObjectHelper
     /// </summary>
     /// <param name="obj">The game object.</param>
     /// <returns>
-    /// A <see cref="Vector2"/> representing the facing direction of the game object.
+    /// A <see cref="Vector3"/> representing the facing direction of the game object.
     /// </returns>
-    internal static Vector2 GetFaceVector(this IGameObject obj)
+    internal static Vector3 GetFaceVector(this IGameObject obj)
     {
-        if (obj == null) return Vector2.Zero;
+        if (obj == null) return Vector3.Zero;
 
         float rotation = obj.Rotation;
-        return new Vector2((float)Math.Cos(rotation), (float)Math.Sin(rotation));
+        return new Vector3((float)Math.Sin(rotation), 0, (float)Math.Cos(rotation));
     }
 
     /// <summary>
@@ -507,12 +511,12 @@ public static class ObjectHelper
     /// <returns>
     /// The angle in radians between the two vectors.
     /// </returns>
-    internal static double AngleTo(this Vector2 vec1, Vector2 vec2)
+    internal static double AngleTo(this Vector3 vec1, Vector3 vec2)
     {
         double lengthProduct = vec1.Length() * vec2.Length();
         if (lengthProduct == 0) return 0;
 
-        double dotProduct = Vector2.Dot(vec1, vec2);
+        double dotProduct = Vector3.Dot(vec1, vec2);
         return Math.Acos(dotProduct / lengthProduct);
     }
 
@@ -529,5 +533,4 @@ public static class ObjectHelper
         var distance = Vector3.Distance(player.Position, obj.Position) - (player.HitboxRadius + obj.HitboxRadius);
         return distance;
     }
-
 }

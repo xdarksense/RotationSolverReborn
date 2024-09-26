@@ -14,7 +14,6 @@ using ECommons.ImGuiMethods;
 using ExCSS;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Fate;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using Lumina.Excel.GeneratedSheets;
@@ -2771,7 +2770,10 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"Is Dying: {battleChara.IsDying()}");
             ImGui.Text($"Is Alive: {battleChara.IsAlive()}");
             ImGui.Text($"Is Party: {battleChara.IsParty()}");
+            ImGui.Text($"Is Healer: {battleChara.IsJobCategory(JobRole.Healer)}");
+            ImGui.Text($"Is Alliance: {battleChara.IsAlliance()}");
             ImGui.Text($"Is Enemy: {battleChara.IsEnemy()}");
+            ImGui.Text($"Distance To Player: {battleChara.DistanceToPlayer()}");
             ImGui.Text($"Is In EnemiesList: {battleChara.IsInEnemiesList()}");
             ImGui.Text($"Is Attackable: {battleChara.IsAttackable()}");
             ImGui.Text($"CanProvoke: {battleChara.CanProvoke()}");
