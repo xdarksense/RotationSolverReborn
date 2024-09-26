@@ -567,12 +567,6 @@ partial class CustomRotation
 
     #region Service
     /// <summary>
-    /// The count down ahead.
-    /// </summary>
-    [Description("Count Down ahead")]
-    public static float CountDownAhead => Service.Config.CountDownAhead;
-
-    /// <summary>
     /// 
     /// </summary>
     [Description("Health of Area Ability")]

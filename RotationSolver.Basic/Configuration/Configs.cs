@@ -335,10 +335,6 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Use beneficial AoE actions when moving.", Parent = nameof(UseGroundBeneficialAbility))]
     private static readonly bool _useGroundBeneficialAbilityWhenMoving = false;
 
-    [ConditionBool, UI("Heal/Rez players in other alliances.",
-        Filter = TargetConfig, Section = 3)]
-    private static readonly bool _targetAllForFriendly = false;
-
     [ConditionBool, UI("Show Cooldown Window", Filter = UiWindows)]
     private static readonly bool _showCooldownWindow = false;
 
@@ -432,10 +428,10 @@ internal partial class Configs : IPluginConfiguration
         PvEFilter = JobFilterType.None)]
     private static readonly bool _raisePlayerBySwift = true;
 
-    [ConditionBool, UI("Raise any player in range in Alliance Raids",
+    [JobConfig, UI("Raise styles",
         Filter = HealingActionCondition, Section = 2,
         PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
-    private static readonly bool _raiseAll = false;
+    private readonly RaiseType _RaiseType = RaiseType.PartyOnly;
 
     [ConditionBool, UI("Raise players that have the Brink of Death debuff",
         Filter = HealingActionCondition, Section = 2,
@@ -526,11 +522,6 @@ internal partial class Configs : IPluginConfiguration
     Parent = nameof(AutoHeal))]
     [Range(0, 3, ConfigUnitType.Seconds, 0.002f)]
     public Vector2 HealDelay { get; set; } = new(0.5f, 1);
-
-    [UI("How soon before countdown is finished to start casting or attacking.",
-        Filter = BasicTimer, Section = 1, PvPFilter = JobFilterType.NoJob)]
-    [Range(0, 0.7f, ConfigUnitType.Seconds, 0.002f)]
-    public float CountDownAhead { get; set; } = 0.4f;
 
     [UI("The size of the sector angle that can be selected as the moveable target",
         Description = "If the selection mode is based on character facing, i.e., targets within the character's viewpoint are moveable targets. \nIf the selection mode is screen-centered, i.e., targets within a sector drawn upward from the character's point are movable targets.",
