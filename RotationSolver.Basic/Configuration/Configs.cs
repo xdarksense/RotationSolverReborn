@@ -110,7 +110,7 @@ internal partial class Configs : IPluginConfiguration
         Parent = nameof(AddEnemyListToHostile))]
     private static readonly bool _onlyAttackInEnemyList = false;
 
-    [JobConfig, UI("Gemdraughts/Tinctures/Pots", Filter = AutoActionUsage, PvPFilter = JobFilterType.NoJob)]
+    [JobConfig, UI("Only used automatically if coded into the rotation", Filter = AutoActionUsage, PvPFilter = JobFilterType.NoJob)]
     private readonly TinctureUseType _TinctureType = TinctureUseType.Nowhere;
 
     [ConditionBool, UI("Automatically use Anti-Knockback role actions (Arms Length, Surecast)", Filter = AutoActionUsage)]
@@ -316,7 +316,7 @@ internal partial class Configs : IPluginConfiguration
         PvEFilter = JobFilterType.Tank)]
     private static readonly bool _autoTankStance = true;
 
-    [ConditionBool, UI("Auto provoke non-tank attacking targets", Description = "Automatically use provoke when an enemy is attacking a non-tank member of the party.",
+    [ConditionBool, UI("Auto provoke when there is another tank in party", Description = "Automatically use provoke when an enemy is attacking a non-tank member of the party while there is more than one tank in party.",
         Parent = nameof(UseAbility), PvEFilter = JobFilterType.Tank)]
     private static readonly bool _autoProvokeForTank = true;
 
@@ -391,11 +391,6 @@ internal partial class Configs : IPluginConfiguration
     [Range(0.100f, 2.500f, ConfigUnitType.Seconds, 0.001f)]
     public float isFirstAbilityTimer { get; set; } = 0.600f;
 
-    [UI("Max Attack Target Count Tracking", Description = "Don't fuck with this if you dont know what it does",
-        Filter = Extra)]
-    [Range(8, 100, ConfigUnitType.None, 1)]
-    public int internalAttackTargetCount { get; set; } = 48;
-
     [UI("Auto turn off RSR when combat is over more for more then...",
         Parent = nameof(AutoOffAfterCombat))]
     [Range(0, 600, ConfigUnitType.Seconds)]
@@ -468,7 +463,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = HealingActionCondition, Section = 3)]
     private static readonly bool _healOutOfCombat = false;
 
-    [ConditionBool, UI("Heal solo instance NPCs. (Experimental)",
+    [ConditionBool, UI("Heal solo instance NPCs", Description = "Experimental.",
         Filter = HealingActionCondition, Section = 3)]
     private static readonly bool _friendlyBattleNPCHeal = false;
 
@@ -476,7 +471,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = HealingActionCondition, Section = 3)]
     private static readonly bool _friendlyPartyNPCHealRaise = true;
 
-    [ConditionBool, UI("Heal/Dance partner your chocobo. (Experimental)",
+    [ConditionBool, UI("Heal/Dance partner your chocobo", Description = "Experimental.",
         Filter = HealingActionCondition, Section = 3)]
     private static readonly bool _chocoboPartyMember = false;
 

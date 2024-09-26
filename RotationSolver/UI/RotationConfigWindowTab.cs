@@ -17,7 +17,7 @@ internal class TabSkipAttribute : Attribute
 [AttributeUsage(AttributeTargets.Field)]
 internal class TabIconAttribute : Attribute
 {
-    public uint Icon { get; set; }
+    public uint Icon { get; init; }
 }
 
 /// <summary>
@@ -64,10 +64,10 @@ internal enum RotationConfigWindowTab : byte
 /// </summary>
 public struct IncompatiblePlugin
 {
-    public string Name { get; set; }
-    public string Icon { get; set; }
-    public string Url { get; set; }
-    public string Features { get; set; }
+    public string Name { get; init; }
+    public string Icon { get; init; }
+    public string Url { get; init; }
+    public string Features { get; init; }
 
     /// <summary>
     /// Checks if the plugin is installed.
@@ -78,12 +78,13 @@ public struct IncompatiblePlugin
         get
         {
             var name = this.Name;
-            return Svc.PluginInterface.InstalledPlugins.Any(x =>
+            var installedPlugins = Svc.PluginInterface.InstalledPlugins;
+            return installedPlugins.Any(x =>
                 (x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase)) && x.IsLoaded);
         }
     }
 
-    public CompatibleType Type { get; set; }
+    public CompatibleType Type { get; init; }
 }
 
 /// <summary>

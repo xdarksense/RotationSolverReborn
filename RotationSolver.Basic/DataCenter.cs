@@ -353,9 +353,6 @@ internal static class DataCenter
                 // Check if the target is an enemy.
                 if (!b.IsEnemy()) return false;
 
-                // Check if the target is dead.
-                if (b.CurrentHp <= 1) return false;
-
                 // Check if the target is targetable.
                 if (!b.IsTargetable) return false;
 

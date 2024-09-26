@@ -23,8 +23,10 @@ internal static class ImguiTooltips
     /// <param name="text">The text to display in the tooltip.</param>
     public static void HoveredTooltip(string? text)
     {
-        if (!ImGui.IsItemHovered()) return;
-        ShowTooltip(text);
+        if (ImGui.IsItemHovered() && !string.IsNullOrEmpty(text))
+        {
+            ShowTooltip(() => ImGui.Text(text));
+        }
     }
 
     /// <summary>
@@ -33,8 +35,10 @@ internal static class ImguiTooltips
     /// <param name="text">The text to display in the tooltip.</param>
     public static void ShowTooltip(string? text)
     {
-        if (string.IsNullOrEmpty(text)) return;
-        ShowTooltip(() => ImGui.Text(text));
+        if (!string.IsNullOrEmpty(text))
+        {
+            ShowTooltip(() => ImGui.Text(text));
+        }
     }
 
     /// <summary>
@@ -43,14 +47,14 @@ internal static class ImguiTooltips
     /// <param name="act">The action to perform to render the tooltip content.</param>
     public static void ShowTooltip(Action act)
     {
-        if (act == null) return;
-        if (Service.Config == null || !Service.Config.ShowTooltips) return;
+        if (act == null || Service.Config == null || !Service.Config.ShowTooltips) return;
 
         ImGui.SetNextWindowBgAlpha(1);
 
         using var color = ImRaii.PushColor(ImGuiCol.BorderShadow, ImGuiColors.DalamudWhite);
 
-        ImGui.SetNextWindowSizeConstraints(new Vector2(150, 0) * ImGuiHelpers.GlobalScale, new Vector2(1200, 1500) * ImGuiHelpers.GlobalScale);
+        var globalScale = ImGuiHelpers.GlobalScale;
+        ImGui.SetNextWindowSizeConstraints(new Vector2(150, 0) * globalScale, new Vector2(1200, 1500) * globalScale);
         ImGui.SetWindowPos(TOOLTIP_ID, ImGui.GetIO().MousePos);
 
         if (ImGui.Begin(TOOLTIP_ID, TOOLTIP_FLAG))

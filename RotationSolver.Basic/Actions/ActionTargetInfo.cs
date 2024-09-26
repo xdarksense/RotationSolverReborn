@@ -179,7 +179,7 @@ public struct ActionTargetInfo(IBaseAction action)
     /// <returns>
     /// <c>true</c> if the battle character meets the criteria for targeting; otherwise, <c>false</c>.
     /// </returns>
-    private bool GeneralCheck(IBattleChara gameObject, bool skipStatusProvideCheck)
+    public bool GeneralCheck(IBattleChara gameObject, bool skipStatusProvideCheck)
     {
         if (!gameObject.IsTargetable) return false;
 

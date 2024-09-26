@@ -12,43 +12,27 @@ internal abstract class CtrlWindow(string name) : Window(name, BaseFlags)
 
     public override void PreDraw()
     {
-        Vector4 bgColor = Service.Config.IsControlWindowLock
-            ? Service.Config.ControlWindowLockBg
-            : Service.Config.ControlWindowUnlockBg;
+        var config = Service.Config;
+        Vector4 bgColor = config.IsControlWindowLock
+            ? config.ControlWindowLockBg
+            : config.ControlWindowUnlockBg;
         ImGui.PushStyleColor(ImGuiCol.WindowBg, bgColor);
 
         Flags = BaseFlags;
-        if (Service.Config.IsControlWindowLock)
+        if (config.IsControlWindowLock)
         {
             Flags |= ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove;
         }
 
         ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
 
-        try
-        {
-            base.PreDraw();
-        }
-        catch (Exception)
-        {
-
-        }
+        base.PreDraw();
     }
 
     public override void PostDraw()
     {
-        try
-        {
-            base.PostDraw();
-        }
-        catch (Exception)
-        {
-
-        }
-        finally
-        {
-            ImGui.PopStyleColor();
-            ImGui.PopStyleVar();
-        }
+        base.PostDraw();
+        ImGui.PopStyleColor();
+        ImGui.PopStyleVar();
     }
 }
