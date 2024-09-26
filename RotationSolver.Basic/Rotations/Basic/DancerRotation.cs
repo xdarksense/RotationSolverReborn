@@ -409,7 +409,7 @@ partial class DancerRotation
     /// <param name="nextGCD"></param>
     /// <returns></returns>
     [RotationDesc(ActionID.ShieldSambaPvE)]
-    protected sealed override bool DefenseAreaAbility(IAction nextGCD, out IAction act)
+    protected override bool DefenseAreaAbility(IAction nextGCD, out IAction act)
     {
         if (ShieldSambaPvE.CanUse(out act, usedUp: true)) return true;
         return false;
