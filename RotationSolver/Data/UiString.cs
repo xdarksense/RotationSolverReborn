@@ -7,6 +7,27 @@ namespace RotationSolver.Data
         [Description("The condition set you chose, click to modify.")]
         ConfigWindow_ConditionSetDesc,
 
+        [Description("Condition Set")]
+        ConfigWindow_ConditionSet,
+
+        [Description("Action Condition")]
+        ConfigWindow_ActionSet,
+
+        [Description("Trait Condition")]
+        ConfigWindow_TraitSet,
+
+        [Description("Target Condition")]
+        ConfigWindow_TargetSet,
+
+        [Description("Rotation Condition")]
+        ConfigWindow_RotationSet,
+
+        [Description("Named Condition")]
+        ConfigWindow_NamedSet,
+
+        [Description("Territory Condition")]
+        ConfigWindow_Territoryset,
+
         [Description("No rotations loaded! Please see the rotations tab!")]
         ConfigWindow_NoRotation,
 

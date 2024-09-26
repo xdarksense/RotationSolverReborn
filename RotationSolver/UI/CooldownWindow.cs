@@ -8,37 +8,42 @@ internal class CooldownWindow() : CtrlWindow(nameof(CooldownWindow))
     {
         if (DataCenter.RightNowRotation == null) return;
 
-        var width = Service.Config.CooldownWindowIconSize;
+        var config = Service.Config;
+        var width = config.CooldownWindowIconSize;
         const float IconSpacingFactor = 6f / 82f;
-        var count = Math.Max(1, (int)MathF.Floor(ImGui.GetColumnWidth() / (width * (1 + IconSpacingFactor) + ImGui.GetStyle().ItemSpacing.X)));
+        var style = ImGui.GetStyle();
+        var columnWidth = ImGui.GetColumnWidth();
+        var count = Math.Max(1, (int)MathF.Floor(columnWidth / (width * (1 + IconSpacingFactor) + style.ItemSpacing.X)));
 
-        if (RotationUpdater.AllGroupedActions == null) return;
+        var allGroupedActions = RotationUpdater.AllGroupedActions;
+        if (allGroupedActions == null) return;
 
-        foreach (var pair in RotationUpdater.AllGroupedActions)
+        foreach (var pair in allGroupedActions)
         {
-            var showItems = pair.OrderBy(a => a.SortKey)
-                                .Where(a => a.IsInCooldown && (a is not IBaseAction b || !b.Info.IsLimitBreak));
-
-            if (!Service.Config.ShowGcdCooldown)
-            {
-                showItems = showItems.Where(i => !(i is IBaseAction a && a.Info.IsGeneralGCD));
-            }
+            var showItems = pair
+                .Where(a => a.IsInCooldown && (a is not IBaseAction b || !b.Info.IsLimitBreak))
+                .Where(a => config.ShowGcdCooldown || !(a is IBaseAction b && b.Info.IsGeneralGCD))
+                .Where(a => config.ShowItemsCooldown || !(a is IBaseItem))
+                .OrderBy(a => a.SortKey)
+                .ToList();
 
             if (!showItems.Any()) continue;
 
-            if (!Service.Config.ShowItemsCooldown && showItems.Any(i => i is IBaseItem)) continue;
-
             ImGui.Text(pair.Key);
 
+            ImGui.Columns(count, null, false);
             uint itemIndex = 0;
             foreach (var item in showItems)
             {
-                if (itemIndex++ % count != 0)
-                {
-                    ImGui.SameLine();
-                }
                 ControlWindow.DrawIAction(item, width, 1f);
+                itemIndex++;
+                if (itemIndex % count != 0)
+                {
+                    ImGui.NextColumn();
+                }
             }
+            ImGui.Columns(1);
+            ImGui.NewLine();
         }
     }
 }

@@ -22,7 +22,7 @@ namespace RotationSolver.UI
                     var font = lockedHandle.ImFont;
 
                     // Check if the font pointer is valid
-                    if (new IntPtr(font.NativePtr) == IntPtr.Zero)
+                    if (font.NativePtr == null)
                     {
                         return ImGui.GetFont();
                     }

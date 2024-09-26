@@ -1,6 +1,7 @@
 ﻿using RotationSolver.Basic.Configuration;
 using RotationSolver.UI.SearchableConfigs;
 using RotationSolver.UI.SearchableSettings;
+using System.Collections.Concurrent;
 
 namespace RotationSolver.UI;
 
@@ -15,9 +16,12 @@ internal class SearchableCollection
     public SearchableCollection()
     {
         // Retrieve properties from the Configs class
-        var properties = typeof(Configs).GetRuntimeProperties();
-        var pairs = new List<SearchPair>(properties.Count());
-        var parents = new Dictionary<string, CheckBoxSearch>(properties.Count());
+        var properties = typeof(Configs).GetRuntimeProperties().ToArray();
+        var pairs = new List<SearchPair>(properties.Length);
+        var parents = new Dictionary<string, CheckBoxSearch>(properties.Length);
+
+        // Cache attributes to avoid repeated reflection calls
+        var attributes = new ConcurrentDictionary<PropertyInfo, UIAttribute>();
 
         // Iterate over each property
         foreach (var property in properties)
@@ -93,23 +97,22 @@ internal class SearchableCollection
         if (string.IsNullOrEmpty(searchingText)) return Array.Empty<ISearchable>();
 
         var results = new HashSet<ISearchable>();
-        var enumerator = _items.Select(i => i.Searchable)
-                               .SelectMany(GetChildren)
-                               .OrderByDescending(i => Similarity(i.SearchingKeys, searchingText))
-                               .Select(GetParent)
-                               .Distinct()
-                               .GetEnumerator();
+        var finalResults = new List<ISearchable>(MaxResultLength);
 
-        int index = 0;
-        var finalResults = new ISearchable[MaxResultLength];
-        while (enumerator.MoveNext() && index < MaxResultLength)
+        foreach (var searchable in _items.Select(i => i.Searchable).SelectMany(GetChildren))
         {
-            if (results.Contains(enumerator.Current)) continue;
-            results.Add(enumerator.Current);
-            finalResults[index++] = enumerator.Current;
+            var parent = GetParent(searchable);
+            if (results.Contains(parent)) continue;
+
+            if (Similarity(searchable.SearchingKeys, searchingText) > 0)
+            {
+                results.Add(parent);
+                finalResults.Add(parent);
+                if (finalResults.Count >= MaxResultLength) break;
+            }
         }
 
-        return finalResults;
+        return finalResults.ToArray();
     }
 
     private static ISearchable? CreateSearchable(PropertyInfo property)
@@ -154,17 +157,16 @@ internal class SearchableCollection
     private static IEnumerable<ISearchable> GetChildren(ISearchable searchable)
     {
         // Include the current searchable item
-        var myself = new ISearchable[] { searchable };
+        yield return searchable;
 
         // If the searchable item is a CheckBoxSearch and has children, recursively get all children
         if (searchable is CheckBoxSearch c && c.Children != null)
         {
-            // Use SelectMany to flatten the hierarchy and include the current item
-            return c.Children.SelectMany(GetChildren).Concat(myself);
+            foreach (var child in c.Children.SelectMany(GetChildren))
+            {
+                yield return child;
+            }
         }
-
-        // Return the current item if there are no children
-        return myself;
     }
 
     private static ISearchable GetParent(ISearchable searchable)

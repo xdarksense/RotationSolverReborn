@@ -559,13 +559,13 @@ internal static class ConditionDrawer
             using var popUp = ImRaii.Popup("Popup" + conditionSet.GetHashCode().ToString());
             if (popUp)
             {
-                AddOneCondition<ConditionSet>();
-                AddOneCondition<ActionCondition>();
-                AddOneCondition<TraitCondition>();
-                AddOneCondition<TargetCondition>();
-                AddOneCondition<RotationCondition>();
-                AddOneCondition<NamedCondition>();
-                AddOneCondition<TerritoryCondition>();
+                AddOneCondition<ConditionSet>(UiString.ConfigWindow_ConditionSet.GetDescription());
+                AddOneCondition<ActionCondition>(UiString.ConfigWindow_ActionSet.GetDescription());
+                AddOneCondition<TraitCondition>(UiString.ConfigWindow_TraitSet.GetDescription());
+                AddOneCondition<TargetCondition>(UiString.ConfigWindow_TargetSet.GetDescription());
+                AddOneCondition<RotationCondition>(UiString.ConfigWindow_RotationSet.GetDescription());
+                AddOneCondition<NamedCondition>(UiString.ConfigWindow_NamedSet.GetDescription());
+                AddOneCondition<TerritoryCondition>(UiString.ConfigWindow_Territoryset.GetDescription());
                 if (ImGui.Selectable(UiString.ActionSequencer_FromClipboard.GetDescription()))
                 {
                     var str = ImGui.GetClipboardText();
@@ -582,9 +582,9 @@ internal static class ConditionDrawer
                 }
             }
 
-            void AddOneCondition<T>() where T : ICondition
+            void AddOneCondition<T>(string description) where T : ICondition
             {
-                if (ImGui.Selectable(typeof(T).ToString()))
+                if (ImGui.Selectable(description))
                 {
                     conditionSet.Conditions.Add(Activator.CreateInstance<T>());
                     ImGui.CloseCurrentPopup();

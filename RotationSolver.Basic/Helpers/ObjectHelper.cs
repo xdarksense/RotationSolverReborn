@@ -36,8 +36,7 @@ public static class ObjectHelper
     {
         if (target == null) return false;
 
-        // Assuming DataCenter.FateId is an ID, not an IGameObject
-        if (target.DataId == DataCenter.FateId) return false;
+        if (DataCenter.FateId != 0 && target.FateId() == DataCenter.FateId) return false;
 
         //Removed the listed names.
         if (OtherConfiguration.NoProvokeNames.TryGetValue(Svc.ClientState.TerritoryType, out var ns1))
@@ -194,7 +193,7 @@ public static class ObjectHelper
 
     internal static bool IsAlive(this IGameObject obj)
     {
-        return obj is not IBattleChara b || b.CurrentHp > 1 && obj.IsTargetable;
+        return obj is not IBattleChara b || b.CurrentHp > 0 && obj.IsTargetable;
     }
 
     /// <summary>

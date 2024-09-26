@@ -2,13 +2,14 @@
 using Dalamud.Interface.Windowing;
 using ECommons.DalamudServices;
 using RotationSolver.Data;
-
 using RotationSolver.Updaters;
 
 namespace RotationSolver.UI
 {
     internal class WelcomeWindow : Window
     {
+        private static readonly HttpClient HttpClient = new HttpClient();
+
         public WelcomeWindow() : base($"Welcome to Rotation Solver Reborn!", BaseFlags)
         {
             Size = new Vector2(650, 500);
@@ -25,7 +26,7 @@ namespace RotationSolver.UI
 #if DEBUG
         private string _assemblyVersion = "6.9.6.9"; //kekw
 #else
-            private string _assemblyVersion = typeof(RotationConfigWindow).Assembly.GetName().Version?.ToString() ?? "4.0.5.4";
+        private string _assemblyVersion = typeof(RotationConfigWindow).Assembly.GetName().Version?.ToString() ?? "4.0.5.4";
 #endif
 
         private string _lastSeenChangelog = Service.Config.LastSeenChangelog;
@@ -43,28 +44,25 @@ namespace RotationSolver.UI
             string url = $"https://api.github.com/repos/{Service.USERNAME}/{Service.REPO}/compare/{comparisonGoal}...{_assemblyVersion}";
             try
             {
-                using (var client = new HttpClient())
+                HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd("RotationSolver");
+                HttpClient.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github.v3+json");
+                var response = await HttpClient.GetAsync(url);
+                if (response.IsSuccessStatusCode)
                 {
-                    client.DefaultRequestHeaders.Add("User-Agent", "RotationSolver");
-                    client.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
-                    var response = await client.GetAsync(url);
-                    if (response.IsSuccessStatusCode)
+                    var content = await response.Content.ReadAsStringAsync();
+                    var changeLog = JsonConvert.DeserializeObject<GitHubCommitComparison>(content);
+                    if (changeLog != null)
                     {
-                        var content = await response.Content.ReadAsStringAsync();
-                        var changeLog = JsonConvert.DeserializeObject<GitHubCommitComparison>(content);
-                        if (changeLog != null)
-                        {
-                            _changeLog = changeLog;
-                        }
-                        else
-                        {
-                            Svc.Log.Error("Failed to deserialize GitHub commit comparison.");
-                        }
+                        _changeLog = changeLog;
                     }
                     else
                     {
-                        Svc.Log.Error($"Failed to get comparison: {response.StatusCode}");
+                        Svc.Log.Error("Failed to deserialize GitHub commit comparison.");
                     }
+                }
+                else
+                {
+                    Svc.Log.Error($"Failed to get comparison: {response.StatusCode}");
                 }
             }
             catch (Exception ex)
@@ -78,36 +76,33 @@ namespace RotationSolver.UI
             var url = $"https://api.github.com/repos/{Service.USERNAME}/{Service.REPO}/releases";
             try
             {
-                using (var client = new HttpClient())
+                HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd("RotationSolver");
+                HttpClient.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github.v3+json");
+                var response = await HttpClient.GetAsync(url);
+                if (response.IsSuccessStatusCode)
                 {
-                    client.DefaultRequestHeaders.Add("User-Agent", "RotationSolver");
-                    client.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
-                    var response = await client.GetAsync(url);
-                    if (response.IsSuccessStatusCode)
+                    var content = await response.Content.ReadAsStringAsync();
+                    var releases = JsonConvert.DeserializeObject<List<GithubRelease.Release>>(content);
+                    var foundLatest = false;
+                    if (releases?.Count > 0)
                     {
-                        var content = await response.Content.ReadAsStringAsync();
-                        var releases = JsonConvert.DeserializeObject<List<GithubRelease.Release>>(content);
-                        var foundLatest = false;
-                        if (releases?.Count > 0)
+                        foreach (var release in releases)
                         {
-                            foreach (var release in releases)
+                            if (release.Prerelease) continue;
+                            if (!foundLatest)
                             {
-                                if (release.Prerelease) continue;
-                                if (!foundLatest)
-                                {
-                                    foundLatest = true;
-                                    continue;
-                                }
-                                return release.TagName;
+                                foundLatest = true;
+                                continue;
                             }
+                            return release.TagName;
                         }
-                        return "4.1.0.0";
                     }
-                    else
-                    {
-                        Svc.Log.Error($"Failed to get releases: {response.StatusCode}");
-                        return "4.1.0.0";
-                    }
+                    return "4.1.0.0";
+                }
+                else
+                {
+                    Svc.Log.Error($"Failed to get releases: {response.StatusCode}");
+                    return "4.1.0.0";
                 }
             }
             catch (Exception ex)
@@ -122,7 +117,8 @@ namespace RotationSolver.UI
             var windowWidth = ImGui.GetWindowWidth();
             // Centered title
             var text = UiString.WelcomeWindow_Header.GetDescription();
-            ImGui.PushFont(FontManager.GetFont(ImGui.GetFontSize() + 10));
+            var fontSize = ImGui.GetFontSize();
+            ImGui.PushFont(FontManager.GetFont(fontSize + 10));
             var textSize = ImGui.CalcTextSize(text).X;
             ImGuiHelper.DrawItemMiddle(() =>
             {
@@ -131,7 +127,7 @@ namespace RotationSolver.UI
             ImGui.PopFont();
 
             text = $"Version {_assemblyVersion}";
-            ImGui.PushFont(FontManager.GetFont(ImGui.GetFontSize() + 3));
+            ImGui.PushFont(FontManager.GetFont(fontSize + 3));
             textSize = ImGui.CalcTextSize(text).X;
             ImGuiHelper.DrawItemMiddle(() =>
             {
@@ -140,7 +136,7 @@ namespace RotationSolver.UI
             ImGui.PopFont();
 
             text = Service.Config.FirstTimeSetupDone ? UiString.WelcomeWindow_WelcomeBack.GetDescription() : UiString.WelcomeWindow_Welcome.GetDescription();
-            ImGui.PushFont(FontManager.GetFont(ImGui.GetFontSize() + 1));
+            ImGui.PushFont(FontManager.GetFont(fontSize + 1));
             textSize = ImGui.CalcTextSize(text).X;
             ImGuiHelper.DrawItemMiddle(() =>
             {
@@ -153,7 +149,7 @@ namespace RotationSolver.UI
             if (!Service.Config.FirstTimeSetupDone)
             {
                 text = UiString.WelcomeWindow_FirstTime.GetDescription();
-                ImGui.PushFont(FontManager.GetFont(ImGui.GetFontSize() + 3));
+                ImGui.PushFont(FontManager.GetFont(fontSize + 3));
                 textSize = ImGui.CalcTextSize(text).X;
                 ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudOrange);
                 ImGui.TextWrapped(text);
@@ -176,7 +172,7 @@ namespace RotationSolver.UI
                 }
 
                 text = UiString.WelcomeWindow_FirstTime2.GetDescription();
-                ImGui.PushFont(FontManager.GetFont(ImGui.GetFontSize() + 2));
+                ImGui.PushFont(FontManager.GetFont(fontSize + 2));
                 textSize = ImGui.CalcTextSize(text).X;
                 ImGuiHelper.DrawItemMiddle(() =>
                 {
@@ -206,7 +202,7 @@ namespace RotationSolver.UI
             DrawChangeLog();
 
             ImGui.Separator();
-            ImGui.Text($"Older changelogs are available on GitHub");
+            ImGui.Text("Older changelogs are available on GitHub");
             if (ImGui.Button("Open GitHub"))
             {
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = $"https://github.com/{Service.USERNAME}/{Service.REPO}", UseShellExecute = true });
@@ -228,11 +224,18 @@ namespace RotationSolver.UI
                 return;
             }
 
-            var commits = changeLog.Commits.OrderByDescending(c => c.CommitData.CommitAuthor.Date).Where(c => !c.CommitData.Message.Contains("Merge pull request"));
-            List<string> authors = GetAuthorsFromChangeLogs(commits);
+            var commits = changeLog.Commits
+                .Where(c => !c.CommitData.Message.Contains("Merge pull request"))
+                .OrderByDescending(c => c.CommitData.CommitAuthor.Date)
+                .ToList();
+            var authors = GetAuthorsFromChangeLogs(commits);
+            var commitCount = commits.Count;
+            var authorCount = authors.Count;
+
             ImGui.PushFont(FontManager.GetFont(ImGui.GetFontSize() + 1));
-            ImGui.Text($"You've missed {commits.Count()} changes from {authors.Count()} contributer{(authors.Count() > 1 ? "s" : "")}!");
+            ImGui.Text($"You've missed {commitCount} changes from {authorCount} contributer{(authorCount > 1 ? "s" : "")}!");
             ImGui.PopFont();
+
             foreach (var commit in commits)
             {
                 ImGui.Text($"[{commit.CommitData.CommitAuthor.Date:yyyy-MM-dd}]");
@@ -253,7 +256,7 @@ namespace RotationSolver.UI
                     System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = $"https://github.com/{author}", UseShellExecute = true });
                 }
             }
-            //Build file stats
+            // Build file stats
             var additions = changeLog.Files.Sum(f => f.Additions);
             var deletions = changeLog.Files.Sum(f => f.Deletions);
             var files = changeLog.Files.Count;
@@ -268,15 +271,12 @@ namespace RotationSolver.UI
 
         private List<string> GetAuthorsFromChangeLogs(IEnumerable<Commit> commits)
         {
-            var authors = new List<string>();
+            var authors = new HashSet<string>();
             foreach (var commit in commits)
             {
-                if (!authors.Contains(commit.CommitData.CommitAuthor.Name))
-                {
-                    authors.Add(commit.CommitData.CommitAuthor.Name);
-                }
+                authors.Add(commit.CommitData.CommitAuthor.Name);
             }
-            return authors;
+            return authors.ToList();
         }
 
         public override void OnClose()
@@ -287,6 +287,7 @@ namespace RotationSolver.UI
             IsOpen = false;
             base.OnClose();
         }
+
         public override bool DrawConditions()
         {
             return Svc.ClientState.IsLoggedIn;
