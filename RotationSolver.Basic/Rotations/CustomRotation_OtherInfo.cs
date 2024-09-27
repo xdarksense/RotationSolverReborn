@@ -566,6 +566,13 @@ partial class CustomRotation
         => DataCenter.GCDTime(gcdCount, offset);
 
     #region Service
+
+    /// <summary>
+    /// The count down ahead.
+    /// </summary>
+    [Description("Count Down ahead")]
+    public static float CountDownAhead => Service.Config.CountDownAhead;
+
     /// <summary>
     /// 
     /// </summary>
