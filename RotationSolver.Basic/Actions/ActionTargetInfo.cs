@@ -1090,7 +1090,7 @@ public struct ActionTargetInfo(IBaseAction action)
     private static IBattleChara? RandomObject(IEnumerable<IBattleChara> objs)
     {
         return objs.FirstOrDefault();
-        //Random ran = new(DateTime.UtcNow.Millisecond);
+        //Random ran = new(DateTime.Now.Millisecond);
         //var count = objs.Count();
         //if (count == 0) return null;
         //return objs.ElementAt(ran.Next(count));

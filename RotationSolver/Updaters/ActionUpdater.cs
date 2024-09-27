@@ -103,7 +103,7 @@ internal static class ActionUpdater
         DataCenter.IsMoving = AgentMap.Instance()->IsPlayerMoving > 0;
         if (last && !DataCenter.IsMoving)
         {
-            _stopMovingTime = DateTime.UtcNow;
+            _stopMovingTime = DateTime.Now;
         }
         else if (DataCenter.IsMoving)
         {
@@ -112,7 +112,7 @@ internal static class ActionUpdater
 
         DataCenter.StopMovingRaw = _stopMovingTime == DateTime.MinValue
             ? 0
-            : (float)(DateTime.UtcNow - _stopMovingTime).TotalSeconds;
+            : (float)(DateTime.Now - _stopMovingTime).TotalSeconds;
     }
 
     static DateTime _startCombatTime = DateTime.MinValue;
@@ -123,7 +123,7 @@ internal static class ActionUpdater
 
         if (!lastInCombat && DataCenter.InCombat)
         {
-            _startCombatTime = DateTime.UtcNow;
+            _startCombatTime = DateTime.Now;
         }
         else if (lastInCombat && !DataCenter.InCombat)
         {
@@ -131,19 +131,19 @@ internal static class ActionUpdater
 
             if (Service.Config.AutoOffAfterCombat)
             {
-                AutoCancelTime = DateTime.UtcNow.AddSeconds(Service.Config.AutoOffAfterCombatTime);
+                AutoCancelTime = DateTime.Now.AddSeconds(Service.Config.AutoOffAfterCombatTime);
             }
         }
 
         DataCenter.CombatTimeRaw = _startCombatTime == DateTime.MinValue
             ? 0
-            : (float)(DateTime.UtcNow - _startCombatTime).TotalSeconds;
+            : (float)(DateTime.Now - _startCombatTime).TotalSeconds;
     }
 
     static uint _lastMP = 0;
-    static DateTime _lastMPUpdate = DateTime.UtcNow;
+    static DateTime _lastMPUpdate = DateTime.Now;
 
-    internal static float MPUpdateElapsed => (float)(DateTime.UtcNow - _lastMPUpdate).TotalSeconds % 3;
+    internal static float MPUpdateElapsed => (float)(DateTime.Now - _lastMPUpdate).TotalSeconds % 3;
 
     private static void UpdateMPTimer()
     {
@@ -158,7 +158,7 @@ internal static class ActionUpdater
 
         if (_lastMP < player.CurrentMp)
         {
-            _lastMPUpdate = DateTime.UtcNow;
+            _lastMPUpdate = DateTime.Now;
         }
         _lastMP = player.CurrentMp;
     }

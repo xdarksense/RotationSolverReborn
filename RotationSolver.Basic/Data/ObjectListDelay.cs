@@ -11,7 +11,7 @@ public class ObjectListDelay<T> : IEnumerable<T> where T : IGameObject
     private IEnumerable<T> _list = new List<T>();
     private readonly Func<(float min, float max)> _getRange;
     private SortedList<ulong, DateTime> _revealTime = new();
-    private readonly Random _ran = new(DateTime.UtcNow.Millisecond);
+    private readonly Random _ran = new(DateTime.Now.Millisecond);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ObjectListDelay{T}"/> class.
@@ -43,7 +43,7 @@ public class ObjectListDelay<T> : IEnumerable<T> where T : IGameObject
     {
         var outList = new List<T>(originData.Count());
         var revealTime = new SortedList<ulong, DateTime>();
-        var now = DateTime.UtcNow;
+        var now = DateTime.Now;
 
         foreach (var item in originData)
         {
