@@ -169,7 +169,7 @@ public readonly struct ActionCooldownInfo : ICooldown
         if (charges <= CurrentCharges)
             return true;
 
-        float requiredTime = (charges - CurrentCharges) * RecastTimeOneChargeRaw;
+        float requiredTime = (charges - CurrentCharges - 1) * RecastTimeOneChargeRaw;
         return RecastTimeRemainOneCharge <= remain - requiredTime;
     }
 

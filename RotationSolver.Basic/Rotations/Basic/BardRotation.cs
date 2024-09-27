@@ -63,6 +63,7 @@ partial class BardRotation
         ImGui.Text("SongTimeRaw: " + SongTimeRaw.ToString());
         ImGui.Text("SongTime: " + SongTime.ToString());
         ImGui.Text("BloodletterMax: " + BloodletterMax.ToString());
+        ImGui.Text("Bloodlettercharges: " + BloodletterPvE.Cooldown.CurrentCharges.ToString());
     }
     #endregion
 
