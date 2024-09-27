@@ -31,7 +31,7 @@ public static class ObjectHelper
     {
         return obj == null ? null : Service.GetSheet<Lumina.Excel.GeneratedSheets.BNpcBase>().GetRow(obj.DataId);
     }
-    
+
     internal static bool CanProvoke(this IGameObject target)
     {
         if (target == null) return false;
@@ -112,8 +112,7 @@ public static class ObjectHelper
 
         if (Service.CountDownTime > 0 || DataCenter.IsPvP) return true;
 
-        return DataCenter.RightNowTargetToHostileType switch
-        {
+        return DataCenter.RightNowTargetToHostileType switch {
             TargetHostileType.AllTargetsCanAttack => true,
             TargetHostileType.TargetsHaveTarget => battleChara.TargetObject is IBattleChara,
             TargetHostileType.AllTargetsWhenSolo => DataCenter.PartyMembers.Length < 2 || battleChara.TargetObject is IBattleChara,
@@ -382,7 +381,7 @@ public static class ObjectHelper
             }
         }
 
-        var timespan = DateTime.UtcNow - startTime;
+        var timespan = DateTime.Now - startTime;
         if (startTime == DateTime.MinValue || timespan < CheckSpan) return float.NaN;
 
         var ratioNow = b.GetHealthRatio();
@@ -409,7 +408,7 @@ public static class ObjectHelper
         {
             if (id == b.GameObjectId)
             {
-                return now - time <= TimeSpan.FromSeconds(1);
+                return now - time >= TimeSpan.FromSeconds(1);
             }
         }
         return false;

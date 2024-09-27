@@ -132,6 +132,7 @@ internal static class StateUpdater
 
                 if (DataCenter.Role == JobRole.Tank) // Tank defensive abilties.
                 {
+
                     var movingHere = (float)DataCenter.NumberOfHostilesInRange / DataCenter.NumberOfHostilesInMaxRange > 0.3f;
 
                     var tarOnMe = DataCenter.AllHostileTargets.Where(t => t.DistanceToPlayer() <= 3
@@ -139,7 +140,6 @@ internal static class StateUpdater
                     var tarOnMeCount = tarOnMe.Count();
                     var attackedCount = tarOnMe.Count(ObjectHelper.IsAttacked);
                     var attacked = (float)attackedCount / tarOnMeCount > 0.7f;
-
                     //A lot targets are targeting on me.
                     if (tarOnMeCount >= Service.Config.AutoDefenseNumber
                         && Player.Object.GetHealthRatio() <= Service.Config.HealthForAutoDefense

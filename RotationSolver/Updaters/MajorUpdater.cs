@@ -26,7 +26,7 @@ internal static class MajorUpdater
         && Player.Available;
 
     private static Exception? _threadException;
-    private static DateTime _lastUpdatedWork = DateTime.UtcNow;
+    private static DateTime _lastUpdatedWork = DateTime.Now;
     private static DateTime _warningsLastDisplayed = DateTime.MinValue;
 
     private unsafe static void FrameworkUpdate(IFramework framework)
@@ -84,7 +84,7 @@ internal static class MajorUpdater
 
             foreach (var warning in DataCenter.SystemWarnings)
             {
-                if ((warning.Value + TimeSpan.FromMinutes(10)) < DateTime.UtcNow)
+                if ((warning.Value + TimeSpan.FromMinutes(10)) < DateTime.Now)
                 {
                     warningsToRemove.Add(warning.Key);
                 }
@@ -99,7 +99,7 @@ internal static class MajorUpdater
 
     private static async Task HandleWorkUpdateAsync()
     {
-        var now = DateTime.UtcNow;
+        var now = DateTime.Now;
         if (now - _lastUpdatedWork < TimeSpan.FromSeconds(Service.Config.MinUpdatingTime))
             return;
 
@@ -205,10 +205,10 @@ internal static class MajorUpdater
         Svc.Framework.Update += FrameworkUpdate;
     }
 
-    static DateTime _closeWindowTime = DateTime.UtcNow;
+    static DateTime _closeWindowTime = DateTime.Now;
     private unsafe static void CloseWindow()
     {
-        if (_closeWindowTime < DateTime.UtcNow) return;
+        if (_closeWindowTime < DateTime.Now) return;
 
         var needGreedWindow = Svc.GameGui.GetAddonByName("NeedGreed", 1);
         if (needGreedWindow == IntPtr.Zero) return;
@@ -234,7 +234,7 @@ internal static class MajorUpdater
         }
     }
 
-    static DateTime _nextOpenTime = DateTime.UtcNow;
+    static DateTime _nextOpenTime = DateTime.Now;
     static ulong _lastChest = 0;
     private unsafe static void OpenChest()
     {
@@ -260,10 +260,10 @@ internal static class MajorUpdater
         });
 
         if (treasure == null) return;
-        if (DateTime.UtcNow < _nextOpenTime) return;
-        if (treasure.GameObjectId == _lastChest && DateTime.UtcNow - _nextOpenTime < TimeSpan.FromSeconds(10)) return;
+        if (DateTime.Now < _nextOpenTime) return;
+        if (treasure.GameObjectId == _lastChest && DateTime.Now - _nextOpenTime < TimeSpan.FromSeconds(10)) return;
 
-        _nextOpenTime = DateTime.UtcNow.AddSeconds(new Random().NextDouble() + 0.2);
+        _nextOpenTime = DateTime.Now.AddSeconds(new Random().NextDouble() + 0.2);
         _lastChest = treasure.GameObjectId;
 
         try
@@ -280,7 +280,7 @@ internal static class MajorUpdater
         }
 
         if (!Service.Config.AutoCloseChestWindow) return;
-        _closeWindowTime = DateTime.UtcNow.AddSeconds(0.5);
+        _closeWindowTime = DateTime.Now.AddSeconds(0.5);
     }
 
     public static void Dispose()

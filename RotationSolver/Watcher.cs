@@ -76,8 +76,8 @@ public static class Watcher
                     var knock = Svc.Data.GetExcelSheet<Knockback>()?.GetRow(entry.value);
                     if (knock != null)
                     {
-                        DataCenter.KnockbackStart = DateTime.UtcNow;
-                        DataCenter.KnockbackFinished = DateTime.UtcNow + TimeSpan.FromSeconds(knock.Distance / (float)knock.Speed);
+                        DataCenter.KnockbackStart = DateTime.Now;
+                        DataCenter.KnockbackFinished = DateTime.Now + TimeSpan.FromSeconds(knock.Distance / (float)knock.Speed);
                         if (set.Action != null && !OtherConfiguration.HostileCastingKnockback.Contains(set.Action.RowId) && Service.Config.RecordKnockbackies)
                         {
                             OtherConfiguration.HostileCastingKnockback.Add(set.Action.RowId);
@@ -160,8 +160,8 @@ public static class Watcher
             DataCenter.MPGain = (uint)set.GetSpecificTypeEffect(ActionEffectType.MpGain)
                 .Where(i => i.Key == playerObject.GameObjectId)
                 .Sum(i => i.Value);
-            DataCenter.EffectTime = DateTime.UtcNow;
-            DataCenter.EffectEndTime = DateTime.UtcNow.AddSeconds(set.Header.AnimationLockTime + 1);
+            DataCenter.EffectTime = DateTime.Now;
+            DataCenter.EffectEndTime = DateTime.Now.AddSeconds(set.Header.AnimationLockTime + 1);
 
             var attackedTargets = DataCenter.AttackedTargets;
             var attackedTargetsCount = DataCenter.AttackedTargetsCount;
@@ -195,7 +195,7 @@ public static class Watcher
                 }
 
                 // Enqueue the new target
-                attackedTargets.Enqueue((effect.TargetID, DateTime.UtcNow));
+                attackedTargets.Enqueue((effect.TargetID, DateTime.Now));
             }
 
             // Macro

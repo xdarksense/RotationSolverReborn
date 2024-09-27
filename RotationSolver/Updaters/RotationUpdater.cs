@@ -364,7 +364,7 @@ internal static class RotationUpdater
     // It also has a check to ensure it's not running too frequently, to avoid hurting the FPS of the game.
     public static void LocalRotationWatcher()
     {
-        if (DateTime.UtcNow < LastRunTime.AddSeconds(2))
+        if (DateTime.Now < LastRunTime.AddSeconds(2))
         {
             return;
         }
@@ -397,7 +397,7 @@ internal static class RotationUpdater
             });
         }
 
-        LastRunTime = DateTime.UtcNow;
+        LastRunTime = DateTime.Now;
     }
 
     public static Type[] TryGetTypes(Assembly assembly)

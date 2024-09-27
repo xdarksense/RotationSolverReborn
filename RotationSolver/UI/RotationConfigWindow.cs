@@ -2642,7 +2642,10 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Merged Status: {DataCenter.MergedStatus}");
         ImGui.Text($"TargetingType: {DataCenter.TargetingType}");
         ImGui.Text($"DeathTarget: {DataCenter.DeathTarget}");
-
+        foreach (var item in DataCenter.AttackedTargets)
+        {
+            ImGui.Text(item.id.ToString());
+        }
 
         // VFX info
         ImGui.Text("VFX Data:");
