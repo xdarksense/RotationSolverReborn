@@ -401,7 +401,7 @@ partial class BardRotation
 
     /// <inheritdoc/>
     [RotationDesc(ActionID.TroubadourPvE)]
-    protected sealed override bool DefenseAreaAbility(IAction nextGCD, out IAction act)
+    protected override bool DefenseAreaAbility(IAction nextGCD, out IAction act)
     {
         if (TroubadourPvE.CanUse(out act)) return true;
         return false;
