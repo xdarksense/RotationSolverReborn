@@ -471,12 +471,12 @@ internal static class DataCenter
 
     public static bool HasHostilesInRange => NumberOfHostilesInRange > 0;
     public static bool HasHostilesInMaxRange => NumberOfHostilesInMaxRange > 0;
-    public static int NumberOfHostilesInRange => AllHostileTargets.Count(o => o.DistanceToPlayer() <= JobRange);
-    public static int NumberOfHostilesInMaxRange => AllHostileTargets.Count(o => o.DistanceToPlayer() <= 25);
-    public static int NumberOfAllHostilesInRange => AllHostileTargets.Count(o => o.DistanceToPlayer() <= JobRange);
-    public static int NumberOfAllHostilesInMaxRange => AllHostileTargets.Count(o => o.DistanceToPlayer() <= 25);
+    public static int NumberOfHostilesInRange => AllHostileTargets.Count(o => o.DistanceToPlayer() < JobRange);
+    public static int NumberOfHostilesInMaxRange => AllHostileTargets.Count(o => o.DistanceToPlayer() < 25);
+    public static int NumberOfAllHostilesInRange => AllHostileTargets.Count(o => o.DistanceToPlayer() < JobRange);
+    public static int NumberOfAllHostilesInMaxRange => AllHostileTargets.Count(o => o.DistanceToPlayer() < 25);
 
-    public static bool MobsTime => AllHostileTargets.Count(o => o.DistanceToPlayer() <= JobRange && o.CanSee())
+    public static bool MobsTime => AllHostileTargets.Count(o => o.DistanceToPlayer() < JobRange && o.CanSee())
                                    >= Service.Config.AutoDefenseNumber;
 
     public static bool AreHostilesCastingKnockback => AllHostileTargets.Any(IsHostileCastingKnockback);

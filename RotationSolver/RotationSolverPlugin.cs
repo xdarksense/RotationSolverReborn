@@ -12,12 +12,10 @@ using RotationSolver.Basic.IPC;
 using RotationSolver.Commands;
 using RotationSolver.Data;
 using RotationSolver.Helpers;
-
 using RotationSolver.UI;
 using RotationSolver.UI.HighlightTeachingMode;
 using RotationSolver.UI.HighlightTeachingMode.ElementSpecial;
 using RotationSolver.Updaters;
-using static FFXIVClientStructs.FFXIV.Client.UI.Agent.AgentPartyMember.Delegates;
 using WelcomeWindow = RotationSolver.UI.WelcomeWindow;
 
 namespace RotationSolver;
@@ -249,7 +247,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
         isValid &= !Service.Config.OnlyShowWithHostileOrInDuty
                 || Svc.Condition[ConditionFlag.BoundByDuty]
-                || DataCenter.AllHostileTargets.Any(o => o.DistanceToPlayer() <= 25);
+                || DataCenter.AllHostileTargets.Any(o => o.DistanceToPlayer() < 25);
 
         _controlWindow!.IsOpen = isValid && Service.Config.ShowControlWindow;
         _cooldownWindow!.IsOpen = isValid && Service.Config.ShowCooldownWindow;

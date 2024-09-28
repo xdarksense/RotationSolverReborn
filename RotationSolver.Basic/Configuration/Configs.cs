@@ -102,14 +102,6 @@ internal partial class Configs : IPluginConfiguration
     [UI("", Action = ActionID.ImprovisationPvE, Parent = nameof(PoslockCasting))]
     public bool PosImprovisation { get; set; } = false;
 
-    [ConditionBool, UI("Add enemy list to the hostile targets.",
-        Filter = TargetConfig)]
-    private static readonly bool _addEnemyListToHostile = true;
-
-    [ConditionBool, UI("Only attack the targets in enemy list.",
-        Parent = nameof(AddEnemyListToHostile))]
-    private static readonly bool _onlyAttackInEnemyList = false;
-
     [JobConfig, UI("Only used automatically if coded into the rotation", Filter = AutoActionUsage, PvPFilter = JobFilterType.NoJob)]
     private readonly TinctureUseType _TinctureType = TinctureUseType.Nowhere;
 

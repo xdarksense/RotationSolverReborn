@@ -10,8 +10,11 @@ using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
+using FFXIVClientStructs.FFXIV.Component.GUI;
 using RotationSolver.Basic.Configuration;
 using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace RotationSolver.Basic.Helpers;
@@ -95,53 +98,123 @@ public static class ObjectHelper
             if (tarFateId != 0 && tarFateId != DataCenter.FateId) return false;
         }
 
-        if (Service.Config.AddEnemyListToHostile)
-        {
-            if (battleChara.IsInEnemiesList()) return true;
-            // Only attack
-            if (Service.Config.OnlyAttackInEnemyList) return false;
-        }
-
-        // Tar on me
-        if (battleChara.TargetObject == Player.Object
-            || battleChara.TargetObject?.OwnerId == Player.Object.GameObjectId) return true;
-
         if (battleChara.IsOthersPlayers()) return false;
 
         if (battleChara.IsTopPriorityHostile()) return true;
 
         if (Service.CountDownTime > 0 || DataCenter.IsPvP) return true;
 
-        return DataCenter.RightNowTargetToHostileType switch {
+        // Tar on me
+        if (battleChara.TargetObject == Player.Object
+            || battleChara.TargetObject?.OwnerId == Player.Object.GameObjectId) return true;
+
+        return DataCenter.RightNowTargetToHostileType switch
+        {
             TargetHostileType.AllTargetsCanAttack => true,
             TargetHostileType.TargetsHaveTarget => battleChara.TargetObject is IBattleChara,
             TargetHostileType.AllTargetsWhenSolo => DataCenter.PartyMembers.Length < 2 || battleChara.TargetObject is IBattleChara,
             TargetHostileType.AllTargetsWhenSoloInDuty => (DataCenter.PartyMembers.Length < 2 && Svc.Condition[ConditionFlag.BoundByDuty])
                 || battleChara.TargetObject is IBattleChara,
+            TargetHostileType.TargetIsInEnemiesList => battleChara.TargetObject is IBattleChara target && target.IsInEnemiesList(),
+            TargetHostileType.AllTargetsWhenSoloTargetIsInEnemiesList => DataCenter.PartyMembers.Length < 2 || battleChara.TargetObject is IBattleChara target && target.IsInEnemiesList(),
             _ => true,
         };
     }
 
-    internal static unsafe bool IsInEnemiesList(this IBattleChara IBattleChara)
+    private static string RemoveControlCharacters(string input)
+    {
+        if (string.IsNullOrEmpty(input))
+            return input;
+
+        // Use a StringBuilder for efficient string manipulation
+        var output = new StringBuilder(input.Length);
+        foreach (char c in input)
+        {
+            // Exclude control characters and private use area characters
+            if (!char.IsControl(c) && (c < '\uE000' || c > '\uF8FF'))
+            {
+                output.Append(c);
+            }
+        }
+        return output.ToString();
+    }
+
+    //Below never returns true
+    internal static unsafe bool IsInEnemiesList(this IBattleChara battleChara)
     {
         var addons = Service.GetAddons<AddonEnemyList>();
 
-        if (!addons.Any()) return false;
-        var addon = addons.FirstOrDefault();
-        var enemy = (AddonEnemyList*)addon;
-
-        var numArray = FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->GetUIModule()->GetRaptureAtkModule()->AtkModule.AtkArrayDataHolder.NumberArrays[19];
-        if (numArray == null) return false;
-
-        const int baseIndex = 8;
-        const int step = 6;
-
-        for (var i = 0; i < enemy->EnemyCount; i++)
+        if (!addons.Any())
         {
-            var id = (uint)numArray->IntArray[baseIndex + i * step];
-
-            if (IBattleChara.GameObjectId == id) return true;
+            return false;
         }
+
+        if (!addons.Any())
+        {
+            return false;
+        }
+
+        var addon = addons.FirstOrDefault();
+        if (addon == IntPtr.Zero)
+        {
+            return false;
+        }
+
+        var enemyList = (AddonEnemyList*)addon;
+
+        // Ensure that EnemyOneComponent is valid
+        if (enemyList->EnemyOneComponent == null)
+        {
+            return false;
+        }
+
+        // EnemyCount indicates how many enemies are in the list
+        var enemyCount = enemyList->EnemyCount;
+
+        for (int i = 0; i < enemyCount; i++)
+        {
+            // Access each enemy component
+            var enemyComponentPtr = enemyList->EnemyOneComponent + i;
+            if (enemyComponentPtr == null || *enemyComponentPtr == null)
+            {
+                continue;
+            }
+
+            var enemyComponent = *enemyComponentPtr;
+            var atkComponentBase = enemyComponent->AtkComponentBase;
+
+            // Access the UldManager's NodeList
+            var uldManager = atkComponentBase.UldManager;
+
+            for (int j = 0; j < uldManager.NodeListCount; j++)
+            {
+                var node = uldManager.NodeList[j];
+                if (node == null)
+                    continue;
+
+                if (node->Type == NodeType.Text)
+                {
+                    var textNode = (AtkTextNode*)node;
+                    if (textNode->NodeText.StringPtr == null)
+                        continue;
+
+                    // Read the enemy's name
+                    var enemyNameRaw = Marshal.PtrToStringUTF8((IntPtr)textNode->NodeText.StringPtr);
+                    if (string.IsNullOrEmpty(enemyNameRaw))
+                        continue;
+
+                    // Remove control characters from the enemy's name
+                    var enemyName = RemoveControlCharacters(enemyNameRaw);
+
+                    // Compare with battleChara's name
+                    if (string.Equals(enemyName, battleChara.Name.TextValue, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
         return false;
     }
 
