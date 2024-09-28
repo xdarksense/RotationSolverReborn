@@ -332,27 +332,4 @@ partial class PaladinRotation
     {
         setting.SpecialType = SpecialActionType.MovingForward;
     }
-    /// <inheritdoc/>
-    protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
-    {
-        if (HallowedGroundPvE.CanUse(out act)
-            && Player.GetHealthRatio() <= Service.Config.HealthForDyingTanks) return true;
-        return base.EmergencyAbility(nextGCD, out act);
-    }
-
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.IntervenePvE)]
-    protected sealed override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
-    {
-        if (IntervenePvE.CanUse(out act)) return true;
-        return base.MoveForwardAbility(nextGCD, out act);
-    }
-
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.ClemencyPvE)]
-    protected sealed override bool HealSingleGCD(out IAction? act)
-    {
-        if (ClemencyPvE.CanUse(out act)) return true;
-        return base.HealSingleGCD(out act);
-    }
 }

@@ -371,14 +371,4 @@ partial class MachinistRotation
             AoeCount = 1,
         };
     }
-
-
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.TacticianPvE, ActionID.DismantlePvE)]
-    protected override bool DefenseAreaAbility(IAction nextGCD, out IAction act)
-    {
-        if (TacticianPvE.CanUse(out act, skipAoeCheck: true)) return true;
-        if (DismantlePvE.CanUse(out act, skipAoeCheck: true)) return true;
-        return false;
-    }
 }
