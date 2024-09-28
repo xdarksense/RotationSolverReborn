@@ -318,20 +318,4 @@ partial class DragoonRotation
     {
         setting.SpecialType = SpecialActionType.MovingForward;
     }
-
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.FeintPvE)]
-    protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
-    {
-        if (FeintPvE.CanUse(out act)) return true;
-        return false;
-    }
-
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.ElusiveJumpPvE)]
-    protected override bool MoveBackAbility(IAction nextGCD, out IAction? act)
-    {
-        if (ElusiveJumpPvE.CanUse(out act)) return true;
-        return base.MoveBackAbility(nextGCD, out act);
-    }
 }

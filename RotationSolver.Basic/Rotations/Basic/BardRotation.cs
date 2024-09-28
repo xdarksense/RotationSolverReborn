@@ -383,28 +383,4 @@ partial class BardRotation
     }
 
     #endregion
-
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.TheWardensPaeanPvE)]
-    protected override bool DispelGCD(out IAction? act)
-    {
-        if (TheWardensPaeanPvE.CanUse(out act)) return true;
-        return base.DispelGCD(out act);
-    }
-
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.NaturesMinnePvE)]
-    protected sealed override bool HealSingleAbility(IAction nextGCD, out IAction? act)
-    {
-        if (NaturesMinnePvE.CanUse(out act)) return true;
-        return base.HealSingleAbility(nextGCD, out act);
-    }
-
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.TroubadourPvE)]
-    protected override bool DefenseAreaAbility(IAction nextGCD, out IAction act)
-    {
-        if (TroubadourPvE.CanUse(out act)) return true;
-        return false;
-    }
 }
