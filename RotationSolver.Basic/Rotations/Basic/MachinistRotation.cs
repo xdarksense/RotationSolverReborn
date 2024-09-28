@@ -282,6 +282,7 @@ partial class MachinistRotation
 
     static partial void ModifyQueenOverdrivePvE(ref ActionSetting setting)
     {
+        setting.ActionCheck = () => JobGauge.IsRobotActive;
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 16,
