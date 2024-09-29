@@ -14,12 +14,12 @@ public enum RaiseType : byte
     /// <summary>
     /// Raise party and alliance members.
     /// </summary>
-    [Description("Raise party and alliance members.")]
+    [Description("Raise all.")]
     PartyAndAlliance,
 
     /// <summary>
     /// Raise party members and alliance healers.
     /// </summary>
-    [Description("Raise party members and alliance healers.")]
+    [Description("Raise party members and non-party healers.")]
     PartyAndAllianceHealers,
 }
