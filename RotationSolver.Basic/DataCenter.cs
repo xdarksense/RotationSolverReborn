@@ -11,6 +11,7 @@ using Lumina.Excel.GeneratedSheets;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Configuration.Conditions;
 using RotationSolver.Basic.Rotations.Duties;
+using Svg.FilterEffects;
 using Action = Lumina.Excel.GeneratedSheets.Action;
 using CharacterManager = FFXIVClientStructs.FFXIV.Client.Game.Character.CharacterManager;
 
@@ -313,7 +314,7 @@ internal static class DataCenter
     public unsafe static IBattleChara[] AllianceMembers => AllTargets.Where(ObjectHelper.IsAlliance)
         .Where(b => b.Character()->CharacterData.OnlineStatus != 15 && b.IsTargetable).ToArray();
 
-    public static unsafe IBattleChara[] FriendlyNPCMembers
+    public unsafe static IBattleChara[] FriendlyNPCMembers
     {
         get
         {
@@ -374,60 +375,67 @@ internal static class DataCenter
     {
         get
         {
-            // Ensure AllianceMembers and PartyMembers are not null
-            if (AllianceMembers == null || PartyMembers == null) return null;
-
-            var deathAll = AllianceMembers.GetDeath();
-            var deathParty = PartyMembers.GetDeath();
-            var deathNPC = FriendlyNPCMembers.GetDeath();
-
-            // Check death in party members
-            if (deathParty.Any())
+            // Added so it only tracks deathtarget if you are on a raise job
+            var rotation = DataCenter.RightNowRotation;
+            if (Player.Job == Job.WHM || Player.Job == Job.SCH || Player.Job == Job.AST || Player.Job == Job.SGE ||
+                Player.Job == Job.SMN || Player.Job == Job.RDM)
             {
-                var deathT = deathParty.GetJobCategory(JobRole.Tank).ToList();
-                var deathH = deathParty.GetJobCategory(JobRole.Healer).ToList();
+                // Ensure AllianceMembers and PartyMembers are not null
+                if (AllianceMembers == null || PartyMembers == null) return null;
 
-                if (deathT.Count > 1) return deathT.FirstOrDefault();
-                if (deathH.Any()) return deathH.FirstOrDefault();
-                if (deathT.Any()) return deathT.FirstOrDefault();
+                var deathAll = AllianceMembers.GetDeath();
+                var deathParty = PartyMembers.GetDeath();
+                var deathNPC = FriendlyNPCMembers.GetDeath();
 
-                return deathParty.FirstOrDefault();
-            }
-
-            // Check death in alliance members
-            if (deathAll.Any())
-            {
-                if (Service.Config.RaiseType == RaiseType.PartyAndAllianceHealers)
+                // Check death in party members
+                if (deathParty.Any())
                 {
-                    var deathAllH = deathAll.GetJobCategory(JobRole.Healer).ToList();
-                    if (deathAllH.Any()) return deathAllH.FirstOrDefault();
+                    var deathT = deathParty.GetJobCategory(JobRole.Tank).ToList();
+                    var deathH = deathParty.GetJobCategory(JobRole.Healer).ToList();
+
+                    if (deathT.Count > 1) return deathT.FirstOrDefault();
+                    if (deathH.Any()) return deathH.FirstOrDefault();
+                    if (deathT.Any()) return deathT.FirstOrDefault();
+
+                    return deathParty.FirstOrDefault();
                 }
 
-                if (Service.Config.RaiseType == RaiseType.PartyAndAlliance)
+                // Check death in alliance members
+                if (deathAll.Any())
                 {
-                    var deathAllH = deathAll.GetJobCategory(JobRole.Healer).ToList();
-                    var deathAllT = deathAll.GetJobCategory(JobRole.Tank).ToList();
+                    if (Service.Config.RaiseType == RaiseType.PartyAndAllianceHealers)
+                    {
+                        var deathAllH = deathAll.GetJobCategory(JobRole.Healer).ToList();
+                        if (deathAllH.Any()) return deathAllH.FirstOrDefault();
+                    }
 
-                    if (deathAllH.Any()) return deathAllH.FirstOrDefault();
-                    if (deathAllT.Any()) return deathAllT.FirstOrDefault();
+                    if (Service.Config.RaiseType == RaiseType.PartyAndAlliance)
+                    {
+                        var deathAllH = deathAll.GetJobCategory(JobRole.Healer).ToList();
+                        var deathAllT = deathAll.GetJobCategory(JobRole.Tank).ToList();
 
-                    return deathAll.FirstOrDefault();
+                        if (deathAllH.Any()) return deathAllH.FirstOrDefault();
+                        if (deathAllT.Any()) return deathAllT.FirstOrDefault();
+
+                        return deathAll.FirstOrDefault();
+                    }
                 }
+
+                // Check death in friendly NPC members
+                if (deathNPC.Any() && Service.Config.FriendlyPartyNpcHealRaise)
+                {
+                    var deathNPCT = deathNPC.GetJobCategory(JobRole.Tank).ToList();
+                    var deathNPCH = deathNPC.GetJobCategory(JobRole.Healer).ToList();
+
+                    if (deathNPCT.Count > 1) return deathNPCT.FirstOrDefault();
+                    if (deathNPCH.Any()) return deathNPCH.FirstOrDefault();
+                    if (deathNPCT.Any()) return deathNPCT.FirstOrDefault();
+
+                    return deathNPC.FirstOrDefault();
+                }
+
+                return null;
             }
-
-            // Check death in friendly NPC members
-            if (deathNPC.Any() && Service.Config.FriendlyPartyNpcHealRaise)
-            {
-                var deathNPCT = deathNPC.GetJobCategory(JobRole.Tank).ToList();
-                var deathNPCH = deathNPC.GetJobCategory(JobRole.Healer).ToList();
-
-                if (deathNPCT.Count > 1) return deathNPCT.FirstOrDefault();
-                if (deathNPCH.Any()) return deathNPCH.FirstOrDefault();
-                if (deathNPCT.Any()) return deathNPCT.FirstOrDefault();
-
-                return deathNPC.FirstOrDefault();
-            }
-
             return null;
         }
     }
