@@ -294,7 +294,7 @@ partial class AstrologianRotation
 
     static partial void ModifyCombustIiiPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = CombustStatus;
+        setting.TargetStatusProvide = CombustStatus;
     }
 
     static partial void ModifyMaleficIvPvE(ref ActionSetting setting)
