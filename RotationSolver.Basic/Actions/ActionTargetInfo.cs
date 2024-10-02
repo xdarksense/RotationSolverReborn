@@ -488,7 +488,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 break;
 
             case BeneficialAreaStrategy.OnTarget: // Target
-                if (Svc.Targets.Target != null && Svc.Targets.Target.DistanceToPlayer() < range)
+                if (Svc.Targets.Target != null && range != 0 && Svc.Targets.Target.DistanceToPlayer() < range)
                 {
                     var target = Svc.Targets.Target as IBattleChara;
                     return new TargetResult(target, GetAffects(target?.Position, canAffects).ToArray(), target?.Position);
@@ -496,7 +496,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 break;
         }
 
-        if (Svc.Targets.Target is IBattleChara b && b.DistanceToPlayer() < range &&
+        if (Svc.Targets.Target is IBattleChara b && range != 0 && b.DistanceToPlayer() < range &&
             b.IsBossFromIcon() && b.HasPositional() && b.HitboxRadius <= 8)
         {
             return new TargetResult(b, GetAffects(b.Position, canAffects).ToArray(), b.Position);
