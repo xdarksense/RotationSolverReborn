@@ -497,11 +497,6 @@ internal partial class Configs : IPluginConfiguration
     [Range(0, 5, ConfigUnitType.Seconds, 0.05f)]
     public Vector2 HealWhenNothingTodoDelay { get; set; } = new(0.5f, 1);
 
-    [UI("Auto Heal delay range",
-    Parent = nameof(AutoHeal))]
-    [Range(0, 3, ConfigUnitType.Seconds, 0.002f)]
-    public Vector2 HealDelay { get; set; } = new(0.5f, 1);
-
     [UI("How soon before countdown is finished to start casting or attacking.",
         Filter = BasicTimer, Section = 1, PvPFilter = JobFilterType.NoJob)]
     [Range(0, 0.7f, ConfigUnitType.Seconds, 0.002f)]
