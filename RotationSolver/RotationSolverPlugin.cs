@@ -90,7 +90,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         windowSystem.AddWindow(_cooldownWindow);
         windowSystem.AddWindow(_changelogWindow);
         windowSystem.AddWindow(_overlayWindow);
-        Notify.Success("Overlay Window was added!");
+        //Notify.Success("Overlay Window was added!");
 
         Svc.PluginInterface.UiBuilder.OpenConfigUi += OnOpenConfigUi;
         Svc.PluginInterface.UiBuilder.OpenMainUi += OnOpenConfigUi;

@@ -32,7 +32,7 @@ internal static class DataCenter
     internal static List<uint> PrioritizedNameIds { get; set; } = new();
     internal static List<uint> BlacklistedNameIds { get; set; } = new();
 
-    internal static Queue<VfxNewData> VfxDataQueue { get; } = new(64);
+    internal static List<VfxNewData> VfxDataQueue { get; } = new();
 
     /// <summary>
     /// This one never be null.
@@ -738,6 +738,7 @@ internal static class DataCenter
         _timeLastActionUsed = DateTime.Now;
         _actions.Clear();
 
+        AttackedTargets.Clear();
         VfxDataQueue.Clear();
     }
 
@@ -782,7 +783,7 @@ internal static class DataCenter
 
         try
         {
-            foreach (var item in DataCenter.VfxDataQueue.Reverse())
+            foreach (var item in DataCenter.VfxDataQueue.OrderBy(v => v.TimeDuration))
             {
                 if (item.TimeDuration.TotalSeconds is > 1 and < 5)
                 {

@@ -5,7 +5,7 @@ namespace RotationSolver.Basic.Data;
 /// <summary>
 /// Represents new VFX data.
 /// </summary>
-public readonly struct VfxNewData
+public readonly record struct VfxNewData
 {
     /// <summary>
     /// Gets the object ID.
