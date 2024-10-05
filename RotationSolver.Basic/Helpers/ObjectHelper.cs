@@ -97,8 +97,8 @@ public static class ObjectHelper
             var tarFateId = battleChara.FateId();
             if (tarFateId != 0 && tarFateId != DataCenter.FateId) return false;
         }
-
-        if (battleChara.IsOthersPlayers()) return false;
+        
+        if (Service.Config.TargetQuestThings && battleChara.IsOthersPlayers()) return false;
 
         if (battleChara.IsTopPriorityHostile()) return true;
 

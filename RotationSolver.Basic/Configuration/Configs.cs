@@ -267,8 +267,11 @@ internal partial class Configs : IPluginConfiguration
 
     [ConditionBool, UI("Target quest priority.",
         Filter = TargetConfig, Section = 1)]
-
     private static readonly bool _targetQuestPriority = true;
+
+    [ConditionBool, UI("Block targetting quest mobs belonging to other players (Broken).",
+        Filter = TargetConfig, Section = 1)]
+    private static readonly bool targetQuestThings = true;
 
     [ConditionBool, UI("Ignore target dummies",
                Filter = TargetConfig, Section = 1)]
