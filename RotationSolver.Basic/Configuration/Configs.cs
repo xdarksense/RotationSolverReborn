@@ -66,10 +66,6 @@ internal partial class Configs : IPluginConfiguration
         Filter = BasicAutoSwitch)]
     private static readonly bool _autoOffWhenDutyCompleted = true;
 
-    [ConditionBool, UI("Select only Fate targets in Fate",
-        Filter = TargetConfig, Section = 1)]
-    private static readonly bool _changeTargetForFate = true;
-
     [ConditionBool, UI("Use movement actions towards the object/mob in the center of the screen",
         Description = "Use movement actions towards the object/mob in the center of the screen, otherwise toward object/mob your character is facing.",
         Filter = TargetConfig, Section = 2)]
@@ -139,10 +135,6 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Teaching mode", Filter = UiInformation)]
     private static readonly bool _teachingMode = false;
 
-    //[ConditionBool, UI("Use task for overlay window.",
-    //    Parent = nameof(TeachingMode))]
-    //private static readonly bool _useTasksForOverlay = false;
-
     [ConditionBool, UI("Simulate the effect of pressing abilities",
         Filter = UiInformation)]
     private static readonly bool _keyBoardNoise = true;
@@ -176,7 +168,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig, Section = 3)]
     private static readonly bool _switchTargetFriendly = false;
 
-    [ConditionBool, UI("Use interrupt abilities if possible.",
+    [JobConfig, UI("Use interrupt abilities if possible.",
         Filter = AutoActionUsage, Section = 3,
         PvEFilter = JobFilterType.Interrupt,
         PvPFilter = JobFilterType.NoJob)]
@@ -201,11 +193,6 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Only attack the targets in vision cone",
                 Filter = TargetConfig, Section = 1)]
     private static readonly bool _onlyAttackInVisionCone = false;
-
-    [ConditionBool, UI("Use single target healing over time actions only on tanks",
-        Filter = HealingActionCondition, Section = 1,
-        PvEFilter = JobFilterType.Healer, PvPFilter = JobFilterType.Healer)]
-    private static readonly bool _onlyHotOnTanks = false;
 
     [ConditionBool, UI("Debug Mode", Filter = Debug)]
     private static readonly bool _inDebug = false;
@@ -269,10 +256,6 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Show tooltips",
         Filter = UiInformation)]
     private static readonly bool _showTooltips = true;
-
-    [ConditionBool, UI("Target Fate priority",
-        Filter = TargetConfig, Section = 1)]
-    private static readonly bool _targetFatePriority = true;
 
     [ConditionBool, UI("Target Hunt/Relic/Leve priority. (Relic behaviour bugged)",
         Filter = TargetConfig, Section = 1)]
@@ -410,14 +393,14 @@ internal partial class Configs : IPluginConfiguration
     [Range(0, 1, ConfigUnitType.Percent, 0.02f)]
     public float HealthHealerRatio { get; set; } = 0.4f;
 
-    [ConditionBool, UI("Hard cast Raise players while Swiftcast is on cooldown", Description = "If this is enabled and Swiftcast is on cooldown, you will only attempt to raise while standing still.",
+    [JobConfig, UI("Hard cast Raise players while Swiftcast is on cooldown", Description = "If this is enabled and Swiftcast is on cooldown, you will only attempt to raise while standing still.",
         Filter = HealingActionCondition, Section = 2,
         PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _raisePlayerByCasting = true;
 
-    [ConditionBool, UI("Raise player by using Swiftcast/Dualcast if avaliable", Description = "If this is disabled, you will never use Swiftcast/Dualcast to raise players.",
+    [JobConfig, UI("Raise player by using Swiftcast/Dualcast if avaliable", Description = "If this is disabled, you will never use Swiftcast/Dualcast to raise players.",
         Filter = HealingActionCondition, Section = 2,
-        PvEFilter = JobFilterType.None)]
+        PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _raisePlayerBySwift = true;
 
     [JobConfig, UI("Raise styles",
@@ -425,7 +408,7 @@ internal partial class Configs : IPluginConfiguration
         PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
     private readonly RaiseType _RaiseType = RaiseType.PartyOnly;
 
-    [ConditionBool, UI("Raise players that have the Brink of Death debuff",
+    [JobConfig, UI("Raise players that have the Brink of Death debuff",
         Filter = HealingActionCondition, Section = 2,
         PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _raiseBrinkOfDeath = true;
