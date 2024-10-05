@@ -111,7 +111,11 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Automatically use MP Potions", Description = "Experimental.",
         Filter = AutoActionUsage)]
     private static readonly bool _useMpPotions = false;
-    
+
+    [JobConfig, UI("MP threshold under which to use Lucid Dreaming", Filter = AutoActionUsage)]
+    [Range(0, 10000, ConfigUnitType.None)]
+    public int LucidDreamingMpThreshold { get; set; } = 6000;
+
     [ConditionBool, UI("Prioritize mob/object targets with attack markers",
         Filter = TargetConfig)]
     private static readonly bool _chooseAttackMark = true;
@@ -492,11 +496,6 @@ internal partial class Configs : IPluginConfiguration
     [UI("Downtime healing delay range.", Parent = nameof(HealWhenNothingTodo))]
     [Range(0, 5, ConfigUnitType.Seconds, 0.05f)]
     public Vector2 HealWhenNothingTodoDelay { get; set; } = new(0.5f, 1);
-
-    [UI("Auto Heal delay range",
-    Parent = nameof(AutoHeal))]
-    [Range(0, 3, ConfigUnitType.Seconds, 0.002f)]
-    public Vector2 HealDelay { get; set; } = new(0.5f, 1);
 
     [UI("How soon before countdown is finished to start casting or attacking.",
         Filter = BasicTimer, Section = 1, PvPFilter = JobFilterType.NoJob)]

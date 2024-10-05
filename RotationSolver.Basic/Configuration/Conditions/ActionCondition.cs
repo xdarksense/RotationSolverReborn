@@ -65,6 +65,10 @@ internal class ActionCondition : DelayCondition
                         return _action.Cooldown.MaxCharges == Param1;
                 }
                 break;
+            case ActionConditionType.CanUse:
+                return _action.CanUse(out var act);
+                break;
+
         }
         return false;
     }

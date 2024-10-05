@@ -869,6 +869,11 @@ internal static class ConditionDrawer
                 ImGuiHelper.SetNextWidthWithName(targetCondition.CastingActionName);
                 ImGui.InputText($"Name##TargetName{targetCondition.GetHashCode()}", ref targetCondition.CastingActionName, 128);
                 break;
+            case TargetConditionType.TargetRole:
+                ImGui.SameLine();
+                ImGuiHelper.SetNextWidthWithName(targetCondition.CombatRole.ToString());
+                ImGui.InputText($"Name##TargetRole{targetCondition.GetHashCode()}", ref targetCondition.CombatRole, 128);
+                break;
         }
 
         if (targetCondition._action == null && targetCondition.TargetType == TargetType.Target)
