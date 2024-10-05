@@ -304,9 +304,6 @@ public static class ObjectHelper
 
         if (Service.Config.ChooseAttackMark && MarkingHelper.AttackSignTargets.FirstOrDefault(id => id != 0) == (long)obj.GameObjectId) return true;
 
-        // Fate
-        if (Service.Config.TargetFatePriority && fateId != 0 && obj.FateId() == fateId) return true;
-
         var icon = obj.GetNamePlateIcon();
 
         // Hunting log and weapon

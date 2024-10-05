@@ -202,9 +202,9 @@ internal static class DataCenter
         {
             try
             {
-                if (Service.Config.ChangeTargetForFate && (IntPtr)FateManager.Instance() != IntPtr.Zero
-                                                       && (IntPtr)FateManager.Instance()->CurrentFate != IntPtr.Zero
-                                                       && Player.Level <= FateManager.Instance()->CurrentFate->MaxLevel)
+                if ((IntPtr)FateManager.Instance() != IntPtr.Zero
+                    && (IntPtr)FateManager.Instance()->CurrentFate != IntPtr.Zero
+                    && Player.Level <= FateManager.Instance()->CurrentFate->MaxLevel)
                 {
                     return FateManager.Instance()->CurrentFate->FateId;
                 }
