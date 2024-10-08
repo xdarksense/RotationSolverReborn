@@ -170,6 +170,7 @@ partial class MonkRotation
 
     static partial void ModifyPerfectBalancePvE(ref ActionSetting setting)
     {
+        setting.ActionCheck = () => BeastChakras.Distinct().Count() == 1 && BeastChakras.Any(chakra => chakra == BeastChakra.NONE);
         setting.UnlockedByQuestID = 66602;
         setting.StatusProvide = [StatusID.PerfectBalance];
     }
