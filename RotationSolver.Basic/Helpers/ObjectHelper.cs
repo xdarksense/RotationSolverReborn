@@ -100,6 +100,8 @@ public static class ObjectHelper
         
         if (Service.Config.TargetQuestThings && battleChara.IsOthersPlayers()) return false;
 
+        if (battleChara.IsTopPriorityNamedHostile()) return true;
+
         if (battleChara.IsTopPriorityHostile()) return true;
 
         if (Service.CountDownTime > 0 || DataCenter.IsPvP) return true;
@@ -278,6 +280,32 @@ public static class ObjectHelper
     public static unsafe ObjectKind GetObjectKind(this IGameObject obj) => (ObjectKind)obj.Struct()->ObjectKind;
 
     /// <summary>
+    /// Determines whether the specified game object is a top priority hostile target based on its name being listed.
+    /// </summary>
+    /// <param name="obj">The game object to check.</param>
+    /// <returns>
+    /// <c>true</c> if the game object is a top priority named hostile, target; otherwise, <c>false</c>.
+    /// </returns>
+    internal static bool IsTopPriorityNamedHostile(this IGameObject obj)
+    {
+        if (obj == null) return false;
+
+        // Fetch prioritized target names
+        if (OtherConfiguration.PrioTargetNames.TryGetValue(Svc.ClientState.TerritoryType, out var prioTargetNames))
+        {
+            // If the target's name matches any prioritized names, it is attackable
+            if (obj is IBattleChara bpnc && prioTargetNames.Any(n => !string.IsNullOrEmpty(n) && new Regex(n).Match(bpnc.Name.TextValue).Success))
+            {
+                return true;
+            }
+        }
+
+        if (obj is IBattleChara npc && DataCenter.PrioritizedNameIds.Contains(npc.NameId)) return true;
+
+        return false;
+    }
+
+    /// <summary>
     /// Determines whether the specified game object is a top priority hostile target.
     /// </summary>
     /// <param name="obj">The game object to check.</param>
@@ -290,19 +318,12 @@ public static class ObjectHelper
 
         var fateId = DataCenter.FateId;
 
-        // Fetch prioritized target names
-        if (OtherConfiguration.PrioTargetNames.TryGetValue(Svc.ClientState.TerritoryType, out var prioTargetNames))
-        {
-            // If the target's name matches any prioritized names, it is attackable
-            if (obj is IBattleChara bpnc && prioTargetNames.Any(n => !string.IsNullOrEmpty(n) && new Regex(n).Match(bpnc.Name.TextValue).Success))
-            {
-                return true;
-            }
-        }
-
         if (obj is IBattleChara b && b.StatusList?.Any(StatusHelper.IsPriority) == true) return true;
 
         if (Service.Config.ChooseAttackMark && MarkingHelper.AttackSignTargets.FirstOrDefault(id => id != 0) == (long)obj.GameObjectId) return true;
+
+        // Fate
+        if (Service.Config.TargetFatePriority && fateId != 0 && obj.FateId() == fateId) return true;
 
         var icon = obj.GetNamePlateIcon();
 
@@ -318,8 +339,6 @@ public static class ObjectHelper
         //71144 Major Quest
         //71224 Other Quest
         //71344 Major Quest
-
-        if (obj is IBattleChara npc && DataCenter.PrioritizedNameIds.Contains(npc.NameId)) return true;
 
         // Check if the object is a BattleNpcPart
         if (Service.Config.PrioEnemyParts && obj.GetBattleNPCSubKind() == BattleNpcSubKind.BattleNpcPart) return true;
