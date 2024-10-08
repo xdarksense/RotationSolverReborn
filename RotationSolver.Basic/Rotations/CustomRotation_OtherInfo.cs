@@ -103,7 +103,6 @@ partial class CustomRotation
     /// The player's target.
     /// <br> WARNING: Do not use if there is more than one target, this is not the actions target, it is the players current hard target. Try to use <see cref="IBaseAction.Target"/> or <seealso cref="HostileTarget"/> instead after using this.</br>
     /// </summary>
-    [Obsolete("You'd better not use it. More information in summary.")]
     protected static IBattleChara Target => Svc.Targets.Target is IBattleChara b ? b : Player;
 
     /// <summary>

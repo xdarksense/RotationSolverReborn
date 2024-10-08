@@ -429,6 +429,7 @@ public partial class PictomancerRotation
     static partial void ModifyStarryMusePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => isStarryMuseReady && InCombat;
+        setting.TargetType = TargetType.Self;
         setting.StatusProvide = [StatusID.Starstruck, StatusID.SubtractiveSpectrum, StatusID.Inspiration, StatusID.Hyperphantasia, StatusID.RainbowBright];
         setting.CreateConfig = () => new ActionConfig()
         {

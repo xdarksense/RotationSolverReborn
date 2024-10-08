@@ -310,8 +310,7 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Use movement speed increase abilities when out of combat.", Parent = nameof(UseAbility))]
     private static readonly bool _autoSpeedOutOfCombat = true;
 
-    [ConditionBool, UI("Use beneficial ground-targeted actions", Parent = nameof(UseAbility),
-        PvEFilter = JobFilterType.Healer)]
+    [ConditionBool, UI("Use beneficial ground-targeted actions", Parent = nameof(UseAbility))]
     private static readonly bool _useGroundBeneficialAbility = true;
 
     [ConditionBool, UI("Use beneficial AoE actions when moving.", Parent = nameof(UseGroundBeneficialAbility))]
@@ -322,6 +321,10 @@ internal partial class Configs : IPluginConfiguration
 
     [ConditionBool, UI("Record AOE actions", Filter = List)]
     private static readonly bool _recordCastingArea = true;
+
+    [ConditionBool, UI("Target Fate priority",
+        Filter = TargetConfig, Section = 1)]
+    private static readonly bool _targetFatePriority = true;
 
     [ConditionBool, UI("Auto turn off RSR when combat is over more for more then...",
         Filter = BasicAutoSwitch)]
