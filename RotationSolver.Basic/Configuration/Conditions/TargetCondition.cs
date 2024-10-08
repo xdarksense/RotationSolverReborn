@@ -1,4 +1,5 @@
 ﻿using ECommons.DalamudServices;
+using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using Lumina.Excel.GeneratedSheets;
 
@@ -23,6 +24,8 @@ internal class TargetCondition : DelayCondition
     public int GCD, Param2;
 
     public string CastingActionName = string.Empty;
+
+    public string CombatRole = string.Empty;
 
     /// <summary>
     /// Checks if the condition is true inside the rotation.
@@ -63,7 +66,8 @@ internal class TargetCondition : DelayCondition
             TargetConditionType.HPRatio => CheckHPRatio(tar),
             TargetConditionType.MP => CheckMP(tar),
             TargetConditionType.TargetName => CheckTargetName(tar),
-            _ => false,
+            TargetConditionType.TargetRole => CheckTargetRole(tar),
+	    _ => false,
         };
     }
 
@@ -158,6 +162,14 @@ internal class TargetCondition : DelayCondition
         }
         return tar.Name.TextValue == CastingActionName;
     }
+    private bool CheckTargetRole(IBattleChara tar)
+    {
+        if (string.IsNullOrEmpty(CombatRole))
+        {
+            return false;
+        }
+        return tar.GetRole().ToString() == CombatRole;
+    }
 }
 
 internal enum TargetType : byte
@@ -221,4 +233,7 @@ internal enum TargetConditionType : byte
 
     [Description("Target Name")]
     TargetName,
+
+    [Description("Target Role")]
+    TargetRole,
 }

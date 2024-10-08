@@ -49,22 +49,22 @@ public partial class PictomancerRotation
     /// <summary>
     /// Is Pom Motif ready
     /// </summary>
-    public static bool isPomMotifReady => ((byte)JobGauge.CreatureFlags & 32) == 32 || ((byte)JobGauge.CreatureFlags & 0) == 0;
+    public static bool isPomMotifReady => ((byte)JobGauge.CreatureFlags) == 32 || ((byte)JobGauge.CreatureFlags) == 0;
 
     /// <summary>
     /// Is Wing Motif ready
     /// </summary>
-    public static bool isWingMotifReady => ((byte)JobGauge.CreatureFlags & 33) == 33 || ((byte)JobGauge.CreatureFlags & 1) == 1;
+    public static bool isWingMotifReady => ((byte)JobGauge.CreatureFlags) == 33 || ((byte)JobGauge.CreatureFlags) == 1;
 
     /// <summary>
     /// Is Claw Motif ready
     /// </summary>
-    public static bool isClawMotifReady => ((byte)JobGauge.CreatureFlags & 19) == 19 || ((byte)JobGauge.CreatureFlags & 3) == 3;
+    public static bool isClawMotifReady => ((byte)JobGauge.CreatureFlags) == 19 || ((byte)JobGauge.CreatureFlags) == 3;
 
     /// <summary>
     /// Indicates that the player is not in a Dread Combo.
     /// </summary>
-    public static bool isMawMotifReady => ((byte)JobGauge.CreatureFlags & 23) == 23 || ((byte)JobGauge.CreatureFlags & 7) == 7;
+    public static bool isMawMotifReady => ((byte)JobGauge.CreatureFlags) == 23 || ((byte)JobGauge.CreatureFlags) == 7;
 
 
     /// <summary>
@@ -429,6 +429,7 @@ public partial class PictomancerRotation
     static partial void ModifyStarryMusePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => isStarryMuseReady && InCombat;
+        setting.TargetType = TargetType.Self;
         setting.StatusProvide = [StatusID.Starstruck, StatusID.SubtractiveSpectrum, StatusID.Inspiration, StatusID.Hyperphantasia, StatusID.RainbowBright];
         setting.CreateConfig = () => new ActionConfig()
         {

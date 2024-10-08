@@ -333,17 +333,17 @@ partial class DarkKnightRotation
 
     static partial void ModifyScarletDeliriumPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DeliriumStacks == 3;
+        setting.ActionCheck = () => !Player.WillStatusEnd(0, true, StatusID.Delirium_3836);
     }
 
     static partial void ModifyComeuppancePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DeliriumStacks == 2;
+        setting.ActionCheck = () => !Player.WillStatusEnd(0, true, StatusID.Delirium_3836);
     }
 
     static partial void ModifyTorcleaverPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DeliriumStacks == 1;
+        setting.ActionCheck = () => !Player.WillStatusEnd(0, true, StatusID.Delirium_3836);
     }
 
     static partial void ModifyImpalementPvE(ref ActionSetting setting)

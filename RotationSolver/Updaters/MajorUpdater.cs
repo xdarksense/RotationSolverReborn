@@ -157,6 +157,18 @@ internal static class MajorUpdater
 
             RSCommands.UpdateRotationState();
             HotbarHighlightManager.UpdateSettings();
+
+            List<VfxNewData> expiredVfx = new List<VfxNewData>();
+            foreach (var vfx in DataCenter.VfxDataQueue)
+            {
+                if (vfx.TimeDuration > TimeSpan.FromSeconds(30))
+                    expiredVfx.Add(vfx);
+            }
+
+            foreach (var vfx in expiredVfx)
+            {
+                DataCenter.VfxDataQueue.Remove(vfx);
+            }
         }
         catch (Exception ex)
         {

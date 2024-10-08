@@ -32,7 +32,7 @@ internal static class DataCenter
     internal static List<uint> PrioritizedNameIds { get; set; } = new();
     internal static List<uint> BlacklistedNameIds { get; set; } = new();
 
-    internal static Queue<VfxNewData> VfxDataQueue { get; } = new(64);
+    internal static List<VfxNewData> VfxDataQueue { get; } = new();
 
     /// <summary>
     /// This one never be null.
@@ -202,9 +202,9 @@ internal static class DataCenter
         {
             try
             {
-                if (Service.Config.ChangeTargetForFate && (IntPtr)FateManager.Instance() != IntPtr.Zero
-                                                       && (IntPtr)FateManager.Instance()->CurrentFate != IntPtr.Zero
-                                                       && Player.Level <= FateManager.Instance()->CurrentFate->MaxLevel)
+                if ((IntPtr)FateManager.Instance() != IntPtr.Zero
+                    && (IntPtr)FateManager.Instance()->CurrentFate != IntPtr.Zero
+                    && Player.Level <= FateManager.Instance()->CurrentFate->MaxLevel)
                 {
                     return FateManager.Instance()->CurrentFate->FateId;
                 }
@@ -318,6 +318,12 @@ internal static class DataCenter
     {
         get
         {
+            // Check if the configuration setting is true
+            if (!Service.Config.FriendlyBattleNpcHeal && !Service.Config.FriendlyPartyNpcHealRaise)
+            {
+                return Array.Empty<IBattleChara>();
+            }
+
             try
             {
                 // Ensure Svc.Objects is not null
@@ -329,7 +335,20 @@ internal static class DataCenter
                 // Filter and cast objects safely
                 var friendlyNpcs = Svc.Objects
                     .Where(obj => obj != null && obj.ObjectKind == ObjectKind.BattleNpc)
-                    .Where(obj => obj.GetNameplateKind() == NameplateKind.FriendlyBattleNPC || obj.GetBattleNPCSubKind() == BattleNpcSubKind.NpcPartyMember)
+                    .Where(obj =>
+                    {
+                        try
+                        {
+                            return obj.GetNameplateKind() == NameplateKind.FriendlyBattleNPC ||
+                                   obj.GetBattleNPCSubKind() == BattleNpcSubKind.NpcPartyMember;
+                        }
+                        catch (Exception ex)
+                        {
+                            // Log the exception for debugging purposes
+                            Svc.Log.Error($"Error filtering object in get_FriendlyNPCMembers: {ex.Message}");
+                            return false;
+                        }
+                    })
                     .OfType<IBattleChara>()
                     .ToArray();
 
@@ -589,9 +608,9 @@ internal static class DataCenter
     #region HP
 
     public static Dictionary<ulong, float> RefinedHP => PartyMembers
-        .ToDictionary(p => p.GameObjectId, GetPartyMemberHPRatio);
+    .ToDictionary(p => p.GameObjectId, GetPartyMemberHPRatio);
 
-    private static Dictionary<ulong, uint> _lastHp = [];
+    private static Dictionary<ulong, uint> _lastHp = new Dictionary<ulong, uint>();
 
     private static float GetPartyMemberHPRatio(IBattleChara member)
     {
@@ -605,10 +624,7 @@ internal static class DataCenter
         var currentHp = member.CurrentHp;
         if (currentHp > 0)
         {
-            if (!_lastHp.TryGetValue(member.GameObjectId, out var lastHp))
-            {
-                lastHp = currentHp;
-            }
+            _lastHp.TryGetValue(member.GameObjectId, out var lastHp);
 
             if (currentHp - lastHp == healedHp)
             {
@@ -629,7 +645,7 @@ internal static class DataCenter
         get
         {
             var partyMembersHP = PartyMembersHP.ToList();
-            return partyMembersHP.Any() ? partyMembersHP.Min() : 0;
+            return partyMembersHP.Count > 0 ? partyMembersHP.Min() : 0;
         }
     }
 
@@ -638,7 +654,7 @@ internal static class DataCenter
         get
         {
             var partyMembersHP = PartyMembersHP.ToList();
-            return partyMembersHP.Any() ? partyMembersHP.Average() : 0;
+            return partyMembersHP.Count > 0 ? partyMembersHP.Average() : 0;
         }
     }
 
@@ -647,10 +663,11 @@ internal static class DataCenter
         get
         {
             var partyMembersHP = PartyMembersHP.ToList();
-            if (!partyMembersHP.Any()) return 0;
+            if (partyMembersHP.Count == 0) return 0;
 
             var averageHP = partyMembersHP.Average();
-            return (float)Math.Sqrt(partyMembersHP.Average(d => Math.Pow(d - averageHP, 2)));
+            var variance = partyMembersHP.Average(d => (d - averageHP) * (d - averageHP));
+            return (float)Math.Sqrt(variance);
         }
     }
 
@@ -664,7 +681,7 @@ internal static class DataCenter
     #region Action Record
     public const float MinAnimationLock = 0.6f;
 
-    const int QUEUECAPACITY = 32;
+    const int QUEUECAPACITY = 16;
     private static readonly Queue<ActionRec> _actions = new(QUEUECAPACITY);
     private static readonly Queue<DamageRec> _damages = new(QUEUECAPACITY);
 
@@ -738,6 +755,7 @@ internal static class DataCenter
         _timeLastActionUsed = DateTime.Now;
         _actions.Clear();
 
+        AttackedTargets.Clear();
         VfxDataQueue.Clear();
     }
 
@@ -782,7 +800,7 @@ internal static class DataCenter
 
         try
         {
-            foreach (var item in DataCenter.VfxDataQueue.Reverse())
+            foreach (var item in DataCenter.VfxDataQueue.OrderBy(v => v.TimeDuration))
             {
                 if (item.TimeDuration.TotalSeconds is > 1 and < 5)
                 {

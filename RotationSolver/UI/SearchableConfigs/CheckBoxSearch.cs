@@ -245,5 +245,7 @@ internal abstract class CheckBoxSearch : Searchable
             ImGui.TextWrapped(Name);
             if (ImGui.IsItemHovered()) ShowTooltip(false);
         }
+        // Draw job icon if IsJob is true
+        if (IsJob) DrawJobIcon();
     }
 }

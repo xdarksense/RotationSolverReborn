@@ -25,8 +25,6 @@ partial class CustomRotation
 
             if (EmergencyGCD(out act)) return act;
 
-            IBaseAction.ShouldEndSpecial = true;
-
             IBaseAction.TargetOverride = TargetType.Death;
 
             if (RaiseSpell(out act, false)) return act;
@@ -147,8 +145,10 @@ partial class CustomRotation
 
         if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
         {
+            IBaseAction.ShouldEndSpecial = true;
             if (RaiseGCD(out act) || RaiseAction(out act, false)) return true;
         }
+        IBaseAction.ShouldEndSpecial = false;
 
         if (!DataCenter.AutoStatus.HasFlag(AutoStatus.Raise)) return false;
 
@@ -187,7 +187,12 @@ partial class CustomRotation
     /// <returns>True if the action can be used; otherwise, false.</returns>
     protected virtual bool RaiseGCD(out IAction? act)
     {
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
+        {
+            IBaseAction.ShouldEndSpecial = true;
+        }
         if (DataCenter.RightNowDutyRotation?.RaiseGCD(out act) ?? false) return true;
+        IBaseAction.ShouldEndSpecial = false;
         act = null; return false;
     }
 
@@ -200,9 +205,13 @@ partial class CustomRotation
     {
         act = null;
         if (ShouldSkipAction()) return false;
-
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Dispel))
+        {
+            IBaseAction.ShouldEndSpecial = true;
+        }
         if (!HasSwift && EsunaPvE.CanUse(out act)) return true;
         if (DataCenter.RightNowDutyRotation?.DispelGCD(out act) ?? false) return true;
+        IBaseAction.ShouldEndSpecial = false;
         return false;
     }
 
@@ -237,8 +246,13 @@ partial class CustomRotation
     {
         act = null;
         if (ShouldSkipAction()) return false;
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.MoveForward))
+        {
+            IBaseAction.ShouldEndSpecial = true;
+        }
 
         if (DataCenter.RightNowDutyRotation?.MoveForwardGCD(out act) ?? false) return true;
+        IBaseAction.ShouldEndSpecial = false;
         act = null; return false;
     }
 
@@ -250,7 +264,13 @@ partial class CustomRotation
     [RotationDesc(DescType.HealSingleGCD)]
     protected virtual bool HealSingleGCD(out IAction? act)
     {
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.HealSingleSpell))
+        {
+            IBaseAction.ShouldEndSpecial = true;
+        }
+
         if (DataCenter.RightNowDutyRotation?.HealSingleGCD(out act) ?? false) return true;
+        IBaseAction.ShouldEndSpecial = false;
         act = null; return false;
     }
 
@@ -264,8 +284,13 @@ partial class CustomRotation
     {
         act = null;
         if (ShouldSkipAction()) return false;
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.HealAreaSpell))
+        {
+            IBaseAction.ShouldEndSpecial = true;
+        }
 
         if (DataCenter.RightNowDutyRotation?.HealAreaGCD(out act) ?? false) return true;
+        IBaseAction.ShouldEndSpecial = false;
         act = null!; return false;
     }
 
@@ -279,8 +304,13 @@ partial class CustomRotation
     {
         act = null;
         if (ShouldSkipAction()) return false;
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.DefenseSingle))
+        {
+            IBaseAction.ShouldEndSpecial = true;
+        }
 
         if (DataCenter.RightNowDutyRotation?.DefenseSingleGCD(out act) ?? false) return true;
+        IBaseAction.ShouldEndSpecial = false;
         act = null!; return false;
     }
 
@@ -294,8 +324,13 @@ partial class CustomRotation
     {
         act = null;
         if (ShouldSkipAction()) return false;
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.DefenseArea))
+        {
+            IBaseAction.ShouldEndSpecial = true;
+        }
 
         if (DataCenter.RightNowDutyRotation?.DefenseAreaGCD(out act) ?? false) return true;
+        IBaseAction.ShouldEndSpecial = false;
         act = null; return false;
     }
 

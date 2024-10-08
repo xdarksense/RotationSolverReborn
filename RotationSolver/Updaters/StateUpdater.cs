@@ -20,12 +20,6 @@ internal static class StateUpdater
         DataCenter.AutoStatus = StatusFromAutomatic();
     }
 
-    static RandomDelay
-        _healDelay1 = new(() => Service.Config.HealDelay),
-        _healDelay2 = new(() => Service.Config.HealDelay),
-        _healDelay3 = new(() => Service.Config.HealDelay),
-        _healDelay4 = new(() => Service.Config.HealDelay);
-
     private static AutoStatus StatusFromAutomatic()
     {
         AutoStatus status = AutoStatus.None;
@@ -83,19 +77,19 @@ internal static class StateUpdater
                     canHealAreaSpell = DataCenter.PartyMembersDifferHP < Service.Config.HealthDifference && DataCenter.PartyMembersAverHP < Lerp(Service.Config.HealthAreaSpell, Service.Config.HealthAreaSpellHot, ratio);
             }
 
-            if (_healDelay1.Delay(canHealAreaAbility))
+            if (canHealAreaAbility)
             {
                 status |= AutoStatus.HealAreaAbility;
             }
-            if (_healDelay2.Delay(canHealAreaSpell))
+            if (canHealAreaSpell)
             {
                 status |= AutoStatus.HealAreaSpell;
             }
-            if (_healDelay3.Delay(canHealSingleAbility))
+            if (canHealSingleAbility)
             {
                 status |= AutoStatus.HealSingleAbility;
             }
-            if (_healDelay4.Delay(canHealSingleSpell))
+            if (canHealSingleSpell)
             {
                 status |= AutoStatus.HealSingleSpell;
             }

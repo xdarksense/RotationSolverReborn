@@ -450,6 +450,12 @@ public struct ActionTargetInfo(IBaseAction action)
     {
         if (canAffects == null || player == null) return null;
 
+        // Check if the action's range is zero and handle it as targeting self
+        if (range == 0)
+        {
+            return new TargetResult(player, GetAffects(player.Position, canAffects).ToArray(), player.Position);
+        }
+
         var strategy = Service.Config.BeneficialAreaStrategy;
         switch (strategy)
         {
@@ -458,6 +464,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 OtherConfiguration.BeneficialPositions.TryGetValue(Svc.ClientState.TerritoryType, out var pts);
                 pts ??= Array.Empty<Vector3>();
 
+                // Use fallback points if no beneficial positions are found
                 if (pts.Length == 0)
                 {
                     if (DataCenter.TerritoryContentType == TerritoryContentType.Trials ||
@@ -470,6 +477,7 @@ public struct ActionTargetInfo(IBaseAction action)
                     }
                 }
 
+                // Find the closest point and apply a random offset
                 if (pts.Length > 0)
                 {
                     var closest = pts.MinBy(p => Vector3.Distance(player.Position, p));
@@ -478,12 +486,15 @@ public struct ActionTargetInfo(IBaseAction action)
                     var radius = random.NextDouble();
                     closest.X += (float)(Math.Sin(rotation) * radius);
                     closest.Z += (float)(Math.Cos(rotation) * radius);
+
+                    // Check if the closest point is within the effect range
                     if (Vector3.Distance(player.Position, closest) < player.HitboxRadius + EffectRange)
                     {
                         return new TargetResult(player, GetAffects(closest, canAffects).ToArray(), closest);
                     }
                 }
 
+                // Return null if strategy is OnlyOnLocations and no valid point is found
                 if (strategy == BeneficialAreaStrategy.OnlyOnLocations) return null;
                 break;
 
@@ -494,40 +505,43 @@ public struct ActionTargetInfo(IBaseAction action)
                     return new TargetResult(target, GetAffects(target?.Position, canAffects).ToArray(), target?.Position);
                 }
                 break;
-        }
 
-        if (Svc.Targets.Target is IBattleChara b && b.DistanceToPlayer() < range &&
-            b.IsBossFromIcon() && b.HasPositional() && b.HitboxRadius <= 8)
-        {
-            return new TargetResult(b, GetAffects(b.Position, canAffects).ToArray(), b.Position);
-        }
-        else
-        {
-            var effectRange = EffectRange;
-            var attackT = FindTargetByType(DataCenter.AllianceMembers.GetObjectInRadius(range + effectRange),
-                TargetType.BeAttacked, action.Config.AutoHealRatio, action.Setting.SpecialType);
-
-            if (attackT == null)
-            {
-                return new TargetResult(player, GetAffects(player.Position, canAffects).ToArray(), player.Position);
-            }
-            else
-            {
-                var disToTankRound = Vector3.Distance(player.Position, attackT.Position) + attackT.HitboxRadius;
-
-                if (disToTankRound < effectRange
-                    || disToTankRound > 2 * effectRange - player.HitboxRadius)
+            case BeneficialAreaStrategy.OnCalculated: // OnCalculated
+                if (Svc.Targets.Target is IBattleChara b && b.DistanceToPlayer() < range &&
+                    b.IsBossFromIcon() && b.HasPositional() && b.HitboxRadius <= 8)
                 {
-                    return new TargetResult(player, GetAffects(player.Position, canAffects).ToArray(), player.Position);
+                    return new TargetResult(b, GetAffects(b.Position, canAffects).ToArray(), b.Position);
                 }
                 else
                 {
-                    Vector3 directionToTank = attackT.Position - player.Position;
-                    var moveDirection = directionToTank / directionToTank.Length() * Math.Max(0, disToTankRound - effectRange);
-                    return new TargetResult(player, GetAffects(player.Position, canAffects).ToArray(), player.Position + moveDirection);
+                    var effectRange = EffectRange;
+                    var attackT = FindTargetByType(DataCenter.AllianceMembers.GetObjectInRadius(range + effectRange),
+                        TargetType.BeAttacked, action.Config.AutoHealRatio, action.Setting.SpecialType);
+
+                    if (attackT == null)
+                    {
+                        return new TargetResult(player, GetAffects(player.Position, canAffects).ToArray(), player.Position);
+                    }
+                    else
+                    {
+                        var disToTankRound = Vector3.Distance(player.Position, attackT.Position) + attackT.HitboxRadius;
+
+                        if (disToTankRound < effectRange
+                            || disToTankRound > 2 * effectRange - player.HitboxRadius)
+                        {
+                            return new TargetResult(player, GetAffects(player.Position, canAffects).ToArray(), player.Position);
+                        }
+                        else
+                        {
+                            Vector3 directionToTank = attackT.Position - player.Position;
+                            var moveDirection = directionToTank / directionToTank.Length() * Math.Max(0, disToTankRound - effectRange);
+                            return new TargetResult(player, GetAffects(player.Position, canAffects).ToArray(), player.Position + moveDirection);
+                        }
+                    }
                 }
-            }
         }
+
+        return null;
     }
 
 
