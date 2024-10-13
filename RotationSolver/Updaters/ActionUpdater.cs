@@ -1,6 +1,7 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using ECommons.DalamudServices;
+using ECommons.EzIpcManager;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
@@ -12,7 +13,25 @@ internal static class ActionUpdater
 {
     internal static DateTime AutoCancelTime { get; set; } = DateTime.MinValue;
 
-    internal static IAction? NextAction { get; set; }
+    static ActionUpdater() {
+        EzIPC.Init(typeof(ActionUpdater), "RotationSolverReborn.ActionUpdater");
+    }
+
+    [EzIPCEvent] public static Action<uint>? NextGCDActionChanged;
+    [EzIPCEvent] public static Action<uint>? NextActionChanged;
+
+    private static IAction? _nextAction;
+    internal static IAction? NextAction 
+    {
+        get => _nextAction;
+        set {
+            if (_nextAction != value) 
+            {
+                _nextAction = value;
+                NextActionChanged?.Invoke(_nextAction?.ID ?? 0);
+            }
+        }
+    }
 
     private static IBaseAction? _nextGCDAction;
     const float gcdHeight = 5;
@@ -24,6 +43,7 @@ internal static class ActionUpdater
             if (_nextGCDAction != value)
             {
                 _nextGCDAction = value;
+                NextGCDActionChanged?.Invoke(_nextGCDAction?.AdjustedID ?? 0);
             }
         }
     }
