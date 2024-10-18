@@ -7,17 +7,22 @@ partial class MachinistRotation
 
     #region Job Gauge
     /// <summary>
-    /// 
+    /// Gets a value indicating whether the player is currently Overheated.
     /// </summary>
     public static bool IsOverheated => JobGauge.IsOverheated;
 
     /// <summary>
-    /// 
+    /// Gets a value indicating whether the player has an active Robot.
+    /// </summary>
+    public static bool IsRobotActive => JobGauge.IsRobotActive;
+
+    /// <summary>
+    /// Gets the current Heat level.
     /// </summary>
     public static byte Heat => JobGauge.Heat;
     
     /// <summary>
-    /// 
+    /// Gets the current Overheated Stacks.
     /// </summary>
     public static byte OverheatedStacks
     {
@@ -29,21 +34,28 @@ partial class MachinistRotation
     }
 
     /// <summary>
-    /// 
+    /// Gets the current Battery level.
     /// </summary>
     public static byte Battery => JobGauge.Battery;
 
     /// <summary>
-    /// 
+    /// Gets the battery level of the last summon (robot).
     /// </summary>
     public static byte LastSummonBatteryPower => JobGauge.LastSummonBatteryPower;
 
     static float OverheatTimeRemainingRaw => JobGauge.OverheatTimeRemaining / 1000f;
 
+    static float SummonTimeRemainingRaw => JobGauge.SummonTimeRemaining / 1000f;
+
     /// <summary>
-    /// 
+    /// Gets the time remaining for Overheat in seconds minus the DefaultGCDRemain.
     /// </summary>
     public static float OverheatTime => OverheatTimeRemainingRaw - DataCenter.DefaultGCDRemain;
+
+    /// <summary>
+    /// Gets the time remaining for the Rook or Queen in seconds minus the DefaultGCDRemain.
+    /// </summary>
+    public static float SummonTime => SummonTimeRemainingRaw - DataCenter.DefaultGCDRemain;
 
     /// <summary>
     /// 
@@ -65,9 +77,12 @@ partial class MachinistRotation
     public override void DisplayStatus()
     {
         ImGui.Text("IsOverheated: " + IsOverheated.ToString());
+        ImGui.Text("IsRobotActive: " + IsRobotActive.ToString());
         ImGui.Text("Heat: " + Heat.ToString());
         ImGui.Text("Battery: " + Battery.ToString());
         ImGui.Text("LastSummonBatteryPower: " + LastSummonBatteryPower.ToString());
+        ImGui.Text("SummonTimeRemainingRaw: " + SummonTimeRemainingRaw.ToString());
+        ImGui.Text("SummonTime: " + SummonTime.ToString());
         ImGui.Text("OverheatTimeRemainingRaw: " + OverheatTimeRemainingRaw.ToString());
         ImGui.Text("OverheatTime: " + OverheatTime.ToString());
         ImGui.Text("OverheatedStacks: " + OverheatedStacks.ToString());
@@ -92,7 +107,7 @@ partial class MachinistRotation
     static partial void ModifyReassemblePvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Reassembled];
-        setting.ActionCheck = () => HasHostilesInRange;
+        setting.ActionCheck = () => HasHostilesInRange && !Player.HasStatus(true, StatusID.Reassembled);
     }
 
     static partial void ModifyGaussRoundPvE(ref ActionSetting setting)
@@ -146,6 +161,7 @@ partial class MachinistRotation
 
     static partial void ModifyRookOverdrivePvE(ref ActionSetting setting)
     {
+        setting.ActionCheck = () => JobGauge.IsRobotActive;
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 16,
@@ -198,6 +214,7 @@ partial class MachinistRotation
     static partial void ModifyTacticianPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 67244;
+        setting.ActionCheck = () => !Player.HasStatus(false, StatusID.Troubadour, StatusID.ShieldSamba);
         setting.StatusProvide = StatusHelper.PhysicalRangedResistance;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -224,6 +241,8 @@ partial class MachinistRotation
     static partial void ModifyDismantlePvE(ref ActionSetting setting)
     {
         setting.TargetStatusProvide = [StatusID.Dismantled];
+        // Pretty sure this will work as intended, but commented out cause I want a 2nd opinion ~ Kirbo
+        //setting.ActionCheck = () => CurrentTarget != null && !CurrentTarget.HasStatus(false, StatusID.Dismantled);
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
