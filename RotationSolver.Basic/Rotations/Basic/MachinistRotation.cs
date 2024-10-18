@@ -214,7 +214,6 @@ partial class MachinistRotation
     static partial void ModifyTacticianPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 67244;
-        setting.ActionCheck = () => !Player.HasStatus(false, StatusID.Troubadour, StatusID.ShieldSamba);
         setting.StatusProvide = StatusHelper.PhysicalRangedResistance;
         setting.CreateConfig = () => new ActionConfig()
         {
