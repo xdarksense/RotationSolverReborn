@@ -17,15 +17,16 @@ internal static class ActionUpdater
         EzIPC.Init(typeof(ActionUpdater), "RotationSolverReborn.ActionUpdater");
     }
 
-    [EzIPCEvent] public static Action<uint>? NextGCDActionChanged;
-    [EzIPCEvent] public static Action<uint>? NextActionChanged;
+    [EzIPCEvent] public static Action<uint> NextGCDActionChanged = delegate { };
+    [EzIPCEvent] public static Action<uint> NextActionChanged = delegate { };
 
     private static IAction? _nextAction;
-    internal static IAction? NextAction 
+    internal static IAction? NextAction
     {
         get => _nextAction;
-        set {
-            if (_nextAction != value) 
+        set
+        {
+            if (_nextAction != value)
             {
                 _nextAction = value;
                 NextActionChanged?.Invoke(_nextAction?.ID ?? 0);
