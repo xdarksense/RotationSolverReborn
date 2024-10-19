@@ -318,7 +318,10 @@ public static class ObjectHelper
 
         var fateId = DataCenter.FateId;
 
-        if (obj is IBattleChara b && b.StatusList?.Any(StatusHelper.IsPriority) == true) return true;
+        if (obj is IBattleChara b)
+        {
+            if (b.StatusList != null && b.StatusList.Any(StatusHelper.IsPriority)) return true;
+        }
 
         if (Service.Config.ChooseAttackMark && MarkingHelper.AttackSignTargets.FirstOrDefault(id => id != 0) == (long)obj.GameObjectId) return true;
 
