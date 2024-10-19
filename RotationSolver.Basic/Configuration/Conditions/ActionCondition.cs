@@ -67,8 +67,6 @@ internal class ActionCondition : DelayCondition
                 break;
             case ActionConditionType.CanUse:
                 return _action.CanUse(out var act);
-                break;
-
         }
         return false;
     }
