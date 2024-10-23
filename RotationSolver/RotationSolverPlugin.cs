@@ -42,7 +42,10 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
     public RotationSolverPlugin(IDalamudPluginInterface pluginInterface)
     {
         ECommonsMain.Init(pluginInterface, this, ECommons.Module.DalamudReflector, ECommons.Module.ObjectFunctions);
-        ThreadLoadImageHandler.TryGetIconTextureWrap(0, true, out _);
+        Svc.Framework.RunOnTick(() =>
+        {
+            ThreadLoadImageHandler.TryGetIconTextureWrap(0, true, out _);
+        });
         IconSet.Init();
 
         _dis.Add(new Service());
