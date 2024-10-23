@@ -30,13 +30,13 @@ public enum TargetingType
     LowHP,
 
     /// <summary>
-    /// Find the target whose max HP is highest.
+    /// Find the target whose HP percentage is highest.
     /// </summary>
     [Description("High HP%")]
     HighHPPercent,
 
     /// <summary>
-    /// Find the target whose max HP is highest.
+    /// Find the target whose HP percentage is lowest.
     /// </summary>
     [Description("Low HP%")]
     LowHPPercent,
