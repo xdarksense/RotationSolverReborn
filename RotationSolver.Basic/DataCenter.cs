@@ -463,12 +463,12 @@ internal static class DataCenter
     {
         get
         {
-            var weakenPeople =
-                DataCenter.PartyMembers.Where(o => o is IBattleChara b && b.StatusList.Any(StatusHelper.CanDispel));
-            var weakenNPC =
-                DataCenter.FriendlyNPCMembers.Where(o => o is IBattleChara b && b.StatusList.Any(StatusHelper.CanDispel));
-            var dyingPeople =
-                weakenPeople.Where(o => o is IBattleChara b && b.StatusList.Any(StatusHelper.IsDangerous));
+            var weakenPeople = DataCenter.PartyMembers
+                .Where(o => o is IBattleChara b && b.StatusList != null && b.StatusList.Any(StatusHelper.CanDispel));
+            var weakenNPC = DataCenter.FriendlyNPCMembers
+                .Where(o => o is IBattleChara b && b.StatusList != null && b.StatusList.Any(StatusHelper.CanDispel));
+            var dyingPeople = weakenPeople
+                .Where(o => o is IBattleChara b && b.StatusList != null && b.StatusList.Any(StatusHelper.IsDangerous));
 
             return dyingPeople.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault()
                    ?? weakenPeople.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault()
