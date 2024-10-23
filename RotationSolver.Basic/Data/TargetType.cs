@@ -32,6 +32,18 @@ public enum TargetingType
     /// <summary>
     /// Find the target whose max HP is highest.
     /// </summary>
+    [Description("High HP%")]
+    HighHPPercent,
+
+    /// <summary>
+    /// Find the target whose max HP is highest.
+    /// </summary>
+    [Description("Low HP%")]
+    LowHPPercent,
+
+    /// <summary>
+    /// Find the target whose max HP is highest.
+    /// </summary>
     [Description("High Max HP")]
     HighMaxHP,
 
