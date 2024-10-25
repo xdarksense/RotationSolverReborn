@@ -463,10 +463,10 @@ internal static class DataCenter
     {
         get
         {
-            var weakenPeople = DataCenter.PartyMembers
-                .Where(o => o is IBattleChara b && b.StatusList != null && b.StatusList.Any(StatusHelper.CanDispel));
-            var weakenNPC = DataCenter.FriendlyNPCMembers
-                .Where(o => o is IBattleChara b && b.StatusList != null && b.StatusList.Any(StatusHelper.CanDispel));
+            var weakenPeople = DataCenter.PartyMembers?
+                .Where(o => o is IBattleChara b && b.StatusList != null && b.StatusList.Any(StatusHelper.CanDispel)) ?? Enumerable.Empty<IBattleChara>();
+            var weakenNPC = DataCenter.FriendlyNPCMembers?
+                .Where(o => o is IBattleChara b && b.StatusList != null && b.StatusList.Any(StatusHelper.CanDispel)) ?? Enumerable.Empty<IBattleChara>();
             var dyingPeople = weakenPeople
                 .Where(o => o is IBattleChara b && b.StatusList != null && b.StatusList.Any(StatusHelper.IsDangerous));
 
