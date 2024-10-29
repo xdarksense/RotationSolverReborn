@@ -122,7 +122,7 @@ public class BaseAction : IBaseAction
 
     /// <inheritdoc/>
     public bool CanUse(out IAction act, bool isLastAbility = false, bool isFirstAbility = false, bool skipStatusProvideCheck = false, bool skipComboCheck = false, bool skipCastingCheck = false,
-    bool usedUp = false, bool skipAoeCheck = false, byte gcdCountForAbility = 0)
+    bool usedUp = false, bool skipAoeCheck = false, bool skipTTKCheck = false, byte gcdCountForAbility = 0)
     {
         act = this;
 
@@ -149,7 +149,10 @@ public class BaseAction : IBaseAction
 
         if (Setting.SpecialType == SpecialActionType.MeleeRange && IActionHelper.IsLastAction(IActionHelper.MovingActions)) return false; // No range actions after moving.
 
-        if (!IsTimeToKillValid()) return false;
+        if (!skipTTKCheck)
+        {
+            if (!IsTimeToKillValid()) return false;
+        }
 
         PreviewTarget = TargetInfo.FindTarget(skipAoeCheck, skipStatusProvideCheck);
         if (PreviewTarget == null) return false;
