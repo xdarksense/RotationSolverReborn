@@ -219,7 +219,7 @@ partial class SamuraiRotation
         setting.UnlockedByQuestID = 68106;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 1,
+            AoeCount = 2,
         };
     }
 
