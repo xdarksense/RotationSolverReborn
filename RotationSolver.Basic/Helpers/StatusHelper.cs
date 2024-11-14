@@ -304,7 +304,7 @@ public static class StatusHelper
     /// <returns>The name of the status.</returns>
     internal static string GetStatusName(StatusID id)
     {
-        var statusRow = Service.GetSheet<Lumina.Excel.GeneratedSheets.Status>().GetRow((uint)id);
+        var statusRow = Service.GetSheet<Lumina.Excel.Sheets.Status>().GetRow((uint)id);
         if (statusRow == null)
         {
             PluginLog.Error($"Status with ID {id} not found.");
@@ -353,7 +353,7 @@ public static class StatusHelper
     /// <returns>True if the status is invincible, otherwise false.</returns>
     public static bool IsInvincible(this Status status)
     {
-        if (status.GameData.Icon == 15024) return true;
+        if (status.GameData.Value.Icon == 15024) return true;
         return OtherConfiguration.InvincibleStatus.Any(id => (uint)id == status.StatusId);
     }
 

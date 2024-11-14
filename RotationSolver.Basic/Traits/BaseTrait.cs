@@ -1,5 +1,5 @@
 ﻿using ECommons.GameHelpers;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace RotationSolver.Basic.Traits;
 
@@ -53,7 +53,7 @@ public class BaseTrait : IBaseTrait
     {
         ID = traitId;
         _trait = Service.GetSheet<Trait>().GetRow(traitId);
-        Name = _trait?.Name ?? string.Empty;
+        Name = _trait?.Name.ExtractText() ?? string.Empty;
         IconID = (uint)(_trait?.Icon ?? 0);
     }
 }

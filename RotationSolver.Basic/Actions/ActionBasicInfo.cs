@@ -5,7 +5,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 namespace RotationSolver.Basic.Actions;
 
 /// <summary>
-/// The action info for the <see cref="Lumina.Excel.GeneratedSheets.Action"/>.
+/// The action info for the <see cref="Lumina.Excel.Sheets.Action"/>.
 /// </summary>
 public readonly struct ActionBasicInfo
 {
@@ -21,7 +21,7 @@ public readonly struct ActionBasicInfo
     /// <summary>
     /// The name of the action.
     /// </summary>
-    public readonly string Name => _action.Action.Name;
+    public readonly string Name => _action.Action.Name.ExtractText();
 
     /// <summary>
     /// The ID of the action.
@@ -97,7 +97,7 @@ public readonly struct ActionBasicInfo
     {
         get
         {
-            if (_action.Action.ClassJob.Row == (uint)Job.BLU)
+            if (_action.Action.ClassJob.RowId == (uint)Job.BLU)
             {
                 return DataCenter.BluSlots.Contains(ID);
             }
@@ -194,7 +194,7 @@ public readonly struct ActionBasicInfo
         return !skipStatusProvideCheck && _action.Setting.StatusProvide != null && !player.WillStatusEndGCD(_action.Config.StatusGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusProvide);
     }
 
-    private bool IsLimitBreakLevelLow() => _action.Action.ActionCategory.Row == 15 && CustomRotation.LimitBreakLevel <= 1;
+    private bool IsLimitBreakLevelLow() => _action.Action.ActionCategory.RowId == 15 && CustomRotation.LimitBreakLevel <= 1;
 
     private bool IsComboValid(bool skipComboCheck) => skipComboCheck || !IsGeneralGCD || CheckForCombo();
 
@@ -230,8 +230,8 @@ public readonly struct ActionBasicInfo
             if (_action.Setting.ComboIdsNot.Contains(DataCenter.LastComboAction)) return false;
         }
 
-        var comboActions = (_action.Action.ActionCombo?.Row ?? 0) != 0
-            ? new ActionID[] { (ActionID)_action.Action.ActionCombo!.Row }
+        var comboActions = (_action.Action.ActionCombo?.RowId ?? 0) != 0
+            ? new ActionID[] { (ActionID)_action.Action.ActionCombo!.RowId }
             : [];
 
         if (_action.Setting.ComboIds != null) comboActions = [.. comboActions, .. _action.Setting.ComboIds];

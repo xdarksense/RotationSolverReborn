@@ -1,6 +1,6 @@
 ﻿using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace RotationSolver.Basic.Actions;
 
@@ -54,7 +54,7 @@ public class BaseItem : IBaseItem
     /// <summary>
     /// Item name.
     /// </summary>
-    public string Name => _item.Name;
+    public string Name => _item.Name.ExtractText();
 
     /// <summary>
     /// The item configs.

@@ -1,6 +1,6 @@
 ﻿using ECommons.DalamudServices;
 using ECommons.ExcelServices;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace RotationSolver.Basic.Rotations;
 
@@ -36,7 +36,7 @@ partial class CustomRotation : ICustomRotation
         {
             if (_name != null) return _name;
 
-            var classJob = Svc.Data.GetExcelSheet<ClassJob>()?.GetRow((uint)Job)!;
+            var classJob = Svc.Data.GetExcelSheet<ClassJob>().GetRow((uint)Job)!;
             return _name = $"{classJob.Abbreviation} - {classJob.Name}";
         }
     }
