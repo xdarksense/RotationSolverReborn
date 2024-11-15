@@ -41,8 +41,7 @@ public readonly struct ActionBasicInfo
     /// <summary>
     /// The attack type of this action.
     /// </summary>
-    public readonly AttackType AttackType => (AttackType)(_action.Action.AttackType.Value?.RowId ?? byte.MaxValue);
-
+    public readonly AttackType AttackType => (AttackType)(_action.Action.AttackType.RowId != 0 ? _action.Action.AttackType.RowId : byte.MaxValue);
     /// <summary>
     /// The aspect of this action.
     /// </summary>
@@ -141,7 +140,7 @@ public readonly struct ActionBasicInfo
         _action = action;
         IsGeneralGCD = _action.Action.IsGeneralGCD();
         IsRealGCD = _action.Action.IsRealGCD();
-        IsLimitBreak = (ActionCate?)_action.Action.ActionCategory?.Value?.RowId
+        IsLimitBreak = (ActionCate?)_action.Action.ActionCategory.Value.RowId
             is ActionCate.LimitBreak or ActionCate.LimitBreak_15;
         IsDutyAction = isDutyAction;
         Aspect = (Aspect)_action.Action.Aspect;
@@ -200,7 +199,7 @@ public readonly struct ActionBasicInfo
 
     private bool IsRoleActionValid()
     {
-        return !_action.Action.IsRoleAction || (_action.Action.ClassJobCategory.Value?.DoesJobMatchCategory(DataCenter.Job) ?? false);
+        return !_action.Action.IsRoleAction || (_action.Action.ClassJobCategory.Value.DoesJobMatchCategory(DataCenter.Job) == true);
     }
 
     private bool IsRotationCheckValid()
@@ -230,9 +229,9 @@ public readonly struct ActionBasicInfo
             if (_action.Setting.ComboIdsNot.Contains(DataCenter.LastComboAction)) return false;
         }
 
-        var comboActions = (_action.Action.ActionCombo?.RowId ?? 0) != 0
-            ? new ActionID[] { (ActionID)_action.Action.ActionCombo!.RowId }
-            : [];
+        var comboActions = _action.Action.ActionCombo.RowId != 0
+    ?       new ActionID[] { (ActionID)_action.Action.ActionCombo.RowId }
+    :       Array.Empty<ActionID>();
 
         if (_action.Setting.ComboIds != null) comboActions = [.. comboActions, .. _action.Setting.ComboIds];
 

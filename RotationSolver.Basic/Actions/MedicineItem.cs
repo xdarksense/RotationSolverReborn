@@ -44,7 +44,7 @@ internal class MedicineItem : BaseItem
 
     public MedicineItem(Item item) : base(item)
     {
-        Type = _item.Unknown19 switch
+        Type = _item.Icon switch // used to be Unknown19, not entirely sure if Icon is the correct property to use
         {
             10120 => MedicineType.Strength,
             10140 => MedicineType.Dexterity,

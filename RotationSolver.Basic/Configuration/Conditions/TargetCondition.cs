@@ -100,7 +100,8 @@ internal class TargetCondition : DelayCondition
             return false;
         }
 
-        var castName = Service.GetSheet<Lumina.Excel.Sheets.Action>().GetRow(tar.CastActionId)?.Name.ToString();
+        var actionRow = Service.GetSheet<Lumina.Excel.Sheets.Action>().GetRow(tar.CastActionId);
+        var castName = actionRow.Name.ExtractText();
         return CastingActionName == castName;
     }
 

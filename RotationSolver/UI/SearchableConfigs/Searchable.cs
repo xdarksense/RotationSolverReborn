@@ -123,7 +123,7 @@ internal readonly struct JobFilter
         get
         {
             var roleOrJob = string.Join("\n",
-                AllJobs.Select(job => Svc.Data.GetExcelSheet<ClassJob>()?.GetRow((uint)job)?.Name ?? job.ToString()));
+                AllJobs.Select(job => Svc.Data.GetExcelSheet<ClassJob>()?.GetRow((uint)job).Name ?? job.ToString()));
             return string.Format(UiString.NotInJob.GetDescription(), roleOrJob);
         }
     }

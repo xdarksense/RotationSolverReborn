@@ -90,7 +90,7 @@ namespace RotationSolver.Commands
             where T : struct, Enum
         {
             //Get job role.
-            var role = Player.Object?.ClassJob.GameData?.GetJobRole() ?? JobRole.None;
+            var role = Player.Object?.ClassJob.Value.GetJobRole() ?? JobRole.None;
 
             if (role == JobRole.None) return;
 

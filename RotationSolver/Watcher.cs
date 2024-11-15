@@ -77,10 +77,13 @@ public static class Watcher
                     if (knock != null)
                     {
                         DataCenter.KnockbackStart = DateTime.Now;
-                        DataCenter.KnockbackFinished = DateTime.Now + TimeSpan.FromSeconds(knock.Distance / (float)knock.Speed);
-                        if (set.Action != null && !OtherConfiguration.HostileCastingKnockback.Contains(set.Action.RowId) && Service.Config.RecordKnockbackies)
+                        if (knock.HasValue)
                         {
-                            OtherConfiguration.HostileCastingKnockback.Add(set.Action.RowId);
+                            DataCenter.KnockbackFinished = DateTime.Now + TimeSpan.FromSeconds(knock.Value.Distance / (float)knock.Value.Speed);
+                        }
+                        if (set.Action.HasValue && !OtherConfiguration.HostileCastingKnockback.Contains(set.Action.Value.RowId) && Service.Config.RecordKnockbackies)
+                        {
+                            OtherConfiguration.HostileCastingKnockback.Add(set.Action.Value.RowId);
                             OtherConfiguration.Save();
                         }
                     }
@@ -90,7 +93,7 @@ public static class Watcher
 
             if (set.Header.ActionType == ActionType.Action && DataCenter.PartyMembers.Length >= 4 && set.Action?.Cast100ms > 0)
             {
-                var type = set.Action.GetActionCate();
+                var type = set.Action?.GetActionCate();
 
                 if (type is ActionCate.Spell or ActionCate.Weaponskill or ActionCate.Ability)
                 {
@@ -111,7 +114,7 @@ public static class Watcher
                     {
                         if (Service.Config.RecordCastingArea)
                         {
-                            OtherConfiguration.HostileCastingArea.Add(set.Action.RowId);
+                            OtherConfiguration.HostileCastingArea.Add(set.Action!.Value.RowId);
                             OtherConfiguration.SaveHostileCastingArea();
                         }
                     }
@@ -134,10 +137,10 @@ public static class Watcher
             if (set.Source.GameObjectId != playerObject.GameObjectId) return;
             if (set.Header.ActionType != ActionType.Action && set.Header.ActionType != ActionType.Item) return;
             if (set.Action == null) return;
-            if ((ActionCate)set.Action.ActionCategory.Value!.RowId == ActionCate.Autoattack) return;
+            if (set.Action?.ActionCategory.Value.RowId == (uint)ActionCate.Autoattack) return;
 
-            var id = set.Action.RowId;
-            if (!set.Action.IsRealGCD() && (set.Action.ClassJob.Row > 0 || Enum.IsDefined((ActionID)id)))
+            var id = set.Action!.Value.RowId;
+            if (!set.Action?.IsRealGCD() && (set.Action?.ClassJob.Id > 0 || Enum.IsDefined((ActionID)id)))
             {
                 OtherConfiguration.AnimationLockTime[id] = set.Header.AnimationLockTime;
             }

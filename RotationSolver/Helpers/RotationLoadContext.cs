@@ -1,7 +1,7 @@
 ﻿using Dalamud.Plugin;
 using ECommons.DalamudServices;
 using Lumina.Excel;
-using Lumina.Excel.CustomSheets;
+//using Lumina.Excel.CustomSheets;
 using System.Runtime.Loader;
 
 namespace RotationSolver.Helpers;
@@ -22,7 +22,7 @@ internal class RotationLoadContext(DirectoryInfo? directoryInfo)
             typeof(IDalamudPluginInterface).Assembly,
             typeof(DataCenter).Assembly,
             typeof(SheetAttribute).Assembly,
-            typeof(QuestDialogueText).Assembly,
+            //typeof(QuestDialogueText).Assembly,
         };
 
         foreach (var assembly in assemblies)

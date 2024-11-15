@@ -123,7 +123,7 @@ internal class Service : IDisposable
         => ActionManager.Instance()->GetAdjustedActionId(id);
 
 
-    private static readonly ConcurrentDictionary<Type, Addon?> AddonCache = new();
+    private static readonly ConcurrentDictionary<Type, AddonAttribute?> AddonCache = new();
 
     /// <summary>
     /// Gets the addons of the specified type.
@@ -133,7 +133,7 @@ internal class Service : IDisposable
     public static IEnumerable<IntPtr> GetAddons<T>() where T : struct
     {
         // Check the cache for the attribute or add it if not present
-        var addon = AddonCache.GetOrAdd(typeof(T), t => t.GetCustomAttribute<Addon>());
+        var addon = AddonCache.GetOrAdd(typeof(T), t => t.GetCustomAttribute<AddonAttribute>());
     
         if (addon is null) return Array.Empty<nint>();
     

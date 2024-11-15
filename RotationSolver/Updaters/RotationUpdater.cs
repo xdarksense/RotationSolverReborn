@@ -427,7 +427,7 @@ internal static class RotationUpdater
 
                string result;
 
-               if (act.Action.ActionCategory.Row is 10 or 11)
+               if (act.Action.ActionCategory.RowId is 10 or 11)
                {
                    return "System Action";
                }
@@ -508,7 +508,7 @@ internal static class RotationUpdater
 
     private static void UpdateCustomRotation()
     {
-        var nowJob = (Job)Player.Object.ClassJob.Id;
+        var nowJob = (Job)Player.Object.ClassJob.RowId;
         foreach (var group in CustomRotations)
         {
             if (!group.ClassJobIds.Contains(nowJob)) continue;

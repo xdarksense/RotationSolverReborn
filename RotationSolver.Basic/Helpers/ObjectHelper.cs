@@ -49,7 +49,7 @@ public static class ObjectHelper
         }
 
         //Target can move or too big and has a target
-        if ((target.GetObjectNPC()?.Unknown12 == 0 || target.HitboxRadius >= 5)
+        if ((target.GetObjectNPC()?.Unknown0 == 0 || target.HitboxRadius >= 5) // Unknown12 used to be the flag checked for the mobs ability to move, honestly just guessing on this one
             && (target.TargetObject?.IsValid() ?? false))
         {
             //the target is not a tank role
@@ -65,7 +65,7 @@ public static class ObjectHelper
 
     internal static bool HasPositional(this IGameObject obj)
     {
-        return obj != null && !(obj.GetObjectNPC()?.Unknown10 ?? false);
+        return obj != null && !(obj.GetObjectNPC()?.IsOmnidirectional ?? false); // Unknown10 used to be the flag for no positional, believe this was changed to IsOmnidirectional
     }
 
     internal static unsafe bool IsOthersPlayers(this IGameObject obj)
@@ -378,7 +378,7 @@ public static class ObjectHelper
         if (_effectRangeCheck.TryGetValue(id, out var check)) return check;
 
         var act = Service.GetSheet<Lumina.Excel.Sheets.Action>().GetRow(b.CastActionId);
-        if (act == null) return _effectRangeCheck[id] = false;
+        if (act.RowId == 0) return _effectRangeCheck[id] = false;
         if (act.CastType is 3 or 4 || (act.EffectRange is > 0 and < 8)) return _effectRangeCheck[id] = false;
 
         return _effectRangeCheck[id] = true;

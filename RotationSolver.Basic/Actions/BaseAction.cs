@@ -86,7 +86,7 @@ public class BaseAction : IBaseAction
                 Service.Config.RotationActionConfig[ID] = value;
 
                 var classJob = Action.ClassJob.Value;
-                if (classJob != null && classJob.GetJobRole() == JobRole.Tank)
+                if (classJob.RowId != 0 && classJob.GetJobRole() == JobRole.Tank)
                 {
                     value.AoeCount = 2;
                 }

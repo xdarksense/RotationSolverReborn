@@ -20,7 +20,7 @@ internal static class ActionHelper
     /// <returns>The action category.</returns>
     internal static ActionCate GetActionCate(this Action action)
     {
-        return (ActionCate)(action.ActionCategory?.Value?.RowId ?? 0);
+        return (ActionCate)(action.ActionCategory.IsValid ? action.ActionCategory.Value.RowId : 0);
     }
 
     /// <summary>
@@ -63,7 +63,7 @@ internal static class ActionHelper
     /// <returns><c>true</c> if the action is in the current job; otherwise, <c>false</c>.</returns>
     internal static bool IsInJob(this Action action)
     {
-        var cate = action.ClassJobCategory?.Value;
+        var cate = action.ClassJobCategory.ValueNullable;
         if (cate != null)
         {
             var jobName = DataCenter.Job.ToString();

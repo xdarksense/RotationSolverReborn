@@ -174,9 +174,11 @@ public static class IconSet
 
         if (!_actionIcons.TryGetValue(actionID, out var iconId))
         {
-            iconId = Service.GetSheet<Lumina.Excel.Sheets.Action>().GetRow((uint)actionID)?.Icon ?? 0;
+            var actionRow = Service.GetSheet<Lumina.Excel.Sheets.Action>().GetRow((uint)actionID);
+            iconId = actionRow.Icon;
             _actionIcons[actionID] = iconId;
         }
+
         return GetTexture(iconId, out texture);
     }
 
@@ -345,7 +347,7 @@ public static class IconSet
         }
 
         var classJobRow = classJobSheet.GetRow((uint)job);
-        if (classJobRow == null)
+        if (classJobRow.RowId == 0)
         {
             throw new InvalidOperationException($"ClassJob row for job {job} not found.");
         }

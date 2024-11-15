@@ -305,7 +305,7 @@ public static class StatusHelper
     internal static string GetStatusName(StatusID id)
     {
         var statusRow = Service.GetSheet<Lumina.Excel.Sheets.Status>().GetRow((uint)id);
-        if (statusRow == null)
+        if (statusRow.RowId == 0)
         {
             PluginLog.Error($"Status with ID {id} not found.");
             return string.Empty;
@@ -387,6 +387,6 @@ public static class StatusHelper
     /// <returns>True if the status can be dispelled, otherwise false.</returns>
     public static bool CanDispel(this Status status)
     {
-        return status.GameData.CanDispel && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain;
+        return status.GameData.Value.CanDispel && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain;
     }
 }
