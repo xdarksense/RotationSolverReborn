@@ -131,6 +131,13 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         {
             DataCenter.ResetAllRecords();
 
+            // Check if the id is valid before proceeding
+            if (id == 0)
+            {
+                Svc.Log.Warning("Invalid territory id: 0");
+                return;
+            }
+
             var territory = Service.GetSheet<TerritoryType>().GetRow(id);
 
             DataCenter.Territory = territory;
