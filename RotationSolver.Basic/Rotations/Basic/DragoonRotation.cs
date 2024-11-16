@@ -108,6 +108,7 @@ partial class DragoonRotation
     static partial void ModifyElusiveJumpPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 66604;
+        setting.StatusProvide = [StatusID.EnhancedPiercingTalon];
     }
 
     static partial void ModifyDoomSpikePvE(ref ActionSetting setting)

@@ -16,7 +16,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Fate;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Data;
 using RotationSolver.Helpers;
@@ -24,8 +24,8 @@ using RotationSolver.UI.SearchableConfigs;
 using RotationSolver.UI.SearchableSettings;
 using RotationSolver.Updaters;
 using System.Diagnostics;
-using GAction = Lumina.Excel.GeneratedSheets.Action;
-using Status = Lumina.Excel.GeneratedSheets.Status;
+using GAction = Lumina.Excel.Sheets.Action;
+using Status = Lumina.Excel.Sheets.Status;
 using Task = System.Threading.Tasks.Task;
 
 namespace RotationSolver.UI;
@@ -417,7 +417,7 @@ public partial class RotationConfigWindow : Window
             return;
         }
 
-        var rotations = RotationUpdater.CustomRotations.FirstOrDefault(i => i.ClassJobIds.Contains((Job)(Player.Object?.ClassJob.Id ?? 0)))?.Rotations ?? [];
+        var rotations = RotationUpdater.CustomRotations.FirstOrDefault(i => i.ClassJobIds.Contains((Job)(Player.Object?.ClassJob.RowId ?? 0)))?.Rotations ?? [];
 
         if (rotation != null)
         {
@@ -1957,9 +1957,9 @@ public partial class RotationConfigWindow : Window
 
     private static readonly Lazy<GAction[]> _allActions = new(() =>
         Service.GetSheet<GAction>()
-            .Where(a => !string.IsNullOrEmpty(a.Name) && !a.IsPvP && !a.IsPlayerAction
-                && a.ClassJob.Value == null && a.Cast100ms > 0)
-            .ToArray());
+        .Where(a => !string.IsNullOrEmpty(a.ToString()) && !a.IsPvP && !a.IsPlayerAction
+            && a.ClassJob.RowId == 0 && a.Cast100ms > 0)
+        .ToArray());
 
     internal static GAction[] AllActions => _allActions.Value;
 
@@ -2125,8 +2125,8 @@ public partial class RotationConfigWindow : Window
         }
 
         foreach (var status in statuses.Select(a => Service.GetSheet<Status>().GetRow(a))
-            .Where(a => a != null)
-            .OrderByDescending(s => SearchableCollection.Similarity($"{s!.Name} {s.RowId}", _statusSearching)))
+            .Where(a => a.RowId != 0)
+            .OrderByDescending(s => SearchableCollection.Similarity($"{s.Name} {s.RowId}", _statusSearching)))
         {
             void Delete() => removeId = status.RowId;
 
@@ -2272,7 +2272,7 @@ public partial class RotationConfigWindow : Window
         ImGui.Spacing();
 
         foreach (var action in actions.Select(a => Service.GetSheet<GAction>().GetRow(a))
-            .Where(a => a != null)
+            .Where(a => a.RowId != 0)
             .OrderByDescending(s => SearchableCollection.Similarity($"{s!.Name} {s.RowId}", _actionSearching)))
         {
             void Reset() => removeId = action.RowId;
@@ -2336,11 +2336,12 @@ public partial class RotationConfigWindow : Window
             const int iconSize = 32;
             var contentFinder = DataCenter.ContentFinder;
             var territoryName = DataCenter.TerritoryName;
-            if (contentFinder != null && !string.IsNullOrEmpty(contentFinder.Name))
+
+            if (contentFinder.HasValue && !string.IsNullOrEmpty(contentFinder.Value.Name.ExtractText()))
             {
                 territoryName += $" ({DataCenter.ContentFinderName})";
             }
-            var icon = DataCenter.ContentFinder?.ContentType?.Value?.Icon ?? 23;
+            var icon = DataCenter.ContentFinder?.ContentType.Value.Icon ?? 23;
             if (icon == 0) icon = 23;
             var getIcon = IconSet.GetTexture(icon, out var texture);
             ImGuiHelper.DrawItemMiddle(() =>
@@ -2727,7 +2728,7 @@ public partial class RotationConfigWindow : Window
         foreach (var status in Player.Object.StatusList)
         {
             var source = status.SourceId == Player.Object.GameObjectId ? "You" : Svc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
-            ImGui.Text($"{status.GameData.Name}: {status.StatusId} From: {source}");
+            ImGui.Text($"{status.GameData.Value.Name}: {status.StatusId} From: {source}");
         }
     }
 
@@ -2796,7 +2797,7 @@ public partial class RotationConfigWindow : Window
             var npc = battleChara.GetObjectNPC();
             if (npc != null)
             {
-                ImGui.Text($"Unknown12: {npc.Unknown12}");
+                // ImGui.Text($"Unknown12: {npc.Unknown12}"); commented out for now as broken with Lumina5 and unsure its purposed tbh
 
                 // Uncomment these lines if needed
                 // ImGui.Text($"Unknown15: {npc.Unknown15}");
@@ -2809,7 +2810,7 @@ public partial class RotationConfigWindow : Window
             foreach (var status in battleChara.StatusList)
             {
                 var source = status.SourceId == Player.Object.GameObjectId ? "You" : Svc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
-                ImGui.Text($"{status.GameData.Name}: {status.StatusId} From: {source}");
+                ImGui.Text($"{status.GameData.Value.Name}: {status.StatusId} From: {source}");
             }
         }
 

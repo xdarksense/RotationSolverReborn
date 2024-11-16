@@ -1,5 +1,5 @@
 ﻿using ECommons.ExcelServices;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using System.Data;
 
 namespace RotationSolver.Basic.Helpers;
@@ -79,7 +79,7 @@ public static class TargetFilter
     private static bool IsJobs(this IGameObject obj, HashSet<byte> validJobs)
     {
         if (obj is not IBattleChara b) return false;
-        return validJobs.Contains((byte?)b.ClassJob.GameData?.RowId ?? 0);
+        return validJobs.Contains((byte?)b.ClassJob.Value.RowId ?? 0);
     }
     #endregion
 

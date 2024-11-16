@@ -5,7 +5,7 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Utility;
 using ECommons.DalamudServices;
 using ECommons.ImGuiMethods;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration.Conditions;
 using RotationSolver.Data;
 using RotationSolver.Updaters;
@@ -688,7 +688,7 @@ internal static class ConditionDrawer
         DelayCondition.CheckBaseAction(rotation, targetCondition.ID, ref targetCondition._action);
 
         if (targetCondition.StatusId != StatusID.None &&
-            (targetCondition.Status == null || targetCondition.Status.RowId != (uint)targetCondition.StatusId))
+            (targetCondition.Status == null || targetCondition.Status.Value.RowId != (uint)targetCondition.StatusId))
         {
             targetCondition.Status = AllStatus.FirstOrDefault(a => a.RowId == (uint)targetCondition.StatusId);
         }
@@ -748,7 +748,7 @@ internal static class ConditionDrawer
         RotationConfigWindow.StatusPopUp(popupId, AllStatus, ref searchTxt, status =>
         {
             targetCondition.Status = status;
-            targetCondition.StatusId = (StatusID)targetCondition.Status.RowId;
+            targetCondition.StatusId = (StatusID)targetCondition.Status.Value.RowId;
         }, size: IconSizeRaw);
 
         void DrawStatusIcon()
@@ -760,7 +760,7 @@ internal static class ConditionDrawer
                 {
                     if (!ImGui.IsPopupOpen(popupId)) ImGui.OpenPopup(popupId);
                 }
-                ImguiTooltips.HoveredTooltip(targetCondition.Status?.Name ?? string.Empty);
+                ImguiTooltips.HoveredTooltip(targetCondition.Status?.Name.ExtractText() ?? string.Empty);
             }
         }
 
@@ -885,12 +885,12 @@ internal static class ConditionDrawer
 
     private static string[]? _territoryNames = null;
     public static string[] TerritoryNames => _territoryNames ??= Service.GetSheet<TerritoryType>()?
-        .Select(t => t?.PlaceName?.Value?.Name?.RawString ?? string.Empty).Where(s => !string.IsNullOrEmpty(s)).ToArray()!;
+        .Select(t => t.PlaceName.Value.Name.ExtractText() ?? string.Empty).Where(s => !string.IsNullOrEmpty(s)).ToArray()!;
 
     private static string[]? _dutyNames = null;
 
     public static string[] DutyNames => _dutyNames ??= new HashSet<string>(Service.GetSheet<ContentFinderCondition>()?
-        .Select(t => t?.Name?.RawString ?? string.Empty).Where(s => !string.IsNullOrEmpty(s)).Reverse()!).ToArray();
+        .Select(t => t.Name.ExtractText() ?? string.Empty).Where(s => !string.IsNullOrEmpty(s)).Reverse()!).ToArray();
 
     private static void DrawAfter(this TerritoryCondition territoryCondition, ICustomRotation _)
     {

@@ -1,7 +1,7 @@
 ﻿using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using Action = Lumina.Excel.GeneratedSheets.Action;
+using Action = Lumina.Excel.Sheets.Action;
 
 namespace RotationSolver.Basic.Actions;
 
@@ -86,7 +86,7 @@ public class BaseAction : IBaseAction
                 Service.Config.RotationActionConfig[ID] = value;
 
                 var classJob = Action.ClassJob.Value;
-                if (classJob != null && classJob.GetJobRole() == JobRole.Tank)
+                if (classJob.RowId != 0 && classJob.GetJobRole() == JobRole.Tank)
                 {
                     value.AoeCount = 2;
                 }

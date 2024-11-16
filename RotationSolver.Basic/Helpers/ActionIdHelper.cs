@@ -1,6 +1,6 @@
 ﻿using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using Action = Lumina.Excel.GeneratedSheets.Action;
+using Action = Lumina.Excel.Sheets.Action;
 
 namespace RotationSolver.Basic.Helpers;
 
@@ -17,7 +17,7 @@ public static class ActionIdHelper
     public unsafe static bool IsCoolingDown(this ActionID actionID)
     {
         var action = actionID.GetAction();
-        return action != null && IsCoolingDown(action.GetCoolDownGroup());
+        return action.HasValue && IsCoolingDown(ActionHelper.GetCoolDownGroup(action.Value));
     }
 
     /// <summary>

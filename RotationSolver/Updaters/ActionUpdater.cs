@@ -172,7 +172,7 @@ internal static class ActionUpdater
         if (player == null) return;
 
         // Ignore if player is Black Mage
-        if (player.ClassJob.Id != (uint)ECommons.ExcelServices.Job.BLM) return;
+        if (player.ClassJob.RowId != (uint)ECommons.ExcelServices.Job.BLM) return;
 
         // Ignore if player is Lucid Dreaming
         if (player.HasStatus(true, StatusID.LucidDreaming)) return;

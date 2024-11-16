@@ -140,7 +140,7 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
 
     private static unsafe IEnumerable<nint> GetAddons<T>() where T : struct
     {
-        if (typeof(T).GetCustomAttribute<Addon>() is not Addon on) return Array.Empty<nint>();
+        if (typeof(T).GetCustomAttribute<AddonAttribute>() is not AddonAttribute on) return Array.Empty<nint>();
 
         return on.AddonIdentifiers
             .Select(str => Svc.GameGui.GetAddonByName(str, 1))

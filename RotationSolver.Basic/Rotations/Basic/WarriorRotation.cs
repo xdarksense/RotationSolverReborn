@@ -318,7 +318,7 @@ partial class WarriorRotation
 
     static partial void ModifyChaoticCyclonePvP(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.NascentChaos_1992];
+        //setting.StatusNeed = [StatusID.NascentChaos_1992];
     }
 
     /// <inheritdoc/>

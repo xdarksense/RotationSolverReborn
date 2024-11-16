@@ -7,7 +7,7 @@ using ECommons.ImGuiMethods;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using RotationSolver.Commands;
 using RotationSolver.Data;
 
@@ -186,7 +186,7 @@ internal static class MajorUpdater
         HotbarID? hotbar = nextAction switch
         {
             IBaseItem item => new HotbarID(HotbarSlotType.Item, item.ID),
-            IBaseAction baseAction when baseAction.Action.ActionCategory.Row is 10 or 11 => Svc.Data.GetExcelSheet<GeneralAction>()?.FirstOrDefault(g => g.Action.Row == baseAction.ID) is GeneralAction gAct ? new HotbarID(HotbarSlotType.GeneralAction, gAct.RowId) : null,
+            IBaseAction baseAction when baseAction.Action.ActionCategory.RowId is 10 or 11 => Svc.Data.GetExcelSheet<GeneralAction>()?.FirstOrDefault(g => g.Action.RowId == baseAction.ID) is GeneralAction gAct ? new HotbarID(HotbarSlotType.GeneralAction, gAct.RowId) : null,
             IBaseAction baseAction => new HotbarID(HotbarSlotType.Action, baseAction.AdjustedID),
             _ => null
         };

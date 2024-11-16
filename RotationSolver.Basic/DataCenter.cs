@@ -7,12 +7,12 @@ using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Fate;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Configuration.Conditions;
 using RotationSolver.Basic.Rotations.Duties;
 using Svg.FilterEffects;
-using Action = Lumina.Excel.GeneratedSheets.Action;
+using Action = Lumina.Excel.Sheets.Action;
 using CharacterManager = FFXIVClientStructs.FFXIV.Client.Game.Character.CharacterManager;
 
 namespace RotationSolver.Basic;
@@ -102,13 +102,13 @@ internal static class DataCenter
 
     public static TerritoryType? Territory { get; set; }
 
-    public static string TerritoryName => Territory?.PlaceName?.Value?.Name?.RawString ?? "Territory";
+    public static string TerritoryName => Territory?.PlaceName.Value.Name.ExtractText() ?? "Territory";
 
     public static bool IsPvP => Territory?.IsPvpZone ?? false;
 
-    public static ContentFinderCondition? ContentFinder => Territory?.ContentFinderCondition?.Value;
+    public static ContentFinderCondition? ContentFinder => Territory?.ContentFinderCondition.Value;
 
-    public static string ContentFinderName => ContentFinder?.Name?.RawString ?? "Duty";
+    public static string ContentFinderName => ContentFinder?.Name.ExtractText() ?? "Duty";
 
     public static bool IsInHighEndDuty => ContentFinder?.HighEndDuty ?? false;
 
@@ -120,7 +120,7 @@ internal static class DataCenter
     public static bool IsInTOP => TerritoryID == 1122;
 
     public static TerritoryContentType TerritoryContentType =>
-        (TerritoryContentType)(ContentFinder?.ContentType?.Value?.RowId ?? 0);
+        (TerritoryContentType)(ContentFinder?.ContentType.Value.RowId ?? 0);
 
     public static AutoStatus MergedStatus => AutoStatus | CommandStatus;
 
@@ -151,7 +151,14 @@ internal static class DataCenter
 
     public static Job Job => Player.Job;
 
-    public static JobRole Role => Service.GetSheet<ClassJob>().GetRow((uint)Job)?.GetJobRole() ?? JobRole.None;
+    public static JobRole Role
+    {
+        get
+        {
+            var classJob = Service.GetSheet<ClassJob>().GetRow((uint)Job);
+            return classJob.RowId != 0 ? classJob.GetJobRole() : JobRole.None;
+        }
+    }
 
     internal static void AddCommandAction(IAction act, double time)
     {
@@ -833,7 +840,7 @@ internal static class DataCenter
     public static bool IsHostileCastingKnockback(IBattleChara h)
     {
         return IsHostileCastingBase(h,
-            (act) => act != null && OtherConfiguration.HostileCastingKnockback.Contains(act.RowId));
+            (act) => act.RowId != 0 && OtherConfiguration.HostileCastingKnockback.Contains(act.RowId));
     }
 
     public static bool IsHostileCastingBase(IBattleChara h, Func<Action, bool> check)
@@ -860,7 +867,7 @@ internal static class DataCenter
 
         // Get the action being cast
         var action = actionSheet.GetRow(h.CastActionId);
-        if (action == null) return false; // Check if action is null
+        if (action.RowId == 0) return false; // Check if action is not initialized
 
         // Invoke the check function on the action and return the result
         return check?.Invoke(action) ?? false; // Check if check is null

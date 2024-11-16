@@ -186,6 +186,10 @@ partial class NinjaRotation
         {
             TimeToKill = 10,
         };
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyBhavacakraPvE(ref ActionSetting setting)
@@ -197,7 +201,6 @@ partial class NinjaRotation
     {
         setting.StatusProvide = [StatusID.TenChiJin, StatusID.TenriJindoReady];
         setting.UnlockedByQuestID = 68488;
-        setting.ActionCheck = () => !IsMoving;
     }
 
     static partial void ModifyMeisuiPvE(ref ActionSetting setting)

@@ -1,6 +1,6 @@
 ﻿using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace RotationSolver.Basic.Actions;
 
@@ -54,7 +54,7 @@ public class BaseItem : IBaseItem
     /// <summary>
     /// Item name.
     /// </summary>
-    public string Name => _item.Name;
+    public string Name => _item.Name.ExtractText();
 
     /// <summary>
     /// The item configs.
@@ -165,7 +165,7 @@ public class BaseItem : IBaseItem
     public virtual unsafe bool CanUse(out IAction item, bool clippingCheck = false)
     {
         item = this;
-        if (_item == null) return false;
+        if (_item.RowId == 0) return false; // Check if the item is uninitialized
         if (!CanUseThis) return false;
         if (DataCenter.DisabledActionSequencer?.Contains(ID) ?? false) return false;
         if (!IsEnabled) return false;
@@ -188,7 +188,7 @@ public class BaseItem : IBaseItem
     /// <returns></returns>
     public unsafe bool Use()
     {
-        if (_item == null) return false;
+        if (_item.RowId == 0) return false; // Check if the item is uninitialized
 
         if (InventoryManager.Instance()->GetInventoryItemCount(ID, true) > 0)
         {

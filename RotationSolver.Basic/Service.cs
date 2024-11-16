@@ -123,7 +123,7 @@ internal class Service : IDisposable
         => ActionManager.Instance()->GetAdjustedActionId(id);
 
 
-    private static readonly ConcurrentDictionary<Type, Addon?> AddonCache = new();
+    private static readonly ConcurrentDictionary<Type, AddonAttribute?> AddonCache = new();
 
     /// <summary>
     /// Gets the addons of the specified type.
@@ -133,10 +133,10 @@ internal class Service : IDisposable
     public static IEnumerable<IntPtr> GetAddons<T>() where T : struct
     {
         // Check the cache for the attribute or add it if not present
-        var addon = AddonCache.GetOrAdd(typeof(T), t => t.GetCustomAttribute<Addon>());
-
+        var addon = AddonCache.GetOrAdd(typeof(T), t => t.GetCustomAttribute<AddonAttribute>());
+    
         if (addon is null) return Array.Empty<nint>();
-
+    
         return addon.AddonIdentifiers
             .Select(str => Svc.GameGui.GetAddonByName(str, 1))
             .Where(ptr => ptr != IntPtr.Zero);
@@ -147,7 +147,7 @@ internal class Service : IDisposable
     /// </summary>
     /// <typeparam name="T">The type of the Excel row.</typeparam>
     /// <returns>The Excel sheet.</returns>
-    public static ExcelSheet<T> GetSheet<T>() where T : ExcelRow => Svc.Data.GetExcelSheet<T>()!;
+    public static ExcelSheet<T> GetSheet<T>() where T : struct, IExcelRow<T> => Svc.Data.GetExcelSheet<T>()!;
 
     /// <summary>
     /// Releases unmanaged resources and performs other cleanup operations.

@@ -228,6 +228,12 @@ partial class SummonerRotation
     static partial void ModifyCrimsonCyclonePvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.IfritsFavor];
+        setting.StatusProvide = [StatusID.CrimsonStrikeReady_4403];
+    }
+
+    static partial void ModifyCrimsonStrikePvE(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.CrimsonStrikeReady_4403];
     }
 
     static partial void ModifyCrimsonCyclonePvP(ref ActionSetting setting)
