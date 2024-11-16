@@ -8,6 +8,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using System.Text.RegularExpressions;
+using Action = Lumina.Excel.Sheets.Action;
 
 namespace RotationSolver;
 
@@ -140,7 +141,7 @@ public static class Watcher
             if (set.Action?.ActionCategory.Value.RowId == (uint)ActionCate.Autoattack) return;
 
             var id = set.Action!.Value.RowId;
-            if (!set.Action?.IsRealGCD() && (set.Action?.ClassJob.Id > 0 || Enum.IsDefined((ActionID)id)))
+            if (!set.Action.Value.IsRealGCD()) //&& (set.Action?.ClassJob.Id > 0 || Enum.IsDefined((ActionID)id)))
             {
                 OtherConfiguration.AnimationLockTime[id] = set.Header.AnimationLockTime;
             }
@@ -151,7 +152,7 @@ public static class Watcher
             var tar = set.Target;
 
             // Record
-            DataCenter.AddActionRec(action);
+            DataCenter.AddActionRec(action!.Value);
             ShowStrSelf = set.ToString();
 
             DataCenter.HealHP = set.GetSpecificTypeEffect(ActionEffectType.Heal);
@@ -206,7 +207,7 @@ public static class Watcher
             var events = Service.Config.Events;
             foreach (var item in events)
             {
-                if (!Regex.IsMatch(action.Name, item.Name, regexOptions)) continue;
+                if (!Regex.IsMatch(action.Value.Name.ExtractText(), item.Name, regexOptions)) continue;
                 if (item.AddMacro(tar)) break;
             }
         }

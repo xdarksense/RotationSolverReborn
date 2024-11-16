@@ -196,7 +196,7 @@ partial class DarkKnightRotation
 
     static partial void ModifyDarkMindPvE(ref ActionSetting setting)
     {
-
+        setting.StatusProvide = [StatusID.DarkMind];
     }
 
     static partial void ModifyLivingDeadPvE(ref ActionSetting setting)

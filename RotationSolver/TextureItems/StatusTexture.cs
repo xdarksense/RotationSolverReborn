@@ -23,7 +23,7 @@ internal class StatusTexture : ITexture
     }
 
     public StatusTexture(uint id)
-    : this(Service.GetSheet<Status>().GetRow(id) ?? throw new ArgumentException($"Invalid Status ID: {id}", nameof(id))!)
+    : this(Service.GetSheet<Status>().GetRow(id))
     {
     }
 }

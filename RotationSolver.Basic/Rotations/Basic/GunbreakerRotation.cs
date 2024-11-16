@@ -239,7 +239,7 @@ partial class GunbreakerRotation
 
     static partial void ModifyDoubleDownPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Ammo > 1;
+        setting.ActionCheck = () => Ammo >= 1;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
