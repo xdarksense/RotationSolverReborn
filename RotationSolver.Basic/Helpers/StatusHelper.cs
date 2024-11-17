@@ -364,6 +364,7 @@ public static class StatusHelper
     /// <returns>True if the status is a priority, otherwise false.</returns>
     public static bool IsPriority(this Status status)
     {
+        if (status == null) return false;
         return OtherConfiguration.PriorityStatus.Any(id => (uint)id == status.StatusId);
     }
 
@@ -374,6 +375,7 @@ public static class StatusHelper
     /// <returns>True if the status needs to be dispelled, otherwise false.</returns>
     public static bool IsDangerous(this Status status)
     {
+        if (status == null) return false;
         if (!status.CanDispel()) return false;
         if (status.StackCount > 2) return true;
         if (status.RemainingTime > 20) return true;
@@ -387,6 +389,7 @@ public static class StatusHelper
     /// <returns>True if the status can be dispelled, otherwise false.</returns>
     public static bool CanDispel(this Status status)
     {
+        if (status == null) return false;
         return status.GameData.Value.CanDispel && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain;
     }
 }

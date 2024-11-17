@@ -12,6 +12,7 @@ using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Configuration.Conditions;
 using RotationSolver.Basic.Rotations.Duties;
 using Svg.FilterEffects;
+using System.Linq;
 using Action = Lumina.Excel.Sheets.Action;
 using CharacterManager = FFXIVClientStructs.FFXIV.Client.Game.Character.CharacterManager;
 
@@ -471,11 +472,11 @@ internal static class DataCenter
         get
         {
             var weakenPeople = DataCenter.PartyMembers?
-                .Where(o => o is IBattleChara b && b.StatusList != null && b.StatusList.Any(StatusHelper.CanDispel)) ?? Enumerable.Empty<IBattleChara>();
+                .Where(o => o is IBattleChara b && b.StatusList != null && b.StatusList.Any(status => status != null && StatusHelper.CanDispel(status))) ?? Enumerable.Empty<IBattleChara>();
             var weakenNPC = DataCenter.FriendlyNPCMembers?
-                .Where(o => o is IBattleChara b && b.StatusList != null && b.StatusList.Any(StatusHelper.CanDispel)) ?? Enumerable.Empty<IBattleChara>();
+                .Where(o => o is IBattleChara b && b.StatusList != null && b.StatusList.Any(status => status != null && StatusHelper.CanDispel(status))) ?? Enumerable.Empty<IBattleChara>();
             var dyingPeople = weakenPeople
-                .Where(o => o is IBattleChara b && b.StatusList != null && b.StatusList.Any(StatusHelper.IsDangerous));
+                .Where(o => o is IBattleChara b && b.StatusList != null && b.StatusList.Any(status => status != null && StatusHelper.IsDangerous(status)));
 
             return dyingPeople.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault()
                    ?? weakenPeople.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault()
