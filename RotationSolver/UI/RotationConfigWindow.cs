@@ -146,7 +146,7 @@ public partial class RotationConfigWindow : Window
         var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
 
         bool hasIncompatiblePlugin = incompatiblePlugins.Any(item =>
-            (item.Name == "XIV Combo" || item.Name == "XIV Combo Expanded" || item.Name == "XIVSlothCombo") && item.IsInstalled);
+            (item.Name == "XIV Combo" || item.Name == "XIV Combo Expanded" || item.Name == "XIVSlothCombo" || item.Name == "Wrath Combo") && item.IsInstalled);
 
         if (hasIncompatiblePlugin)
         {
@@ -168,6 +168,11 @@ public partial class RotationConfigWindow : Window
                     else if (plugin.Name == "XIVSlothCombo")
                     {
                         message = "Disable XIVSlothCombo plugin";
+                        break;
+                    }
+                    else if (plugin.Name == "Wrath Combo")
+                    {
+                        message = "Disable Wrath Combo plugin";
                         break;
                     }
                 }

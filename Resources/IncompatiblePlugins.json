@@ -28,6 +28,13 @@
     "Type": 5
   },
   {
+    "Name": "WrathCombo (formerly XIVSlothCombo)",
+    "Icon": "https://s3.puni.sh/media/plugin/60/icon-2bwhkn3zf1f.png",
+    "Url": "https://github.com/PunishXIV/WrathCombo",
+    "Features": "Auto rotation and targetting conflicts",
+    "Type": 5
+  },
+  {
     "Name": "BossMod Reborn",
     "Icon": "https://raw.githubusercontent.com/FFXIV-CombatReborn/RebornAssets/main/IconAssets/BMR_Icon.png",
     "Url": "https://github.com/FFXIV-CombatReborn/BossmodReborn",
