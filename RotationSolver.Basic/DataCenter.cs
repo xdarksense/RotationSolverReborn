@@ -327,7 +327,7 @@ internal static class DataCenter
         get
         {
             // Check if the configuration setting is true
-            if (!Service.Config.FriendlyBattleNpcHeal && !Service.Config.FriendlyPartyNpcHealRaise)
+            if (!Service.Config.FriendlyBattleNpcHeal && !Service.Config.FriendlyPartyNpcHealRaise2)
             {
                 return Array.Empty<IBattleChara>();
             }
@@ -449,7 +449,7 @@ internal static class DataCenter
                 }
 
                 // Check death in friendly NPC members
-                if (deathNPC.Any() && Service.Config.FriendlyPartyNpcHealRaise)
+                if (deathNPC.Any() && Service.Config.FriendlyPartyNpcHealRaise2)
                 {
                     var deathNPCT = deathNPC.GetJobCategory(JobRole.Tank).ToList();
                     var deathNPCH = deathNPC.GetJobCategory(JobRole.Healer).ToList();
