@@ -34,10 +34,7 @@ internal partial class Configs : IPluginConfiguration
     public List<ActionEventInfo> Events { get; private set; } = [];
     public SortedSet<Job> DisabledJobs { get; private set; } = [];
 
-    [JsonIgnore]
-    public static string[] DefaultRotations = ["https://github.com/FFXIV-CombatReborn/RebornRotations/releases/latest/download/RebornRotations.dll"];
-
-    public string[] RotationLibs { get; set; } = DefaultRotations;
+    public string[] RotationLibs { get; set; } = [];
     public List<TargetingType> TargetingTypes { get; set; } = [];
 
     public MacroInfo DutyStart { get; set; } = new MacroInfo();
@@ -202,7 +199,10 @@ internal partial class Configs : IPluginConfiguration
     private static readonly bool _inDebug = false;
 
     [ConditionBool, UI("Load rotations automatically at startup", Filter = Rotations)]
-    private static readonly bool _autoLoadRotations = false;
+    private static readonly bool _loadRotationsAtStartup = true;
+
+    [ConditionBool, UI("Load default rotations", Description = "Load the rotations provided by the Combat Reborn team", Filter = Rotations)]
+    private static readonly bool _loadDefaultRotations = true;
 
     [ConditionBool, UI("Download custom rotations from the internet",
                Description = "This will allow RSR to download custom rotations from the internet. This is a security risk and should only be enabled if you trust the source of the rotations.",

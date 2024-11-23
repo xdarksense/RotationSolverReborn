@@ -29,6 +29,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RotationSolver.GameData", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RotationSolver.DummyRotations", "RotationSolver.DummyRotations\RotationSolver.DummyRotations.csproj", "{2C9BACA6-A791-478C-84BB-8A798123468A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RebornRotations", "BasicRotations\RebornRotations.csproj", "{054B46FA-5639-45A0-A5A1-4A8ED860DDC9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -59,6 +61,10 @@ Global
 		{2C9BACA6-A791-478C-84BB-8A798123468A}.Debug|x64.Build.0 = Debug|x64
 		{2C9BACA6-A791-478C-84BB-8A798123468A}.Release|x64.ActiveCfg = Release|x64
 		{2C9BACA6-A791-478C-84BB-8A798123468A}.Release|x64.Build.0 = Release|x64
+		{054B46FA-5639-45A0-A5A1-4A8ED860DDC9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{054B46FA-5639-45A0-A5A1-4A8ED860DDC9}.Debug|x64.Build.0 = Debug|Any CPU
+		{054B46FA-5639-45A0-A5A1-4A8ED860DDC9}.Release|x64.ActiveCfg = Release|Any CPU
+		{054B46FA-5639-45A0-A5A1-4A8ED860DDC9}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

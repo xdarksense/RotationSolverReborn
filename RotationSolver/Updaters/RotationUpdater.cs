@@ -26,7 +26,6 @@ internal static class RotationUpdater
 
     public static Task ResetToDefaults()
     {
-        Service.Config.RotationLibs = Configs.DefaultRotations;
         try
         {
             var relayFolder = Svc.PluginInterface.ConfigDirectory.FullName + "\\Rotations";
@@ -93,6 +92,18 @@ internal static class RotationUpdater
         }
     }
 
+    private static Assembly? LoadDefaultRotationsFromLocal()
+    {
+        var directory = Svc.PluginInterface.AssemblyLocation.Directory;
+        if (directory == null || !directory.Exists)
+        {
+            Svc.Log.Error("Failed to find main assembly directory");
+            return null;
+        }
+        var assemblyPath = Path.Combine(directory.ToString(), "RebornRotations.dll");
+        return LoadOne(assemblyPath);
+    }
+
     /// <summary>
     /// This method loads custom rotation groups from local directories and assemblies, creates a sorted list of
     /// author hashes, and creates a sorted list of custom rotations grouped by job role.
@@ -106,12 +117,25 @@ internal static class RotationUpdater
 
         var assemblies = new List<Assembly>();
 
+        if (Service.Config.LoadDefaultRotations)
+        {
+            var defaultAssembly = LoadDefaultRotationsFromLocal();
+            if (defaultAssembly == null)
+            {
+                Svc.Log.Error("Failed to load default rotations from local directory");
+                return;
+            }
+            assemblies.Add(defaultAssembly);
+        }
+
         foreach (var dir in directories)
         {
             if (Directory.Exists(dir))
             {
                 foreach (var dll in Directory.GetFiles(dir, "*.dll"))
                 {
+                    if (dll.Contains("RebornRotations.dll"))
+                        continue;
                     var assembly = LoadOne(dll);
 
                     if (assembly != null && !assemblies.Any(a => a.FullName == assembly.FullName))
