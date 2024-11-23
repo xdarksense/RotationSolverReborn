@@ -160,9 +160,6 @@ namespace RotationSolver.Data
         [Description("Conditions for automatic use of action being disabled.")]
         ConfigWindow_Actions_DisabledConditionSet_Description,
 
-        [Description("It looks like this might be your first time here. Rotation Solver Reborn does not come with rotations out of the box, but you can download ones created by the community. You can also create your own rotations! For your convenience, Rotation Solver Reborn comes pre-loaded with links to well-known community rotations, but it still your responsibility to install them.")]
-        ConfigWindow_Rotations_FirstTime,
-
         [Description("Custom rotations are just like plugins and have full access to the game and your computer")]
         ConfigWindow_Rotations_Warning,
 
@@ -676,26 +673,8 @@ namespace RotationSolver.Data
         [Description("It looks like you might be new here! Let's get you started!")]
         WelcomeWindow_Welcome,
 
-        [Description("Rotation Solver Reborn does not come with rotations out of the box, but for your convenience a link to a set of rotations maintained by the Combat Reborn team is included by default.")]
-        WelcomeWindow_FirstTime,
-
-        [Description("Would you like to install the default rotations now?")]
-        WelcomeWindow_FirstTime2,
-
-        [Description("Some other settings you may want to consider:")]
-        WelcomeWindow_FirstTime3,
-
-        [Description("Click here to install")]
-        WelcomeWindow_SaveAndInstall,
-
         [Description("Recent Changes:")]
         WelcomeWindow_Changelog,
-
-        [Description("Do you want your rotations to update and reload automatically upon login?")]
-        WelcomeWindow_LoadAtStartup,
-
-        [Description("Do you want to automatically reload local rotations when they are updated? (Developer Mode)")]
-        WelcomeWindow_AutoReload,
     }
 
     public static class EnumExtensions

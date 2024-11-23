@@ -146,59 +146,6 @@ namespace RotationSolver.UI
 
             ImGui.Separator();  // Separator for aesthetic or logical separation
 
-            if (!Service.Config.FirstTimeSetupDone)
-            {
-                text = UiString.WelcomeWindow_FirstTime.GetDescription();
-                ImGui.PushFont(FontManager.GetFont(fontSize + 3));
-                textSize = ImGui.CalcTextSize(text).X;
-                ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudOrange);
-                ImGui.TextWrapped(text);
-                ImGui.PopStyleColor();
-                ImGui.PopFont();
-
-                text = UiString.WelcomeWindow_FirstTime3.GetDescription();
-                ImGui.TextWrapped(text);
-                var autoUpdate = Service.Config.AutoLoadRotations.Value;
-                if (ImGui.Checkbox(UiString.WelcomeWindow_LoadAtStartup.GetDescription(), ref autoUpdate))
-                {
-                    Service.Config.AutoLoadRotations.Value = autoUpdate;
-                    Service.Config.Save();
-                }
-                var autoReload = Service.Config.AutoReloadRotations.Value;
-                if (ImGui.Checkbox(UiString.WelcomeWindow_AutoReload.GetDescription(), ref autoReload))
-                {
-                    Service.Config.AutoReloadRotations.Value = autoReload;
-                    Service.Config.Save();
-                }
-
-                text = UiString.WelcomeWindow_FirstTime2.GetDescription();
-                ImGui.PushFont(FontManager.GetFont(fontSize + 2));
-                textSize = ImGui.CalcTextSize(text).X;
-                ImGuiHelper.DrawItemMiddle(() =>
-                {
-                    ImGui.TextColored(ImGuiColors.DalamudOrange, text);
-                }, windowWidth, textSize);
-                ImGui.PopFont();
-
-                text = UiString.WelcomeWindow_SaveAndInstall.GetDescription();
-                textSize = ImGui.CalcTextSize(text).X;
-                ImGuiHelper.DrawItemMiddle(async () =>
-                {
-                    if (ImGui.Button(text))
-                    {
-                        Service.Config.FirstTimeSetupDone = true;
-                        Service.Config.Save();
-                        await Task.Run(async () =>
-                        {
-                            await RotationUpdater.GetAllCustomRotationsAsync(DownloadOption.Download | DownloadOption.Local | DownloadOption.ShowList);
-                            Service.Config.FirstTimeSetupDone = true;
-                            Service.Config.Save();
-                        });
-                    }
-                }, windowWidth, textSize);
-                ImGui.Separator();
-            }
-
             DrawChangeLog();
 
             ImGui.Separator();

@@ -38,6 +38,8 @@ jobs:
       - name: Restore Nuget Packages
         run: dotnet restore RotationSolver/RotationSolver.csproj
 
+      - name: Build Rotations
+        run: dotnet build --no-restore -c Release BasicRotations/RebornRotations.csproj -p:AssemblyVersion=${{ env.tag }} -p:FileVersion=${{ env.tag }} -p:PackageVersion=${{ env.tag }} -p:InformationalVersion=${{ env.tag }} --output .\build
       - name: Build Plugin
         run: dotnet build --no-restore -c Release RotationSolver/RotationSolver.csproj -p:AssemblyVersion=${{ env.tag }} -p:FileVersion=${{ env.tag }} -p:PackageVersion=${{ env.tag }} -p:InformationalVersion=${{ env.tag }} --output .\build
       - name: Push Nuget Package

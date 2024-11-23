@@ -970,17 +970,17 @@ public partial class RotationConfigWindow : Window
         }
         ImGui.Spacing();
         // Display the Auto Load Rotations status
-        ImGui.TextWrapped($"Auto Load Rotations: {Service.Config.AutoLoadRotations}");
+        ImGui.TextWrapped($"Auto Load Rotations: {Service.Config.LoadRotationsAtStartup}");
         if (ImGui.Button("Enable Auto Loading Rotations"))
         {
-            Service.Config.AutoLoadRotations.Value = true;
+            Service.Config.LoadRotationsAtStartup.Value = true;
         }
         ImGui.Spacing();
         // Display the Download Custom Rotations status
         ImGui.TextWrapped($"Download Custom Rotations: {Service.Config.DownloadCustomRotations}");
         if (ImGui.Button("Enable Downloading Custom Rotations"))
         {
-            Service.Config.AutoLoadRotations.Value = true;
+            Service.Config.LoadRotationsAtStartup.Value = true;
         }
         ImGui.Spacing();
         // Display the Auto Off Between Area status
@@ -1718,15 +1718,6 @@ public partial class RotationConfigWindow : Window
             ImGui.TextColored(ImGuiColors.DalamudYellow, text);
         }, width, textWidth);
         ImGui.PopFont();
-
-        if (DataCenter.RightNowRotation == null)
-        {
-            text = UiString.ConfigWindow_Rotations_FirstTime.GetDescription();
-            textWidth = ImGuiHelpers.GetButtonSize(text).X;
-            ImGui.TextWrapped(text);
-        }
-
-        ImGui.Separator();
 
         ImGui.Separator();
         DrawRotationsSettings();
