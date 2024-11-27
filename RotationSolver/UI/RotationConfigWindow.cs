@@ -2631,7 +2631,7 @@ public partial class RotationConfigWindow : Window
         {
             ImGui.Text($"Fate: {DataCenter.FateId}");
         }
-        ImGui.Text($"Height: {Player.Character->CalculateHeight()}");
+        ImGui.Text($"Height: {Player.Character->ModelContainer.CalculateHeight()}");
         ImGui.Text($"Moving: {DataCenter.IsMoving}");
         ImGui.Text($"Stop Moving: {DataCenter.StopMovingRaw}");
         ImGui.Text($"CountDownTime: {Service.CountDownTime}");
