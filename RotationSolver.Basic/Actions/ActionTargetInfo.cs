@@ -951,7 +951,7 @@ public struct ActionTargetInfo(IBaseAction action)
             if (Service.Config.FilterStopMark)
             {
                 var filteredCharacters = MarkingHelper.FilterStopCharacters(IGameObjects);
-                if (filteredCharacters?.Any() ?? false)
+                if (filteredCharacters != null && filteredCharacters.Any())
                 {
                     IGameObjects = filteredCharacters;
                 }

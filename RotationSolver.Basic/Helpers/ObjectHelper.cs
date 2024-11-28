@@ -320,6 +320,7 @@ public static class ObjectHelper
 
         if (obj is IBattleChara b)
         {
+            // Ensure StatusList is not null before calling Any
             if (b.StatusList != null && b.StatusList.Any(StatusHelper.IsPriority)) return true;
         }
 
