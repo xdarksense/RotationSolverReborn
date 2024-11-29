@@ -163,7 +163,7 @@ public readonly struct ActionBasicInfo
         return true;
     }
 
-    private bool IsActionEnabled() => _action.Config.IsEnabled;
+    private bool IsActionEnabled() => _action.Config?.IsEnabled ?? false;
 
     private bool IsActionDisabled() => !IBaseAction.ForceEnable && (DataCenter.DisabledActionSequencer?.Contains(ID) ?? false); 
 
