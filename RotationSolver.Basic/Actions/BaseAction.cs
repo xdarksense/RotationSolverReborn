@@ -167,12 +167,30 @@ public class BaseAction : IBaseAction
 
     private bool IsLastAbilityUsable()
     {
+        if (Service.Config.UseV2AbilityChecks)
+        {
+            return IsLastAbilityv2Usable();
+        }
         return DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD <= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.isLastAbilityTimer);
     }
 
     private bool IsFirstAbilityUsable()
     {
+        if (Service.Config.UseV2AbilityChecks)
+        {
+            return IsFirstAbilityv2Usable();
+        }
         return DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD >= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.isFirstAbilityTimer);
+    }
+
+    private bool IsLastAbilityv2Usable()
+    {
+        return DataCenter.InCombat && (DataCenter.DefaultGCDElapsed >= DataCenter.DefaultGCDRemain);
+    }
+
+    private bool IsFirstAbilityv2Usable()
+    {
+        return DataCenter.InCombat && (DataCenter.DefaultGCDRemain >= DataCenter.DefaultGCDElapsed);
     }
 
     private bool IsTimeToKillValid()

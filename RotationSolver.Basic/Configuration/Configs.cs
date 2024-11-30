@@ -334,6 +334,10 @@ internal partial class Configs : IPluginConfiguration
         Filter = Extra)]
     private static readonly bool _autoOpenChest = true;
 
+    [ConditionBool, UI("Use experimental FirstAbility and LastAbility checks",
+        Filter = Extra)]
+    private static readonly bool _useV2AbilityChecks = false;
+
     [ConditionBool, UI("Auto close the loot window when auto opened the chest.",
         Parent = nameof(AutoOpenChest))]
     private static readonly bool _autoCloseChestWindow = true;

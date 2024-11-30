@@ -251,6 +251,9 @@ internal static class DataCenter
     public static float GCDTime(uint gcdCount = 0, float offset = 0)
         => ActionManagerHelper.GetDefaultRecastTime() * gcdCount + offset;
 
+    public static bool LastAbilityv2 => DataCenter.InCombat && (DataCenter.DefaultGCDElapsed >= DataCenter.DefaultGCDRemain);
+    public static bool FirstAbilityv2 => DataCenter.InCombat && (DataCenter.DefaultGCDRemain >= DataCenter.DefaultGCDElapsed);
+
     public static bool LastAbilityorNot => DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD <= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.isLastAbilityTimer);
     public static bool FirstAbilityorNot => DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD >= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.isFirstAbilityTimer);
     #endregion
