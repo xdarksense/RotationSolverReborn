@@ -11,8 +11,6 @@ using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Configuration.Conditions;
 using RotationSolver.Basic.Rotations.Duties;
-using Svg.FilterEffects;
-using System.Linq;
 using Action = Lumina.Excel.Sheets.Action;
 using CharacterManager = FFXIVClientStructs.FFXIV.Client.Game.Character.CharacterManager;
 
@@ -251,8 +249,8 @@ internal static class DataCenter
     public static float GCDTime(uint gcdCount = 0, float offset = 0)
         => ActionManagerHelper.GetDefaultRecastTime() * gcdCount + offset;
 
-    public static bool LastAbilityv2 => DataCenter.InCombat && (DataCenter.DefaultGCDElapsed >= DataCenter.DefaultGCDRemain);
-    public static bool FirstAbilityv2 => DataCenter.InCombat && (DataCenter.DefaultGCDRemain >= DataCenter.DefaultGCDElapsed);
+    public static bool LastAbilityv2 => DataCenter.InCombat && !ActionHelper.CanUseGCD && (ActionManagerHelper.GetCurrentAnimationLock() == 0) && !Player.Object.IsCasting && (DataCenter.DefaultGCDElapsed >= DataCenter.DefaultGCDRemain);
+    public static bool FirstAbilityv2 => DataCenter.InCombat && !ActionHelper.CanUseGCD && (ActionManagerHelper.GetCurrentAnimationLock() == 0) && !Player.Object.IsCasting && (DataCenter.DefaultGCDRemain >= DataCenter.DefaultGCDElapsed);
 
     public static bool LastAbilityorNot => DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD <= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.isLastAbilityTimer);
     public static bool FirstAbilityorNot => DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD >= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.isFirstAbilityTimer);
@@ -692,7 +690,7 @@ internal static class DataCenter
     #region Action Record
     public const float MinAnimationLock = 0.6f;
 
-    const int QUEUECAPACITY = 16;
+    const int QUEUECAPACITY = 32;
     private static readonly Queue<ActionRec> _actions = new(QUEUECAPACITY);
     private static readonly Queue<DamageRec> _damages = new(QUEUECAPACITY);
 

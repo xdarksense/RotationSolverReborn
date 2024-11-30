@@ -15,6 +15,7 @@ using ExCSS;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Fate;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
+using FFXIVClientStructs.FFXIV.Client.System.Scheduler;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
@@ -2612,6 +2613,7 @@ public partial class RotationConfigWindow : Window
         {() => "Next Action", DrawNextAction },
         {() => "Last Action", DrawLastAction },
         {() => "Others", DrawOthers },
+        {() => "GCD Cooldown Visualization", DrawGCDCooldownStuff },
         {() => "Effect", () =>
             {
                 ImGui.Text(Watcher.ShowStrSelf);
@@ -2645,11 +2647,11 @@ public partial class RotationConfigWindow : Window
         }
 
         // VFX info
-        ImGui.Text("VFX Data:");
-        foreach (var item in DataCenter.VfxDataQueue)
-        {
-            ImGui.Text(item.ToString());
-        }
+        //ImGui.Text("VFX Data:");
+        //foreach (var item in DataCenter.VfxDataQueue)
+        //{
+        //    ImGui.Text(item.ToString());
+        //}
 
         // Check and display VFX casting status
         ImGui.Text($"Is Casting Tank VFX: {DataCenter.IsCastingTankVfx()}");
@@ -2848,6 +2850,83 @@ public partial class RotationConfigWindow : Window
     {
         ImGui.Text($"Combat Time: {DataCenter.CombatTimeRaw}");
         ImGui.Text($"Limit Break: {CustomRotation.LimitBreakLevel}");
+    }
+
+    private static float _maxAnimationLockTime = 0;
+
+    private static void DrawGCDCooldownStuff()
+    {
+        ImGui.Text("GCD Cooldown Visualization");
+
+        ImGui.Text($"GCD Elapsed: {DataCenter.DefaultGCDElapsed}");
+        ImGui.Text($"GCD Remain: {DataCenter.DefaultGCDRemain}");
+        ImGui.Text($"GCD Total: {DataCenter.DefaultGCDTotal}");
+
+        // Change text color based on LastAbilityv2
+        if (DataCenter.LastAbilityv2)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.ParsedGreen);
+            ImGui.Text("LastAbilityv2: true");
+        }
+        else
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudRed);
+            ImGui.Text("LastAbilityv2: false");
+        }
+        ImGui.PopStyleColor();
+
+        // Change text color based on FirstAbilityv2
+        if (DataCenter.FirstAbilityv2)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.ParsedGreen);
+            ImGui.Text("FirstAbilityv2: true");
+        }
+        else
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudRed);
+            ImGui.Text("FirstAbilityv2: false");
+        }
+        ImGui.PopStyleColor();
+
+        // Visualize the GCD and oGCD slots
+        float gcdTotal = DataCenter.DefaultGCDElapsed + DataCenter.DefaultGCDRemain;
+        float gcdProgress = DataCenter.DefaultGCDElapsed / gcdTotal;
+
+        // Draw the progress bar
+        ImGui.ProgressBar(gcdProgress, new Vector2(-1, 0), $"{DataCenter.DefaultGCDElapsed:F2}s / {gcdTotal:F2}s");
+
+        // Update the maximum Animation Lock Time if the current value is larger
+        float currentAnimationLockTime = ActionManagerHelper.GetCurrentAnimationLock(); // Assuming you have this value
+        if (currentAnimationLockTime > _maxAnimationLockTime)
+        {
+            _maxAnimationLockTime = currentAnimationLockTime;
+        }
+
+        // Calculate the position for the Animation Lock Delay marker
+        float markerPosition = _maxAnimationLockTime / gcdTotal;
+
+        // Draw the marker on the progress bar
+        Vector2 cursorPos = ImGui.GetCursorPos();
+        float progressBarWidth = ImGui.GetContentRegionAvail().X;
+        float markerXPos = cursorPos.X + (progressBarWidth * markerPosition);
+
+        // Draw the marker on the same line as the progress bar
+        ImGui.SetCursorPos(new Vector2(markerXPos, cursorPos.Y - ImGui.GetTextLineHeight() / 2));
+        ImGui.Text("|");
+
+        // Check if the marker is hovered and display a tooltip
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("Most recent recorded animation lock delay");
+        }
+
+        // Reset cursor position
+        ImGui.SetCursorPos(cursorPos);
+
+        // Add space below the progress bar
+        ImGui.Dummy(new Vector2(0, 20));
+
+        // Add any additional visualization for oGCD slots if needed
     }
 
     private static void DrawAction(ActionID id, string type)

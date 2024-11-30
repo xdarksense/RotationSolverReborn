@@ -25,14 +25,6 @@ partial class CustomRotation
 
             if (EmergencyGCD(out act)) return act;
 
-            IBaseAction.TargetOverride = TargetType.Death;
-
-            if (RaiseSpell(out act, false)) return act;
-
-            if (Service.Config.RaisePlayerByCasting && SwiftcastPvE.Cooldown.IsCoolingDown && RaiseSpell(out act, true)) return act;
-
-            IBaseAction.TargetOverride = null;
-
             if (DataCenter.MergedStatus.HasFlag(AutoStatus.MoveForward)
                 && MoveForwardGCD(out act))
             {
@@ -77,6 +69,14 @@ partial class CustomRotation
             IBaseAction.TargetOverride = TargetType.Dispel;
             if (DataCenter.MergedStatus.HasFlag(AutoStatus.Dispel)
                 && DispelGCD(out act)) return act;
+
+            IBaseAction.TargetOverride = TargetType.Death;
+
+            if (RaiseSpell(out act, false)) return act;
+
+            if (Service.Config.RaisePlayerByCasting && SwiftcastPvE.Cooldown.IsCoolingDown && RaiseSpell(out act, true)) return act;
+
+            IBaseAction.TargetOverride = null;
 
             IBaseAction.ShouldEndSpecial = false;
             IBaseAction.TargetOverride = null;

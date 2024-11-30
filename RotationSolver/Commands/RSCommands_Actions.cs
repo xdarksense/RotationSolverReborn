@@ -70,7 +70,11 @@ namespace RotationSolver.Commands
 
             if (nextAction.Use())
             {
-                OtherConfiguration.RotationSolverRecord.ClickingCount++;
+                // Check if the setting to enable clicking count increment is enabled
+                if (Service.Config.EnableClickingCount)
+                {
+                    OtherConfiguration.RotationSolverRecord.ClickingCount++;
+                }
 
                 _lastActionID = nextAction.AdjustedID;
                 _lastUsedTime = DateTime.Now;
