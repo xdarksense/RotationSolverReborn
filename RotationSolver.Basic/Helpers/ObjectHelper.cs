@@ -460,31 +460,31 @@ public static class ObjectHelper
         var objectId = b.GameObjectId;
 
         DateTime startTime = DateTime.MinValue;
-        float thatTimeRatio = 0;
+        float initialHpRatio = 0;
 
-        // Create a copy of the RecordedHP collection to avoid modification during enumeration
-        var recordedHPCopy = DataCenter.RecordedHP.ToList();
+        // Use a snapshot of the RecordedHP collection to avoid modification during enumeration
+        var recordedHPCopy = DataCenter.RecordedHP.ToArray();
 
         foreach (var (time, hpRatios) in recordedHPCopy)
         {
             if (hpRatios.TryGetValue(objectId, out var ratio) && ratio != 1)
             {
                 startTime = time;
-                thatTimeRatio = ratio;
+                initialHpRatio = ratio;
                 break;
             }
         }
 
-        var timespan = DateTime.Now - startTime;
-        if (startTime == DateTime.MinValue || timespan < CheckSpan) return float.NaN;
+        if (startTime == DateTime.MinValue || (DateTime.Now - startTime) < CheckSpan) return float.NaN;
 
-        var ratioNow = b.GetHealthRatio();
-        if (float.IsNaN(ratioNow)) return float.NaN;
+        var currentHpRatio = b.GetHealthRatio();
+        if (float.IsNaN(currentHpRatio)) return float.NaN;
 
-        var ratioReduce = thatTimeRatio - ratioNow;
-        if (ratioReduce <= 0) return float.NaN;
+        var hpRatioDifference = initialHpRatio - currentHpRatio;
+        if (hpRatioDifference <= 0) return float.NaN;
 
-        return (float)timespan.TotalSeconds / ratioReduce * (wholeTime ? 1 : ratioNow);
+        var elapsedTime = (float)(DateTime.Now - startTime).TotalSeconds;
+        return elapsedTime / hpRatioDifference * (wholeTime ? 1 : currentHpRatio);
     }
 
     /// <summary>

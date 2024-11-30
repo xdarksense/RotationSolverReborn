@@ -138,7 +138,8 @@ public sealed class MNK_Default : MonkRotation
             if (HowlingFistPvE.CanUse(out act, skipAoeCheck: true)) return true; // Howling Fist
         }
         else
-            if (TheForbiddenChakraPvE.CanUse(out act)) return true;
+        if (SteelPeakPvE.CanUse(out act)) return true;
+        if (TheForbiddenChakraPvE.CanUse(out act)) return true;
 
         // use bh when bh and rof are ready (opener) or ask bh to wait for rof's cd to be close and then use bh
         if (!CombatElapsedLessGCD(2)

@@ -8,7 +8,6 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using System.Text.RegularExpressions;
-using Action = Lumina.Excel.Sheets.Action;
 
 namespace RotationSolver;
 

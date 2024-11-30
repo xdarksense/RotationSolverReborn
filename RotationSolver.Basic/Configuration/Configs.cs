@@ -334,6 +334,14 @@ internal partial class Configs : IPluginConfiguration
         Filter = Extra)]
     private static readonly bool _autoOpenChest = true;
 
+    [ConditionBool, UI("Use experimental FirstAbility and LastAbility checks",
+        Filter = Extra)]
+    private static readonly bool _useV2AbilityChecks = false;
+
+    [ConditionBool, UI("Enable RSR click counter in main menu",
+        Filter = Extra)]
+    private static readonly bool _enableClickingCount = true;
+
     [ConditionBool, UI("Auto close the loot window when auto opened the chest.",
         Parent = nameof(AutoOpenChest))]
     private static readonly bool _autoCloseChestWindow = true;
