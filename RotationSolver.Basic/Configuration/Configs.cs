@@ -421,6 +421,11 @@ internal partial class Configs : IPluginConfiguration
         PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _raisePlayerBySwift = true;
 
+    [JobConfig, UI("Prioritize raising dead players over Healing/Defense.",
+        Filter = HealingActionCondition, Section = 2,
+        PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
+    private static readonly bool _raisePlayerFirst = false;
+
     [JobConfig, UI("Raise styles",
         Filter = HealingActionCondition, Section = 2,
         PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]

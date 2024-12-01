@@ -7,6 +7,8 @@ partial class BlueMageRotation
     /// </summary>
     public override MedicineType MedicineType => MedicineType.Intelligence;
 
+    private protected sealed override IBaseAction Raise => AngelWhisperPvE;
+
     /// <summary>
     /// Tye ID card for Blu.
     /// </summary>
@@ -31,11 +33,33 @@ partial class BlueMageRotation
     /// <summary>
     /// 
     /// </summary>
-    protected BLUID BlueId { get; set; } = BLUID.DPS;
+    protected static BLUID BlueId { get; set; } = BLUID.DPS;
 
-    private protected sealed override IBaseAction Raise => AngelWhisperPvE;
+    static partial void ModifySongOfTormentPvE(ref ActionSetting setting)
+    {
+        setting.TargetStatusProvide = [StatusID.Bleeding_1714];
+    }
+
+    static partial void ModifyBristlePvE(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.Boost_1716];
+    }
+
+    static partial void ModifyMoonFlutePvE(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.WaxingNocturne];
+    }
 
     static partial void ModifyFeatherRainPvE(ref ActionSetting setting)
+    {
+        setting.TargetStatusProvide = [StatusID.Windburn_1723];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyShockStrikePvE(ref ActionSetting setting)
     {
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -43,12 +67,171 @@ partial class BlueMageRotation
         };
     }
 
-    static partial void ModifyEruptionPvE(ref ActionSetting setting)
+    static partial void ModifySonicBoomPvE(ref ActionSetting setting)
+    {
+        
+    }
+
+    static partial void ModifyWhistlePvE(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.Harmonized];
+    }
+
+
+    static partial void ModifyAngelWhisperPvE(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyAethericMimicryPvE(ref ActionSetting setting)
+    {
+        setting.CanTarget = (IBattleChara chara) =>
+        {
+            switch (BlueId)
+            {
+                case BLUID.DPS:
+                    if (!Player.HasStatus(true, StatusID.AethericMimicryDps))
+                    {
+                        return TargetFilter.GetJobCategory(new[] { chara }, JobRole.Melee, JobRole.RangedMagical, JobRole.RangedPhysical).FirstOrDefault() != null;
+                    }
+                    break;
+
+                case BLUID.Tank:
+                    if (!Player.HasStatus(true, StatusID.AethericMimicryTank))
+                    {
+                        return TargetFilter.GetJobCategory(new[] { chara }, JobRole.Tank).FirstOrDefault() != null;
+                    }
+                    break;
+
+                case BLUID.Healer:
+                    if (!Player.HasStatus(true, StatusID.AethericMimicryHealer))
+                    {
+                        return TargetFilter.GetJobCategory(new[] { chara }, JobRole.Healer).FirstOrDefault() != null;
+                    }
+                    break;
+            }
+            return false;
+        };
+    }
+
+    static partial void ModifySurpanakhaPvE(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.SurpanakhasFury];
+        setting.IsFriendly = false;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyJKickPvE(ref ActionSetting setting)
     {
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
+    }
+
+    static partial void ModifyTripleTridentPvE(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyTinglePvE(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.Tingling];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyColdFogPvE(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.ColdFog];
+        setting.TargetType = TargetType.Self;
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyWhiteDeathPvE(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.TouchOfFrost];
+        setting.TargetStatusProvide = [StatusID.DeepFreeze_1731];
+    }
+
+    static partial void ModifyTheRoseOfDestructionPvE(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyMatraMagicPvE(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyPhantomFlurryPvE(ref ActionSetting setting)
+    {
+        setting.IsFriendly = false;
+        setting.ActionCheck = () => !IsMoving;
+        setting.StatusProvide = [StatusID.PhantomFlurry];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyNightbloomPvE(ref ActionSetting setting)
+    {
+        setting.IsFriendly = false;
+        setting.TargetStatusProvide = [StatusID.Bleeding_1714];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyWingedReprobationPvE(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.WingedReprobation, StatusID.WingedRedemption];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifySeaShantyPvE(ref ActionSetting setting)
+    {
+        
+    }
+
+    static partial void ModifyBeingMortalPvE(ref ActionSetting setting)
+    {
+        setting.IsFriendly = false;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+
+    //Optional
+    static partial void ModifyFlyingSardinePvE(ref ActionSetting setting)
+    {
+        setting.TargetType = TargetType.Interrupt;
+    }
+
+    static partial void ModifyWhiteWindPvE(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public override void DisplayStatus()
+    {
+        ImGui.TextWrapped(BlueId.ToString());
+        base.DisplayStatus();
     }
 }
 
@@ -79,23 +262,10 @@ partial class BlueMageRotation
 //    /// <summary>
 //    /// 
 //    /// </summary>
-//    public static IBLUAction SongOfTorment { get; } = new BLUAction(ActionID.SongOfTorment, ActionOption.Dot)
-//    {
-//        TargetStatus = new[] { StatusID.Bleeding }
-//    };
-
-//    /// <summary>
-//    /// 
-//    /// </summary>
 //    public static IBLUAction BloodDrain { get; } = new BLUAction(ActionID.BloodDrain)
 //    {
 //        ActionCheck = (b, m) => Player.CurrentMp <= 9500,
 //    };
-
-//    /// <summary>
-//    /// 
-//    /// </summary>
-//    public static IBLUAction SonicBoom { get; } = new BLUAction(ActionID.SonicBoom);
 
 //    /// <summary>
 //    /// 
@@ -111,16 +281,6 @@ partial class BlueMageRotation
 //    /// 
 //    /// </summary>
 //    public static IBLUAction Devour { get; } = new BLUAction(ActionID.Devour, ActionOption.Heal);
-
-//    /// <summary>
-//    /// 
-//    /// </summary>
-//    public static IBLUAction TheRoseOfDestruction { get; } = new BLUAction(ActionID.TheRoseOfDestruction);
-
-//    /// <summary>
-//    /// 
-//    /// </summary>
-//    public static IBLUAction MatraMagic { get; } = new BLUAction(ActionID.MatraMagic);
 
 //    /// <summary>
 //    /// 
@@ -930,14 +1090,5 @@ partial class BlueMageRotation
 
 //        if (WhiteWind.CanUse(out act, CanUseOption.MustUse)) return true;
 //        return base.HealAreaGCD(out act);
-//    }
-
-//    /// <summary>
-//    /// 
-//    /// </summary>
-//    public override void DisplayStatus()
-//    {
-//        ImGui.TextWrapped(BlueId.ToString());
-//        base.DisplayStatus();
 //    }
 //}
