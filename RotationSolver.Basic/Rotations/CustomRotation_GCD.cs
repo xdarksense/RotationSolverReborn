@@ -29,6 +29,17 @@ partial class CustomRotation
                 if (MyInterruptGCD(out act)) return act;
             }
 
+            IBaseAction.TargetOverride = TargetType.Death;
+
+            if (Service.Config.RaisePlayerFirst)
+            {
+                if (RaiseSpell(out act, false)) return act;
+
+                if (Service.Config.RaisePlayerByCasting && SwiftcastPvE.Cooldown.IsCoolingDown && RaiseSpell(out act, true)) return act;
+            }
+
+            IBaseAction.TargetOverride = null;
+
             if (DataCenter.MergedStatus.HasFlag(AutoStatus.MoveForward)
                 && MoveForwardGCD(out act))
             {
@@ -76,9 +87,12 @@ partial class CustomRotation
 
             IBaseAction.TargetOverride = TargetType.Death;
 
-            if (RaiseSpell(out act, false)) return act;
+            if (!Service.Config.RaisePlayerFirst)
+            {
+                if (RaiseSpell(out act, false)) return act;
 
-            if (Service.Config.RaisePlayerByCasting && SwiftcastPvE.Cooldown.IsCoolingDown && RaiseSpell(out act, true)) return act;
+                if (Service.Config.RaisePlayerByCasting && SwiftcastPvE.Cooldown.IsCoolingDown && RaiseSpell(out act, true)) return act;
+            }
 
             IBaseAction.TargetOverride = null;
 
