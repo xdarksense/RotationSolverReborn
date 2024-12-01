@@ -22,8 +22,12 @@ partial class CustomRotation
                 && UseLimitBreak(out act)) return act;
 
             IBaseAction.ShouldEndSpecial = false;
-
             if (EmergencyGCD(out act)) return act;
+
+            if (DataCenter.CommandStatus.HasFlag(AutoStatus.Interrupt))
+            {
+                if (MyInterruptGCD(out act)) return act;
+            }
 
             if (DataCenter.MergedStatus.HasFlag(AutoStatus.MoveForward)
                 && MoveForwardGCD(out act))
@@ -178,6 +182,20 @@ partial class CustomRotation
             act = null!;
             return false;
         }
+    }
+
+    /// <summary>
+    /// Attempts to use the Interrupt GCD action.
+    /// </summary>
+    /// <param name="act">The action to be performed.</param>
+    /// <returns>True if the action can be used; otherwise, false.</returns>
+    protected virtual bool MyInterruptGCD(out IAction? act)
+    {
+        act = null;
+        if (ShouldSkipAction()) return false;
+
+        if (DataCenter.RightNowDutyRotation?.MyInterruptGCD(out act) ?? false) return true;
+        act = null; return false;
     }
 
     /// <summary>

@@ -169,7 +169,6 @@ partial class PaladinRotation
     static partial void ModifyBulwarkPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Bulwark];
-        setting.UnlockedByQuestID = 66596;
     }
 
     static partial void ModifyGoringBladePvE(ref ActionSetting setting)

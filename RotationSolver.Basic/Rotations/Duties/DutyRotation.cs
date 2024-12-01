@@ -12,6 +12,11 @@ partial class DutyRotation : IDisposable
         act = null; return false;
     }
 
+    public virtual bool MyInterruptGCD(out IAction? act)
+    {
+        act = null; return false;
+    }
+
     public virtual bool GeneralGCD(out IAction? act)
     {
         act = null; return false;
