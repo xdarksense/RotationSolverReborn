@@ -80,10 +80,11 @@ public sealed class Blue_Default : BlueMageRotation
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (JKickPvE.CanUse(out act))
-        {
-            if (Player.HasStatus(true, StatusID.Harmonized)) return true;
-        }
+        if (JKickPvE.CanUse(out act)) return true;
+        if (BeingMortalPvE.CanUse(out act)) return true;
+        if (NightbloomPvE.CanUse(out act)) return true;
+        if (FeatherRainPvE.CanUse(out act)) return true;
+        if (ShockStrikePvE.CanUse(out act)) return true;
 
         return base.AttackAbility(nextGCD, out act);
     }
@@ -91,7 +92,7 @@ public sealed class Blue_Default : BlueMageRotation
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-
+        if (Player.CurrentMp < 6000 && InCombat && LucidDreamingPvE.CanUse(out act)) return true;
         if (AethericMimicryPvE_19239.CanUse(out act)) return true;
         return base.GeneralAbility(nextGCD, out act);
     }
@@ -161,15 +162,18 @@ public sealed class Blue_Default : BlueMageRotation
     {
         if (WhiteDeathPvE.CanUse(out act)) return true;
 
-        if (BreathOfMagicPvE.CanUse(out act)) return true;
-        if (SongOfTormentPvE.CanUse(out act)) return true;
+        if (BreathOfMagicPvE.CanUse(out act) && (BreathOfMagicPvE.Target.Target?.WillStatusEnd(2, true, BreathOfMagicPvE.Setting.TargetStatusProvide ?? []) ?? false)) return true;
+        if (SongOfTormentPvE.CanUse(out act) && !IsLastAbility(ActionID.NightbloomPvE)) return true;
 
         if (MatraMagicPvE.CanUse(out act)) return true;
         if (TheRoseOfDestructionPvE.CanUse(out act)) return true;
 
-        if (TripleTridentPvE.CanUse(out act) && IsLastGCD(ActionID.TinglePvE)) return true;
-        if (TinglePvE.CanUse(out act)) return true;
+        if (TinglePvE.CanUse(out act) && TripleTridentPvE.Cooldown.WillHaveOneChargeGCD(2) && !Player.HasStatus(true, StatusID.Tingling) && !IsLastGCD(ActionID.TinglePvE)) return true;
+        if (WhistlePvE.CanUse(out act) && Player.HasStatus(true, StatusID.Tingling)) return true;
+        if (TripleTridentPvE.CanUse(out act) && IsLastGCD(ActionID.WhistlePvE) && Player.HasStatus(true, StatusID.Tingling)) return true;
+
         if (SonicBoomPvE.CanUse(out act)) return true;
+        if (FlyingSardinePvE.CanUse(out act)) return true;
         return base.GeneralGCD(out act);
     }
     #endregion

@@ -190,6 +190,16 @@ partial class BlueMageRotation
         };
     }
 
+    static partial void ModifyBreathOfMagicPvE(ref ActionSetting setting)
+    {
+        setting.TargetStatusProvide = [StatusID.BreathOfMagic];
+        setting.IsFriendly = false;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
     static partial void ModifyWingedReprobationPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.WingedReprobation, StatusID.WingedRedemption];
@@ -217,7 +227,7 @@ partial class BlueMageRotation
     //Optional
     static partial void ModifyFlyingSardinePvE(ref ActionSetting setting)
     {
-        setting.TargetType = TargetType.Interrupt;
+        
     }
 
     static partial void ModifyWhiteWindPvE(ref ActionSetting setting)
