@@ -5,7 +5,8 @@
         // List of OIDs (DataId)
         private static readonly HashSet<uint> priorityOids = new HashSet<uint>
         {
-            0x415E, // Example OID
+            0x415E, // Crystalline Debris in D022Kahderyor
+            0x4642 // Raw Electrope in D09YuweyawataFieldStation
             // Add more OIDs here
         };
 
