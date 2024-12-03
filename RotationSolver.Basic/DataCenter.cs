@@ -377,16 +377,21 @@ internal static class DataCenter
     {
         get
         {
+            var strongOfShieldPositional = EnemyPositional.Front;
+
             return AllTargets.Where(b =>
             {
-                // Check if the target is an enemy.
-                if (!b.IsEnemy()) return false;
-
-                // Check if the target is targetable.
-                if (!b.IsTargetable) return false;
+                // Check if the target is an enemy and targetable.
+                if (!b.IsEnemy() || !b.IsTargetable) return false;
 
                 // Check if the target is invincible.
                 if (b.StatusList.Any(StatusHelper.IsInvincible)) return false;
+
+                // Special exception for Jeuno raid Ark Angels.
+                if (b.IsWrongEpicFatedVaunted()) return false;
+
+                // Special exception for the Strong of Shield status on Hansel and Gretel.
+                if (b.HasStatus(true, StatusID.StrongOfShield) && strongOfShieldPositional != b.FindEnemyPositional()) return false;
 
                 // If all checks pass, the target is considered hostile.
                 return true;
