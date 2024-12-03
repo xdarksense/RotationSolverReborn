@@ -1,9 +1,11 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
+using ECommons;
 using ECommons.DalamudServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
+using ECommons.Reflection;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
@@ -44,7 +46,7 @@ public static class ObjectHelper
         //Removed the listed names.
         if (OtherConfiguration.NoProvokeNames.TryGetValue(Svc.ClientState.TerritoryType, out var ns1))
         {
-            var names = ns1.Where(n => !string.IsNullOrEmpty(n) && new Regex(n).Match(target.Name.ToString()).Success);
+            var names = ns1.Where(n => !string.IsNullOrEmpty(n) && new Regex(n).Match(target.Name.ExtractText()).Success);
             if (names.Any()) return false;
         }
 
@@ -65,7 +67,7 @@ public static class ObjectHelper
 
     internal static bool HasPositional(this IGameObject obj)
     {
-        return obj != null && !(obj.GetObjectNPC()?.IsOmnidirectional ?? false); // Unknown10 used to be the flag for no positional, believe this was changed to IsOmnidirectional
+        return obj != null && !(obj.GetObjectNPC()?.IsOmnidirectional ?? false) && !obj.HasStatus(true, StatusID.DirectionalDisregard); // Unknown10 used to be the flag for no positional, believe this was changed to IsOmnidirectional
     }
 
     internal static unsafe bool IsOthersPlayers(this IGameObject obj)
@@ -280,6 +282,24 @@ public static class ObjectHelper
     public static unsafe ObjectKind GetObjectKind(this IGameObject obj) => (ObjectKind)obj.Struct()->ObjectKind;
 
     /// <summary>
+    /// Determines whether the specified game object is a valid target for a player with the Epic Hero, Fated Hero, or Vaunted hero status.
+    /// </summary>
+    /// <param name="obj">The game object to check.</param>
+    /// <returns>
+    /// <c>true</c> if the game object does not have the appropriate status, target; otherwise, <c>false</c>.
+    /// </returns>
+    internal static bool IsWrongEpicFatedVaunted(this IGameObject obj)
+    {
+        if (obj == null || Player.Object == null) return false;
+
+        var player = Player.Object;
+
+        return (player.HasStatus(true, StatusID.EpicHero) && !obj.HasStatus(true, StatusID.EpicVillain)) ||
+               (player.HasStatus(true, StatusID.FatedHero) && !obj.HasStatus(true, StatusID.FatedVillain)) ||
+               (player.HasStatus(true, StatusID.VauntedHero) && !obj.HasStatus(true, StatusID.VauntedVillain));
+    }
+
+    /// <summary>
     /// Determines whether the specified game object is a top priority hostile target based on its name being listed.
     /// </summary>
     /// <param name="obj">The game object to check.</param>
@@ -318,8 +338,12 @@ public static class ObjectHelper
 
         var fateId = DataCenter.FateId;
 
+
         if (obj is IBattleChara b)
         {
+            if (Player.Object == null) return false;
+            // Check IBattleChara against the priority target list of OIDs
+            if (PriorityTargetHelper.IsPriorityTarget(b.DataId)) return true;
             // Ensure StatusList is not null before calling Any
             if (b.StatusList != null && b.StatusList.Any(StatusHelper.IsPriority)) return true;
         }
