@@ -206,7 +206,7 @@ public struct ActionTargetInfo(IBaseAction action)
             return false;
         }
 
-        if (MarkingHelper.StopTargets.Contains((long)gameObject.GameObjectId) && Service.Config.FilterStopMark)
+        if (MarkingHelper.GetStopTargets().Contains((long)gameObject.GameObjectId) && Service.Config.FilterStopMark)
         {
             return false;
         }

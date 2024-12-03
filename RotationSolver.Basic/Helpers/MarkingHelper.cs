@@ -48,64 +48,36 @@ namespace RotationSolver.Basic.Helpers
         /// <summary>
         /// Gets a value indicating whether there are any attack characters.
         /// </summary>
-        internal static bool HaveAttackChara => AttackSignTargets.Any(id => id != 0);
+        internal static bool HaveAttackChara => GetAttackSignTargets().Any(id => id != 0);
 
-        private static long[]? _attackSignTargets;
         /// <summary>
         /// Gets the attack sign targets.
         /// </summary>
-        internal static long[] AttackSignTargets
+        internal static long[] GetAttackSignTargets()
         {
-            get
+            return new long[]
             {
-                if (_attackSignTargets == null)
-                {
-                    lock (_lock)
-                    {
-                        if (_attackSignTargets == null)
-                        {
-                            _attackSignTargets = new long[]
-                            {
-                                GetMarker(HeadMarker.Attack1),
-                                GetMarker(HeadMarker.Attack2),
-                                GetMarker(HeadMarker.Attack3),
-                                GetMarker(HeadMarker.Attack4),
-                                GetMarker(HeadMarker.Attack5),
-                                GetMarker(HeadMarker.Attack6),
-                                GetMarker(HeadMarker.Attack7),
-                                GetMarker(HeadMarker.Attack8),
-                            };
-                        }
-                    }
-                }
-                return _attackSignTargets;
-            }
+                GetMarker(HeadMarker.Attack1),
+                GetMarker(HeadMarker.Attack2),
+                GetMarker(HeadMarker.Attack3),
+                GetMarker(HeadMarker.Attack4),
+                GetMarker(HeadMarker.Attack5),
+                GetMarker(HeadMarker.Attack6),
+                GetMarker(HeadMarker.Attack7),
+                GetMarker(HeadMarker.Attack8),
+            };
         }
 
-        private static long[]? _stopTargets;
         /// <summary>
         /// Gets the stop targets.
         /// </summary>
-        internal static long[] StopTargets
+        internal static long[] GetStopTargets()
         {
-            get
+            return new long[]
             {
-                if (_stopTargets == null)
-                {
-                    lock (_lock)
-                    {
-                        if (_stopTargets == null)
-                        {
-                            _stopTargets = new long[]
-                            {
-                                GetMarker(HeadMarker.Stop1),
-                                GetMarker(HeadMarker.Stop2),
-                            };
-                        }
-                    }
-                }
-                return _stopTargets;
-            }
+                GetMarker(HeadMarker.Stop1),
+                GetMarker(HeadMarker.Stop2),
+            };
         }
 
         /// <summary>
@@ -115,7 +87,7 @@ namespace RotationSolver.Basic.Helpers
         /// <returns>The filtered characters.</returns>
         internal unsafe static IEnumerable<IBattleChara> FilterStopCharacters(IEnumerable<IBattleChara> charas)
         {
-            var ids = new HashSet<long>(StopTargets.Where(id => id != 0));
+            var ids = new HashSet<long>(GetStopTargets().Where(id => id != 0));
             return charas.Where(b => !ids.Contains((long)b.GameObjectId));
         }
     }
