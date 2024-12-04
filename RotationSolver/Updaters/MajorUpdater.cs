@@ -150,7 +150,7 @@ internal static class MajorUpdater
 
             if (DataCenter.IsActivated())
             {
-                TargetUpdater.UpdateTarget();
+                TargetUpdater.UpdateTargets();
                 ActionSequencerUpdater.UpdateActionSequencerAction();
                 ActionUpdater.UpdateNextAction();
             }
