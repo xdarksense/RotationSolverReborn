@@ -86,6 +86,24 @@ public static class IActionHelper
     }
 
     /// <summary>
+    /// Determines if the last action was a GCD.
+    /// </summary>
+    /// <returns>True if the last action was a GCD, otherwise false.</returns>
+    public static bool IsLastActionGCD()
+    {
+        return DataCenter.LastAction == DataCenter.LastGCD;
+    }
+
+    /// <summary>
+    /// Determines if the last action was an ability.
+    /// </summary>
+    /// <returns>True if the last action was an ability, otherwise false.</returns>
+    public static bool IsLastActionAbility()
+    {
+        return DataCenter.LastAction == DataCenter.LastAbility;
+    }
+
+    /// <summary>
     /// Determines if the action is the same as any of the provided actions.
     /// </summary>
     /// <param name="action">The action to check.</param>

@@ -274,9 +274,6 @@ namespace RotationSolver.Data
         [Description("Add Action")]
         ConfigWindow_List_AddAction,
 
-        [Description("Prio Target")]
-        ConfigWindow_List_PrioTarget,
-
         [Description("Don't target")]
         ConfigWindow_List_NoHostile,
 
@@ -286,7 +283,7 @@ namespace RotationSolver.Data
         [Description("Beneficial AoE locations")]
         ConfigWindow_List_BeneficialPositions,
 
-        [Description("Enemies that will be prioritized.")]
+        [Description("Enemies that will be prioritized. This system is under construction and experimental, but should be stable.")]
         ConfigWindow_List_PrioTargetDesc,
 
         [Description("Enemies that will never be targeted.")]
@@ -450,6 +447,9 @@ namespace RotationSolver.Data
 
         [Description("Hostile")]
         ConfigWindow_List_Hostile,
+
+        [Description("Target Priority")]
+        ConfigWindow_List_TargetPriority,
 
         [Description("Enemy targeting logic. Adding more options cycles them when using /rotation Auto.\nUse /rotation Settings TargetingTypes add <option> to add,\n/rotation Settings TargetingTypes remove <option> to remove,\nand /rotation Settings TargetingTypes removeall to remove all options.")]
         ConfigWindow_Param_HostileDesc,

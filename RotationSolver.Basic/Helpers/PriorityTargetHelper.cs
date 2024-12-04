@@ -1,14 +1,16 @@
-﻿namespace RotationSolver.Basic.Helpers
+﻿using System.IO;
+using System.Text.Json;
+using JsonSerializer = System.Text.Json.JsonSerializer;
+using RotationSolver.Basic.Configuration;
+
+namespace RotationSolver.Basic.Helpers
 {
     internal class PriorityTargetHelper
     {
+        private static readonly string FilePath = "PriorityId.json";
+
         // List of OIDs (DataId)
-        private static readonly HashSet<uint> priorityOids = new HashSet<uint>
-        {
-            0x415E, // Crystalline Debris in D022Kahderyor
-            0x4642 // Raw Electrope in D09YuweyawataFieldStation
-            // Add more OIDs here
-        };
+        private static HashSet<uint> priorityOids = LoadPriorityOids();
 
         // Method to check if the given DataId is a priority target
         public static bool IsPriorityTarget(uint dataId)
@@ -22,7 +24,19 @@
             if (!priorityOids.Contains(dataId))
             {
                 priorityOids.Add(dataId);
+                OtherConfiguration.SavePrioTargetId();
             }
+        }
+
+        // Method to load priority OIDs from JSON file
+        private static HashSet<uint> LoadPriorityOids()
+        {
+            if (File.Exists(FilePath))
+            {
+                var json = File.ReadAllText(FilePath);
+                return JsonSerializer.Deserialize<HashSet<uint>>(json) ?? new HashSet<uint>();
+            }
+            return new HashSet<uint>();
         }
     }
 }
