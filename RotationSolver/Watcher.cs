@@ -91,13 +91,13 @@ public static class Watcher
                 }
             }
 
-            if (set.Header.ActionType == ActionType.Action && DataCenter.PartyMembers.Length >= 4 && set.Action?.Cast100ms > 0)
+            if (set.Header.ActionType == ActionType.Action && DataCenter.PartyMembers.Count() >= 4 && set.Action?.Cast100ms > 0)
             {
                 var type = set.Action?.GetActionCate();
 
                 if (type is ActionCate.Spell or ActionCate.Weaponskill or ActionCate.Ability)
                 {
-                    int partyMemberCount = DataCenter.PartyMembers.Length;
+                    int partyMemberCount = DataCenter.PartyMembers.Count();
                     int damageEffectCount = 0;
 
                     foreach (var effect in set.TargetEffects)

@@ -317,181 +317,24 @@ internal static class DataCenter
         }
     }
 
-    public unsafe static IBattleChara[] PartyMembers => AllianceMembers.Where(ObjectHelper.IsParty)
-        .Where(b => b.Character()->CharacterData.OnlineStatus != 15 && b.IsTargetable).ToArray();
+    public static List<IBattleChara> PartyMembers { get; set; } = [];
 
-    public unsafe static IBattleChara[] AllianceMembers => AllTargets.Where(ObjectHelper.IsAlliance)
-        .Where(b => b.Character()->CharacterData.OnlineStatus != 15 && b.IsTargetable).ToArray();
+    public static List<IBattleChara> AllianceMembers { get; set; } = [];
 
-    public unsafe static IBattleChara[] FriendlyNPCMembers
-    {
-        get
-        {
-            // Check if the configuration setting is true
-            if (!Service.Config.FriendlyBattleNpcHeal && !Service.Config.FriendlyPartyNpcHealRaise2)
-            {
-                return Array.Empty<IBattleChara>();
-            }
-
-            try
-            {
-                // Ensure Svc.Objects is not null
-                if (Svc.Objects == null)
-                {
-                    return Array.Empty<IBattleChara>();
-                }
-
-                // Filter and cast objects safely
-                var friendlyNpcs = Svc.Objects
-                    .Where(obj => obj != null && obj.ObjectKind == ObjectKind.BattleNpc)
-                    .Where(obj =>
-                    {
-                        try
-                        {
-                            return obj.GetNameplateKind() == NameplateKind.FriendlyBattleNPC ||
-                                   obj.GetBattleNPCSubKind() == BattleNpcSubKind.NpcPartyMember;
-                        }
-                        catch (Exception ex)
-                        {
-                            // Log the exception for debugging purposes
-                            Svc.Log.Error($"Error filtering object in get_FriendlyNPCMembers: {ex.Message}");
-                            return false;
-                        }
-                    })
-                    .OfType<IBattleChara>()
-                    .ToArray();
-
-                return friendlyNpcs;
-            }
-            catch (Exception ex)
-            {
-                // Log the exception for debugging purposes
-                Svc.Log.Error($"Error in get_FriendlyNPCMembers: {ex.Message}");
-                return Array.Empty<IBattleChara>();
-            }
-        }
-    }
+    public static List<IBattleChara> FriendlyNPCMembers { get; set; } = [];
 
 
-    public static IBattleChara[] AllHostileTargets
-    {
-        get
-        {
-            var strongOfShieldPositional = EnemyPositional.Front;
+    public static List<IBattleChara> AllHostileTargets { get; set; } = [];
 
-            return AllTargets.Where(b =>
-            {
-                // Check if the target is an enemy and targetable.
-                if (!b.IsEnemy() || !b.IsTargetable) return false;
+    public static IBattleChara? InterruptTarget { get; set; }
 
-                // Check if the target is invincible.
-                if (b.StatusList.Any(StatusHelper.IsInvincible)) return false;
+    public static IBattleChara? ProvokeTarget { get; set; }
 
-                // Special exception for Jeuno raid Ark Angels.
-                if (b.IsWrongEpicFatedVaunted()) return false;
+    public static IBattleChara? DeathTarget { get; set; }
 
-                // Special exception for the Strong of Shield status on Hansel and Gretel.
-                if (b.HasStatus(true, StatusID.StrongOfShield) && strongOfShieldPositional != b.FindEnemyPositional()) return false;
+    public static IBattleChara? DispelTarget { get; set; }
 
-                // If all checks pass, the target is considered hostile.
-                return true;
-            }).ToArray();
-        }
-    }
-
-    public static IBattleChara? InterruptTarget =>
-        AllHostileTargets.FirstOrDefault(ObjectHelper.CanInterrupt);
-
-    public static IBattleChara? ProvokeTarget => AllHostileTargets.FirstOrDefault(ObjectHelper.CanProvoke);
-
-    public static IBattleChara? DeathTarget
-    {
-        get
-        {
-            // Added so it only tracks deathtarget if you are on a raise job
-            var rotation = DataCenter.RightNowRotation;
-            if (Player.Job == Job.WHM || Player.Job == Job.SCH || Player.Job == Job.AST || Player.Job == Job.SGE ||
-                Player.Job == Job.SMN || Player.Job == Job.RDM)
-            {
-                // Ensure AllianceMembers and PartyMembers are not null
-                if (AllianceMembers == null || PartyMembers == null) return null;
-
-                var deathAll = AllianceMembers.GetDeath();
-                var deathParty = PartyMembers.GetDeath();
-                var deathNPC = FriendlyNPCMembers.GetDeath();
-
-                // Check death in party members
-                if (deathParty.Any())
-                {
-                    var deathT = deathParty.GetJobCategory(JobRole.Tank).ToList();
-                    var deathH = deathParty.GetJobCategory(JobRole.Healer).ToList();
-
-                    if (deathT.Count > 1) return deathT.FirstOrDefault();
-                    if (deathH.Any()) return deathH.FirstOrDefault();
-                    if (deathT.Any()) return deathT.FirstOrDefault();
-
-                    return deathParty.FirstOrDefault();
-                }
-
-                // Check death in alliance members
-                if (deathAll.Any())
-                {
-                    if (Service.Config.RaiseType == RaiseType.PartyAndAllianceHealers)
-                    {
-                        var deathAllH = deathAll.GetJobCategory(JobRole.Healer).ToList();
-                        if (deathAllH.Any()) return deathAllH.FirstOrDefault();
-                    }
-
-                    if (Service.Config.RaiseType == RaiseType.PartyAndAlliance)
-                    {
-                        var deathAllH = deathAll.GetJobCategory(JobRole.Healer).ToList();
-                        var deathAllT = deathAll.GetJobCategory(JobRole.Tank).ToList();
-
-                        if (deathAllH.Any()) return deathAllH.FirstOrDefault();
-                        if (deathAllT.Any()) return deathAllT.FirstOrDefault();
-
-                        return deathAll.FirstOrDefault();
-                    }
-                }
-
-                // Check death in friendly NPC members
-                if (deathNPC.Any() && Service.Config.FriendlyPartyNpcHealRaise2)
-                {
-                    var deathNPCT = deathNPC.GetJobCategory(JobRole.Tank).ToList();
-                    var deathNPCH = deathNPC.GetJobCategory(JobRole.Healer).ToList();
-
-                    if (deathNPCT.Count > 1) return deathNPCT.FirstOrDefault();
-                    if (deathNPCH.Any()) return deathNPCH.FirstOrDefault();
-                    if (deathNPCT.Any()) return deathNPCT.FirstOrDefault();
-
-                    return deathNPC.FirstOrDefault();
-                }
-
-                return null;
-            }
-            return null;
-        }
-    }
-
-    public static IBattleChara? DispelTarget
-    {
-        get
-        {
-            var weakenPeople = DataCenter.PartyMembers?
-                .Where(o => o is IBattleChara b && b.StatusList != null && b.StatusList.Any(status => status != null && StatusHelper.CanDispel(status))) ?? Enumerable.Empty<IBattleChara>();
-            var weakenNPC = DataCenter.FriendlyNPCMembers?
-                .Where(o => o is IBattleChara b && b.StatusList != null && b.StatusList.Any(status => status != null && StatusHelper.CanDispel(status))) ?? Enumerable.Empty<IBattleChara>();
-            var dyingPeople = weakenPeople
-                .Where(o => o is IBattleChara b && b.StatusList != null && b.StatusList.Any(status => status != null && StatusHelper.IsDangerous(status)));
-
-            return dyingPeople.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault()
-                   ?? weakenPeople.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault()
-                   ?? weakenNPC.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault();
-        }
-    }
-
-    public static IBattleChara[] AllTargets => Svc.Objects.OfType<IBattleChara>().GetObjectInRadius(30)
-        .Where(o => !o.IsDummy() || !Service.Config.DisableTargetDummys).ToArray();
+    public static List<IBattleChara> AllTargets { get; set; } = [];
 
     public static ulong[] TreasureCharas
     {
