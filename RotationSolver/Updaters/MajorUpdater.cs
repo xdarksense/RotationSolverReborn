@@ -158,13 +158,12 @@ internal static class MajorUpdater
             RSCommands.UpdateRotationState();
             HotbarHighlightManager.UpdateSettings();
 
-            List<VfxNewData> expiredVfx = new List<VfxNewData>();
-            foreach (var vfx in DataCenter.VfxDataQueue)
-            {
-                if (vfx.TimeDuration > TimeSpan.FromSeconds(30))
-                    expiredVfx.Add(vfx);
-            }
+            // Collect expired VfxNewData items
+            var expiredVfx = DataCenter.VfxDataQueue
+                .Where(vfx => vfx.TimeDuration > TimeSpan.FromSeconds(10))
+                .ToList();
 
+            // Remove expired VfxNewData items
             foreach (var vfx in expiredVfx)
             {
                 DataCenter.VfxDataQueue.Remove(vfx);

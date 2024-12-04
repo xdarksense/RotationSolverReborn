@@ -310,16 +310,6 @@ public static class ObjectHelper
     {
         if (obj == null) return false;
 
-        // Fetch prioritized target names
-        if (OtherConfiguration.PrioTargetNames.TryGetValue(Svc.ClientState.TerritoryType, out var prioTargetNames))
-        {
-            // If the target's name matches any prioritized names, it is attackable
-            if (obj is IBattleChara bpnc && prioTargetNames.Any(n => !string.IsNullOrEmpty(n) && new Regex(n).Match(bpnc.Name.TextValue).Success))
-            {
-                return true;
-            }
-        }
-
         if (obj is IBattleChara npc && DataCenter.PrioritizedNameIds.Contains(npc.NameId)) return true;
 
         return false;
@@ -348,7 +338,7 @@ public static class ObjectHelper
             if (b.StatusList != null && b.StatusList.Any(StatusHelper.IsPriority)) return true;
         }
 
-        if (Service.Config.ChooseAttackMark && MarkingHelper.GetAttackSignTargets().FirstOrDefault(id => id != 0) == (long)obj.GameObjectId) return true;
+        if (Service.Config.ChooseAttackMark && MarkingHelper.GetAttackSignTargets().FirstOrDefault(id => id != 0) == (long)obj.GameObjectId && obj.IsEnemy()) return true;
 
         // Fate
         if (Service.Config.TargetFatePriority && fateId != 0 && obj.FateId() == fateId) return true;

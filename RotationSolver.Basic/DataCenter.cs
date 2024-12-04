@@ -809,24 +809,16 @@ internal static class DataCenter
 
     public static bool IsCastingVfx(Func<VfxNewData, bool> isVfx)
     {
-        if (isVfx == null) return false;
-        if (DataCenter.VfxDataQueue == null) return false;
+        // Create a copy of the VfxDataQueue to avoid modifying the collection while enumerating
+        var vfxDataQueueCopy = VfxDataQueue.ToList();
 
-        try
+        foreach (var vfx in vfxDataQueueCopy)
         {
-            foreach (var item in DataCenter.VfxDataQueue.OrderBy(v => v.TimeDuration))
+            if (isVfx(vfx))
             {
-                if (item.TimeDuration.TotalSeconds is > 1 and < 5)
-                {
-                    if (isVfx(item)) return true;
-                }
+                return true;
             }
         }
-        catch (Exception ex)
-        {
-            Svc.Log.Error(ex, "Exception in IsCastingVfx");
-        }
-
         return false;
     }
 

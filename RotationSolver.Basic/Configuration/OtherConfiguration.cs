@@ -10,7 +10,6 @@ internal class OtherConfiguration
 
     public static SortedList<uint, float> AnimationLockTime = [];
 
-    public static Dictionary<uint, string[]> PrioTargetNames = [];
     public static Dictionary<uint, string[]> NoHostileNames = [];
     public static Dictionary<uint, string[]> NoProvokeNames = [];
     public static Dictionary<uint, Vector3[]> BeneficialPositions = [];
@@ -19,6 +18,7 @@ internal class OtherConfiguration
     public static HashSet<uint> PriorityStatus = [];
     public static HashSet<uint> InvincibleStatus = [];
     public static HashSet<uint> NoCastingStatus = [];
+    public static HashSet<uint> PrioTargetId = [];
 
     public static RotationSolverRecord RotationSolverRecord = new();
 
@@ -32,7 +32,7 @@ internal class OtherConfiguration
         Task.Run(() => InitOne(ref DangerousStatus, nameof(DangerousStatus)));
         Task.Run(() => InitOne(ref PriorityStatus, nameof(PriorityStatus)));
         Task.Run(() => InitOne(ref InvincibleStatus, nameof(InvincibleStatus)));
-        Task.Run(() => InitOne(ref PrioTargetNames, nameof(PrioTargetNames)));
+        Task.Run(() => InitOne(ref PrioTargetId, nameof(PrioTargetId)));
         Task.Run(() => InitOne(ref NoHostileNames, nameof(NoHostileNames)));
         Task.Run(() => InitOne(ref NoProvokeNames, nameof(NoProvokeNames)));
         Task.Run(() => InitOne(ref AnimationLockTime, nameof(AnimationLockTime)));
@@ -51,7 +51,7 @@ internal class OtherConfiguration
             await SavePriorityStatus();
             await SaveDangerousStatus();
             await SaveInvincibleStatus();
-            await SavePrioTargetNames();
+            await SavePrioTargetId();
             await SaveNoHostileNames();
             await SaveAnimationLockTime();
             await SaveHostileCastingArea();
@@ -159,9 +159,15 @@ internal class OtherConfiguration
         return Task.Run(() => Save(BeneficialPositions, nameof(BeneficialPositions)));
     }
 
-    public static Task SavePrioTargetNames()
+    public static void ResetPrioTargetId()
     {
-        return Task.Run(() => Save(PrioTargetNames, nameof(PrioTargetNames)));
+        InitOne(ref PrioTargetId, nameof(PrioTargetId), true, true);
+        SaveHostileCastingKnockback().Wait();
+    }
+
+    public static Task SavePrioTargetId()
+    {
+        return Task.Run(() => Save(PrioTargetId, nameof(PrioTargetId)));
     }
 
     public static Task SaveNoHostileNames()
