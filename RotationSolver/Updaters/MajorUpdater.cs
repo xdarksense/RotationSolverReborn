@@ -139,8 +139,6 @@ internal static class MajorUpdater
 
         try
         {
-            StateUpdater.UpdateState();
-
             if (Service.Config.AutoReloadRotations)
             {
                 RotationUpdater.LocalRotationWatcher();
@@ -151,6 +149,7 @@ internal static class MajorUpdater
             if (DataCenter.IsActivated())
             {
                 TargetUpdater.UpdateTargets();
+                StateUpdater.UpdateState();
                 ActionSequencerUpdater.UpdateActionSequencerAction();
                 ActionUpdater.UpdateNextAction();
             }
