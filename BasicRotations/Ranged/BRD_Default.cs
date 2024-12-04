@@ -1,6 +1,6 @@
 namespace DefaultRotations.Ranged;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.10",
+[Rotation("Default", CombatType.PvE, GameVersion = "7.11",
     Description = "Please make sure that the three song times add up to 120 seconds, Wanderers default first song for now.")]
 [SourceCode(Path = "main/BasicRotations/Ranged/BRD_Default.cs")]
 [Api(4)]
@@ -220,7 +220,8 @@ public sealed class BRD_Default : BardRotation
         //aoe
         if (ShadowbitePvE.CanUse(out act)) return true;
         if (WideVolleyPvE.CanUse(out act)) return true;
-        if (QuickNockPvE.CanUse(out act)) return true;
+        if (LadonsbitePvE.CanUse(out act) && !Player.HasStatus(true, StatusID.HawksEye_3861)) return true;
+        if (QuickNockPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.HawksEye_3861)) return true;
 
         if (IronJawsPvE.EnoughLevel && (HostileTarget?.HasStatus(true, StatusID.Windbite, StatusID.Stormbite) == true) && (HostileTarget?.HasStatus(true, StatusID.VenomousBite, StatusID.CausticBite) == true))
         {
@@ -235,6 +236,7 @@ public sealed class BRD_Default : BardRotation
 
         if (RefulgentArrowPvE.CanUse(out act, skipComboCheck: true)) return true;
         if (StraightShotPvE.CanUse(out act)) return true;
+        if (BurstShotPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.HawksEye_3861)) return true;
         if (HeavyShotPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.HawksEye_3861)) return true;
 
         return base.GeneralGCD(out act);
