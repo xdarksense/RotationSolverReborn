@@ -20,14 +20,14 @@ internal static partial class TargetUpdater
     {
         DataCenter.AllTargets = Svc.Objects.OfType<IBattleChara>().GetObjectInRadius(30)
             .Where(o => !o.IsDummy() || !Service.Config.DisableTargetDummys).ToList();
-        DataCenter.DeathTarget = GetDeathTarget();
-        DataCenter.DispelTarget = GetDispelTarget();
-        DataCenter.ProvokeTarget = DataCenter.AllHostileTargets.FirstOrDefault(ObjectHelper.CanProvoke);
-        DataCenter.InterruptTarget = DataCenter.AllHostileTargets.FirstOrDefault(ObjectHelper.CanInterrupt);
-        DataCenter.AllHostileTargets = GetAllHostileTargets();
         DataCenter.FriendlyNPCMembers = GetFriendlyNPCs();
         DataCenter.AllianceMembers = GetAllianceMembers();
         DataCenter.PartyMembers = GetPartyMembers();
+        DataCenter.DeathTarget = GetDeathTarget();
+        DataCenter.DispelTarget = GetDispelTarget();
+        DataCenter.AllHostileTargets = GetAllHostileTargets();
+        DataCenter.ProvokeTarget = DataCenter.AllHostileTargets.FirstOrDefault(ObjectHelper.CanProvoke);
+        DataCenter.InterruptTarget = DataCenter.AllHostileTargets.FirstOrDefault(ObjectHelper.CanInterrupt);
         UpdateTimeToKill();
     }
 
