@@ -85,7 +85,15 @@ public class BaseAction : IBaseAction
                 value = Setting.CreateConfig?.Invoke() ?? new ActionConfig();
                 Service.Config.RotationActionConfig[ID] = value;
 
+                if (!Action.ClassJob.IsValid)
+                {
+                    // Log the error for debugging purposes
+                    Svc.Log.Debug($"ClassJob is not valid for Action ID: {ID}");
+                    return value;
+                }
+
                 var classJob = Action.ClassJob.Value;
+
                 if (classJob.RowId != 0 && classJob.GetJobRole() == JobRole.Tank)
                 {
                     value.AoeCount = 2;
