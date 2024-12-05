@@ -1,8 +1,10 @@
 ﻿using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Game.ClientState.Objects.Types;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 
 namespace RotationSolver.Updaters;
 
@@ -99,9 +101,6 @@ internal static partial class TargetUpdater
 
             // Check if the target is invincible.
             if (b.StatusList.Any(StatusHelper.IsInvincible)) return false;
-
-            // Special exception for Jeuno raid Ark Angels.
-            if (b.IsWrongEpicFatedVaunted()) return false;
 
             // Special exception for the Strong of Shield status on Hansel and Gretel.
             if (b.HasStatus(true, StatusID.StrongOfShield) && strongOfShieldPositional != b.FindEnemyPositional()) return false;
