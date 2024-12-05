@@ -2716,6 +2716,7 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"Distance To Player: {battleChara.DistanceToPlayer()}");
             ImGui.Text($"Is In EnemiesList: {battleChara.IsInEnemiesList()}");
             ImGui.Text($"Is Attackable: {battleChara.IsAttackable()}");
+            ImGui.Text($"Is Jeuno Boss Immune: {battleChara.IsJeunoBossImmune()}");
             ImGui.Text($"CanProvoke: {battleChara.CanProvoke()}");
             ImGui.Text($"EventType: {battleChara.GetEventType()}");
             ImGui.Text($"NamePlate: {battleChara.GetNamePlateIcon()}");

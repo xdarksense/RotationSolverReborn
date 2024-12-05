@@ -81,7 +81,10 @@ public static class ObjectHelper
         // Dead.
         if (Service.Config.FilterOneHpInvincible && battleChara.CurrentHp <= 1) return false;
 
-        if (battleChara.StatusList.Any(StatusHelper.IsInvincible)) return false;
+        // Check if the target is invincible.
+        if (battleChara.IsJeunoBossImmune()) return false;
+
+        if (battleChara.StatusList.Any(status => StatusHelper.IsInvincible(status))) return false;
 
         if (Svc.ClientState == null) return false;
 
@@ -282,24 +285,6 @@ public static class ObjectHelper
     public static unsafe ObjectKind GetObjectKind(this IGameObject obj) => (ObjectKind)obj.Struct()->ObjectKind;
 
     /// <summary>
-    /// Determines whether the specified game object is a valid target for a player with the Epic Hero, Fated Hero, or Vaunted hero status.
-    /// </summary>
-    /// <param name="obj">The game object to check.</param>
-    /// <returns>
-    /// <c>true</c> if the game object does not have the appropriate status, target; otherwise, <c>false</c>.
-    /// </returns>
-    internal static bool IsWrongEpicFatedVaunted(this IGameObject obj)
-    {
-        if (obj == null || Player.Object == null) return false;
-
-        var player = Player.Object;
-
-        return (player.HasStatus(true, StatusID.EpicHero) && !obj.HasStatus(true, StatusID.EpicVillain)) ||
-               (player.HasStatus(true, StatusID.FatedHero) && !obj.HasStatus(true, StatusID.FatedVillain)) ||
-               (player.HasStatus(true, StatusID.VauntedHero) && !obj.HasStatus(true, StatusID.VauntedVillain));
-    }
-
-    /// <summary>
     /// Determines whether the specified game object is a top priority hostile target based on its name being listed.
     /// </summary>
     /// <param name="obj">The game object to check.</param>
@@ -400,6 +385,36 @@ public static class ObjectHelper
     }
 
     internal static bool IsDummy(this IBattleChara obj) => obj?.NameId == 541;
+
+    /// <summary>
+    /// Is target Jeuno Boss immune.
+    /// </summary>
+    /// <param name="obj">the object.</param>
+    /// <returns></returns>
+    public static bool IsJeunoBossImmune(this IBattleChara obj)
+    {
+        var player = Player.Object;
+
+        if (obj.IsEnemy() && obj.HasStatus(true, StatusID.EpicVillain)
+            && (player.HasStatus(true, StatusID.VauntedHero) || player.HasStatus(true, StatusID.FatedHero)))
+        {
+            return true;
+        }
+
+        if (obj.IsEnemy() && obj.HasStatus(true, StatusID.VauntedVillain)
+            && (player.HasStatus(true, StatusID.EpicHero) || player.HasStatus(true, StatusID.FatedHero)))
+        {
+            return true;
+        }
+
+        if (obj.IsEnemy() && obj.HasStatus(true, StatusID.FatedVillain)
+            && (player.HasStatus(true, StatusID.EpicHero) || player.HasStatus(true, StatusID.VauntedHero)))
+        {
+            return true;
+        }
+
+        return false;
+    }
 
     /// <summary>
     /// Is target a boss depends on the ttk.
