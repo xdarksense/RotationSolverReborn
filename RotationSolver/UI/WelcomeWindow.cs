@@ -2,7 +2,6 @@
 using Dalamud.Interface.Windowing;
 using ECommons.DalamudServices;
 using RotationSolver.Data;
-using RotationSolver.Updaters;
 
 namespace RotationSolver.UI
 {

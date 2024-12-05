@@ -129,7 +129,7 @@ partial class CustomRotation
         if (!enemy.HasPositional()) return true;
 
         EnemyPositional enemy_positional = enemy.FindEnemyPositional();
-        
+
         if (enemy_positional == positional)
             return true;
         return false;

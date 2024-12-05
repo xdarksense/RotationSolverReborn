@@ -153,7 +153,7 @@ public sealed class SMN_Default : SummonerRotation
 
         return base.EmergencyAbility(nextGCD, out act);
     }
-    
+
     #endregion
 
     #region GCD Logic

@@ -2,7 +2,6 @@
 using Dalamud.Game.ClientState.Objects.Enums;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
-using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
@@ -177,7 +176,7 @@ internal static class DataCenter
 
     public static TargetHostileType RightNowTargetToHostileType => Service.Config.HostileType;
     public static TinctureUseType RightNowTinctureUseType => Service.Config.TinctureType;
-    
+
     public static unsafe ActionID LastComboAction => (ActionID)ActionManager.Instance()->Combo.Action;
     public static unsafe float ComboTime => ActionManager.Instance()->Combo.Timer;
 
@@ -227,14 +226,14 @@ internal static class DataCenter
     #region GCD
     // Returns the time remaining until the next GCD (Global Cooldown) after considering the current animation lock.
     public static float NextAbilityToNextGCD => DefaultGCDRemain - Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock);
-    
+
     // Returns the total duration of the default GCD.
     public static float DefaultGCDTotal => ActionManagerHelper.GetDefaultRecastTime();
 
     // Returns the remaining time for the default GCD by subtracting the elapsed time from the total recast time.
     public static float DefaultGCDRemain =>
         ActionManagerHelper.GetDefaultRecastTime() - ActionManagerHelper.GetDefaultRecastTimeElapsed();
-    
+
     // Returns the elapsed time since the start of the default GCD.
     public static float DefaultGCDElapsed => ActionManagerHelper.GetDefaultRecastTimeElapsed();
 

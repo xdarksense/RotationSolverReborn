@@ -2,7 +2,6 @@
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using Lumina.Excel.Sheets;
-using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Rotations.Duties;
 using RotationSolver.Data;
 using RotationSolver.Helpers;
@@ -569,10 +568,10 @@ internal static class RotationUpdater
             {
                 return (ICustomRotation?)Activator.CreateInstance(t);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 #if DEBUG
-                Svc.Log.Error(ex, $"Failed to create the rotation: {t.Name}");
+                Svc.Log.Error($"Failed to create the rotation: {t.Name}");
 #endif
                 return null;
             }

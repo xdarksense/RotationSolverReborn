@@ -5,9 +5,7 @@ using ECommons;
 using ECommons.DalamudServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
-using ECommons.Reflection;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Client.UI;
@@ -101,7 +99,7 @@ public static class ObjectHelper
             var tarFateId = battleChara.FateId();
             if (tarFateId != 0 && tarFateId != DataCenter.FateId) return false;
         }
-        
+
         if (Service.Config.TargetQuestThings && battleChara.IsOthersPlayers()) return false;
 
         if (battleChara.IsTopPriorityNamedHostile()) return true;

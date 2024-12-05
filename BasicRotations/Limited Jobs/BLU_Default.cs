@@ -141,7 +141,7 @@ public sealed class Blue_Default : BlueMageRotation
     protected override bool MoveForwardGCD(out IAction? act)
     {
         act = null;
-        
+
         return base.MoveForwardGCD(out act);
     }
 

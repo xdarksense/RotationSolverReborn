@@ -37,7 +37,7 @@ public sealed class zMCH_Beta_2 : MachinistRotation
         if (IsBurst && MidfightBurstMeds && !CombatElapsedLessGCD(10) && TimeForBurstMeds(out act, nextGCD)) return true;
         if (IsBurst)
         {
-            
+
             if (FullMetalFieldPvE.EnoughLevel)
             {
                 // Use Wildfire before FMF in the second half of the GCD window to avoid wasting time in status
@@ -46,11 +46,11 @@ public sealed class zMCH_Beta_2 : MachinistRotation
                     && WildfirePvE.CanUse(out act, isLastAbility: true)) return true;
             }
             // Legacy logic for <100
-            else if ((IsLastAbility(false, HyperchargePvE) 
-                    || Heat >= 50 
-                    || Player.HasStatus(true, StatusID.Hypercharged)) 
-                && ToolChargeSoon(out _) 
-                && !LowLevelHyperCheck 
+            else if ((IsLastAbility(false, HyperchargePvE)
+                    || Heat >= 50
+                    || Player.HasStatus(true, StatusID.Hypercharged))
+                && ToolChargeSoon(out _)
+                && !LowLevelHyperCheck
                 && WildfirePvE.CanUse(out act)) return true;
         }
 
@@ -103,8 +103,8 @@ public sealed class zMCH_Beta_2 : MachinistRotation
 
         // Use Hypercharge if wildfire will not be up in 30 seconds or if you hit 100 heat and it will not break your combo
         if (!LowLevelHyperCheck
-            && !Player.HasStatus(true, StatusID.Reassembled) 
-            && (!WildfirePvE.Cooldown.WillHaveOneCharge(30) || Heat == 100) 
+            && !Player.HasStatus(true, StatusID.Reassembled)
+            && (!WildfirePvE.Cooldown.WillHaveOneCharge(30) || Heat == 100)
             && !(LiveComboTime <= HYPERCHARGE_DURATION && LiveComboTime > 0f)
             && ToolChargeSoon(out act)) return true;
 
@@ -117,7 +117,7 @@ public sealed class zMCH_Beta_2 : MachinistRotation
                 && RicochetPvE.CanUse(out act, skipAoeCheck: true, usedUp: true))
                 return true;
         }
-            
+
         if ((IsLastGCD(true, BlazingShotPvE, HeatBlastPvE)
             || GaussRoundPvE.Cooldown.RecastTimeElapsed >= 45
             || !BarrelStabilizerPvE.Cooldown.ElapsedAfter(20))
@@ -167,7 +167,7 @@ public sealed class zMCH_Beta_2 : MachinistRotation
 
         // save Drill for burst
         if (EnhancedMultiweaponTrait.EnoughLevel
-            && !ChainSawPvE.Cooldown.WillHaveOneCharge(6) 
+            && !ChainSawPvE.Cooldown.WillHaveOneCharge(6)
             && (!(LiveComboTime <= 6) || (!CleanShotPvE.CanUse(out _) && !SlugShotPvE.CanUse(out _)))
             && DrillPvE.CanUse(out act, usedUp: true)) return true;
 

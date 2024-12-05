@@ -3,7 +3,6 @@ using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
-using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 
 namespace RotationSolver.Updaters;
 

@@ -34,7 +34,7 @@ public enum TargetHostileType : byte
     /// </summary>
     [Description("Only attack targets in your parties enemy list")]
     TargetIsInEnemiesList,
-    
+
     /// <summary>
     /// All targets when solo, or only attack targets in your parties enemy list.
     /// </summary>

@@ -1,7 +1,5 @@
-﻿using System.IO;
-using System.Text.Json;
+﻿using RotationSolver.Basic.Configuration;
 using JsonSerializer = System.Text.Json.JsonSerializer;
-using RotationSolver.Basic.Configuration;
 
 namespace RotationSolver.Basic.Helpers
 {

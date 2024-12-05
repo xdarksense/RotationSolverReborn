@@ -15,7 +15,6 @@ using ExCSS;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Fate;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
-using FFXIVClientStructs.FFXIV.Client.System.Scheduler;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
@@ -2699,7 +2698,7 @@ public partial class RotationConfigWindow : Window
         {
             ImGui.Text($"Owner: {owner.Name}");
         }
-        
+
         if (target is IBattleChara battleChara)
         {
             ImGui.Text($"HP: {battleChara.CurrentHp} / {battleChara.MaxHp}");

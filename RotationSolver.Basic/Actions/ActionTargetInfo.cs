@@ -6,8 +6,6 @@ using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using RotationSolver.Basic.Configuration;
-using RotationSolver.Basic.Helpers;
-using static FFXIVClientStructs.FFXIV.Client.Game.Character.ActionEffectHandler;
 using static RotationSolver.Basic.Configuration.ConfigTypes;
 
 namespace RotationSolver.Basic.Actions;
