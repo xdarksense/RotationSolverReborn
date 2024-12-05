@@ -47,11 +47,11 @@ public sealed class zMCH_Beta : MachinistRotation
         bool isReassembleUsable =
             //Reassemble current # of charges and double proc protection
             ReassemblePvE.Cooldown.CurrentCharges > 0 && !Player.HasStatus(true, StatusID.Reassembled) &&
-            (nextGCD.IsTheSameTo(true, [ChainSawPvE, ExcavatorPvE]) 
+            (nextGCD.IsTheSameTo(true, [ChainSawPvE, ExcavatorPvE])
             || (!ChainSawPvE.EnoughLevel && nextGCD.IsTheSameTo(true, SpreadShotPvE) && ((IBaseAction)nextGCD).Target.AffectedTargets.Length >= (SpreadShotMasteryTrait.EnoughLevel ? 4 : 5))
-            || nextGCD.IsTheSameTo(false, [AirAnchorPvE]) 
-            || (!ChainSawPvE.EnoughLevel && nextGCD.IsTheSameTo(true, DrillPvE)) 
-            || (!DrillPvE.EnoughLevel && nextGCD.IsTheSameTo(true, CleanShotPvE)) 
+            || nextGCD.IsTheSameTo(false, [AirAnchorPvE])
+            || (!ChainSawPvE.EnoughLevel && nextGCD.IsTheSameTo(true, DrillPvE))
+            || (!DrillPvE.EnoughLevel && nextGCD.IsTheSameTo(true, CleanShotPvE))
             || (!CleanShotPvE.EnoughLevel && nextGCD.IsTheSameTo(false, HotShotPvE)));
         // Attempt to use Reassemble if it's ready
         if (isReassembleUsable)
@@ -75,7 +75,7 @@ public sealed class zMCH_Beta : MachinistRotation
     {
         // Keeps Ricochet and Gauss cannon Even
         bool isRicochetMore = RicochetPvE.EnoughLevel && GaussRoundPvE.Cooldown.RecastTimeElapsed <= RicochetPvE.Cooldown.RecastTimeElapsed;
-        
+
         // If Wildfire is active, use Hypercharge.....Period
         if (Player.HasStatus(true, StatusID.Wildfire_1946) && HyperchargePvE.CanUse(out act)) return true;
 
@@ -150,9 +150,9 @@ public sealed class zMCH_Beta : MachinistRotation
         if (FullMetalFieldPvE.CanUse(out act)) return true;
 
         // dont use the second charge of Drill if it's in opener, also save Drill for burst  --- need to combine this with the logic above!!!
-        if (EnhancedMultiweaponTrait.EnoughLevel 
-            && !CombatElapsedLessGCD(6) 
-            && !ChainSawPvE.Cooldown.WillHaveOneCharge(6) 
+        if (EnhancedMultiweaponTrait.EnoughLevel
+            && !CombatElapsedLessGCD(6)
+            && !ChainSawPvE.Cooldown.WillHaveOneCharge(6)
             && (!HoldDrillForCombo || !(LiveComboTime <= 5) || (!CleanShotPvE.CanUse(out _) && !SlugShotPvE.CanUse(out _)))
             && DrillPvE.CanUse(out act, usedUp: true)) return true;
 
@@ -200,7 +200,7 @@ public sealed class zMCH_Beta : MachinistRotation
         }
     }
 
-    private bool TimeForBurstMeds(out IAction? act, IAction nextGCD) 
+    private bool TimeForBurstMeds(out IAction? act, IAction nextGCD)
     {
         if (AirAnchorPvE.Cooldown.WillHaveOneChargeGCD(1) && BarrelStabilizerPvE.Cooldown.WillHaveOneChargeGCD(6) && WildfirePvE.Cooldown.WillHaveOneChargeGCD(6)) return UseBurstMedicine(out act);
         act = null;
@@ -209,9 +209,9 @@ public sealed class zMCH_Beta : MachinistRotation
 
     private bool CanUseQueenMeow(out IAction? act, IAction nextGCD)
     {
-        if (WildfirePvE.Cooldown.WillHaveOneChargeGCD(4) 
+        if (WildfirePvE.Cooldown.WillHaveOneChargeGCD(4)
             || !WildfirePvE.Cooldown.ElapsedAfter(10)
-            || (nextGCD.IsTheSameTo(true, CleanShotPvE) && Battery == 100) 
+            || (nextGCD.IsTheSameTo(true, CleanShotPvE) && Battery == 100)
             || (nextGCD.IsTheSameTo(true, HotShotPvE, AirAnchorPvE, ChainSawPvE, ExcavatorPvE) && (Battery == 90 || Battery == 100)))
         {
             if (RookAutoturretPvE.CanUse(out act)) return true;

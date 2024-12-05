@@ -15,7 +15,7 @@ public sealed class SAM_Default : SamuraiRotation
     public bool HiganbanaTargets { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Enable TEA Checker.")]
-    public bool EnableTEAChecker { get; set; } = false; 
+    public bool EnableTEAChecker { get; set; } = false;
     #endregion
 
     #region Countdown Logic
@@ -65,7 +65,7 @@ public sealed class SAM_Default : SamuraiRotation
         {
             return false;
         }
-        
+
         var IsTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
         var IsTargetDying = HostileTarget?.IsDying() ?? false;
 
@@ -100,7 +100,7 @@ public sealed class SAM_Default : SamuraiRotation
         {
             return false;
         }
-        
+
         var IsTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
         var IsTargetDying = HostileTarget?.IsDying() ?? false;
 
@@ -160,7 +160,7 @@ public sealed class SAM_Default : SamuraiRotation
         if ((!HasMoon || IsMoonTimeLessThanFlower || !OkaPvE.EnoughLevel) && MangetsuPvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && !HasGetsu)) return true;
         if ((!HasFlower || !IsMoonTimeLessThanFlower) && OkaPvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && !HasKa)) return true;
 
-        if (!HasSetsu && SamBuffs.All(SamBuffs => Player.HasStatus(true, SamBuffs)) && 
+        if (!HasSetsu && SamBuffs.All(SamBuffs => Player.HasStatus(true, SamBuffs)) &&
             YukikazePvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && HasGetsu && HasKa)) return true;
 
         // single target 123 combo's 3 or used 3 directly during burst when MeikyoShisui is active, while also trying to start with the one that player is in position for extra DMG

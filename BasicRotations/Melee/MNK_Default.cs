@@ -17,7 +17,7 @@ public sealed class MNK_Default : MonkRotation
     public bool AutoPB_AOE { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Enable TEA Checker.")]
-    public bool EnableTEAChecker { get; set; } = false; 
+    public bool EnableTEAChecker { get; set; } = false;
     #endregion
 
     #region Countdown Logic
@@ -44,7 +44,7 @@ public sealed class MNK_Default : MonkRotation
         {
             return false;
         }
-        
+
         // PerfectBalancePvE after first gcd + TheForbiddenChakraPvE after second gcd
         // fail to weave both after first gcd - rsr doesn't have enough time to react to both spells
         // you pot -2s (real world -3s) prepull or after 2nd gcd!!! 
@@ -194,7 +194,7 @@ public sealed class MNK_Default : MonkRotation
         {
             return false;
         }
-        
+
         // bullet proofed finisher - use when during burst
         // or if burst was missed, and next burst is not arriving in time, use it better than waste it, otherwise, hold it for next rof
         if (!BeastChakras.Contains(BeastChakra.NONE) && (Player.HasStatus(true, StatusID.RiddleOfFire) || RiddleOfFirePvE.Cooldown.JustUsedAfter(42)))

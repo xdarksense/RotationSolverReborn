@@ -1,12 +1,12 @@
-﻿using System.Collections.Concurrent;
-using System.Text;
-using Dalamud.Utility.Signatures;
+﻿using Dalamud.Utility.Signatures;
 using ECommons.DalamudServices;
 using ECommons.EzHookManager;
 using FFXIVClientStructs.Attributes;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Lumina.Excel;
 using RotationSolver.Basic.Configuration;
+using System.Collections.Concurrent;
+using System.Text;
 
 namespace RotationSolver.Basic;
 
@@ -134,9 +134,9 @@ internal class Service : IDisposable
     {
         // Check the cache for the attribute or add it if not present
         var addon = AddonCache.GetOrAdd(typeof(T), t => t.GetCustomAttribute<AddonAttribute>());
-    
+
         if (addon is null) return Array.Empty<nint>();
-    
+
         return addon.AddonIdentifiers
             .Select(str => Svc.GameGui.GetAddonByName(str, 1))
             .Where(ptr => ptr != IntPtr.Zero);

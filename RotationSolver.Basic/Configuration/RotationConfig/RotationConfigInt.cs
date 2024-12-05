@@ -1,7 +1,4 @@
-﻿using System;
-using System.Reflection;
-
-namespace RotationSolver.Basic.Configuration.RotationConfig;
+﻿namespace RotationSolver.Basic.Configuration.RotationConfig;
 
 /// <summary>
 /// Represents an integer rotation configuration.

@@ -165,7 +165,7 @@ public readonly struct ActionBasicInfo
 
     private bool IsActionEnabled() => _action.Config?.IsEnabled ?? false;
 
-    private bool IsActionDisabled() => !IBaseAction.ForceEnable && (DataCenter.DisabledActionSequencer?.Contains(ID) ?? false); 
+    private bool IsActionDisabled() => !IBaseAction.ForceEnable && (DataCenter.DisabledActionSequencer?.Contains(ID) ?? false);
 
     private bool HasEnoughMP() => DataCenter.CurrentMp >= MPNeed;
 
@@ -230,8 +230,8 @@ public readonly struct ActionBasicInfo
         }
 
         var comboActions = _action.Action.ActionCombo.RowId != 0
-    ?       new ActionID[] { (ActionID)_action.Action.ActionCombo.RowId }
-    :       Array.Empty<ActionID>();
+    ? new ActionID[] { (ActionID)_action.Action.ActionCombo.RowId }
+    : Array.Empty<ActionID>();
 
         if (_action.Setting.ComboIds != null) comboActions = [.. comboActions, .. _action.Setting.ComboIds];
 

@@ -1,5 +1,4 @@
-﻿using ECommons.DalamudServices;
-using RotationSolver.UI;
+﻿using RotationSolver.UI;
 
 namespace RotationSolver.Helpers;
 

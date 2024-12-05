@@ -1,5 +1,4 @@
-﻿using ECommons.DalamudServices;
-using FFXIVClientStructs.FFXIV.Client.System.Framework;
+﻿using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using System.Runtime.InteropServices;
 

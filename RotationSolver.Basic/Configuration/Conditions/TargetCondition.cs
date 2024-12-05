@@ -67,7 +67,7 @@ internal class TargetCondition : DelayCondition
             TargetConditionType.MP => CheckMP(tar),
             TargetConditionType.TargetName => CheckTargetName(tar),
             TargetConditionType.TargetRole => CheckTargetRole(tar),
-	    _ => false,
+            _ => false,
         };
     }
 

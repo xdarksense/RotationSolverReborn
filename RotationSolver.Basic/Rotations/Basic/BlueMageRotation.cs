@@ -69,7 +69,7 @@ partial class BlueMageRotation
 
     static partial void ModifySonicBoomPvE(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyWhistlePvE(ref ActionSetting setting)
@@ -211,7 +211,7 @@ partial class BlueMageRotation
 
     static partial void ModifySeaShantyPvE(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyBeingMortalPvE(ref ActionSetting setting)
@@ -227,7 +227,7 @@ partial class BlueMageRotation
     //Optional
     static partial void ModifyFlyingSardinePvE(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyWhiteWindPvE(ref ActionSetting setting)

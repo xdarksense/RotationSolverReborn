@@ -1,6 +1,4 @@
-﻿using Dalamud.Game.ClientState.JobGauge;
-using Dalamud.Plugin.Services;
-using System;
+﻿using Dalamud.Plugin.Services;
 
 namespace RotationSolver.Basic.Data
 {

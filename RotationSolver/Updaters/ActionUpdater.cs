@@ -13,7 +13,8 @@ internal static class ActionUpdater
 {
     internal static DateTime AutoCancelTime { get; set; } = DateTime.MinValue;
 
-    static ActionUpdater() {
+    static ActionUpdater()
+    {
         EzIPC.Init(typeof(ActionUpdater), "RotationSolverReborn.ActionUpdater");
     }
 

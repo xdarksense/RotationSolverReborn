@@ -172,7 +172,7 @@ public sealed class VPR_Default : ViperRotation
 
         if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true)) return true;
         if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true)) return true;
-        
+
 
         if (VicewinderPvE.Cooldown.CurrentCharges == 1 && VicewinderPvE.Cooldown.RecastTimeRemainOneCharge < 10)
         {

@@ -20,7 +20,7 @@ partial class MachinistRotation
     /// Gets the current Heat level.
     /// </summary>
     public static byte Heat => JobGauge.Heat;
-    
+
     /// <summary>
     /// Gets the current Overheated Stacks.
     /// </summary>

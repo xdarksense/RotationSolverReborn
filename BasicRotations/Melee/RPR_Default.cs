@@ -97,7 +97,7 @@ public sealed class RPR_Default : ReaperRotation
         {
             if (ShadowOfDeathPvE.CanUse(out act)) return true;
         }
-        
+
         if (HasEnshrouded)
         {
             if (ShadowOfDeathPvE.CanUse(out act)) return true;

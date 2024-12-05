@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-
-namespace RotationSolver.Basic.Configuration;
+﻿namespace RotationSolver.Basic.Configuration;
 
 /// <summary>
 /// Represents a boolean condition with additional configuration options.
