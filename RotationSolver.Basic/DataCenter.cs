@@ -117,6 +117,7 @@ internal static class DataCenter
     public static bool IsInTEA => TerritoryID == 887;
     public static bool IsInDSR => TerritoryID == 968;
     public static bool IsInTOP => TerritoryID == 1122;
+    public static bool IsInFRU => TerritoryID == 1238;
 
     public static TerritoryContentType TerritoryContentType =>
         (TerritoryContentType)(ContentFinder?.ContentType.Value.RowId ?? 0);
