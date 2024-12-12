@@ -13,6 +13,35 @@ partial class AstrologianRotation
     /// NONE = 0, BALANCE = 1, BOLE = 2, ARROW = 3, SPEAR = 4, EWERS = 5, SPIRE = 6
     /// </summary>
     protected static CardType[] DrawnCard => JobGauge.DrawnCards;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasBalance => DrawnCard.Any(card => card == CardType.BALANCE);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasBole => DrawnCard.Any(card => card == CardType.BOLE);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasArrow => DrawnCard.Any(card => card == CardType.ARROW);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasSpear => DrawnCard.Any(card => card == CardType.SPEAR);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasEwer => DrawnCard.Any(card => card == CardType.EWER);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasSpire => DrawnCard.Any(card => card == CardType.SPIRE);
 
     /// <summary>
     /// Indicates the state of Minor Arcana and which card will be used next when activating Minor Arcana, LORD = 7, LADY = 8
@@ -118,7 +147,7 @@ partial class AstrologianRotation
 
     static partial void ModifyTheBalancePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DrawnCard.Any(card => card == CardType.BALANCE);
+        setting.ActionCheck = () => HasBalance;
         setting.TargetStatusProvide = [StatusID.TheBalance_3887, StatusID.Weakness,
         StatusID.BrinkOfDeath];
         setting.TargetType = TargetType.Melee;
@@ -127,7 +156,7 @@ partial class AstrologianRotation
 
     static partial void ModifyTheArrowPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DrawnCard.Any(card => card == CardType.ARROW);
+        setting.ActionCheck = () => HasArrow;
         setting.TargetStatusProvide = [StatusID.TheArrow_3888, StatusID.BrinkOfDeath];
         setting.TargetType = TargetType.BeAttacked;
         setting.IsFriendly = true;
@@ -135,7 +164,7 @@ partial class AstrologianRotation
 
     static partial void ModifyTheSpirePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DrawnCard.Any(card => card == CardType.SPIRE);
+        setting.ActionCheck = () => HasSpire;
         setting.TargetStatusProvide = [StatusID.TheSpire_3892, StatusID.BrinkOfDeath];
         setting.TargetType = TargetType.BeAttacked;
         setting.IsFriendly = true;
@@ -143,7 +172,7 @@ partial class AstrologianRotation
 
     static partial void ModifyTheSpearPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DrawnCard.Any(card => card == CardType.SPEAR);
+        setting.ActionCheck = () => HasSpear;
         setting.TargetStatusProvide = [StatusID.TheSpear_3889, StatusID.Weakness,
         StatusID.BrinkOfDeath];
         setting.TargetType = TargetType.Range;
@@ -152,7 +181,7 @@ partial class AstrologianRotation
 
     static partial void ModifyTheBolePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DrawnCard.Any(card => card == CardType.BOLE);
+        setting.ActionCheck = () => HasBole;
         setting.TargetStatusProvide = [StatusID.TheBole_3890, StatusID.BrinkOfDeath];
         setting.TargetType = TargetType.BeAttacked;
         setting.IsFriendly = true;
@@ -160,7 +189,7 @@ partial class AstrologianRotation
 
     static partial void ModifyTheEwerPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DrawnCard.Any(card => card == CardType.EWER);
+        setting.ActionCheck = () => HasEwer;
         setting.TargetStatusProvide = [StatusID.TheEwer_3891, StatusID.BrinkOfDeath];
         setting.TargetType = TargetType.BeAttacked;
         setting.IsFriendly = true;
