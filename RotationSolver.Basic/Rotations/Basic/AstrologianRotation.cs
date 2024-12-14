@@ -44,6 +44,16 @@ partial class AstrologianRotation
     public static bool HasSpire => DrawnCard.Any(card => card == CardType.SPIRE);
 
     /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasLord => DrawnCard.Any(card => card == CardType.LORD);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasLady => DrawnCard.Any(card => card == CardType.LADY);
+
+    /// <summary>
     /// Indicates the state of Minor Arcana and which card will be used next when activating Minor Arcana, LORD = 7, LADY = 8
     /// </summary>
     protected static CardType DrawnCrownCard => JobGauge.DrawnCrownCard;
@@ -302,7 +312,7 @@ partial class AstrologianRotation
 
     static partial void ModifyLordOfCrownsPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DrawnCrownCard == CardType.LORD;
+        setting.ActionCheck = () => HasLord;
         setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -313,7 +323,7 @@ partial class AstrologianRotation
 
     static partial void ModifyLadyOfCrownsPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DrawnCrownCard == CardType.LADY;
+        setting.ActionCheck = () => HasLady;
         setting.IsFriendly = true;
         setting.CreateConfig = () => new ActionConfig()
         {
