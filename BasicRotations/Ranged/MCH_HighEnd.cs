@@ -1,9 +1,9 @@
 namespace DefaultRotations.Ranged;
 
-[Rotation("zMCH Beta 2", CombatType.PvE, GameVersion = "7.05")]
-[SourceCode(Path = "main/BasicRotations/Ranged/zMCH_Beta_2.cs")]
+[Rotation("High End", CombatType.PvE, GameVersion = "7.11")]
+[SourceCode(Path = "main/BasicRotations/Ranged/MCH_HighEnd.cs")]
 [Api(4)]
-public sealed class zMCH_Beta_2 : MachinistRotation
+public sealed class MCH_HighEnd : MachinistRotation
 {
     #region Config Options
     [RotationConfig(CombatType.PvE, Name = "Use hardcoded Queen timings\nSlight DPS gain if uninterrupted but possibly loses more from drift or death.")]
