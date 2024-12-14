@@ -1,6 +1,6 @@
 namespace DefaultRotations.Tank;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.00")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.11")]
 [SourceCode(Path = "main/BasicRotations/Tank/GNB_Default.cs")]
 [Api(4)]
 public sealed class GNB_Default : GunbreakerRotation
@@ -103,7 +103,7 @@ public sealed class GNB_Default : GunbreakerRotation
 
         if (IsLastGCD(false, NobleBloodPvE) && LionHeartPvE.CanUse(out act, skipComboCheck: true)) return true;
         if (IsLastGCD(false, ReignOfBeastsPvE) && NobleBloodPvE.CanUse(out act, skipComboCheck: true)) return true;
-        if (ReignOfBeastsPvE.CanUse(out act)) return true;
+        if (ReignOfBeastsPvE.CanUse(out act, skipAoeCheck: true)) return true;
 
         if (Player.HasStatus(true, StatusID.NoMercy) && SonicBreakPvE.CanUse(out act)) return true;
 
