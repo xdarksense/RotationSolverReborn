@@ -129,10 +129,11 @@ partial class BardRotation
 
     static partial void ModifyMagesBalladPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.MagesBallad_2217, StatusID.Repertoire];
+        setting.StatusProvide = [StatusID.MagesBallad_2217];
         setting.ActionCheck = () => InCombat;
         setting.TargetType = TargetType.Self;
         setting.UnlockedByQuestID = 66621;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyTheWardensPaeanPvE(ref ActionSetting setting)
@@ -149,10 +150,11 @@ partial class BardRotation
 
     static partial void ModifyArmysPaeonPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.ArmysPaeon_2218, StatusID.Repertoire];
+        setting.StatusProvide = [StatusID.ArmysPaeon_2218];
         setting.ActionCheck = () => InCombat;
         setting.TargetType = TargetType.Self;
         setting.UnlockedByQuestID = 66623;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyRainOfDeathPvE(ref ActionSetting setting)
@@ -177,10 +179,11 @@ partial class BardRotation
 
     static partial void ModifyTheWanderersMinuetPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.TheWanderersMinuet_2216, StatusID.Repertoire];
+        setting.StatusProvide = [StatusID.TheWanderersMinuet_2216];
         setting.ActionCheck = () => InCombat;
         setting.TargetType = TargetType.Self;
         setting.UnlockedByQuestID = 67250;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyPitchPerfectPvE(ref ActionSetting setting)
