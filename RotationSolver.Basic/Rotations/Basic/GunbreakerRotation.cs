@@ -18,7 +18,7 @@ partial class GunbreakerRotation
 
     #region Job Gauge
     /// <summary>
-    /// 
+    /// Gets the amount of ammo available.
     /// </summary>
     public static byte Ammo => JobGauge.Ammo;
 
@@ -32,12 +32,18 @@ partial class GunbreakerRotation
     /// </summary>
     public static byte MaxAmmo => CartridgeChargeIiTrait.EnoughLevel ? (byte)3 : (byte)2;
 
+    /// <summary>
+    /// Gets the max combo time of the Gnashing Fang combo.
+    /// </summary>
+    public static short MaxTimerDuration => JobGauge.MaxTimerDuration;
+
     /// <inheritdoc/>
     public override void DisplayStatus()
     {
         ImGui.Text("Ammo: " + Ammo.ToString());
         ImGui.Text("AmmoComboStep: " + AmmoComboStep.ToString());
         ImGui.Text("MaxAmmo: " + MaxAmmo.ToString());
+        ImGui.Text("MaxTimerDuration: " + MaxTimerDuration.ToString());
     }
     #endregion
 
