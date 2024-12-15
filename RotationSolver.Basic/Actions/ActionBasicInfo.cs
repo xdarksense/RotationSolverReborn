@@ -1,6 +1,7 @@
 ﻿using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
 
 namespace RotationSolver.Basic.Actions;
 
@@ -150,9 +151,7 @@ public readonly struct ActionBasicInfo
     {
         if (!IsActionEnabled() || !IsOnSlot) return false;
         if (IsLimitBreak) return true;
-        if (IsActionDisabled() || !EnoughLevel || !HasEnoughMP() || !IsQuestUnlocked()) return false;
-
-        var player = Player.Object;
+        if (IsActionDisabled() || !EnoughLevel || !HasEnoughMP() || !SpellUnlocked) return false;
 
         if (IsStatusNeeded() || IsStatusProvided(skipStatusProvideCheck)) return false;
         if (IsLimitBreakLevelLow() || !IsComboValid(skipComboCheck) || !IsRoleActionValid()) return false;
@@ -163,23 +162,16 @@ public readonly struct ActionBasicInfo
         return true;
     }
 
+    /// <summary>
+    /// Whether the spell is unlocked by the player
+    /// </summary>
+    public unsafe bool SpellUnlocked => _action.Action.UnlockLink.RowId <= 0 || UIState.Instance()->IsUnlockLinkUnlockedOrQuestCompleted(_action.Action.UnlockLink.RowId);
+
     private bool IsActionEnabled() => _action.Config?.IsEnabled ?? false;
 
     private bool IsActionDisabled() => !IBaseAction.ForceEnable && (DataCenter.DisabledActionSequencer?.Contains(ID) ?? false);
 
     private bool HasEnoughMP() => DataCenter.CurrentMp >= MPNeed;
-
-    private bool IsQuestUnlocked()
-    {
-        if (_action.Setting.UnlockedByQuestID == 0) return true;
-        var isUnlockQuestComplete = QuestManager.IsQuestComplete(_action.Setting.UnlockedByQuestID);
-        if (!isUnlockQuestComplete)
-        {
-            var warning = $"The action {Name} is locked by the quest {_action.Setting.UnlockedByQuestID}. Please complete this quest to learn this action.";
-            WarningHelper.AddSystemWarning(warning);
-        }
-        return isUnlockQuestComplete;
-    }
 
     private bool IsStatusNeeded()
     {

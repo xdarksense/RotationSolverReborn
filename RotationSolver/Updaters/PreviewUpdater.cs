@@ -43,6 +43,7 @@ internal static class PreviewUpdater
             Job.SMN => BitmapFontIcon.Summoner,
             Job.RDM => BitmapFontIcon.RedMage,
             Job.PCT => BitmapFontIcon.Pictomancer,
+            Job.BLU => BitmapFontIcon.BlueMage,
 
             Job.MNK => BitmapFontIcon.Monk,
             Job.SAM => BitmapFontIcon.Samurai,
@@ -54,6 +55,20 @@ internal static class PreviewUpdater
             Job.BRD => BitmapFontIcon.Bard,
             Job.MCH => BitmapFontIcon.Machinist,
             Job.DNC => BitmapFontIcon.Dancer,
+
+            Job.BSM => BitmapFontIcon.Blacksmith,
+            Job.ARM => BitmapFontIcon.Armorer,
+            Job.WVR => BitmapFontIcon.Weaver,
+            Job.ALC => BitmapFontIcon.Alchemist,
+            Job.CRP => BitmapFontIcon.Carpenter,
+            Job.LTW => BitmapFontIcon.Leatherworker,
+            Job.CUL => BitmapFontIcon.Culinarian,
+            Job.GSM => BitmapFontIcon.Goldsmith,
+
+            Job.FSH => BitmapFontIcon.Fisher,
+            Job.MIN => BitmapFontIcon.Miner,
+            Job.BTN => BitmapFontIcon.Botanist,
+
             _ => BitmapFontIcon.ExclamationRectangle,
         };
 
