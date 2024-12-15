@@ -91,6 +91,24 @@ public sealed class BRD_Default : BardRotation
 
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
+        if (TheWanderersMinuetPvE.CanUse(out act) && InCombat && !IsLastAbility(ActionID.ArmysPaeonPvE) && !IsLastAbility(ActionID.MagesBalladPvE))
+        {
+            if (SongEndAfter(ARMYRemainTime) && (Song != Song.NONE || Player.HasStatus(true, StatusID.ArmysEthos))) return true;
+        }
+
+        if (MagesBalladPvE.CanUse(out act) && InCombat && !IsLastAbility(ActionID.ArmysPaeonPvE) && !IsLastAbility(ActionID.TheWanderersMinuetPvE))
+        {
+            if (Song == Song.WANDERER && SongEndAfter(WANDRemainTime) && (Repertoire == 0 || !HasHostilesInMaxRange)) return true;
+            if (Song == Song.ARMY && SongEndAfterGCD(2) && TheWanderersMinuetPvE.Cooldown.IsCoolingDown) return true;
+        }
+
+        if (ArmysPaeonPvE.CanUse(out act) && InCombat && !IsLastAbility(ActionID.MagesBalladPvE) && !IsLastAbility(ActionID.TheWanderersMinuetPvE))
+        {
+            if (TheWanderersMinuetPvE.EnoughLevel && SongEndAfter(MAGERemainTime) && Song == Song.MAGE) return true;
+            if (TheWanderersMinuetPvE.EnoughLevel && SongEndAfter(2) && MagesBalladPvE.Cooldown.IsCoolingDown && Song == Song.WANDERER) return true;
+            if (!TheWanderersMinuetPvE.EnoughLevel && SongEndAfter(2)) return true;
+        }
+
         if (Song == Song.NONE && InCombat)
         {
             switch (FirstSong)
@@ -110,24 +128,6 @@ public sealed class BRD_Default : BardRotation
             if (TheWanderersMinuetPvE.CanUse(out act)) return true;
             if (MagesBalladPvE.CanUse(out act)) return true;
             if (ArmysPaeonPvE.CanUse(out act)) return true;
-        }
-
-        if (TheWanderersMinuetPvE.CanUse(out act) && InCombat)
-        {
-            if (SongEndAfter(ARMYRemainTime) && (Song != Song.NONE || Player.HasStatus(true, StatusID.ArmysEthos))) return true;
-        }
-
-        if (MagesBalladPvE.CanUse(out act) && InCombat)
-        {
-            if (Song == Song.WANDERER && SongEndAfter(WANDRemainTime) && (Repertoire == 0 || !HasHostilesInMaxRange)) return true;
-            if (Song == Song.ARMY && SongEndAfterGCD(2) && TheWanderersMinuetPvE.Cooldown.IsCoolingDown) return true;
-        }
-
-        if (ArmysPaeonPvE.CanUse(out act) && InCombat)
-        {
-            if (TheWanderersMinuetPvE.EnoughLevel && SongEndAfter(MAGERemainTime) && Song == Song.MAGE) return true;
-            if (TheWanderersMinuetPvE.EnoughLevel && SongEndAfter(2) && MagesBalladPvE.Cooldown.IsCoolingDown && Song == Song.WANDERER) return true;
-            if (!TheWanderersMinuetPvE.EnoughLevel && SongEndAfter(2)) return true;
         }
 
         return base.GeneralAbility(nextGCD, out act);

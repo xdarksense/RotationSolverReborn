@@ -1,15 +1,11 @@
 ﻿namespace DefaultRotations.Melee;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.05")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.11")]
 [SourceCode(Path = "main/BasicRotations/Melee/SAM_Default.cs")]
 [Api(4)]
 public sealed class SAM_Default : SamuraiRotation
 {
     #region Config Options
-
-    [Range(0, 85, ConfigUnitType.None, 5)]
-    [RotationConfig(CombatType.PvE, Name = "Use Kenki above.")]
-    public int AddKenki { get; set; } = 50;
 
     [RotationConfig(CombatType.PvE, Name = "Prevent Higanbana use if theres more than one target")]
     public bool HiganbanaTargets { get; set; } = false;
@@ -58,6 +54,26 @@ public sealed class SAM_Default : SamuraiRotation
 
     #region oGCD Logic
 
+    protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
+    {
+        act = null;
+        if (EnableTEAChecker && Target.Name.ToString() == "Jagd Doll" && Target.GetHealthRatio() < 0.25)
+        {
+            return false;
+        }
+
+        var IsTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
+        var IsTargetDying = HostileTarget?.IsDying() ?? false;
+
+        // from old version - didn't touch this, didn't test this, personally i doubt it's working !!! check later !!!
+        if (HasHostilesInRange && IsLastGCD(true, YukikazePvE, MangetsuPvE, OkaPvE) &&
+            (!IsTargetBoss || (HostileTarget?.HasStatus(true, StatusID.Higanbana) ?? false) && !(HostileTarget?.WillStatusEnd(40, true, StatusID.Higanbana) ?? false) || !HasMoon && !HasFlower || IsTargetBoss && IsTargetDying))
+        {
+            if (MeikyoShisuiPvE.CanUse(out act, usedUp: true)) return true;
+        }
+        return base.EmergencyAbility(nextGCD, out act);
+    }
+
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
@@ -83,34 +99,17 @@ public sealed class SAM_Default : SamuraiRotation
             if (HagakurePvE.CanUse(out act)) return true;
         }
 
-        if (ZanshinPvE.CanUse(out act)) return true; // need to check rsr code for upgrade and remove aoecheck here !!! check later !!!
-        if (HissatsuGurenPvE.CanUse(out act, skipAoeCheck: !HissatsuSeneiPvE.EnoughLevel)) return true;
-        if (HissatsuSeneiPvE.CanUse(out act)) return true;
+        if (ZanshinPvE.CanUse(out act)) return true;
 
-        if (HissatsuKyutenPvE.CanUse(out act)) return true;
-        if (HissatsuShintenPvE.CanUse(out act)) return true;
+        //ensures pooling Kenki for Zanshin if it's available
+        bool hasZanshinReady = Player.HasStatus(true, StatusID.ZanshinReady_3855);
+
+        if (!hasZanshinReady && HissatsuGurenPvE.CanUse(out act, skipAoeCheck: !HissatsuSeneiPvE.EnoughLevel)) return true;
+        if (!hasZanshinReady && HissatsuSeneiPvE.CanUse(out act)) return true;
+        if (!hasZanshinReady && HissatsuKyutenPvE.CanUse(out act)) return true;
+        if (!hasZanshinReady && HissatsuShintenPvE.CanUse(out act)) return true;
 
         return base.AttackAbility(nextGCD, out act);
-    }
-
-    protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
-    {
-        act = null;
-        if (EnableTEAChecker && Target.Name.ToString() == "Jagd Doll" && Target.GetHealthRatio() < 0.25)
-        {
-            return false;
-        }
-
-        var IsTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
-        var IsTargetDying = HostileTarget?.IsDying() ?? false;
-
-        // from old version - didn't touch this, didn't test this, personally i doubt it's working !!! check later !!!
-        if (HasHostilesInRange && IsLastGCD(true, YukikazePvE, MangetsuPvE, OkaPvE) &&
-            (!IsTargetBoss || (HostileTarget?.HasStatus(true, StatusID.Higanbana) ?? false) && !(HostileTarget?.WillStatusEnd(40, true, StatusID.Higanbana) ?? false) || !HasMoon && !HasFlower || IsTargetBoss && IsTargetDying))
-        {
-            if (MeikyoShisuiPvE.CanUse(out act, usedUp: true)) return true;
-        }
-        return base.EmergencyAbility(nextGCD, out act);
     }
 
     #endregion
