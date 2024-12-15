@@ -2,6 +2,7 @@
 using Lumina.Excel;
 //using Lumina.Excel.CustomSheets;
 using System.Runtime.Loader;
+using ECommons.DalamudServices;
 
 namespace RotationSolver.Helpers;
 

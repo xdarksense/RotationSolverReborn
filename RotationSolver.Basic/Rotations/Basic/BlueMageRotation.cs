@@ -1,7 +1,58 @@
-﻿namespace RotationSolver.Basic.Rotations.Basic;
+﻿using ECommons;
+
+namespace RotationSolver.Basic.Rotations.Basic;
 
 partial class BlueMageRotation
 {
+    public enum BluDPSSpell : byte
+    {
+        WaterCannon,
+        SonicBoom,
+        GoblinPunch,
+
+    }
+
+    public enum BluAOESpell : byte
+    {
+        Glower,
+        FlyingFrenzy,
+        FlameThrower,
+        DrillCannons,
+        Plaincracker,
+        HighVoltage,
+        MindBlast,
+        ThousandNeedles,
+    }
+
+    public enum BluHealSpell : byte
+    {
+        WhiteWind,
+        AngelsSnack,
+    }
+
+    public BlueMageRotation()
+    {
+        BluDPSSpellActions.Add(BluDPSSpell.WaterCannon, WaterCannonPvE);
+        BluDPSSpellActions.Add(BluDPSSpell.SonicBoom, SonicBoomPvE);
+        BluDPSSpellActions.Add(BluDPSSpell.GoblinPunch, GoblinPunchPvE);
+
+        BluHealSpellActions.Add(BluHealSpell.WhiteWind, WhiteWindPvE);
+        BluHealSpellActions.Add(BluHealSpell.AngelsSnack, AngelsSnackPvE);
+
+        BluAOESpellActions.Add(BluAOESpell.Glower, GlowerPvE);
+        BluAOESpellActions.Add(BluAOESpell.FlyingFrenzy, FlyingFrenzyPvE);
+        BluAOESpellActions.Add(BluAOESpell.FlameThrower, FlameThrowerPvE);
+        BluAOESpellActions.Add(BluAOESpell.DrillCannons, DrillCannonsPvE);
+        BluAOESpellActions.Add(BluAOESpell.Plaincracker, PlaincrackerPvE);
+        BluAOESpellActions.Add(BluAOESpell.HighVoltage, HighVoltagePvE);
+        BluAOESpellActions.Add(BluAOESpell.MindBlast, MindBlastPvE);
+        BluAOESpellActions.Add(BluAOESpell.ThousandNeedles, _1000NeedlesPvE);
+    }
+
+    public Dictionary<BluDPSSpell, IBaseAction> BluDPSSpellActions = [];
+    public Dictionary<BluAOESpell, IBaseAction> BluAOESpellActions = [];
+    public Dictionary<BluHealSpell, IBaseAction> BluHealSpellActions = [];
+
     /// <summary>
     /// 
     /// </summary>
@@ -30,10 +81,8 @@ partial class BlueMageRotation
         DPS,
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    protected static BLUID BlueId { get; set; } = BLUID.DPS;
+    [RotationConfig(CombatType.PvE, Name = "Aetheric Mimicry Role")]
+    public static BLUID BlueId { get; set; } = BLUID.DPS;
 
     static partial void ModifySongOfTormentPvE(ref ActionSetting setting)
     {
@@ -214,7 +263,22 @@ partial class BlueMageRotation
 
     }
 
+    static partial void ModifyMightyGuardPvE(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+        setting.StatusProvide = [StatusID.MightyGuard];
+    }
+
     static partial void ModifyBeingMortalPvE(ref ActionSetting setting)
+    {
+        setting.IsFriendly = false;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyGlowerPvE(ref ActionSetting setting)
     {
         setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
@@ -230,9 +294,25 @@ partial class BlueMageRotation
 
     }
 
+    static partial void ModifyMindBlastPvE(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 3,
+        };
+        setting.IsFriendly = false;
+    }
+
     static partial void ModifyWhiteWindPvE(ref ActionSetting setting)
     {
         setting.IsFriendly = true;
+    }
+
+    static partial void ModifyBasicInstinctPvE(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+        setting.StatusProvide = [StatusID.BasicInstinct];
+        setting.ActionCheck = () => IsInDuty && PartyMembers.Count() <= 1 && DataCenter.TerritoryContentType != TerritoryContentType.TheMaskedCarnivale;
     }
 
     /// <summary>
@@ -353,7 +433,7 @@ partial class BlueMageRotation
 //    public static IBLUAction FireAngon { get; } = new BLUAction(ActionID.FireAngon);
 
 //    /// <summary>
-//    /// 
+//    ///
 //    /// </summary>
 //    public static IBLUAction MindBlast { get; } = new BLUAction(ActionID.MindBlast);
 

@@ -1634,6 +1634,7 @@ public partial class RotationConfigWindow : Window
                     ImGui.Text($"Can Use: {action.CanUse(out _)} ");
                     ImGui.Text("IgnoreCastCheck:" + action.CanUse(out _, skipCastingCheck: true).ToString());
                     ImGui.Text("Target Name: " + action.Target.Target?.Name ?? string.Empty);
+                    ImGui.Text($"SpellUnlocked: {action.Info.SpellUnlocked} ({action.Action.UnlockLink.RowId})");
                 }
                 catch
                 {
