@@ -282,7 +282,7 @@ partial class SamuraiRotation
 
     static partial void ModifyZanshinPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.ZanshinReady];
+        setting.StatusNeed = [StatusID.ZanshinReady_3855];
         setting.ActionCheck = () => Kenki >= 50;
         setting.CreateConfig = () => new ActionConfig()
         {
