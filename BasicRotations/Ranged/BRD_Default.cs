@@ -205,7 +205,7 @@ public sealed class BRD_Default : BardRotation
         if (IronJawsPvE.CanUse(out act)) return true;
         if (IronJawsPvE.CanUse(out act, skipStatusProvideCheck: true) && (IronJawsPvE.Target.Target?.WillStatusEnd(30, true, IronJawsPvE.Setting.TargetStatusProvide ?? []) ?? false))
         {
-            if (Player.HasStatus(true, StatusID.BattleVoice) && Player.WillStatusEndGCD(1, 0, true, StatusID.BattleVoice)) return true;
+            if (Player.HasStatus(true, StatusID.BattleVoice, StatusID.RadiantFinale, StatusID.RagingStrikes) && Player.WillStatusEndGCD(1, 1, true, StatusID.BattleVoice, StatusID.RadiantFinale, StatusID.RagingStrikes)) return true;
         }
 
         if (ResonantArrowPvE.CanUse(out act)) return true;
@@ -220,6 +220,7 @@ public sealed class BRD_Default : BardRotation
         {
             if (!Player.HasStatus(true, StatusID.RagingStrikes)) return true;
             if (Player.HasStatus(true, StatusID.RagingStrikes) && BarragePvE.Cooldown.IsCoolingDown) return true;
+            if (HostileTarget?.WillStatusEndGCD(1, 0.5f, true, StatusID.Windbite, StatusID.Stormbite, StatusID.VenomousBite, StatusID.CausticBite) ?? false) return false;
         }
 
         //aoe
@@ -251,9 +252,14 @@ public sealed class BRD_Default : BardRotation
     #region Extra Methods
     private bool CanUseApexArrow(out IAction act)
     {
-        if (!ApexArrowPvE.CanUse(out act, skipAoeCheck: true)) return false;
+        if (!ApexArrowPvE.CanUse(out act)) return false;
 
         if (QuickNockPvE.CanUse(out _) && SoulVoice == 100) return true;
+        if (LadonsbitePvE.CanUse(out _) && SoulVoice == 100) return true;
+
+        if (HostileTarget?.WillStatusEndGCD(1, 1, true, StatusID.Windbite, StatusID.Stormbite, StatusID.VenomousBite, StatusID.CausticBite) ?? false) return false;
+
+        if (Song == Song.WANDERER && SoulVoice >= 80 && !Player.HasStatus(true, StatusID.RagingStrikes)) return false;
 
         if (SoulVoice == 100 && BattleVoicePvE.Cooldown.WillHaveOneCharge(25)) return false;
 
@@ -267,6 +273,7 @@ public sealed class BRD_Default : BardRotation
 
         return false;
     }
+
     private bool BetterBloodletterLogic(out IAction? act)
     {
         bool isRagingStrikesLevel = RagingStrikesPvE.EnoughLevel;
