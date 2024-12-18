@@ -296,6 +296,10 @@ partial class SamuraiRotation
     {
         setting.ActionCheck = () => SenCount == 1 && MeditationStacks <= 2;
         setting.TargetStatusProvide = [StatusID.Higanbana];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            TimeToKill = 48,
+        };
     }
 
     static partial void ModifyTenkaGokenPvE(ref ActionSetting setting)

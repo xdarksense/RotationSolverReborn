@@ -1,11 +1,34 @@
 ﻿namespace DefaultRotations.Melee;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.11")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Melee/SAM_Default.cs")]
 [Api(4)]
 public sealed class SAM_Default : SamuraiRotation
 {
     #region Config Options
+
+    [Range(0, 100, ConfigUnitType.None, 1)]
+    [RotationConfig(CombatType.PvE, Name = "Kenki needed to use Shinten")]
+    public int ShintenKenki { get; set; } = 75;
+
+    [Range(0, 100, ConfigUnitType.None, 1)]
+    [RotationConfig(CombatType.PvE, Name = "Kenki needed to use Kyuten")]
+    public int KyutenKenki { get; set; } = 75;
+
+    [Range(0, 100, ConfigUnitType.None, 1)]
+    [RotationConfig(CombatType.PvE, Name = "Kenki needed to use Senei")]
+    public int SeneiKenki { get; set; } = 25;
+
+    [Range(0, 100, ConfigUnitType.None, 1)]
+    [RotationConfig(CombatType.PvE, Name = "Kenki needed to use Guren")]
+    public int GurenKenki { get; set; } = 25;
+
+    [Range(0, 100, ConfigUnitType.None, 1)]
+    [RotationConfig(CombatType.PvE, Name = "Kenki needed to use Zanshin")]
+    public int ZanshinKenki { get; set; } = 50;
+
+    [RotationConfig(CombatType.PvE, Name = "Prioritize Zanshin use over other Kenki abilties when available.")]
+    public bool ZanshinPrio { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Prevent Higanbana use if theres more than one target")]
     public bool HiganbanaTargets { get; set; } = false;
@@ -99,15 +122,15 @@ public sealed class SAM_Default : SamuraiRotation
             if (HagakurePvE.CanUse(out act)) return true;
         }
 
-        if (ZanshinPvE.CanUse(out act)) return true;
+        if (Kenki >= GurenKenki && ZanshinPvE.CanUse(out act)) return true;
 
         //ensures pooling Kenki for Zanshin if it's available
-        bool hasZanshinReady = Player.HasStatus(true, StatusID.ZanshinReady_3855);
+        bool hasZanshinReady = Player.HasStatus(true, StatusID.ZanshinReady_3855) && ZanshinPrio;
 
-        if (!hasZanshinReady && HissatsuGurenPvE.CanUse(out act, skipAoeCheck: !HissatsuSeneiPvE.EnoughLevel)) return true;
-        if (!hasZanshinReady && HissatsuSeneiPvE.CanUse(out act)) return true;
-        if (!hasZanshinReady && HissatsuKyutenPvE.CanUse(out act)) return true;
-        if (!hasZanshinReady && HissatsuShintenPvE.CanUse(out act)) return true;
+        if (!hasZanshinReady && Kenki >= GurenKenki && HissatsuGurenPvE.CanUse(out act, skipAoeCheck: !HissatsuSeneiPvE.EnoughLevel)) return true;
+        if (!hasZanshinReady && Kenki >= SeneiKenki && HissatsuSeneiPvE.CanUse(out act)) return true;
+        if (!hasZanshinReady && Kenki >= KyutenKenki && HissatsuKyutenPvE.CanUse(out act)) return true;
+        if (!hasZanshinReady && Kenki >= ShintenKenki && HissatsuShintenPvE.CanUse(out act)) return true;
 
         return base.AttackAbility(nextGCD, out act);
     }
