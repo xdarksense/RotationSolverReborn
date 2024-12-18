@@ -4,32 +4,93 @@ namespace RotationSolver.Basic.Rotations.Basic;
 
 partial class BlueMageRotation
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public enum BluDPSSpell : byte
     {
+        /// <summary>
+        /// 
+        /// </summary>
         WaterCannon,
+
+        /// <summary>
+        /// 
+        /// </summary>
         SonicBoom,
+
+        /// <summary>
+        /// 
+        /// </summary>
         GoblinPunch,
 
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public enum BluAOESpell : byte
     {
+        /// <summary>
+        /// 
+        /// </summary>
         Glower,
+
+        /// <summary>
+        /// 
+        /// </summary>
         FlyingFrenzy,
+
+        /// <summary>
+        /// 
+        /// </summary>
         FlameThrower,
+
+        /// <summary>
+        /// 
+        /// </summary>
         DrillCannons,
+
+        /// <summary>
+        /// 
+        /// </summary>
         Plaincracker,
+
+        /// <summary>
+        /// 
+        /// </summary>
         HighVoltage,
+
+        /// <summary>
+        /// 
+        /// </summary>
         MindBlast,
+
+        /// <summary>
+        /// 
+        /// </summary>
         ThousandNeedles,
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public enum BluHealSpell : byte
     {
+        /// <summary>
+        /// 
+        /// </summary>
         WhiteWind,
+
+        /// <summary>
+        /// 
+        /// </summary>
         AngelsSnack,
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public BlueMageRotation()
     {
         BluDPSSpellActions.Add(BluDPSSpell.WaterCannon, WaterCannonPvE);
@@ -49,8 +110,19 @@ partial class BlueMageRotation
         BluAOESpellActions.Add(BluAOESpell.ThousandNeedles, _1000NeedlesPvE);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public Dictionary<BluDPSSpell, IBaseAction> BluDPSSpellActions = [];
+
+    /// <summary>
+    /// 
+    /// </summary>
     public Dictionary<BluAOESpell, IBaseAction> BluAOESpellActions = [];
+
+    /// <summary>
+    /// 
+    /// </summary>
     public Dictionary<BluHealSpell, IBaseAction> BluHealSpellActions = [];
 
     /// <summary>
@@ -81,6 +153,9 @@ partial class BlueMageRotation
         DPS,
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
     [RotationConfig(CombatType.PvE, Name = "Aetheric Mimicry Role")]
     public static BLUID BlueId { get; set; } = BLUID.DPS;
 
