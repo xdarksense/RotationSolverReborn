@@ -1,11 +1,14 @@
 ﻿namespace DefaultRotations.Tank;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.05")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Tank/PLD_Default.cs")]
 [Api(4)]
 public class PLD_Default : PaladinRotation
 {
     #region Config Options
+
+    [RotationConfig(CombatType.PvE, Name = "Prevent actions while you have Passage of Prms up")]
+    public bool PassageProtec { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Use Hallowed Ground with Cover")]
     private bool HallowedWithCover { get; set; } = true;
@@ -80,25 +83,29 @@ public class PLD_Default : PaladinRotation
     #region oGCD Logic
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        {
-            if (Player.HasStatus(true, StatusID.Cover) && HallowedWithCover && HallowedGroundPvE.CanUse(out act)) return true;
+        act = null;
+        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
 
-            if (HallowedGroundPvE.CanUse(out act)
-            && Player.GetHealthRatio() <= HealthForDyingTanks) return true;
+        if (Player.HasStatus(true, StatusID.Cover) && HallowedWithCover && HallowedGroundPvE.CanUse(out act)) return true;
 
-            if ((Player.HasStatus(true, StatusID.Rampart) || Player.HasStatus(true, StatusID.Sentinel)) &&
-                InterventionPvE.CanUse(out act) &&
-                InterventionPvE.Target.Target?.GetHealthRatio() < 0.6) return true;
+        if (HallowedGroundPvE.CanUse(out act)
+        && Player.GetHealthRatio() <= HealthForDyingTanks) return true;
 
-            if (CoverPvE.CanUse(out act) && CoverPvE.Target.Target?.DistanceToPlayer() < 10 &&
-                CoverPvE.Target.Target?.GetHealthRatio() < CoverRatio) return true;
-        }
+        if ((Player.HasStatus(true, StatusID.Rampart) || Player.HasStatus(true, StatusID.Sentinel)) &&
+            InterventionPvE.CanUse(out act) &&
+            InterventionPvE.Target.Target?.GetHealthRatio() < 0.6) return true;
+
+        if (CoverPvE.CanUse(out act) && CoverPvE.Target.Target?.DistanceToPlayer() < 10 &&
+            CoverPvE.Target.Target?.GetHealthRatio() < CoverRatio) return true;
+
         return base.EmergencyAbility(nextGCD, out act);
     }
 
     [RotationDesc(ActionID.IntervenePvE)]
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
+        act = null;
+        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
         if (IntervenePvE.CanUse(out act)) return true;
         return base.MoveForwardAbility(nextGCD, out act);
     }
@@ -106,6 +113,8 @@ public class PLD_Default : PaladinRotation
     [RotationDesc(ActionID.SentinelPvE, ActionID.RampartPvE, ActionID.BulwarkPvE, ActionID.SheltronPvE, ActionID.ReprisalPvE)]
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
+        act = null;
+        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
 
         // If the player has the Hallowed Ground status, don't use any abilities.
         if (!Player.HasStatus(true, StatusID.HallowedGround))
@@ -132,6 +141,9 @@ public class PLD_Default : PaladinRotation
     [RotationDesc(ActionID.DivineVeilPvE, ActionID.PassageOfArmsPvE)]
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
+        act = null;
+        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
+
         if (DivineVeilPvE.CanUse(out act)) return true;
 
         if (PassageOfArmsPvE.CanUse(out act)) return true;
@@ -141,6 +153,9 @@ public class PLD_Default : PaladinRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
+        act = null;
+        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
+
         if (WeaponRemain > 0.42f)
         {
             act = null;
@@ -173,6 +188,9 @@ public class PLD_Default : PaladinRotation
     #region GCD Logic
     protected override bool GeneralGCD(out IAction? act)
     {
+        act = null;
+        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
+
         //Minimizes Accidents in EX and Savage Hopefully
         if (IsInHighEndDuty && !InCombat) { act = null; return false; }
 
@@ -232,6 +250,8 @@ public class PLD_Default : PaladinRotation
     [RotationDesc(ActionID.ClemencyPvE)]
     protected override bool HealSingleGCD(out IAction? act)
     {
+        act = null;
+        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
         if (ClemencyPvE.CanUse(out act)) return true;
         return base.HealSingleGCD(out act);
     }
