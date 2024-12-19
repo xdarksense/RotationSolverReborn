@@ -355,7 +355,7 @@ internal partial class Configs : IPluginConfiguration
         PvPFilter = JobFilterType.NoHealer, PvEFilter = JobFilterType.NoHealer)]
     private static readonly bool _onlyHealSelfWhenNoHealer = false;
 
-    [ConditionBool, UI("Show action toggle feedback in chat.",
+    [ConditionBool, UI("Show action toggled action and state feedback in chat.",
         Filter = UiInformation)]
     private static readonly bool _showToggledActionInChat = false;
 

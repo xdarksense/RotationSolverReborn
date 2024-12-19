@@ -131,7 +131,10 @@ public static partial class RSCommands
             property.SetValue(Service.Config, convertedValue);
             command = convertedValue.ToString();
 
-            Svc.Chat.Print(string.Format(UiString.CommandsChangeSettingsValue.GetDescription(), property.Name, command));
+            if (Service.Config.ShowToggledActionInChat)
+            {
+                Svc.Chat.Print(string.Format(UiString.CommandsChangeSettingsValue.GetDescription(), property.Name, command));
+            }
 
             return;
         }
@@ -283,10 +286,13 @@ public static partial class RSCommands
         {
             if (config.DoCommand(configs, str))
             {
-                Svc.Chat.Print(string.Format(UiString.CommandsChangeSettingsValue.GetDescription(),
+                if (Service.Config.ShowToggledActionInChat)
+                {
+                    Svc.Chat.Print(string.Format(UiString.CommandsChangeSettingsValue.GetDescription(),
                     config.DisplayName, config.Value));
 
-                return;
+                    return;
+                }
             }
         }
 
