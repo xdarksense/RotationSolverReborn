@@ -6,15 +6,17 @@ namespace DefaultRotations.Magical;
 public sealed class Blue_Default : BlueMageRotation
 {
     #region Countdown logic
+
     // Defines logic for actions to take during the countdown before combat starts.
     protected override IAction? CountDownAction(float remainTime)
     {
-
         return base.CountDownAction(remainTime);
     }
+
     #endregion
 
     #region Emergency Logic
+
     // Determines emergency actions to take based on the next planned GCD action.
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
@@ -22,9 +24,11 @@ public sealed class Blue_Default : BlueMageRotation
 
         return base.EmergencyAbility(nextGCD, out act);
     }
+
     #endregion
 
     #region Move oGCD Logic
+
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
@@ -48,9 +52,11 @@ public sealed class Blue_Default : BlueMageRotation
 
         return base.SpeedAbility(nextGCD, out act);
     }
+
     #endregion
 
     #region Heal/Defense oGCD Logic
+
     protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
@@ -74,9 +80,11 @@ public sealed class Blue_Default : BlueMageRotation
 
         return base.DefenseSingleAbility(nextGCD, out act);
     }
+
     #endregion
 
     #region oGCD Logic
+
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
@@ -96,6 +104,7 @@ public sealed class Blue_Default : BlueMageRotation
         if (AethericMimicryPvE_19239.CanUse(out act)) return true;
         return base.GeneralAbility(nextGCD, out act);
     }
+
     #endregion
 
     #region GCD Logic
@@ -162,19 +171,35 @@ public sealed class Blue_Default : BlueMageRotation
     {
         if (WhiteDeathPvE.CanUse(out act)) return true;
 
-        if (BreathOfMagicPvE.CanUse(out act) && (BreathOfMagicPvE.Target.Target?.WillStatusEnd(2, true, BreathOfMagicPvE.Setting.TargetStatusProvide ?? []) ?? false)) return true;
+        if (BreathOfMagicPvE.CanUse(out act) &&
+            (BreathOfMagicPvE.Target.Target?.WillStatusEnd(2, true,
+                BreathOfMagicPvE.Setting.TargetStatusProvide ?? []) ?? false)) return true;
         if (SongOfTormentPvE.CanUse(out act) && !IsLastAbility(ActionID.NightbloomPvE)) return true;
 
         if (MatraMagicPvE.CanUse(out act)) return true;
         if (TheRoseOfDestructionPvE.CanUse(out act)) return true;
 
-        if (TinglePvE.CanUse(out act) && TripleTridentPvE.Cooldown.WillHaveOneChargeGCD(2) && !Player.HasStatus(true, StatusID.Tingling) && !IsLastGCD(ActionID.TinglePvE)) return true;
+        if (TinglePvE.CanUse(out act) && TripleTridentPvE.Cooldown.WillHaveOneChargeGCD(2) &&
+            !Player.HasStatus(true, StatusID.Tingling) && !IsLastGCD(ActionID.TinglePvE)) return true;
         if (WhistlePvE.CanUse(out act) && Player.HasStatus(true, StatusID.Tingling)) return true;
-        if (TripleTridentPvE.CanUse(out act) && IsLastGCD(ActionID.WhistlePvE) && Player.HasStatus(true, StatusID.Tingling)) return true;
+        if (TripleTridentPvE.CanUse(out act) && IsLastGCD(ActionID.WhistlePvE) &&
+            Player.HasStatus(true, StatusID.Tingling)) return true;
 
         if (SonicBoomPvE.CanUse(out act)) return true;
         if (FlyingSardinePvE.CanUse(out act)) return true;
         return base.GeneralGCD(out act);
     }
+
     #endregion
+
+    protected override IBaseAction[] ActiveActions
+    {
+        get
+        {
+            return
+            [
+                WaterCannonPvE
+            ];
+        }
+    }
 }

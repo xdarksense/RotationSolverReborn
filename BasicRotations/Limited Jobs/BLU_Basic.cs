@@ -5,7 +5,6 @@ namespace DefaultRotations.Magical;
 [Api(4)]
 public sealed class Blue_Basic : BlueMageRotation
 {
-
     [RotationConfig(CombatType.PvE, Name = "Single Target Spell")]
     public BluDPSSpell SingleTargetDPSSpell { get; set; } = BluDPSSpell.SonicBoom;
 
@@ -22,15 +21,17 @@ public sealed class Blue_Basic : BlueMageRotation
     public bool UseMightyGuard { get; set; } = true;
 
     #region Countdown logic
+
     // Defines logic for actions to take during the countdown before combat starts.
     protected override IAction? CountDownAction(float remainTime)
     {
-
         return base.CountDownAction(remainTime);
     }
+
     #endregion
 
     #region Emergency Logic
+
     // Determines emergency actions to take based on the next planned GCD action.
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
@@ -38,9 +39,11 @@ public sealed class Blue_Basic : BlueMageRotation
 
         return base.EmergencyAbility(nextGCD, out act);
     }
+
     #endregion
 
     #region Move oGCD Logic
+
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
@@ -64,9 +67,11 @@ public sealed class Blue_Basic : BlueMageRotation
 
         return base.SpeedAbility(nextGCD, out act);
     }
+
     #endregion
 
     #region Heal/Defense oGCD Logic
+
     protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
@@ -90,9 +95,11 @@ public sealed class Blue_Basic : BlueMageRotation
 
         return base.DefenseSingleAbility(nextGCD, out act);
     }
+
     #endregion
 
     #region oGCD Logic
+
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
@@ -107,7 +114,127 @@ public sealed class Blue_Basic : BlueMageRotation
         //if (AethericMimicryPvE_19239.CanUse(out act)) return true;
         return base.GeneralAbility(nextGCD, out act);
     }
+
     #endregion
+
+    /// <summary>
+    ///
+    /// </summary>
+    public enum BluDPSSpell : byte
+    {
+        /// <summary>
+        ///
+        /// </summary>
+        WaterCannon,
+
+        /// <summary>
+        ///
+        /// </summary>
+        SonicBoom,
+
+        /// <summary>
+        ///
+        /// </summary>
+        GoblinPunch,
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public enum BluAOESpell : byte
+    {
+        /// <summary>
+        ///
+        /// </summary>
+        Glower,
+
+        /// <summary>
+        ///
+        /// </summary>
+        FlyingFrenzy,
+
+        /// <summary>
+        ///
+        /// </summary>
+        FlameThrower,
+
+        /// <summary>
+        ///
+        /// </summary>
+        DrillCannons,
+
+        /// <summary>
+        ///
+        /// </summary>
+        Plaincracker,
+
+        /// <summary>
+        ///
+        /// </summary>
+        HighVoltage,
+
+        /// <summary>
+        ///
+        /// </summary>
+        MindBlast,
+
+        /// <summary>
+        ///
+        /// </summary>
+        ThousandNeedles,
+    }
+
+    public Blue_Basic()
+    {
+        BluDPSSpellActions.Add(BluDPSSpell.WaterCannon, WaterCannonPvE);
+        BluDPSSpellActions.Add(BluDPSSpell.SonicBoom, SonicBoomPvE);
+        BluDPSSpellActions.Add(BluDPSSpell.GoblinPunch, GoblinPunchPvE);
+
+        BluHealSpellActions.Add(BluHealSpell.WhiteWind, WhiteWindPvE);
+        BluHealSpellActions.Add(BluHealSpell.AngelsSnack, AngelsSnackPvE);
+
+        BluAOESpellActions.Add(BluAOESpell.Glower, GlowerPvE);
+        BluAOESpellActions.Add(BluAOESpell.FlyingFrenzy, FlyingFrenzyPvE);
+        BluAOESpellActions.Add(BluAOESpell.FlameThrower, FlameThrowerPvE);
+        BluAOESpellActions.Add(BluAOESpell.DrillCannons, DrillCannonsPvE);
+        BluAOESpellActions.Add(BluAOESpell.Plaincracker, PlaincrackerPvE);
+        BluAOESpellActions.Add(BluAOESpell.HighVoltage, HighVoltagePvE);
+        BluAOESpellActions.Add(BluAOESpell.MindBlast, MindBlastPvE);
+        BluAOESpellActions.Add(BluAOESpell.ThousandNeedles, _1000NeedlesPvE);
+
+        BlueId = BLUID.Tank;
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public Dictionary<BluDPSSpell, IBaseAction> BluDPSSpellActions = [];
+
+    /// <summary>
+    ///
+    /// </summary>
+    public Dictionary<BluAOESpell, IBaseAction> BluAOESpellActions = [];
+
+    /// <summary>
+    ///
+    /// </summary>
+    public Dictionary<BluHealSpell, IBaseAction> BluHealSpellActions = [];
+
+    /// <summary>
+    ///
+    /// </summary>
+    public enum BluHealSpell : byte
+    {
+        /// <summary>
+        ///
+        /// </summary>
+        WhiteWind,
+
+        /// <summary>
+        ///
+        /// </summary>
+        AngelsSnack,
+    }
 
     #region GCD Logic
 
@@ -170,5 +297,37 @@ public sealed class Blue_Basic : BlueMageRotation
         if (FlyingSardinePvE.CanUse(out act)) return true;
         return base.GeneralGCD(out act);
     }
+
     #endregion
+
+    protected override IBaseAction[] ActiveActions
+    {
+        get
+        {
+            return
+            [
+                WaterCannonPvE,
+                SonicBoomPvE,
+                GoblinPunchPvE,
+                WhiteWindPvE,
+                AngelsSnackPvE,
+                GlowerPvE,
+                FlyingFrenzyPvE,
+                FlameThrowerPvE,
+                DrillCannonsPvE,
+                PlaincrackerPvE,
+                HighVoltagePvE,
+                MindBlastPvE,
+                _1000NeedlesPvE,
+                BasicInstinctPvE,
+                MightyGuardPvE,
+                AethericMimicryPvE,
+                FlyingSardinePvE,
+                BloodDrainPvE,
+                LoomPvE,
+                SelfdestructPvE,
+                DiamondbackPvE
+            ];
+        }
+    }
 }

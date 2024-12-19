@@ -1,4 +1,6 @@
 ﻿using ECommons;
+using ECommons.DalamudServices;
+using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace RotationSolver.Basic.Rotations.Basic;
 
@@ -7,130 +9,24 @@ partial class BlueMageRotation
     /// <summary>
     /// 
     /// </summary>
-    public enum BluDPSSpell : byte
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        WaterCannon,
-
-        /// <summary>
-        /// 
-        /// </summary>
-        SonicBoom,
-
-        /// <summary>
-        /// 
-        /// </summary>
-        GoblinPunch,
-
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public enum BluAOESpell : byte
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        Glower,
-
-        /// <summary>
-        /// 
-        /// </summary>
-        FlyingFrenzy,
-
-        /// <summary>
-        /// 
-        /// </summary>
-        FlameThrower,
-
-        /// <summary>
-        /// 
-        /// </summary>
-        DrillCannons,
-
-        /// <summary>
-        /// 
-        /// </summary>
-        Plaincracker,
-
-        /// <summary>
-        /// 
-        /// </summary>
-        HighVoltage,
-
-        /// <summary>
-        /// 
-        /// </summary>
-        MindBlast,
-
-        /// <summary>
-        /// 
-        /// </summary>
-        ThousandNeedles,
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public enum BluHealSpell : byte
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        WhiteWind,
-
-        /// <summary>
-        /// 
-        /// </summary>
-        AngelsSnack,
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public BlueMageRotation()
-    {
-        BluDPSSpellActions.Add(BluDPSSpell.WaterCannon, WaterCannonPvE);
-        BluDPSSpellActions.Add(BluDPSSpell.SonicBoom, SonicBoomPvE);
-        BluDPSSpellActions.Add(BluDPSSpell.GoblinPunch, GoblinPunchPvE);
-
-        BluHealSpellActions.Add(BluHealSpell.WhiteWind, WhiteWindPvE);
-        BluHealSpellActions.Add(BluHealSpell.AngelsSnack, AngelsSnackPvE);
-
-        BluAOESpellActions.Add(BluAOESpell.Glower, GlowerPvE);
-        BluAOESpellActions.Add(BluAOESpell.FlyingFrenzy, FlyingFrenzyPvE);
-        BluAOESpellActions.Add(BluAOESpell.FlameThrower, FlameThrowerPvE);
-        BluAOESpellActions.Add(BluAOESpell.DrillCannons, DrillCannonsPvE);
-        BluAOESpellActions.Add(BluAOESpell.Plaincracker, PlaincrackerPvE);
-        BluAOESpellActions.Add(BluAOESpell.HighVoltage, HighVoltagePvE);
-        BluAOESpellActions.Add(BluAOESpell.MindBlast, MindBlastPvE);
-        BluAOESpellActions.Add(BluAOESpell.ThousandNeedles, _1000NeedlesPvE);
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public Dictionary<BluDPSSpell, IBaseAction> BluDPSSpellActions = [];
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public Dictionary<BluAOESpell, IBaseAction> BluAOESpellActions = [];
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public Dictionary<BluHealSpell, IBaseAction> BluHealSpellActions = [];
-
-    /// <summary>
-    /// 
-    /// </summary>
     public override MedicineType MedicineType => MedicineType.Intelligence;
 
     private protected sealed override IBaseAction Raise => AngelWhisperPvE;
+
+    /// <summary>
+    /// Represents the collection of active abilities or actions that are currently configured
+    /// for the Blue Mage's rotation. This property determines which abilities are available
+    /// and used in the rotation solver logic.
+    /// The actions stored in this property are of type <see cref="IBaseAction"/>
+    /// and are managed to ensure they comply with game constraints, such
+    /// as the maximum and minimum number of active actions.
+    /// Custom setter logic validates and applies the selected Blue Mage actions,
+    /// returning whether the operation was successful. For instance, it ensures
+    /// the number of actions is within valid boundaries and synchronizes with the game state when necessary.
+    /// Any errors encountered during the set operation (e.g., exceeding allowable actions
+    /// or synchronization issues) are logged for debugging purposes.
+    /// </summary>
+    protected abstract IBaseAction[] ActiveActions { get; }
 
     /// <summary>
     /// Tye ID card for Blu.
@@ -153,11 +49,64 @@ partial class BlueMageRotation
         DPS,
     }
 
+    public BlueMageRotation()
+    {
+        SetBlueMageActions();
+    }
+
+    /// <summary>
+    /// Attempts to set the actions for the Blue Mage character.
+    /// </summary>
+    /// <param name="actions">An array of actions implementing the <see cref="IBaseAction"/> interface to be set for the Blue Mage. The maximum number of actions is 24.</param>
+    /// <returns>Returns <c>true</c> if the actions are successfully set; otherwise, returns <c>false</c>.</returns>
+    protected unsafe bool SetBlueMageActions()
+    {
+        if (!Service.Config.SetBluActions)
+            return false;
+        if (ActiveActions.Length > 24 || ActiveActions.Length == 0)
+        {
+            Svc.Log.Error($"Active actions count {ActiveActions.Length} is invalid.");
+            return false;
+        }
+
+        try
+        {
+            var idArray = ActiveActions.Select(a => a.Action.RowId).ToArray();
+            if (idArray.Equals(GetBlueMageActions()))
+                return true;
+            var actionManager = ActionManager.Instance();
+            fixed (uint* idArrayPtr = idArray)
+            {
+                return actionManager->SetBlueMageActions(idArrayPtr);
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Svc.Log.Error($"Failed to set BlueMage actions: {ex.Message}");
+            return false;
+        }
+    }
+
+    private unsafe uint[] GetBlueMageActions()
+    {
+        var actionManager = ActionManager.Instance();
+        if (actionManager == null) return [];
+
+        List<uint> loadedActionIds = [];
+        for (var slot = 1; slot < 24; slot++)
+        {
+            var loadedId = actionManager->GetActiveBlueMageActionInSlot(slot);
+            if (loadedId > 0)
+                loadedActionIds.Add(loadedId);
+        }
+        return loadedActionIds.ToArray();
+    }
+
     /// <summary>
     /// 
     /// </summary>
-    [RotationConfig(CombatType.PvE, Name = "Aetheric Mimicry Role")]
-    public static BLUID BlueId { get; set; } = BLUID.DPS;
+    public static BLUID BlueId { get; protected set; } = BLUID.DPS;
 
     static partial void ModifySongOfTormentPvE(ref ActionSetting setting)
     {
@@ -395,8 +344,12 @@ partial class BlueMageRotation
     /// </summary>
     public override void DisplayStatus()
     {
-        ImGui.TextWrapped(BlueId.ToString());
-        base.DisplayStatus();
+        ImGui.TextWrapped($"Aetheric Mimicry Role: {BlueId.ToString()}");
+        ImGui.Text($"This rotation requires the following actions:");
+        foreach (var action in ActiveActions)
+        {
+            ImGui.Text($" - {action.Name}");
+        }
     }
 }
 
