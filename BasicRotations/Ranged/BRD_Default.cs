@@ -1,6 +1,6 @@
 namespace DefaultRotations.Ranged;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.11",
+[Rotation("Default", CombatType.PvE, GameVersion = "7.15",
     Description = "Please make sure that the three song times add up to 120 seconds, Wanderers default first song for now.")]
 [SourceCode(Path = "main/BasicRotations/Ranged/BRD_Default.cs")]
 [Api(4)]
@@ -153,7 +153,7 @@ public sealed class BRD_Default : BardRotation
 
         if (RadiantFinalePvE.EnoughLevel && RadiantFinalePvE.Cooldown.IsCoolingDown && BattleVoicePvE.EnoughLevel && !BattleVoicePvE.Cooldown.IsCoolingDown) return false;
 
-        if (Song != Song.NONE && EmpyrealArrowPvE.CanUse(out act)) return true;
+        if ((RagingStrikesPvE.Cooldown.IsCoolingDown || !RagingStrikesPvE.Cooldown.WillHaveOneCharge(15)) && Song != Song.NONE && EmpyrealArrowPvE.CanUse(out act)) return true;
 
         if (PitchPerfectPvE.CanUse(out act, skipCastingCheck: true, skipAoeCheck: true, skipComboCheck: true))
         {

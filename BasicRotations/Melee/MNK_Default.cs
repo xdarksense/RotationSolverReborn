@@ -1,6 +1,6 @@
 namespace DefaultRotations.Melee;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.00", Description = "Uses Lunar Solar Opener from The Balance")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.15", Description = "Uses Lunar Solar Opener from The Balance")]
 [SourceCode(Path = "main/BasicRotations/Melee/MNK_Default.cs")]
 [Api(4)]
 
@@ -15,6 +15,9 @@ public sealed class MNK_Default : MonkRotation
 
     [RotationConfig(CombatType.PvE, Name = "Auto Use Perfect Balance (aoe aggressive PB dump, turn me off if you don't want to waste PB in boss fight)")]
     public bool AutoPB_AOE { get; set; } = true;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Howling Fist as a ranged attack verses single target enemies")]
+    public bool HowlingSingle { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Enable TEA Checker.")]
     public bool EnableTEAChecker { get; set; } = false;
@@ -245,7 +248,7 @@ public sealed class MNK_Default : MonkRotation
 
         // i'm clever and i can do kame hame ha, so i won't stand still and keep refreshing form shift
         if (EnlightenmentPvE.CanUse(out act, skipAoeCheck: true)) return true; // Enlightment
-        if (HowlingFistPvE.CanUse(out act, skipAoeCheck: true)) return true; // Howling Fist
+        if (HowlingFistPvE.CanUse(out act, skipAoeCheck: HowlingSingle)) return true; // Howling Fist
 
         return base.GeneralGCD(out act);
     }
