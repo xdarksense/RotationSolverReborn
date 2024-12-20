@@ -31,11 +31,6 @@ internal static class MovingUpdater
                 statusList.Add(StatusID.Flamethrower);
                 actionList.Add(ActionID.FlameThrowerPvE);
             }
-            if (Service.Config.PosTenChiJin)
-            {
-                statusList.Add(StatusID.TenChiJin);
-                actionList.Add(ActionID.TenChiJinPvE);
-            }
             if (Service.Config.PosPassageOfArms)
             {
                 statusList.Add(StatusID.PassageOfArms);

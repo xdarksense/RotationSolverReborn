@@ -86,9 +86,6 @@ internal partial class Configs : IPluginConfiguration
     [UI("", Action = ActionID.PassageOfArmsPvE, Parent = nameof(PoslockCasting))]
     public bool PosPassageOfArms { get; set; } = false;
 
-    [UI("", Action = ActionID.TenChiJinPvE, Parent = nameof(PoslockCasting))]
-    public bool PosTenChiJin { get; set; } = true;
-
     [UI("", Action = ActionID.FlamethrowerPvE, Parent = nameof(PoslockCasting))]
     public bool PosFlameThrower { get; set; } = false;
 
