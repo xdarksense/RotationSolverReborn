@@ -44,19 +44,19 @@ partial class AstrologianRotation
     public static bool HasSpire => DrawnCard.Any(card => card == CardType.SPIRE);
 
     /// <summary>
-    /// 
-    /// </summary>
-    public static bool HasLord => DrawnCard.Any(card => card == CardType.LORD);
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool HasLady => DrawnCard.Any(card => card == CardType.LADY);
-
-    /// <summary>
     /// Indicates the state of Minor Arcana and which card will be used next when activating Minor Arcana, LORD = 7, LADY = 8
     /// </summary>
     protected static CardType DrawnCrownCard => JobGauge.DrawnCrownCard;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasLord => DrawnCrownCard == CardType.LORD;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasLady => DrawnCrownCard == CardType.LADY;
 
     /// <summary>
     ///  Can use Umbral or Astral draw, active draw matching what the next draw will be, ASTRAL, UMBRAL
