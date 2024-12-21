@@ -69,6 +69,16 @@ internal static class PreviewUpdater
             Job.MIN => BitmapFontIcon.Miner,
             Job.BTN => BitmapFontIcon.Botanist,
 
+            Job.GLA => BitmapFontIcon.Gladiator,
+            Job.CNJ => BitmapFontIcon.Conjurer,
+            Job.MRD => BitmapFontIcon.Marauder,
+            Job.PGL => BitmapFontIcon.Pugilist,
+            Job.LNC => BitmapFontIcon.Lancer,
+            Job.ROG => BitmapFontIcon.Rogue,
+            Job.ARC => BitmapFontIcon.Archer,
+            Job.THM => BitmapFontIcon.Thaumaturge,
+            Job.ACN => BitmapFontIcon.Arcanist,
+
             _ => BitmapFontIcon.ExclamationRectangle,
         };
 

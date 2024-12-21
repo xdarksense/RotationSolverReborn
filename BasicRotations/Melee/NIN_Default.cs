@@ -1,6 +1,6 @@
 namespace DefaultRotations.Melee;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.05")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Melee/NIN_Default.cs")]
 [Api(4)]
 
@@ -8,10 +8,15 @@ public sealed class NIN_Default : NinjaRotation
 {
     #region Config Options
     // Configuration properties for rotation behavior.
+
     [RotationConfig(CombatType.PvE, Name = "Use Hide")]
     public bool UseHide { get; set; } = true;
+
     [RotationConfig(CombatType.PvE, Name = "Use Unhide")]
     public bool AutoUnhide { get; set; } = true;
+
+    [RotationConfig(CombatType.PvE, Name = "Attempt to lock out all GCDs except mudra during mudra to prevent ghosting")]
+    public bool MudraProtection { get; set; } = false;
 
     public bool IsShadowWalking = Player.HasStatus(true, StatusID.ShadowWalker);
     #endregion
@@ -218,7 +223,7 @@ public sealed class NIN_Default : NinjaRotation
             }
             else if (jinId == SuitonPvE_18881.ID && !IsLastAction(false, SuitonPvE_18881))
             {
-                if (SuitonPvE_18881.CanUse(out act, skipAoeCheck: true)) return true;
+                if (SuitonPvE_18881.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: true)) return true;
             }
         }
 
@@ -340,9 +345,9 @@ public sealed class NIN_Default : NinjaRotation
         // If Ninjutsu is available or not in combat, it exits early, indicating no attack action to perform.
         if (!NoNinjutsu || !InCombat) return false;
 
-        // If the player is not moving, is within Trick Attack's effective window, and Ten Chi Jin hasn't recently been used,
+        // If the player is within Trick Attack's effective window, and Ten Chi Jin hasn't recently been used,
         // then Ten Chi Jin is set as the next action to perform.
-        if (!IsMoving && InTrickAttack && !TenPvE.Cooldown.ElapsedAfter(30) && TenChiJinPvE.CanUse(out act)) return true;
+        if (InTrickAttack && !TenPvE.Cooldown.ElapsedAfter(30) && TenChiJinPvE.CanUse(out act)) return true;
 
         // If more than 5 seconds have passed in combat, checks if Bunshin is available to use.
         if (!CombatElapsedLess(5) && BunshinPvE.CanUse(out act)) return true;
@@ -368,10 +373,17 @@ public sealed class NIN_Default : NinjaRotation
         if ((!InMug || InTrickAttack)
             && (!BunshinPvE.Cooldown.WillHaveOneCharge(10) || Player.HasStatus(false, StatusID.PhantomKamaitachiReady) || MugPvE.Cooldown.WillHaveOneCharge(2)))
         {
-            if (HellfrogMediumPvE.CanUse(out act)) return true;
+            if (HellfrogMediumPvE.CanUse(out act, skipAoeCheck: !BhavacakraPvE.EnoughLevel)) return true;
             if (BhavacakraPvE.CanUse(out act)) return true;
             if (TenriJindoPvE.CanUse(out act)) return true;
         }
+
+        if (Ninki == 100)
+        {
+            if (HellfrogMediumPvE.CanUse(out act, skipAoeCheck: !BhavacakraPvE.EnoughLevel)) return true;
+            if (BhavacakraPvE.CanUse(out act)) return true;
+        }
+
         if (MergedStatus.HasFlag(AutoStatus.MoveForward) && MoveForwardAbility(nextGCD, out act)) return true;
         // If none of the conditions are met, it falls back to the base class's implementation for attack ability.
         return base.AttackAbility(nextGCD, out act);
@@ -379,9 +391,10 @@ public sealed class NIN_Default : NinjaRotation
     #endregion
 
     #region GCD Logic
-    // Main method for determining the general action to take during the combat's global cooldown phase.
     protected override bool GeneralGCD(out IAction? act)
     {
+        act = null;
+
         var hasRaijuReady = Player.HasStatus(true, StatusID.RaijuReady);
 
         if ((InTrickAttack || InMug) && NoNinjutsu && !hasRaijuReady
@@ -396,6 +409,11 @@ public sealed class NIN_Default : NinjaRotation
         {
             if (!CombatElapsedLess(10) && FleetingRaijuPvE.CanUse(out act)) return true;
             if (hasRaijuReady) return false;
+        }
+
+        if (IsLastAbility(true, TenPvE, ChiPvE, JinPvE) && MudraProtection)
+        {
+            return base.GeneralGCD(out act);
         }
 
         //AOE
