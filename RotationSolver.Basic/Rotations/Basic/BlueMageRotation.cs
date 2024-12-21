@@ -1,6 +1,8 @@
 ﻿using ECommons;
 using ECommons.DalamudServices;
+using ECommons.GameFunctions;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using CombatRole = RotationSolver.Basic.Data.CombatRole;
 
 namespace RotationSolver.Basic.Rotations.Basic;
 
@@ -28,27 +30,6 @@ partial class BlueMageRotation
     /// </summary>
     protected abstract IBaseAction[] ActiveActions { get; }
 
-    /// <summary>
-    /// Tye ID card for Blu.
-    /// </summary>
-    public enum BLUID : byte
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        Tank,
-
-        /// <summary>
-        /// 
-        /// </summary>
-        Healer,
-
-        /// <summary>
-        /// 
-        /// </summary>
-        DPS,
-    }
-
     public BlueMageRotation()
     {
         SetBlueMageActions();
@@ -71,7 +52,7 @@ partial class BlueMageRotation
 
         try
         {
-            var idArray = ActiveActions.Select(a => a.Action.RowId).ToArray();
+            var idArray = ActiveActions.Where(a => a.Info.SpellUnlocked).Select(a => a.Action.RowId).ToArray();
             if (idArray.Equals(GetBlueMageActions()))
                 return true;
             var actionManager = ActionManager.Instance();
@@ -106,7 +87,7 @@ partial class BlueMageRotation
     /// <summary>
     /// 
     /// </summary>
-    public static BLUID BlueId { get; protected set; } = BLUID.DPS;
+    public CombatRole BlueId { get; protected set; } = CombatRole.DPS;
 
     static partial void ModifySongOfTormentPvE(ref ActionSetting setting)
     {
@@ -158,33 +139,10 @@ partial class BlueMageRotation
 
     static partial void ModifyAethericMimicryPvE(ref ActionSetting setting)
     {
-        setting.CanTarget = (IBattleChara chara) =>
-        {
-            switch (BlueId)
-            {
-                case BLUID.DPS:
-                    if (!Player.HasStatus(true, StatusID.AethericMimicryDps))
-                    {
-                        return TargetFilter.GetJobCategory(new[] { chara }, JobRole.Melee, JobRole.RangedMagical, JobRole.RangedPhysical).FirstOrDefault() != null;
-                    }
-                    break;
-
-                case BLUID.Tank:
-                    if (!Player.HasStatus(true, StatusID.AethericMimicryTank))
-                    {
-                        return TargetFilter.GetJobCategory(new[] { chara }, JobRole.Tank).FirstOrDefault() != null;
-                    }
-                    break;
-
-                case BLUID.Healer:
-                    if (!Player.HasStatus(true, StatusID.AethericMimicryHealer))
-                    {
-                        return TargetFilter.GetJobCategory(new[] { chara }, JobRole.Healer).FirstOrDefault() != null;
-                    }
-                    break;
-            }
-            return false;
-        };
+        setting.IsFriendly = true;
+        setting.TargetType = TargetType.MimicryTarget;
+        setting.StatusProvide =
+            [StatusID.AethericMimicryDps, StatusID.AethericMimicryHealer, StatusID.AethericMimicryTank];
     }
 
     static partial void ModifySurpanakhaPvE(ref ActionSetting setting)

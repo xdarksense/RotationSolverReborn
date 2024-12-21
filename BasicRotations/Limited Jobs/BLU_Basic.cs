@@ -20,6 +20,13 @@ public sealed class Blue_Basic : BlueMageRotation
     [RotationConfig(CombatType.PvE, Name = "Use Mighty Guard")]
     public bool UseMightyGuard { get; set; } = true;
 
+    [RotationConfig(CombatType.PvE, Name = "Aetheric Mimicry Role")]
+    public CombatRole CombatRole
+    {
+        get => BlueId;
+        set => BlueId = value;
+    }
+
     #region Countdown logic
 
     // Defines logic for actions to take during the countdown before combat starts.
@@ -201,8 +208,6 @@ public sealed class Blue_Basic : BlueMageRotation
         BluAOESpellActions.Add(BluAOESpell.HighVoltage, HighVoltagePvE);
         BluAOESpellActions.Add(BluAOESpell.MindBlast, MindBlastPvE);
         BluAOESpellActions.Add(BluAOESpell.ThousandNeedles, _1000NeedlesPvE);
-
-        BlueId = BLUID.Tank;
     }
 
     /// <summary>
@@ -290,6 +295,7 @@ public sealed class Blue_Basic : BlueMageRotation
 
     protected override bool GeneralGCD(out IAction? act)
     {
+        if (AethericMimicryPvE.CanUse(out act)) return true;
         if (UseMightyGuard && MightyGuardPvE.CanUse(out act)) return true;
         if (UseBasicInstinct && BasicInstinctPvE.CanUse(out act)) return true;
         if (BluAOESpellActions[AoeSpell].CanUse(out act)) return true;

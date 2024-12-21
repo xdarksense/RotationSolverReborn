@@ -5,8 +5,11 @@ using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
+using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using static RotationSolver.Basic.Configuration.ConfigTypes;
+using AttackType = RotationSolver.Basic.Data.AttackType;
+using CombatRole = RotationSolver.Basic.Data.CombatRole;
 
 namespace RotationSolver.Basic.Actions;
 
@@ -771,6 +774,7 @@ public struct ActionTargetInfo(IBaseAction action)
             TargetType.Magical => IGameObjects != null ? RandomMagicalTarget(IGameObjects) : null,
             TargetType.Physical => IGameObjects != null ? RandomPhysicalTarget(IGameObjects) : null,
             TargetType.DancePartner => FindDancePartner(),
+            TargetType.MimicryTarget => FindMimicryTarget(),
             _ => FindHostile(),
         };
 
@@ -1054,6 +1058,27 @@ public struct ActionTargetInfo(IBaseAction action)
         }
     }
 
+    private static IBattleChara? FindMimicryTarget()
+    {
+        var targetCandidates = DataCenter.AllTargets.Where(IsNeededRole).OrderBy(o => Player.DistanceTo(o.Position));
+        return targetCandidates.FirstOrDefault();
+    }
+
+    private static bool IsNeededRole(IBattleChara character)
+    {
+        if (character.GameObjectId == Player.Object.GameObjectId)
+            return false;
+        var player = character as IPlayerCharacter;
+        if (player == null || player.ClassJob.Value.IsLimitedJob)
+            return false;
+
+        var neededRole = DataCenter.BluRole;
+        if (neededRole == null || neededRole == CombatRole.None)
+            return false;
+
+        return (int)neededRole == (int)player.GetRole();
+    }
+
 
     internal static IBattleChara? RandomPhysicalTarget(IEnumerable<IBattleChara> tars)
     {
@@ -1136,6 +1161,7 @@ public enum TargetType : byte
     Magical,
     Self,
     DancePartner,
+    MimicryTarget,
 }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
