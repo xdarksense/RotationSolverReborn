@@ -338,7 +338,7 @@ partial class NinjaRotation
 
     static partial void ModifySuitonPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.ShadowWalker];
+        //setting.StatusProvide = [StatusID.ShadowWalker];
     }
 
     static partial void ModifyGokaMekkyakuPvE(ref ActionSetting setting)
