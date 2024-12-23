@@ -16,8 +16,8 @@ public sealed class MNK_Default : MonkRotation
     [RotationConfig(CombatType.PvE, Name = "Auto Use Perfect Balance (aoe aggressive PB dump, turn me off if you don't want to waste PB in boss fight)")]
     public bool AutoPB_AOE { get; set; } = true;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Howling Fist as a ranged attack verses single target enemies")]
-    public bool HowlingSingle { get; set; } = false;
+    [RotationConfig(CombatType.PvE, Name = "Use Howling Fist/Enlightenment as a ranged attack verses single target enemies")]
+    public bool HowlingSingle { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Enable TEA Checker.")]
     public bool EnableTEAChecker { get; set; } = false;
@@ -133,14 +133,8 @@ public sealed class MNK_Default : MonkRotation
             if (PerfectBalancePvE.CanUse(out act, usedUp: true)) return true;
         }
 
-        // 'TFC is used in the first weave slot to avoid any chakra overcap from the following gcds.'
-        // dump 5 stacks of chakara 
-        if (NumberOfHostilesInRange >= 2)
-        {
-            if (EnlightenmentPvE.CanUse(out act, skipAoeCheck: true)) return true; // Enlightment
-            if (HowlingFistPvE.CanUse(out act, skipAoeCheck: true)) return true; // Howling Fist
-        }
-        else
+        if (EnlightenmentPvE.CanUse(out act)) return true; // Enlightment
+        if (HowlingFistPvE.CanUse(out act)) return true; // Howling Fist
         if (SteelPeakPvE.CanUse(out act)) return true;
         if (TheForbiddenChakraPvE.CanUse(out act)) return true;
 
@@ -154,8 +148,9 @@ public sealed class MNK_Default : MonkRotation
         // 'Use on cooldown, unless you know your killtime. You should aim to get as many casts of RoW as you can, and then shift those usages to align with burst as much as possible without losing a use.'
         if (!CombatElapsedLessGCD(3) && RiddleOfWindPvE.CanUse(out act)) return true; // Riddle Of Wind
 
-        // what's this? check later
-        if (MergedStatus.HasFlag(AutoStatus.MoveForward) && MoveForwardAbility(nextGCD, out act)) return true;
+        // i'm clever and i can do kame hame ha, so i won't stand still and keep refreshing form shift
+        if (EnlightenmentPvE.CanUse(out act, skipAoeCheck: HowlingSingle)) return true; // Enlightment
+        if (HowlingFistPvE.CanUse(out act, skipAoeCheck: HowlingSingle)) return true; // Howling Fist
 
         return base.AttackAbility(nextGCD, out act);
     }
@@ -245,10 +240,6 @@ public sealed class MNK_Default : MonkRotation
 
         // out of range or nothing to do, refresh buff second, but dont keep refreshing or it draws too much attention
         if (AutoFormShift && !Player.HasStatus(true, StatusID.PerfectBalance) && !Player.HasStatus(true, StatusID.FormlessFist) && FormShiftPvE.CanUse(out act)) return true; // Form Shift GCD use
-
-        // i'm clever and i can do kame hame ha, so i won't stand still and keep refreshing form shift
-        if (EnlightenmentPvE.CanUse(out act, skipAoeCheck: true)) return true; // Enlightment
-        if (HowlingFistPvE.CanUse(out act, skipAoeCheck: HowlingSingle)) return true; // Howling Fist
 
         return base.GeneralGCD(out act);
     }
