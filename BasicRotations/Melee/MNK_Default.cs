@@ -133,10 +133,8 @@ public sealed class MNK_Default : MonkRotation
             if (PerfectBalancePvE.CanUse(out act, usedUp: true)) return true;
         }
 
-        if (EnlightenmentPvE.CanUse(out act)) return true; // Enlightment
-        if (HowlingFistPvE.CanUse(out act)) return true; // Howling Fist
-        if (SteelPeakPvE.CanUse(out act)) return true;
         if (TheForbiddenChakraPvE.CanUse(out act)) return true;
+        if (SteelPeakPvE.CanUse(out act)) return true;
 
         // use bh when bh and rof are ready (opener) or ask bh to wait for rof's cd to be close and then use bh
         if (!CombatElapsedLessGCD(2)
