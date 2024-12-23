@@ -139,7 +139,7 @@ public sealed class NIN_Default : NinjaRotation
             //Aoe
             if (KatonPvE.CanUse(out _) && ChiPvE.CanUse(out _) && TenPvE.CanUse(out _))
             {
-                if (!Player.HasStatus(true, StatusID.Doton) && !IsMoving && !IsLastGCD(false, DotonPvE) && (!TenChiJinPvE.Cooldown.WillHaveOneCharge(6)) || !TenChiJinPvE.Cooldown.IsCoolingDown && TenPvE.CanUse(out _) && ChiPvE.CanUse(out _) && JinPvE.CanUse(out _))
+                if (!Player.HasStatus(true, StatusID.Doton) && !IsMoving && !IsLastGCD(false, DotonPvE) && (!TenChiJinPvE.Cooldown.WillHaveOneCharge(6)) || !Player.HasStatus(true, StatusID.Doton) && !TenChiJinPvE.Cooldown.IsCoolingDown && TenPvE.CanUse(out _) && ChiPvE.CanUse(out _) && JinPvE.CanUse(out _))
                     SetNinjutsu(DotonPvE);
                 else SetNinjutsu(KatonPvE);
                 return false;
