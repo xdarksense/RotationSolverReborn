@@ -1,3 +1,6 @@
+using System.ComponentModel;
+using static DefaultRotations.Magical.SMN_Default;
+
 namespace DefaultRotations.Melee;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.15", Description = "Uses Lunar Solar Opener from The Balance")]
@@ -7,6 +10,14 @@ namespace DefaultRotations.Melee;
 public sealed class MNK_Default : MonkRotation
 {
     #region Config Options
+
+    public enum RiddleOfFireFirst : byte
+    {
+        [Description("Brotherhood")] Brotherhood,
+
+        [Description("Perfect Balance")] PerfectBalance,
+    }
+
     [RotationConfig(CombatType.PvE, Name = "Use Form Shift")]
     public bool AutoFormShift { get; set; } = true;
 
@@ -21,6 +32,9 @@ public sealed class MNK_Default : MonkRotation
 
     [RotationConfig(CombatType.PvE, Name = "Enable TEA Checker.")]
     public bool EnableTEAChecker { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Riddle of Fire after this ability")]
+    public RiddleOfFireFirst ROFFirst { get; set; } = RiddleOfFireFirst.Brotherhood;
     #endregion
 
     #region Countdown Logic
@@ -58,10 +72,28 @@ public sealed class MNK_Default : MonkRotation
         if (AutoPB_Boss && InCombat && CombatElapsedLess(3) && PerfectBalancePvE.CanUse(out act, usedUp: true)) return true;
         //if (CombatElapsedLessGCD(1) && TheForbiddenChakraPvE.CanUse(out act)) return true; // if it weaves one day in the future...
 
-        // need this to connect the first three buffs
-        if (IsLastAbility(true, BrotherhoodPvE) && RiddleOfFirePvE.CanUse(out act)) return true; // Riddle Of Fire
+        if (RiddleOfFirePvE.CanUse(out _))
+        {
+            switch (ROFFirst)
+            {
+                case RiddleOfFireFirst.Brotherhood:
+                default:
+                    if (IsLastAbility(true, BrotherhoodPvE) && RiddleOfFirePvE.CanUse(out act)) return true;
+                    break;
+
+                case RiddleOfFireFirst.PerfectBalance:
+                    if (IsLastAbility(true, PerfectBalancePvE) && RiddleOfFirePvE.CanUse(out act)) return true;
+                    break;
+            }
+        }
 
         return base.EmergencyAbility(nextGCD, out act);
+    }
+
+    protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
+    {
+        if (Player.WillStatusEnd(2.5f, true, StatusID.EarthsRumination) && EarthsReplyPvE.CanUse(out act)) return true;
+        return base.GeneralAbility(nextGCD, out act);
     }
 
     [RotationDesc(ActionID.ThunderclapPvE)]
@@ -81,6 +113,7 @@ public sealed class MNK_Default : MonkRotation
     [RotationDesc(ActionID.MantraPvE)]
     protected override bool HealAreaAbility(IAction nextGCD, out IAction? act)
     {
+        if (EarthsReplyPvE.CanUse(out act)) return true;
         if (MantraPvE.CanUse(out act)) return true;
         return base.HealAreaAbility(nextGCD, out act);
     }
