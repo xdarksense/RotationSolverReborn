@@ -27,44 +27,44 @@ public enum AutoStatus : uint
     Provoke = 1 << 2,
 
     /// <summary>
+    /// We should dispel.
+    /// </summary>
+    Dispel = 1 << 3,
+
+    /// <summary>
     /// We should use defense single.
     /// </summary>
-    DefenseSingle = 1 << 3,
+    DefenseSingle = 1 << 4,
 
     /// <summary>
     /// We should use defense area.
     /// </summary>
-    DefenseArea = 1 << 4,
+    DefenseArea = 1 << 5,
 
     /// <summary>
     /// We should heal single by ability.
     /// </summary>
-    HealSingleAbility = 1 << 5,
+    HealSingleAbility = 1 << 6,
 
     /// <summary>
     /// We should heal single by spell.
     /// </summary>
-    HealSingleSpell = 1 << 6,
+    HealSingleSpell = 1 << 7,
 
     /// <summary>
     /// We should heal area by ability.
     /// </summary>
-    HealAreaAbility = 1 << 7,
+    HealAreaAbility = 1 << 8,
 
     /// <summary>
     /// We should heal area by spell.
     /// </summary>
-    HealAreaSpell = 1 << 8,
+    HealAreaSpell = 1 << 9,
 
     /// <summary>
     /// We should raise.
     /// </summary>
-    Raise = 1 << 9,
-
-    /// <summary>
-    /// We should dispel.
-    /// </summary>
-    Dispel = 1 << 10,
+    Raise = 1 << 10,
 
     /// <summary>
     /// We should use positional abilities.

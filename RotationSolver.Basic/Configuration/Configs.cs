@@ -25,6 +25,11 @@ internal partial class Configs : IPluginConfiguration
         List2 = "List2",
         Debug = "Debug";
 
+    public List<AutoStatus> AutoStatusOrder { get; set; } = Enum.GetValues(typeof(AutoStatus))
+        .Cast<AutoStatus>()
+        .Where(status => status != AutoStatus.None)
+        .ToList();
+
     public const int CurrentVersion = 12;
     public int Version { get; set; } = CurrentVersion;
 

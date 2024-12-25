@@ -179,7 +179,6 @@ public sealed class MNK_Default : MonkRotation
         // 'Use on cooldown, unless you know your killtime. You should aim to get as many casts of RoW as you can, and then shift those usages to align with burst as much as possible without losing a use.'
         if (!CombatElapsedLessGCD(3) && RiddleOfWindPvE.CanUse(out act)) return true; // Riddle Of Wind
 
-        // i'm clever and i can do kame hame ha, so i won't stand still and keep refreshing form shift
         if (EnlightenmentPvE.CanUse(out act, skipAoeCheck: HowlingSingle)) return true; // Enlightment
         if (HowlingFistPvE.CanUse(out act, skipAoeCheck: HowlingSingle)) return true; // Howling Fist
 
@@ -267,7 +266,7 @@ public sealed class MNK_Default : MonkRotation
         if (OpoOpoForm(out act)) return true;
 
         // out of range or nothing to do, recharge chakra first
-        if (Chakra < 5 && (ForbiddenMeditationPvE.CanUse(out act) || SteeledMeditationPvE.CanUse(out act))) return true;
+        if (Chakra < 5 && (EnlightenedMeditationPvE.CanUse(out act) || ForbiddenMeditationPvE.CanUse(out act))) return true;
 
         // out of range or nothing to do, refresh buff second, but dont keep refreshing or it draws too much attention
         if (AutoFormShift && !Player.HasStatus(true, StatusID.PerfectBalance) && !Player.HasStatus(true, StatusID.FormlessFist) && FormShiftPvE.CanUse(out act)) return true; // Form Shift GCD use

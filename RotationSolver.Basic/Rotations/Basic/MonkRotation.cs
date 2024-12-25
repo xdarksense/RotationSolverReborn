@@ -78,12 +78,12 @@ partial class MonkRotation
 
     static partial void ModifySteeledMeditationPvE(ref ActionSetting setting)
     {
-
+        setting.ActionCheck = () => Chakra < 5;
     }
 
     static partial void ModifySteelPeakPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InCombat && Chakra >= 5;
+        setting.ActionCheck = () => InCombat && Chakra == 5;
         setting.UnlockedByQuestID = 66094;
     }
 
@@ -129,12 +129,12 @@ partial class MonkRotation
 
     static partial void ModifyInspiritedMeditationPvE(ref ActionSetting setting)
     {
-
+        setting.ActionCheck = () => Chakra < 5;
     }
 
     static partial void ModifyHowlingFistPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InCombat && Chakra >= 5;
+        setting.ActionCheck = () => InCombat && Chakra == 5;
         setting.UnlockedByQuestID = 66599;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -183,12 +183,12 @@ partial class MonkRotation
 
     static partial void ModifyForbiddenMeditationPvE(ref ActionSetting setting)
     {
-
+        setting.ActionCheck = () => Chakra < 5;
     }
 
     static partial void ModifyTheForbiddenChakraPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InCombat && Chakra >= 5;
+        setting.ActionCheck = () => InCombat && Chakra == 5;
         setting.UnlockedByQuestID = 67564;
     }
 
@@ -245,6 +245,10 @@ partial class MonkRotation
     static partial void ModifyEarthsReplyPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.EarthsRumination];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyRiddleOfFirePvE(ref ActionSetting setting)
@@ -277,21 +281,21 @@ partial class MonkRotation
 
     static partial void ModifyEnlightenedMeditationPvE(ref ActionSetting setting)
     {
-
+        setting.ActionCheck = () => Chakra < 5;
     }
 
     static partial void ModifyEnlightenmentPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InCombat && Chakra >= 5;
+        setting.ActionCheck = () => InCombat && Chakra == 5;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 1,
+            AoeCount = 3,
         };
     }
 
     static partial void ModifySixsidedStarPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InCombat && Chakra >= 5;
+        setting.ActionCheck = () => InCombat && Chakra >= 1;
         setting.StatusProvide = [StatusID.SixsidedStar];
     }
 
