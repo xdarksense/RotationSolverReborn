@@ -29,6 +29,10 @@ partial class CustomRotation
                 if (MyInterruptGCD(out act)) return act;
             }
 
+            IBaseAction.TargetOverride = TargetType.Dispel;
+            if (DataCenter.MergedStatus.HasFlag(AutoStatus.Dispel)
+                && DispelGCD(out act)) return act;
+
             IBaseAction.TargetOverride = TargetType.Death;
 
             if (Service.Config.RaisePlayerFirst)
@@ -80,10 +84,6 @@ partial class CustomRotation
 
             if (DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseSingle)
                 && DefenseSingleGCD(out act)) return act;
-
-            IBaseAction.TargetOverride = TargetType.Dispel;
-            if (DataCenter.MergedStatus.HasFlag(AutoStatus.Dispel)
-                && DispelGCD(out act)) return act;
 
             IBaseAction.TargetOverride = TargetType.Death;
 

@@ -53,6 +53,11 @@ public sealed class BRD_Default : BardRotation
     #region oGCD Logic
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
+        if (Player.HasStatus(true, StatusID.Doom))
+        {
+            if (TheWardensPaeanPvE.CanUse(out act)) return true;
+        }
+
         if (nextGCD.IsTheSameTo(true, StraightShotPvE, VenomousBitePvE, WindbitePvE, IronJawsPvE))
         {
             return base.EmergencyAbility(nextGCD, out act);
