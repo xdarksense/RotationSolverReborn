@@ -1,3 +1,6 @@
+using System.ComponentModel;
+using static DefaultRotations.Magical.SMN_Default;
+
 namespace DefaultRotations.Melee;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.15", Description = "Uses Lunar Solar Opener from The Balance")]
@@ -7,6 +10,14 @@ namespace DefaultRotations.Melee;
 public sealed class MNK_Default : MonkRotation
 {
     #region Config Options
+
+    public enum RiddleOfFireFirst : byte
+    {
+        [Description("Brotherhood")] Brotherhood,
+
+        [Description("Perfect Balance")] PerfectBalance,
+    }
+
     [RotationConfig(CombatType.PvE, Name = "Use Form Shift")]
     public bool AutoFormShift { get; set; } = true;
 
@@ -16,11 +27,14 @@ public sealed class MNK_Default : MonkRotation
     [RotationConfig(CombatType.PvE, Name = "Auto Use Perfect Balance (aoe aggressive PB dump, turn me off if you don't want to waste PB in boss fight)")]
     public bool AutoPB_AOE { get; set; } = true;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Howling Fist as a ranged attack verses single target enemies")]
-    public bool HowlingSingle { get; set; } = false;
+    [RotationConfig(CombatType.PvE, Name = "Use Howling Fist/Enlightenment as a ranged attack verses single target enemies")]
+    public bool HowlingSingle { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Enable TEA Checker.")]
     public bool EnableTEAChecker { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Riddle of Fire after this ability")]
+    public RiddleOfFireFirst ROFFirst { get; set; } = RiddleOfFireFirst.Brotherhood;
     #endregion
 
     #region Countdown Logic
@@ -58,10 +72,28 @@ public sealed class MNK_Default : MonkRotation
         if (AutoPB_Boss && InCombat && CombatElapsedLess(3) && PerfectBalancePvE.CanUse(out act, usedUp: true)) return true;
         //if (CombatElapsedLessGCD(1) && TheForbiddenChakraPvE.CanUse(out act)) return true; // if it weaves one day in the future...
 
-        // need this to connect the first three buffs
-        if (IsLastAbility(true, BrotherhoodPvE) && RiddleOfFirePvE.CanUse(out act)) return true; // Riddle Of Fire
+        if (RiddleOfFirePvE.CanUse(out _))
+        {
+            switch (ROFFirst)
+            {
+                case RiddleOfFireFirst.Brotherhood:
+                default:
+                    if (IsLastAbility(true, BrotherhoodPvE) && RiddleOfFirePvE.CanUse(out act)) return true;
+                    break;
+
+                case RiddleOfFireFirst.PerfectBalance:
+                    if (IsLastAbility(true, PerfectBalancePvE) && RiddleOfFirePvE.CanUse(out act)) return true;
+                    break;
+            }
+        }
 
         return base.EmergencyAbility(nextGCD, out act);
+    }
+
+    protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
+    {
+        if (Player.WillStatusEnd(2.5f, true, StatusID.EarthsRumination) && EarthsReplyPvE.CanUse(out act)) return true;
+        return base.GeneralAbility(nextGCD, out act);
     }
 
     [RotationDesc(ActionID.ThunderclapPvE)]
@@ -81,6 +113,7 @@ public sealed class MNK_Default : MonkRotation
     [RotationDesc(ActionID.MantraPvE)]
     protected override bool HealAreaAbility(IAction nextGCD, out IAction? act)
     {
+        if (EarthsReplyPvE.CanUse(out act)) return true;
         if (MantraPvE.CanUse(out act)) return true;
         return base.HealAreaAbility(nextGCD, out act);
     }
@@ -133,16 +166,8 @@ public sealed class MNK_Default : MonkRotation
             if (PerfectBalancePvE.CanUse(out act, usedUp: true)) return true;
         }
 
-        // 'TFC is used in the first weave slot to avoid any chakra overcap from the following gcds.'
-        // dump 5 stacks of chakara 
-        if (NumberOfHostilesInRange >= 2)
-        {
-            if (EnlightenmentPvE.CanUse(out act, skipAoeCheck: true)) return true; // Enlightment
-            if (HowlingFistPvE.CanUse(out act, skipAoeCheck: true)) return true; // Howling Fist
-        }
-        else
-        if (SteelPeakPvE.CanUse(out act)) return true;
         if (TheForbiddenChakraPvE.CanUse(out act)) return true;
+        if (SteelPeakPvE.CanUse(out act)) return true;
 
         // use bh when bh and rof are ready (opener) or ask bh to wait for rof's cd to be close and then use bh
         if (!CombatElapsedLessGCD(2)
@@ -154,8 +179,8 @@ public sealed class MNK_Default : MonkRotation
         // 'Use on cooldown, unless you know your killtime. You should aim to get as many casts of RoW as you can, and then shift those usages to align with burst as much as possible without losing a use.'
         if (!CombatElapsedLessGCD(3) && RiddleOfWindPvE.CanUse(out act)) return true; // Riddle Of Wind
 
-        // what's this? check later
-        if (MergedStatus.HasFlag(AutoStatus.MoveForward) && MoveForwardAbility(nextGCD, out act)) return true;
+        if (EnlightenmentPvE.CanUse(out act, skipAoeCheck: HowlingSingle)) return true; // Enlightment
+        if (HowlingFistPvE.CanUse(out act, skipAoeCheck: HowlingSingle)) return true; // Howling Fist
 
         return base.AttackAbility(nextGCD, out act);
     }
@@ -241,14 +266,10 @@ public sealed class MNK_Default : MonkRotation
         if (OpoOpoForm(out act)) return true;
 
         // out of range or nothing to do, recharge chakra first
-        if (Chakra < 5 && (ForbiddenMeditationPvE.CanUse(out act) || SteeledMeditationPvE.CanUse(out act))) return true;
+        if (Chakra < 5 && (EnlightenedMeditationPvE.CanUse(out act) || ForbiddenMeditationPvE.CanUse(out act))) return true;
 
         // out of range or nothing to do, refresh buff second, but dont keep refreshing or it draws too much attention
         if (AutoFormShift && !Player.HasStatus(true, StatusID.PerfectBalance) && !Player.HasStatus(true, StatusID.FormlessFist) && FormShiftPvE.CanUse(out act)) return true; // Form Shift GCD use
-
-        // i'm clever and i can do kame hame ha, so i won't stand still and keep refreshing form shift
-        if (EnlightenmentPvE.CanUse(out act, skipAoeCheck: true)) return true; // Enlightment
-        if (HowlingFistPvE.CanUse(out act, skipAoeCheck: HowlingSingle)) return true; // Howling Fist
 
         return base.GeneralGCD(out act);
     }

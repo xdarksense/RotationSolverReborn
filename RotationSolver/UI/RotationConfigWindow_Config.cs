@@ -279,9 +279,10 @@ public partial class RotationConfigWindow
     /// <summary>
     /// Draws the auto section of the configuration window.
     /// </summary>
-    private static void DrawAuto()
+    private void DrawAuto()
     {
         ImGui.TextWrapped(UiString.ConfigWindow_Auto_Description.GetDescription());
+        DrawAutoStatusOrderConfig();
         _autoHeader?.Draw();
     }
 

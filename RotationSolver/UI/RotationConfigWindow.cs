@@ -758,6 +758,77 @@ public partial class RotationConfigWindow : Window
         _aboutHeaders.Draw();
     }
 
+    private void DrawAutoStatusOrderConfig()
+    {
+        ImGui.Text("Reorder AutoStatus Priorities:");
+        ImGui.Spacing();
+
+        if (ImGui.Button("Reset to Default"))
+        {
+            Service.Config.AutoStatusOrder = Enum.GetValues(typeof(AutoStatus))
+                .Cast<AutoStatus>()
+                .Where(status => status != AutoStatus.None)
+                .ToList();
+            Service.Config.Save();
+        }
+        ImGui.Spacing();
+
+        var autoStatusOrder = Service.Config.AutoStatusOrder;
+        bool orderChanged = false;
+
+        // Begin a child window to contain the list
+        ImGui.BeginChild("AutoStatusOrderList", new Vector2(0, 200 * Scale), true);
+
+        int itemCount = autoStatusOrder.Count;
+
+        for (int i = 0; i < itemCount; i++)
+        {
+            var item = autoStatusOrder[i];
+
+            // Draw up button
+            if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowUp, $"##Up{i}") && i > 0)
+            {
+                // Swap with the previous item
+                var temp = autoStatusOrder[i - 1];
+                autoStatusOrder[i - 1] = autoStatusOrder[i];
+                autoStatusOrder[i] = temp;
+                orderChanged = true;
+            }
+
+            ImGui.SameLine();
+
+            // Draw down button
+            if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowDown, $"##Down{i}") && i < itemCount - 1)
+            {
+                // Swap with the next item
+                var temp = autoStatusOrder[i + 1];
+                autoStatusOrder[i + 1] = autoStatusOrder[i];
+                autoStatusOrder[i] = temp;
+                orderChanged = true;
+            }
+
+            ImGui.SameLine();
+
+            // Draw the item
+            ImGui.Text(item.ToString());
+
+            // Optionally, add tooltips or additional information
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.BeginTooltip();
+                ImGui.Text($"Priority: {i + 1}");
+                ImGui.EndTooltip();
+            }
+        }
+
+        ImGui.EndChild();
+
+        if (orderChanged)
+        {
+            Service.Config.Save();
+        }
+    }
+
     private static readonly CollapsingHeaderGroup _aboutHeaders = new(new()
     {
         { UiString.ConfigWindow_About_Macros.GetDescription, DrawAboutMacros },
