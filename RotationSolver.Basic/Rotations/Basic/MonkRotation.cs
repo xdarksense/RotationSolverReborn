@@ -148,6 +148,7 @@ partial class MonkRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
+            AoeCount = 1,
         };
     }
 
@@ -240,11 +241,17 @@ partial class MonkRotation
     static partial void ModifyRiddleOfEarthPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.RiddleOfEarth, StatusID.EarthsRumination];
+        setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyEarthsReplyPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.EarthsRumination];
+        setting.IsFriendly = true;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -266,6 +273,7 @@ partial class MonkRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
+            AoeCount = 1,
         };
         setting.UnlockedByQuestID = 67966;
     }
@@ -289,7 +297,7 @@ partial class MonkRotation
         setting.ActionCheck = () => InCombat && Chakra == 5;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 1,
         };
     }
 

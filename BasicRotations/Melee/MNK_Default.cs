@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using static DefaultRotations.Magical.SMN_Default;
 
 namespace DefaultRotations.Melee;
 
@@ -92,7 +91,7 @@ public sealed class MNK_Default : MonkRotation
 
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
-        if (Player.WillStatusEnd(2.5f, true, StatusID.EarthsRumination) && EarthsReplyPvE.CanUse(out act)) return true;
+        if (Player.WillStatusEnd(5, true, StatusID.EarthsRumination) && EarthsReplyPvE.CanUse(out act)) return true;
         return base.GeneralAbility(nextGCD, out act);
     }
 
@@ -172,7 +171,7 @@ public sealed class MNK_Default : MonkRotation
         // use bh when bh and rof are ready (opener) or ask bh to wait for rof's cd to be close and then use bh
         if (!CombatElapsedLessGCD(2)
             && ((BrotherhoodPvE.IsInCooldown && RiddleOfFirePvE.IsInCooldown) || Math.Abs(BrotherhoodPvE.Cooldown.CoolDownGroup - RiddleOfFirePvE.Cooldown.CoolDownGroup) < 3)
-            && BrotherhoodPvE.CanUse(out act, skipAoeCheck: true)) return true;
+            && BrotherhoodPvE.CanUse(out act)) return true;
 
         // rof needs to be used on cd or after x gcd in opener
         if (!CombatElapsedLessGCD(3) && RiddleOfFirePvE.CanUse(out act)) return true; // Riddle Of Fire
@@ -227,18 +226,27 @@ public sealed class MNK_Default : MonkRotation
         // or if burst was missed, and next burst is not arriving in time, use it better than waste it, otherwise, hold it for next rof
         if (!BeastChakras.Contains(BeastChakra.NONE) && (Player.HasStatus(true, StatusID.RiddleOfFire) || RiddleOfFirePvE.Cooldown.JustUsedAfter(42)))
         {
-            // for some reason phantom doesn't count as a variation of masterful like the others
-            if (PhantomRushPvE.CanUse(out act, skipAoeCheck: true)) return true;
-            if (TornadoKickPvE.CanUse(out act, skipAoeCheck: true)) return true;
-            if (CelestialRevolutionPvE.CanUse(out act, skipAoeCheck: true)) return true; // shouldn't need this but who know what button the user may press
-            if (MasterfulBlitzPvE.CanUse(out act, skipAoeCheck: true)) return true;
+            // Both Nadi and 3 beasts
+            if (PhantomRushPvE.CanUse(out act)) return true;
+            if (TornadoKickPvE.CanUse(out act)) return true;
+
+            // Needing Solar Nadi and has 3 different beasts
+            if (RisingPhoenixPvE.CanUse(out act)) return true;
+            if (FlintStrikePvE.CanUse(out act)) return true;
+
+            // Needing Lunar Nadi and has 3 of the same beasts
+            if (ElixirBurstPvE.CanUse(out act)) return true;
+            if (ElixirFieldPvE.CanUse(out act)) return true;
+
+            // No Nadi and 3 beasts
+            if (CelestialRevolutionPvE.CanUse(out act)) return true;
         }
 
         // 'Because Fire¡¯s Reply grants formless, we have an imposed restriction that we prefer not to use it while under PB, or if we have a formless already.' + 'Cast Fire's Reply after an opo gcd'
         // need to test and see if IsLastGCD(false, ...) is better
-        if ((!Player.HasStatus(true, StatusID.PerfectBalance) && !Player.HasStatus(true, StatusID.FormlessFist) && IsLastGCD(true, DragonKickPvE, LeapingOpoPvE, BootshinePvE) || Player.WillStatusEnd(5, true, StatusID.FiresRumination)) && FiresReplyPvE.CanUse(out act, skipAoeCheck: true)) return true; // Fires Reply
+        if ((!Player.HasStatus(true, StatusID.PerfectBalance) && !Player.HasStatus(true, StatusID.FormlessFist) && IsLastGCD(true, DragonKickPvE, LeapingOpoPvE, BootshinePvE) || Player.WillStatusEnd(5, true, StatusID.FiresRumination)) && FiresReplyPvE.CanUse(out act)) return true; // Fires Reply
         // 'Cast Wind's Reply literally anywhere in the window'
-        if (!Player.HasStatus(true, StatusID.PerfectBalance) && WindsReplyPvE.CanUse(out act, skipAoeCheck: true)) return true; // Winds Reply
+        if ((!Player.HasStatus(true, StatusID.PerfectBalance) || Player.WillStatusEnd(5, true, StatusID.WindsRumination)) && WindsReplyPvE.CanUse(out act)) return true; // Winds Reply
 
         // Opo needs to follow each PB
         // 'This means ¡°bookending¡± any PB usage with opos and spending formless on opos.'
