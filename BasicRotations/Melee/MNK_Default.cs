@@ -165,6 +165,8 @@ public sealed class MNK_Default : MonkRotation
             if (PerfectBalancePvE.CanUse(out act, usedUp: true)) return true;
         }
 
+        if (EnlightenmentPvE.CanUse(out act)) return true; // Enlightment
+        if (HowlingFistPvE.CanUse(out act)) return true; // Howling Fist
         if (TheForbiddenChakraPvE.CanUse(out act)) return true;
         if (SteelPeakPvE.CanUse(out act)) return true;
 
@@ -178,8 +180,8 @@ public sealed class MNK_Default : MonkRotation
         // 'Use on cooldown, unless you know your killtime. You should aim to get as many casts of RoW as you can, and then shift those usages to align with burst as much as possible without losing a use.'
         if (!CombatElapsedLessGCD(3) && RiddleOfWindPvE.CanUse(out act)) return true; // Riddle Of Wind
 
-        if (EnlightenmentPvE.CanUse(out act, skipAoeCheck: HowlingSingle)) return true; // Enlightment
-        if (HowlingFistPvE.CanUse(out act, skipAoeCheck: HowlingSingle)) return true; // Howling Fist
+        if (HowlingSingle && EnlightenmentPvE.CanUse(out act, skipAoeCheck: true)) return true; // Enlightment
+        if (HowlingSingle && HowlingFistPvE.CanUse(out act, skipAoeCheck: true)) return true; // Howling Fist
 
         return base.AttackAbility(nextGCD, out act);
     }
