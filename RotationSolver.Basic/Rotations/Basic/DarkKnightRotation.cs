@@ -17,6 +17,31 @@ partial class DarkKnightRotation
     /// 
     /// </summary>
     public static bool HasDarkArts => JobGauge.HasDarkArts;
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasDelirium => !Player.WillStatusEnd(0, true, StatusID.Delirium_3836);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ScarletDeliriumReady => Service.GetAdjustedActionId(ActionID.BloodspillerPvE) == ActionID.ScarletDeliriumPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ComeuppanceReady => Service.GetAdjustedActionId(ActionID.BloodspillerPvE) == ActionID.ComeuppancePvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool TorcleaverReady => Service.GetAdjustedActionId(ActionID.BloodspillerPvE) == ActionID.TorcleaverPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ImpalementReady => Service.GetAdjustedActionId(ActionID.QuietusPvE) == ActionID.ImpalementPvE;
 
     static float DarkSideTimeRemainingRaw => JobGauge.DarksideTimeRemaining / 1000f;
 
@@ -110,6 +135,11 @@ partial class DarkKnightRotation
         ImGui.Text("DarkSideTime: " + DarkSideTime.ToString());
         ImGui.Text("HasDarkArts: " + HasDarkArts.ToString());
         ImGui.Text("Blood: " + Blood.ToString());
+        ImGui.Text("HasDelirium: " + HasDelirium.ToString());
+        ImGui.Text("ScarletDeliriumReady: " + ScarletDeliriumReady.ToString());
+        ImGui.Text("ComeuppanceReady: " + ComeuppanceReady.ToString());
+        ImGui.Text("TorcleaverReady: " + TorcleaverReady.ToString());
+        ImGui.Text("ImpalementReady: " + ImpalementReady.ToString());
     }
     #endregion
 
@@ -333,22 +363,27 @@ partial class DarkKnightRotation
 
     static partial void ModifyScarletDeliriumPvE(ref ActionSetting setting)
     {
-        
+        setting.ActionCheck = () => ScarletDeliriumReady;
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyComeuppancePvE(ref ActionSetting setting)
     {
-        
+        setting.ActionCheck = () => ComeuppanceReady;
+        setting.MPOverride = () => 0;
+        setting.ComboIds = [ActionID.ScarletDeliriumPvE];
     }
 
     static partial void ModifyTorcleaverPvE(ref ActionSetting setting)
     {
-        
+        setting.ActionCheck = () => TorcleaverReady;
+        setting.MPOverride = () => 0;
+        setting.ComboIds = [ActionID.ComeuppancePvE];
     }
 
     static partial void ModifyImpalementPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => !Player.WillStatusEnd(0, true, StatusID.Delirium_3836);
+        setting.ActionCheck = () => ImpalementReady;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 2,
@@ -358,6 +393,7 @@ partial class DarkKnightRotation
     static partial void ModifyDisesteemPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.Scorn];
+        setting.MPOverride = () => 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
