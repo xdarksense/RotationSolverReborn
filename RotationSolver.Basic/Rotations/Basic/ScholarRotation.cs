@@ -6,6 +6,7 @@ partial class ScholarRotation
     public override MedicineType MedicineType => MedicineType.Mind;
 
     #region Job Gauge
+
     /// <summary>
     /// 
     /// </summary>
@@ -22,6 +23,22 @@ partial class ScholarRotation
     /// 
     /// </summary>
     public static float SeraphTime => SeraphTimeRaw - DataCenter.DefaultGCDRemain;
+    #endregion
+
+    #region Actions Unassignable
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ManifestationReady => Service.GetAdjustedActionId(ActionID.AdloquiumPvE) == ActionID.ManifestationPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool AccessionReady => Service.GetAdjustedActionId(ActionID.ConcitationPvE) == ActionID.AccessionPvE;
+    #endregion
+
+    #region Debug
 
     /// <inheritdoc/>
     public override void DisplayStatus()
@@ -30,8 +47,11 @@ partial class ScholarRotation
         ImGui.Text("HasAetherflow: " + HasAetherflow.ToString());
         ImGui.Text("SeraphTime: " + SeraphTime.ToString());
         ImGui.Text("Has Fairy Out: " + DataCenter.HasPet.ToString());
+        ImGui.Text("ManifestationReady: " + ManifestationReady.ToString());
+        ImGui.Text("AccessionReady: " + AccessionReady.ToString());
     }
     #endregion
+
     private sealed protected override IBaseAction Raise => ResurrectionPvE;
 
     static partial void ModifyRuinPvE(ref ActionSetting setting)
@@ -318,7 +338,7 @@ partial class ScholarRotation
 
     static partial void ModifyManifestationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Player.HasStatus(true, StatusID.Seraphism);
+        setting.ActionCheck = () => ManifestationReady;
         setting.TargetStatusProvide =
         [
             StatusID.EukrasianDiagnosis,
@@ -330,7 +350,7 @@ partial class ScholarRotation
 
     static partial void ModifyAccessionPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Player.HasStatus(true, StatusID.Seraphism);
+        setting.ActionCheck = () => AccessionReady;
         setting.StatusProvide =
         [
             StatusID.EukrasianDiagnosis,

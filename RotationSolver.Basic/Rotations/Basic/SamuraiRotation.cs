@@ -64,7 +64,61 @@ partial class SamuraiRotation
     /// 
     /// </summary>
     public static bool HaveMeikyoShisui => Player.HasStatus(true, StatusID.MeikyoShisui);
+    #endregion
 
+    #region Actions Unassignable
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HiganbanaReady => Service.GetAdjustedActionId(ActionID.IaijutsuPvE) == ActionID.HiganbanaPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool TenkaGokenReady => Service.GetAdjustedActionId(ActionID.IaijutsuPvE) == ActionID.TenkaGokenPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool MidareSetsugekkaReady => Service.GetAdjustedActionId(ActionID.IaijutsuPvE) == ActionID.MidareSetsugekkaPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool KaeshiGokenReady => Service.GetAdjustedActionId(ActionID.TsubamegaeshiPvE) == ActionID.KaeshiGokenPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool KaeshiSetsugekkaReady => Service.GetAdjustedActionId(ActionID.TsubamegaeshiPvE) == ActionID.KaeshiSetsugekkaPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool KaeshiNamikiriReady => Service.GetAdjustedActionId(ActionID.OgiNamikiriPvE) == ActionID.KaeshiNamikiriPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool TendoGokenReady => Service.GetAdjustedActionId(ActionID.IaijutsuPvE) == ActionID.TendoGokenPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool TendoSetsugekkaReady => Service.GetAdjustedActionId(ActionID.IaijutsuPvE) == ActionID.TendoSetsugekkaPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool TendoKaeshiGokenReady => Service.GetAdjustedActionId(ActionID.TsubamegaeshiPvE) == ActionID.TendoKaeshiGokenPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool TendoKaeshiSetsugekkaReady => Service.GetAdjustedActionId(ActionID.TsubamegaeshiPvE) == ActionID.TendoKaeshiSetsugekkaPvE;
+    #endregion
+
+    #region Debug
     /// <inheritdoc/>
     public override void DisplayStatus()
     {
@@ -78,6 +132,16 @@ partial class SamuraiRotation
         ImGui.Text("HasMoon: " + HasMoon.ToString());
         ImGui.Text("HasFlower: " + HasFlower.ToString());
         ImGui.Text("HaveMeikyoShisui: " + HaveMeikyoShisui.ToString());
+        ImGui.Text("HiganbanaReady: " + HiganbanaReady.ToString());
+        ImGui.Text("TenkaGokenReady: " + TenkaGokenReady.ToString());
+        ImGui.Text("MidareSetsugekkaReady: " + MidareSetsugekkaReady.ToString());
+        ImGui.Text("KaeshiGokenReady: " + KaeshiGokenReady.ToString());
+        ImGui.Text("KaeshiSetsugekkaReady: " + KaeshiSetsugekkaReady.ToString());
+        ImGui.Text("KaeshiNamikiriReady: " + KaeshiNamikiriReady.ToString());
+        ImGui.Text("TendoGokenReady: " + TendoGokenReady.ToString());
+        ImGui.Text("TendoSetsugekkaReady: " + TendoSetsugekkaReady.ToString());
+        ImGui.Text("TendoKaeshiGokenReady: " + TendoKaeshiGokenReady.ToString());
+        ImGui.Text("TendoKaeshiSetsugekkaReady: " + TendoKaeshiSetsugekkaReady.ToString());
     }
     #endregion
 
@@ -230,7 +294,7 @@ partial class SamuraiRotation
 
     static partial void ModifyTsubamegaeshiPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.GnashingFangPvE) == ActionID.TsubamegaeshiPvE;
+
     }
 
     static partial void ModifyShohaPvE(ref ActionSetting setting)
@@ -266,15 +330,6 @@ partial class SamuraiRotation
         };
     }
 
-    static partial void ModifyKaeshiNamikiriPvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => Kaeshi == Kaeshi.NAMIKIRI;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
-    }
-
     static partial void ModifyGyofuPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Kenki <= 95;
@@ -294,7 +349,7 @@ partial class SamuraiRotation
 
     static partial void ModifyHiganbanaPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SenCount == 1 && MeditationStacks <= 2;
+        setting.ActionCheck = () => HiganbanaReady;
         setting.TargetStatusProvide = [StatusID.Higanbana];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -304,7 +359,7 @@ partial class SamuraiRotation
 
     static partial void ModifyTenkaGokenPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SenCount == 2 && MeditationStacks <= 2;
+        setting.ActionCheck = () => TenkaGokenReady;
         setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -314,12 +369,12 @@ partial class SamuraiRotation
 
     static partial void ModifyMidareSetsugekkaPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SenCount == 3 && MeditationStacks <= 2 && !Player.HasStatus(true, StatusID.Tendo);
+        setting.ActionCheck = () => MidareSetsugekkaReady;
     }
 
     static partial void ModifyKaeshiGokenPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Kaeshi == Kaeshi.GOKEN;
+        setting.ActionCheck = () => KaeshiGokenReady;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -328,13 +383,22 @@ partial class SamuraiRotation
 
     static partial void ModifyKaeshiSetsugekkaPvE(ref ActionSetting setting)
     {
-        //setting.ActionCheck = () => Kaeshi == Kaeshi.SETSUGEKKA;
+        setting.ActionCheck = () => KaeshiSetsugekkaReady;
         setting.StatusNeed = [StatusID.Tsubamegaeshi];
+    }
+
+    static partial void ModifyKaeshiNamikiriPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => KaeshiNamikiriReady;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyTendoGokenPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SenCount == 2 && MeditationStacks <= 2;
+        setting.ActionCheck = () => TendoGokenReady;
         setting.StatusProvide = [StatusID.Tsubamegaeshi];
         setting.StatusNeed = [StatusID.Tendo];
         setting.IsFriendly = false;
@@ -346,14 +410,14 @@ partial class SamuraiRotation
 
     static partial void ModifyTendoSetsugekkaPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SenCount == 3 && MeditationStacks <= 2 && Player.HasStatus(true, StatusID.Tendo);
+        setting.ActionCheck = () => TendoSetsugekkaReady;
         setting.StatusProvide = [StatusID.Tsubamegaeshi];
         setting.StatusNeed = [StatusID.Tendo];
     }
 
     static partial void ModifyTendoKaeshiGokenPvE(ref ActionSetting setting)
     {
-        //setting.ActionCheck = () => (byte)Kaeshi == 5;
+        setting.ActionCheck = () => TendoKaeshiGokenReady;
         setting.IsFriendly = false;
         setting.StatusNeed = [StatusID.Tendo];
         setting.CreateConfig = () => new ActionConfig()
@@ -364,7 +428,7 @@ partial class SamuraiRotation
 
     static partial void ModifyTendoKaeshiSetsugekkaPvE(ref ActionSetting setting)
     {
-        //setting.ActionCheck = () => (byte)Kaeshi == 6; // Temporary until Dalamud enums are updated
+        setting.ActionCheck = () => TendoKaeshiSetsugekkaReady;
         setting.StatusNeed = [StatusID.Tsubamegaeshi_4218];
     }
 
