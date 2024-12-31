@@ -101,19 +101,23 @@ partial class BlackMageRotation
     /// <returns></returns>
     protected static bool ElementTimeEndAfterGCD(uint gctCount = 0, float offset = 0)
         => ElementTimeEndAfter(GCDTime(gctCount, offset));
-    #endregion
-
 
     /// <summary>
     /// 
     /// </summary>
-    protected static bool HasFire => Player.HasStatus(true, StatusID.Firestarter);
+    protected static float Fire4Time { get; private set; }
 
     /// <summary>
     /// 
     /// </summary>
-    protected static bool HasThunder => Player.HasStatus(true, StatusID.Thunderhead);
-
+    protected override void UpdateInfo()
+    {
+        if (Player.CastActionId == (uint)ActionID.FireIvPvE && Player.CurrentCastTime < 0.2)
+        {
+            Fire4Time = Player.TotalCastTime;
+        }
+        base.UpdateInfo();
+    }
 
     /// <summary>
     /// A check with variable max stacks of Polyglot based on the trait level.
@@ -136,7 +140,31 @@ partial class BlackMageRotation
             }
         }
     }
+    #endregion
 
+    #region Status Tracking
+    /// <summary>
+    /// 
+    /// </summary>
+    protected static bool HasPvPAstralFire => Player.HasStatus(true, StatusID.AstralFire_3212, StatusID.AstralFireIi_3213, StatusID.AstralFireIii_3381);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    protected static bool HasPvPUmbralIce => Player.HasStatus(true, StatusID.UmbralIce_3214, StatusID.UmbralIceIi_3215, StatusID.UmbralIceIii_3382);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    protected static bool HasFire => Player.HasStatus(true, StatusID.Firestarter);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    protected static bool HasThunder => Player.HasStatus(true, StatusID.Thunderhead);
+    #endregion
+
+    #region Debug
     /// <inheritdoc/>
     public override void DisplayStatus()
     {
@@ -155,7 +183,12 @@ partial class BlackMageRotation
         ImGui.Text("IsEnochianActive: " + IsEnochianActive.ToString());
         ImGui.Text("EnochianTimeRaw: " + EnochianTimeRaw.ToString());
         ImGui.Text("EnochianTime: " + EnochianTime.ToString());
+        ImGui.Text("HasPvPAstralFire: " + HasPvPAstralFire.ToString());
+        ImGui.Text("HasPvPUmbralIce: " + HasPvPUmbralIce.ToString());
     }
+    #endregion
+
+    #region PvE Actions
 
     static partial void ModifyBlizzardPvE(ref ActionSetting setting)
     {
@@ -399,27 +432,158 @@ partial class BlackMageRotation
             AoeCount = 1,
         };
     }
+    #endregion
+
+    #region PvP Actions Unassignable
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool WreathOfFireReady => Service.GetAdjustedActionId(ActionID.ElementalWeavePvP) == ActionID.WreathOfFirePvP;
 
     /// <summary>
     /// 
     /// </summary>
-    protected static float Fire4Time { get; private set; }
+    public static bool WreathOfIceReady => Service.GetAdjustedActionId(ActionID.ElementalWeavePvP) == ActionID.WreathOfIcePvP;
+    #endregion
 
-    /// <summary>
-    /// 
-    /// </summary>
-    protected override void UpdateInfo()
+    #region PvP Actions
+    static partial void ModifyFirePvP(ref ActionSetting setting)
     {
-        if (Player.CastActionId == (uint)ActionID.FireIvPvE && Player.CurrentCastTime < 0.2)
-        {
-            Fire4Time = Player.TotalCastTime;
-        }
-        base.UpdateInfo();
+        setting.StatusProvide = [StatusID.Paradox, StatusID.AstralFire_3212];
     }
 
-    // PvP
+    static partial void ModifyBlizzardPvP(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.Paradox, StatusID.UmbralIce_3214];
+    }
+
+    static partial void ModifyBurstPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyParadoxPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.Paradox];
+    }
+
+    static partial void ModifyXenoglossyPvP(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyLethargyPvP(ref ActionSetting setting)
+    {
+        setting.TargetStatusProvide = [StatusID.Lethargy_4333, StatusID.Heavy_1344];
+    }
+
     static partial void ModifyAetherialManipulationPvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
     }
+
+    static partial void ModifyElementalWeavePvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyFireIiiPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.AstralFire_3212];
+        setting.StatusProvide = [StatusID.AstralFireIi_3213];
+    }
+
+    static partial void ModifyFireIvPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.AstralFireIi_3213];
+        setting.StatusProvide = [StatusID.AstralFireIii_3381];
+    }
+
+    static partial void ModifyHighFireIiPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.AstralFireIii_3381];
+        setting.StatusProvide = [StatusID.AstralFire_3212];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyFlarePvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.SoulResonance];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyBlizzardIiiPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.UmbralIce_3214];
+        setting.StatusProvide = [StatusID.UmbralIceIi_3215];
+    }
+
+    static partial void ModifyBlizzardIvPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.UmbralIceIi_3215];
+        setting.StatusProvide = [StatusID.UmbralIceIii_3382];
+    }
+
+    static partial void ModifyHighBlizzardIiPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.UmbralIceIii_3382];
+        setting.StatusProvide = [StatusID.UmbralIce_3214];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyFreezePvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.SoulResonance];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyWreathOfFirePvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => WreathOfFireReady;
+    }
+
+    static partial void ModifyWreathOfIcePvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => WreathOfIceReady;
+    }
+
+    static partial void ModifyFlareStarPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.ElementalStar];
+        setting.ActionCheck = () => HasPvPAstralFire;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+    
+    static partial void ModifyFrostStarPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.ElementalStar];
+        setting.ActionCheck = () => HasPvPUmbralIce;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    #endregion
 }

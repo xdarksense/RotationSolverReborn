@@ -1,6 +1,6 @@
 ﻿namespace DefaultRotations.Magical;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.00", Description = "Beta Rotation")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.15", Description = "Beta Rotation")]
 [SourceCode(Path = "main/BasicRotations/PVPRotations/Magical/BLM_Default.PVP.cs")]
 [Api(4)]
 public class BLM_DefaultPVP : BlackMageRotation
@@ -42,6 +42,8 @@ public class BLM_DefaultPVP : BlackMageRotation
     [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
     public bool GuardCancel { get; set; } = false;
 
+    protected static bool HalfHeathXeno => Player.CurrentHp >= 27000;
+
     private bool TryPurify(out IAction? action)
     {
         action = null;
@@ -79,10 +81,25 @@ public class BLM_DefaultPVP : BlackMageRotation
         return base.EmergencyAbility(nextGCD, out act);
     }
 
+    protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
+    {
+        act = null;
+        if (GuardCancel && Player.HasStatus(true, StatusID.Guard)) return false;
+
+        if (AetherialManipulationPvP.CanUse(out act)) return true;
+
+        return base.MoveForwardAbility(nextGCD, out act);
+    }
+
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
         if (GuardCancel && Player.HasStatus(true, StatusID.Guard)) return false;
+
+        if (XenoglossyPvP.CanUse(out act)) return true;
+        if (LethargyPvP.CanUse(out act)) return true;
+        if (WreathOfFirePvP.CanUse(out act)) return true;
+        if (WreathOfIcePvP.CanUse(out act)) return true;
 
         return base.AttackAbility(nextGCD, out act);
     }
@@ -91,8 +108,6 @@ public class BLM_DefaultPVP : BlackMageRotation
     {
         act = null;
         if (GuardCancel && Player.HasStatus(true, StatusID.Guard)) return false;
-
-        if (AetherialManipulationPvP.CanUse(out act)) return true;
 
         return base.GeneralAbility(nextGCD, out act);
     }
@@ -104,11 +119,24 @@ public class BLM_DefaultPVP : BlackMageRotation
         if (GuardCancel && Player.HasStatus(true, StatusID.Guard)) return false;
         if (!Player.HasStatus(true, StatusID.Guard) && UseSprintPvP && !Player.HasStatus(true, StatusID.Sprint) && !InCombat && SprintPvP.CanUse(out act)) return true;
 
-        if (BurstPvP.CanUse(out act)) return true;
+        if (XenoglossyPvP.CanUse(out act, usedUp: !HalfHeathXeno)) return true;
 
         if (ParadoxPvP.CanUse(out act)) return true;
 
+        if (BurstPvP.CanUse(out act)) return true;
+
+        if (FlareStarPvP.CanUse(out act)) return true;
+        if (FlarePvP.CanUse(out act)) return true;
+        if (HighFireIiPvP.CanUse(out act)) return true;
+        if (FireIvPvP.CanUse(out act)) return true;
+        if (FireIiiPvP.CanUse(out act)) return true;
         if (FirePvP.CanUse(out act)) return true;
+
+        if (FrostStarPvP.CanUse(out act)) return true;
+        if (FreezePvP.CanUse(out act)) return true;
+        if (HighBlizzardIiPvP.CanUse(out act)) return true;
+        if (BlizzardIvPvP.CanUse(out act)) return true;
+        if (BlizzardIiiPvP.CanUse(out act)) return true;
         if (BlizzardPvP.CanUse(out act)) return true;
 
         return base.GeneralGCD(out act);
