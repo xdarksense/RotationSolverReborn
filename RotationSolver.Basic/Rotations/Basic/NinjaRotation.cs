@@ -22,6 +22,11 @@ partial class NinjaRotation
     public static bool HasJin => IncreaseAttackSpeedTrait.EnoughLevel;
 
     /// <summary>
+    /// Do you need to prep or currently use shadowwalker
+    /// </summary>
+    public bool ShadowWalkerNeeded => TrickAttackPvE.Cooldown.WillHaveOneCharge(18) || KunaisBanePvE.Cooldown.WillHaveOneCharge(18) || MeisuiPvE.Cooldown.WillHaveOneCharge(18);
+
+    /// <summary>
     /// Determines if Trick Attack is in its effective period.
     /// </summary>
     public bool InTrickAttack => (KunaisBanePvE.Cooldown.IsCoolingDown || TrickAttackPvE.Cooldown.IsCoolingDown) && (!KunaisBanePvE.Cooldown.ElapsedAfter(17) || !TrickAttackPvE.Cooldown.ElapsedAfter(17));
@@ -36,6 +41,18 @@ partial class NinjaRotation
     /// </summary>
     public static bool NoNinjutsu => AdjustId(ActionID.NinjutsuPvE) is ActionID.NinjutsuPvE or ActionID.RabbitMediumPvE;
 
+    /// <summary>
+    /// Holds the remaining amount of Delirium stacks
+    /// </summary>
+    public static byte RaijuStacks
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.RaijuReady);
+            return stacks == byte.MaxValue ? (byte)3 : stacks;
+        }
+    }
+
     /// <inheritdoc/>
     public override void DisplayStatus()
     {
@@ -45,6 +62,8 @@ partial class NinjaRotation
         ImGui.Text($"InTrickAttack: {InTrickAttack}");
         ImGui.Text($"InMug: {InMug}");
         ImGui.Text($"NoNinjutsu: {NoNinjutsu}");
+        ImGui.Text($"RaijuStacks: {RaijuStacks}");
+        ImGui.Text($"ShadowWalkerNeeded: {ShadowWalkerNeeded}");
     }
     #endregion
 
@@ -310,7 +329,7 @@ partial class NinjaRotation
 
     static partial void ModifyRaitonPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.RaijuReady];
+        //setting.StatusProvide = [StatusID.RaijuReady];
     }
 
     static partial void ModifyHyotonPvE(ref ActionSetting setting)
@@ -338,7 +357,7 @@ partial class NinjaRotation
 
     static partial void ModifySuitonPvE(ref ActionSetting setting)
     {
-        //setting.StatusProvide = [StatusID.ShadowWalker];
+        setting.StatusProvide = [StatusID.ShadowWalker];
     }
 
     static partial void ModifyGokaMekkyakuPvE(ref ActionSetting setting)
