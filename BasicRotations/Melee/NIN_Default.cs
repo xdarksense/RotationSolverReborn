@@ -126,7 +126,7 @@ public sealed class NIN_Default : NinjaRotation
         {
             // If Suiton is active but no specific Ninjutsu is currently aimed, it clears the Ninjutsu aim.
             // This check is relevant for managing Suiton's effect, particularly for enabling Trick Attack.
-            if (Player.HasStatus(true, StatusID.Suiton)
+            if (Player.HasStatus(true, StatusID.ShadowWalker)
                 && _ninActionAim == SuitonPvE && NoNinjutsu)
             {
                 ClearNinjutsu();
@@ -145,15 +145,8 @@ public sealed class NIN_Default : NinjaRotation
                 return false;
             }
 
-            //Vulnerable
-            if (IsBurst && TrickAttackPvE.Cooldown.WillHaveOneCharge(18) && SuitonPvE.CanUse(out _) && !Player.HasStatus(true, StatusID.Suiton) && TenPvE.CanUse(out _) && ChiPvE.CanUse(out _) && JinPvE.CanUse(out _))
-            {
-                SetNinjutsu(SuitonPvE);
-                return false;
-            }
-
             //Single
-            if (TenPvE.CanUse(out _, usedUp: InTrickAttack && !Player.HasStatus(false, StatusID.RaijuReady)))
+            if (!ShadowWalkerNeeded && TenPvE.CanUse(out _, usedUp: InTrickAttack && !Player.HasStatus(false, StatusID.RaijuReady)))
             {
                 if (RaitonPvE.CanUse(out _) && TenPvE.CanUse(out _) && ChiPvE.CanUse(out _))
                 {
@@ -166,6 +159,13 @@ public sealed class NIN_Default : NinjaRotation
                     SetNinjutsu(FumaShurikenPvE);
                     return false;
                 }
+            }
+
+            //Vulnerable
+            if (ShadowWalkerNeeded && !Player.HasStatus(true, StatusID.TenChiJin) && SuitonPvE.CanUse(out _, skipStatusProvideCheck: false) && TenPvE.CanUse(out _) && ChiPvE.CanUse(out _) && JinPvE.CanUse(out _))
+            {
+                SetNinjutsu(SuitonPvE);
+                return false;
             }
         }
 
@@ -316,7 +316,7 @@ public sealed class NIN_Default : NinjaRotation
         if (!NoNinjutsu || !InCombat) return base.EmergencyAbility(nextGCD, out act);
 
         // First priority is given to Kassatsu if it's available, allowing for an immediate powerful Ninjutsu.
-        if (KassatsuPvE.CanUse(out act)) return true;
+        if (NoNinjutsu && KassatsuPvE.CanUse(out act)) return true;
 
         if (TenriJindoPvE.CanUse(out act)) return true;
 
