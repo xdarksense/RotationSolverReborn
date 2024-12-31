@@ -2721,6 +2721,18 @@ public partial class RotationConfigWindow : Window
             ImGui.Text("Friendly NPC Members: None");
         }
 
+        // Display dispel target
+        var dispelTarget = DataCenter.DispelTarget;
+        if (dispelTarget != null)
+        {
+            ImGui.Text("Dispel Target:");
+            ImGui.Text($"- {dispelTarget.Name}");
+        }
+        else
+        {
+            ImGui.Text("Dispel Target: None");
+        }
+
         ImGui.Text($"TerritoryType: {DataCenter.TerritoryContentType}");
         ImGui.Text($"DPSTaken: {DataCenter.DPSTaken}");
         ImGui.Text($"IsHostileCastingToTank: {DataCenter.IsHostileCastingToTank}");
