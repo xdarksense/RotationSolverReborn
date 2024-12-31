@@ -219,8 +219,8 @@ internal static partial class TargetUpdater
     private static IBattleChara? GetDispelTarget()
     {
         var rotation = DataCenter.RightNowRotation;
-        if ((Player.Job == Job.WHM || Player.Job == Job.SCH || Player.Job == Job.AST || Player.Job == Job.SGE ||
-            Player.Job == Job.BRD) && Service.Config.DispelAll)
+        if (Player.Job == Job.WHM || Player.Job == Job.SCH || Player.Job == Job.AST || Player.Job == Job.SGE ||
+            Player.Job == Job.BRD)
         {
             var weakenPeople = DataCenter.PartyMembers?
                 .Where(o => o is IBattleChara b && b.StatusList != null &&
@@ -236,8 +236,10 @@ internal static partial class TargetUpdater
                                       ?? weakenPeople.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault()
                                       ?? weakenNPC.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault();
         }
-
-        return null;
+        else
+        {
+            return null;
+        }
     }
 
     private static void UpdateTimeToKill()
