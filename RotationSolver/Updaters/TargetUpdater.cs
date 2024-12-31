@@ -34,14 +34,36 @@ internal static partial class TargetUpdater
 
     private static unsafe List<IBattleChara> GetPartyMembers()
     {
-        return DataCenter.AllianceMembers.Where(ObjectHelper.IsParty)
-            .Where(b => b.Character()->CharacterData.OnlineStatus != 15 && b.IsTargetable).ToList();
+        try
+        {
+            return DataCenter.AllianceMembers?
+                .Where(ObjectHelper.IsParty)
+                .Where(b => b.Character() != null && b.Character()->CharacterData.OnlineStatus != 15 && b.IsTargetable)
+                .ToList() ?? new List<IBattleChara>();
+        }
+        catch (Exception ex)
+        {
+            // Log the exception for debugging purposes
+            Svc.Log.Error($"Error in GetPartyMembers: {ex.Message}");
+            return new List<IBattleChara>();
+        }
     }
 
     private static unsafe List<IBattleChara> GetAllianceMembers()
     {
-        return DataCenter.AllTargets.Where(ObjectHelper.IsAlliance)
-            .Where(b => b.Character()->CharacterData.OnlineStatus != 15 && b.IsTargetable).ToList();
+        try
+        {
+            return DataCenter.AllTargets?
+                .Where(ObjectHelper.IsAlliance)
+                .Where(b => b.Character() != null && b.Character()->CharacterData.OnlineStatus != 15 && b.IsTargetable)
+                .ToList() ?? new List<IBattleChara>();
+        }
+        catch (Exception ex)
+        {
+            // Log the exception for debugging purposes
+            Svc.Log.Error($"Error in GetAllianceMembers: {ex.Message}");
+            return new List<IBattleChara>();
+        }
     }
 
     private static List<IBattleChara> GetFriendlyNPCs()
@@ -49,7 +71,7 @@ internal static partial class TargetUpdater
         // Check if the configuration setting is true
         if (!Service.Config.FriendlyBattleNpcHeal && !Service.Config.FriendlyPartyNpcHealRaise2)
         {
-            return [];
+            return new List<IBattleChara>();
         }
 
         try
@@ -57,7 +79,7 @@ internal static partial class TargetUpdater
             // Ensure Svc.Objects is not null
             if (Svc.Objects == null)
             {
-                return [];
+                return new List<IBattleChara>();
             }
 
             // Filter and cast objects safely
@@ -73,7 +95,7 @@ internal static partial class TargetUpdater
                     catch (Exception ex)
                     {
                         // Log the exception for debugging purposes
-                        Svc.Log.Error($"Error filtering object in get_FriendlyNPCMembers: {ex.Message}");
+                        Svc.Log.Error($"Error filtering object in GetFriendlyNPCs: {ex.Message}");
                         return false;
                     }
                 })
@@ -85,8 +107,8 @@ internal static partial class TargetUpdater
         catch (Exception ex)
         {
             // Log the exception for debugging purposes
-            Svc.Log.Error($"Error in get_FriendlyNPCMembers: {ex.Message}");
-            return [];
+            Svc.Log.Error($"Error in GetFriendlyNPCs: {ex.Message}");
+            return new List<IBattleChara>();
         }
     }
 
@@ -94,20 +116,32 @@ internal static partial class TargetUpdater
     {
         var strongOfShieldPositional = EnemyPositional.Front;
 
-        return DataCenter.AllTargets.Where(b =>
+        try
         {
-            // Check if the target is an enemy and targetable.
-            if (!b.IsEnemy() || !b.IsTargetable) return false;
+            return DataCenter.AllTargets.Where(b =>
+            {
+                // Check if the target is null.
+                if (b == null) return false;
 
-            // Check if the target is invincible.
-            if (b.StatusList.Any(StatusHelper.IsInvincible)) return false;
+                // Check if the target is an enemy and targetable.
+                if (!b.IsEnemy() || !b.IsTargetable) return false;
 
-            // Special exception for the Strong of Shield status on Hansel and Gretel.
-            if (b.HasStatus(true, StatusID.StrongOfShield) && strongOfShieldPositional != b.FindEnemyPositional()) return false;
+                // Check if the target is invincible.
+                if (b.StatusList?.Any(StatusHelper.IsInvincible) == true) return false;
 
-            // If all checks pass, the target is considered hostile.
-            return true;
-        }).ToList();
+                // Special exception for the Strong of Shield status on Hansel and Gretel.
+                if (b.HasStatus(true, StatusID.StrongOfShield) && strongOfShieldPositional != b.FindEnemyPositional()) return false;
+
+                // If all checks pass, the target is considered hostile.
+                return true;
+            }).ToList();
+        }
+        catch (Exception ex)
+        {
+            // Log the exception for debugging purposes
+            Svc.Log.Error($"Error in GetAllHostileTargets: {ex.Message}");
+            return new List<IBattleChara>();
+        }
     }
 
     private static IBattleChara? GetDeathTarget()
@@ -117,56 +151,63 @@ internal static partial class TargetUpdater
         if (Player.Job == Job.WHM || Player.Job == Job.SCH || Player.Job == Job.AST || Player.Job == Job.SGE ||
             Player.Job == Job.SMN || Player.Job == Job.RDM)
         {
-            var deathAll = DataCenter.AllianceMembers.GetDeath();
-
-            var deathParty = DataCenter.PartyMembers.GetDeath();
-            var deathNPC = DataCenter.FriendlyNPCMembers.GetDeath();
-
-            // Check death in party members
-            if (deathParty.Any())
+            try
             {
-                var deathT = deathParty.GetJobCategory(JobRole.Tank).ToList();
-                var deathH = deathParty.GetJobCategory(JobRole.Healer).ToList();
+                var deathAll = DataCenter.AllianceMembers?.GetDeath() ?? new List<IBattleChara>();
+                var deathParty = DataCenter.PartyMembers?.GetDeath() ?? new List<IBattleChara>();
+                var deathNPC = DataCenter.FriendlyNPCMembers?.GetDeath() ?? new List<IBattleChara>();
 
-                if (deathT.Count > 1) return deathT.FirstOrDefault();
-                if (deathH.Any()) return deathH.FirstOrDefault();
-                if (deathT.Any()) return deathT.FirstOrDefault();
-
-                return deathParty.FirstOrDefault();
-            }
-
-            // Check death in alliance members
-            if (deathAll.Any())
-            {
-                if (Service.Config.RaiseType == RaiseType.PartyAndAllianceHealers)
+                // Check death in party members
+                if (deathParty.Any())
                 {
-                    var deathAllH = deathAll.GetJobCategory(JobRole.Healer).ToList();
-                    if (deathAllH.Any()) return deathAllH.FirstOrDefault();
+                    var deathT = deathParty.GetJobCategory(JobRole.Tank).ToList();
+                    var deathH = deathParty.GetJobCategory(JobRole.Healer).ToList();
+
+                    if (deathT.Count > 1) return deathT.FirstOrDefault();
+                    if (deathH.Any()) return deathH.FirstOrDefault();
+                    if (deathT.Any()) return deathT.FirstOrDefault();
+
+                    return deathParty.FirstOrDefault();
                 }
 
-                if (Service.Config.RaiseType == RaiseType.PartyAndAlliance)
+                // Check death in alliance members
+                if (deathAll.Any())
                 {
-                    var deathAllH = deathAll.GetJobCategory(JobRole.Healer).ToList();
-                    var deathAllT = deathAll.GetJobCategory(JobRole.Tank).ToList();
+                    if (Service.Config.RaiseType == RaiseType.PartyAndAllianceHealers)
+                    {
+                        var deathAllH = deathAll.GetJobCategory(JobRole.Healer).ToList();
+                        if (deathAllH.Any()) return deathAllH.FirstOrDefault();
+                    }
 
-                    if (deathAllH.Any()) return deathAllH.FirstOrDefault();
-                    if (deathAllT.Any()) return deathAllT.FirstOrDefault();
+                    if (Service.Config.RaiseType == RaiseType.PartyAndAlliance)
+                    {
+                        var deathAllH = deathAll.GetJobCategory(JobRole.Healer).ToList();
+                        var deathAllT = deathAll.GetJobCategory(JobRole.Tank).ToList();
 
-                    return deathAll.FirstOrDefault();
+                        if (deathAllH.Any()) return deathAllH.FirstOrDefault();
+                        if (deathAllT.Any()) return deathAllT.FirstOrDefault();
+
+                        return deathAll.FirstOrDefault();
+                    }
+                }
+
+                // Check death in friendly NPC members
+                if (deathNPC.Any() && Service.Config.FriendlyPartyNpcHealRaise2)
+                {
+                    var deathNPCT = deathNPC.GetJobCategory(JobRole.Tank).ToList();
+                    var deathNPCH = deathNPC.GetJobCategory(JobRole.Healer).ToList();
+
+                    if (deathNPCT.Count > 1) return deathNPCT.FirstOrDefault();
+                    if (deathNPCH.Any()) return deathNPCH.FirstOrDefault();
+                    if (deathNPCT.Any()) return deathNPCT.FirstOrDefault();
+
+                    return deathNPC.FirstOrDefault();
                 }
             }
-
-            // Check death in friendly NPC members
-            if (deathNPC.Any() && Service.Config.FriendlyPartyNpcHealRaise2)
+            catch (Exception ex)
             {
-                var deathNPCT = deathNPC.GetJobCategory(JobRole.Tank).ToList();
-                var deathNPCH = deathNPC.GetJobCategory(JobRole.Healer).ToList();
-
-                if (deathNPCT.Count > 1) return deathNPCT.FirstOrDefault();
-                if (deathNPCH.Any()) return deathNPCH.FirstOrDefault();
-                if (deathNPCT.Any()) return deathNPCT.FirstOrDefault();
-
-                return deathNPC.FirstOrDefault();
+                // Log the exception for debugging purposes
+                Svc.Log.Error($"Error in GetDeathTarget: {ex.Message}");
             }
 
             return null;
@@ -177,19 +218,26 @@ internal static partial class TargetUpdater
 
     private static IBattleChara? GetDispelTarget()
     {
-        var weakenPeople = DataCenter.PartyMembers?
-            .Where(o => o is IBattleChara b && b.StatusList != null &&
-                        b.StatusList.Any(status => status != null && status.CanDispel())) ?? [];
-        var weakenNPC = DataCenter.FriendlyNPCMembers?
-            .Where(o => o is IBattleChara b && b.StatusList != null &&
-                        b.StatusList.Any(status => status != null && status.CanDispel())) ?? [];
-        var dyingPeople = weakenPeople
-            .Where(o => o is IBattleChara b && b.StatusList != null &&
-                        b.StatusList.Any(status => status != null && status.IsDangerous()));
+        var rotation = DataCenter.RightNowRotation;
+        if ((Player.Job == Job.WHM || Player.Job == Job.SCH || Player.Job == Job.AST || Player.Job == Job.SGE ||
+            Player.Job == Job.BRD) && Service.Config.DispelAll)
+        {
+            var weakenPeople = DataCenter.PartyMembers?
+                .Where(o => o is IBattleChara b && b.StatusList != null &&
+                        b.StatusList.Any(status => status != null && status.CanDispel())) ?? Enumerable.Empty<IBattleChara>();
+            var weakenNPC = DataCenter.FriendlyNPCMembers?
+                .Where(o => o is IBattleChara b && b.StatusList != null &&
+                            b.StatusList.Any(status => status != null && status.CanDispel())) ?? Enumerable.Empty<IBattleChara>();
+            var dyingPeople = weakenPeople
+                .Where(o => o is IBattleChara b && b.StatusList != null &&
+                            b.StatusList.Any(status => status != null && status.IsDangerous()));
 
-        return dyingPeople.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault()
-                                  ?? weakenPeople.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault()
-                                  ?? weakenNPC.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault();
+            return dyingPeople.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault()
+                                      ?? weakenPeople.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault()
+                                      ?? weakenNPC.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault();
+        }
+
+        return null;
     }
 
     private static void UpdateTimeToKill()

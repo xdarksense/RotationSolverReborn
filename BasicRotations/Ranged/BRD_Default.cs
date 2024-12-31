@@ -30,6 +30,9 @@ public sealed class BRD_Default : BardRotation
     [RotationConfig(CombatType.PvE, Name = "First Song")]
     private Song FirstSong { get; set; } = Song.WANDERER;
 
+    [RotationConfig(CombatType.PvE, Name = "Use Warden's Paean on other players")]
+    public bool BRDEsuna { get; set; } = true;
+
     private float WANDRemainTime => 45 - WANDTime;
     private float MAGERemainTime => 45 - MAGETime;
     private float ARMYRemainTime => 45 - ARMYTime;
@@ -76,7 +79,7 @@ public sealed class BRD_Default : BardRotation
     [RotationDesc(ActionID.TheWardensPaeanPvE)]
     protected override bool DispelGCD(out IAction? act)
     {
-        if (TheWardensPaeanPvE.CanUse(out act)) return true;
+        if (BRDEsuna && TheWardensPaeanPvE.CanUse(out act)) return true;
         return base.DispelGCD(out act);
     }
 

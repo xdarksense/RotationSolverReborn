@@ -1,7 +1,7 @@
 namespace DefaultRotations.Tank;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.05")]
-[SourceCode(Path = "main/BasicRotations/Tank/DRK_Balance.cs")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
+[SourceCode(Path = "main/BasicRotations/Tank/DRK_Default.cs")]
 [Api(4)]
 public sealed class DRK_Default : DarkKnightRotation
 {
@@ -136,27 +136,27 @@ public sealed class DRK_Default : DarkKnightRotation
     #region GCD Logic
     protected override bool GeneralGCD(out IAction? act)
     {
-        if (ImpalementPvE.CanUse(out act, skipComboCheck: true)) return true;
-        if (QuietusPvE.CanUse(out act, skipComboCheck: true)) return true;
-
-        if (IsLastGCD(true, ComeuppancePvE) && TorcleaverPvE.CanUse(out act, skipComboCheck: true)) return true;
-        if (IsLastGCD(true, ScarletDeliriumPvE) && ComeuppancePvE.CanUse(out act, skipComboCheck: true)) return true;
-        if (ScarletDeliriumPvE.CanUse(out act, skipComboCheck: true)) return true;
-
         if (DisesteemPvE.CanUse(out act)) return true;
 
+        //AOE Delirium
+        if (ImpalementPvE.CanUse(out act)) return true;
+        if (QuietusPvE.CanUse(out act)) return true;
+
+        // Single Target Delirium
+        if (TorcleaverPvE.CanUse(out act, skipComboCheck: true)) return true;
+        if (ComeuppancePvE.CanUse(out act, skipComboCheck: true)) return true;
+        if (ScarletDeliriumPvE.CanUse(out act, skipComboCheck: true)) return true;
+
         if (BloodspillerPvE.CanUse(out act, skipComboCheck: true)) return true;
-
-
 
         //AOE
         if (StalwartSoulPvE.CanUse(out act)) return true;
         if (UnleashPvE.CanUse(out act)) return true;
 
         //Single Target
-        if (SouleaterPvE.CanUse(out act)) return true;
-        if (SyphonStrikePvE.CanUse(out act)) return true;
-        if (HardSlashPvE.CanUse(out act)) return true;
+        if (!HasDelirium && SouleaterPvE.CanUse(out act)) return true;
+        if (!HasDelirium && SyphonStrikePvE.CanUse(out act)) return true;
+        if (!HasDelirium && HardSlashPvE.CanUse(out act)) return true;
 
         if (UnmendPvE.CanUse(out act)) return true;
 

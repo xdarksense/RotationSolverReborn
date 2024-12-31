@@ -44,7 +44,7 @@ internal class MedicineItem : BaseItem
 
     public MedicineItem(Item item) : base(item)
     {
-        Type = _item.Icon switch // used to be Unknown19, not entirely sure if Icon is the correct property to use
+        Type = _item.Unknown4 switch // Unknown4 is column for the medicine type
         {
             10120 => MedicineType.Strength,
             10140 => MedicineType.Dexterity,
@@ -55,5 +55,5 @@ internal class MedicineItem : BaseItem
         };
     }
 
-    protected override bool CanUseThis => DataCenter.RightNowTinctureUseType == TinctureUseType.Anywhere || DataCenter.RightNowTinctureUseType == TinctureUseType.InHighEndDuty;
+    protected override bool CanUseThis => DataCenter.RightNowTinctureUseType == TinctureUseType.Anywhere || (DataCenter.RightNowTinctureUseType == TinctureUseType.InHighEndDuty && DataCenter.IsInHighEndDuty);
 }

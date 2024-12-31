@@ -62,6 +62,10 @@ partial class AstrologianRotation
     ///  Can use Umbral or Astral draw, active draw matching what the next draw will be, ASTRAL, UMBRAL
     /// </summary>
     protected static DrawType ActiveDraw => JobGauge.ActiveDraw;
+    #endregion
+
+    #region Debug
+
     /// <inheritdoc/>
     public override void DisplayStatus()
     {

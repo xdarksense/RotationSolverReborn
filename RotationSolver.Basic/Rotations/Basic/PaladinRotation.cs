@@ -42,7 +42,42 @@ partial class PaladinRotation
     /// Gets the current level of the Oath gauge.
     /// </summary>
     public static byte OathGauge => JobGauge.OathGauge;
+    #endregion
 
+    #region Actions Unassignable
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool SupplicationReady => Service.GetAdjustedActionId(ActionID.AtonementPvE) == ActionID.SupplicationPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool SepulchreReady => Service.GetAdjustedActionId(ActionID.SupplicationPvE) == ActionID.SepulchrePvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool BladeOfFaithReady => Service.GetAdjustedActionId(ActionID.ConfiteorPvE) == ActionID.BladeOfFaithPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool BladeOfTruthReady => Service.GetAdjustedActionId(ActionID.BladeOfFaithPvE) == ActionID.BladeOfTruthPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool BladeOfValorReady => Service.GetAdjustedActionId(ActionID.BladeOfTruthPvE) == ActionID.BladeOfValorPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool BladeOfHonorReady => Service.GetAdjustedActionId(ActionID.ImperatorPvE) == ActionID.BladeOfHonorPvE;
+    #endregion
+
+    #region Debug
     /// <inheritdoc/>
     public override void DisplayStatus()
     {
@@ -240,12 +275,6 @@ partial class PaladinRotation
         setting.StatusProvide = [StatusID.SupplicationReady];
     }
 
-    static partial void ModifySupplicationPvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.SupplicationReady];
-        setting.StatusProvide = [StatusID.SepulchreReady];
-    }
-
     static partial void ModifySepulchrePvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.SepulchreReady];
@@ -324,6 +353,15 @@ partial class PaladinRotation
         {
             AoeCount = 1,
         };
+    }
+
+    // Actions Unassignable
+
+    static partial void ModifySupplicationPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => SupplicationReady;
+        setting.StatusNeed = [StatusID.SupplicationReady];
+        setting.StatusProvide = [StatusID.SepulchreReady];
     }
 
     // PvP

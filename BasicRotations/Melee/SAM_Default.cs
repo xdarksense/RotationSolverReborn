@@ -31,7 +31,7 @@ public sealed class SAM_Default : SamuraiRotation
     public bool ZanshinPrio { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Prevent Higanbana use if theres more than one target")]
-    public bool HiganbanaTargets { get; set; } = false;
+    public bool HiganbanaTargets { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Enable TEA Checker.")]
     public bool EnableTEAChecker { get; set; } = false;
@@ -85,12 +85,12 @@ public sealed class SAM_Default : SamuraiRotation
             return false;
         }
 
-        var IsTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
-        var IsTargetDying = HostileTarget?.IsDying() ?? false;
+        var isTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
+        var isTargetDying = HostileTarget?.IsDying() ?? false;
 
         // from old version - didn't touch this, didn't test this, personally i doubt it's working !!! check later !!!
         if (HasHostilesInRange && IsLastGCD(true, YukikazePvE, MangetsuPvE, OkaPvE) &&
-            (!IsTargetBoss || (HostileTarget?.HasStatus(true, StatusID.Higanbana) ?? false) && !(HostileTarget?.WillStatusEnd(40, true, StatusID.Higanbana) ?? false) || !HasMoon && !HasFlower || IsTargetBoss && IsTargetDying))
+            (!isTargetBoss || (HostileTarget?.HasStatus(true, StatusID.Higanbana) ?? false) && !(HostileTarget?.WillStatusEnd(40, true, StatusID.Higanbana) ?? false) || !HasMoon && !HasFlower || isTargetBoss && isTargetDying))
         {
             if (MeikyoShisuiPvE.CanUse(out act, usedUp: true)) return true;
         }
@@ -105,8 +105,8 @@ public sealed class SAM_Default : SamuraiRotation
             return false;
         }
 
-        var IsTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
-        var IsTargetDying = HostileTarget?.IsDying() ?? false;
+        var isTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
+        var isTargetDying = HostileTarget?.IsDying() ?? false;
 
         // IkishotenPvE logic combined with the delayed opener:
         // you should weave the tincture in manually after rsr lands the first gcd (usually Gekko)
@@ -124,7 +124,7 @@ public sealed class SAM_Default : SamuraiRotation
 
         if (Kenki >= GurenKenki && ZanshinPvE.CanUse(out act)) return true;
 
-        //ensures pooling Kenki for Zanshin if it's available
+        // ensures pooling Kenki for Zanshin if it's available
         bool hasZanshinReady = Player.HasStatus(true, StatusID.ZanshinReady_3855) && ZanshinPrio;
 
         if (!hasZanshinReady && Kenki >= GurenKenki && HissatsuGurenPvE.CanUse(out act, skipAoeCheck: !HissatsuSeneiPvE.EnoughLevel)) return true;
@@ -139,7 +139,7 @@ public sealed class SAM_Default : SamuraiRotation
 
     #region GCD Logic
 
-    StatusID[] SamBuffs = [StatusID.Fugetsu, StatusID.Fuka];
+    StatusID[] SamBuffs = { StatusID.Fugetsu, StatusID.Fuka };
 
     protected override bool GeneralGCD(out IAction? act)
     {
@@ -151,7 +151,6 @@ public sealed class SAM_Default : SamuraiRotation
 
         if ((!HiganbanaTargets || (HiganbanaTargets && NumberOfAllHostilesInRange < 2)) && (HostileTarget?.WillStatusEnd(18, true, StatusID.Higanbana) ?? false) && HiganbanaPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
 
-
         if (MidareSetsugekkaPvE.CanUse(out act)) return true;
 
         if (TenkaGokenPvE.CanUse(out act)) return true;
@@ -162,8 +161,8 @@ public sealed class SAM_Default : SamuraiRotation
         // use 2nd finisher combo spell first
         if (KaeshiNamikiriPvE.CanUse(out act, usedUp: true)) return true;
 
-        var IsTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
-        var IsTargetDying = HostileTarget?.IsDying() ?? false;
+        var isTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
+        var isTargetDying = HostileTarget?.IsDying() ?? false;
 
         // use 2nd finisher combo spell first
         if (KaeshiGokenPvE.CanUse(out act, usedUp: true)) return true;
@@ -172,7 +171,7 @@ public sealed class SAM_Default : SamuraiRotation
         if (TendoKaeshiSetsugekkaPvE.CanUse(out act, usedUp: true)) return true;
 
         // burst finisher
-        if ((!IsTargetBoss || (HostileTarget?.HasStatus(true, StatusID.Higanbana) ?? false)) && HasMoon && HasFlower
+        if ((!isTargetBoss || (HostileTarget?.HasStatus(true, StatusID.Higanbana) ?? false)) && HasMoon && HasFlower
             && OgiNamikiriPvE.CanUse(out act)) return true;
 
         if (TendoSetsugekkaPvE.CanUse(out act)) return true;
@@ -182,7 +181,7 @@ public sealed class SAM_Default : SamuraiRotation
         if ((!HasMoon || IsMoonTimeLessThanFlower || !OkaPvE.EnoughLevel) && MangetsuPvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && !HasGetsu)) return true;
         if ((!HasFlower || !IsMoonTimeLessThanFlower) && OkaPvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && !HasKa)) return true;
 
-        if (!HasSetsu && SamBuffs.All(SamBuffs => Player.HasStatus(true, SamBuffs)) &&
+        if (!HasSetsu && SamBuffs.All(buff => Player.HasStatus(true, buff)) &&
             YukikazePvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && HasGetsu && HasKa)) return true;
 
         // single target 123 combo's 3 or used 3 directly during burst when MeikyoShisui is active, while also trying to start with the one that player is in position for extra DMG
