@@ -36,7 +36,17 @@ partial class SamuraiRotation
     /// <summary>
     /// 
     /// </summary>
-    public static byte SenCount => (byte)((HasGetsu ? 1 : 0) + (HasSetsu ? 1 : 0) + (HasKa ? 1 : 0));
+    public static byte SenCount
+    {
+        get
+        {
+            byte count = 0;
+            if (HasGetsu) count++;
+            if (HasSetsu) count++;
+            if (HasKa) count++;
+            return count;
+        }
+    }
     #endregion
 
     #region Status Tracking
@@ -58,7 +68,12 @@ partial class SamuraiRotation
     /// 
     /// </summary>
     public static bool IsMoonTimeLessThanFlower
-        => Player.StatusTime(true, StatusID.Fugetsu) < Player.StatusTime(true, StatusID.Fuka);
+    {
+        get
+        {
+            return Player.StatusTime(true, StatusID.Fugetsu) < Player.StatusTime(true, StatusID.Fuka);
+        }
+    }
 
     /// <summary>
     /// 
@@ -155,7 +170,7 @@ partial class SamuraiRotation
     static partial void ModifyJinpuPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Kenki <= 95;
-        setting.ComboIds = [ActionID.HakazePvE, ActionID.GyofuPvE];
+        setting.ComboIds = new[] { ActionID.HakazePvE, ActionID.GyofuPvE };
     }
 
     static partial void ModifyEnpiPvE(ref ActionSetting setting)
@@ -165,13 +180,13 @@ partial class SamuraiRotation
 
     static partial void ModifyThirdEyePvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.ThirdEye];
+        setting.StatusProvide = new[] { StatusID.ThirdEye };
     }
 
     static partial void ModifyShifuPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Kenki <= 95;
-        setting.ComboIds = [ActionID.HakazePvE, ActionID.GyofuPvE];
+        setting.ComboIds = new[] { ActionID.HakazePvE, ActionID.GyofuPvE };
     }
 
     static partial void ModifyFugaPvE(ref ActionSetting setting)
@@ -185,7 +200,7 @@ partial class SamuraiRotation
 
     static partial void ModifyGekkoPvE(ref ActionSetting setting)
     {
-        setting.ComboIds = [ActionID.JinpuPvE];
+        setting.ComboIds = new[] { ActionID.JinpuPvE };
         setting.ActionCheck = () => Kenki <= 90;
     }
 
@@ -196,7 +211,7 @@ partial class SamuraiRotation
 
     static partial void ModifyMangetsuPvE(ref ActionSetting setting)
     {
-        setting.ComboIds = [ActionID.FukoPvE];
+        setting.ComboIds = new[] { ActionID.FukoPvE };
         setting.ActionCheck = () => Kenki <= 90;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -207,12 +222,12 @@ partial class SamuraiRotation
     static partial void ModifyKashaPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Kenki <= 90;
-        setting.ComboIds = [ActionID.ShifuPvE];
+        setting.ComboIds = new[] { ActionID.ShifuPvE };
     }
 
     static partial void ModifyOkaPvE(ref ActionSetting setting)
     {
-        setting.ComboIds = [ActionID.FukoPvE];
+        setting.ComboIds = new[] { ActionID.FukoPvE };
         setting.ActionCheck = () => Kenki <= 90;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -222,13 +237,13 @@ partial class SamuraiRotation
 
     static partial void ModifyYukikazePvE(ref ActionSetting setting)
     {
-        setting.ComboIds = [ActionID.HakazePvE, ActionID.GyofuPvE];
+        setting.ComboIds = new[] { ActionID.HakazePvE, ActionID.GyofuPvE };
         setting.ActionCheck = () => Kenki <= 85;
     }
 
     static partial void ModifyMeikyoShisuiPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.MeikyoShisui, StatusID.Tendo];
+        setting.StatusProvide = new[] { StatusID.MeikyoShisui, StatusID.Tendo };
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 0,
@@ -273,7 +288,7 @@ partial class SamuraiRotation
 
     static partial void ModifyIkishotenPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.OgiNamikiriReady, StatusID.ZanshinReady];
+        setting.StatusProvide = new[] { StatusID.OgiNamikiriReady, StatusID.ZanshinReady };
         setting.ActionCheck = () => InCombat && Kenki <= 50;
     }
 
@@ -308,7 +323,7 @@ partial class SamuraiRotation
 
     static partial void ModifyTengentsuPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.Tengentsu];
+        setting.StatusProvide = new[] { StatusID.Tengentsu };
     }
 
     static partial void ModifyFukoPvE(ref ActionSetting setting)
@@ -322,7 +337,7 @@ partial class SamuraiRotation
 
     static partial void ModifyOgiNamikiriPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.OgiNamikiriReady];
+        setting.StatusNeed = new[] { StatusID.OgiNamikiriReady };
         setting.ActionCheck = () => MeditationStacks <= 2;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -337,7 +352,7 @@ partial class SamuraiRotation
 
     static partial void ModifyZanshinPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.ZanshinReady_3855];
+        setting.StatusNeed = new[] { StatusID.ZanshinReady_3855 };
         setting.ActionCheck = () => Kenki >= 50;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -350,7 +365,7 @@ partial class SamuraiRotation
     static partial void ModifyHiganbanaPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => HiganbanaReady;
-        setting.TargetStatusProvide = [StatusID.Higanbana];
+        setting.TargetStatusProvide = new[] { StatusID.Higanbana };
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 48,
@@ -385,7 +400,7 @@ partial class SamuraiRotation
     static partial void ModifyKaeshiSetsugekkaPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => KaeshiSetsugekkaReady;
-        setting.StatusNeed = [StatusID.Tsubamegaeshi];
+        setting.StatusNeed = new[] { StatusID.Tsubamegaeshi };
     }
 
     static partial void ModifyKaeshiNamikiriPvE(ref ActionSetting setting)
@@ -410,8 +425,8 @@ partial class SamuraiRotation
     static partial void ModifyTendoSetsugekkaPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => TendoSetsugekkaReady;
-        setting.StatusProvide = [StatusID.Tsubamegaeshi];
-        setting.StatusNeed = [StatusID.Tendo];
+        setting.StatusProvide = new[] { StatusID.Tsubamegaeshi };
+        setting.StatusNeed = new[] { StatusID.Tendo };
     }
 
     static partial void ModifyTendoKaeshiGokenPvE(ref ActionSetting setting)
@@ -427,7 +442,7 @@ partial class SamuraiRotation
     static partial void ModifyTendoKaeshiSetsugekkaPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => TendoKaeshiSetsugekkaReady;
-        setting.StatusNeed = [StatusID.Tsubamegaeshi_4218];
+        setting.StatusNeed = new[] { StatusID.Tsubamegaeshi_4218 };
     }
 
     #endregion

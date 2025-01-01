@@ -1,18 +1,18 @@
 namespace DefaultRotations.Ranged;
 
-[Rotation("High End", CombatType.PvE, GameVersion = "7.11")]
+[Rotation("High End", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Ranged/MCH_HighEnd.cs")]
 [Api(4)]
 public sealed class MCH_HighEnd : MachinistRotation
 {
     #region Config Options
     [RotationConfig(CombatType.PvE, Name = "Use hardcoded Queen timings\nSlight DPS gain if uninterrupted but possibly loses more from drift or death.")]
-    private bool UseBalanceQueenTimings { get; set; }
+    private bool UseBalanceQueenTimings { get; set; } = false;
 
-    [RotationConfig(CombatType.PvE, Name = "Use burst medicine in countdown")]
+    [RotationConfig(CombatType.PvE, Name = "Use burst medicine at the 2 second mark in countdown")]
     private bool OpenerBurstMeds { get; set; } = false;
 
-    [RotationConfig(CombatType.PvE, Name = "Use burst medicine when available for midfight burst phase")]
+    [RotationConfig(CombatType.PvE, Name = "Use burst medicine midfight when Air Anchor, Barrel Stabilizer, and Wildfire are about to come off cooldown")]
     private bool MidfightBurstMeds { get; set; } = false;
     #endregion
 
@@ -74,8 +74,8 @@ public sealed class MCH_HighEnd : MachinistRotation
     [RotationDesc(ActionID.TacticianPvE, ActionID.DismantlePvE)]
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction act)
     {
-        if (TacticianPvE.CanUse(out act, skipAoeCheck: true)) return true;
-        if (DismantlePvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (TacticianPvE.CanUse(out act)) return true;
+        if (DismantlePvE.CanUse(out act)) return true;
         return false;
     }
 
@@ -93,8 +93,8 @@ public sealed class MCH_HighEnd : MachinistRotation
         }
 
         // Start Ricochet/Gauss cooldowns rolling
-        if (!RicochetPvE.Cooldown.IsCoolingDown && RicochetPvE.CanUse(out act, skipAoeCheck: true)) return true;
-        if (!GaussRoundPvE.Cooldown.IsCoolingDown && GaussRoundPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (!RicochetPvE.Cooldown.IsCoolingDown && RicochetPvE.CanUse(out act)) return true;
+        if (!GaussRoundPvE.Cooldown.IsCoolingDown && GaussRoundPvE.CanUse(out act)) return true;
 
         if (IsBurst && IsLastGCD(true, DrillPvE) && BarrelStabilizerPvE.CanUse(out act)) return true;
 
@@ -114,14 +114,14 @@ public sealed class MCH_HighEnd : MachinistRotation
             if ((IsLastGCD(true, BlazingShotPvE, HeatBlastPvE)
                 || RicochetPvE.Cooldown.RecastTimeElapsed >= 45
                 || !BarrelStabilizerPvE.Cooldown.ElapsedAfter(20))
-                && RicochetPvE.CanUse(out act, skipAoeCheck: true, usedUp: true))
+                && RicochetPvE.CanUse(out act, usedUp: true))
                 return true;
         }
 
         if ((IsLastGCD(true, BlazingShotPvE, HeatBlastPvE)
             || GaussRoundPvE.Cooldown.RecastTimeElapsed >= 45
             || !BarrelStabilizerPvE.Cooldown.ElapsedAfter(20))
-            && GaussRoundPvE.CanUse(out act, usedUp: true, skipAoeCheck: true))
+            && GaussRoundPvE.CanUse(out act, usedUp: true))
             return true;
 
 
@@ -138,7 +138,7 @@ public sealed class MCH_HighEnd : MachinistRotation
     protected override bool GeneralGCD(out IAction? act)
     {
         // use procs asap
-        if (ExcavatorPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (ExcavatorPvE.CanUse(out act)) return true;
         if (!ChainSawPvE.Cooldown.WillHaveOneChargeGCD(2) && FullMetalFieldPvE.CanUse(out act)) return true;
 
         // overheated aoe
@@ -163,7 +163,7 @@ public sealed class MCH_HighEnd : MachinistRotation
         }
 
         // ChainSaw is always used after Drill
-        if (ChainSawPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (ChainSawPvE.CanUse(out act)) return true;
 
         // save Drill for burst
         if (EnhancedMultiweaponTrait.EnoughLevel
