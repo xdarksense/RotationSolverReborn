@@ -27,6 +27,7 @@ partial class CustomRotation
     static partial void ModifyTrueNorthPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = new[] { StatusID.TrueNorth };
+        setting.ActionCheck = () => !IsLastAction(ActionID.TrueNorthPvE);
     }
 
     static partial void ModifyAddlePvE(ref ActionSetting setting)
