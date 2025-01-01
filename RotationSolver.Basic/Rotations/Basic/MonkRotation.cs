@@ -297,7 +297,7 @@ partial class MonkRotation
         setting.ActionCheck = () => InCombat && Chakra == 5;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 1,
+            AoeCount = 3,
         };
     }
 
