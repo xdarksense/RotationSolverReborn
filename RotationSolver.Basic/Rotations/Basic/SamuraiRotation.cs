@@ -375,6 +375,7 @@ partial class SamuraiRotation
     static partial void ModifyKaeshiGokenPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => KaeshiGokenReady;
+        setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -399,8 +400,6 @@ partial class SamuraiRotation
     static partial void ModifyTendoGokenPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => TendoGokenReady;
-        setting.StatusProvide = [StatusID.Tsubamegaeshi];
-        setting.StatusNeed = [StatusID.Tendo];
         setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -419,7 +418,6 @@ partial class SamuraiRotation
     {
         setting.ActionCheck = () => TendoKaeshiGokenReady;
         setting.IsFriendly = false;
-        setting.StatusNeed = [StatusID.Tendo];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
