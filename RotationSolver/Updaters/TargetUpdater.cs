@@ -38,7 +38,7 @@ internal static partial class TargetUpdater
         {
             return DataCenter.AllianceMembers?
                 .Where(ObjectHelper.IsParty)
-                .Where(b => b.Character() != null && b.Character()->CharacterData.OnlineStatus != 15 && b.IsTargetable)
+                .Where(b => b.Character() != null && b.Character()->CharacterData.OnlineStatus != 15 && b.Character()->CharacterData.OnlineStatus != 5 && b.IsTargetable)
                 .ToList() ?? new List<IBattleChara>();
         }
         catch (Exception ex)
@@ -55,7 +55,7 @@ internal static partial class TargetUpdater
         {
             return DataCenter.AllTargets?
                 .Where(ObjectHelper.IsAlliance)
-                .Where(b => b.Character() != null && b.Character()->CharacterData.OnlineStatus != 15 && b.IsTargetable)
+                .Where(b => b.Character() != null && b.Character()->CharacterData.OnlineStatus != 15 && b.Character()->CharacterData.OnlineStatus != 5 && b.IsTargetable)
                 .ToList() ?? new List<IBattleChara>();
         }
         catch (Exception ex)

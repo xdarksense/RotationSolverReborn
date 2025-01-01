@@ -104,6 +104,7 @@ partial class AstrologianRotation
     static partial void ModifyLightspeedPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Lightspeed];
+        setting.ActionCheck = () => !IsLastAbility(ActionID.LightspeedPvE);
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
