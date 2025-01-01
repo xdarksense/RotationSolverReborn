@@ -144,6 +144,9 @@ public sealed class SAM_Default : SamuraiRotation
     protected override bool GeneralGCD(out IAction? act)
     {
         act = null;
+        var isTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
+        var isTargetDying = HostileTarget?.IsDying() ?? false;
+
         if (EnableTEAChecker && Target.Name.ToString() == "Jagd Doll" && Target.GetHealthRatio() < 0.25)
         {
             return false;
@@ -151,23 +154,28 @@ public sealed class SAM_Default : SamuraiRotation
 
         if ((!HiganbanaTargets || (HiganbanaTargets && NumberOfAllHostilesInRange < 2)) && (HostileTarget?.WillStatusEnd(18, true, StatusID.Higanbana) ?? false) && HiganbanaPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
 
+        if (TendoKaeshiGokenPvE.CanUse(out act)) return true;
+        if (TendoGokenPvE.CanUse(out act)) return true;
+        if (KaeshiGokenPvE.CanUse(out act)) return true;
+        if (TenkaGokenPvE.CanUse(out act)) return true;
+
+        // aoe 12 combo's 2
+        if ((!HasMoon || IsMoonTimeLessThanFlower || !OkaPvE.EnoughLevel) && MangetsuPvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && !HasGetsu)) return true;
+        if ((!HasFlower || !IsMoonTimeLessThanFlower) && OkaPvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && !HasKa)) return true;
+
+        // initiate aoe
+        if (FukoPvE.CanUse(out act, skipComboCheck: true)) return true;
+        if (!FukoPvE.EnoughLevel && FugaPvE.CanUse(out act, skipComboCheck: true)) return true;
+
         if (MidareSetsugekkaPvE.CanUse(out act)) return true;
 
-        if (TenkaGokenPvE.CanUse(out act)) return true;
-        if (TendoGokenPvE.CanUse(out act)) return true;
         if (TendoSetsugekkaPvE.CanUse(out act)) return true;
-        if (TendoKaeshiGokenPvE.CanUse(out act)) return true;
         if (TendoKaeshiSetsugekkaPvE.CanUse(out act)) return true;
         // use 2nd finisher combo spell first
         if (KaeshiNamikiriPvE.CanUse(out act, usedUp: true)) return true;
 
-        var isTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
-        var isTargetDying = HostileTarget?.IsDying() ?? false;
-
         // use 2nd finisher combo spell first
-        if (KaeshiGokenPvE.CanUse(out act, usedUp: true)) return true;
         if (KaeshiSetsugekkaPvE.CanUse(out act, usedUp: true)) return true;
-        if (TendoKaeshiGokenPvE.CanUse(out act, usedUp: true)) return true;
         if (TendoKaeshiSetsugekkaPvE.CanUse(out act, usedUp: true)) return true;
 
         // burst finisher
@@ -176,10 +184,6 @@ public sealed class SAM_Default : SamuraiRotation
 
         if (TendoSetsugekkaPvE.CanUse(out act)) return true;
         if (MidareSetsugekkaPvE.CanUse(out act)) return true;
-
-        // aoe 12 combo's 2
-        if ((!HasMoon || IsMoonTimeLessThanFlower || !OkaPvE.EnoughLevel) && MangetsuPvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && !HasGetsu)) return true;
-        if ((!HasFlower || !IsMoonTimeLessThanFlower) && OkaPvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && !HasKa)) return true;
 
         if (!HasSetsu && SamBuffs.All(buff => Player.HasStatus(true, buff)) &&
             YukikazePvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && HasGetsu && HasKa)) return true;
@@ -197,10 +201,6 @@ public sealed class SAM_Default : SamuraiRotation
 
         if ((!HasMoon || IsMoonTimeLessThanFlower || !ShifuPvE.EnoughLevel) && JinpuPvE.CanUse(out act)) return true;
         if ((!HasFlower || !IsMoonTimeLessThanFlower) && ShifuPvE.CanUse(out act)) return true;
-
-        // initiate aoe
-        if (FukoPvE.CanUse(out act, skipComboCheck: true)) return true; // fuga doesn't becomes fuko automatically
-        if (!FukoPvE.EnoughLevel && FugaPvE.CanUse(out act, skipComboCheck: true)) return true;
 
         // MeikyoShisui buff is not active - not bursting - single target 123 combo's 1
         if (!HaveMeikyoShisui)
