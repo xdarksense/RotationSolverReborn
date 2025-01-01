@@ -112,7 +112,10 @@ partial class MachinistRotation
 
     static partial void ModifyGaussRoundPvE(ref ActionSetting setting)
     {
-
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifySpreadShotPvE(ref ActionSetting setting)

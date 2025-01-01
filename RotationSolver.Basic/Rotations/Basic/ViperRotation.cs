@@ -210,12 +210,24 @@ public partial class ViperRotation
     /// <summary>
     /// Indicates that Hunters Instinct is ending before Swiftscaled.
     /// </summary>
-    public static bool HunterLessThanSwift => Player.StatusTime(true, StatusID.HuntersInstinct) < Player.StatusTime(true, StatusID.Swiftscaled);
+    public static bool HunterLessThanSwift
+    {
+        get
+        {
+            return Player.StatusTime(true, StatusID.HuntersInstinct) < Player.StatusTime(true, StatusID.Swiftscaled);
+        }
+    }
 
     /// <summary>
     /// Indicates that Swiftscaled is ending before Hunters Instinct.
     /// </summary>
-    public static bool SwiftLessThanHunter => Player.StatusTime(true, StatusID.Swiftscaled) < Player.StatusTime(true, StatusID.HuntersInstinct);
+    public static bool SwiftLessThanHunter
+    {
+        get
+        {
+            return Player.StatusTime(true, StatusID.Swiftscaled) < Player.StatusTime(true, StatusID.HuntersInstinct);
+        }
+    }
     #endregion
 
     #region Actions
