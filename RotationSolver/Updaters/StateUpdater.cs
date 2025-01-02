@@ -1,4 +1,5 @@
 ﻿using ECommons.GameHelpers;
+using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Configuration.Conditions;
 
 namespace RotationSolver.Updaters;
@@ -24,78 +25,78 @@ internal static class StateUpdater
         AutoStatus status = AutoStatus.None;
 
         // Get the user-defined order of AutoStatus flags
-        var autoStatusOrder = Service.Config.AutoStatusOrder;
+        var autoStatusOrder = OtherConfiguration.AutoStatusOrder;
 
         foreach (var autoStatus in autoStatusOrder)
         {
             switch (autoStatus)
             {
-                case AutoStatus.Dispel:
+                case (uint)AutoStatus.Dispel:
                     if (ShouldAddDispel())
                         status |= AutoStatus.Dispel;
                     break;
 
-                case AutoStatus.Interrupt:
+                case (uint)AutoStatus.Interrupt:
                     if (ShouldAddInterrupt())
                         status |= AutoStatus.Interrupt;
                     break;
 
-                case AutoStatus.AntiKnockback:
+                case (uint)AutoStatus.AntiKnockback:
                     if (ShouldAddAntiKnockback())
                         status |= AutoStatus.AntiKnockback;
                     break;
 
-                case AutoStatus.Positional:
+                case (uint)AutoStatus.Positional:
                     if (ShouldAddPositional())
                         status |= AutoStatus.Positional;
                     break;
 
-                case AutoStatus.HealAreaAbility:
+                case (uint)AutoStatus.HealAreaAbility:
                     if (ShouldAddHealAreaAbility())
                         status |= AutoStatus.HealAreaAbility;
                     break;
 
-                case AutoStatus.HealAreaSpell:
+                case (uint)AutoStatus.HealAreaSpell:
                     if (ShouldAddHealAreaSpell())
                         status |= AutoStatus.HealAreaSpell;
                     break;
 
-                case AutoStatus.HealSingleAbility:
+                case (uint)AutoStatus.HealSingleAbility:
                     if (ShouldAddHealSingleAbility())
                         status |= AutoStatus.HealSingleAbility;
                     break;
 
-                case AutoStatus.HealSingleSpell:
+                case (uint)AutoStatus.HealSingleSpell:
                     if (ShouldAddHealSingleSpell())
                         status |= AutoStatus.HealSingleSpell;
                     break;
 
-                case AutoStatus.DefenseArea:
+                case (uint)AutoStatus.DefenseArea:
                     if (ShouldAddDefenseArea())
                         status |= AutoStatus.DefenseArea;
                     break;
 
-                case AutoStatus.DefenseSingle:
+                case (uint)AutoStatus.DefenseSingle:
                     if (ShouldAddDefenseSingle())
                         status |= AutoStatus.DefenseSingle;
                     break;
 
-                case AutoStatus.Raise:
+                case (uint)AutoStatus.Raise:
                     if (ShouldAddRaise())
                         status |= AutoStatus.Raise;
                     break;
 
-                case AutoStatus.Provoke:
+                case (uint)AutoStatus.Provoke:
                     if (ShouldAddProvoke())
                         status |= AutoStatus.Provoke;
                     break;
 
-                case AutoStatus.TankStance:
+                case (uint)AutoStatus.TankStance:
                     if (ShouldAddTankStance())
                         status |= AutoStatus.TankStance;
                     break;
 
-                case AutoStatus.Speed:
+                case (uint)AutoStatus.Speed:
                     if (ShouldAddSpeed())
                         status |= AutoStatus.Speed;
                     break;

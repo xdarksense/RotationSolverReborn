@@ -19,6 +19,7 @@ internal class OtherConfiguration
     public static HashSet<uint> InvincibleStatus = [];
     public static HashSet<uint> NoCastingStatus = [];
     public static HashSet<uint> PrioTargetId = [];
+    public static HashSet<uint> AutoStatusOrder = [];
 
     public static RotationSolverRecord RotationSolverRecord = new();
 
@@ -33,6 +34,7 @@ internal class OtherConfiguration
         Task.Run(() => InitOne(ref PriorityStatus, nameof(PriorityStatus)));
         Task.Run(() => InitOne(ref InvincibleStatus, nameof(InvincibleStatus)));
         Task.Run(() => InitOne(ref PrioTargetId, nameof(PrioTargetId)));
+        Task.Run(() => InitOne(ref AutoStatusOrder, nameof(AutoStatusOrder)));
         Task.Run(() => InitOne(ref NoHostileNames, nameof(NoHostileNames)));
         Task.Run(() => InitOne(ref NoProvokeNames, nameof(NoProvokeNames)));
         Task.Run(() => InitOne(ref AnimationLockTime, nameof(AnimationLockTime)));
@@ -52,6 +54,7 @@ internal class OtherConfiguration
             await SaveDangerousStatus();
             await SaveInvincibleStatus();
             await SavePrioTargetId();
+            await SaveAutoStatusOrder();
             await SaveNoHostileNames();
             await SaveAnimationLockTime();
             await SaveHostileCastingArea();
@@ -162,12 +165,23 @@ internal class OtherConfiguration
     public static void ResetPrioTargetId()
     {
         InitOne(ref PrioTargetId, nameof(PrioTargetId), true, true);
-        SaveHostileCastingKnockback().Wait();
+        SavePrioTargetId().Wait();
     }
 
     public static Task SavePrioTargetId()
     {
         return Task.Run(() => Save(PrioTargetId, nameof(PrioTargetId)));
+    }
+
+    public static void ResetAutoStatusOrder()
+    {
+        InitOne(ref AutoStatusOrder, nameof(AutoStatusOrder), true, true);
+        SaveAutoStatusOrder().Wait();
+    }
+
+    public static Task SaveAutoStatusOrder()
+    {
+        return Task.Run(() => Save(AutoStatusOrder, nameof(AutoStatusOrder)));
     }
 
     public static Task SaveNoHostileNames()

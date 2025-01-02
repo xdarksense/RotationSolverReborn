@@ -4,3 +4,4 @@ obj/
 lib/
 .idea/
 RotationSolver/Localization/Localization.json
+/Resources/AutoStatusOrder.json

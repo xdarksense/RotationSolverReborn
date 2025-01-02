@@ -13,7 +13,7 @@ namespace RotationSolver.UI
         {
             Size = new Vector2(650, 500);
             SizeCondition = ImGuiCond.FirstUseEver;
-            if (_lastSeenChangelog != _assemblyVersion || !Service.Config.FirstTimeSetupDone)
+            if ((_lastSeenChangelog != _assemblyVersion && Service.Config.ChangelogPopup || !Service.Config.FirstTimeSetupDone) && Service.Config.ChangelogPopup)
             {
                 PopulateChangelogs();
                 IsOpen = true;
@@ -25,7 +25,7 @@ namespace RotationSolver.UI
 #if DEBUG
         private string _assemblyVersion = "6.9.6.9"; //kekw
 #else
-        private string _assemblyVersion = typeof(RotationConfigWindow).Assembly.GetName().Version?.ToString() ?? "4.0.5.4";
+        private string _assemblyVersion = typeof(RotationConfigWindow).Assembly.GetName().Version?.ToString() ?? "7.1.5.24";
 #endif
 
         private string _lastSeenChangelog = Service.Config.LastSeenChangelog;
