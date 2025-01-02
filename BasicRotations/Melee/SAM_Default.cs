@@ -1,4 +1,6 @@
-﻿namespace DefaultRotations.Melee;
+﻿using System.ComponentModel;
+
+namespace DefaultRotations.Melee;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Melee/SAM_Default.cs")]
@@ -6,6 +8,13 @@
 public sealed class SAM_Default : SamuraiRotation
 {
     #region Config Options
+
+    public enum STtoAOEStrategy : byte
+    {
+        [Description("Hagakure")] Hagakure,
+
+        [Description("Midare Setsugekka")] MidareSetsugekka,
+    }
 
     [Range(0, 100, ConfigUnitType.None, 1)]
     [RotationConfig(CombatType.PvE, Name = "Kenki needed to use Shinten")]
@@ -35,6 +44,9 @@ public sealed class SAM_Default : SamuraiRotation
 
     [RotationConfig(CombatType.PvE, Name = "Enable TEA Checker.")]
     public bool EnableTEAChecker { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Hagakure or Midare Setsugekka when going from single target to AOE scenarios")]
+    public STtoAOEStrategy STtoAOE { get; set; } = STtoAOEStrategy.Hagakure;
     #endregion
 
     #region Countdown Logic
@@ -153,6 +165,23 @@ public sealed class SAM_Default : SamuraiRotation
         }
 
         if ((!HiganbanaTargets || (HiganbanaTargets && NumberOfAllHostilesInRange < 2)) && (HostileTarget?.WillStatusEnd(18, true, StatusID.Higanbana) ?? false) && HiganbanaPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
+
+        if (NumberOfHostilesInRange >= 3)
+        {
+            switch (STtoAOE)
+            {
+                case STtoAOEStrategy.Hagakure:
+                default:
+                    if (MidareSetsugekkaPvE.CanUse(out _) && HagakurePvE.CanUse(out act)) return true;
+                    break;
+
+                case STtoAOEStrategy.MidareSetsugekka:
+                    if (MidareSetsugekkaPvE.CanUse(out act)) return true;
+                    break;
+            }
+        }
+
+        if (!HagakurePvE.EnoughLevel && NumberOfHostilesInRange >= 3 && MidareSetsugekkaPvE.CanUse(out act)) return true;
 
         if (TendoKaeshiGokenPvE.CanUse(out act)) return true;
         if (TendoGokenPvE.CanUse(out act)) return true;
