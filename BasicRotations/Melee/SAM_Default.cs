@@ -13,7 +13,7 @@ public sealed class SAM_Default : SamuraiRotation
     {
         [Description("Hagakure")] Hagakure,
 
-        [Description("Midare Setsugekka")] MidareSetsugekka,
+        [Description("Setsugekka")] Setsugekka,
     }
 
     [Range(0, 100, ConfigUnitType.None, 1)]
@@ -45,7 +45,7 @@ public sealed class SAM_Default : SamuraiRotation
     [RotationConfig(CombatType.PvE, Name = "Enable TEA Checker.")]
     public bool EnableTEAChecker { get; set; } = false;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Hagakure or Midare Setsugekka when going from single target to AOE scenarios")]
+    [RotationConfig(CombatType.PvE, Name = "Use Hagakure or Midare/Tendo Setsugekka when going from single target to AOE scenarios")]
     public STtoAOEStrategy STtoAOE { get; set; } = STtoAOEStrategy.Hagakure;
     #endregion
 
@@ -175,7 +175,8 @@ public sealed class SAM_Default : SamuraiRotation
                     if (MidareSetsugekkaPvE.CanUse(out _) && HagakurePvE.CanUse(out act)) return true;
                     break;
 
-                case STtoAOEStrategy.MidareSetsugekka:
+                case STtoAOEStrategy.Setsugekka:
+                    if (TendoSetsugekkaPvE.CanUse(out act)) return true;
                     if (MidareSetsugekkaPvE.CanUse(out act)) return true;
                     break;
             }
@@ -196,23 +197,17 @@ public sealed class SAM_Default : SamuraiRotation
         if (FukoPvE.CanUse(out act, skipComboCheck: true)) return true;
         if (!FukoPvE.EnoughLevel && FugaPvE.CanUse(out act, skipComboCheck: true)) return true;
 
+        if (TendoSetsugekkaPvE.CanUse(out act)) return true;
         if (MidareSetsugekkaPvE.CanUse(out act)) return true;
 
-        if (TendoSetsugekkaPvE.CanUse(out act)) return true;
-        if (TendoKaeshiSetsugekkaPvE.CanUse(out act)) return true;
         // use 2nd finisher combo spell first
         if (KaeshiNamikiriPvE.CanUse(out act, usedUp: true)) return true;
-
-        // use 2nd finisher combo spell first
-        if (KaeshiSetsugekkaPvE.CanUse(out act, usedUp: true)) return true;
-        if (TendoKaeshiSetsugekkaPvE.CanUse(out act, usedUp: true)) return true;
+        if (!KaeshiNamikiriReady && KaeshiSetsugekkaPvE.CanUse(out act, usedUp: true)) return true;
+        if (!KaeshiNamikiriReady && TendoKaeshiSetsugekkaPvE.CanUse(out act, usedUp: true)) return true;
 
         // burst finisher
         if ((!isTargetBoss || (HostileTarget?.HasStatus(true, StatusID.Higanbana) ?? false)) && HasMoon && HasFlower
             && OgiNamikiriPvE.CanUse(out act)) return true;
-
-        if (TendoSetsugekkaPvE.CanUse(out act)) return true;
-        if (MidareSetsugekkaPvE.CanUse(out act)) return true;
 
         if (!HasSetsu && SamBuffs.All(buff => Player.HasStatus(true, buff)) &&
             YukikazePvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && HasGetsu && HasKa)) return true;

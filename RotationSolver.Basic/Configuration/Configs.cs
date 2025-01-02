@@ -283,7 +283,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = UiInformation)]
     private static readonly bool _showToastsAboutDoAction = false;
 
-    [ConditionBool, UI("Automatically trigger dps burst phase.", Description = "If this is disabled, you will not use abilties that consume resources/gauge.", Filter = AutoActionUsage, Section = 4)]
+    [ConditionBool, UI("Allow rotations that use this config to use abilties definied in the rotation as burst", Filter = AutoActionUsage, Section = 4)]
     private static readonly bool _autoBurst = true;
 
     [ConditionBool, UI("Automatic Healing Thresholds", Filter = HealingActionCondition, Section = 1, Order = 1)]
