@@ -25,11 +25,6 @@ internal partial class Configs : IPluginConfiguration
         List2 = "List2",
         Debug = "Debug";
 
-    public List<AutoStatus> AutoStatusOrder { get; set; } = Enum.GetValues(typeof(AutoStatus))
-        .Cast<AutoStatus>()
-        .Where(status => status != AutoStatus.None)
-        .ToList();
-
     public const int CurrentVersion = 12;
     public int Version { get; set; } = CurrentVersion;
 
@@ -64,6 +59,10 @@ internal partial class Configs : IPluginConfiguration
         Filter = BasicAutoSwitch)]
     private static readonly bool _autoOffWhenDead = true;
 
+    [ConditionBool, UI("Auto turn off when dead in PvP.",
+        Filter = BasicAutoSwitch)]
+    private static readonly bool _autoOffWhenDeadPvP = true;
+
     [ConditionBool, UI("Auto turn off when duty completed.",
         Filter = BasicAutoSwitch)]
     private static readonly bool _autoOffWhenDutyCompleted = true;
@@ -76,6 +75,10 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Audio notification for when the status changes",
         Filter = UiInformation)]
     private static readonly bool _sayOutStateChanged = false;
+
+    [ConditionBool, UI("Enable changelog window popup on update",
+        Filter = UiInformation)]
+    private static readonly bool _changelogPopup = true;
 
     [ConditionBool, UI("Show plugin status in server info bar.",
         Filter = UiInformation)]

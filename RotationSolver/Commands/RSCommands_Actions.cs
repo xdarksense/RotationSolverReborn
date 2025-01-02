@@ -187,6 +187,12 @@ namespace RotationSolver.Commands
             {
                 CancelState();
             }
+            else if (Service.Config.AutoOffWhenDeadPvP && DataCenter.Territory?.IsPvP == true
+                && Player.Available
+                && Player.Object.CurrentHp == 0)
+            {
+                CancelState();
+            }
             else if (Service.Config.AutoOffCutScene
                 && Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent])
             {

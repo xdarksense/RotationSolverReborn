@@ -40,7 +40,7 @@ public partial class RotationConfigWindow : Window
     private const float JOB_ICON_WIDTH = 50;
 
     public RotationConfigWindow()
-        : base("", ImGuiWindowFlags.NoScrollbar, false)
+    : base("", ImGuiWindowFlags.NoScrollbar, false)
     {
         SizeCondition = ImGuiCond.FirstUseEver;
         Size = new Vector2(740f, 490f);
@@ -765,15 +765,11 @@ public partial class RotationConfigWindow : Window
 
         if (ImGui.Button("Reset to Default"))
         {
-            Service.Config.AutoStatusOrder = Enum.GetValues(typeof(AutoStatus))
-                .Cast<AutoStatus>()
-                .Where(status => status != AutoStatus.None)
-                .ToList();
-            Service.Config.Save();
+            OtherConfiguration.ResetAutoStatusOrder();
         }
         ImGui.Spacing();
 
-        var autoStatusOrder = Service.Config.AutoStatusOrder;
+        var autoStatusOrder = OtherConfiguration.AutoStatusOrder.ToList(); // Convert HashSet to List
         bool orderChanged = false;
 
         // Begin a child window to contain the list
@@ -784,6 +780,7 @@ public partial class RotationConfigWindow : Window
         for (int i = 0; i < itemCount; i++)
         {
             var item = autoStatusOrder[i];
+            var itemName = Enum.GetName(typeof(AutoStatus), item) ?? item.ToString(); // Retrieve the status name by its enum value
 
             // Draw up button
             if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowUp, $"##Up{i}") && i > 0)
@@ -810,7 +807,7 @@ public partial class RotationConfigWindow : Window
             ImGui.SameLine();
 
             // Draw the item
-            ImGui.Text(item.ToString());
+            ImGui.Text(itemName);
 
             // Optionally, add tooltips or additional information
             if (ImGui.IsItemHovered())
@@ -825,7 +822,8 @@ public partial class RotationConfigWindow : Window
 
         if (orderChanged)
         {
-            Service.Config.Save();
+            OtherConfiguration.AutoStatusOrder = new HashSet<uint>(autoStatusOrder); // Convert List back to HashSet
+            OtherConfiguration.SaveAutoStatusOrder();
         }
     }
 

@@ -30,6 +30,11 @@ partial class CustomRotation
         setting.ActionCheck = () => !IsLastAction(ActionID.TrueNorthPvE);
     }
 
+    static partial void ModifyShirkPvE(ref ActionSetting setting)
+    {
+        setting.TargetType = TargetType.Tank;
+    }
+
     static partial void ModifyAddlePvE(ref ActionSetting setting)
     {
         setting.TargetStatusProvide = new[] { StatusID.Addle };
