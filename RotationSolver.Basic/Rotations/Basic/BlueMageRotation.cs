@@ -387,7 +387,7 @@ partial class BlueMageRotation
     {
         setting.IsFriendly = true;
         setting.StatusProvide = [StatusID.BasicInstinct];
-        setting.ActionCheck = () => IsInDuty && PartyMembers.Count() <= 1 && DataCenter.TerritoryContentType != TerritoryContentType.TheMaskedCarnivale;
+        setting.ActionCheck = () => IsInDuty && PartyMembers.Count() <= 1 && DataCenter.Territory?.ContentType != TerritoryContentType.TheMaskedCarnivale;
     }
 
     /// <summary>

@@ -140,7 +140,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
             var territory = Service.GetSheet<TerritoryType>().GetRow(id);
 
-            DataCenter.Territory = territory;
+            DataCenter.Territory = new TerritoryInfo(territory);
 
             try
             {
@@ -157,9 +157,9 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
             if (!Player.Available) return;
             if (!Player.Object.IsJobCategory(JobRole.Tank) && !Player.Object.IsJobCategory(JobRole.Healer)) return;
 
-            if (DataCenter.IsInHighEndDuty)
+            if (DataCenter.Territory?.IsHighEndDuty ?? false)
             {
-                var warning = string.Format(UiString.HighEndWarning.GetDescription(), DataCenter.ContentFinderName);
+                var warning = string.Format(UiString.HighEndWarning.GetDescription(), DataCenter.Territory.ContentFinderName);
 #pragma warning disable CS0436
                 WarningHelper.AddSystemWarning(warning);
             }

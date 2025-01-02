@@ -2402,14 +2402,14 @@ public partial class RotationConfigWindow : Window
             using var color = ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
 
             const int iconSize = 32;
-            var contentFinder = DataCenter.ContentFinder;
-            var territoryName = DataCenter.TerritoryName;
+            var contentFinder = DataCenter.Territory?.ContentType;
+            var territoryName = DataCenter.Territory?.Name;
 
-            if (contentFinder.HasValue && !string.IsNullOrEmpty(contentFinder.Value.Name.ExtractText()))
+            if (contentFinder.HasValue && !string.IsNullOrEmpty(DataCenter.Territory?.ContentFinderName))
             {
-                territoryName += $" ({DataCenter.ContentFinderName})";
+                territoryName += $" ({DataCenter.Territory?.ContentFinderName})";
             }
-            var icon = DataCenter.ContentFinder?.ContentType.Value.Icon ?? 23;
+            var icon = DataCenter.Territory?.ContentFinderIcon ?? 23;
             if (icon == 0) icon = 23;
             var getIcon = IconSet.GetTexture(icon, out var texture);
             ImGuiHelper.DrawItemMiddle(() =>
@@ -2423,7 +2423,7 @@ public partial class RotationConfigWindow : Window
             }, ImGui.GetWindowWidth(), ImGui.CalcTextSize(territoryName).X + ImGui.GetStyle().ItemSpacing.X + iconSize);
         }
 
-        DrawContentFinder(DataCenter.ContentFinder);
+        DrawContentFinder(DataCenter.Territory?.ContentFinderIcon ?? 23);
 
         using var table = ImRaii.Table("Rotation Solver List Territories", 4, ImGuiTableFlags.BordersInner | ImGuiTableFlags.Resizable | ImGuiTableFlags.SizingStretchSame);
         if (table)
@@ -2578,12 +2578,12 @@ public partial class RotationConfigWindow : Window
         }
     }
 
-    internal static void DrawContentFinder(ContentFinderCondition? content)
+    internal static void DrawContentFinder(uint imageId)
     {
         const float MaxWidth = 480f;
-        var badge = content?.Image;
-        if (badge != null && badge.Value != 0
-            && IconSet.GetTexture(badge.Value, out var badgeTexture))
+        var badge = imageId;
+        if (badge != 0
+            && IconSet.GetTexture(badge, out var badgeTexture))
         {
             var wholeWidth = ImGui.GetWindowWidth();
             var size = new Vector2(badgeTexture.Width, badgeTexture.Height) * MathF.Min(1, MathF.Min(MaxWidth, wholeWidth) / badgeTexture.Width);
@@ -2734,7 +2734,7 @@ public partial class RotationConfigWindow : Window
             ImGui.Text("Dispel Target: None");
         }
 
-        ImGui.Text($"TerritoryType: {DataCenter.TerritoryContentType}");
+        ImGui.Text($"TerritoryType: {DataCenter.Territory?.ContentType}");
         ImGui.Text($"DPSTaken: {DataCenter.DPSTaken}");
         ImGui.Text($"IsHostileCastingToTank: {DataCenter.IsHostileCastingToTank}");
         ImGui.Text($"RightNowRotation: {DataCenter.RightNowRotation}");

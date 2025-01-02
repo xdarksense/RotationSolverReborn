@@ -277,13 +277,13 @@ partial class CustomRotation
     /// <summary>
     /// Type of the content player is in.
     /// </summary>
-    protected static TerritoryContentType TerritoryContentType => DataCenter.TerritoryContentType;
+    protected static TerritoryContentType TerritoryContentType => DataCenter.Territory?.ContentType ?? TerritoryContentType.None;
 
     /// <summary>
     /// Is player in high-end duty, savage, extrene or ultimate.
     /// </summary>
     [Description("Is in the high-end duty")]
-    public static bool IsInHighEndDuty => DataCenter.IsInHighEndDuty;
+    public static bool IsInHighEndDuty => DataCenter.Territory?.IsHighEndDuty ?? false;
 
     /// <summary>
     /// Is player in UCoB duty.

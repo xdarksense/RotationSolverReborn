@@ -33,7 +33,7 @@ partial class CustomRotation
         act = null;
 
         bool isHostileTargetDummy = HostileTarget?.IsDummy() ?? false;
-        bool isInHighEndDuty = DataCenter.IsInHighEndDuty;
+        bool isInHighEndDuty = DataCenter.Territory?.IsHighEndDuty ?? false;
 
         if (!isHostileTargetDummy && !isInHighEndDuty && DataCenter.RightNowTinctureUseType == TinctureUseType.InHighEndDuty)
         {
