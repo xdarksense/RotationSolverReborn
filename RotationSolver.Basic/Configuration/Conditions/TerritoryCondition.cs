@@ -14,15 +14,15 @@ internal class TerritoryCondition : DelayCondition
         switch (TerritoryConditionType)
         {
             case TerritoryConditionType.TerritoryContentType:
-                result = (int)DataCenter.TerritoryContentType == TerritoryId;
+                if (DataCenter.Territory != null) result = (int)DataCenter.Territory.Id == TerritoryId;
                 break;
 
             case TerritoryConditionType.DutyName:
-                result = Name == DataCenter.ContentFinderName;
+                result = Name == DataCenter.Territory?.Name;
                 break;
 
             case TerritoryConditionType.TerritoryName:
-                result = Name == DataCenter.TerritoryName;
+                result = Name == DataCenter.Territory?.Name;
                 break;
         }
         return result;

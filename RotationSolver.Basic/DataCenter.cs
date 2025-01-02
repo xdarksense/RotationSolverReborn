@@ -99,17 +99,9 @@ internal static class DataCenter
         return false;
     }
 
-    public static TerritoryType? Territory { get; set; }
+    public static TerritoryInfo? Territory { get; set; }
 
-    public static string TerritoryName => Territory?.PlaceName.Value.Name.ExtractText() ?? "Territory";
-
-    public static bool IsPvP => Territory?.IsPvpZone ?? false;
-
-    public static ContentFinderCondition? ContentFinder => Territory?.ContentFinderCondition.Value;
-
-    public static string ContentFinderName => ContentFinder?.Name.ExtractText() ?? "Duty";
-
-    public static bool IsInHighEndDuty => ContentFinder?.HighEndDuty ?? false;
+    public static bool IsPvP => Territory?.IsPvP ?? false;
 
     public static ushort TerritoryID => Svc.ClientState.TerritoryType;
     public static bool IsInUCoB => TerritoryID == 733;
@@ -118,9 +110,6 @@ internal static class DataCenter
     public static bool IsInDSR => TerritoryID == 968;
     public static bool IsInTOP => TerritoryID == 1122;
     public static bool IsInFRU => TerritoryID == 1238;
-
-    public static TerritoryContentType TerritoryContentType =>
-        (TerritoryContentType)(ContentFinder?.ContentType.Value.RowId ?? 0);
 
     public static AutoStatus MergedStatus => AutoStatus | CommandStatus;
 

@@ -97,7 +97,7 @@ public static class ObjectHelper
         }
 
         // Fate
-        if (DataCenter.TerritoryContentType != TerritoryContentType.Eureka)
+        if (DataCenter.Territory?.ContentType != TerritoryContentType.Eureka)
         {
             var tarFateId = battleChara.FateId();
             if (tarFateId != 0 && tarFateId != DataCenter.FateId) return false;
@@ -232,7 +232,7 @@ public static class ObjectHelper
 
     internal static unsafe bool IsAlliance(this IGameObject obj)
         => obj.GameObjectId is not 0
-        && (!(DataCenter.IsPvP) && obj is IPlayerCharacter
+        && (!DataCenter.IsPvP && obj is IPlayerCharacter
         || ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, obj.Struct()));
 
 

@@ -465,9 +465,9 @@ public struct ActionTargetInfo(IBaseAction action)
                 // Use fallback points if no beneficial positions are found
                 if (pts.Length == 0)
                 {
-                    if (DataCenter.TerritoryContentType == TerritoryContentType.Trials ||
-                        (DataCenter.TerritoryContentType == TerritoryContentType.Raids &&
-                        DataCenter.AllianceMembers.Count(p => p is IPlayerCharacter) == 8))
+                    if (DataCenter.Territory?.ContentType == TerritoryContentType.Trials ||
+                        (DataCenter.Territory?.ContentType == TerritoryContentType.Raids &&
+                         DataCenter.AllianceMembers.Count(p => p is IPlayerCharacter) == 8))
                     {
                         var fallbackPoints = new[] { Vector3.Zero, new Vector3(100, 0, 100) };
                         var closestFallback = fallbackPoints.MinBy(p => Vector3.Distance(player.Position, p));
