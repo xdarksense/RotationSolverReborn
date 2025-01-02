@@ -308,6 +308,7 @@ partial class BlackMageRotation
         setting.ActionCheck = () => !IsMoving;
         setting.StatusProvide = [StatusID.LeyLines];
         setting.UnlockedByQuestID = 67215;
+        setting.IsFriendly = true;
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 15,
@@ -418,6 +419,7 @@ partial class BlackMageRotation
     {
         setting.ActionCheck = () => !IsMoving && !Player.HasStatus(true, StatusID.CircleOfPower);
         setting.StatusNeed = [StatusID.LeyLines];
+        setting.IsFriendly = true;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

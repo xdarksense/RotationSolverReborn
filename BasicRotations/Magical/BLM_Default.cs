@@ -1,6 +1,6 @@
 ﻿namespace DefaultRotations.Magical;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.01")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Magical/BLM_Default.cs")]
 [Api(4)]
 public class BLM_Default : BlackMageRotation
@@ -9,14 +9,20 @@ public class BLM_Default : BlackMageRotation
     [RotationConfig(CombatType.PvE, Name = "Use Transpose to Astral Fire before Paradox")]
     public bool UseTransposeForParadox { get; set; } = true;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Retrace when out of Leylines and standing still (Dangerous and Experimental)")]
-    public bool UseRetrace { get; set; } = false;
-
     [RotationConfig(CombatType.PvE, Name = "Extend Astral Fire time more conservatively (3 GCDs) (Default is 2 GCDs)")]
     public bool ExtendTimeSafely { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = @"Use ""Double Paradox"" rotation [N15]")]
     public bool UseN15 { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Leylines in combat when standing still")]
+    public bool LeylineMadness { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Use both stacks of Leylines automatically")]
+    public bool Leyline2Madness { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Retrace when out of Leylines in combat and standing still")]
+    public bool UseRetrace { get; set; } = false;
     #endregion
 
     #region Additional oGCD Logic
@@ -90,10 +96,12 @@ public class BLM_Default : BlackMageRotation
     #endregion
 
     #region oGCD Logic
-    [RotationDesc(ActionID.ManafontPvE, ActionID.TransposePvE)]
+    [RotationDesc(ActionID.TransposePvE, ActionID.LeyLinesPvE, ActionID.RetracePvE)]
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
         if (IsMoving && HasHostilesInRange && TriplecastPvE.CanUse(out act, usedUp: true)) return true;
+        if (LeylineMadness && InCombat && HasHostilesInRange && LeyLinesPvE.CanUse(out act, usedUp: Leyline2Madness)) return true;
+        if (!IsLastAbility(ActionID.LeyLinesPvE) && UseRetrace && InCombat && HasHostilesInRange && RetracePvE.CanUse(out act)) return true;
 
         return base.GeneralAbility(nextGCD, out act);
     }
