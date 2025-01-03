@@ -6,6 +6,7 @@ using ECommons.DalamudServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Client.UI;
@@ -65,7 +66,7 @@ public static class ObjectHelper
 
     internal static bool HasPositional(this IGameObject obj)
     {
-        return obj != null && !(obj.GetObjectNPC()?.IsOmnidirectional ?? false) && !obj.HasStatus(true, StatusID.DirectionalDisregard); // Unknown10 used to be the flag for no positional, believe this was changed to IsOmnidirectional
+        return obj != null && !(obj.GetObjectNPC()?.IsOmnidirectional ?? false) && obj.HasStatus(false, StatusID.DirectionalDisregard); // Unknown10 used to be the flag for no positional, believe this was changed to IsOmnidirectional
     }
 
     internal static unsafe bool IsOthersPlayers(this IGameObject obj)
@@ -395,22 +396,37 @@ public static class ObjectHelper
     {
         var player = Player.Object;
 
-        if (obj.IsEnemy() && obj.HasStatus(true, StatusID.EpicVillain)
-            && (player.HasStatus(true, StatusID.VauntedHero) || player.HasStatus(true, StatusID.FatedHero)))
+        if (obj.IsEnemy())
         {
-            return true;
-        }
+            if (obj.HasStatus(true, StatusID.EpicVillain) &&
+                (player.HasStatus(true, StatusID.VauntedHero) || player.HasStatus(true, StatusID.FatedHero)))
+            {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("IsJeunoBossImmune: EpicVillain status found");
+                }
+                return true;
+            }
 
-        if (obj.IsEnemy() && obj.HasStatus(true, StatusID.VauntedVillain)
-            && (player.HasStatus(true, StatusID.EpicHero) || player.HasStatus(true, StatusID.FatedHero)))
-        {
-            return true;
-        }
+            if (obj.HasStatus(true, StatusID.VauntedVillain) &&
+                (player.HasStatus(true, StatusID.EpicHero) || player.HasStatus(true, StatusID.FatedHero)))
+            {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("IsJeunoBossImmune: VauntedVillain status found");
+                }
+                return true;
+            }
 
-        if (obj.IsEnemy() && obj.HasStatus(true, StatusID.FatedVillain)
-            && (player.HasStatus(true, StatusID.EpicHero) || player.HasStatus(true, StatusID.VauntedHero)))
-        {
-            return true;
+            if (obj.HasStatus(true, StatusID.FatedVillain) &&
+                (player.HasStatus(true, StatusID.EpicHero) || player.HasStatus(true, StatusID.VauntedHero)))
+            {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("IsJeunoBossImmune: FatedVillain status found");
+                }
+                return true;
+            }
         }
 
         return false;
@@ -494,13 +510,25 @@ public static class ObjectHelper
         // Use a snapshot of the RecordedHP collection to avoid modification during enumeration
         var recordedHPCopy = DataCenter.RecordedHP.ToArray();
 
-        foreach (var (time, hpRatios) in recordedHPCopy)
+        // Calculate a moving average of HP ratios
+        const int movingAverageWindow = 5;
+        Queue<float> hpRatios = new Queue<float>();
+
+        foreach (var (time, hpRatiosDict) in recordedHPCopy)
         {
-            if (hpRatios.TryGetValue(objectId, out var ratio) && ratio != 1)
+            if (hpRatiosDict.TryGetValue(objectId, out var ratio) && ratio != 1)
             {
-                startTime = time;
-                initialHpRatio = ratio;
-                break;
+                if (startTime == DateTime.MinValue)
+                {
+                    startTime = time;
+                    initialHpRatio = ratio;
+                }
+
+                hpRatios.Enqueue(ratio);
+                if (hpRatios.Count > movingAverageWindow)
+                {
+                    hpRatios.Dequeue();
+                }
             }
         }
 
@@ -509,7 +537,9 @@ public static class ObjectHelper
         var currentHpRatio = b.GetHealthRatio();
         if (float.IsNaN(currentHpRatio)) return float.NaN;
 
-        var hpRatioDifference = initialHpRatio - currentHpRatio;
+        // Calculate the moving average of the HP ratios
+        var averageHpRatio = hpRatios.Average();
+        var hpRatioDifference = initialHpRatio - averageHpRatio;
         if (hpRatioDifference <= 0) return float.NaN;
 
         var elapsedTime = (float)(DateTime.Now - startTime).TotalSeconds;
