@@ -297,8 +297,12 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Disable hostile actions if something is casting an action on the Gaze/Stop list (EXPEREMENTAL)", Filter = AutoActionUsage, Section = 4)]
     private static readonly bool _castingStop = false;
 
-    [ConditionBool, UI("Disable for the entire duration (Disabling this may lead to Gaze failure)", Filter = AutoActionUsage, Section = 4, Parent = nameof(CastingStop))]
-    private static readonly bool _castingStopCalculate = true;
+    [UI("Configurable amount of time before the cast finishes that RSR stops taking actions", Filter = AutoActionUsage, Section = 4, Parent = nameof(CastingStop))]
+    [Range(0, 15, ConfigUnitType.Seconds)]
+    public float CastingStopTime { get; set; } = 2.5f;
+
+    [ConditionBool, UI("Disable for the entire duration (Enabling this will prevent your actions for the entire cast.)", Filter = AutoActionUsage, Section = 4, Parent = nameof(CastingStop))]
+    private static readonly bool _castingStopCalculate = false;
 
     [ConditionBool, UI("Automatic Healing Thresholds", Filter = HealingActionCondition, Section = 1, Order = 1)]
     private static readonly bool _autoHeal = true;

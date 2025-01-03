@@ -102,11 +102,15 @@ public static class Watcher
 
                     foreach (var effect in set.TargetEffects)
                     {
-                        if (DataCenter.PartyMembers.Any(p => p.GameObjectId == effect.TargetID) &&
-                            effect.GetSpecificTypeEffect(ActionEffectType.Damage, out var damageEffect) &&
-                            (damageEffect.value > 0 || (damageEffect.param0 & 6) == 6))
+                        foreach (var partyMember in DataCenter.PartyMembers)
                         {
-                            damageEffectCount++;
+                            if (partyMember.GameObjectId == effect.TargetID &&
+                                effect.GetSpecificTypeEffect(ActionEffectType.Damage, out var damageEffect) &&
+                                (damageEffect.value > 0 || (damageEffect.param0 & 6) == 6))
+                            {
+                                damageEffectCount++;
+                                break;
+                            }
                         }
                     }
 
@@ -145,7 +149,7 @@ public static class Watcher
                 OtherConfiguration.AnimationLockTime[id] = set.Header.AnimationLockTime;
             }
 
-            if (!set.TargetEffects.Any()) return;
+            if (set.TargetEffects.Length == 0) return;
 
             var action = set.Action;
             var tar = set.Target;
@@ -160,9 +164,17 @@ public static class Watcher
             {
                 DataCenter.ApplyStatus[effect.Key] = effect.Value;
             }
-            DataCenter.MPGain = (uint)set.GetSpecificTypeEffect(ActionEffectType.MpGain)
-                .Where(i => i.Key == playerObject.GameObjectId)
-                .Sum(i => i.Value);
+
+            uint mpGain = 0;
+            foreach (var effect in set.GetSpecificTypeEffect(ActionEffectType.MpGain))
+            {
+                if (effect.Key == playerObject.GameObjectId)
+                {
+                    mpGain += effect.Value;
+                }
+            }
+            DataCenter.MPGain = mpGain;
+
             DataCenter.EffectTime = DateTime.Now;
             DataCenter.EffectEndTime = DateTime.Now.AddSeconds(set.Header.AnimationLockTime + 1);
 
