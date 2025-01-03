@@ -7,6 +7,7 @@ internal class OtherConfiguration
     public static HashSet<uint> HostileCastingArea = [];
     public static HashSet<uint> HostileCastingTank = [];
     public static HashSet<uint> HostileCastingKnockback = [];
+    public static HashSet<uint> HostileCastingStop = [];
 
     public static SortedList<uint, float> AnimationLockTime = [];
 
@@ -44,6 +45,7 @@ internal class OtherConfiguration
         Task.Run(() => InitOne(ref RotationSolverRecord, nameof(RotationSolverRecord), false));
         Task.Run(() => InitOne(ref NoCastingStatus, nameof(NoCastingStatus)));
         Task.Run(() => InitOne(ref HostileCastingKnockback, nameof(HostileCastingKnockback)));
+        Task.Run(() => InitOne(ref HostileCastingStop, nameof(HostileCastingStop)));
     }
 
     public static Task Save()
@@ -64,6 +66,7 @@ internal class OtherConfiguration
             await SaveNoProvokeNames();
             await SaveNoCastingStatus();
             await SaveHostileCastingKnockback();
+            await SaveHostileCastingStop();
         });
     }
     #region Action Tab
@@ -85,6 +88,12 @@ internal class OtherConfiguration
         SaveHostileCastingKnockback().Wait();
     }
 
+    public static void ResetHostileCastingStop()
+    {
+        InitOne(ref HostileCastingStop, nameof(HostileCastingStop), true, true);
+        SaveHostileCastingStop().Wait();
+    }
+
     public static Task SaveHostileCastingArea()
     {
         return Task.Run(() => Save(HostileCastingArea, nameof(HostileCastingArea)));
@@ -98,6 +107,11 @@ internal class OtherConfiguration
     private static Task SaveHostileCastingKnockback()
     {
         return Task.Run(() => Save(HostileCastingKnockback, nameof(HostileCastingKnockback)));
+    }
+
+    private static Task SaveHostileCastingStop()
+    {
+        return Task.Run(() => Save(HostileCastingStop, nameof(HostileCastingStop)));
     }
     #endregion
 

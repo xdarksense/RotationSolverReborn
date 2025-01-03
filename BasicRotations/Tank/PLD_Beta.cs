@@ -144,11 +144,11 @@ public sealed class PLD_Beta : PaladinRotation
         if (!SwordOathTrait.EnoughLevel && nextGCD.IsTheSameTo(true, RoyalAuthorityPvE) && FightOrFlightPvE.CanUse(out act)) return true;
         if (SwordOathTrait.EnoughLevel && Player.HasStatus(true, StatusID.AtonementReady) && FightOrFlightPvE.CanUse(out act)) return true;
 
-        if (IsLastAbility(true, FightOrFlightPvE) && ImperatorPvE.CanUse(out act)) return true;
+        if (IsLastAbility(true, FightOrFlightPvE) && ImperatorPvE.CanUse(out act, skipAoeCheck: true)) return true;
         if (IsLastAbility(true, FightOrFlightPvE) && RequiescatPvE.CanUse(out act)) return true;
          
-        if (FightOrFlightPvE.Cooldown.IsCoolingDown && CircleOfScornPvE.CanUse(out act)) return true;
-        if (FightOrFlightPvE.Cooldown.IsCoolingDown && ExpiacionPvE.CanUse(out act)) return true;
+        if (FightOrFlightPvE.Cooldown.IsCoolingDown && CircleOfScornPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (FightOrFlightPvE.Cooldown.IsCoolingDown && ExpiacionPvE.CanUse(out act, skipAoeCheck: true)) return true;
         if (FightOrFlightPvE.Cooldown.IsCoolingDown && SpiritsWithinPvE.CanUse(out act)) return true;
         if (!IsMoving && IntervenePvE.CanUse(out act, usedUp: UseInterveneFight && HasFightOrFlight)) return true;
         return base.AttackAbility(nextGCD, out act);
@@ -185,7 +185,7 @@ public sealed class PLD_Beta : PaladinRotation
         if (BladeOfValorPvE.CanUse(out act)) return true;
         if (BladeOfTruthPvE.CanUse(out act)) return true;
         if (BladeOfFaithPvE.CanUse(out act)) return true;
-        if (Player.HasStatus(true, StatusID.Requiescat) && ConfiteorPvE.CanUse(out act, usedUp: true)) return true;
+        if (Player.HasStatus(true, StatusID.Requiescat) && ConfiteorPvE.CanUse(out act, usedUp: true, skipAoeCheck: true)) return true;
 
         if (GoringBladePvE.CanUse(out act)) return true;
 
@@ -207,7 +207,7 @@ public sealed class PLD_Beta : PaladinRotation
         if (FastBladePvE.CanUse(out act)) return true;
 
         //Ranged
-        if (HolySpiritPvE.CanUse(out act)) return true;
+        if (StopMovingTime > 1 && HolySpiritPvE.CanUse(out act)) return true;
         if (ShieldLobPvE.CanUse(out act)) return true;
         return base.GeneralGCD(out act);
     }

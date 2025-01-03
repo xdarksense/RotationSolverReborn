@@ -11,6 +11,7 @@ using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Configuration.Conditions;
 using RotationSolver.Basic.Rotations.Duties;
+using System.Linq;
 using Action = Lumina.Excel.Sheets.Action;
 using CharacterManager = FFXIVClientStructs.FFXIV.Client.Game.Character.CharacterManager;
 
@@ -393,7 +394,41 @@ internal static class DataCenter
 
     public static bool IsHostileCastingToTank => IsCastingTankVfx() || AllHostileTargets.Any(IsHostileCastingTank);
 
+    public static bool IsHostileCastingStop => InCombat && Service.Config.CastingStop && AllHostileTargets.Any(IsHostileStop);
+
     private static DateTime _petLastSeen = DateTime.MinValue;
+
+    public static bool IsHostileStop(IBattleChara h)
+    {
+        return IsHostileCastingStopBase(h,
+            (act) => act.RowId != 0 && OtherConfiguration.HostileCastingStop.Contains(act.RowId));
+    }
+
+    public static bool IsHostileCastingStopBase(IBattleChara h, Func<Action, bool> check)
+    {
+        // Check if h is null
+        if (h == null) return false;
+
+        // Check if the hostile character is casting
+        if (!h.IsCasting) return false;
+
+        // Check if the cast is interruptible
+        if (h.IsCastInterruptible) return false;
+
+        // Validate the cast time
+        if ((h.TotalCastTime - h.CurrentCastTime) > 2.5f) return false;
+
+        // Get the action sheet
+        var actionSheet = Service.GetSheet<Action>();
+        if (actionSheet == null) return false; // Check if actionSheet is null
+
+        // Get the action being cast
+        var action = actionSheet.GetRow(h.CastActionId);
+        if (action.RowId == 0) return false; // Check if action is not initialized
+
+        // Invoke the check function on the action and return the result
+        return check?.Invoke(action) ?? false; // Check if check is null
+    }
 
     public static bool HasPet
     {

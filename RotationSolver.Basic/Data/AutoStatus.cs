@@ -102,7 +102,7 @@ public enum AutoStatus : uint
     Speed = 1 << 17,
 
     /// <summary>
-    /// We should use limit break.
+    /// Stop taking actions.
     /// </summary>
-    LimitBreak = 1 << 18,
+    NoCasting = 1 << 18,
 }

@@ -400,6 +400,11 @@ partial class CustomRotation
     /// <returns>True if the emergency ability can be used; otherwise, false.</returns>
     protected virtual bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.NoCasting))
+        {
+            act = null;
+        }
+
         if (nextGCD is BaseAction action)
         {
             if (Role is JobRole.RangedMagical &&
@@ -547,7 +552,13 @@ partial class CustomRotation
     /// <returns>True if the ability can be used; otherwise, false.</returns>
     protected virtual bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.NoCasting))
+        {
+            act = null;
+        }
+
         if (DataCenter.RightNowDutyRotation?.GeneralAbility(nextGCD, out act) ?? false) return true;
+
         act = null;
         return false;
     }
@@ -560,6 +571,11 @@ partial class CustomRotation
     /// <returns>True if the ability can be used; otherwise, false.</returns>
     protected virtual bool AttackAbility(IAction nextGCD, out IAction? act)
     {
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.NoCasting))
+        {
+            act = null;
+        }
+
         if (DataCenter.RightNowDutyRotation?.AttackAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;

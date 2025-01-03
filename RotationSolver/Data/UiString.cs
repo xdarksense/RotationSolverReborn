@@ -262,6 +262,9 @@ namespace RotationSolver.Data
         [Description("Knockback")]
         ConfigWindow_List_HostileCastingKnockback,
 
+        [Description("Gaze/Stop")]
+        ConfigWindow_List_HostileCastingStop,
+
         [Description("Use tank personal damage mitigation abilities if the target is casting any of these actions")]
         ConfigWindow_List_HostileCastingTankDesc,
 
@@ -270,6 +273,9 @@ namespace RotationSolver.Data
 
         [Description("Use knockback prevention abilities if the target is casting any of these actions")]
         ConfigWindow_List_HostileCastingKnockbackDesc,
+
+        [Description("Stop casting or taking actions if the enemy is casting this ability")]
+        ConfigWindow_List_HostileCastingStopDesc,
 
         [Description("Add Action")]
         ConfigWindow_List_AddAction,
@@ -436,8 +442,8 @@ namespace RotationSolver.Data
         [Description("Speed Forced Condition")]
         ConfigWindow_Auto_SpeedConditionSet,
 
-        [Description("Limit Break Forced Condition (Unsupported)")]
-        ConfigWindow_Auto_LimitBreakConditionSet,
+        [Description("No Casting Condition Set")]
+        ConfigWindow_Auto_NoCastingConditionSet,
 
         [Description("This will change the way that RSR uses actions.")]
         ConfigWindow_Auto_ActionCondition_Description,

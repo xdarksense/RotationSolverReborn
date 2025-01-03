@@ -2,6 +2,7 @@
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Updaters;
 
@@ -220,6 +221,14 @@ namespace RotationSolver.Commands
                 {
                     DoStateCommandType(StateCommandType.Manual);
                 }
+            }
+
+            // Cancel state if combat starts before countdown is finished
+            else if (Service.Config.CancelStateOnCombatBeforeCountdown
+                && Service.CountDownTime > 0.2f
+                && DataCenter.InCombat)
+            {
+                CancelState();
             }
 
             // Auto start at count down.
