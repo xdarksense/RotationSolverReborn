@@ -14,6 +14,9 @@ public sealed class PLD_Beta : PaladinRotation
     [RotationConfig(CombatType.PvE, Name = "Use Hallowed Ground with Cover")]
     private bool HallowedWithCover { get; set; } = true;
 
+    [RotationConfig(CombatType.PvE, Name = "Use up both stacks of Intervene during burst window")]
+    private bool UseInterveneFight { get; set; } = true;
+
     [Range(0, 100, ConfigUnitType.Pixels)]
     [RotationConfig(CombatType.PvE, Name = "Use Sheltron at minimum X Oath to prevent over cap (Set to 0 to disable)")]
     private int WhenToSheltron { get; set; } = 100;
@@ -125,11 +128,7 @@ public sealed class PLD_Beta : PaladinRotation
         act = null;
         if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
 
-        if (OathGauge >= WhenToSheltron && WhenToSheltron > 0 && UseOath(out act)) return true;
-
-        if (!RiotBladePvE.EnoughLevel && FightOrFlightPvE.CanUse(out act)) return true;
-        if (!RageOfHalonePvE.EnoughLevel && nextGCD.IsTheSameTo(true, RiotBladePvE) && FightOrFlightPvE.CanUse(out act)) return true;
-        if (!ProminencePvE.EnoughLevel && nextGCD.IsTheSameTo(true, RageOfHalonePvE) && FightOrFlightPvE.CanUse(out act)) return true;
+        if (InCombat && OathGauge >= WhenToSheltron && WhenToSheltron > 0 && UseOath(out act)) return true;
         return base.GeneralAbility(nextGCD, out act);
     }
     [RotationDesc(ActionID.SpiritsWithinPvE)]
@@ -151,7 +150,7 @@ public sealed class PLD_Beta : PaladinRotation
         if (FightOrFlightPvE.Cooldown.IsCoolingDown && CircleOfScornPvE.CanUse(out act)) return true;
         if (FightOrFlightPvE.Cooldown.IsCoolingDown && ExpiacionPvE.CanUse(out act)) return true;
         if (FightOrFlightPvE.Cooldown.IsCoolingDown && SpiritsWithinPvE.CanUse(out act)) return true;
-        if (!IsMoving && IntervenePvE.CanUse(out act, usedUp: HasFightOrFlight)) return true;
+        if (!IsMoving && IntervenePvE.CanUse(out act, usedUp: UseInterveneFight && HasFightOrFlight)) return true;
         return base.AttackAbility(nextGCD, out act);
     }
     #endregion

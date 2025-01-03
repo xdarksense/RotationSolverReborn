@@ -1,6 +1,6 @@
 ﻿namespace DefaultRotations.Melee;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.01", Description = "")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.15", Description = "")]
 [SourceCode(Path = "main/BasicRotations/Melee/RPR_Default.cs")]
 [Api(4)]
 public sealed class RPR_Default : ReaperRotation
