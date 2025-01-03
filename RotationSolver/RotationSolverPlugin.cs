@@ -31,9 +31,9 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
     static WelcomeWindow? _changelogWindow;
     static OverlayWindow? _overlayWindow;
 
-    static readonly List<IDisposable> _dis = [];
+    static readonly List<IDisposable> _dis = new();
     public static string Name => "Rotation Solver Reborn";
-    internal static readonly List<DrawingHighlightHotbarBase> _drawingElements = [];
+    internal static readonly List<DrawingHighlightHotbarBase> _drawingElements = new();
 
     public static DalamudLinkPayload OpenLinkPayload { get; private set; } = null!;
     public static DalamudLinkPayload? HideWarningLinkPayload { get; private set; }
@@ -257,10 +257,22 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
         isValid &= !Service.Config.OnlyShowWithHostileOrInDuty
                 || Svc.Condition[ConditionFlag.BoundByDuty]
-                || DataCenter.AllHostileTargets.Any(o => o.DistanceToPlayer() < 25);
+                || AnyHostileTargetWithinDistance(25);
 
         _controlWindow!.IsOpen = isValid && Service.Config.ShowControlWindow;
         _cooldownWindow!.IsOpen = isValid && Service.Config.ShowCooldownWindow;
         _overlayWindow!.IsOpen = isValid && Service.Config.TeachingMode;
+    }
+
+    private static bool AnyHostileTargetWithinDistance(float distance)
+    {
+        foreach (var target in DataCenter.AllHostileTargets)
+        {
+            if (target.DistanceToPlayer() < distance)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

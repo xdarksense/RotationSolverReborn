@@ -40,10 +40,15 @@ partial class MonkRotation
     /// </summary>
     public static int RaptorFury => JobGauge.RaptorFury;
 
-    /// <summary>
+    /// <summary>Brotherhood
     /// Gets the amount of available Coeurl Fury stacks.
     /// </summary>
     public static int CoeurlFury => JobGauge.CoeurlFury;
+
+    /// <summary>Brotherhood
+    /// Brotherhood
+    /// </summary>
+    public static bool InBrotherhood => !Player.WillStatusEnd(0, true, StatusID.Brotherhood);
 
     /// <inheritdoc/>
     public override void DisplayStatus()
@@ -189,7 +194,7 @@ partial class MonkRotation
 
     static partial void ModifyTheForbiddenChakraPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InCombat && Chakra == 5;
+        setting.ActionCheck = () => InCombat;
         setting.UnlockedByQuestID = 67564;
     }
 

@@ -27,7 +27,7 @@ public sealed class MNK_Default : MonkRotation
     public bool AutoPB_AOE { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Use Howling Fist/Enlightenment as a ranged attack verses single target enemies")]
-    public bool HowlingSingle { get; set; } = true;
+    public bool HowlingSingle { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Enable TEA Checker.")]
     public bool EnableTEAChecker { get; set; } = false;
@@ -84,6 +84,26 @@ public sealed class MNK_Default : MonkRotation
                     if (IsLastAbility(true, PerfectBalancePvE) && RiddleOfFirePvE.CanUse(out act)) return true;
                     break;
             }
+        }
+
+        if (InBrotherhood)
+        {
+            // 'If you are in brotherhood, and you have 10 chakra, and forbidden chakra is available, use it.'
+            if (Chakra == 10 && TheForbiddenChakraPvE.CanUse(out act)) return true;
+            // 'If you are in brotherhood, and forbidden chakra is available, use it regardless of stacks.'
+            if (Player.WillStatusEndGCD(1, 0, true, StatusID.Brotherhood) && TheForbiddenChakraPvE.CanUse(out act)) return true;
+        }
+        if (!InBrotherhood)
+        {
+            // 'If you are not in brotherhood, have 5 chakra, and brotherhood is about to be available, hold.'
+            if (Chakra == 5 && BrotherhoodPvE.Cooldown.WillHaveOneChargeGCD(1) && TheForbiddenChakraPvE.CanUse(out act)) return false;
+            // 'If you are not in brotherhood, have 5 chakra, and brotherhood is in cooldown, use it.'
+            if (Chakra == 5 && BrotherhoodPvE.Cooldown.IsCoolingDown && TheForbiddenChakraPvE.CanUse(out act)) return true;
+        }
+        if (!TheForbiddenChakraPvE.EnoughLevel)
+        {
+            // 'If you are not high enough level for TheForbiddenChakra, use immediately at 5 chakra.'
+            if (Chakra == 5 && SteelPeakPvE.CanUse(out act)) return true;
         }
 
         return base.EmergencyAbility(nextGCD, out act);
@@ -165,11 +185,6 @@ public sealed class MNK_Default : MonkRotation
             if (PerfectBalancePvE.CanUse(out act, usedUp: true)) return true;
         }
 
-        if (EnlightenmentPvE.CanUse(out act)) return true; // Enlightment
-        if (HowlingFistPvE.CanUse(out act)) return true; // Howling Fist
-        if (TheForbiddenChakraPvE.CanUse(out act)) return true;
-        if (SteelPeakPvE.CanUse(out act)) return true;
-
         // use bh when bh and rof are ready (opener) or ask bh to wait for rof's cd to be close and then use bh
         if (!CombatElapsedLessGCD(2)
             && ((BrotherhoodPvE.IsInCooldown && RiddleOfFirePvE.IsInCooldown) || Math.Abs(BrotherhoodPvE.Cooldown.CoolDownGroup - RiddleOfFirePvE.Cooldown.CoolDownGroup) < 3)
@@ -180,8 +195,8 @@ public sealed class MNK_Default : MonkRotation
         // 'Use on cooldown, unless you know your killtime. You should aim to get as many casts of RoW as you can, and then shift those usages to align with burst as much as possible without losing a use.'
         if (!CombatElapsedLessGCD(3) && RiddleOfWindPvE.CanUse(out act)) return true; // Riddle Of Wind
 
-        if (HowlingSingle && EnlightenmentPvE.CanUse(out act, skipAoeCheck: true)) return true; // Enlightment
-        if (HowlingSingle && HowlingFistPvE.CanUse(out act, skipAoeCheck: true)) return true; // Howling Fist
+        if (EnlightenmentPvE.CanUse(out act, skipAoeCheck: HowlingSingle)) return true; // Enlightment
+        if (HowlingFistPvE.CanUse(out act, skipAoeCheck: HowlingSingle)) return true; // Howling Fist
 
         return base.AttackAbility(nextGCD, out act);
     }

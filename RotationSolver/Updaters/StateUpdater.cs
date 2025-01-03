@@ -146,17 +146,85 @@ internal static class StateUpdater
 
     private static bool ShouldAddPositional()
     {
+        // Check if the player's role is Melee and if there is a next GCD (Global Cooldown) action
+        // Also, check if the configuration allows automatic use of True North
         if (DataCenter.Role == JobRole.Melee && ActionUpdater.NextGCDAction != null
             && Service.Config.AutoUseTrueNorth)
         {
+            // Get the ID of the next GCD action
             var id = ActionUpdater.NextGCDAction.ID;
+            // Get the target of the next GCD action
+            var target = ActionUpdater.NextGCDAction.Target.Target;
+
+            // Check if the action ID has a positional requirement
             if (ConfigurationHelper.ActionPositional.TryGetValue((ActionID)id, out var positional)
-                && positional != ActionUpdater.NextGCDAction.Target.Target?.FindEnemyPositional()
-                && (ActionUpdater.NextGCDAction.Target.Target?.HasPositional() ?? false))
+            // Check if the positional requirement is not met by the target's current position
+            && positional != target?.FindEnemyPositional()
+            // Check if the target has positional requirements
+            && target?.HasPositional() == true
+            // Check if the target does not have a status that turns target into a wallboss
+            && !target.HasStatus(true, StatusID.DirectionalDisregard))
+            {
+                // If all conditions are met, return true to add the Positional flag
+                return true;
+            }
+        }
+        // If any condition is not met, return false
+        return false;
+    }
+
+    private static bool ShouldAddDefenseArea()
+    {
+        if (!DataCenter.InCombat || !Service.Config.UseDefenseAbility)
+            return false;
+
+        return DataCenter.IsHostileCastingAOE;
+    }
+
+    private static bool ShouldAddDefenseSingle()
+    {
+        if (!DataCenter.InCombat || !Service.Config.UseDefenseAbility)
+            return false;
+
+        if (DataCenter.Role == JobRole.Healer)
+        {
+            if (DataCenter.PartyMembers.Any((tank) =>
+            {
+                var attackingTankObj = DataCenter.AllHostileTargets.Where(t => t.TargetObjectId == tank.GameObjectId);
+
+                if (attackingTankObj.Count() != 1)
+                    return false;
+
+                return DataCenter.IsHostileCastingToTank;
+            }))
             {
                 return true;
             }
         }
+
+        if (DataCenter.Role == JobRole.Tank)
+        {
+            var movingHere = (float)DataCenter.NumberOfHostilesInRange / DataCenter.NumberOfHostilesInMaxRange > 0.3f;
+
+            var tarOnMe = DataCenter.AllHostileTargets.Where(t => t.DistanceToPlayer() <= 3
+            && t.TargetObject == Player.Object);
+            var tarOnMeCount = tarOnMe.Count();
+            var attackedCount = tarOnMe.Count(ObjectHelper.IsAttacked);
+            var attacked = (float)attackedCount / tarOnMeCount > 0.7f;
+
+            if (tarOnMeCount >= Service.Config.AutoDefenseNumber
+                && Player.Object.GetHealthRatio() <= Service.Config.HealthForAutoDefense
+                && movingHere && attacked)
+            {
+                return true;
+            }
+
+            if (DataCenter.IsHostileCastingToTank)
+            {
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -250,61 +318,6 @@ internal static class StateUpdater
 
             return singleSpell > 0;
         }
-    }
-
-    private static bool ShouldAddDefenseArea()
-    {
-        if (!DataCenter.InCombat || !Service.Config.UseDefenseAbility)
-            return false;
-
-        return DataCenter.IsHostileCastingAOE;
-    }
-
-    private static bool ShouldAddDefenseSingle()
-    {
-        if (!DataCenter.InCombat || !Service.Config.UseDefenseAbility)
-            return false;
-
-        if (DataCenter.Role == JobRole.Healer)
-        {
-            if (DataCenter.PartyMembers.Any((tank) =>
-            {
-                var attackingTankObj = DataCenter.AllHostileTargets.Where(t => t.TargetObjectId == tank.GameObjectId);
-
-                if (attackingTankObj.Count() != 1)
-                    return false;
-
-                return DataCenter.IsHostileCastingToTank;
-            }))
-            {
-                return true;
-            }
-        }
-
-        if (DataCenter.Role == JobRole.Tank)
-        {
-            var movingHere = (float)DataCenter.NumberOfHostilesInRange / DataCenter.NumberOfHostilesInMaxRange > 0.3f;
-
-            var tarOnMe = DataCenter.AllHostileTargets.Where(t => t.DistanceToPlayer() <= 3
-            && t.TargetObject == Player.Object);
-            var tarOnMeCount = tarOnMe.Count();
-            var attackedCount = tarOnMe.Count(ObjectHelper.IsAttacked);
-            var attacked = (float)attackedCount / tarOnMeCount > 0.7f;
-
-            if (tarOnMeCount >= Service.Config.AutoDefenseNumber
-                && Player.Object.GetHealthRatio() <= Service.Config.HealthForAutoDefense
-                && movingHere && attacked)
-            {
-                return true;
-            }
-
-            if (DataCenter.IsHostileCastingToTank)
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private static bool ShouldAddAntiKnockback()
