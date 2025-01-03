@@ -42,24 +42,24 @@ public enum AutoStatus : uint
     DefenseArea = 1 << 5,
 
     /// <summary>
-    /// We should heal single by ability.
-    /// </summary>
-    HealSingleAbility = 1 << 6,
-
-    /// <summary>
-    /// We should heal single by spell.
-    /// </summary>
-    HealSingleSpell = 1 << 7,
-
-    /// <summary>
     /// We should heal area by ability.
     /// </summary>
-    HealAreaAbility = 1 << 8,
+    HealAreaAbility = 1 << 6,
 
     /// <summary>
     /// We should heal area by spell.
     /// </summary>
-    HealAreaSpell = 1 << 9,
+    HealAreaSpell = 1 << 7,
+
+    /// <summary>
+    /// We should heal single by ability.
+    /// </summary>
+    HealSingleAbility = 1 << 8,
+
+    /// <summary>
+    /// We should heal single by spell.
+    /// </summary>
+    HealSingleSpell = 1 << 9,
 
     /// <summary>
     /// We should raise.
