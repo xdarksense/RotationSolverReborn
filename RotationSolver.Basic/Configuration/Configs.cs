@@ -23,6 +23,7 @@ internal partial class Configs : IPluginConfiguration
         Rotations = "Rotations",
         List = "List",
         List2 = "List2",
+        List3 = "List3",
         Debug = "Debug";
 
     public const int CurrentVersion = 12;
@@ -157,6 +158,10 @@ internal partial class Configs : IPluginConfiguration
                Parent = nameof(StartOnCountdown))]
     private static readonly bool _countdownStartsManualMode = false;
 
+    [ConditionBool, UI("Cancel auto mode if combat is started early during countdown",
+        Filter = BasicAutoSwitch, Section = 1)]
+    private static readonly bool _cancelStateOnCombatBeforeCountdown = false;
+
     [ConditionBool, UI("Switch to manual and target attackers automatically.",
         Filter = BasicAutoSwitch, Section = 1)]
     private static readonly bool _startOnAttackedBySomeone = false;
@@ -288,6 +293,12 @@ internal partial class Configs : IPluginConfiguration
 
     [ConditionBool, UI("Allow rotations that use this config to use abilties definied in the rotation as burst", Filter = AutoActionUsage, Section = 4)]
     private static readonly bool _autoBurst = true;
+
+    [ConditionBool, UI("Disable hostile actions if something is casting an action on the Gaze/Stop list (EXPEREMENTAL)", Filter = AutoActionUsage, Section = 4)]
+    private static readonly bool _castingStop = false;
+
+    [ConditionBool, UI("Disable for the entire duration (Disabling this may lead to Gaze failure)", Filter = AutoActionUsage, Section = 4, Parent = nameof(CastingStop))]
+    private static readonly bool _castingStopCalculate = true;
 
     [ConditionBool, UI("Automatic Healing Thresholds", Filter = HealingActionCondition, Section = 1, Order = 1)]
     private static readonly bool _autoHeal = true;

@@ -31,6 +31,11 @@ internal static class StateUpdater
         {
             switch (autoStatus)
             {
+                case (uint)AutoStatus.NoCasting:
+                    if (ShouldAddNoCasting())
+                        status |= AutoStatus.NoCasting;
+                    break;
+
                 case (uint)AutoStatus.Dispel:
                     if (ShouldAddDispel())
                         status |= AutoStatus.Dispel;
@@ -111,6 +116,11 @@ internal static class StateUpdater
     }
 
     // Condition methods for each AutoStatus flag
+
+    private static bool ShouldAddNoCasting()
+    {
+        return DataCenter.IsHostileCastingStop;
+    }
 
     private static bool ShouldAddDispel()
     {
@@ -383,6 +393,7 @@ internal static class StateUpdater
     {
         var status = DataCenter.SpecialType switch
         {
+            SpecialCommandType.NoCasting => AutoStatus.NoCasting,
             SpecialCommandType.HealArea => AutoStatus.HealAreaSpell
                                 | AutoStatus.HealAreaAbility,
             SpecialCommandType.HealSingle => AutoStatus.HealSingleSpell
@@ -399,7 +410,6 @@ internal static class StateUpdater
             SpecialCommandType.AntiKnockback => AutoStatus.AntiKnockback,
             SpecialCommandType.Burst => AutoStatus.Burst,
             SpecialCommandType.Speed => AutoStatus.Speed,
-            SpecialCommandType.LimitBreak => AutoStatus.LimitBreak,
             _ => AutoStatus.None,
         };
 
@@ -420,7 +430,7 @@ internal static class StateUpdater
             status |= AutoStatus.Burst;
         }
         AddStatus(ref status, AutoStatus.Speed, DataCenter.RightSet.SpeedConditionSet);
-        AddStatus(ref status, AutoStatus.LimitBreak, DataCenter.RightSet.LimitBreakConditionSet);
+        AddStatus(ref status, AutoStatus.NoCasting, DataCenter.RightSet.NoCastingConditionSet);
 
         return status;
     }

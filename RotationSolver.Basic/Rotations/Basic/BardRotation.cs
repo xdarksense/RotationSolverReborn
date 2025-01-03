@@ -90,6 +90,10 @@ partial class BardRotation
     static partial void ModifyVenomousBitePvE(ref ActionSetting setting)
     {
         setting.TargetStatusProvide = [StatusID.VenomousBite, StatusID.CausticBite];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            TimeToKill = 0,
+        };
     }
 
     static partial void ModifyBloodletterPvE(ref ActionSetting setting)
@@ -125,6 +129,10 @@ partial class BardRotation
     {
         setting.TargetStatusProvide = [StatusID.Windbite, StatusID.Stormbite];
         setting.UnlockedByQuestID = 65612;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            TimeToKill = 0,
+        };
     }
 
     static partial void ModifyMagesBalladPvE(ref ActionSetting setting)
@@ -211,6 +219,10 @@ partial class BardRotation
             return true;
         };
         setting.UnlockedByQuestID = 67252;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            TimeToKill = 0,
+        };
     }
 
     static partial void ModifySidewinderPvE(ref ActionSetting setting)
@@ -232,12 +244,20 @@ partial class BardRotation
     {
         setting.TargetStatusProvide = [StatusID.VenomousBite, StatusID.CausticBite];
         setting.StatusProvide = [StatusID.HawksEye_3861];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            TimeToKill = 0,
+        };
     }
 
     static partial void ModifyStormbitePvE(ref ActionSetting setting)
     {
         setting.TargetStatusProvide = [StatusID.Windbite, StatusID.Stormbite];
         setting.StatusProvide = [StatusID.HawksEye_3861];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            TimeToKill = 0,
+        };
     }
 
     static partial void ModifyNaturesMinnePvE(ref ActionSetting setting)

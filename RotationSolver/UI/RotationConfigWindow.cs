@@ -2267,7 +2267,7 @@ public partial class RotationConfigWindow : Window
         ImGui.SetNextItemWidth(ImGui.GetWindowWidth());
         ImGui.InputTextWithHint("##Searching the action", UiString.ConfigWindow_List_ActionNameOrId.GetDescription(), ref _actionSearching, 128);
 
-        using var table = ImRaii.Table("Rotation Solver List Actions", 3, ImGuiTableFlags.BordersInner | ImGuiTableFlags.Resizable | ImGuiTableFlags.SizingStretchSame);
+        using var table = ImRaii.Table("Rotation Solver List Actions", 4, ImGuiTableFlags.BordersInner | ImGuiTableFlags.Resizable | ImGuiTableFlags.SizingStretchSame);
         if (table)
         {
             ImGui.TableSetupScrollFreeze(0, 1);
@@ -2294,6 +2294,13 @@ public partial class RotationConfigWindow : Window
             }
             ImGui.TableHeader(UiString.ConfigWindow_List_HostileCastingKnockback.GetDescription());
 
+            ImGui.TableNextColumn();
+            if (ImGui.Button("Reset and Stop Casting List"))
+            {
+                OtherConfiguration.ResetHostileCastingStop();
+            }
+            ImGui.TableHeader(UiString.ConfigWindow_List_HostileCastingStop.GetDescription());
+
             ImGui.TableNextRow();
 
             ImGui.TableNextColumn();
@@ -2309,6 +2316,11 @@ public partial class RotationConfigWindow : Window
             _allSearchable.DrawItems(Configs.List2);
             ImGui.TextWrapped(UiString.ConfigWindow_List_HostileCastingKnockbackDesc.GetDescription());
             DrawActionsList(nameof(OtherConfiguration.HostileCastingKnockback), OtherConfiguration.HostileCastingKnockback);
+
+            ImGui.TableNextColumn();
+            _allSearchable.DrawItems(Configs.List3);
+            ImGui.TextWrapped(UiString.ConfigWindow_List_HostileCastingStopDesc.GetDescription());
+            DrawActionsList(nameof(OtherConfiguration.HostileCastingStop), OtherConfiguration.HostileCastingStop);
         }
     }
 
@@ -2665,6 +2677,7 @@ public partial class RotationConfigWindow : Window
         // Check and display VFX casting status
         ImGui.Text($"Is Casting Tank VFX: {DataCenter.IsCastingTankVfx()}");
         ImGui.Text($"Is Casting Area VFX: {DataCenter.IsCastingAreaVfx()}");
+        ImGui.Text($"Is Hostile Casting Stop: {DataCenter.IsHostileCastingStop}");
 
         // Check and display VFX casting status
         ImGui.Text("Casting Vfx:");
@@ -2737,6 +2750,8 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"IsHostileCastingToTank: {DataCenter.IsHostileCastingToTank}");
         ImGui.Text($"RightNowRotation: {DataCenter.RightNowRotation}");
         ImGui.Text($"Job: {DataCenter.Job}");
+        ImGui.Text($"JobRange: {DataCenter.JobRange}");
+        ImGui.Text($"Job Role: {DataCenter.Role}");
         ImGui.Text($"Have pet: {DataCenter.HasPet}");
         ImGui.Text($"Hostile Near Count: {DataCenter.NumberOfHostilesInRange}");
         ImGui.Text($"Hostile Near Count Max Range: {DataCenter.NumberOfHostilesInMaxRange}");
