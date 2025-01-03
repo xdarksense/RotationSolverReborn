@@ -198,6 +198,7 @@ partial class PaladinRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
+            TimeToKill = 0,
         };
     }
 

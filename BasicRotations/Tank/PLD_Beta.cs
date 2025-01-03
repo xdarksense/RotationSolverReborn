@@ -28,6 +28,9 @@ public sealed class PLD_Beta : PaladinRotation
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Health threshold for Cover (Set to 0 to disable)")]
     private float CoverRatio { get; set; } = 0.3f;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Holy Spirit when out of melee range")]
+    private bool UseHolyWhenAway { get; set; } = false;
     #endregion
 
     private const ActionID ConfiteorPvEActionId = (ActionID)16459;
@@ -137,7 +140,7 @@ public sealed class PLD_Beta : PaladinRotation
         act = null;
         if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
 
-        if (BladeOfHonorPvE.CanUse(out act)) return true;
+        if (BladeOfHonorPvE.CanUse(out act, skipAoeCheck: true)) return true;
 
         if (!RiotBladePvE.EnoughLevel && FightOrFlightPvE.CanUse(out act)) return true;
         if (!RageOfHalonePvE.EnoughLevel && nextGCD.IsTheSameTo(true, RiotBladePvE) && FightOrFlightPvE.CanUse(out act)) return true;
@@ -207,7 +210,7 @@ public sealed class PLD_Beta : PaladinRotation
         if (FastBladePvE.CanUse(out act)) return true;
 
         //Ranged
-        if (StopMovingTime > 1 && HolySpiritPvE.CanUse(out act)) return true;
+        if (UseHolyWhenAway && StopMovingTime > 1 && HolySpiritPvE.CanUse(out act)) return true;
         if (ShieldLobPvE.CanUse(out act)) return true;
         return base.GeneralGCD(out act);
     }
