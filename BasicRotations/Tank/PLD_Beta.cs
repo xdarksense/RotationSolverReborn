@@ -36,6 +36,9 @@ public sealed class PLD_Beta : PaladinRotation
     private const ActionID ConfiteorPvEActionId = (ActionID)16459;
     private new readonly IBaseAction ConfiteorPvE = new BaseAction(ConfiteorPvEActionId);
 
+    private const ActionID ImperatorPvEActionId = (ActionID)36921;
+    private new readonly IBaseAction ImperatorPvE = new BaseAction(ImperatorPvEActionId);
+
     #region Countdown Logic
     protected override IAction? CountDownAction(float remainTime)
     {
@@ -147,8 +150,8 @@ public sealed class PLD_Beta : PaladinRotation
         if (!SwordOathTrait.EnoughLevel && nextGCD.IsTheSameTo(true, RoyalAuthorityPvE) && FightOrFlightPvE.CanUse(out act)) return true;
         if (SwordOathTrait.EnoughLevel && Player.HasStatus(true, StatusID.AtonementReady) && FightOrFlightPvE.CanUse(out act)) return true;
 
-        if (IsLastAbility(true, FightOrFlightPvE) && ImperatorPvE.CanUse(out act, skipAoeCheck: true)) return true;
-        if (IsLastAbility(true, FightOrFlightPvE) && RequiescatPvE.CanUse(out act)) return true;
+        if (IsLastAbility(true, FightOrFlightPvE) && ImperatorPvE.CanUse(out act, skipAoeCheck: true, usedUp: true)) return true;
+        if (IsLastAbility(true, FightOrFlightPvE) && RequiescatPvE.CanUse(out act, skipAoeCheck: true, usedUp: true)) return true;
          
         if (FightOrFlightPvE.Cooldown.IsCoolingDown && CircleOfScornPvE.CanUse(out act, skipAoeCheck: true)) return true;
         if (FightOrFlightPvE.Cooldown.IsCoolingDown && ExpiacionPvE.CanUse(out act, skipAoeCheck: true)) return true;
