@@ -25,8 +25,16 @@ public sealed class SCH_Default : ScholarRotation
     [RotationConfig(CombatType.PvE, Name = "Remove Aetherpact to conserve resources if party member is above this percentage")]
     public float AetherpactRemove { get; set; } = 0.9f;
 
+    [Range(0, 5, ConfigUnitType.Seconds)]
+    [RotationConfig(CombatType.PvE, Name = "How long you need to be moving before Ruin is used")]
+    public float RuinTime { get; set; } = 0;
+
     [RotationConfig(CombatType.PvE, Name = "Use DOT while moving even if it does not need refresh (disabling is a damage down)")]
     public bool DOTUpkeep { get; set; } = true;
+
+    [Range(0, 5, ConfigUnitType.Seconds)]
+    [RotationConfig(CombatType.PvE, Name = "How long you need to be moving before DOT is used (requires above to be enabled)")]
+    public float DOTTime { get; set; } = 0;
     #endregion
 
     #region Countdown Logic
@@ -50,11 +58,6 @@ public sealed class SCH_Default : ScholarRotation
     #region oGCD Logic
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        if (nextGCD.IsTheSameTo(true, SuccorPvE, AdloquiumPvE))
-        {
-            if (RecitationPvE.CanUse(out act)) return true;
-        }
-
         //Remove Aetherpact
         foreach (var item in PartyMembers)
         {
@@ -72,6 +75,9 @@ public sealed class SCH_Default : ScholarRotation
     [RotationDesc(ActionID.SummonSeraphPvE, ActionID.ConsolationPvE, ActionID.WhisperingDawnPvE, ActionID.SacredSoilPvE, ActionID.IndomitabilityPvE)]
     protected override bool HealAreaAbility(IAction nextGCD, out IAction? act)
     {
+        if (!IndomitabilityPvE.Cooldown.IsCoolingDown && RecitationPvE.CanUse(out act)) return true;
+        if (IsLastAbility(ActionID.RecitationPvE) && IndomitabilityPvE.CanUse(out act)) return true;
+
         if (AccessionPvE.CanUse(out act)) return true;
         if (ConcitationPvE.CanUse(out act)) return true;
         if (WhisperingDawnPvE_16537.Cooldown.ElapsedOneChargeAfterGCD(1) || FeyIlluminationPvE_16538.Cooldown.ElapsedOneChargeAfterGCD(1) || FeyBlessingPvE.Cooldown.ElapsedOneChargeAfterGCD(1))
@@ -82,8 +88,9 @@ public sealed class SCH_Default : ScholarRotation
         if (FeyBlessingPvE.CanUse(out act)) return true;
 
         if (WhisperingDawnPvE_16537.CanUse(out act)) return true;
-        if (SacredSoilPvE.CanUse(out act)) return true;
         if (IndomitabilityPvE.CanUse(out act)) return true;
+
+        if (SacredSoilPvE.CanUse(out act)) return true;
 
         return base.HealAreaAbility(nextGCD, out act);
     }
@@ -105,7 +112,7 @@ public sealed class SCH_Default : ScholarRotation
     [RotationDesc(ActionID.FeyIlluminationPvE, ActionID.ExpedientPvE, ActionID.SummonSeraphPvE, ActionID.ConsolationPvE, ActionID.SacredSoilPvE)]
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (DeploymentTacticsPvE.CanUse(out act)) return true;
+        if ((DeploymentTacticsPvE.Target.Target?.WillStatusEnd(0, false, DeploymentTacticsPvE.Setting.TargetStatusNeed ?? []) ?? false) && DeploymentTacticsPvE.CanUse(out act)) return true;
 
         if (SeraphismPvE.CanUse(out act)) return true;
 
@@ -219,12 +226,12 @@ public sealed class SCH_Default : ScholarRotation
         if (RuinPvE.CanUse(out act)) return true;
 
         //Single Instant for when moving.
-        if (RuinIiPvE.CanUse(out act)) return true;
-
+        if (MovingTime > RuinTime && RuinIiPvE.CanUse(out act)) return true;
+        
         //Add dot while moving.
-        if (BiolysisPvE.CanUse(out act, skipStatusProvideCheck: DOTUpkeep)) return true;
-        if (BioIiPvE.CanUse(out act, skipStatusProvideCheck: DOTUpkeep)) return true;
-        if (BioPvE.CanUse(out act, skipStatusProvideCheck: DOTUpkeep)) return true;
+        if (MovingTime > DOTTime && BiolysisPvE.CanUse(out act, skipStatusProvideCheck: DOTUpkeep)) return true;
+        if (MovingTime > DOTTime && BioIiPvE.CanUse(out act, skipStatusProvideCheck: DOTUpkeep)) return true;
+        if (MovingTime > DOTTime && BioPvE.CanUse(out act, skipStatusProvideCheck: DOTUpkeep)) return true;
 
         return base.GeneralGCD(out act);
     }
