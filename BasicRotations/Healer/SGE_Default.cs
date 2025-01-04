@@ -339,6 +339,21 @@ public sealed class SGE_Default : SageRotation
 
         if (HasSwift && SwiftLogic && EgeiroPvE.CanUse(out _)) return false;
 
+        if (EukrasianDiagnosisPvE.CanUse(out act) && MergedStatus.HasFlag(AutoStatus.DefenseSingle))
+        {
+            if (EukrasianDiagnosisPvE.Target.Target?.HasStatus(true,
+                StatusID.EukrasianDiagnosis,
+                StatusID.DifferentialDiagnosis,
+                StatusID.EukrasianPrognosis,
+                StatusID.Galvanize
+            ) ?? false) return false;
+
+            if (EukrasiaPvE.CanUse(out act)) return true;
+
+            act = EukrasianDiagnosisPvE;
+            return true;
+        }
+
         if (!InCombat && !Player.HasStatus(true, StatusID.Eukrasia) && EukrasiaPvE.CanUse(out act)) return true;
 
         if (HostileTarget?.IsBossFromTTK() ?? false)
@@ -390,7 +405,7 @@ public sealed class SGE_Default : SageRotation
 
         if (DyskrasiaPvE.CanUse(out _))
         {
-            if (EukrasianDyskrasiaPvE.EnoughLevel && (EukrasianDyskrasiaPvE.Target.Target?.WillStatusEnd(3, true, EukrasianDyskrasiaPvE.Setting.TargetStatusProvide ?? []) ?? false) && InCombat)
+            if (EukrasianDyskrasiaPvE.EnoughLevel && (EukrasianDyskrasiaPvE.Target.Target?.WillStatusEnd(3, true, EukrasianDyskrasiaPvE.Setting.TargetStatusProvide ?? []) ?? false) && InCombat && (!MergedStatus.HasFlag(AutoStatus.DefenseArea) || !MergedStatus.HasFlag(AutoStatus.DefenseSingle)))
             {
                 StatusHelper.StatusOff(StatusID.Eukrasia);
             }
@@ -412,7 +427,7 @@ public sealed class SGE_Default : SageRotation
 
         if (DosisPvE.CanUse(out _))
         {
-            if ((EukrasianDosisPvE.Target.Target?.WillStatusEnd(3, true, EukrasianDosisPvE.Setting.TargetStatusProvide ?? []) ?? false) && InCombat)
+            if ((EukrasianDosisPvE.Target.Target?.WillStatusEnd(3, true, EukrasianDosisPvE.Setting.TargetStatusProvide ?? []) ?? false) && InCombat && (!MergedStatus.HasFlag(AutoStatus.DefenseArea) || !MergedStatus.HasFlag(AutoStatus.DefenseSingle)))
             {
                 StatusHelper.StatusOff(StatusID.Eukrasia);
             }

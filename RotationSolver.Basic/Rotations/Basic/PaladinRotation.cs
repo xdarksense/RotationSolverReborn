@@ -5,8 +5,6 @@ partial class PaladinRotation
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Strength;
 
-    private const ActionID ConfiteorPvEActionId = (ActionID)16459;
-
     /// <summary>
     /// 
     /// </summary>
