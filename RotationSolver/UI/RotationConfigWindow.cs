@@ -2656,6 +2656,7 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Height: {Player.Character->ModelContainer.CalculateHeight()}");
         ImGui.Text($"OnlineStatus: {Player.OnlineStatus}");
         ImGui.Text($"Moving: {DataCenter.IsMoving}");
+        ImGui.Text($"Moving Time: {DataCenter.MovingRaw}");
         ImGui.Text($"Stop Moving: {DataCenter.StopMovingRaw}");
         ImGui.Text($"CountDownTime: {Service.CountDownTime}");
         ImGui.Text($"Combo Time: {DataCenter.ComboTime}");

@@ -118,7 +118,9 @@ internal static class ActionUpdater
         }
     }
 
+    static DateTime _startMovingTime = DateTime.MinValue;
     static DateTime _stopMovingTime = DateTime.MinValue;
+
     private unsafe static void UpdateMoving()
     {
         var last = DataCenter.IsMoving;
@@ -127,14 +129,18 @@ internal static class ActionUpdater
         {
             _stopMovingTime = DateTime.Now;
         }
-        else if (DataCenter.IsMoving)
+        else if (DataCenter.IsMoving && !last)
         {
-            _stopMovingTime = DateTime.MinValue;
+            _startMovingTime = DateTime.Now;
         }
 
         DataCenter.StopMovingRaw = _stopMovingTime == DateTime.MinValue
             ? 0
             : (float)(DateTime.Now - _stopMovingTime).TotalSeconds;
+
+        DataCenter.MovingRaw = _startMovingTime == DateTime.MinValue
+            ? 0
+            : (float)(DateTime.Now - _startMovingTime).TotalSeconds;
     }
 
     static DateTime _startCombatTime = DateTime.MinValue;

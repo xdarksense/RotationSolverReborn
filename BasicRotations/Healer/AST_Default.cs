@@ -12,9 +12,6 @@ public sealed class AST_Default : AstrologianRotation
     [RotationConfig(CombatType.PvE, Name = "Use both stacks of Lightspeed while moving")]
     public bool LightspeedMove { get; set; } = true;
 
-    [RotationConfig(CombatType.PvE, Name = "Use experimental card logic to pool for divination buff if possible")]
-    public bool SmartCard { get; set; } = true;
-
     [RotationConfig(CombatType.PvE, Name = "Use spells with cast times to heal. (Ignored if you are the only healer in party)")]
     public bool GCDHeal { get; set; } = false;
 
@@ -23,6 +20,9 @@ public sealed class AST_Default : AstrologianRotation
 
     [RotationConfig(CombatType.PvE, Name = "Prioritize Microcosmos over all other healing when available")]
     public bool MicroPrio { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Simple Lord of Crowns logic (use under divinaiton)")]
+    public bool SimpleLord { get; set; } = false;
 
     [Range(4, 20, ConfigUnitType.Seconds)]
     [RotationConfig(CombatType.PvE, Name = "Use Earthly Star during countdown timer.")]
@@ -77,6 +77,10 @@ public sealed class AST_Default : AstrologianRotation
         {
             if (SynastryPvE.CanUse(out act)) return true;
         }
+
+        if (DivinationPvE.CanUse(out _)
+            && UseBurstMedicine(out act)) return true;
+
         return base.EmergencyAbility(nextGCD, out act);
     }
 
@@ -167,10 +171,20 @@ public sealed class AST_Default : AstrologianRotation
         act = null;
         if (BubbleProtec && Player.HasStatus(true, StatusID.CollectiveUnconscious_848)) return false;
 
+        // Use LadyOfCrownsPvE if your party is needs to be topped up or you are about to use Astral Draw (to prevent overwriting)
+        if (PartyMembersAverHP < .8 && LadyOfCrownsPvE.CanUse(out act)) return true;
+        if (AstralDrawPvE.Cooldown.WillHaveOneCharge(3) && LadyOfCrownsPvE.CanUse(out act)) return true;
+
+        // Use cards if you are about to use Umbral or Astral Draw (to prevent overwriting)
+        if (AstralDrawPvE.Cooldown.WillHaveOneCharge(3) && InCombat && TheArrowPvE.CanUse(out act)) return true;
+        if (AstralDrawPvE.Cooldown.WillHaveOneCharge(3) && InCombat && TheBolePvE.CanUse(out act)) return true;
+        if (UmbralDrawPvE.Cooldown.WillHaveOneCharge(3) && InCombat && TheArrowPvE.CanUse(out act)) return true;
+        if (UmbralDrawPvE.Cooldown.WillHaveOneCharge(3) && InCombat && TheSpirePvE.CanUse(out act)) return true;
+
         if (AstralDrawPvE.CanUse(out act)) return true;
         if (UmbralDrawPvE.CanUse(out act)) return true;
-        if (((Player.HasStatus(true, StatusID.Divination) || !DivinationPvE.Cooldown.WillHaveOneCharge(45) || !DivinationPvE.EnoughLevel || UmbralDrawPvE.Cooldown.WillHaveOneCharge(3)) && SmartCard || (!SmartCard)) && InCombat && TheBalancePvE.CanUse(out act)) return true;
-        if (((Player.HasStatus(true, StatusID.Divination) || !DivinationPvE.Cooldown.WillHaveOneCharge(45) || !DivinationPvE.EnoughLevel || UmbralDrawPvE.Cooldown.WillHaveOneCharge(3)) && SmartCard || (!SmartCard)) && InCombat && TheSpearPvE.CanUse(out act)) return true;
+        if ((Player.HasStatus(true, StatusID.Divination) || !DivinationPvE.Cooldown.WillHaveOneCharge(45) || !DivinationPvE.EnoughLevel || UmbralDrawPvE.Cooldown.WillHaveOneCharge(3)) && InCombat && TheBalancePvE.CanUse(out act)) return true;
+        if ((Player.HasStatus(true, StatusID.Divination) || !DivinationPvE.Cooldown.WillHaveOneCharge(45) || !DivinationPvE.EnoughLevel || AstralDrawPvE.Cooldown.WillHaveOneCharge(3)) && InCombat && TheSpearPvE.CanUse(out act)) return true;
         return base.GeneralAbility(nextGCD, out act);
     }
 
@@ -178,6 +192,9 @@ public sealed class AST_Default : AstrologianRotation
     {
         act = null;
         if (BubbleProtec && Player.HasStatus(true, StatusID.CollectiveUnconscious_848)) return false;
+
+        // Use LordOfCrownsPvE if you have SimpleLord enabled and  Divination is active
+        if (SimpleLord && InCombat && Player.HasStatus(true, StatusID.Divination) && LordOfCrownsPvE.CanUse(out act)) return true;
 
         if (!Player.HasStatus(true, StatusID.Lightspeed)
             && InCombat
@@ -207,7 +224,7 @@ public sealed class AST_Default : AstrologianRotation
             }
 
             {
-                if (((Player.HasStatus(true, StatusID.Divination) || !DivinationPvE.Cooldown.WillHaveOneCharge(45) || !DivinationPvE.EnoughLevel || UmbralDrawPvE.Cooldown.WillHaveOneCharge(3)) && SmartCard || (!SmartCard)) && LordOfCrownsPvE.CanUse(out act)) return true;
+                if (!SimpleLord && (Player.HasStatus(true, StatusID.Divination) || !DivinationPvE.Cooldown.WillHaveOneCharge(45) || !DivinationPvE.EnoughLevel || UmbralDrawPvE.Cooldown.WillHaveOneCharge(3)) && LordOfCrownsPvE.CanUse(out act)) return true;
             }
         }
         return base.AttackAbility(nextGCD, out act);

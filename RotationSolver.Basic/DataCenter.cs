@@ -203,6 +203,8 @@ internal static class DataCenter
 
     internal static float StopMovingRaw { get; set; }
 
+    internal static float MovingRaw { get; set; }
+
     public static unsafe ushort FateId
     {
         get

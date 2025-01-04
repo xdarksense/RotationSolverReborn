@@ -555,6 +555,14 @@ partial class CustomRotation
     [Description("Stop moving time")]
     public static float StopMovingTime => IsMoving ? 0 : DataCenter.StopMovingRaw + DataCenter.DefaultGCDRemain;
 
+
+    /// <summary>
+    /// How long the player has been moving.
+    /// <br>WARNING: Do Not make this method the main of your rotation.</br>
+    /// </summary>
+    [Description("Moving time")]
+    public static float MovingTime => IsMoving ? DataCenter.MovingRaw + DataCenter.DefaultGCDRemain : 0;
+
     /// <summary>
     /// Time from GCD.
     /// </summary>
