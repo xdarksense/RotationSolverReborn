@@ -31,6 +31,17 @@ public sealed class PLD_Beta : PaladinRotation
 
     [RotationConfig(CombatType.PvE, Name = "Use Holy Spirit when out of melee range")]
     private bool UseHolyWhenAway { get; set; } = false;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Clemency with Requiescat")]
+    public float ClemencyRequi { get; set; } = 0.2f;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Clemency without Requiescat")]
+    private bool HealBot { get; set; } = true;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Clemency without Requiescat")]
+    public float ClemencyNoRequi { get; set; } = 0.4f;
     #endregion
 
     private const ActionID ConfiteorPvEActionId = (ActionID)16459;
@@ -128,7 +139,7 @@ public sealed class PLD_Beta : PaladinRotation
 
     #region oGCD Logic
 
-    [RotationDesc(ActionID.FightOrFlightPvE)]
+    [RotationDesc(ActionID.SheltronPvE, ActionID.HolySheltronPvE)]
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
@@ -137,7 +148,8 @@ public sealed class PLD_Beta : PaladinRotation
         if (InCombat && OathGauge >= WhenToSheltron && WhenToSheltron > 0 && UseOath(out act)) return true;
         return base.GeneralAbility(nextGCD, out act);
     }
-    [RotationDesc(ActionID.SpiritsWithinPvE)]
+
+    [RotationDesc(ActionID.IntervenePvE, ActionID.SpiritsWithinPvE, ActionID.ExpiacionPvE, ActionID.CircleOfScornPvE, ActionID.RequiescatPvE, ActionID.ImperatorPvE, ActionID.FightOrFlightPvE)]
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
@@ -145,14 +157,26 @@ public sealed class PLD_Beta : PaladinRotation
 
         if (BladeOfHonorPvE.CanUse(out act, skipAoeCheck: true)) return true;
 
-        if (!RiotBladePvE.EnoughLevel && FightOrFlightPvE.CanUse(out act)) return true;
-        if (!RageOfHalonePvE.EnoughLevel && nextGCD.IsTheSameTo(true, RiotBladePvE) && FightOrFlightPvE.CanUse(out act)) return true;
-        if (!SwordOathTrait.EnoughLevel && nextGCD.IsTheSameTo(true, RoyalAuthorityPvE) && FightOrFlightPvE.CanUse(out act)) return true;
-        if (SwordOathTrait.EnoughLevel && Player.HasStatus(true, StatusID.AtonementReady) && FightOrFlightPvE.CanUse(out act)) return true;
+        if (!RiotBladePvE.EnoughLevel && nextGCD.IsTheSameTo(true, FastBladePvE) && FightOrFlightPvE.CanUse(out act)) return true;
+        if (!RageOfHalonePvE.EnoughLevel && nextGCD.IsTheSameTo(true, RiotBladePvE, TotalEclipsePvE) && FightOrFlightPvE.CanUse(out act)) return true;
+        if (!ProminencePvE.EnoughLevel && nextGCD.IsTheSameTo(true, RageOfHalonePvE, TotalEclipsePvE) && FightOrFlightPvE.CanUse(out act)) return true;
+        if (!AtonementPvE.EnoughLevel && nextGCD.IsTheSameTo(true, RoyalAuthorityPvE, ProminencePvE) && FightOrFlightPvE.CanUse(out act)) return true;
+        if (AtonementPvE.EnoughLevel && (Player.HasStatus(true, StatusID.AtonementReady) || nextGCD.IsTheSameTo(true, ProminencePvE)) && FightOrFlightPvE.CanUse(out act)) return true;
 
-        if (IsLastAbility(true, FightOrFlightPvE) && ImperatorPvE.CanUse(out act, skipAoeCheck: true, usedUp: true)) return true;
-        if (IsLastAbility(true, FightOrFlightPvE) && RequiescatPvE.CanUse(out act, skipAoeCheck: true, usedUp: true)) return true;
-         
+        // if requiscat is able to proc confiteor, use it immediately after Fight or Flight
+        if (RequiescatMasteryTrait.EnoughLevel)
+        {
+            if (IsLastAbility(true, FightOrFlightPvE) && ImperatorPvE.CanUse(out act, skipAoeCheck: true, usedUp: true)) return true;
+            if (IsLastAbility(true, FightOrFlightPvE) && RequiescatPvE.CanUse(out act, skipAoeCheck: true, usedUp: true)) return true;
+        }
+
+        // if requiscat is not able to proc confiteor, use it as AOE tool if able, otherwise as Single Target
+        if (!RequiescatMasteryTrait.EnoughLevel)
+        {
+            if (HolyCirclePvE.EnoughLevel && NumberOfHostilesInRange > 1 && RequiescatPvE.CanUse(out act, skipAoeCheck: true, usedUp: true)) return true;
+            if (!HolyCirclePvE.EnoughLevel && (NumberOfHostilesInRange == 1 || (RequiescatPvE.Target.Target?.IsBossFromIcon() ?? false)) && RequiescatPvE.CanUse(out act, skipAoeCheck: true, usedUp: true)) return true;
+        }
+
         if (FightOrFlightPvE.Cooldown.IsCoolingDown && CircleOfScornPvE.CanUse(out act, skipAoeCheck: true)) return true;
         if (FightOrFlightPvE.Cooldown.IsCoolingDown && ExpiacionPvE.CanUse(out act, skipAoeCheck: true)) return true;
         if (FightOrFlightPvE.Cooldown.IsCoolingDown && SpiritsWithinPvE.CanUse(out act)) return true;
@@ -168,7 +192,8 @@ public sealed class PLD_Beta : PaladinRotation
     {
         act = null;
         if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
-        if (ClemencyPvE.CanUse(out act)) return true;
+        if (ClemencyPvE.Target.Target?.GetHealthRatio() < ClemencyRequi && RequiescatStacks > 0 && ClemencyPvE.CanUse(out act, skipCastingCheck: true)) return true;
+        if (HealBot && ClemencyPvE.Target.Target?.GetHealthRatio() < ClemencyNoRequi && ClemencyPvE.CanUse(out act)) return true;
         return base.HealSingleGCD(out act);
     }
 
@@ -200,12 +225,12 @@ public sealed class PLD_Beta : PaladinRotation
         if (AtonementPvE.CanUse(out act)) return true;
 
         //AoE
-        if (Player.HasStatus(true, StatusID.DivineMight) && HolyCirclePvE.CanUse(out act)) return true;
+        if ((Player.HasStatus(true, StatusID.DivineMight) || RequiescatStacks > 0) && HolyCirclePvE.CanUse(out act, skipCastingCheck: true)) return true;
         if (ProminencePvE.CanUse(out act)) return true;
         if (TotalEclipsePvE.CanUse(out act)) return true;
 
         //Single Target
-        if (Player.HasStatus(true, StatusID.DivineMight) && HolySpiritPvE.CanUse(out act)) return true;
+        if ((Player.HasStatus(true, StatusID.DivineMight) || RequiescatStacks > 0) && HolySpiritPvE.CanUse(out act, skipCastingCheck: true)) return true;
 
         if (RoyalAuthorityPvE.CanUse(out act)) return true;
         if (RageOfHalonePvE.CanUse(out act)) return true;
