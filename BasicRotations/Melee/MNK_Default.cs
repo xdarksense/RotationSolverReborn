@@ -88,22 +88,20 @@ public sealed class MNK_Default : MonkRotation
 
         if (InBrotherhood)
         {
-            // 'If you are in brotherhood, and you have 10 chakra, and forbidden chakra is available, use it.'
-            if (Chakra == 10 && TheForbiddenChakraPvE.CanUse(out act)) return true;
-            // 'If you are in brotherhood, and forbidden chakra is available, use it regardless of stacks.'
-            if (Player.WillStatusEndGCD(1, 0, true, StatusID.Brotherhood) && TheForbiddenChakraPvE.CanUse(out act)) return true;
+            // 'If you are in brotherhood and forbidden chakra is available, use it.'
+            if (TheForbiddenChakraPvE.CanUse(out act)) return true;
         }
         if (!InBrotherhood)
         {
-            // 'If you are not in brotherhood, have 5 chakra, and brotherhood is about to be available, hold.'
-            if (Chakra == 5 && BrotherhoodPvE.Cooldown.WillHaveOneChargeGCD(1) && TheForbiddenChakraPvE.CanUse(out act)) return false;
-            // 'If you are not in brotherhood, have 5 chakra, and brotherhood is in cooldown, use it.'
-            if (Chakra == 5 && BrotherhoodPvE.Cooldown.IsCoolingDown && TheForbiddenChakraPvE.CanUse(out act)) return true;
+            // 'If you are not in brotherhood and brotherhood is about to be available, hold for burst.'
+            if (BrotherhoodPvE.Cooldown.WillHaveOneChargeGCD(1) && TheForbiddenChakraPvE.CanUse(out act)) return false;
+            // 'If you are not in brotherhood use it.'
+            if (TheForbiddenChakraPvE.CanUse(out act)) return true;
         }
         if (!TheForbiddenChakraPvE.EnoughLevel)
         {
             // 'If you are not high enough level for TheForbiddenChakra, use immediately at 5 chakra.'
-            if (Chakra == 5 && SteelPeakPvE.CanUse(out act)) return true;
+            if (SteelPeakPvE.CanUse(out act)) return true;
         }
 
         return base.EmergencyAbility(nextGCD, out act);
