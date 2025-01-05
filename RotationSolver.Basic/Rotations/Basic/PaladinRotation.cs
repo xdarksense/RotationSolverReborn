@@ -227,6 +227,11 @@ partial class PaladinRotation
     static partial void ModifyClemencyPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 67572;
+        setting.CanTarget = t =>
+        {
+            if (t.HasStatus(false, StatusHelper.TankStanceStatus)) return false;
+            return true;
+        };
     }
 
     static partial void ModifyRoyalAuthorityPvE(ref ActionSetting setting)
