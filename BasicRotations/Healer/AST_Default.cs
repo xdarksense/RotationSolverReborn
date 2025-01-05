@@ -33,6 +33,10 @@ public sealed class AST_Default : AstrologianRotation
     public float AspectedBeneficHeal { get; set; } = 0.4f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Essential Dignity")]
+    public float EssentialDignityHeal { get; set; } = 0.4f;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold among party member needed to use Horoscope")]
     public float HoroscopeHeal { get; set; } = 0.3f;
 
@@ -136,7 +140,8 @@ public sealed class AST_Default : AstrologianRotation
         if (InCombat && TheArrowPvE.CanUse(out act)) return true;
         if (InCombat && TheEwerPvE.CanUse(out act)) return true;
 
-        if (EssentialDignityPvE.CanUse(out act, usedUp: true)) return true;
+        if (EssentialDignityPvE.CanUse(out act, usedUp: true)
+            && EssentialDignityPvE.Target.Target?.GetHealthRatio() < EssentialDignityHeal) return true;
 
         if (CelestialIntersectionPvE.CanUse(out act, usedUp: true)) return true;
 
@@ -196,19 +201,14 @@ public sealed class AST_Default : AstrologianRotation
         // Use LordOfCrownsPvE if you have SimpleLord enabled and  Divination is active
         if (SimpleLord && InCombat && Player.HasStatus(true, StatusID.Divination) && LordOfCrownsPvE.CanUse(out act)) return true;
 
-        if (!Player.HasStatus(true, StatusID.Lightspeed)
-            && InCombat
-            && DivinationPvE.Cooldown.ElapsedAfter(115)
-            && LightspeedPvE.CanUse(out act, usedUp: true)) return true;
-
         if (IsBurst && !IsMoving
             && DivinationPvE.CanUse(out act)) return true;
 
         if (AstralDrawPvE.CanUse(out act, usedUp: IsBurst)) return true;
 
         if (!Player.HasStatus(true, StatusID.Lightspeed)
-            && (InBurstStatus || DivinationPvE.Cooldown.ElapsedAfter(115))
             && InCombat
+            && (InBurstStatus || DivinationPvE.Cooldown.ElapsedAfter(115) || DivinationPvE.Cooldown.WillHaveOneCharge(5) || Player.HasStatus(true, StatusID.Divination))
             && LightspeedPvE.CanUse(out act, usedUp: true)) return true;
 
         if (InCombat)
@@ -242,7 +242,7 @@ public sealed class AST_Default : AstrologianRotation
 
         if (AspectedBeneficPvE.CanUse(out act)
             && (IsMoving
-            || AspectedBeneficPvE.Target.Target?.GetHealthRatio() > AspectedBeneficHeal)) return true;
+            || AspectedBeneficPvE.Target.Target?.GetHealthRatio() < AspectedBeneficHeal)) return true;
 
         if (BeneficIiPvE.CanUse(out act)) return true;
         if (BeneficPvE.CanUse(out act)) return true;
