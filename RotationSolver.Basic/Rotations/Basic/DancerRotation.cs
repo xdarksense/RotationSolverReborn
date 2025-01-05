@@ -204,7 +204,7 @@ partial class DancerRotation
     {
         setting.IsFriendly = true;
         setting.TargetType = TargetType.DancePartner;
-        setting.ActionCheck = () => !AllianceMembers.Any(b => b.HasStatus(true, StatusID.ClosedPosition_2026));
+        setting.ActionCheck = () => !IsDancing && !AllianceMembers.Any(b => b.HasStatus(true, StatusID.ClosedPosition_2026));
     }
 
     static partial void ModifyDevilmentPvE(ref ActionSetting setting)
