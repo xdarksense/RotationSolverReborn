@@ -6,6 +6,7 @@ using ECommons.DalamudServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Client.UI;
@@ -44,8 +45,13 @@ public static class ObjectHelper
         //Removed the listed names.
         if (OtherConfiguration.NoProvokeNames.TryGetValue(Svc.ClientState.TerritoryType, out var ns1))
         {
-            var names = ns1.Where(n => !string.IsNullOrEmpty(n) && new Regex(n).Match(target.Name.ExtractText()).Success);
-            if (names.Any()) return false;
+            foreach (var n in ns1)
+            {
+                if (!string.IsNullOrEmpty(n) && new Regex(n).Match(target.Name.ExtractText()).Success)
+                {
+                    return false;
+                }
+            }
         }
 
         //Target can move or too big and has a target
@@ -65,7 +71,7 @@ public static class ObjectHelper
 
     internal static bool HasPositional(this IGameObject obj)
     {
-        return obj != null && !(obj.GetObjectNPC()?.IsOmnidirectional ?? false) && !obj.HasStatus(true, StatusID.DirectionalDisregard); // Unknown10 used to be the flag for no positional, believe this was changed to IsOmnidirectional
+        return obj != null && (!(obj.GetObjectNPC()?.IsOmnidirectional ?? false)); // Unknown10 used to be the flag for no positional, believe this was changed to IsOmnidirectional
     }
 
     internal static unsafe bool IsOthersPlayers(this IGameObject obj)
@@ -84,7 +90,10 @@ public static class ObjectHelper
         // Check if the target is invincible.
         if (battleChara.IsJeunoBossImmune()) return false;
 
-        if (battleChara.StatusList.Any(status => StatusHelper.IsInvincible(status))) return false;
+        foreach (var status in battleChara.StatusList)
+        {
+            if (StatusHelper.IsInvincible(status)) return false;
+        }
 
         if (Svc.ClientState == null) return false;
 
@@ -92,12 +101,17 @@ public static class ObjectHelper
         if (OtherConfiguration.NoHostileNames != null &&
             OtherConfiguration.NoHostileNames.TryGetValue(Svc.ClientState.TerritoryType, out var ns1))
         {
-            var names = ns1.Where(n => !string.IsNullOrEmpty(n) && new Regex(n).Match(battleChara.Name.TextValue).Success);
-            if (names.Any()) return false;
+            foreach (var n in ns1)
+            {
+                if (!string.IsNullOrEmpty(n) && new Regex(n).Match(battleChara.Name.TextValue).Success)
+                {
+                    return false;
+                }
+            }
         }
 
         // Fate
-        if (DataCenter.TerritoryContentType != TerritoryContentType.Eureka)
+        if (DataCenter.Territory?.ContentType != TerritoryContentType.Eureka)
         {
             var tarFateId = battleChara.FateId();
             if (tarFateId != 0 && tarFateId != DataCenter.FateId) return false;
@@ -127,7 +141,7 @@ public static class ObjectHelper
             TargetHostileType.AllTargetsWhenSoloInDutyTargetIsInEnemiesList => DataCenter.PartyMembers.Count() < 2 || battleChara.TargetObject is IBattleChara target && target.IsInEnemiesList(),
             _ => true,
         };
-    }
+        }
 
     private static string RemoveControlCharacters(string input)
     {
@@ -232,7 +246,7 @@ public static class ObjectHelper
 
     internal static unsafe bool IsAlliance(this IGameObject obj)
         => obj.GameObjectId is not 0
-        && (!(DataCenter.IsPvP) && obj is IPlayerCharacter
+        && (!DataCenter.IsPvP && obj is IPlayerCharacter
         || ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, obj.Struct()));
 
 
@@ -247,11 +261,13 @@ public static class ObjectHelper
         {
             // Accessing Player.Object and Svc.Party within the lock to ensure thread safety
             if (gameObject.GameObjectId == Player.Object?.GameObjectId) return true;
-            if (Svc.Party.Any(p => p.GameObject?.GameObjectId == gameObject.GameObjectId)) return true;
+            foreach (var p in Svc.Party)
+            {
+                if (p.GameObject?.GameObjectId == gameObject.GameObjectId) return true;
+            }
             if (Service.Config.FriendlyPartyNpcHealRaise2 && gameObject.GetBattleNPCSubKind() == BattleNpcSubKind.NpcPartyMember) return true;
             if (Service.Config.ChocoboPartyMember && gameObject.GetNameplateKind() == NameplateKind.PlayerCharacterChocobo) return true;
             if (Service.Config.FriendlyBattleNpcHeal && gameObject.GetNameplateKind() == NameplateKind.FriendlyBattleNPC) return true;
-
         }
         return false;
     }
@@ -267,7 +283,10 @@ public static class ObjectHelper
         if (obj is IBattleChara b && b.CurrentHp != 0) return false;
         if (obj.HasStatus(false, StatusID.Raise)) return false;
         if (!Service.Config.RaiseBrinkOfDeath && obj.HasStatus(false, StatusID.BrinkOfDeath)) return false;
-        if (DataCenter.AllianceMembers.Any(c => c.CastTargetObjectId == obj.GameObjectId)) return false;
+        foreach (var c in DataCenter.AllianceMembers)
+        {
+            if (c.CastTargetObjectId == obj.GameObjectId) return false;
+        }
 
         return true;
     }
@@ -295,7 +314,13 @@ public static class ObjectHelper
     {
         if (obj == null) return false;
 
-        if (obj is IBattleChara npc && DataCenter.PrioritizedNameIds.Contains(npc.NameId)) return true;
+        if (obj is IBattleChara npc)
+        {
+            foreach (var id in DataCenter.PrioritizedNameIds)
+            {
+                if (npc.NameId == id) return true;
+            }
+        }
 
         return false;
     }
@@ -313,14 +338,16 @@ public static class ObjectHelper
 
         var fateId = DataCenter.FateId;
 
-
         if (obj is IBattleChara b)
         {
             if (Player.Object == null) return false;
             // Check IBattleChara against the priority target list of OIDs
             if (PriorityTargetHelper.IsPriorityTarget(b.DataId)) return true;
             // Ensure StatusList is not null before calling Any
-            if (b.StatusList != null && b.StatusList.Any(StatusHelper.IsPriority)) return true;
+            foreach (var status in b.StatusList)
+            {
+                if (StatusHelper.IsPriority(status)) return true;
+            }
         }
 
         if (Service.Config.ChooseAttackMark && MarkingHelper.GetAttackSignTargets().FirstOrDefault(id => id != 0) == (long)obj.GameObjectId && obj.IsEnemy()) return true;
@@ -331,13 +358,13 @@ public static class ObjectHelper
         var icon = obj.GetNamePlateIcon();
 
         // Hunting log and weapon
-        if (Service.Config.TargetHuntingRelicLevePriority && icon is 60092 or 60096 or 71244) return true;
+        if (Service.Config.TargetHuntingRelicLevePriority && (icon == 60092 || icon == 60096 || icon == 71244)) return true;
         //60092 Hunt Target
         //60096 Relic Weapon
         //71244 Leve Target
 
         // Quest
-        if (Service.Config.TargetQuestPriority && (icon is 71204 or 71144 or 71224 or 71344 || obj.GetEventType() is EventHandlerType.Quest)) return true;
+        if (Service.Config.TargetQuestPriority && (icon == 71204 || icon == 71144 || icon == 71224 || icon == 71344 || obj.GetEventType() == EventHandlerType.Quest)) return true;
         //71204 Main Quest
         //71144 Major Quest
         //71224 Other Quest
@@ -379,7 +406,7 @@ public static class ObjectHelper
 
         var act = Service.GetSheet<Lumina.Excel.Sheets.Action>().GetRow(b.CastActionId);
         if (act.RowId == 0) return _effectRangeCheck[id] = false;
-        if (act.CastType is 3 or 4 || (act.EffectRange is > 0 and < 8)) return _effectRangeCheck[id] = false;
+        if (act.CastType == 3 || act.CastType == 4 || (act.EffectRange > 0 && act.EffectRange < 8)) return _effectRangeCheck[id] = false;
 
         return _effectRangeCheck[id] = true;
     }
@@ -395,22 +422,37 @@ public static class ObjectHelper
     {
         var player = Player.Object;
 
-        if (obj.IsEnemy() && obj.HasStatus(true, StatusID.EpicVillain)
-            && (player.HasStatus(true, StatusID.VauntedHero) || player.HasStatus(true, StatusID.FatedHero)))
+        if (obj.IsEnemy())
         {
-            return true;
-        }
+            if (obj.HasStatus(true, StatusID.EpicVillain) &&
+                (player.HasStatus(true, StatusID.VauntedHero) || player.HasStatus(true, StatusID.FatedHero)))
+            {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("IsJeunoBossImmune: EpicVillain status found");
+                }
+                return true;
+            }
 
-        if (obj.IsEnemy() && obj.HasStatus(true, StatusID.VauntedVillain)
-            && (player.HasStatus(true, StatusID.EpicHero) || player.HasStatus(true, StatusID.FatedHero)))
-        {
-            return true;
-        }
+            if (obj.HasStatus(true, StatusID.VauntedVillain) &&
+                (player.HasStatus(true, StatusID.EpicHero) || player.HasStatus(true, StatusID.FatedHero)))
+            {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("IsJeunoBossImmune: VauntedVillain status found");
+                }
+                return true;
+            }
 
-        if (obj.IsEnemy() && obj.HasStatus(true, StatusID.FatedVillain)
-            && (player.HasStatus(true, StatusID.EpicHero) || player.HasStatus(true, StatusID.VauntedHero)))
-        {
-            return true;
+            if (obj.HasStatus(true, StatusID.FatedVillain) &&
+                (player.HasStatus(true, StatusID.EpicHero) || player.HasStatus(true, StatusID.VauntedHero)))
+            {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("IsJeunoBossImmune: FatedVillain status found");
+                }
+                return true;
+            }
         }
 
         return false;
@@ -494,13 +536,25 @@ public static class ObjectHelper
         // Use a snapshot of the RecordedHP collection to avoid modification during enumeration
         var recordedHPCopy = DataCenter.RecordedHP.ToArray();
 
-        foreach (var (time, hpRatios) in recordedHPCopy)
+        // Calculate a moving average of HP ratios
+        const int movingAverageWindow = 5;
+        Queue<float> hpRatios = new Queue<float>();
+
+        foreach (var (time, hpRatiosDict) in recordedHPCopy)
         {
-            if (hpRatios.TryGetValue(objectId, out var ratio) && ratio != 1)
+            if (hpRatiosDict.TryGetValue(objectId, out var ratio) && ratio != 1)
             {
-                startTime = time;
-                initialHpRatio = ratio;
-                break;
+                if (startTime == DateTime.MinValue)
+                {
+                    startTime = time;
+                    initialHpRatio = ratio;
+                }
+
+                hpRatios.Enqueue(ratio);
+                if (hpRatios.Count > movingAverageWindow)
+                {
+                    hpRatios.Dequeue();
+                }
             }
         }
 
@@ -509,7 +563,9 @@ public static class ObjectHelper
         var currentHpRatio = b.GetHealthRatio();
         if (float.IsNaN(currentHpRatio)) return float.NaN;
 
-        var hpRatioDifference = initialHpRatio - currentHpRatio;
+        // Calculate the moving average of the HP ratios
+        var averageHpRatio = hpRatios.Average();
+        var hpRatioDifference = initialHpRatio - averageHpRatio;
         if (hpRatioDifference <= 0) return float.NaN;
 
         var elapsedTime = (float)(DateTime.Now - startTime).TotalSeconds;
@@ -655,4 +711,5 @@ public static class ObjectHelper
         var distance = Vector3.Distance(player.Position, obj.Position) - (player.HitboxRadius + obj.HitboxRadius);
         return distance;
     }
+
 }

@@ -7,6 +7,7 @@ internal class OtherConfiguration
     public static HashSet<uint> HostileCastingArea = [];
     public static HashSet<uint> HostileCastingTank = [];
     public static HashSet<uint> HostileCastingKnockback = [];
+    public static HashSet<uint> HostileCastingStop = [];
 
     public static SortedList<uint, float> AnimationLockTime = [];
 
@@ -19,6 +20,7 @@ internal class OtherConfiguration
     public static HashSet<uint> InvincibleStatus = [];
     public static HashSet<uint> NoCastingStatus = [];
     public static HashSet<uint> PrioTargetId = [];
+    public static HashSet<uint> AutoStatusOrder = [];
 
     public static RotationSolverRecord RotationSolverRecord = new();
 
@@ -33,6 +35,7 @@ internal class OtherConfiguration
         Task.Run(() => InitOne(ref PriorityStatus, nameof(PriorityStatus)));
         Task.Run(() => InitOne(ref InvincibleStatus, nameof(InvincibleStatus)));
         Task.Run(() => InitOne(ref PrioTargetId, nameof(PrioTargetId)));
+        Task.Run(() => InitOne(ref AutoStatusOrder, nameof(AutoStatusOrder)));
         Task.Run(() => InitOne(ref NoHostileNames, nameof(NoHostileNames)));
         Task.Run(() => InitOne(ref NoProvokeNames, nameof(NoProvokeNames)));
         Task.Run(() => InitOne(ref AnimationLockTime, nameof(AnimationLockTime)));
@@ -42,6 +45,7 @@ internal class OtherConfiguration
         Task.Run(() => InitOne(ref RotationSolverRecord, nameof(RotationSolverRecord), false));
         Task.Run(() => InitOne(ref NoCastingStatus, nameof(NoCastingStatus)));
         Task.Run(() => InitOne(ref HostileCastingKnockback, nameof(HostileCastingKnockback)));
+        Task.Run(() => InitOne(ref HostileCastingStop, nameof(HostileCastingStop)));
     }
 
     public static Task Save()
@@ -52,6 +56,7 @@ internal class OtherConfiguration
             await SaveDangerousStatus();
             await SaveInvincibleStatus();
             await SavePrioTargetId();
+            await SaveAutoStatusOrder();
             await SaveNoHostileNames();
             await SaveAnimationLockTime();
             await SaveHostileCastingArea();
@@ -61,6 +66,7 @@ internal class OtherConfiguration
             await SaveNoProvokeNames();
             await SaveNoCastingStatus();
             await SaveHostileCastingKnockback();
+            await SaveHostileCastingStop();
         });
     }
     #region Action Tab
@@ -82,6 +88,12 @@ internal class OtherConfiguration
         SaveHostileCastingKnockback().Wait();
     }
 
+    public static void ResetHostileCastingStop()
+    {
+        InitOne(ref HostileCastingStop, nameof(HostileCastingStop), true, true);
+        SaveHostileCastingStop().Wait();
+    }
+
     public static Task SaveHostileCastingArea()
     {
         return Task.Run(() => Save(HostileCastingArea, nameof(HostileCastingArea)));
@@ -95,6 +107,11 @@ internal class OtherConfiguration
     private static Task SaveHostileCastingKnockback()
     {
         return Task.Run(() => Save(HostileCastingKnockback, nameof(HostileCastingKnockback)));
+    }
+
+    private static Task SaveHostileCastingStop()
+    {
+        return Task.Run(() => Save(HostileCastingStop, nameof(HostileCastingStop)));
     }
     #endregion
 
@@ -162,12 +179,23 @@ internal class OtherConfiguration
     public static void ResetPrioTargetId()
     {
         InitOne(ref PrioTargetId, nameof(PrioTargetId), true, true);
-        SaveHostileCastingKnockback().Wait();
+        SavePrioTargetId().Wait();
     }
 
     public static Task SavePrioTargetId()
     {
         return Task.Run(() => Save(PrioTargetId, nameof(PrioTargetId)));
+    }
+
+    public static void ResetAutoStatusOrder()
+    {
+        InitOne(ref AutoStatusOrder, nameof(AutoStatusOrder), true, true);
+        SaveAutoStatusOrder().Wait();
+    }
+
+    public static Task SaveAutoStatusOrder()
+    {
+        return Task.Run(() => Save(AutoStatusOrder, nameof(AutoStatusOrder)));
     }
 
     public static Task SaveNoHostileNames()

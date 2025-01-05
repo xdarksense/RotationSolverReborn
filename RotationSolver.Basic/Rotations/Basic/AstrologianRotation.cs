@@ -104,6 +104,7 @@ partial class AstrologianRotation
     static partial void ModifyLightspeedPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Lightspeed];
+        setting.ActionCheck = () => !IsLastAbility(ActionID.LightspeedPvE);
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
@@ -164,7 +165,7 @@ partial class AstrologianRotation
         setting.ActionCheck = () => HasBalance;
         setting.TargetStatusProvide = [StatusID.TheBalance_3887, StatusID.Weakness,
         StatusID.BrinkOfDeath];
-        setting.TargetType = TargetType.Melee;
+        setting.TargetType = TargetType.TheBalance;
         setting.IsFriendly = true;
     }
 
@@ -189,7 +190,7 @@ partial class AstrologianRotation
         setting.ActionCheck = () => HasSpear;
         setting.TargetStatusProvide = [StatusID.TheSpear_3889, StatusID.Weakness,
         StatusID.BrinkOfDeath];
-        setting.TargetType = TargetType.Range;
+        setting.TargetType = TargetType.TheSpear;
         setting.IsFriendly = true;
     }
 

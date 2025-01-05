@@ -1,4 +1,6 @@
-﻿namespace DefaultRotations.Melee;
+﻿using System.ComponentModel;
+
+namespace DefaultRotations.Melee;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Melee/SAM_Default.cs")]
@@ -6,6 +8,13 @@
 public sealed class SAM_Default : SamuraiRotation
 {
     #region Config Options
+
+    public enum STtoAOEStrategy : byte
+    {
+        [Description("Hagakure")] Hagakure,
+
+        [Description("Setsugekka")] Setsugekka,
+    }
 
     [Range(0, 100, ConfigUnitType.None, 1)]
     [RotationConfig(CombatType.PvE, Name = "Kenki needed to use Shinten")]
@@ -35,6 +44,9 @@ public sealed class SAM_Default : SamuraiRotation
 
     [RotationConfig(CombatType.PvE, Name = "Enable TEA Checker.")]
     public bool EnableTEAChecker { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Hagakure or Midare/Tendo Setsugekka when going from single target to AOE scenarios")]
+    public STtoAOEStrategy STtoAOE { get; set; } = STtoAOEStrategy.Hagakure;
     #endregion
 
     #region Countdown Logic
@@ -154,6 +166,24 @@ public sealed class SAM_Default : SamuraiRotation
 
         if ((!HiganbanaTargets || (HiganbanaTargets && NumberOfAllHostilesInRange < 2)) && (HostileTarget?.WillStatusEnd(18, true, StatusID.Higanbana) ?? false) && HiganbanaPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
 
+        if (NumberOfHostilesInRange >= 3)
+        {
+            switch (STtoAOE)
+            {
+                case STtoAOEStrategy.Hagakure:
+                default:
+                    if (MidareSetsugekkaPvE.CanUse(out _) && HagakurePvE.CanUse(out act)) return true;
+                    break;
+
+                case STtoAOEStrategy.Setsugekka:
+                    if (TendoSetsugekkaPvE.CanUse(out act)) return true;
+                    if (MidareSetsugekkaPvE.CanUse(out act)) return true;
+                    break;
+            }
+        }
+
+        if (!HagakurePvE.EnoughLevel && NumberOfHostilesInRange >= 3 && MidareSetsugekkaPvE.CanUse(out act)) return true;
+
         if (TendoKaeshiGokenPvE.CanUse(out act)) return true;
         if (TendoGokenPvE.CanUse(out act)) return true;
         if (KaeshiGokenPvE.CanUse(out act)) return true;
@@ -167,23 +197,17 @@ public sealed class SAM_Default : SamuraiRotation
         if (FukoPvE.CanUse(out act, skipComboCheck: true)) return true;
         if (!FukoPvE.EnoughLevel && FugaPvE.CanUse(out act, skipComboCheck: true)) return true;
 
+        if (TendoSetsugekkaPvE.CanUse(out act)) return true;
         if (MidareSetsugekkaPvE.CanUse(out act)) return true;
 
-        if (TendoSetsugekkaPvE.CanUse(out act)) return true;
-        if (TendoKaeshiSetsugekkaPvE.CanUse(out act)) return true;
         // use 2nd finisher combo spell first
         if (KaeshiNamikiriPvE.CanUse(out act, usedUp: true)) return true;
-
-        // use 2nd finisher combo spell first
-        if (KaeshiSetsugekkaPvE.CanUse(out act, usedUp: true)) return true;
-        if (TendoKaeshiSetsugekkaPvE.CanUse(out act, usedUp: true)) return true;
+        if (!KaeshiNamikiriReady && KaeshiSetsugekkaPvE.CanUse(out act, usedUp: true)) return true;
+        if (!KaeshiNamikiriReady && TendoKaeshiSetsugekkaPvE.CanUse(out act, usedUp: true)) return true;
 
         // burst finisher
         if ((!isTargetBoss || (HostileTarget?.HasStatus(true, StatusID.Higanbana) ?? false)) && HasMoon && HasFlower
             && OgiNamikiriPvE.CanUse(out act)) return true;
-
-        if (TendoSetsugekkaPvE.CanUse(out act)) return true;
-        if (MidareSetsugekkaPvE.CanUse(out act)) return true;
 
         if (!HasSetsu && SamBuffs.All(buff => Player.HasStatus(true, buff)) &&
             YukikazePvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && HasGetsu && HasKa)) return true;

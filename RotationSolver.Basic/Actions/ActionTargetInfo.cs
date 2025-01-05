@@ -468,9 +468,9 @@ public struct ActionTargetInfo(IBaseAction action)
                 // Use fallback points if no beneficial positions are found
                 if (pts.Length == 0)
                 {
-                    if (DataCenter.TerritoryContentType == TerritoryContentType.Trials ||
-                        (DataCenter.TerritoryContentType == TerritoryContentType.Raids &&
-                        DataCenter.AllianceMembers.Count(p => p is IPlayerCharacter) == 8))
+                    if (DataCenter.Territory?.ContentType == TerritoryContentType.Trials ||
+                        (DataCenter.Territory?.ContentType == TerritoryContentType.Raids &&
+                         DataCenter.AllianceMembers.Count(p => p is IPlayerCharacter) == 8))
                     {
                         var fallbackPoints = new[] { Vector3.Zero, new Vector3(100, 0, 100) };
                         var closestFallback = fallbackPoints.MinBy(p => Vector3.Distance(player.Position, p));
@@ -775,6 +775,8 @@ public struct ActionTargetInfo(IBaseAction action)
             TargetType.Physical => IGameObjects != null ? RandomPhysicalTarget(IGameObjects) : null,
             TargetType.DancePartner => FindDancePartner(),
             TargetType.MimicryTarget => FindMimicryTarget(),
+            TargetType.TheSpear => FindTheSpear(),
+            TargetType.TheBalance => FindTheBalance(),
             _ => FindHostile(),
         };
 
@@ -785,14 +787,91 @@ public struct ActionTargetInfo(IBaseAction action)
 
             if (IGameObjects == null) return null;
 
-            var PartyMembers = IGameObjects.Where(ObjectHelper.IsParty);
+            var partyMembers = new List<IBattleChara>();
+            foreach (var obj in IGameObjects)
+            {
+                if (ObjectHelper.IsParty(obj))
+                {
+                    partyMembers.Add(obj);
+                }
+            }
 
             foreach (var job in DancePartnerPriority)
             {
-                var partner = PartyMembers.FirstOrDefault(member => member.IsJobs(job) && !member.IsDead);
-                if (partner != null)
+                foreach (var member in partyMembers)
                 {
-                    return partner;
+                    if (member.IsJobs(job) && !member.IsDead)
+                    {
+                        return member;
+                    }
+                }
+            }
+
+            return RandomMeleeTarget(IGameObjects)
+                ?? RandomRangeTarget(IGameObjects)
+                ?? RandomMagicalTarget(IGameObjects)
+                ?? RandomPhysicalTarget(IGameObjects)
+                ?? null;
+        }
+
+        IBattleChara? FindTheSpear()
+        {
+            // The Spear priority based on the info from The Balance Discord for Level 100 Dance Partner
+            Job[] TheSpearpriority = { Job.PCT, Job.SAM, Job.RPR, Job.VPR, Job.MNK, Job.NIN, Job.DRG, Job.PCT, Job.SAM, Job.BLM, Job.RDM, Job.SMN, Job.MCH, Job.BRD, Job.DNC };
+
+            if (IGameObjects == null) return null;
+
+            var partyMembers = new List<IBattleChara>();
+            foreach (var obj in IGameObjects)
+            {
+                if (ObjectHelper.IsParty(obj))
+                {
+                    partyMembers.Add(obj);
+                }
+            }
+
+            foreach (var job in TheSpearpriority)
+            {
+                foreach (var member in partyMembers)
+                {
+                    if (member.IsJobs(job) && !member.IsDead)
+                    {
+                        return member;
+                    }
+                }
+            }
+
+            return RandomRangeTarget(IGameObjects)
+                ?? RandomMeleeTarget(IGameObjects)
+                ?? RandomMagicalTarget(IGameObjects)
+                ?? RandomPhysicalTarget(IGameObjects)
+                ?? null;
+        }
+
+        IBattleChara? FindTheBalance()
+        {
+            // The Balance priority based on the info from The Balance Discord for Level 100 Dance Partner
+            Job[] TheBalancepriority = { Job.PCT, Job.SAM, Job.BLM, Job.RDM, Job.SMN, Job.MCH, Job.BRD, Job.DNC, Job.RPR, Job.VPR, Job.MNK, Job.NIN, Job.DRG };
+
+            if (IGameObjects == null) return null;
+
+            var partyMembers = new List<IBattleChara>();
+            foreach (var obj in IGameObjects)
+            {
+                if (ObjectHelper.IsParty(obj))
+                {
+                    partyMembers.Add(obj);
+                }
+            }
+
+            foreach (var job in TheBalancepriority)
+            {
+                foreach (var member in partyMembers)
+                {
+                    if (member.IsJobs(job) && !member.IsDead)
+                    {
+                        return member;
+                    }
                 }
             }
 
@@ -1162,6 +1241,8 @@ public enum TargetType : byte
     Self,
     DancePartner,
     MimicryTarget,
+    TheBalance,
+    TheSpear,
 }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 

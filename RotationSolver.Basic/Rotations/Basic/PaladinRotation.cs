@@ -86,7 +86,12 @@ partial class PaladinRotation
         ImGui.Text("HasDivineMight: " + HasDivineMight.ToString());
         ImGui.Text("HasFightOrFlight: " + HasFightOrFlight.ToString());
         ImGui.Text("CanHealAreaAbility: " + CanHealAreaAbility.ToString());
-        ImGui.Text("CanHealSingleSpell: " + CanHealSingleSpell.ToString());
+        ImGui.Text("SupplicationReady: " + SupplicationReady.ToString());
+        ImGui.Text("SepulchreReady: " + SepulchreReady.ToString());
+        ImGui.Text("BladeOfFaithReady: " + BladeOfFaithReady.ToString());
+        ImGui.Text("BladeOfTruthReady: " + BladeOfTruthReady.ToString());
+        ImGui.Text("BladeOfValorReady: " + BladeOfValorReady.ToString());
+        ImGui.Text("BladeOfHonorReady: " + BladeOfHonorReady.ToString());
     }
 
     #endregion
@@ -191,6 +196,7 @@ partial class PaladinRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
+            TimeToKill = 0,
         };
     }
 
@@ -221,6 +227,11 @@ partial class PaladinRotation
     static partial void ModifyClemencyPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 67572;
+        setting.CanTarget = t =>
+        {
+            if (t.HasStatus(false, StatusHelper.TankStanceStatus)) return false;
+            return true;
+        };
     }
 
     static partial void ModifyRoyalAuthorityPvE(ref ActionSetting setting)
@@ -307,6 +318,7 @@ partial class PaladinRotation
 
     static partial void ModifyBladeOfFaithPvE(ref ActionSetting setting)
     {
+        setting.ActionCheck = () => BladeOfFaithReady;
         setting.ComboIds = [ActionID.ConfiteorPvE];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -316,6 +328,7 @@ partial class PaladinRotation
 
     static partial void ModifyBladeOfTruthPvE(ref ActionSetting setting)
     {
+        setting.ActionCheck = () => BladeOfTruthReady;
         setting.ComboIds = [ActionID.BladeOfFaithPvE];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -325,6 +338,7 @@ partial class PaladinRotation
 
     static partial void ModifyBladeOfValorPvE(ref ActionSetting setting)
     {
+        setting.ActionCheck = () => BladeOfValorReady;
         setting.ComboIds = [ActionID.BladeOfTruthPvE];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -348,7 +362,7 @@ partial class PaladinRotation
     }
     static partial void ModifyBladeOfHonorPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.BladeOfHonorReady];
+        setting.ActionCheck = () => BladeOfHonorReady;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

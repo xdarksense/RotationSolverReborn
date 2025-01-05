@@ -1,6 +1,6 @@
 namespace DefaultRotations.Magical;
 
-[Rotation("Basic BLU", CombatType.PvE, GameVersion = "7.11")]
+[Rotation("Basic BLU", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Limited Jobs/BLU_Basic.cs")]
 [Api(4)]
 public sealed class Blue_Basic : BlueMageRotation

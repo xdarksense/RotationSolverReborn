@@ -1,6 +1,6 @@
 namespace DefaultRotations.Ranged;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.11")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Ranged/MCH_Default.cs")]
 [Api(4)]
 public sealed class MCH_Default : MachinistRotation
@@ -64,8 +64,8 @@ public sealed class MCH_Default : MachinistRotation
     [RotationDesc(ActionID.TacticianPvE, ActionID.DismantlePvE)]
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if ((!BurstDefense || (BurstDefense && !IsOverheated)) && TacticianPvE.CanUse(out act, skipAoeCheck: true)) return true;
-        if ((!BurstDefense || (BurstDefense && !IsOverheated)) && DismantlePvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if ((!BurstDefense || (BurstDefense && !IsOverheated)) && TacticianPvE.CanUse(out act)) return true;
+        if ((!BurstDefense || (BurstDefense && !IsOverheated)) && DismantlePvE.CanUse(out act)) return true;
 
         return base.DefenseAreaAbility(nextGCD, out act);
     }
@@ -80,8 +80,8 @@ public sealed class MCH_Default : MachinistRotation
         if (Player.HasStatus(true, StatusID.Wildfire_1946) && HyperchargePvE.CanUse(out act)) return true;
 
         // Start Ricochet/Gauss cooldowns rolling
-        if (!RicochetPvE.Cooldown.IsCoolingDown && RicochetPvE.CanUse(out act, skipAoeCheck: true)) return true;
-        if (!GaussRoundPvE.Cooldown.IsCoolingDown && GaussRoundPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (!RicochetPvE.Cooldown.IsCoolingDown && RicochetPvE.CanUse(out act)) return true;
+        if (!GaussRoundPvE.Cooldown.IsCoolingDown && GaussRoundPvE.CanUse(out act)) return true;
 
         // Check for not burning Hypercharge below level 52 on AOE
         bool LowLevelHyperCheck = !AutoCrossbowPvE.EnoughLevel && SpreadShotPvE.CanUse(out _);
@@ -109,8 +109,8 @@ public sealed class MCH_Default : MachinistRotation
         if (CanUseQueenMeow(out act, nextGCD)) return true;
 
         // Use Ricochet and Gauss
-        if (isRicochetMore && RicochetPvE.CanUse(out act, skipAoeCheck: true, usedUp: true)) return true;
-        if (GaussRoundPvE.CanUse(out act, usedUp: true, skipAoeCheck: true)) return true;
+        if (isRicochetMore && RicochetPvE.CanUse(out act, usedUp: true)) return true;
+        if (GaussRoundPvE.CanUse(out act, usedUp: true)) return true;
 
         if (IsBurst && BarrelStabilizerPvE.CanUse(out act)) return true;
 
@@ -143,9 +143,9 @@ public sealed class MCH_Default : MachinistRotation
         }
 
         // ChainSaw is always used after Drill
-        if (ChainSawPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (ChainSawPvE.CanUse(out act)) return true;
         // use combo finisher asap
-        if (ExcavatorPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (ExcavatorPvE.CanUse(out act)) return true;
         // use FMF after ChainSaw combo in 'alternative opener'
         if (FullMetalFieldPvE.CanUse(out act)) return true;
 

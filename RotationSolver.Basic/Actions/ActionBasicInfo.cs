@@ -107,7 +107,7 @@ public readonly struct ActionBasicInfo
                 return DataCenter.DutyActions.Contains(ID);
             }
 
-            return IsPvP == DataCenter.Territory?.IsPvpZone;
+            return IsPvP == DataCenter.IsPvP;
         }
     }
 

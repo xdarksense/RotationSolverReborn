@@ -40,7 +40,7 @@ public partial class RotationConfigWindow : Window
     private const float JOB_ICON_WIDTH = 50;
 
     public RotationConfigWindow()
-        : base("", ImGuiWindowFlags.NoScrollbar, false)
+    : base("", ImGuiWindowFlags.NoScrollbar, false)
     {
         SizeCondition = ImGuiCond.FirstUseEver;
         Size = new Vector2(740f, 490f);
@@ -765,15 +765,11 @@ public partial class RotationConfigWindow : Window
 
         if (ImGui.Button("Reset to Default"))
         {
-            Service.Config.AutoStatusOrder = Enum.GetValues(typeof(AutoStatus))
-                .Cast<AutoStatus>()
-                .Where(status => status != AutoStatus.None)
-                .ToList();
-            Service.Config.Save();
+            OtherConfiguration.ResetAutoStatusOrder();
         }
         ImGui.Spacing();
 
-        var autoStatusOrder = Service.Config.AutoStatusOrder;
+        var autoStatusOrder = OtherConfiguration.AutoStatusOrder.ToList(); // Convert HashSet to List
         bool orderChanged = false;
 
         // Begin a child window to contain the list
@@ -784,6 +780,7 @@ public partial class RotationConfigWindow : Window
         for (int i = 0; i < itemCount; i++)
         {
             var item = autoStatusOrder[i];
+            var itemName = Enum.GetName(typeof(AutoStatus), item) ?? item.ToString(); // Retrieve the status name by its enum value
 
             // Draw up button
             if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowUp, $"##Up{i}") && i > 0)
@@ -810,7 +807,7 @@ public partial class RotationConfigWindow : Window
             ImGui.SameLine();
 
             // Draw the item
-            ImGui.Text(item.ToString());
+            ImGui.Text(itemName);
 
             // Optionally, add tooltips or additional information
             if (ImGui.IsItemHovered())
@@ -825,7 +822,8 @@ public partial class RotationConfigWindow : Window
 
         if (orderChanged)
         {
-            Service.Config.Save();
+            OtherConfiguration.AutoStatusOrder = new HashSet<uint>(autoStatusOrder); // Convert List back to HashSet
+            OtherConfiguration.SaveAutoStatusOrder();
         }
     }
 
@@ -2269,7 +2267,7 @@ public partial class RotationConfigWindow : Window
         ImGui.SetNextItemWidth(ImGui.GetWindowWidth());
         ImGui.InputTextWithHint("##Searching the action", UiString.ConfigWindow_List_ActionNameOrId.GetDescription(), ref _actionSearching, 128);
 
-        using var table = ImRaii.Table("Rotation Solver List Actions", 3, ImGuiTableFlags.BordersInner | ImGuiTableFlags.Resizable | ImGuiTableFlags.SizingStretchSame);
+        using var table = ImRaii.Table("Rotation Solver List Actions", 4, ImGuiTableFlags.BordersInner | ImGuiTableFlags.Resizable | ImGuiTableFlags.SizingStretchSame);
         if (table)
         {
             ImGui.TableSetupScrollFreeze(0, 1);
@@ -2296,6 +2294,13 @@ public partial class RotationConfigWindow : Window
             }
             ImGui.TableHeader(UiString.ConfigWindow_List_HostileCastingKnockback.GetDescription());
 
+            ImGui.TableNextColumn();
+            if (ImGui.Button("Reset and Stop Casting List"))
+            {
+                OtherConfiguration.ResetHostileCastingStop();
+            }
+            ImGui.TableHeader(UiString.ConfigWindow_List_HostileCastingStop.GetDescription());
+
             ImGui.TableNextRow();
 
             ImGui.TableNextColumn();
@@ -2311,6 +2316,11 @@ public partial class RotationConfigWindow : Window
             _allSearchable.DrawItems(Configs.List2);
             ImGui.TextWrapped(UiString.ConfigWindow_List_HostileCastingKnockbackDesc.GetDescription());
             DrawActionsList(nameof(OtherConfiguration.HostileCastingKnockback), OtherConfiguration.HostileCastingKnockback);
+
+            ImGui.TableNextColumn();
+            _allSearchable.DrawItems(Configs.List3);
+            ImGui.TextWrapped(UiString.ConfigWindow_List_HostileCastingStopDesc.GetDescription());
+            DrawActionsList(nameof(OtherConfiguration.HostileCastingStop), OtherConfiguration.HostileCastingStop);
         }
     }
 
@@ -2402,14 +2412,14 @@ public partial class RotationConfigWindow : Window
             using var color = ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
 
             const int iconSize = 32;
-            var contentFinder = DataCenter.ContentFinder;
-            var territoryName = DataCenter.TerritoryName;
+            var contentFinder = DataCenter.Territory?.ContentType;
+            var territoryName = DataCenter.Territory?.Name;
 
-            if (contentFinder.HasValue && !string.IsNullOrEmpty(contentFinder.Value.Name.ExtractText()))
+            if (contentFinder.HasValue && !string.IsNullOrEmpty(DataCenter.Territory?.ContentFinderName))
             {
-                territoryName += $" ({DataCenter.ContentFinderName})";
+                territoryName += $" ({DataCenter.Territory?.ContentFinderName})";
             }
-            var icon = DataCenter.ContentFinder?.ContentType.Value.Icon ?? 23;
+            var icon = DataCenter.Territory?.ContentFinderIcon ?? 23;
             if (icon == 0) icon = 23;
             var getIcon = IconSet.GetTexture(icon, out var texture);
             ImGuiHelper.DrawItemMiddle(() =>
@@ -2423,7 +2433,7 @@ public partial class RotationConfigWindow : Window
             }, ImGui.GetWindowWidth(), ImGui.CalcTextSize(territoryName).X + ImGui.GetStyle().ItemSpacing.X + iconSize);
         }
 
-        DrawContentFinder(DataCenter.ContentFinder);
+        DrawContentFinder(DataCenter.Territory?.ContentFinderIcon ?? 23);
 
         using var table = ImRaii.Table("Rotation Solver List Territories", 4, ImGuiTableFlags.BordersInner | ImGuiTableFlags.Resizable | ImGuiTableFlags.SizingStretchSame);
         if (table)
@@ -2578,12 +2588,12 @@ public partial class RotationConfigWindow : Window
         }
     }
 
-    internal static void DrawContentFinder(ContentFinderCondition? content)
+    internal static void DrawContentFinder(uint imageId)
     {
         const float MaxWidth = 480f;
-        var badge = content?.Image;
-        if (badge != null && badge.Value != 0
-            && IconSet.GetTexture(badge.Value, out var badgeTexture))
+        var badge = imageId;
+        if (badge != 0
+            && IconSet.GetTexture(badge, out var badgeTexture))
         {
             var wholeWidth = ImGui.GetWindowWidth();
             var size = new Vector2(badgeTexture.Width, badgeTexture.Height) * MathF.Min(1, MathF.Min(MaxWidth, wholeWidth) / badgeTexture.Width);
@@ -2644,7 +2654,9 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"Fate: {DataCenter.FateId}");
         }
         ImGui.Text($"Height: {Player.Character->ModelContainer.CalculateHeight()}");
+        ImGui.Text($"OnlineStatus: {Player.OnlineStatus}");
         ImGui.Text($"Moving: {DataCenter.IsMoving}");
+        ImGui.Text($"Moving Time: {DataCenter.MovingRaw}");
         ImGui.Text($"Stop Moving: {DataCenter.StopMovingRaw}");
         ImGui.Text($"CountDownTime: {Service.CountDownTime}");
         ImGui.Text($"Combo Time: {DataCenter.ComboTime}");
@@ -2666,6 +2678,7 @@ public partial class RotationConfigWindow : Window
         // Check and display VFX casting status
         ImGui.Text($"Is Casting Tank VFX: {DataCenter.IsCastingTankVfx()}");
         ImGui.Text($"Is Casting Area VFX: {DataCenter.IsCastingAreaVfx()}");
+        ImGui.Text($"Is Hostile Casting Stop: {DataCenter.IsHostileCastingStop}");
 
         // Check and display VFX casting status
         ImGui.Text("Casting Vfx:");
@@ -2733,11 +2746,13 @@ public partial class RotationConfigWindow : Window
             ImGui.Text("Dispel Target: None");
         }
 
-        ImGui.Text($"TerritoryType: {DataCenter.TerritoryContentType}");
+        ImGui.Text($"TerritoryType: {DataCenter.Territory?.ContentType}");
         ImGui.Text($"DPSTaken: {DataCenter.DPSTaken}");
         ImGui.Text($"IsHostileCastingToTank: {DataCenter.IsHostileCastingToTank}");
         ImGui.Text($"RightNowRotation: {DataCenter.RightNowRotation}");
         ImGui.Text($"Job: {DataCenter.Job}");
+        ImGui.Text($"JobRange: {DataCenter.JobRange}");
+        ImGui.Text($"Job Role: {DataCenter.Role}");
         ImGui.Text($"Have pet: {DataCenter.HasPet}");
         ImGui.Text($"Hostile Near Count: {DataCenter.NumberOfHostilesInRange}");
         ImGui.Text($"Hostile Near Count Max Range: {DataCenter.NumberOfHostilesInMaxRange}");

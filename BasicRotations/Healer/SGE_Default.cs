@@ -1,6 +1,6 @@
 namespace DefaultRotations.Healer;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.05")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Healer/SGE_Default.cs")]
 [Api(4)]
 public sealed class SGE_Default : SageRotation
@@ -171,7 +171,6 @@ public sealed class SGE_Default : SageRotation
 
         if (SoteriaPvE.CanUse(out act) && PartyMembers.Any(b => b.HasStatus(true, StatusID.Kardion) && b.GetHealthRatio() < SoteriaHeal)) return true;
 
-
         var tank = PartyMembers.GetJobCategory(JobRole.Tank);
         if (Addersgall < 1 && (tank.Any(t => t.GetHealthRatio() < OGCDTankHeal) || PartyMembers.Any(b => b.GetHealthRatio() < OGCDHeal)))
         {
@@ -201,7 +200,6 @@ public sealed class SGE_Default : SageRotation
     }
 
     [RotationDesc(ActionID.EukrasianPrognosisPvE, ActionID.EukrasianPrognosisIiPvE)]
-
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
         // If not in combat and lacking the Kardia status, attempt to use KardiaPvE
@@ -219,69 +217,113 @@ public sealed class SGE_Default : SageRotation
     }
     #endregion
 
+    #region Eukrasia Logic
+    private IBaseAction? _EukrasiaActionAim = null;
+
+    // Sets the target Eukrasia action to be performed next.
+    // If the action is null, it exits early.
+    // If the current action aim is not null and the last action matches certain conditions, it exits early.
+    // Finally, updates the current Eukrasia action aim if it's different from the incoming action.
+    private void SetEukrasia(IBaseAction act)
+    {
+        if (act == null) return;
+
+        if (_EukrasiaActionAim != null && IsLastGCD(false, _EukrasiaActionAim)) return;
+
+        if (_EukrasiaActionAim != act)
+        {
+            _EukrasiaActionAim = act;
+        }
+    }
+
+    // Clears the Eukrasia action aim, effectively resetting any planned Eukrasia action.
+    private void ClearEukrasia()
+    {
+        if (_EukrasiaActionAim != null)
+        {
+            _EukrasiaActionAim = null;
+        }
+    }
+
+    private bool ChoiceEukrasia(out IAction? act)
+    {
+        act = null;
+
+        if (!EukrasiaPvE.CanUse(out _)) return false;
+        // Checks for Eukrasia status.
+        // Attempts to set correct Eurkrasia action based on availablity and MergedStatus.
+        if (EukrasianPrognosisIiPvE.CanUse(out _) && EukrasianPrognosisIiPvE.EnoughLevel && MergedStatus.HasFlag(AutoStatus.DefenseArea))
+        {
+            SetEukrasia(EukrasianPrognosisIiPvE);
+            return false;
+        }
+
+        if (EukrasianPrognosisPvE.CanUse(out _) && EukrasianPrognosisPvE.EnoughLevel && MergedStatus.HasFlag(AutoStatus.DefenseArea))
+        {
+            SetEukrasia(EukrasianPrognosisPvE);
+            return false;
+        }
+
+        if (EukrasianDiagnosisPvE.CanUse(out _) && EukrasianDiagnosisPvE.EnoughLevel && MergedStatus.HasFlag(AutoStatus.DefenseSingle))
+        {
+            SetEukrasia(EukrasianDiagnosisPvE);
+            return false;
+        }
+
+        if (EukrasianDyskrasiaPvE.CanUse(out _) && EukrasianDyskrasiaPvE.EnoughLevel && (!MergedStatus.HasFlag(AutoStatus.DefenseSingle) || !MergedStatus.HasFlag(AutoStatus.DefenseSingle)))
+        {
+            SetEukrasia(EukrasianDyskrasiaPvE);
+            return false;
+        }
+
+        if (EukrasianDosisIiiPvE.CanUse(out _) && EukrasianDosisIiiPvE.EnoughLevel && (!MergedStatus.HasFlag(AutoStatus.DefenseSingle) || !MergedStatus.HasFlag(AutoStatus.DefenseSingle)))
+        {
+            SetEukrasia(EukrasianDosisIiiPvE);
+            return false;
+        }
+
+        if (EukrasianDosisIiPvE.CanUse(out _) && EukrasianDosisIiPvE.EnoughLevel && (!MergedStatus.HasFlag(AutoStatus.DefenseSingle) || !MergedStatus.HasFlag(AutoStatus.DefenseSingle)))
+        {
+            SetEukrasia(EukrasianDosisIiPvE);
+            return false;
+        }
+
+        if (EukrasianDosisPvE.CanUse(out _) && EukrasianDosisPvE.EnoughLevel && (!MergedStatus.HasFlag(AutoStatus.DefenseSingle) || !MergedStatus.HasFlag(AutoStatus.DefenseSingle)))
+        {
+            SetEukrasia(EukrasianDosisPvE);
+            return false;
+        }
+
+        // If the last action performed matches any of a list of specific actions, it clears the Eukrasia aim.
+        // This serves as a reset/cleanup mechanism to ensure the decision logic starts fresh for the next cycle.
+        if (IsLastGCD(false, EukrasianPrognosisIiPvE, EukrasianPrognosisPvE,
+            EukrasianDiagnosisPvE, EukrasianDyskrasiaPvE, EukrasianDosisIiiPvE, EukrasianDosisIiPvE,
+            EukrasianDosisPvE) || !InCombat)
+        {
+            ClearEukrasia();
+        }
+        return false; // Indicates that no specific Eukrasia action was chosen in this cycle.
+    }
+    #endregion
+
+    #region Eukrasia Execution
+    // Attempts to perform a Eukrasia action, based on the current game state and conditions.
+    private bool DoEukrasia(out IAction? act)
+    {
+        act = null;
+
+        if (_EukrasiaActionAim != null && _EukrasiaActionAim.CanUse(out act))
+        {
+            if (EukrasiaPvE.CanUse(out act)) return true;
+
+            act = _EukrasiaActionAim;
+            return true;
+        }
+        return false;
+    }
+    #endregion
+
     #region GCD Logic 
-    protected override bool DefenseAreaGCD(out IAction? act)
-    {
-        act = null;
-
-        if (HasSwift && SwiftLogic && EgeiroPvE.CanUse(out _)) return false;
-
-        if (EukrasianPrognosisIiPvE.CanUse(out act))
-        {
-            if (EukrasianPrognosisIiPvE.Target.Target?.HasStatus(false,
-                StatusID.EukrasianDiagnosis,
-                StatusID.EukrasianPrognosis,
-                StatusID.Galvanize
-            ) ?? false) return false;
-
-            if (EukrasiaPvE.CanUse(out act)) return true;
-
-            act = EukrasianPrognosisIiPvE;
-            return true;
-        }
-
-        if (!EukrasianPrognosisIiPvE.EnoughLevel && EukrasianPrognosisPvE.CanUse(out act))
-        {
-            if (EukrasianPrognosisPvE.Target.Target?.HasStatus(false,
-                StatusID.EukrasianDiagnosis,
-                StatusID.EukrasianPrognosis,
-                StatusID.Galvanize
-            ) ?? false) return false;
-
-            if (EukrasiaPvE.CanUse(out act)) return true;
-
-            act = EukrasianPrognosisPvE;
-            return true;
-        }
-
-        return base.DefenseAreaGCD(out act);
-    }
-
-    [RotationDesc(ActionID.EukrasianDiagnosisPvE)]
-    protected override bool DefenseSingleGCD(out IAction? act)
-    {
-        act = null;
-
-        if (HasSwift && SwiftLogic && EgeiroPvE.CanUse(out _)) return false;
-
-        if (EukrasianDiagnosisPvE.CanUse(out act))
-        {
-            if (EukrasianDiagnosisPvE.Target.Target?.HasStatus(true,
-                StatusID.EukrasianDiagnosis,
-                StatusID.DifferentialDiagnosis,
-                StatusID.EukrasianPrognosis,
-                StatusID.Galvanize
-            ) ?? false) return false;
-
-            if (EukrasiaPvE.CanUse(out act)) return true;
-
-            act = EukrasianDiagnosisPvE;
-            return true;
-        }
-
-        return base.DefenseSingleGCD(out act);
-    }
-
     [RotationDesc(ActionID.PneumaPvE, ActionID.PrognosisPvE, ActionID.EukrasianPrognosisPvE, ActionID.EukrasianPrognosisIiPvE)]
     protected override bool HealAreaGCD(out IAction? act)
     {
@@ -341,32 +383,6 @@ public sealed class SGE_Default : SageRotation
 
         if (!InCombat && !Player.HasStatus(true, StatusID.Eukrasia) && EukrasiaPvE.CanUse(out act)) return true;
 
-        if (HostileTarget?.IsBossFromTTK() ?? false)
-        {
-            if (EukrasianDyskrasiaPvE.CanUse(out _, skipCastingCheck: true))
-            {
-                if (EukrasiaPvE.CanUse(out act, skipCastingCheck: true)) return true;
-                if (EukrasianDyskrasiaPvE.CanUse(out act))
-                {
-                    DosisPvE.Target = EukrasianDyskrasiaPvE.Target;
-                    return true;
-                }
-            }
-        }
-
-        if (HostileTarget?.IsBossFromTTK() ?? false)
-        {
-            if (EukrasianDosisPvE.CanUse(out _, skipCastingCheck: true))
-            {
-                if (EukrasiaPvE.CanUse(out act, skipCastingCheck: true)) return true;
-                if (DosisPvE.CanUse(out act))
-                {
-                    DosisPvE.Target = EukrasianDosisPvE.Target;
-                    return true;
-                }
-            }
-        }
-
         if (PhlegmaIiiPvE.CanUse(out act, usedUp: IsMoving)) return true;
         if (PhlegmaIiPvE.CanUse(out act, usedUp: IsMoving)) return true;
         if (PhlegmaPvE.CanUse(out act, usedUp: IsMoving)) return true;
@@ -378,49 +394,12 @@ public sealed class SGE_Default : SageRotation
 
         if (IsMoving && ToxikonPvE.CanUse(out act)) return true;
 
-        if (EukrasianDyskrasiaPvE.CanUse(out _, skipCastingCheck: true))
-        {
-            if (EukrasiaPvE.CanUse(out act, skipCastingCheck: true)) return true;
-            if (DyskrasiaPvE.CanUse(out act))
-            {
-                DyskrasiaPvE.Target = EukrasianDyskrasiaPvE.Target;
-                return true;
-            }
-        }
+        if (ChoiceEukrasia(out act)) return true;
+        if (DoEukrasia(out act)) return true;
 
-        if (DyskrasiaPvE.CanUse(out _))
-        {
-            if (EukrasianDyskrasiaPvE.EnoughLevel && (EukrasianDyskrasiaPvE.Target.Target?.WillStatusEnd(3, true, EukrasianDyskrasiaPvE.Setting.TargetStatusProvide ?? []) ?? false) && InCombat)
-            {
-                StatusHelper.StatusOff(StatusID.Eukrasia);
-            }
-            if (DyskrasiaPvE.CanUse(out act))
-            {
-                return true;
-            }
-        }
+        if (DyskrasiaPvE.CanUse(out act)) return true;
 
-        if (EukrasianDosisPvE.CanUse(out _, skipCastingCheck: true))
-        {
-            if (EukrasiaPvE.CanUse(out act, skipCastingCheck: true)) return true;
-            if (DosisPvE.CanUse(out act))
-            {
-                DosisPvE.Target = EukrasianDosisPvE.Target;
-                return true;
-            }
-        }
-
-        if (DosisPvE.CanUse(out _))
-        {
-            if ((EukrasianDosisPvE.Target.Target?.WillStatusEnd(3, true, EukrasianDosisPvE.Setting.TargetStatusProvide ?? []) ?? false) && InCombat)
-            {
-                StatusHelper.StatusOff(StatusID.Eukrasia);
-            }
-            if (DosisPvE.CanUse(out act))
-            {
-                return true;
-            }
-        }
+        if (DosisPvE.CanUse(out act)) return true;
 
         return base.GeneralGCD(out act);
     }
@@ -429,5 +408,14 @@ public sealed class SGE_Default : SageRotation
     #region Extra Methods
     public override bool CanHealSingleSpell => base.CanHealSingleSpell && (GCDHeal || PartyMembers.GetJobCategory(JobRole.Healer).Count() < 2);
     public override bool CanHealAreaSpell => base.CanHealAreaSpell && (GCDHeal || PartyMembers.GetJobCategory(JobRole.Healer).Count() < 2);
+
+    public override void DisplayStatus()
+    {
+        ImGui.Text($"Eukrasian Action: {_EukrasiaActionAim}");
+        ImGui.Text("HasEukrasia: " + HasEukrasia.ToString());
+        ImGui.Text("Addersgall: " + Addersgall.ToString());
+        ImGui.Text("Addersting: " + Addersting.ToString());
+        ImGui.Text("AddersgallTime: " + AddersgallTime.ToString());
+    }
     #endregion
 }

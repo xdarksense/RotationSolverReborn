@@ -357,8 +357,8 @@ public partial class RotationConfigWindow
             () => DataCenter.RightSet.SpeedConditionSet?.DrawMain(DataCenter.RightNowRotation)
         },
         {
-            UiString.ConfigWindow_Auto_LimitBreakConditionSet.GetDescription,
-            () => DataCenter.RightSet.LimitBreakConditionSet?.DrawMain(DataCenter.RightNowRotation)
+            UiString.ConfigWindow_Auto_NoCastingConditionSet.GetDescription,
+            () => DataCenter.RightSet.NoCastingConditionSet?.DrawMain(DataCenter.RightNowRotation)
         },
     })
     {

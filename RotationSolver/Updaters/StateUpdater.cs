@@ -1,4 +1,5 @@
 ﻿using ECommons.GameHelpers;
+using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Configuration.Conditions;
 
 namespace RotationSolver.Updaters;
@@ -24,78 +25,83 @@ internal static class StateUpdater
         AutoStatus status = AutoStatus.None;
 
         // Get the user-defined order of AutoStatus flags
-        var autoStatusOrder = Service.Config.AutoStatusOrder;
+        var autoStatusOrder = OtherConfiguration.AutoStatusOrder;
 
         foreach (var autoStatus in autoStatusOrder)
         {
             switch (autoStatus)
             {
-                case AutoStatus.Dispel:
+                case (uint)AutoStatus.NoCasting:
+                    if (ShouldAddNoCasting())
+                        status |= AutoStatus.NoCasting;
+                    break;
+
+                case (uint)AutoStatus.Dispel:
                     if (ShouldAddDispel())
                         status |= AutoStatus.Dispel;
                     break;
 
-                case AutoStatus.Interrupt:
+                case (uint)AutoStatus.Interrupt:
                     if (ShouldAddInterrupt())
                         status |= AutoStatus.Interrupt;
                     break;
 
-                case AutoStatus.AntiKnockback:
+                case (uint)AutoStatus.AntiKnockback:
                     if (ShouldAddAntiKnockback())
                         status |= AutoStatus.AntiKnockback;
                     break;
 
-                case AutoStatus.Positional:
+                case (uint)AutoStatus.Positional:
                     if (ShouldAddPositional())
                         status |= AutoStatus.Positional;
                     break;
 
-                case AutoStatus.HealAreaAbility:
+                case (uint)AutoStatus.HealAreaAbility:
                     if (ShouldAddHealAreaAbility())
                         status |= AutoStatus.HealAreaAbility;
                     break;
 
-                case AutoStatus.HealAreaSpell:
+                case (uint)AutoStatus.HealAreaSpell:
                     if (ShouldAddHealAreaSpell())
                         status |= AutoStatus.HealAreaSpell;
                     break;
 
-                case AutoStatus.HealSingleAbility:
+                case (uint)AutoStatus.HealSingleAbility:
                     if (ShouldAddHealSingleAbility())
                         status |= AutoStatus.HealSingleAbility;
                     break;
 
-                case AutoStatus.HealSingleSpell:
+                case (uint)AutoStatus.HealSingleSpell:
                     if (ShouldAddHealSingleSpell())
                         status |= AutoStatus.HealSingleSpell;
                     break;
 
-                case AutoStatus.DefenseArea:
+                case (uint)AutoStatus.DefenseArea:
                     if (ShouldAddDefenseArea())
                         status |= AutoStatus.DefenseArea;
                     break;
 
-                case AutoStatus.DefenseSingle:
+                case (uint)AutoStatus.DefenseSingle:
                     if (ShouldAddDefenseSingle())
                         status |= AutoStatus.DefenseSingle;
                     break;
 
-                case AutoStatus.Raise:
+                case (uint)AutoStatus.Raise:
                     if (ShouldAddRaise())
                         status |= AutoStatus.Raise;
                     break;
 
-                case AutoStatus.Provoke:
+                case (uint)AutoStatus.Provoke:
                     if (ShouldAddProvoke())
                         status |= AutoStatus.Provoke;
                     break;
 
-                case AutoStatus.TankStance:
+                case (uint)AutoStatus.TankStance:
                     if (ShouldAddTankStance())
                         status |= AutoStatus.TankStance;
                     break;
 
-                case AutoStatus.Speed:
+                case (uint)AutoStatus.Speed:
                     if (ShouldAddSpeed())
                         status |= AutoStatus.Speed;
                     break;
@@ -110,6 +116,11 @@ internal static class StateUpdater
     }
 
     // Condition methods for each AutoStatus flag
+
+    private static bool ShouldAddNoCasting()
+    {
+        return DataCenter.IsHostileCastingStop;
+    }
 
     private static bool ShouldAddDispel()
     {
@@ -135,17 +146,85 @@ internal static class StateUpdater
 
     private static bool ShouldAddPositional()
     {
+        // Check if the player's role is Melee and if there is a next GCD (Global Cooldown) action
+        // Also, check if the configuration allows automatic use of True North
         if (DataCenter.Role == JobRole.Melee && ActionUpdater.NextGCDAction != null
             && Service.Config.AutoUseTrueNorth)
         {
+            // Get the ID of the next GCD action
             var id = ActionUpdater.NextGCDAction.ID;
+            // Get the target of the next GCD action
+            var target = ActionUpdater.NextGCDAction.Target.Target;
+
+            // Check if the action ID has a positional requirement
             if (ConfigurationHelper.ActionPositional.TryGetValue((ActionID)id, out var positional)
-                && positional != ActionUpdater.NextGCDAction.Target.Target?.FindEnemyPositional()
-                && (ActionUpdater.NextGCDAction.Target.Target?.HasPositional() ?? false))
+            // Check if the positional requirement is not met by the target's current position
+            && positional != target?.FindEnemyPositional()
+            // Check if the target has positional requirements
+            && target?.HasPositional() == true
+            // Check if the target does not have a status that turns target into a wallboss
+            && !target.HasStatus(true, StatusID.DirectionalDisregard))
+            {
+                // If all conditions are met, return true to add the Positional flag
+                return true;
+            }
+        }
+        // If any condition is not met, return false
+        return false;
+    }
+
+    private static bool ShouldAddDefenseArea()
+    {
+        if (!DataCenter.InCombat || !Service.Config.UseDefenseAbility)
+            return false;
+
+        return DataCenter.IsHostileCastingAOE;
+    }
+
+    private static bool ShouldAddDefenseSingle()
+    {
+        if (!DataCenter.InCombat || !Service.Config.UseDefenseAbility)
+            return false;
+
+        if (DataCenter.Role == JobRole.Healer)
+        {
+            if (DataCenter.PartyMembers.Any((tank) =>
+            {
+                var attackingTankObj = DataCenter.AllHostileTargets.Where(t => t.TargetObjectId == tank.GameObjectId);
+
+                if (attackingTankObj.Count() != 1)
+                    return false;
+
+                return DataCenter.IsHostileCastingToTank;
+            }))
             {
                 return true;
             }
         }
+
+        if (DataCenter.Role == JobRole.Tank)
+        {
+            var movingHere = (float)DataCenter.NumberOfHostilesInRange / DataCenter.NumberOfHostilesInMaxRange > 0.3f;
+
+            var tarOnMe = DataCenter.AllHostileTargets.Where(t => t.DistanceToPlayer() <= 3
+            && t.TargetObject == Player.Object);
+            var tarOnMeCount = tarOnMe.Count();
+            var attackedCount = tarOnMe.Count(ObjectHelper.IsAttacked);
+            var attacked = (float)attackedCount / tarOnMeCount > 0.7f;
+
+            if (tarOnMeCount >= Service.Config.AutoDefenseNumber
+                && Player.Object.GetHealthRatio() <= Service.Config.HealthForAutoDefense
+                && movingHere && attacked)
+            {
+                return true;
+            }
+
+            if (DataCenter.IsHostileCastingToTank)
+            {
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -241,61 +320,6 @@ internal static class StateUpdater
         }
     }
 
-    private static bool ShouldAddDefenseArea()
-    {
-        if (!DataCenter.InCombat || !Service.Config.UseDefenseAbility)
-            return false;
-
-        return DataCenter.IsHostileCastingAOE;
-    }
-
-    private static bool ShouldAddDefenseSingle()
-    {
-        if (!DataCenter.InCombat || !Service.Config.UseDefenseAbility)
-            return false;
-
-        if (DataCenter.Role == JobRole.Healer)
-        {
-            if (DataCenter.PartyMembers.Any((tank) =>
-            {
-                var attackingTankObj = DataCenter.AllHostileTargets.Where(t => t.TargetObjectId == tank.GameObjectId);
-
-                if (attackingTankObj.Count() != 1)
-                    return false;
-
-                return DataCenter.IsHostileCastingToTank;
-            }))
-            {
-                return true;
-            }
-        }
-
-        if (DataCenter.Role == JobRole.Tank)
-        {
-            var movingHere = (float)DataCenter.NumberOfHostilesInRange / DataCenter.NumberOfHostilesInMaxRange > 0.3f;
-
-            var tarOnMe = DataCenter.AllHostileTargets.Where(t => t.DistanceToPlayer() <= 3
-            && t.TargetObject == Player.Object);
-            var tarOnMeCount = tarOnMe.Count();
-            var attackedCount = tarOnMe.Count(ObjectHelper.IsAttacked);
-            var attacked = (float)attackedCount / tarOnMeCount > 0.7f;
-
-            if (tarOnMeCount >= Service.Config.AutoDefenseNumber
-                && Player.Object.GetHealthRatio() <= Service.Config.HealthForAutoDefense
-                && movingHere && attacked)
-            {
-                return true;
-            }
-
-            if (DataCenter.IsHostileCastingToTank)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     private static bool ShouldAddAntiKnockback()
     {
         if (!DataCenter.InCombat || !Service.Config.UseKnockback)
@@ -382,6 +406,7 @@ internal static class StateUpdater
     {
         var status = DataCenter.SpecialType switch
         {
+            SpecialCommandType.NoCasting => AutoStatus.NoCasting,
             SpecialCommandType.HealArea => AutoStatus.HealAreaSpell
                                 | AutoStatus.HealAreaAbility,
             SpecialCommandType.HealSingle => AutoStatus.HealSingleSpell
@@ -398,7 +423,6 @@ internal static class StateUpdater
             SpecialCommandType.AntiKnockback => AutoStatus.AntiKnockback,
             SpecialCommandType.Burst => AutoStatus.Burst,
             SpecialCommandType.Speed => AutoStatus.Speed,
-            SpecialCommandType.LimitBreak => AutoStatus.LimitBreak,
             _ => AutoStatus.None,
         };
 
@@ -419,7 +443,7 @@ internal static class StateUpdater
             status |= AutoStatus.Burst;
         }
         AddStatus(ref status, AutoStatus.Speed, DataCenter.RightSet.SpeedConditionSet);
-        AddStatus(ref status, AutoStatus.LimitBreak, DataCenter.RightSet.LimitBreakConditionSet);
+        AddStatus(ref status, AutoStatus.NoCasting, DataCenter.RightSet.NoCastingConditionSet);
 
         return status;
     }

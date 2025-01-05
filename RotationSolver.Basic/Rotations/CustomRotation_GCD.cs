@@ -16,11 +16,6 @@ partial class CustomRotation
 
         try
         {
-            IBaseAction.ShouldEndSpecial = true;
-
-            if (DataCenter.MergedStatus.HasFlag(AutoStatus.LimitBreak)
-                && UseLimitBreak(out act)) return act;
-
             IBaseAction.ShouldEndSpecial = false;
             if (EmergencyGCD(out act)) return act;
 
@@ -99,7 +94,7 @@ partial class CustomRotation
             IBaseAction.ShouldEndSpecial = false;
             IBaseAction.TargetOverride = null;
 
-            if (GeneralGCD(out var action)) return action;
+            if (!DataCenter.MergedStatus.HasFlag(AutoStatus.NoCasting) && GeneralGCD(out var action)) return action;
 
             if (Service.Config.HealWhenNothingTodo && InCombat)
             {
@@ -150,7 +145,7 @@ partial class CustomRotation
 
         return LimitBreakLevel switch
         {
-            1 => (DataCenter.IsPvP ? LimitBreakPvP?.CanUse(out act, skipAoeCheck: true) : LimitBreak1?.CanUse(out act, skipAoeCheck: true)) ?? false,
+            1 => (DataCenter.IsPvP? LimitBreakPvP?.CanUse(out act, skipAoeCheck: true) : LimitBreak1?.CanUse(out act, skipAoeCheck: true)) ?? false,
             2 => LimitBreak2?.CanUse(out act, skipAoeCheck: true) ?? false,
             3 => LimitBreak3?.CanUse(out act, skipAoeCheck: true) ?? false,
             _ => false,
@@ -374,6 +369,12 @@ partial class CustomRotation
     protected virtual bool GeneralGCD(out IAction? act)
     {
         act = null;
+
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.NoCasting))
+        {
+            return false;
+        }
+
         if (ShouldSkipAction()) return false;
 
         if (DataCenter.RightNowDutyRotation?.GeneralGCD(out act) ?? false) return true;

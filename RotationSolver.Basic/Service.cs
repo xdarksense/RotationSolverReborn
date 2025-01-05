@@ -132,14 +132,21 @@ internal class Service : IDisposable
     /// <returns>A collection of addon pointers.</returns>
     public static IEnumerable<IntPtr> GetAddons<T>() where T : struct
     {
-        // Check the cache for the attribute or add it if not present
         var addon = AddonCache.GetOrAdd(typeof(T), t => t.GetCustomAttribute<AddonAttribute>());
 
         if (addon is null) return Array.Empty<nint>();
 
-        return addon.AddonIdentifiers
-            .Select(str => Svc.GameGui.GetAddonByName(str, 1))
-            .Where(ptr => ptr != IntPtr.Zero);
+        var addonPointers = new List<IntPtr>();
+        foreach (var str in addon.AddonIdentifiers)
+        {
+            var ptr = Svc.GameGui.GetAddonByName(str, 1);
+            if (ptr != IntPtr.Zero)
+            {
+                addonPointers.Add(ptr);
+            }
+        }
+
+        return addonPointers;
     }
 
     /// <summary>

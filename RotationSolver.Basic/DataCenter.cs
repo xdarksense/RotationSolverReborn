@@ -1,6 +1,5 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
-using Dalamud.Game.ClientState.Statuses;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
@@ -42,9 +41,9 @@ internal static class DataCenter
     {
         get
         {
-            if (ConditionSets == null || !ConditionSets.Any())
+            if (ConditionSets == null || ConditionSets.Length == 0)
             {
-                ConditionSets = [new MajorConditionSet()];
+                ConditionSets = new[] { new MajorConditionSet() };
             }
 
             var index = Service.Config.ActionSequencerIndex;
@@ -57,7 +56,7 @@ internal static class DataCenter
         }
     }
 
-    internal static MajorConditionSet[] ConditionSets { get; set; } = [];
+    internal static MajorConditionSet[] ConditionSets { get; set; } = Array.Empty<MajorConditionSet>();
 
     /// <summary>
     /// Only recorded 15s hps.
@@ -87,31 +86,26 @@ internal static class DataCenter
     internal static Queue<(ulong id, DateTime time)> AttackedTargets { get; } = new(AttackedTargetsCount);
 
     internal static bool InEffectTime => DateTime.Now >= EffectTime && DateTime.Now <= EffectEndTime;
-    internal static Dictionary<ulong, uint> HealHP { get; set; } = [];
-    internal static Dictionary<ulong, uint> ApplyStatus { get; set; } = [];
+    internal static Dictionary<ulong, uint> HealHP { get; set; } = new();
+    internal static Dictionary<ulong, uint> ApplyStatus { get; set; } = new();
     internal static uint MPGain { get; set; }
 
     internal static bool HasApplyStatus(ulong id, StatusID[] ids)
     {
         if (InEffectTime && ApplyStatus.TryGetValue(id, out var statusId))
         {
-            if (ids.Any(s => (ushort)s == statusId)) return true;
+            foreach (var s in ids)
+            {
+                if ((ushort)s == statusId) return true;
+            }
         }
 
         return false;
     }
 
-    public static TerritoryType? Territory { get; set; }
+    public static TerritoryInfo? Territory { get; set; }
 
-    public static string TerritoryName => Territory?.PlaceName.Value.Name.ExtractText() ?? "Territory";
-
-    public static bool IsPvP => Territory?.IsPvpZone ?? false;
-
-    public static ContentFinderCondition? ContentFinder => Territory?.ContentFinderCondition.Value;
-
-    public static string ContentFinderName => ContentFinder?.Name.ExtractText() ?? "Duty";
-
-    public static bool IsInHighEndDuty => ContentFinder?.HighEndDuty ?? false;
+    public static bool IsPvP => Territory?.IsPvP ?? false;
 
     public static ushort TerritoryID => Svc.ClientState.TerritoryType;
     public static bool IsInUCoB => TerritoryID == 733;
@@ -121,17 +115,14 @@ internal static class DataCenter
     public static bool IsInTOP => TerritoryID == 1122;
     public static bool IsInFRU => TerritoryID == 1238;
 
-    public static TerritoryContentType TerritoryContentType =>
-        (TerritoryContentType)(ContentFinder?.ContentType.Value.RowId ?? 0);
-
     public static AutoStatus MergedStatus => AutoStatus | CommandStatus;
 
     public static AutoStatus AutoStatus { get; set; } = AutoStatus.None;
     public static AutoStatus CommandStatus { get; set; } = AutoStatus.None;
 
-    public static HashSet<uint> DisabledActionSequencer { get; set; } = [];
+    public static HashSet<uint> DisabledActionSequencer { get; set; } = new();
 
-    private static List<NextAct> NextActs = [];
+    private static List<NextAct> NextActs = new();
     public static IAction? ActionSequencerAction { private get; set; }
 
     public static IAction? CommandNextAction
@@ -164,7 +155,16 @@ internal static class DataCenter
 
     internal static void AddCommandAction(IAction act, double time)
     {
-        var index = NextActs.FindIndex(i => i.Act.ID == act.ID);
+        var index = -1;
+        for (int i = 0; i < NextActs.Count; i++)
+        {
+            if (NextActs[i].Act.ID == act.ID)
+            {
+                index = i;
+                break;
+            }
+        }
+
         var newItem = new NextAct(act, DateTime.Now.AddSeconds(time));
         if (index < 0)
         {
@@ -175,7 +175,7 @@ internal static class DataCenter
             NextActs[index] = newItem;
         }
 
-        NextActs = [.. NextActs.OrderBy(i => i.DeadTime)];
+        NextActs.Sort((a, b) => a.DeadTime.CompareTo(b.DeadTime));
     }
 
     public static TargetHostileType RightNowTargetToHostileType => Service.Config.HostileType;
@@ -204,6 +204,8 @@ internal static class DataCenter
     public static bool IsMoving { get; internal set; }
 
     internal static float StopMovingRaw { get; set; }
+
+    internal static float MovingRaw { get; set; }
 
     public static unsafe ushort FateId
     {
@@ -320,14 +322,13 @@ internal static class DataCenter
         }
     }
 
-    public static List<IBattleChara> PartyMembers { get; set; } = [];
+    public static List<IBattleChara> PartyMembers { get; set; } = new();
 
-    public static List<IBattleChara> AllianceMembers { get; set; } = [];
+    public static List<IBattleChara> AllianceMembers { get; set; } = new();
 
-    public static List<IBattleChara> FriendlyNPCMembers { get; set; } = [];
+    public static List<IBattleChara> FriendlyNPCMembers { get; set; } = new();
 
-
-    public static List<IBattleChara> AllHostileTargets { get; set; } = [];
+    public static List<IBattleChara> AllHostileTargets { get; set; } = new();
 
     public static IBattleChara? InterruptTarget { get; set; }
 
@@ -337,7 +338,7 @@ internal static class DataCenter
 
     public static IBattleChara? DispelTarget { get; set; }
 
-    public static List<IBattleChara> AllTargets { get; set; } = [];
+    public static List<IBattleChara> AllTargets { get; set; } = new();
 
     public static ulong[] TreasureCharas
     {
@@ -358,15 +359,69 @@ internal static class DataCenter
 
     public static bool HasHostilesInRange => NumberOfHostilesInRange > 0;
     public static bool HasHostilesInMaxRange => NumberOfHostilesInMaxRange > 0;
-    public static int NumberOfHostilesInRange => AllHostileTargets.Count(o => o.DistanceToPlayer() < JobRange);
-    public static int NumberOfHostilesInMaxRange => AllHostileTargets.Count(o => o.DistanceToPlayer() < 25);
-    public static int NumberOfAllHostilesInRange => AllHostileTargets.Count(o => o.DistanceToPlayer() < JobRange);
-    public static int NumberOfAllHostilesInMaxRange => AllHostileTargets.Count(o => o.DistanceToPlayer() < 25);
+    public static int NumberOfHostilesInRange
+    {
+        get
+        {
+            int count = 0;
+            foreach (var o in AllHostileTargets)
+            {
+                if (o.DistanceToPlayer() < JobRange)
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
+    }
+    public static int NumberOfHostilesInMaxRange
+    {
+        get
+        {
+            int count = 0;
+            foreach (var o in AllHostileTargets)
+            {
+                if (o.DistanceToPlayer() < 25)
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
+    }
+    public static int NumberOfAllHostilesInRange => NumberOfHostilesInRange;
+    public static int NumberOfAllHostilesInMaxRange => NumberOfHostilesInMaxRange;
 
-    public static bool MobsTime => AllHostileTargets.Count(o => o.DistanceToPlayer() < JobRange && o.CanSee())
-                                   >= Service.Config.AutoDefenseNumber;
+    public static bool MobsTime
+    {
+        get
+        {
+            int count = 0;
+            foreach (var o in AllHostileTargets)
+            {
+                if (o.DistanceToPlayer() < JobRange && o.CanSee())
+                {
+                    count++;
+                }
+            }
+            return count >= Service.Config.AutoDefenseNumber;
+        }
+    }
 
-    public static bool AreHostilesCastingKnockback => AllHostileTargets.Any(IsHostileCastingKnockback);
+    public static bool AreHostilesCastingKnockback
+    {
+        get
+        {
+            foreach (var h in AllHostileTargets)
+            {
+                if (IsHostileCastingKnockback(h))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
 
     public static float JobRange
     {
@@ -391,14 +446,18 @@ internal static class DataCenter
     {
         get
         {
-            // Select the time to kill for each hostile target and filter out NaN values.
-            var validTimes = AllHostileTargets
-                .Select(b => b.GetTimeToKill())
-                .Where(v => !float.IsNaN(v))
-                .ToList();
-
-            // If there are valid times, return the average; otherwise, return 0.
-            return validTimes.Any() ? validTimes.Average() : 0;
+            float total = 0;
+            int count = 0;
+            foreach (var b in AllHostileTargets)
+            {
+                var timeToKill = b.GetTimeToKill();
+                if (!float.IsNaN(timeToKill))
+                {
+                    total += timeToKill;
+                    count++;
+                }
+            }
+            return count > 0 ? total / count : 0;
         }
     }
 
@@ -406,16 +465,56 @@ internal static class DataCenter
 
     public static bool IsHostileCastingToTank => IsCastingTankVfx() || AllHostileTargets.Any(IsHostileCastingTank);
 
+    public static bool IsHostileCastingStop => InCombat && Service.Config.CastingStop && AllHostileTargets.Any(IsHostileStop);
+
     private static DateTime _petLastSeen = DateTime.MinValue;
+
+    public static bool IsHostileStop(IBattleChara h)
+    {
+        return IsHostileCastingStopBase(h,
+            (act) => act.RowId != 0 && OtherConfiguration.HostileCastingStop.Contains(act.RowId));
+    }
+
+    public static bool IsHostileCastingStopBase(IBattleChara h, Func<Action, bool> check)
+    {
+        // Check if h is null
+        if (h == null) return false;
+
+        // Check if the hostile character is casting
+        if (!h.IsCasting) return false;
+
+        // Check if the cast is interruptible
+        if (h.IsCastInterruptible) return false;
+
+        // Validate the cast time
+        if ((h.TotalCastTime - h.CurrentCastTime) > (Service.Config.CastingStopCalculate ? 100 : Service.Config.CastingStopTime)) return false;
+
+        // Get the action sheet
+        var actionSheet = Service.GetSheet<Action>();
+        if (actionSheet == null) return false; // Check if actionSheet is null
+
+        // Get the action being cast
+        var action = actionSheet.GetRow(h.CastActionId);
+        if (action.RowId == 0) return false; // Check if action is not initialized
+
+        // Invoke the check function on the action and return the result
+        return check?.Invoke(action) ?? false; // Check if check is null
+    }
 
     public static bool HasPet
     {
         get
         {
-            var mayPet = AllTargets.OfType<IBattleNpc>().Where(npc => npc.OwnerId == Player.Object.GameObjectId);
-            var hasPet = mayPet.Any(npc => npc.BattleNpcKind == BattleNpcSubKind.Pet);
-            if (hasPet ||
-                Svc.Condition[ConditionFlag.Mounted] ||
+            foreach (var npc in AllTargets)
+            {
+                if (npc is IBattleNpc battleNpc && battleNpc.OwnerId == Player.Object.GameObjectId && battleNpc.BattleNpcKind == BattleNpcSubKind.Pet)
+                {
+                    _petLastSeen = DateTime.Now;
+                    return true;
+                }
+            }
+
+            if (Svc.Condition[ConditionFlag.Mounted] ||
                 Svc.Condition[ConditionFlag.Mounted2] ||
                 Svc.Condition[ConditionFlag.BetweenAreas] ||
                 Svc.Condition[ConditionFlag.BetweenAreas51] ||
@@ -430,7 +529,7 @@ internal static class DataCenter
                 return true;
             }
 
-            if (!hasPet && _petLastSeen.AddSeconds(3) < DateTime.Now)
+            if (_petLastSeen.AddSeconds(3) < DateTime.Now)
             {
                 return false;
             }
@@ -467,8 +566,18 @@ internal static class DataCenter
 
     #region HP
 
-    public static Dictionary<ulong, float> RefinedHP => PartyMembers
-    .ToDictionary(p => p.GameObjectId, GetPartyMemberHPRatio);
+    public static Dictionary<ulong, float> RefinedHP
+    {
+        get
+        {
+            var refinedHP = new Dictionary<ulong, float>();
+            foreach (var member in PartyMembers)
+            {
+                refinedHP[member.GameObjectId] = GetPartyMemberHPRatio(member);
+            }
+            return refinedHP;
+        }
+    }
 
     private static Dictionary<ulong, uint> _lastHp = new Dictionary<ulong, uint>();
 
@@ -498,14 +607,37 @@ internal static class DataCenter
         return (float)currentHp / member.MaxHp;
     }
 
-    public static IEnumerable<float> PartyMembersHP => RefinedHP.Values.Where(r => r > 0);
+    public static IEnumerable<float> PartyMembersHP
+    {
+        get
+        {
+            foreach (var hp in RefinedHP.Values)
+            {
+                if (hp > 0)
+                {
+                    yield return hp;
+                }
+            }
+        }
+    }
 
     public static float PartyMembersMinHP
     {
         get
         {
-            var partyMembersHP = PartyMembersHP.ToList();
-            return partyMembersHP.Count > 0 ? partyMembersHP.Min() : 0;
+            float minHP = float.MaxValue;
+            bool hasMembers = false;
+
+            foreach (var hp in PartyMembersHP)
+            {
+                if (hp < minHP)
+                {
+                    minHP = hp;
+                }
+                hasMembers = true;
+            }
+
+            return hasMembers ? minHP : 0;
         }
     }
 
@@ -513,8 +645,16 @@ internal static class DataCenter
     {
         get
         {
-            var partyMembersHP = PartyMembersHP.ToList();
-            return partyMembersHP.Count > 0 ? partyMembersHP.Average() : 0;
+            float totalHP = 0;
+            int count = 0;
+
+            foreach (var hp in PartyMembersHP)
+            {
+                totalHP += hp;
+                count++;
+            }
+
+            return count > 0 ? totalHP / count : 0;
         }
     }
 
@@ -522,12 +662,18 @@ internal static class DataCenter
     {
         get
         {
-            var partyMembersHP = PartyMembersHP.ToList();
+            var partyMembersHP = new List<float>(PartyMembersHP);
             if (partyMembersHP.Count == 0) return 0;
 
             var averageHP = partyMembersHP.Average();
-            var variance = partyMembersHP.Average(d => (d - averageHP) * (d - averageHP));
-            return (float)Math.Sqrt(variance);
+            var variance = 0f;
+
+            foreach (var hp in partyMembersHP)
+            {
+                variance += (hp - averageHP) * (hp - averageHP);
+            }
+
+            return (float)Math.Sqrt(variance / partyMembersHP.Count);
         }
     }
 
@@ -553,12 +699,18 @@ internal static class DataCenter
         {
             try
             {
-                var recs = _damages.Where(r => DateTime.Now - r.ReceiveTime < TimeSpan.FromMilliseconds(5));
+                var recs = new List<DamageRec>();
+                foreach (var rec in _damages)
+                {
+                    if (DateTime.Now - rec.ReceiveTime < TimeSpan.FromMilliseconds(5))
+                    {
+                        recs.Add(rec);
+                    }
+                }
 
-                if (!recs.Any()) return 0;
+                if (recs.Count == 0) return 0;
 
                 var damages = recs.Sum(r => r.Ratio);
-
                 var time = recs.Last().ReceiveTime - recs.First().ReceiveTime + TimeSpan.FromMilliseconds(2.5f);
 
                 return damages / (float)time.TotalSeconds;

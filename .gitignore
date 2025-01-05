@@ -4,5 +4,5 @@ obj/
 lib/
 .idea/
 RotationSolver/Localization/Localization.json
-
 RotationSolver.sln.DotSettings.user
+/Resources/AutoStatusOrder.json

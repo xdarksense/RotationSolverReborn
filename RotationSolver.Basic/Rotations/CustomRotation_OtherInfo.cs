@@ -277,13 +277,13 @@ partial class CustomRotation
     /// <summary>
     /// Type of the content player is in.
     /// </summary>
-    protected static TerritoryContentType TerritoryContentType => DataCenter.TerritoryContentType;
+    protected static TerritoryContentType TerritoryContentType => DataCenter.Territory?.ContentType ?? TerritoryContentType.None;
 
     /// <summary>
     /// Is player in high-end duty, savage, extrene or ultimate.
     /// </summary>
     [Description("Is in the high-end duty")]
-    public static bool IsInHighEndDuty => DataCenter.IsInHighEndDuty;
+    public static bool IsInHighEndDuty => DataCenter.Territory?.IsHighEndDuty ?? false;
 
     /// <summary>
     /// Is player in UCoB duty.
@@ -554,6 +554,14 @@ partial class CustomRotation
     /// </summary>
     [Description("Stop moving time")]
     public static float StopMovingTime => IsMoving ? 0 : DataCenter.StopMovingRaw + DataCenter.DefaultGCDRemain;
+
+
+    /// <summary>
+    /// How long the player has been moving.
+    /// <br>WARNING: Do Not make this method the main of your rotation.</br>
+    /// </summary>
+    [Description("Moving time")]
+    public static float MovingTime => IsMoving ? DataCenter.MovingRaw + DataCenter.DefaultGCDRemain : 0;
 
     /// <summary>
     /// Time from GCD.

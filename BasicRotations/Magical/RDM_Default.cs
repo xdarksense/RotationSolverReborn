@@ -1,6 +1,6 @@
 namespace DefaultRotations.Magical;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.05")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Magical/RDM_Default.cs")]
 [Api(4)]
 public sealed class RDM_Default : RedMageRotation
@@ -20,6 +20,12 @@ public sealed class RDM_Default : RedMageRotation
     //Fine, ill do it myself
     [RotationConfig(CombatType.PvE, Name = "Cast manafication outside of embolden window (use at own risk).")]
     public bool AnyoneManafication { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Corps-a-corps when standing still (use at own risk).")]
+    public bool SuicideByDumb { get; set; } = true;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Displacement after Engagement (use at own risk).")]
+    public bool SuicideByDumber { get; set; } = false;
     #endregion
 
     #region Countdown Logic
@@ -149,8 +155,9 @@ public sealed class RDM_Default : RedMageRotation
         if (ViceOfThornsPvE.CanUse(out act, skipAoeCheck: true)) return true;
         if (ContreSixtePvE.CanUse(out act, skipAoeCheck: true)) return true;
         if (FlechePvE.CanUse(out act)) return true;
-        if (EngagementPvE.CanUse(out act, usedUp: true)) return true;
-        if (CorpsacorpsPvE.CanUse(out act) && !IsMoving) return true;
+        if (EngagementPvE.CanUse(out act, usedUp: !SuicideByDumber)) return true;
+        if (SuicideByDumb && CorpsacorpsPvE.CanUse(out act) && !IsMoving) return true;
+        if (SuicideByDumber && EngagementPvE.Cooldown.CurrentCharges == 1 && DisplacementPvE.CanUse(out act, usedUp: true)) return true;
 
         return base.AttackAbility(nextGCD, out act);
     }

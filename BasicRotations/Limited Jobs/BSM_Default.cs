@@ -1,6 +1,6 @@
 //namespace DefaultRotations.Ranged;
 
-//[Rotation("Default", CombatType.PvE, GameVersion = "7.0")]
+//[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
 //[SourceCode(Path = "main/BasicRotations/Limited Jobs/BSM_Default.cs")]
 //[Api(1)]
 //public sealed class BSM_Default : BeastmasterRotation

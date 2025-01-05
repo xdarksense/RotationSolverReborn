@@ -40,10 +40,15 @@ partial class MonkRotation
     /// </summary>
     public static int RaptorFury => JobGauge.RaptorFury;
 
-    /// <summary>
+    /// <summary>Brotherhood
     /// Gets the amount of available Coeurl Fury stacks.
     /// </summary>
     public static int CoeurlFury => JobGauge.CoeurlFury;
+
+    /// <summary>Brotherhood
+    /// Brotherhood
+    /// </summary>
+    public static bool InBrotherhood => !Player.WillStatusEnd(0, true, StatusID.Brotherhood);
 
     /// <inheritdoc/>
     public override void DisplayStatus()
@@ -78,12 +83,12 @@ partial class MonkRotation
 
     static partial void ModifySteeledMeditationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Chakra < 5;
+        setting.ActionCheck = () => (!InBrotherhood && Chakra < 5 || InBrotherhood && Chakra < 10);
     }
 
     static partial void ModifySteelPeakPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InCombat && Chakra == 5;
+        setting.ActionCheck = () => InCombat && (!InBrotherhood && Chakra == 5 || InBrotherhood && Chakra >= 5);
         setting.UnlockedByQuestID = 66094;
     }
 
@@ -129,12 +134,12 @@ partial class MonkRotation
 
     static partial void ModifyInspiritedMeditationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Chakra < 5;
+        setting.ActionCheck = () => (!InBrotherhood && Chakra < 5 || InBrotherhood && Chakra < 10);
     }
 
     static partial void ModifyHowlingFistPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InCombat && Chakra == 5;
+        setting.ActionCheck = () => InCombat && (!InBrotherhood && Chakra == 5 || InBrotherhood && Chakra >= 5);
         setting.UnlockedByQuestID = 66599;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -184,12 +189,12 @@ partial class MonkRotation
 
     static partial void ModifyForbiddenMeditationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Chakra < 5;
+        setting.ActionCheck = () => (!InBrotherhood && Chakra < 5 || InBrotherhood && Chakra < 10);
     }
 
     static partial void ModifyTheForbiddenChakraPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InCombat && Chakra == 5;
+        setting.ActionCheck = () => InCombat && (!InBrotherhood && Chakra == 5 || InBrotherhood && Chakra >= 5);
         setting.UnlockedByQuestID = 67564;
     }
 
@@ -289,15 +294,15 @@ partial class MonkRotation
 
     static partial void ModifyEnlightenedMeditationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Chakra < 5;
+        setting.ActionCheck = () => (!InBrotherhood && Chakra < 5 || InBrotherhood && Chakra < 10);
     }
 
     static partial void ModifyEnlightenmentPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InCombat && Chakra == 5;
+        setting.ActionCheck = () => InCombat && (!InBrotherhood && Chakra == 5 || InBrotherhood && Chakra >= 5);
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 1,
+            AoeCount = 3,
         };
     }
 

@@ -27,6 +27,12 @@ partial class CustomRotation
     static partial void ModifyTrueNorthPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = new[] { StatusID.TrueNorth };
+        setting.ActionCheck = () => !IsLastAbility(ActionID.TrueNorthPvE);
+    }
+
+    static partial void ModifyShirkPvE(ref ActionSetting setting)
+    {
+        setting.TargetType = TargetType.Tank;
     }
 
     static partial void ModifyAddlePvE(ref ActionSetting setting)

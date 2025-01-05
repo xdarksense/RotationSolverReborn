@@ -158,9 +158,14 @@ internal static class MajorUpdater
             HotbarHighlightManager.UpdateSettings();
 
             // Collect expired VfxNewData items
-            var expiredVfx = DataCenter.VfxDataQueue
-                .Where(vfx => vfx.TimeDuration > TimeSpan.FromSeconds(10))
-                .ToList();
+            var expiredVfx = new List<VfxNewData>();
+            foreach (var vfx in DataCenter.VfxDataQueue)
+            {
+                if (vfx.TimeDuration > TimeSpan.FromSeconds(10))
+                {
+                    expiredVfx.Add(vfx);
+                }
+            }
 
             // Remove expired VfxNewData items
             foreach (var vfx in expiredVfx)
@@ -182,7 +187,7 @@ internal static class MajorUpdater
         if (!Service.Config.TeachingMode || ActionUpdater.NextAction is not IAction nextAction) return;
 
         HotbarID? hotbar = nextAction switch
-        {
+            {
             IBaseItem item => new HotbarID(HotbarSlotType.Item, item.ID),
             IBaseAction baseAction when baseAction.Action.ActionCategory.RowId is 10 or 11 => Svc.Data.GetExcelSheet<GeneralAction>()?.FirstOrDefault(g => g.Action.RowId == baseAction.ID) is GeneralAction gAct ? new HotbarID(HotbarSlotType.GeneralAction, gAct.RowId) : null,
             IBaseAction baseAction => new HotbarID(HotbarSlotType.Action, baseAction.AdjustedID),

@@ -7,7 +7,7 @@ public class PLD_Default : PaladinRotation
 {
     #region Config Options
 
-    [RotationConfig(CombatType.PvE, Name = "Prevent actions while you have Passage of Prms up")]
+    [RotationConfig(CombatType.PvE, Name = "Prevent actions while you have Passage of Arms up")]
     public bool PassageProtec { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Use Hallowed Ground with Cover")]

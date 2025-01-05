@@ -52,7 +52,6 @@ partial class SageRotation
         ImGui.Text("Addersgall: " + Addersgall.ToString());
         ImGui.Text("Addersting: " + Addersting.ToString());
         ImGui.Text("AddersgallTime: " + AddersgallTime.ToString());
-        ImGui.Text("AddersgallTimerRaw: " + AddersgallTimerRaw.ToString());
     }
     #endregion
 
@@ -118,7 +117,7 @@ partial class SageRotation
 
     static partial void ModifyEukrasianDiagnosisPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => HasEukrasia && !DataCenter.AllianceMembers.Any(m => m.HasStatus(true, StatusID.EukrasianDiagnosis));
+        setting.ActionCheck = () => !DataCenter.AllianceMembers.Any(m => m.HasStatus(true, StatusID.EukrasianDiagnosis));
         setting.TargetStatusProvide = [StatusID.EukrasianDiagnosis, StatusID.Galvanize]; // Effect cannot be stacked with scholar's Galvanize.
         setting.TargetType = TargetType.BeAttacked;
         setting.StatusFromSelf = false;
