@@ -381,8 +381,6 @@ public sealed class SGE_Default : SageRotation
 
         if (HasSwift && SwiftLogic && EgeiroPvE.CanUse(out _)) return false;
 
-        if (!InCombat && !Player.HasStatus(true, StatusID.Eukrasia) && EukrasiaPvE.CanUse(out act)) return true;
-
         if (PhlegmaIiiPvE.CanUse(out act, usedUp: IsMoving)) return true;
         if (PhlegmaIiPvE.CanUse(out act, usedUp: IsMoving)) return true;
         if (PhlegmaPvE.CanUse(out act, usedUp: IsMoving)) return true;
@@ -401,6 +399,8 @@ public sealed class SGE_Default : SageRotation
 
         if (DosisPvE.CanUse(out act)) return true;
 
+        if (!InCombat && !Player.HasStatus(true, StatusID.Eukrasia) && EukrasiaPvE.CanUse(out act)) return true;
+        if (InCombat && !HasHostilesInRange && EukrasiaPvE.CanUse(out act)) return true;
         return base.GeneralGCD(out act);
     }
     #endregion

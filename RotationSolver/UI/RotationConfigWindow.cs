@@ -733,23 +733,27 @@ public partial class RotationConfigWindow : Window
         {
             // Draw the clicking count with a specific color
             using var color = ImRaii.PushColor(ImGuiCol.Text, new Vector4(0.2f, 0.6f, 0.95f, 1));
-            var countStr = string.Format(UiString.ConfigWindow_About_ClickingCount.GetDescription(), clickingCount);
-            ImGuiHelper.DrawItemMiddle(() =>
+            var countStr = UiString.ConfigWindow_About_ClickingCount.GetDescription();
+            if (countStr != null)
             {
-                ImGui.TextWrapped(countStr);
-            }, width, ImGui.CalcTextSize(countStr).X);
-
-            // Draw the appropriate message based on the clicking count
-            foreach (var pair in CountStringPair.Reverse())
-            {
-                if (clickingCount >= pair.Key)
+                countStr = string.Format(countStr, clickingCount);
+                ImGuiHelper.DrawItemMiddle(() =>
                 {
-                    countStr = pair.Value;
-                    ImGuiHelper.DrawItemMiddle(() =>
+                    ImGui.TextWrapped(countStr);
+                }, width, ImGui.CalcTextSize(countStr).X);
+
+                // Draw the appropriate message based on the clicking count
+                foreach (var pair in CountStringPair.Reverse())
+                {
+                    if (clickingCount >= pair.Key && pair.Value != null)
                     {
-                        ImGui.TextWrapped(countStr);
-                    }, width, ImGui.CalcTextSize(countStr).X);
-                    break;
+                        countStr = pair.Value;
+                        ImGuiHelper.DrawItemMiddle(() =>
+                        {
+                            ImGui.TextWrapped(countStr);
+                        }, width, ImGui.CalcTextSize(countStr).X);
+                        break;
+                    }
                 }
             }
         }
