@@ -159,8 +159,9 @@ internal static class MajorUpdater
 
             // Collect expired VfxNewData items
             var expiredVfx = new List<VfxNewData>();
-            foreach (var vfx in DataCenter.VfxDataQueue)
+            for (int i = 0; i < DataCenter.VfxDataQueue.Count; i++)
             {
+                var vfx = DataCenter.VfxDataQueue[i];
                 if (vfx.TimeDuration > TimeSpan.FromSeconds(10))
                 {
                     expiredVfx.Add(vfx);

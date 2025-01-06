@@ -65,9 +65,10 @@ public sealed class SGE_Default : SageRotation
     #region Countdown Logic
     protected override IAction? CountDownAction(float remainTime)
     {
-        if (remainTime < DosisPvE.Info.CastTime + CountDownAhead
-            && DosisPvE.CanUse(out var act)) return act;
+        if (remainTime < PneumaPvE.Info.CastTime + CountDownAhead
+            && PneumaPvE.CanUse(out var act)) return act;
         if (remainTime <= 3 && UseBurstMedicine(out act)) return act;
+        if (remainTime <= 5 && EukrasiaPvE.CanUse(out act)) return act;
         return base.CountDownAction(remainTime);
     }
     #endregion
@@ -85,20 +86,17 @@ public sealed class SGE_Default : SageRotation
     {
         if (base.EmergencyAbility(nextGCD, out act)) return true;
 
-        if (nextGCD.IsTheSameTo(false, PneumaPvE, EukrasianDiagnosisPvE,
-            EukrasianPrognosisPvE, EukrasianPrognosisIiPvE, DiagnosisPvE, PrognosisPvE))
+        if (nextGCD.IsTheSameTo(false, PneumaPvE, EukrasianPrognosisPvE, EukrasianPrognosisIiPvE))
         {
             if (ZoePvE.CanUse(out act)) return true;
         }
 
-        if (nextGCD.IsTheSameTo(false, PneumaPvE, EukrasianDiagnosisPvE,
-             EukrasianPrognosisPvE, EukrasianPrognosisIiPvE, DiagnosisPvE, PrognosisPvE))
+        if (nextGCD.IsTheSameTo(false, PneumaPvE, EukrasianDiagnosisPvE, DiagnosisPvE, PrognosisPvE))
         {
             if (KrasisPvE.CanUse(out act)) return true;
         }
 
-        if (nextGCD.IsTheSameTo(false, PneumaPvE, EukrasianDiagnosisPvE,
-             EukrasianPrognosisPvE, EukrasianPrognosisIiPvE, DiagnosisPvE, PrognosisPvE))
+        if (nextGCD.IsTheSameTo(false, PneumaPvE, EukrasianPrognosisPvE, EukrasianPrognosisIiPvE, DiagnosisPvE, PrognosisPvE))
         {
             if (PhilosophiaPvE.CanUse(out act)) return true;
         }
@@ -109,6 +107,11 @@ public sealed class SGE_Default : SageRotation
     [RotationDesc(ActionID.PanhaimaPvE, ActionID.KeracholePvE, ActionID.HolosPvE)]
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
+        if (!PanhaimaPvE.Cooldown.IsCoolingDown)
+        {
+            if (PhysisIiPvE.CanUse(out act)) return true;
+        }
+
         if (Addersgall <= 1)
         {
             if (PanhaimaPvE.CanUse(out act)) return true;
@@ -124,6 +127,11 @@ public sealed class SGE_Default : SageRotation
     [RotationDesc(ActionID.HaimaPvE, ActionID.TaurocholePvE, ActionID.PanhaimaPvE, ActionID.KeracholePvE, ActionID.HolosPvE)]
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
+        if (!HaimaPvE.Cooldown.IsCoolingDown)
+        {
+            if (KrasisPvE.CanUse(out act)) return true;
+        }
+
         if (Addersgall <= 1)
         {
             if (HaimaPvE.CanUse(out act)) return true;
@@ -146,16 +154,14 @@ public sealed class SGE_Default : SageRotation
     [RotationDesc(ActionID.KeracholePvE, ActionID.PhysisPvE, ActionID.HolosPvE, ActionID.IxocholePvE)]
     protected override bool HealAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (PhysisIiPvE.CanUse(out act)) return true;
-        if (!PhysisIiPvE.EnoughLevel && PhysisPvE.CanUse(out act)) return true;
-
         if (KeracholePvE.CanUse(out act) && EnhancedKeracholeTrait.EnoughLevel) return true;
-
-        if (HolosPvE.CanUse(out act) && PartyMembersAverHP < HolosHeal) return true;
 
         if (IxocholePvE.CanUse(out act)) return true;
 
-        if (KeracholePvE.CanUse(out act)) return true;
+        if (PhysisIiPvE.CanUse(out act)) return true;
+        if (!PhysisIiPvE.EnoughLevel && PhysisPvE.CanUse(out act)) return true;
+
+        if (HolosPvE.CanUse(out act) && PartyMembersAverHP < HolosHeal) return true;
 
         return base.HealAreaAbility(nextGCD, out act);
     }
@@ -164,8 +170,6 @@ public sealed class SGE_Default : SageRotation
     protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
         if (TaurocholePvE.CanUse(out act)) return true;
-
-        if (KeracholePvE.CanUse(out act) && EnhancedKeracholeTrait.EnoughLevel) return true;
 
         if ((!TaurocholePvE.EnoughLevel || TaurocholePvE.Cooldown.IsCoolingDown) && DruocholePvE.CanUse(out act)) return true;
 
@@ -193,8 +197,6 @@ public sealed class SGE_Default : SageRotation
         {
             if (KrasisPvE.CanUse(out act)) return true;
         }
-
-        if (KeracholePvE.CanUse(out act)) return true;
 
         return base.HealSingleAbility(nextGCD, out act);
     }
@@ -381,8 +383,6 @@ public sealed class SGE_Default : SageRotation
 
         if (HasSwift && SwiftLogic && EgeiroPvE.CanUse(out _)) return false;
 
-        if (!InCombat && !Player.HasStatus(true, StatusID.Eukrasia) && EukrasiaPvE.CanUse(out act)) return true;
-
         if (PhlegmaIiiPvE.CanUse(out act, usedUp: IsMoving)) return true;
         if (PhlegmaIiPvE.CanUse(out act, usedUp: IsMoving)) return true;
         if (PhlegmaPvE.CanUse(out act, usedUp: IsMoving)) return true;
@@ -401,6 +401,8 @@ public sealed class SGE_Default : SageRotation
 
         if (DosisPvE.CanUse(out act)) return true;
 
+        if (!InCombat && !Player.HasStatus(true, StatusID.Eukrasia) && EukrasiaPvE.CanUse(out act)) return true;
+        if (InCombat && !HasHostilesInRange && EukrasiaPvE.CanUse(out act)) return true;
         return base.GeneralGCD(out act);
     }
     #endregion

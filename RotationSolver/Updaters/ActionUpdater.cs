@@ -134,13 +134,13 @@ internal static class ActionUpdater
             _startMovingTime = DateTime.Now;
         }
 
-        DataCenter.StopMovingRaw = _stopMovingTime == DateTime.MinValue
+        DataCenter.StopMovingRaw = DataCenter.IsMoving
             ? 0
             : (float)(DateTime.Now - _stopMovingTime).TotalSeconds;
 
-        DataCenter.MovingRaw = _startMovingTime == DateTime.MinValue
-            ? 0
-            : (float)(DateTime.Now - _startMovingTime).TotalSeconds;
+        DataCenter.MovingRaw = DataCenter.IsMoving
+            ? (float)(DateTime.Now - _startMovingTime).TotalSeconds
+            : 0;
     }
 
     static DateTime _startCombatTime = DateTime.MinValue;

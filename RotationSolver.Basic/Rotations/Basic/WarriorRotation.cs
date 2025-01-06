@@ -12,6 +12,11 @@ partial class WarriorRotation
     public static byte BeastGauge => JobGauge.BeastGauge;
 
     /// <summary>
+    /// 
+    /// </summary>
+    public static byte OnslaughtMax => EnhancedOnslaughtTrait.EnoughLevel ? (byte)3 : (byte)2;
+
+    /// <summary>
     /// Holds the remaining amount of InnerRelease stacks
     /// </summary>
     public static byte InnerReleaseStacks
@@ -34,13 +39,14 @@ partial class WarriorRotation
             return stacks == byte.MaxValue ? (byte)3 : stacks;
         }
     }
-
+    
     /// <inheritdoc/>
     public override void DisplayStatus()
     {
         ImGui.Text("InnerReleaseStacks: " + InnerReleaseStacks.ToString());
         ImGui.Text("BerserkStacks: " + BerserkStacks.ToString());
         ImGui.Text("BeastGaugeValue: " + BeastGauge.ToString());
+        ImGui.Text("OnslaughtMax: " + OnslaughtMax.ToString());
     }
 
     private sealed protected override IBaseAction TankStance => DefiancePvE;
