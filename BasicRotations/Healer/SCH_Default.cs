@@ -99,12 +99,15 @@ public sealed class SCH_Default : ScholarRotation
     protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
         var haveLink = PartyMembers.Any(p => p.HasStatus(true, StatusID.FeyUnion_1223));
-        if (ManifestationPvE.CanUse(out act)) return true;
-        if (AetherpactPvE.CanUse(out act) && FairyGauge >= 70 && !haveLink) return true;
         if (ProtractionPvE.CanUse(out act)) return true;
+        if (IsLastAbility(ActionID.RecitationPvE) && ExcogitationPvE.CanUse(out act)) return true;
+
+        if (AetherpactPvE.CanUse(out act) && FairyGauge >= 70 && !haveLink) return true;
         if (ExcogitationPvE.CanUse(out act)) return true;
         if (LustratePvE.CanUse(out act)) return true;
         if (AetherpactPvE.CanUse(out act) && !haveLink) return true;
+
+        if (ExcogitationPvE.CanUse(out act)) return true;
 
         return base.HealSingleAbility(nextGCD, out act);
     }
@@ -172,6 +175,8 @@ public sealed class SCH_Default : ScholarRotation
         if (HasSwift && SwiftLogic && ResurrectionPvE.CanUse(out _)) return false;
 
         if (SuccorPvE.CanUse(out act)) return true;
+        if (ConcitationPvE.CanUse(out act, skipCastingCheck: true)) return true;
+        if (AccessionPvE.CanUse(out act)) return true;
 
         return base.HealAreaGCD(out act);
     }
@@ -182,8 +187,9 @@ public sealed class SCH_Default : ScholarRotation
         act = null;
 
         if (HasSwift && SwiftLogic && ResurrectionPvE.CanUse(out _)) return false;
-
+        
         if (AdloquiumPvE.CanUse(out act)) return true;
+        if (ManifestationPvE.CanUse(out act, skipCastingCheck: true)) return true;
         if (PhysickPvE.CanUse(out act)) return true;
 
         return base.HealSingleGCD(out act);
@@ -197,6 +203,9 @@ public sealed class SCH_Default : ScholarRotation
         if (HasSwift && SwiftLogic && ResurrectionPvE.CanUse(out _)) return false;
 
         if (SuccorPvE.CanUse(out act)) return true;
+        if (ConcitationPvE.CanUse(out act, skipCastingCheck: true)) return true;
+        if (AccessionPvE.CanUse(out act)) return true;
+
         return base.DefenseAreaGCD(out act);
     }
 

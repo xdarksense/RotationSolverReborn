@@ -380,6 +380,7 @@ partial class SageRotation
     {
         setting.StatusProvide = [StatusID.Philosophia];
         setting.TargetStatusProvide = [StatusID.Eudaimonia];
+        setting.TargetType = TargetType.Self;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

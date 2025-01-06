@@ -1017,7 +1017,6 @@ public partial class RotationConfigWindow : Window
 
     private void DrawAutoduty()
     {
-
         ImGui.TextWrapped("This is a gentle reminder that RSR is not a botting tool, and while I have taken steps to help it work better with Autoduty please keep that in mind");
         ImGui.Spacing();
         ImGui.TextWrapped("This menu is mostly for troubleshooting purposes and is a good first step to share to get assistance.");
@@ -1085,15 +1084,15 @@ public partial class RotationConfigWindow : Window
         // Create a new list of AutoDutyPlugin objects
         var pluginsToCheck = new List<IncompatiblePlugin>
     {
-        new IncompatiblePlugin { Name = "AutoDuty" },
-        new IncompatiblePlugin { Name = "vnavmesh" },
-        new IncompatiblePlugin { Name = "BossMod Reborn" },
-        new IncompatiblePlugin { Name = "Boss Mod" },
-        new IncompatiblePlugin { Name = "Avarice" },
-        new IncompatiblePlugin { Name = "Deliveroo" },
-        new IncompatiblePlugin { Name = "AutoRetainer" },
-        new IncompatiblePlugin { Name = "SkipCutscene" },
-        new IncompatiblePlugin { Name = "AntiAfkKick" },
+        new IncompatiblePlugin { Name = "AutoDuty", Url = "https://puni.sh/api/repository/herc" },
+        new IncompatiblePlugin { Name = "vnavmesh", Url = "https://puni.sh/api/repository/veyn" },
+        new IncompatiblePlugin { Name = "BossMod Reborn", Url = "https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json" },
+        new IncompatiblePlugin { Name = "Boss Mod", Url = "" },
+        new IncompatiblePlugin { Name = "Avarice", Url = "https://love.puni.sh/ment.json" },
+        new IncompatiblePlugin { Name = "Deliveroo", Url = "https://plugins.carvel.li/" },
+        new IncompatiblePlugin { Name = "AutoRetainer", Url = "https://love.puni.sh/ment.json" },
+        new IncompatiblePlugin { Name = "SkipCutscene", Url = "https://raw.githubusercontent.com/KangasZ/DalamudPluginRepository/main/plugin_repository.json" },
+        new IncompatiblePlugin { Name = "AntiAfkKick", Url = "https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/main/pluginmaster.json" },
         // Add more plugins as needed
     };
 
@@ -1111,6 +1110,16 @@ public partial class RotationConfigWindow : Window
             }
 
             bool isInstalled = plugin.IsInstalled;
+
+            // Add a button to copy the URL to the clipboard if the plugin is not installed
+            if (!isInstalled)
+            {
+                if (ImGui.Button($"Copy Repo URL##{plugin.Name}"))
+                {
+                    ImGui.SetClipboardText(plugin.Url);
+                }
+                ImGui.SameLine();
+            }
 
             // Determine the color and text for "Boss Mod"
             Vector4 color;
@@ -1130,6 +1139,7 @@ public partial class RotationConfigWindow : Window
             ImGui.PushStyleColor(ImGuiCol.Text, color);
             ImGui.TextWrapped(text);
             ImGui.PopStyleColor();
+
             ImGui.Spacing();
         }
     }
