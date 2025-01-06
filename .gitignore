@@ -5,3 +5,4 @@ lib/
 .idea/
 RotationSolver/Localization/Localization.json
 /Resources/AutoStatusOrder.json
+/RotationSolver.GameData/RotationSolver.GameData.csproj.user

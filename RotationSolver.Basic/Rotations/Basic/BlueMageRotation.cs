@@ -24,6 +24,11 @@ partial class BlueMageRotation
         /// </summary>
         GoblinPunch,
 
+        /// <summary>
+        /// 
+        /// </summary>
+        SharpenedKnife,
+
     }
 
     /// <summary>
@@ -70,6 +75,11 @@ partial class BlueMageRotation
         /// 
         /// </summary>
         ThousandNeedles,
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ChocoMeteor,
     }
 
     /// <summary>
@@ -86,6 +96,11 @@ partial class BlueMageRotation
         /// 
         /// </summary>
         AngelsSnack,
+
+        /// <summary>
+        /// 
+        /// </summary>
+        PomCure,
     }
 
     /// <summary>
@@ -158,6 +173,24 @@ partial class BlueMageRotation
     /// </summary>
     [RotationConfig(CombatType.PvE, Name = "Aetheric Mimicry Role")]
     public static BLUID BlueId { get; set; } = BLUID.DPS;
+
+    static partial void ModifySharpenedKnifePvE(ref ActionSetting setting)
+    {
+        
+    }
+
+    static partial void ModifyChocoMeteorPvE(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 3,
+        };
+    }
+
+    static partial void ModifyPomCurePvE(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+    }
 
     static partial void ModifySongOfTormentPvE(ref ActionSetting setting)
     {

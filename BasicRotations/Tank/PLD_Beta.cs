@@ -213,10 +213,10 @@ public sealed class PLD_Beta : PaladinRotation
         if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
 
         // Confiteor Combo
-        if (BladeOfValorPvE.CanUse(out act)) return true;
-        if (BladeOfTruthPvE.CanUse(out act)) return true;
-        if (BladeOfFaithPvE.CanUse(out act)) return true;
-        if (Player.HasStatus(true, StatusID.Requiescat) && ConfiteorPvE.CanUse(out act, usedUp: true, skipAoeCheck: true)) return true;
+        if (BladeOfValorPvE.EnoughLevel && BladeOfValorPvE.CanUse(out act)) return true;
+        if (BladeOfTruthPvE.EnoughLevel && BladeOfTruthPvE.CanUse(out act)) return true;
+        if (BladeOfFaithPvE.EnoughLevel && BladeOfFaithPvE.CanUse(out act)) return true;
+        if (Player.HasStatus(true, StatusID.ConfiteorReady) && ConfiteorPvE.CanUse(out act, usedUp: true, skipAoeCheck: true)) return true;
 
         if (GoringBladePvE.CanUse(out act)) return true;
 

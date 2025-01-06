@@ -50,6 +50,8 @@ public partial class RotationConfigWindow : Window
             MaximumSize = new Vector2(5000, 5000),
         };
         RespectCloseHotkey = true;
+
+        _showText = !Service.Config.HasShownMainMenuMessage; // Show the message if it hasn't been shown before
     }
 
     public override void OnClose()
@@ -145,8 +147,15 @@ public partial class RotationConfigWindow : Window
     {
         var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
 
-        bool hasIncompatiblePlugin = incompatiblePlugins.Any(item =>
-            (item.Name == "XIV Combo" || item.Name == "XIV Combo Expanded" || item.Name == "XIVSlothCombo" || item.Name == "Wrath Combo") && item.IsInstalled);
+        bool hasIncompatiblePlugin = false;
+        foreach (var item in incompatiblePlugins)
+        {
+            if ((item.Name == "XIV Combo" || item.Name == "XIV Combo Expanded" || item.Name == "XIVSlothCombo" || item.Name == "Wrath Combo") && item.IsInstalled)
+            {
+                hasIncompatiblePlugin = true;
+                break;
+            }
+        }
 
         if (hasIncompatiblePlugin)
         {
@@ -157,22 +166,22 @@ public partial class RotationConfigWindow : Window
                 {
                     if (plugin.Name == "XIV Combo")
                     {
-                        message = "Disable XIV Combo plugin";
+                        message = "Disable XIV Combo plugin, causes targetting issues";
                         break;
                     }
                     else if (plugin.Name == "XIV Combo Expanded")
                     {
-                        message = "Disable XIV Combo Expanded plugin";
+                        message = "Disable XIV Combo Expanded plugin, causes targetting issues";
                         break;
                     }
                     else if (plugin.Name == "XIVSlothCombo")
                     {
-                        message = "Disable XIVSlothCombo plugin";
+                        message = "Disable XIVSlothCombo plugin, causes targetting issues";
                         break;
                     }
                     else if (plugin.Name == "Wrath Combo")
                     {
-                        message = "Disable Wrath Combo plugin";
+                        message = "Disable Wrath Combo plugin, causes targetting issues";
                         break;
                     }
                 }
@@ -308,7 +317,15 @@ public partial class RotationConfigWindow : Window
                 if (item.GetAttribute<TabSkipAttribute>() != null) continue;
 
                 // Check if the "AutoDuty" plugin is installed
-                bool isAutoDutyInstalled = incompatiblePlugins.Any(plugin => plugin.IsInstalled && plugin.Name == "AutoDuty");
+                bool isAutoDutyInstalled = false;
+                foreach (var plugin in incompatiblePlugins)
+                {
+                    if (plugin.IsInstalled && plugin.Name == "AutoDuty")
+                    {
+                        isAutoDutyInstalled = true;
+                        break;
+                    }
+                }
 
                 // Skip the "AutoDuty" tab if the plugin is not installed
                 if (item == RotationConfigWindowTab.AutoDuty && !isAutoDutyInstalled) continue;
@@ -355,12 +372,20 @@ public partial class RotationConfigWindow : Window
         }
     }
 
+    private bool _showText;
+
     private void DrawHeader(float wholeWidth)
     {
         var size = MathF.Max(MathF.Min(wholeWidth, Scale * 128), Scale * MIN_COLUMN_WIDTH);
 
         if (IconSet.GetTexture((uint)0, out var overlay))
         {
+            if (_showText) // Conditionally render the text
+            {
+                ImGui.TextWrapped("Click RSR icon for main menu");
+                ImGui.Spacing();
+            }
+
             ImGuiHelper.DrawItemMiddle(() =>
             {
                 var cursor = ImGui.GetCursorPos();
@@ -370,6 +395,11 @@ public partial class RotationConfigWindow : Window
                 {
                     _activeTab = RotationConfigWindowTab.About;
                     _searchResults = [];
+                    _showText = false; // Update the flag when the icon is clicked
+
+                    // Save the configuration to indicate that the message has been shown
+                    Service.Config.HasShownMainMenuMessage = true;
+                    Service.Config.Save();
                 }
                 ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Punchline.GetDescription());
 
@@ -422,7 +452,15 @@ public partial class RotationConfigWindow : Window
             return;
         }
 
-        var rotations = RotationUpdater.CustomRotations.FirstOrDefault(i => i.ClassJobIds.Contains((Job)(Player.Object?.ClassJob.RowId ?? 0)))?.Rotations ?? [];
+        Type[] rotations = Array.Empty<Type>();
+        foreach (var customRotation in RotationUpdater.CustomRotations)
+        {
+            if (customRotation.ClassJobIds.Contains((Job)(Player.Object?.ClassJob.RowId ?? 0)))
+            {
+                rotations = customRotation.Rotations;
+                break;
+            }
+        }
 
         if (rotation != null)
         {
@@ -1250,9 +1288,16 @@ public partial class RotationConfigWindow : Window
                     var attr = RotationDescAttribute.MergeToOne(a);
                     if (attr == null) continue;
 
-                    var allActions = attr.Actions.Select(i => rotation.AllBaseActions
-                    .FirstOrDefault(a => a.ID == (uint)i))
-                    .Where(i => i != null);
+                    var allActions = new List<IBaseAction>();
+                    foreach (var actionId in attr.Actions)
+                    {
+                        var action = rotation.AllBaseActions.FirstOrDefault(a => a.ID == (uint)actionId);
+                        if (action != null)
+                        {
+                            allActions.Add(action);
+                        }
+                    }
+
 
                     bool hasDesc = !string.IsNullOrEmpty(attr.Description);
 
@@ -2204,13 +2249,14 @@ public partial class RotationConfigWindow : Window
             ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_List_AddStatus.GetDescription());
         }
 
-        foreach (var status in statuses.Select(a => Service.GetSheet<Status>().GetRow(a))
-            .Where(a => a.RowId != 0)
-            .OrderByDescending(s => SearchableCollection.Similarity($"{s.Name} {s.RowId}", _statusSearching)))
+        foreach (var statusId in statuses)
         {
+            var status = Service.GetSheet<Status>().GetRow(statusId);
+            if (status.RowId == 0) continue;
+
             void Delete() => removeId = status.RowId;
 
-            var key = $"Status{status!.RowId}";
+            var key = $"Status{status.RowId}";
 
             ImGuiHelper.DrawHotKeysPopup(key, string.Empty, (UiString.ConfigWindow_List_Remove.GetDescription(), Delete, new[] { "Delete" }));
 
