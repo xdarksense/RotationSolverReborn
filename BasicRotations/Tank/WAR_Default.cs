@@ -12,8 +12,18 @@ public sealed class WAR_Default : WarriorRotation
     [RotationConfig(CombatType.PvE, Name = "Use Bloodwhetting/Raw intuition on single enemies")]
     public bool SoloIntuition { get; set; } = false;
 
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Bloodwhetting/Raw intuition heal threshold")]
+    public float HealIntuition { get; set; } = 0.7f;
+
     [RotationConfig(CombatType.PvE, Name = "Use Primal Rend while moving (Danger)")]
     public bool YEET { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Use both stacks of Onslaught during burst while standing still")]
+    public bool YEETBurst { get; set; } = true;
+
+    [RotationConfig(CombatType.PvE, Name = "Use a stack of Onslaught during when its about to overcap while standing still")]
+    public bool YEETCooldown { get; set; } = false;
 
     [Range(1, 20, ConfigUnitType.Yalms)]
     [RotationConfig(CombatType.PvE, Name = "Max distance you can be from the boss for Primal Rend use (Danger, setting too high will get you killed)")]
@@ -69,11 +79,20 @@ public sealed class WAR_Default : WarriorRotation
 
         if (Player.HasStatus(false, StatusID.Wrathful) && PrimalWrathPvE.CanUse(out act, skipAoeCheck: true)) return true;
 
-        if (OnslaughtPvE.CanUse(out act, usedUp: IsBurstStatus) &&
+        if (YEETBurst && OnslaughtPvE.CanUse(out act, usedUp: IsBurstStatus) &&
            !IsMoving &&
-           !IsLastAction(true, OnslaughtPvE) &&
-           !IsLastAction(true, UpheavalPvE) &&
-            Player.HasStatus(false, StatusID.SurgingTempest))
+           !IsLastAction(false, OnslaughtPvE) &&
+           !IsLastAction(false, UpheavalPvE) &&
+            Player.HasStatus(true, StatusID.SurgingTempest))
+        {
+            return true;
+        }
+
+        if (YEETCooldown && OnslaughtPvE.CanUse(out act, usedUp: true) &&
+           !IsMoving &&
+           !IsLastAction(false, OnslaughtPvE) &&
+           OnslaughtPvE.Cooldown.WillHaveXChargesGCD(OnslaughtMax, 1) &&
+            Player.HasStatus(true, StatusID.SurgingTempest))
         {
             return true;
         }
@@ -84,6 +103,16 @@ public sealed class WAR_Default : WarriorRotation
 
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
+        if ((InCombat && Player.GetHealthRatio() < HealIntuition && NumberOfHostilesInRange > 0) || (InCombat && PartyMembers.Count() is 1 && NumberOfHostilesInRange > 0))
+        {
+            if (BloodwhettingPvE.CanUse(out act)) return true;
+        }
+
+        if ((InCombat && Player.GetHealthRatio() < HealIntuition && NumberOfHostilesInRange > 0) || (InCombat && PartyMembers.Count() is 1 && NumberOfHostilesInRange > 0))
+        {
+            if (RawIntuitionPvE.CanUse(out act)) return true;
+        }
+
         if (Player.GetHealthRatio() < ThrillOfBattleHeal)
         {
             if (ThrillOfBattlePvE.CanUse(out act)) return true;

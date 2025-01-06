@@ -47,7 +47,7 @@ public static class ObjectHelper
         {
             foreach (var n in ns1)
             {
-                if (!string.IsNullOrEmpty(n) && new Regex(n).Match(target.Name.ExtractText()).Success)
+                if (!string.IsNullOrEmpty(n) && new Regex(n).Match(target.Name?.ExtractText() ?? string.Empty).Success)
                 {
                     return false;
                 }
@@ -55,13 +55,14 @@ public static class ObjectHelper
         }
 
         //Target can move or too big and has a target
-        if ((target.GetObjectNPC()?.Unknown0 == 0 || target.HitboxRadius >= 5) // Unknown12 used to be the flag checked for the mobs ability to move, honestly just guessing on this one
+        var targetNpc = target.GetObjectNPC();
+        if ((targetNpc?.Unknown0 == 0 || target.HitboxRadius >= 5) // Unknown12 used to be the flag checked for the mobs ability to move, honestly just guessing on this one
             && (target.TargetObject?.IsValid() ?? false))
         {
             //the target is not a tank role
             if (Svc.Objects.SearchById(target.TargetObjectId) is IBattleChara battle
                 && !battle.IsJobCategory(JobRole.Tank)
-                && (Vector3.Distance(target.Position, Player.Object.Position) > 5))
+                && (Vector3.Distance(target.Position, Player.Object?.Position ?? Vector3.Zero) > 5))
             {
                 return true;
             }
