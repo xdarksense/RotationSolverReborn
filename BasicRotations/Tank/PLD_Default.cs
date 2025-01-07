@@ -50,7 +50,6 @@ public class PLD_Default : PaladinRotation
     [RotationConfig(CombatType.PvE, Name = "Health threshold for Cover (Set to 0 to disable)")]
     private float CoverRatio { get; set; } = 0.3f;
 
-    private bool HasAtonementReady => Player.HasStatus(true, StatusID.AtonementReady);
     private bool HasSupplicationReady => Player.HasStatus(true, StatusID.SupplicationReady);
     private bool HasSepulchreReady => Player.HasStatus(true, StatusID.SepulchreReady);
     private bool HasHonorReady => Player.HasStatus(true, StatusID.BladeOfHonorReady);
