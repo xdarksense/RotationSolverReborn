@@ -1,3 +1,5 @@
+using Dalamud.Interface.Colors;
+
 namespace RotationSolver.Basic.Rotations.Basic;
 
 partial class BardRotation
@@ -52,6 +54,17 @@ partial class BardRotation
     /// <returns></returns>
     protected static bool SongEndAfterGCD(uint gctCount = 0, float offset = 0)
         => SongEndAfter(GCDTime(gctCount, offset));
+    #endregion
+
+    #region PvE Actions Unassignable
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool BlastArrowPvEReady => Service.GetAdjustedActionId(ActionID.ApexArrowPvE) == ActionID.BlastArrowPvE;
+    #endregion
+
+    #region Draw Debug
 
     /// <inheritdoc/>
     public override void DisplayStatus()
@@ -64,6 +77,8 @@ partial class BardRotation
         ImGui.Text("SongTime: " + SongTime.ToString());
         ImGui.Text("BloodletterMax: " + BloodletterMax.ToString());
         ImGui.Text("Bloodlettercharges: " + BloodletterPvE.Cooldown.CurrentCharges.ToString());
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "PvE Actions");
+        ImGui.Text("BlastArrowPvEReady: " + BlastArrowPvEReady.ToString());
     }
     #endregion
 
@@ -310,7 +325,7 @@ partial class BardRotation
 
     static partial void ModifyBlastArrowPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.BlastArrowReady];
+        setting.ActionCheck = () => BlastArrowPvEReady;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

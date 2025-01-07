@@ -1,39 +1,11 @@
-﻿namespace RotationSolver.Basic.Rotations.Basic;
+﻿using Dalamud.Interface.Colors;
+
+namespace RotationSolver.Basic.Rotations.Basic;
 
 partial class ReaperRotation
 {
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Strength;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool HasEnshrouded => Player.HasStatus(true, StatusID.Enshrouded);
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool HasSoulReaver => Player.HasStatus(true, StatusID.SoulReaver);
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool HasExecutioner => Player.HasStatus(true, StatusID.Executioner);
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool HasIdealHost => Player.HasStatus(true, StatusID.IdealHost);
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool HasOblatio => Player.HasStatus(true, StatusID.Oblatio);
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool HasPerfectioParata => Player.HasStatus(true, StatusID.PerfectioParata);
 
     #region JobGauge
     /// <summary>
@@ -49,16 +21,140 @@ partial class ReaperRotation
     /// <summary>
     /// 
     /// </summary>
+    public static float EnshroudedTiemRemaining => JobGauge.EnshroudedTimeRemaining;
+
+    /// <summary>
+    /// 
+    /// </summary>
     public static byte LemureShroud => JobGauge.LemureShroud;
 
     /// <summary>
     /// 
     /// </summary>
     public static byte VoidShroud => JobGauge.VoidShroud;
+    #endregion
+
+    #region Status Tracking
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasEnshrouded => !Player.WillStatusEnd(0, true, StatusID.Enshrouded);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasSoulReaver => !Player.WillStatusEnd(0, true, StatusID.SoulReaver);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasSoulsow => !Player.WillStatusEnd(0, true, StatusID.Soulsow);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasExecutioner => !Player.WillStatusEnd(0, true, StatusID.Executioner);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasIdealHost => !Player.WillStatusEnd(0, true, StatusID.IdealHost);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasOblatio => !Player.WillStatusEnd(0, true, StatusID.Oblatio);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasPerfectioParata => Player.HasStatus(true, StatusID.PerfectioParata);
+    #endregion
+
+    #region Actions Unassignable
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool UnveiledGibbetPvEReady => Service.GetAdjustedActionId(ActionID.BloodStalkPvE) == ActionID.UnveiledGibbetPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool UnveiledGallowsPvEReady => Service.GetAdjustedActionId(ActionID.BloodStalkPvE) == ActionID.UnveiledGallowsPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool RegressPvEIngressReady => Service.GetAdjustedActionId(ActionID.HellsIngressPvE) == ActionID.RegressPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool RegressPvEEgressReady => Service.GetAdjustedActionId(ActionID.HellsEgressPvE) == ActionID.RegressPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool VoidReapingPvEReady => Service.GetAdjustedActionId(ActionID.GibbetPvE) == ActionID.VoidReapingPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool CrossReapingPvEReady => Service.GetAdjustedActionId(ActionID.GallowsPvE) == ActionID.CrossReapingPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool GrimReapingPvEReady => Service.GetAdjustedActionId(ActionID.GuillotinePvE) == ActionID.GrimReapingPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HarvestMoonPvEReady => Service.GetAdjustedActionId(ActionID.SoulsowPvE) == ActionID.HarvestMoonPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool LemuresSlicePvEReady => Service.GetAdjustedActionId(ActionID.BloodStalkPvE) == ActionID.LemuresSlicePvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool LemuresScythePvEReady => Service.GetAdjustedActionId(ActionID.GrimSwathePvE) == ActionID.LemuresScythePvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool SacrificiumPvEReady => Service.GetAdjustedActionId(ActionID.GluttonyPvE) == ActionID.SacrificiumPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ExecutionersGibbetPvEReady => Service.GetAdjustedActionId(ActionID.GibbetPvE) == ActionID.ExecutionersGibbetPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ExecutionersGallowsPvEReady => Service.GetAdjustedActionId(ActionID.GallowsPvE) == ActionID.ExecutionersGallowsPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ExecutionersGuillotinePvEReady => Service.GetAdjustedActionId(ActionID.GuillotinePvE) == ActionID.ExecutionersGuillotinePvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool PerfectioPvEReady => Service.GetAdjustedActionId(ActionID.CommunioPvE) == ActionID.PerfectioPvE;
+    #endregion
+
+    #region Debug
 
     /// <inheritdoc/>
     public override void DisplayStatus()
     {
+        ImGui.Text("EnshroudedTiemRemaining: " + EnshroudedTiemRemaining.ToString());
         ImGui.Text("HasEnshrouded: " + HasEnshrouded.ToString());
         ImGui.Text("HasSoulReaver: " + HasSoulReaver.ToString());
         ImGui.Text("HasExecutioner: " + HasExecutioner.ToString());
@@ -69,9 +165,26 @@ partial class ReaperRotation
         ImGui.Text("Shroud: " + Shroud.ToString());
         ImGui.Text("LemureShroud: " + LemureShroud.ToString());
         ImGui.Text("VoidShroud: " + VoidShroud.ToString());
+        ImGui.TextColored(ImGuiColors.DalamudOrange, "PvE Actions");
+        ImGui.Text("UnveiledGibbetPvEReady: " + UnveiledGibbetPvEReady.ToString());
+        ImGui.Text("UnveiledGallowsPvEReady: " + UnveiledGallowsPvEReady.ToString());
+        ImGui.Text("RegressPvEIngressReady: " + RegressPvEIngressReady.ToString());
+        ImGui.Text("RegressPvEEgressReady: " + RegressPvEEgressReady.ToString());
+        ImGui.Text("VoidReapingPvEReady: " + VoidReapingPvEReady.ToString());
+        ImGui.Text("CrossReapingPvEReady: " + CrossReapingPvEReady.ToString());
+        ImGui.Text("GrimReapingPvEReady: " + GrimReapingPvEReady.ToString());
+        ImGui.Text("HarvestMoonPvEReady: " + HarvestMoonPvEReady.ToString());
+        ImGui.Text("LemuresSlicePvEReady: " + LemuresSlicePvEReady.ToString());
+        ImGui.Text("LemuresScythePvEReady: " + LemuresScythePvEReady.ToString());
+        ImGui.Text("SacrificiumPvEReady: " + SacrificiumPvEReady.ToString());
+        ImGui.Text("ExecutionersGibbetPvEReady: " + ExecutionersGibbetPvEReady.ToString());
+        ImGui.Text("ExecutionersGallowsPvEReady: " + ExecutionersGallowsPvEReady.ToString());
+        ImGui.Text("ExecutionersGuillotinePvEReady: " + ExecutionersGuillotinePvEReady.ToString());
+        ImGui.Text("PerfectioPvEReady: " + PerfectioPvEReady.ToString());
     }
     #endregion
 
+    #region PvE Actions
     static partial void ModifySlicePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => !HasEnshrouded && !HasSoulReaver;
@@ -82,159 +195,10 @@ partial class ReaperRotation
         setting.ActionCheck = () => !HasEnshrouded && !HasSoulReaver;
     }
 
-    static partial void ModifyInfernalSlicePvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => !HasEnshrouded && !HasSoulReaver;
-    }
-
     static partial void ModifyShadowOfDeathPvE(ref ActionSetting setting)
     {
         setting.TargetStatusProvide = [StatusID.DeathsDesign];
         setting.ActionCheck = () => !HasSoulReaver;
-    }
-
-    static partial void ModifySoulSlicePvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => !HasEnshrouded && !HasSoulReaver && Soul <= 50;
-    }
-
-    static partial void ModifySpinningScythePvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => !HasEnshrouded && !HasSoulReaver;
-    }
-
-    static partial void ModifyNightmareScythePvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => !HasEnshrouded && !HasSoulReaver;
-    }
-
-    static partial void ModifyWhorlOfDeathPvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => !HasSoulReaver;
-        setting.TargetStatusProvide = [StatusID.DeathsDesign];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 3,
-        };
-    }
-
-    static partial void ModifySoulScythePvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => !HasEnshrouded && !HasSoulReaver && Soul <= 50;
-    }
-
-    static partial void ModifyGibbetPvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.SoulReaver];
-    }
-
-    static partial void ModifyExecutionersGibbetPvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.Executioner];
-    }
-
-    static partial void ModifyGallowsPvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.SoulReaver];
-    }
-
-    static partial void ModifyExecutionersGallowsPvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.Executioner];
-    }
-
-    static partial void ModifyGuillotinePvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.SoulReaver];
-    }
-
-    static partial void ModifyExecutionersGuillotinePvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.Executioner];
-    }
-
-    static partial void ModifyBloodStalkPvE(ref ActionSetting setting)
-    {
-        setting.StatusProvide = [StatusID.SoulReaver];
-        setting.ActionCheck = () => !HasEnshrouded && !HasSoulReaver && Soul >= 50;
-    }
-
-    static partial void ModifyGrimSwathePvE(ref ActionSetting setting)
-    {
-        setting.StatusProvide = [StatusID.SoulReaver];
-        setting.ActionCheck = () => !HasEnshrouded && !HasSoulReaver && Soul >= 50;
-    }
-
-    static partial void ModifyGluttonyPvE(ref ActionSetting setting)
-    {
-        setting.StatusProvide = [StatusID.SoulReaver, StatusID.Executioner];
-        setting.ActionCheck = () => !HasEnshrouded && !HasSoulReaver && Soul >= 50;
-    }
-
-    static partial void ModifyArcaneCirclePvE(ref ActionSetting setting)
-    {
-        setting.StatusProvide = [StatusID.BloodsownCircle_2972];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            TimeToKill = 10,
-        };
-    }
-
-    static partial void ModifyPlentifulHarvestPvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.ImmortalSacrifice];
-        setting.ActionCheck = () => !Player.HasStatus(true, StatusID.BloodsownCircle_2972);
-    }
-
-    static partial void ModifyEnshroudPvE(ref ActionSetting setting)
-    {
-        setting.StatusProvide = [StatusID.Enshrouded];
-        setting.ActionCheck = () => !HasEnshrouded && !HasSoulReaver && Soul >= 50;
-        setting.UnlockedByQuestID = 69614;
-    }
-
-    static partial void ModifySacrificiumPvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => HasEnshrouded && HasOblatio;
-    }
-
-    static partial void ModifyCommunioPvE(ref ActionSetting setting)
-    {
-        setting.StatusProvide = [StatusID.PerfectioParata];
-        setting.StatusNeed = [StatusID.Enshrouded];
-        setting.ActionCheck = () => LemureShroud == 1;
-    }
-
-    static partial void ModifyPerfectioPvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => HasPerfectioParata;
-    }
-
-    static partial void ModifyLemuresSlicePvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.Enshrouded];
-        setting.ActionCheck = () => VoidShroud >= 2;
-    }
-
-    static partial void ModifyLemuresScythePvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.Enshrouded];
-        setting.ActionCheck = () => VoidShroud >= 2;
-    }
-
-    static partial void ModifyVoidReapingPvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.Enshrouded];
-    }
-
-    static partial void ModifyCrossReapingPvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.Enshrouded];
-    }
-
-    static partial void ModifyGrimReapingPvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.Enshrouded];
     }
 
     static partial void ModifyHarpePvE(ref ActionSetting setting)
@@ -252,21 +216,194 @@ partial class ReaperRotation
         setting.StatusProvide = [StatusID.EnhancedHarpe, StatusID.Bind];
     }
 
+    static partial void ModifySpinningScythePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => !HasEnshrouded && !HasSoulReaver;
+    }
+
+    static partial void ModifyInfernalSlicePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => !HasEnshrouded && !HasSoulReaver;
+    }
+
+    static partial void ModifyWhorlOfDeathPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => !HasSoulReaver;
+        setting.TargetStatusProvide = [StatusID.DeathsDesign];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 3,
+        };
+    }
+
+    static partial void ModifyArcaneCrestPvE(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.CrestOfTimeBorrowed];
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyNightmareScythePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => !HasEnshrouded && !HasSoulReaver;
+    }
+
+    static partial void ModifyBloodStalkPvE(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.SoulReaver];
+        setting.ActionCheck = () => !HasEnshrouded && !HasSoulReaver && Soul >= 50;
+    }
+
+    static partial void ModifyGrimSwathePvE(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.SoulReaver];
+        setting.ActionCheck = () => !HasEnshrouded && !HasSoulReaver && Soul >= 50;
+    }
+
+    static partial void ModifySoulSlicePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => !HasEnshrouded && !HasSoulReaver && Soul <= 50;
+    }
+
+    static partial void ModifySoulScythePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => !HasEnshrouded && !HasSoulReaver && Soul <= 50;
+    }
+
+    static partial void ModifyGibbetPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => HasSoulReaver;
+    }
+
+    static partial void ModifyGallowsPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => HasSoulReaver;
+    }
+
+    static partial void ModifyGuillotinePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => HasSoulReaver;
+    }
+
+    static partial void ModifyArcaneCirclePvE(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.BloodsownCircle_2972];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            TimeToKill = 10,
+        };
+    }
+
+    static partial void ModifyGluttonyPvE(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.SoulReaver, StatusID.Executioner];
+        setting.ActionCheck = () => !HasEnshrouded && !HasSoulReaver && Soul >= 50;
+    }
+
+    static partial void ModifyEnshroudPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => !HasEnshrouded && !HasSoulReaver && Soul >= 50;
+        setting.UnlockedByQuestID = 69614;
+    }
+
     static partial void ModifySoulsowPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Soulsow];
         setting.ActionCheck = () => !InCombat;
     }
 
-    static partial void ModifyHarvestMoonPvE(ref ActionSetting setting)
+    static partial void ModifyPlentifulHarvestPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Soulsow];
+        setting.StatusNeed = [StatusID.ImmortalSacrifice];
+        setting.ActionCheck = () => !Player.HasStatus(true, StatusID.BloodsownCircle_2972);
     }
 
+    static partial void ModifyCommunioPvE(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.PerfectioParata];
+        setting.ActionCheck = () => LemureShroud == 1 && HasEnshrouded;
+    }
+    #endregion
+
+    #region PvE Actions Unassaignable
+
+    static partial void ModifyUnveiledGibbetPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => UnveiledGibbetPvEReady && Soul >= 50;
+    }
+
+    static partial void ModifyUnveiledGallowsPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => UnveiledGallowsPvEReady && Soul >= 50;
+    }
+
+    static partial void ModifyRegressPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => RegressPvEIngressReady || RegressPvEEgressReady;
+    }
+
+    static partial void ModifyVoidReapingPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => VoidReapingPvEReady && LemureShroud >= 1;
+    }
+
+    static partial void ModifyCrossReapingPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => CrossReapingPvEReady && LemureShroud >= 1;
+    }
+
+    static partial void ModifyGrimReapingPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => GrimReapingPvEReady && LemureShroud >= 1;
+    }
+
+    static partial void ModifyHarvestMoonPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => HarvestMoonPvEReady && HasSoulsow;
+    }
+
+    static partial void ModifyLemuresSlicePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => LemuresSlicePvEReady && VoidShroud >= 2;
+    }
+
+    static partial void ModifyLemuresScythePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => LemuresScythePvEReady && VoidShroud >= 2;
+    }
+
+    static partial void ModifySacrificiumPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => SacrificiumPvEReady && HasEnshrouded && HasOblatio;
+    }
+
+    static partial void ModifyExecutionersGibbetPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => ExecutionersGibbetPvEReady && HasExecutioner;
+    }
+
+    static partial void ModifyExecutionersGallowsPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => ExecutionersGallowsPvEReady && HasExecutioner;
+    }
+
+    static partial void ModifyExecutionersGuillotinePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => ExecutionersGuillotinePvEReady && HasExecutioner;
+    }
+
+    static partial void ModifyPerfectioPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => PerfectioPvEReady && HasPerfectioParata;
+    }
+
+    #endregion
+
+    #region PvP Actions
     static partial void ModifyHellsIngressPvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
     }
+    #endregion
 
     /// <inheritdoc/>
     [RotationDesc(ActionID.HellsIngressPvE)]

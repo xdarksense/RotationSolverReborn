@@ -1,3 +1,5 @@
+using Dalamud.Interface.Colors;
+
 namespace RotationSolver.Basic.Rotations.Basic;
 partial class MonkRotation
 {
@@ -49,6 +51,47 @@ partial class MonkRotation
     /// Brotherhood
     /// </summary>
     public static bool InBrotherhood => !Player.WillStatusEnd(0, true, StatusID.Brotherhood);
+    #endregion
+
+    #region PvE Actions Unassignable
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool CelestialRevolutionPvEReady => Service.GetAdjustedActionId(ActionID.MasterfulBlitzPvE) == ActionID.CelestialRevolutionPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool FlintStrikePvEReady => Service.GetAdjustedActionId(ActionID.MasterfulBlitzPvE) == ActionID.FlintStrikePvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool RisingPhoenixPvEReady => Service.GetAdjustedActionId(ActionID.MasterfulBlitzPvE) == ActionID.RisingPhoenixPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool TornadoKickPvEReady => Service.GetAdjustedActionId(ActionID.MasterfulBlitzPvE) == ActionID.TornadoKickPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool PhantomRushPvEReady => Service.GetAdjustedActionId(ActionID.MasterfulBlitzPvE) == ActionID.PhantomRushPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ElixirFieldPvEReady => Service.GetAdjustedActionId(ActionID.MasterfulBlitzPvE) == ActionID.ElixirFieldPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ElixirBurstPvEReady => Service.GetAdjustedActionId(ActionID.MasterfulBlitzPvE) == ActionID.ElixirBurstPvE;
+    #endregion
+
+    #region Draw Debug
 
     /// <inheritdoc/>
     public override void DisplayStatus()
@@ -61,9 +104,18 @@ partial class MonkRotation
         ImGui.Text($"HasSolar: {HasSolar}");
         ImGui.Text($"Chakra: {Chakra}");
         ImGui.Text($"BeastChakras: {string.Join(", ", BeastChakras)}");
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "PvE Actions");
+        ImGui.Text("CelestialRevolutionPvEReady: " + CelestialRevolutionPvEReady.ToString());
+        ImGui.Text("FlintStrikePvEReady: " + FlintStrikePvEReady.ToString());
+        ImGui.Text("RisingPhoenixPvEReady: " + RisingPhoenixPvEReady.ToString());
+        ImGui.Text("TornadoKickPvEReady: " + TornadoKickPvEReady.ToString());
+        ImGui.Text("PhantomRushPvEReady: " + PhantomRushPvEReady.ToString());
+        ImGui.Text("ElixirFieldPvEReady: " + ElixirFieldPvEReady.ToString());
+        ImGui.Text("ElixirBurstPvEReady: " + ElixirBurstPvEReady.ToString());
     }
     #endregion
 
+    #region PvE Actions
     static partial void ModifyBootshinePvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.RaptorForm];
@@ -215,7 +267,7 @@ partial class MonkRotation
 
     static partial void ModifyElixirFieldPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => BeastChakras.Distinct().Count() == 1 && BeastChakras.Any(chakra => chakra != BeastChakra.NONE);
+        setting.ActionCheck = () => ElixirFieldPvEReady;
         setting.StatusProvide = [StatusID.FormlessFist];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -225,7 +277,7 @@ partial class MonkRotation
 
     static partial void ModifyCelestialRevolutionPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => BeastChakras.Distinct().Count() == 2 && BeastChakras.Any(chakra => chakra != BeastChakra.NONE);
+        setting.ActionCheck = () => CelestialRevolutionPvEReady;
         setting.StatusProvide = [StatusID.FormlessFist];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -235,7 +287,7 @@ partial class MonkRotation
 
     static partial void ModifyFlintStrikePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => BeastChakras.Distinct().Count() == 3 && BeastChakras.Any(chakra => chakra != BeastChakra.NONE);
+        setting.ActionCheck = () => FlintStrikePvEReady;
         setting.StatusProvide = [StatusID.FormlessFist];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -319,7 +371,7 @@ partial class MonkRotation
 
     static partial void ModifyRisingPhoenixPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => BeastChakras.Distinct().Count() == 3 && BeastChakras.Any(chakra => chakra != BeastChakra.NONE);
+        setting.ActionCheck = () => RisingPhoenixPvEReady;
         setting.StatusProvide = [StatusID.FormlessFist];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -329,7 +381,7 @@ partial class MonkRotation
 
     static partial void ModifyPhantomRushPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => HasSolar && HasLunar && BeastChakras.Any(chakra => chakra != BeastChakra.NONE);
+        setting.ActionCheck = () => PhantomRushPvEReady;
         setting.StatusProvide = [StatusID.FormlessFist];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -359,7 +411,7 @@ partial class MonkRotation
 
     static partial void ModifyElixirBurstPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => BeastChakras.Distinct().Count() == 1 && BeastChakras.Any(chakra => chakra != BeastChakra.NONE);
+        setting.ActionCheck = () => ElixirBurstPvEReady;
         setting.StatusProvide = [StatusID.FormlessFist];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -385,7 +437,7 @@ partial class MonkRotation
             AoeCount = 1,
         };
     }
-
+    #endregion
 
     // PvP
     static partial void ModifyThunderclapPvP(ref ActionSetting setting)

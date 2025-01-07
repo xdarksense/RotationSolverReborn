@@ -23,26 +23,6 @@ partial class DarkKnightRotation
     /// </summary>
     public static bool HasDelirium => !Player.WillStatusEnd(0, true, StatusID.Delirium_3836);
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool ScarletDeliriumReady => Service.GetAdjustedActionId(ActionID.BloodspillerPvE) == ActionID.ScarletDeliriumPvE;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool ComeuppanceReady => Service.GetAdjustedActionId(ActionID.BloodspillerPvE) == ActionID.ComeuppancePvE;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool TorcleaverReady => Service.GetAdjustedActionId(ActionID.BloodspillerPvE) == ActionID.TorcleaverPvE;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool ImpalementReady => Service.GetAdjustedActionId(ActionID.QuietusPvE) == ActionID.ImpalementPvE;
-
     static float DarkSideTimeRemainingRaw => JobGauge.DarksideTimeRemaining / 1000f;
 
     /// <summary>
@@ -88,7 +68,9 @@ partial class DarkKnightRotation
     /// <returns></returns>
     protected static bool ShadowTimeEndAfterGCD(uint gctCount = 0, float offset = 0)
         => ShadowTimeEndAfter(GCDTime(gctCount, offset));
+    #endregion
 
+    #region Status Tracking
     /// <summary>
     /// Holds the remaining amount of BloodWeapon stacks
     /// </summary>
@@ -124,6 +106,32 @@ partial class DarkKnightRotation
             return stacks == byte.MaxValue ? (byte)3 : stacks;
         }
     }
+    #endregion
+
+    #region PvE Actions Unassignable
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ScarletDeliriumReady => Service.GetAdjustedActionId(ActionID.BloodspillerPvE) == ActionID.ScarletDeliriumPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ComeuppanceReady => Service.GetAdjustedActionId(ActionID.BloodspillerPvE) == ActionID.ComeuppancePvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool TorcleaverReady => Service.GetAdjustedActionId(ActionID.BloodspillerPvE) == ActionID.TorcleaverPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ImpalementReady => Service.GetAdjustedActionId(ActionID.QuietusPvE) == ActionID.ImpalementPvE;
+    #endregion
+
+    #region Draw Debug
 
     /// <inheritdoc/>
     public override void DisplayStatus()
@@ -143,6 +151,7 @@ partial class DarkKnightRotation
     }
     #endregion
 
+    #region PvE Actions
     static partial void ModifyHardSlashPvE(ref ActionSetting setting)
     {
 
@@ -399,6 +408,7 @@ partial class DarkKnightRotation
             AoeCount = 1,
         };
     }
+    #endregion
 
     /// <inheritdoc/>
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
