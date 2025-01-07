@@ -330,7 +330,13 @@ partial class SageRotation
 
     static partial void ModifyEukrasianDyskrasiaPvE(ref ActionSetting setting)
     {
-        setting.TargetStatusProvide = [StatusID.EukrasianDyskrasia];
+        setting.TargetStatusProvide =
+        [
+            StatusID.EukrasianDosis,
+            StatusID.EukrasianDosisIi,
+            StatusID.EukrasianDosisIii,
+            StatusID.EukrasianDyskrasia
+        ];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
