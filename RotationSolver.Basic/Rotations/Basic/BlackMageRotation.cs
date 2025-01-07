@@ -246,7 +246,6 @@ partial class BlackMageRotation
 
     static partial void ModifyManafontPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InAstralFire && DataCenter.CurrentMp == 0 && UmbralHearts == 0 && !IsParadoxActive;
         setting.StatusProvide = [StatusID.Thunderhead];
         setting.UnlockedByQuestID = 66609;
     }
@@ -265,9 +264,6 @@ partial class BlackMageRotation
 
     static partial void ModifyUmbralSoulPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InUmbralIce && UmbralHearts <= 2 && DataCenter.DefaultGCDRemain <= ElementTimeRaw &&
-        ((UmbralIceStacks == 1 && DataCenter.CurrentMp <= 7500) || (UmbralIceStacks == 2 && DataCenter.CurrentMp <= 5000) || (UmbralIceStacks == 3 && DataCenter.CurrentMp == 0));
-        setting.StatusProvide = [StatusID.Thunderhead];
         setting.UnlockedByQuestID = 66609;
     }
 
@@ -318,7 +314,7 @@ partial class BlackMageRotation
 
     static partial void ModifyBlizzardIvPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InUmbralIce && UmbralHearts == 0 && !ElementTimeEndAfter(ActionID.BlizzardIvPvE.GetCastTime() - 0.1f);
+        setting.ActionCheck = () => InUmbralIce && !ElementTimeEndAfter(ActionID.BlizzardIvPvE.GetCastTime() - 0.1f);
         setting.UnlockedByQuestID = 67218;
     }
 
