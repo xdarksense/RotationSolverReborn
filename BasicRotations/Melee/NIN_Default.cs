@@ -315,6 +315,11 @@ public sealed class NIN_Default : NinjaRotation
         // If Ninjutsu is available or not in combat, defers to the base class's emergency ability logic.
         if (!NoNinjutsu || !InCombat) return base.EmergencyAbility(nextGCD, out act);
 
+        if (NoNinjutsu)
+        {
+            if (!CombatElapsedLess(10) && FleetingRaijuPvE.CanUse(out act)) return true;
+        }
+
         // First priority is given to Kassatsu if it's available, allowing for an immediate powerful Ninjutsu.
         if (NoNinjutsu && KassatsuPvE.CanUse(out act)) return true;
 
@@ -331,7 +336,7 @@ public sealed class NIN_Default : NinjaRotation
             if (!KunaisBanePvE.EnoughLevel && TrickAttackPvE.CanUse(out act, skipStatusProvideCheck: IsShadowWalking)) return true;
 
             // If Trick Attack is on cooldown but will not be ready soon, considers using Meisui to recover Ninki.
-            if (TrickAttackPvE.Cooldown.IsCoolingDown && !TrickAttackPvE.Cooldown.WillHaveOneCharge(19) && MeisuiPvE.CanUse(out act)) return true;
+            if (TrickAttackPvE.Cooldown.IsCoolingDown && !TrickAttackPvE.Cooldown.WillHaveOneCharge(19) && TenChiJinPvE.Cooldown.IsCoolingDown && MeisuiPvE.CanUse(out act)) return true;
         }
 
         // If none of the specific conditions are met, falls back to the base class's emergency ability logic.
