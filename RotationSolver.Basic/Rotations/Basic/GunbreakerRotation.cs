@@ -1,3 +1,5 @@
+using Dalamud.Interface.Colors;
+
 namespace RotationSolver.Basic.Rotations.Basic;
 
 partial class GunbreakerRotation
@@ -36,6 +38,9 @@ partial class GunbreakerRotation
     /// Gets the max combo time of the Gnashing Fang combo.
     /// </summary>
     public static short MaxTimerDuration => JobGauge.MaxTimerDuration;
+    #endregion
+
+    #region Debug Status
 
     /// <inheritdoc/>
     public override void DisplayStatus()
@@ -44,9 +49,19 @@ partial class GunbreakerRotation
         ImGui.Text("AmmoComboStep: " + AmmoComboStep.ToString());
         ImGui.Text("MaxAmmo: " + MaxAmmo.ToString());
         ImGui.Text("MaxTimerDuration: " + MaxTimerDuration.ToString());
+        ImGui.TextColored(ImGuiColors.DalamudYellow, "PvP Actions");
+        ImGui.Text("SavageClawPvPReady: " + SavageClawPvPReady.ToString());
+        ImGui.Text("WickedTalonPvPReady: " + WickedTalonPvPReady.ToString());
+        ImGui.Spacing();
+        ImGui.Text("HypervelocityPvPReady: " + HypervelocityPvPReady.ToString());
+        ImGui.Text("FatedBrandPvPReady: " + FatedBrandPvPReady.ToString());
+        ImGui.Text("JugularRipPvPReady: " + JugularRipPvPReady.ToString());
+        ImGui.Text("AbdomenTearPvPReady: " + AbdomenTearPvPReady.ToString());
+        ImGui.Text("EyeGougePvPReady: " + EyeGougePvPReady.ToString());
+        ImGui.Spacing();
+        ImGui.Text("HasTerminalTrigger: " + HasTerminalTrigger.ToString());
     }
     #endregion
-
 
     #region PvE Actions
 
@@ -71,7 +86,7 @@ partial class GunbreakerRotation
 
     static partial void ModifyCamouflagePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Player.IsTargetOnSelf();
+        setting.TargetType = TargetType.Self;
     }
 
     static partial void ModifyDemonSlicePvE(ref ActionSetting setting)
@@ -298,11 +313,124 @@ partial class GunbreakerRotation
 
     #endregion
 
+    #region PvP Actions Unassignable
+
+    /// <summary>
+    /// Gnashing Fang 2
+    /// </summary>
+    public static bool SavageClawPvPReady => Service.GetAdjustedActionId(ActionID.GnashingFangPvP) == ActionID.SavageClawPvP;
+
+    /// <summary>
+    /// Gnashing Fang 3
+    /// </summary>
+    public static bool WickedTalonPvPReady => Service.GetAdjustedActionId(ActionID.GnashingFangPvP) == ActionID.WickedTalonPvP;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HypervelocityPvPReady => Service.GetAdjustedActionId(ActionID.ContinuationPvP) == ActionID.HypervelocityPvP;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool FatedBrandPvPReady => Service.GetAdjustedActionId(ActionID.ContinuationPvP) == ActionID.FatedBrandPvP;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool JugularRipPvPReady => Service.GetAdjustedActionId(ActionID.ContinuationPvP) == ActionID.JugularRipPvP;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool AbdomenTearPvPReady => Service.GetAdjustedActionId(ActionID.ContinuationPvP) == ActionID.AbdomenTearPvP;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool EyeGougePvPReady => Service.GetAdjustedActionId(ActionID.ContinuationPvP) == ActionID.EyeGougePvP;
+    #endregion
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasTerminalTrigger => !Player.WillStatusEndGCD(0, 0, true, StatusID.RelentlessRush);
+
     #region PvP Actions
+
+    static partial void ModifyGnashingFangPvP(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyFatedCirclePvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyContinuationPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
 
     static partial void ModifyRoughDividePvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
+    }
+
+    static partial void ModifyBlastingZonePvP(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyHeartOfCorundumPvP(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifySavageClawPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => SavageClawPvPReady;
+    }
+
+    static partial void ModifyWickedTalonPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => WickedTalonPvPReady;
+    }
+
+    static partial void ModifyHypervelocityPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => HypervelocityPvPReady;
+    }
+
+    static partial void ModifyFatedBrandPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => FatedBrandPvPReady;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyJugularRipPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => JugularRipPvPReady;
+    }
+
+    static partial void ModifyAbdomenTearPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => AbdomenTearPvPReady;
+    }
+
+    static partial void ModifyEyeGougePvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => EyeGougePvPReady;
     }
 
     /// <inheritdoc/>
