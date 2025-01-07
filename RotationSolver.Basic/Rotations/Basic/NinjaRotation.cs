@@ -1,4 +1,6 @@
-﻿namespace RotationSolver.Basic.Rotations.Basic;
+﻿using Dalamud.Interface.Colors;
+
+namespace RotationSolver.Basic.Rotations.Basic;
 
 partial class NinjaRotation
 {
@@ -24,7 +26,7 @@ partial class NinjaRotation
     /// <summary>
     /// Do you need to prep or currently use shadowwalker
     /// </summary>
-    public bool ShadowWalkerNeeded => TrickAttackPvE.Cooldown.WillHaveOneCharge(18) || KunaisBanePvE.Cooldown.WillHaveOneCharge(18) || MeisuiPvE.Cooldown.WillHaveOneCharge(18);
+    public bool ShadowWalkerNeeded => (TrickAttackPvE.EnoughLevel && TrickAttackPvE.Cooldown.WillHaveOneCharge(18)) || (KunaisBanePvE.EnoughLevel && KunaisBanePvE.Cooldown.WillHaveOneCharge(18)) || (MeisuiPvE.EnoughLevel && MeisuiPvE.Cooldown.WillHaveOneCharge(18));
 
     /// <summary>
     /// Determines if Trick Attack is in its effective period.
@@ -52,7 +54,77 @@ partial class NinjaRotation
             return stacks == byte.MaxValue ? (byte)3 : stacks;
         }
     }
+    #endregion
 
+    #region PvE Actions Unassignable
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool RabbitMediumPvEActive => Service.GetAdjustedActionId(ActionID.NinjutsuPvE) == ActionID.RabbitMediumPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool FumaShurikenPvEReady => Service.GetAdjustedActionId(ActionID.NinjutsuPvE) == ActionID.FumaShurikenPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool KatonPvEReady => Service.GetAdjustedActionId(ActionID.NinjutsuPvE) == ActionID.KatonPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool RaitonPvEReady => Service.GetAdjustedActionId(ActionID.NinjutsuPvE) == ActionID.RaitonPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HyotonPvEReady => Service.GetAdjustedActionId(ActionID.NinjutsuPvE) == ActionID.HyotonPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HutonPvEReady => Service.GetAdjustedActionId(ActionID.NinjutsuPvE) == ActionID.HutonPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool DotonPvEReady => Service.GetAdjustedActionId(ActionID.NinjutsuPvE) == ActionID.DotonPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool SuitonPvEReady => Service.GetAdjustedActionId(ActionID.NinjutsuPvE) == ActionID.SuitonPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool GokaMekkyakuPvEReady => Service.GetAdjustedActionId(ActionID.NinjutsuPvE) == ActionID.GokaMekkyakuPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HyoshoRanryuPvEReady => Service.GetAdjustedActionId(ActionID.NinjutsuPvE) == ActionID.HyoshoRanryuPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool DeathfrogMediumPvEReady => Service.GetAdjustedActionId(ActionID.HellfrogMediumPvE) == ActionID.DeathfrogMediumPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ZeshoMeppoPvEReady => Service.GetAdjustedActionId(ActionID.BhavacakraPvE) == ActionID.ZeshoMeppoPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool TenriJindoPvEReady => Service.GetAdjustedActionId(ActionID.TenChiJinPvE) == ActionID.TenriJindoPvE;
+    #endregion
+
+    #region Draw Debug
     /// <inheritdoc/>
     public override void DisplayStatus()
     {
@@ -64,9 +136,29 @@ partial class NinjaRotation
         ImGui.Text($"NoNinjutsu: {NoNinjutsu}");
         ImGui.Text($"RaijuStacks: {RaijuStacks}");
         ImGui.Text($"ShadowWalkerNeeded: {ShadowWalkerNeeded}");
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "PvE Actions");
+        ImGui.Text("FumaShurikenPvEReady: " + FumaShurikenPvEReady.ToString());
+        ImGui.Text("KatonPvEReady: " + KatonPvEReady.ToString());
+        ImGui.Text("RaitonPvEReady: " + RaitonPvEReady.ToString());
+        ImGui.Text("HyotonPvEReady: " + HyotonPvEReady.ToString());
+        ImGui.Text("HutonPvEReady: " + HutonPvEReady.ToString());
+        ImGui.Text("DotonPvEReady: " + DotonPvEReady.ToString());
+        ImGui.Text("SuitonPvEReady: " + SuitonPvEReady.ToString());
+        ImGui.Text("GokaMekkyakuPvEReady: " + GokaMekkyakuPvEReady.ToString());
+        ImGui.Text("HyoshoRanryuPvEReady: " + HyoshoRanryuPvEReady.ToString());
+        ImGui.Text("DeathfrogMediumPvEReady: " + DeathfrogMediumPvEReady.ToString());
+        ImGui.Text("ZeshoMeppoPvEReady: " + ZeshoMeppoPvEReady.ToString());
+        ImGui.Text("TenriJindoPvEReady: " + TenriJindoPvEReady.ToString());
     }
     #endregion
 
+    #region PvE Actions
+
+    static partial void ModifyRabbitMediumPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => RabbitMediumPvEActive;
+    }
+    
     static partial void ModifySpinningEdgePvE(ref ActionSetting setting)
     {
 
@@ -275,8 +367,7 @@ partial class NinjaRotation
 
     static partial void ModifyDeathfrogMediumPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Ninki <= 50;
-        setting.StatusNeed = [StatusID.Higi];
+        setting.ActionCheck = () => Ninki <= 50 && DeathfrogMediumPvEReady;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -285,13 +376,12 @@ partial class NinjaRotation
 
     static partial void ModifyZeshoMeppoPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Ninki <= 50;
-        setting.StatusNeed = [StatusID.Higi];
+        setting.ActionCheck = () => Ninki <= 50 && ZeshoMeppoPvEReady;
     }
 
     static partial void ModifyTenriJindoPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.TenriJindoReady];
+        setting.ActionCheck = () => TenriJindoPvEReady;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -316,11 +406,12 @@ partial class NinjaRotation
 
     static partial void ModifyFumaShurikenPvE(ref ActionSetting setting)
     {
-
+        setting.ActionCheck = () => FumaShurikenPvEReady;
     }
 
     static partial void ModifyKatonPvE(ref ActionSetting setting)
     {
+        setting.ActionCheck = () => KatonPvEReady;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -329,16 +420,18 @@ partial class NinjaRotation
 
     static partial void ModifyRaitonPvE(ref ActionSetting setting)
     {
-        //setting.StatusProvide = [StatusID.RaijuReady];
+        setting.ActionCheck = () => RaitonPvEReady;
     }
 
     static partial void ModifyHyotonPvE(ref ActionSetting setting)
     {
+        setting.ActionCheck = () => HyotonPvEReady;
         setting.TargetStatusProvide = [StatusID.Blind];
     }
 
     static partial void ModifyHutonPvE(ref ActionSetting setting)
     {
+        setting.ActionCheck = () => HutonPvEReady;
         setting.StatusProvide = [StatusID.ShadowWalker];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -348,6 +441,7 @@ partial class NinjaRotation
 
     static partial void ModifyDotonPvE(ref ActionSetting setting)
     {
+        setting.ActionCheck = () => DotonPvEReady;
         setting.StatusProvide = [StatusID.Doton];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -357,12 +451,13 @@ partial class NinjaRotation
 
     static partial void ModifySuitonPvE(ref ActionSetting setting)
     {
+        setting.ActionCheck = () => SuitonPvEReady;
         setting.StatusProvide = [StatusID.ShadowWalker];
     }
 
     static partial void ModifyGokaMekkyakuPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Kassatsu];
+        setting.ActionCheck = () => GokaMekkyakuPvEReady;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -371,8 +466,9 @@ partial class NinjaRotation
 
     static partial void ModifyHyoshoRanryuPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Kassatsu];
+        setting.ActionCheck = () => HyoshoRanryuPvEReady;
     }
+    #endregion
 
     // PvP
     static partial void ModifyShukuchiPvP(ref ActionSetting setting)

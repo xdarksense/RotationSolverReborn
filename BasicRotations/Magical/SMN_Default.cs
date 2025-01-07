@@ -30,6 +30,9 @@ public sealed class SMN_Default : SummonerRotation
     [RotationConfig(CombatType.PvE, Name = "Use Swiftcast on Garuda")]
     public bool AddSwiftcastOnGaruda { get; set; } = false;
 
+    [RotationConfig(CombatType.PvE, Name = "Use Swiftcast on Ruby Rite if you are not high enough level for Garuda")]
+    public bool AddSwiftcastOnRuby { get; set; } = false;
+
     [RotationConfig(CombatType.PvE, Name = "Order")]
     public SummonOrderType SummonOrder { get; set; } = SummonOrderType.TopazEmeraldRuby;
 
@@ -144,6 +147,11 @@ public sealed class SMN_Default : SummonerRotation
     {
         bool anyBigInvocationIsCoolingDown = SummonBahamutPvE.Cooldown.IsCoolingDown || SummonSolarBahamutPvE.Cooldown.IsCoolingDown || SummonPhoenixPvE.Cooldown.IsCoolingDown;
         if (AddSwiftcastOnGaruda && nextGCD == SlipstreamPvE && Player.Level > 86 && !InBahamut && !InPhoenix && !InSolarBahamut)
+        {
+            if (SwiftcastPvE.CanUse(out act)) return true;
+        }
+
+        if (AddSwiftcastOnRuby && nextGCD == RubyRitePvE && Player.Level < 86)
         {
             if (SwiftcastPvE.CanUse(out act)) return true;
         }

@@ -482,7 +482,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = HealingActionCondition, Section = 3)]
     private static readonly bool _friendlyBattleNPCHeal = false;
 
-    [ConditionBool, UI("Heal and raise Party NPCs. (Breaks some fights due to status weirdness)", Description = "Experimental, only enable as needed.",
+    [ConditionBool, UI("Heal and raise Party NPCs.", Description = "Experimental, only enable as needed.",
         Filter = HealingActionCondition, Section = 3)]
     private static readonly bool _friendlyPartyNPCHealRaise2 = false;
 

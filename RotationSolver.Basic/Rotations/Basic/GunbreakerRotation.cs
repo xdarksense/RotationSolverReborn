@@ -6,8 +6,6 @@ partial class GunbreakerRotation
 {
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Strength;
-
-
     /// <summary>
     /// 
     /// </summary>
@@ -30,14 +28,84 @@ partial class GunbreakerRotation
     public static byte AmmoComboStep => JobGauge.AmmoComboStep;
 
     /// <summary>
-    /// 
+    /// Gets the maximum amount of ammo available.
     /// </summary>
-    public static byte MaxAmmo => CartridgeChargeIiTrait.EnoughLevel ? (byte)3 : (byte)2;
+    public static byte MaxAmmo
+    {
+        get
+        {
+            if (CartridgeChargeIiTrait.EnoughLevel)
+            {
+                return 3;
+            }
+            else if (CartridgeChargeTrait.EnoughLevel)
+            {
+                return 2;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+    }
 
     /// <summary>
     /// Gets the max combo time of the Gnashing Fang combo.
     /// </summary>
     public static short MaxTimerDuration => JobGauge.MaxTimerDuration;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool InGnashingFang => AmmoComboStep > 0;
+    #endregion
+
+    #region PvE Actions Unassignable
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool SavageClawPvEReady => Service.GetAdjustedActionId(ActionID.GnashingFangPvE) == ActionID.SavageClawPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool WickedTalonPvEReady => Service.GetAdjustedActionId(ActionID.GnashingFangPvE) == ActionID.WickedTalonPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool JugularRipPvEReady => Service.GetAdjustedActionId(ActionID.ContinuationPvE) == ActionID.JugularRipPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool AbdomenTearPvEReady => Service.GetAdjustedActionId(ActionID.ContinuationPvE) == ActionID.AbdomenTearPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool EyeGougePvEReady => Service.GetAdjustedActionId(ActionID.ContinuationPvE) == ActionID.EyeGougePvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HypervelocityPvEReady => Service.GetAdjustedActionId(ActionID.ContinuationPvE) == ActionID.HypervelocityPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool FatedBrandPvEReady => Service.GetAdjustedActionId(ActionID.ContinuationPvE) == ActionID.FatedBrandPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool NobleBloodPvEReady => Service.GetAdjustedActionId(ActionID.ReignOfBeastsPvE) == ActionID.NobleBloodPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool LionHeartPvEReady => Service.GetAdjustedActionId(ActionID.ReignOfBeastsPvE) == ActionID.LionHeartPvE;
     #endregion
 
     #region Debug Status
@@ -49,6 +117,19 @@ partial class GunbreakerRotation
         ImGui.Text("AmmoComboStep: " + AmmoComboStep.ToString());
         ImGui.Text("MaxAmmo: " + MaxAmmo.ToString());
         ImGui.Text("MaxTimerDuration: " + MaxTimerDuration.ToString());
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "PvE Actions");
+        ImGui.Text("SavageClawPvEReady: " + SavageClawPvEReady.ToString());
+        ImGui.Text("WickedTalonPvEReady: " + WickedTalonPvEReady.ToString());
+        ImGui.Spacing();
+        ImGui.Text("JugularRipPvEReady: " + JugularRipPvEReady.ToString());
+        ImGui.Text("AbdomenTearPvEReady: " + AbdomenTearPvEReady.ToString());
+        ImGui.Text("EyeGougePvEReady: " + EyeGougePvEReady.ToString());
+        ImGui.Text("HypervelocityPvEReady: " + HypervelocityPvEReady.ToString());
+        ImGui.Spacing();
+        ImGui.Text("FatedBrandPvEReady: " + FatedBrandPvEReady.ToString());
+        ImGui.Spacing();
+        ImGui.Text("NobleBloodPvEReady: " + NobleBloodPvEReady.ToString());
+        ImGui.Text("LionHeartPvEReady: " + LionHeartPvEReady.ToString());
         ImGui.TextColored(ImGuiColors.DalamudYellow, "PvP Actions");
         ImGui.Text("SavageClawPvPReady: " + SavageClawPvPReady.ToString());
         ImGui.Text("WickedTalonPvPReady: " + WickedTalonPvPReady.ToString());
@@ -75,18 +156,19 @@ partial class GunbreakerRotation
         setting.StatusProvide = [StatusID.ReadyToBreak];
         setting.CreateConfig = () => new ActionConfig()
         {
-            TimeToKill = 10,
+            TimeToKill = 5,
         };
     }
 
     static partial void ModifyBrutalShellPvE(ref ActionSetting setting)
     {
-        setting.ComboIds = [ActionID.KeenEdgePvE];
+
     }
 
     static partial void ModifyCamouflagePvE(ref ActionSetting setting)
     {
         setting.TargetType = TargetType.Self;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyDemonSlicePvE(ref ActionSetting setting)
@@ -111,7 +193,7 @@ partial class GunbreakerRotation
 
     static partial void ModifySolidBarrelPvE(ref ActionSetting setting)
     {
-        setting.ComboIds = [ActionID.BrutalShellPvE];
+
     }
 
     static partial void ModifyBurstStrikePvE(ref ActionSetting setting)
@@ -123,12 +205,12 @@ partial class GunbreakerRotation
     static partial void ModifyNebulaPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = StatusHelper.RampartStatus;
-        setting.ActionCheck = () => Player.IsTargetOnSelf();
+        setting.TargetType = TargetType.Self;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyDemonSlaughterPvE(ref ActionSetting setting)
     {
-        setting.ComboIds = [ActionID.DemonSlicePvE];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 2,
@@ -166,15 +248,13 @@ partial class GunbreakerRotation
 
     static partial void ModifySavageClawPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.GnashingFangPvE) == ActionID.SavageClawPvE;
-        setting.ComboIds = [ActionID.GnashingFangPvE];
+        setting.ActionCheck = () => SavageClawPvEReady;
         setting.StatusProvide = [StatusID.ReadyToTear];
     }
 
     static partial void ModifyWickedTalonPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.GnashingFangPvE) == ActionID.WickedTalonPvE;
-        setting.ComboIds = [ActionID.SavageClawPvE];
+        setting.ActionCheck = () => WickedTalonPvEReady;
         setting.StatusProvide = [StatusID.ReadyToGouge];
     }
 
@@ -195,7 +275,7 @@ partial class GunbreakerRotation
     static partial void ModifyHeartOfStonePvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.HeartOfStone];
-        setting.ActionCheck = () => Player.IsParty() || Player.IsTargetOnSelf();
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyContinuationPvE(ref ActionSetting setting)
@@ -205,22 +285,19 @@ partial class GunbreakerRotation
 
     static partial void ModifyJugularRipPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.ContinuationPvE) == ActionID.JugularRipPvE;
-        setting.ComboIds = [ActionID.GnashingFangPvE];
+        setting.ActionCheck = () => JugularRipPvEReady;
         setting.StatusNeed = [StatusID.ReadyToRip];
     }
 
     static partial void ModifyAbdomenTearPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.ContinuationPvE) == ActionID.AbdomenTearPvE;
-        setting.ComboIds = [ActionID.SavageClawPvE];
+        setting.ActionCheck = () => AbdomenTearPvEReady;
         setting.StatusNeed = [StatusID.ReadyToTear];
     }
 
     static partial void ModifyEyeGougePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.ContinuationPvE) == ActionID.EyeGougePvE;
-        setting.ComboIds = [ActionID.WickedTalonPvE];
+        setting.ActionCheck = () => EyeGougePvEReady;
         setting.StatusNeed = [StatusID.ReadyToGouge];
     }
 
@@ -253,8 +330,7 @@ partial class GunbreakerRotation
 
     static partial void ModifyHypervelocityPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.ContinuationPvE) == ActionID.HypervelocityPvE;
-        setting.ComboIds = [ActionID.BurstStrikePvE];
+        setting.ActionCheck = () => HypervelocityPvEReady;
         setting.StatusNeed = [StatusID.ReadyToBlast];
     }
 
@@ -270,13 +346,13 @@ partial class GunbreakerRotation
     static partial void ModifyGreatNebulaPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = StatusHelper.RampartStatus;
-        setting.ActionCheck = () => Player.IsTargetOnSelf();
+        setting.TargetType = TargetType.Self;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyFatedBrandPvE(ref ActionSetting setting)
     {
-        setting.ComboIds = [ActionID.FatedCirclePvE];
-        setting.StatusNeed = [StatusID.ReadyToRaze];
+        setting.ActionCheck = () => FatedBrandPvEReady;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 2,
@@ -294,6 +370,7 @@ partial class GunbreakerRotation
 
     static partial void ModifyNobleBloodPvE(ref ActionSetting setting)
     {
+        setting.ActionCheck = () => NobleBloodPvEReady;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1
@@ -304,6 +381,7 @@ partial class GunbreakerRotation
 
     static partial void ModifyLionHeartPvE(ref ActionSetting setting)
     {
+        setting.ActionCheck = () => LionHeartPvEReady;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1
@@ -432,6 +510,7 @@ partial class GunbreakerRotation
     {
         setting.ActionCheck = () => EyeGougePvPReady;
     }
+    #endregion
 
     /// <inheritdoc/>
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
@@ -440,14 +519,4 @@ partial class GunbreakerRotation
             && Player.GetHealthRatio() <= Service.Config.HealthForDyingTanks) return true;
         return base.EmergencyAbility(nextGCD, out act);
     }
-
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.TrajectoryPvE)]
-    protected sealed override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
-    {
-        if (TrajectoryPvE.CanUse(out act)) return true;
-        return false;
-    }
-
-    #endregion
 }

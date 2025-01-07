@@ -1,3 +1,5 @@
+using Dalamud.Interface.Colors;
+
 namespace DefaultRotations.Melee;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
@@ -82,9 +84,18 @@ public sealed class NIN_Default : NinjaRotation
     {
         act = null;
 
-        if (!JinPvE.CanUse(out _) || !ChiPvE.CanUse(out _) || !TenPvE.CanUse(out _)) return false;
+        // If the last action performed matches any of a list of specific actions, it clears the Ninjutsu aim.
+        // This serves as a reset/cleanup mechanism to ensure the decision logic starts fresh for the next cycle.
+        if (IsLastAction(true, DotonPvE, SuitonPvE,
+            RabbitMediumPvE, FumaShurikenPvE, KatonPvE, RaitonPvE,
+            HyotonPvE, HutonPvE, DotonPvE, SuitonPvE, GokaMekkyakuPvE, HyoshoRanryuPvE))
+        {
+            ClearNinjutsu();
+        }
+
+        if ((!JinPvE.CanUse(out _) && JinPvE.EnoughLevel) || (!ChiPvE.CanUse(out _) && ChiPvE.EnoughLevel)  || (!TenPvE.CanUse(out _) && TenPvE.EnoughLevel)) return false;
         // Ensures that the action ID currently considered for Ninjutsu is actually valid for Ninjutsu execution.
-        if (AdjustId(ActionID.NinjutsuPvE) != ActionID.NinjutsuPvE) return false;
+        //if (AdjustId(ActionID.NinjutsuPvE) != ActionID.NinjutsuPvE) return false;
         // If more than 4.5 seconds have passed since the last action, it clears any pending Ninjutsu to avoid stale actions.
         if (TimeSinceLastAction.TotalSeconds > 4.5) ClearNinjutsu();
 
@@ -93,30 +104,30 @@ public sealed class NIN_Default : NinjaRotation
         {
             // Attempts to set high-damage AoE Ninjutsu if available under Kassatsu's effect.
             // These are prioritized due to Kassatsu's enhancement of Ninjutsu abilities.
-            if (GokaMekkyakuPvE.CanUse(out _) && ChiPvE.CanUse(out _) && TenPvE.CanUse(out _))
+            if (GokaMekkyakuPvE.EnoughLevel && ChiPvE.CanUse(out _) && TenPvE.CanUse(out _))
             {
                 SetNinjutsu(GokaMekkyakuPvE);
                 return false;
             }
-            if (HyoshoRanryuPvE.CanUse(out _) && TenPvE.CanUse(out _) && JinPvE.CanUse(out _))
+            if (HyoshoRanryuPvE.EnoughLevel && TenPvE.CanUse(out _) && JinPvE.CanUse(out _))
             {
                 SetNinjutsu(HyoshoRanryuPvE);
                 return false;
             }
 
-            if (HutonPvE.CanUse(out _) && TenPvE.CanUse(out _) && ChiPvE.CanUse(out _) && JinPvE.CanUse(out _))
+            if (HutonPvE.EnoughLevel && TenPvE.CanUse(out _) && ChiPvE.CanUse(out _) && JinPvE.CanUse(out _))
             {
                 SetNinjutsu(HutonPvE);
                 return false;
             }
 
-            if (KatonPvE.CanUse(out _) && ChiPvE.CanUse(out _) && TenPvE.CanUse(out _))
+            if (KatonPvE.EnoughLevel && ChiPvE.CanUse(out _) && TenPvE.CanUse(out _))
             {
                 SetNinjutsu(KatonPvE);
                 return false;
             }
 
-            if (RaitonPvE.CanUse(out _) && TenPvE.CanUse(out _) && ChiPvE.CanUse(out _))
+            if (RaitonPvE.EnoughLevel && TenPvE.CanUse(out _) && ChiPvE.CanUse(out _))
             {
                 SetNinjutsu(RaitonPvE);
                 return false;
@@ -137,24 +148,23 @@ public sealed class NIN_Default : NinjaRotation
             // Also considers using Suiton for vulnerability debuff on the enemy if conditions are optimal.
 
             //Aoe
-            if (KatonPvE.CanUse(out _) && ChiPvE.CanUse(out _) && TenPvE.CanUse(out _))
+            if (NumberOfHostilesInRange > 1 && KatonPvE.EnoughLevel && ChiPvE.CanUse(out _) && TenPvE.CanUse(out _))
             {
                 if (!Player.HasStatus(true, StatusID.Doton) && !IsMoving && !IsLastGCD(false, DotonPvE) && (!TenChiJinPvE.Cooldown.WillHaveOneCharge(6)) || !Player.HasStatus(true, StatusID.Doton) && !TenChiJinPvE.Cooldown.IsCoolingDown && TenPvE.CanUse(out _) && ChiPvE.CanUse(out _) && JinPvE.CanUse(out _))
                     SetNinjutsu(DotonPvE);
                 else SetNinjutsu(KatonPvE);
-                return false;
             }
 
             //Single
             if (!ShadowWalkerNeeded && TenPvE.CanUse(out _, usedUp: InTrickAttack && !Player.HasStatus(false, StatusID.RaijuReady)))
             {
-                if (RaitonPvE.CanUse(out _) && TenPvE.CanUse(out _) && ChiPvE.CanUse(out _))
+                if (RaitonPvE.EnoughLevel && TenPvE.CanUse(out _) && ChiPvE.CanUse(out _))
                 {
                     SetNinjutsu(RaitonPvE);
                     return false;
                 }
 
-                if (!ChiPvE.EnoughLevel && FumaShurikenPvE.CanUse(out _))
+                if (!ChiPvE.EnoughLevel && FumaShurikenPvE.EnoughLevel)
                 {
                     SetNinjutsu(FumaShurikenPvE);
                     return false;
@@ -162,20 +172,11 @@ public sealed class NIN_Default : NinjaRotation
             }
 
             //Vulnerable
-            if (ShadowWalkerNeeded && !Player.HasStatus(true, StatusID.TenChiJin) && SuitonPvE.CanUse(out _, skipStatusProvideCheck: false) && TenPvE.CanUse(out _) && ChiPvE.CanUse(out _) && JinPvE.CanUse(out _))
+            if (ShadowWalkerNeeded && (!MeisuiPvE.Cooldown.IsCoolingDown || !TrickAttackPvE.Cooldown.IsCoolingDown || KunaisBanePvE.Cooldown.IsCoolingDown) && !Player.HasStatus(true, StatusID.ShadowWalker) && !Player.HasStatus(true, StatusID.TenChiJin) && SuitonPvE.EnoughLevel && TenPvE.CanUse(out _) && ChiPvE.CanUse(out _) && JinPvE.CanUse(out _))
             {
                 SetNinjutsu(SuitonPvE);
                 return false;
             }
-        }
-
-        // If the last action performed matches any of a list of specific actions, it clears the Ninjutsu aim.
-        // This serves as a reset/cleanup mechanism to ensure the decision logic starts fresh for the next cycle.
-        if (IsLastAction(false, DotonPvE, SuitonPvE,
-            RabbitMediumPvE, FumaShurikenPvE, KatonPvE, RaitonPvE,
-            HyotonPvE, HutonPvE, DotonPvE, SuitonPvE, GokaMekkyakuPvE, HyoshoRanryuPvE))
-        {
-            ClearNinjutsu();
         }
         return false; // Indicates that no specific Ninjutsu action was chosen in this cycle.
     }
@@ -199,7 +200,7 @@ public sealed class NIN_Default : NinjaRotation
                 && !IsLastAction(false, FumaShurikenPvE_18875, FumaShurikenPvE_18873))
             {
                 //AOE
-                if (KatonPvE.CanUse(out _))
+                if (KatonPvE.EnoughLevel)
                 {
                     if (FumaShurikenPvE_18875.CanUse(out act)) return true;
                 }
@@ -322,6 +323,7 @@ public sealed class NIN_Default : NinjaRotation
 
         // First priority is given to Kassatsu if it's available, allowing for an immediate powerful Ninjutsu.
         if (NoNinjutsu && KassatsuPvE.CanUse(out act)) return true;
+        if (!TenChiJinPvE.Cooldown.IsCoolingDown && MeisuiPvE.CanUse(out act)) return true;
 
         if (TenriJindoPvE.CanUse(out act)) return true;
 
@@ -352,7 +354,7 @@ public sealed class NIN_Default : NinjaRotation
 
         // If the player is within Trick Attack's effective window, and Ten Chi Jin hasn't recently been used,
         // then Ten Chi Jin is set as the next action to perform.
-        if (InTrickAttack && !TenPvE.Cooldown.ElapsedAfter(30) && TenChiJinPvE.CanUse(out act)) return true;
+        if (InTrickAttack && !Player.HasStatus(true, StatusID.ShadowWalker) && !TenPvE.Cooldown.ElapsedAfter(30) && TenChiJinPvE.CanUse(out act)) return true;
 
         // If more than 5 seconds have passed in combat, checks if Bunshin is available to use.
         if (!CombatElapsedLess(5) && BunshinPvE.CanUse(out act)) return true;
@@ -401,6 +403,8 @@ public sealed class NIN_Default : NinjaRotation
         act = null;
 
         var hasRaijuReady = Player.HasStatus(true, StatusID.RaijuReady);
+
+        if (RabbitMediumPvE.CanUse(out act)) return true;
 
         if ((InTrickAttack || InMug) && NoNinjutsu && !hasRaijuReady
             && !Player.HasStatus(true, StatusID.TenChiJin)
@@ -451,5 +455,31 @@ public sealed class NIN_Default : NinjaRotation
     #region Extra Methods
     // Holds the next ninjutsu action to perform.
     private IBaseAction? _ninActionAim = null;
+
+    public override void DisplayStatus()
+    {
+        ImGui.Text($"Ninjutsu Action: {_ninActionAim}");
+        ImGui.Text($"Ninki: {Ninki}");
+        ImGui.Text($"Kazematoi: {Kazematoi}");
+        ImGui.Text($"HasJin: {HasJin}");
+        ImGui.Text($"InTrickAttack: {InTrickAttack}");
+        ImGui.Text($"InMug: {InMug}");
+        ImGui.Text($"NoNinjutsu: {NoNinjutsu}");
+        ImGui.Text($"RaijuStacks: {RaijuStacks}");
+        ImGui.Text($"ShadowWalkerNeeded: {ShadowWalkerNeeded}");
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "PvE Actions");
+        ImGui.Text("FumaShurikenPvEReady: " + FumaShurikenPvEReady.ToString());
+        ImGui.Text("KatonPvEReady: " + KatonPvEReady.ToString());
+        ImGui.Text("RaitonPvEReady: " + RaitonPvEReady.ToString());
+        ImGui.Text("HyotonPvEReady: " + HyotonPvEReady.ToString());
+        ImGui.Text("HutonPvEReady: " + HutonPvEReady.ToString());
+        ImGui.Text("DotonPvEReady: " + DotonPvEReady.ToString());
+        ImGui.Text("SuitonPvEReady: " + SuitonPvEReady.ToString());
+        ImGui.Text("GokaMekkyakuPvEReady: " + GokaMekkyakuPvEReady.ToString());
+        ImGui.Text("HyoshoRanryuPvEReady: " + HyoshoRanryuPvEReady.ToString());
+        ImGui.Text("DeathfrogMediumPvEReady: " + DeathfrogMediumPvEReady.ToString());
+        ImGui.Text("ZeshoMeppoPvEReady: " + ZeshoMeppoPvEReady.ToString());
+        ImGui.Text("TenriJindoPvEReady: " + TenriJindoPvEReady.ToString());
+    }
     #endregion
 }

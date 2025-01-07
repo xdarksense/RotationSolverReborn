@@ -94,10 +94,11 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
         act = null;
         if (GuardCancel && Player.HasStatus(true, StatusID.Guard)) return false;
 
+        if (HypervelocityPvP.CanUse(out act)) return true;
         if (JugularRipPvP.CanUse(out act)) return true;
-        if (AbdomenTearPvE.CanUse(out act, usedUp: true)) return true;
+        if (AbdomenTearPvP.CanUse(out act)) return true;
         if (EyeGougePvP.CanUse(out act)) return true;
-        if (FatedBrandPvP.CanUse(out act, usedUp: true)) return true;
+        if (FatedBrandPvP.CanUse(out act)) return true;
 
         if (BlastingZonePvP.CanUse(out act)) return true;
         if (RoughDividePvP.CanUse(out act, usedUp: true)) return true;
@@ -120,11 +121,11 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
         if (GuardCancel && Player.HasStatus(true, StatusID.Guard)) return false;
         if (!Player.HasStatus(true, StatusID.Guard) && UseSprintPvP && !Player.HasStatus(true, StatusID.Sprint) && !InCombat && SprintPvP.CanUse(out act)) return true;
 
-        if (!JugularRipPvPReady && !AbdomenTearPvPReady && !EyeGougePvPReady && !FatedBrandPvPReady
+        if (!JugularRipPvPReady && !AbdomenTearPvPReady && !EyeGougePvPReady && !FatedBrandPvPReady && !HypervelocityPvPReady
             && FatedCirclePvP.CanUse(out act)) return true;
 
-        if (WickedTalonPvE.CanUse(out act, usedUp: true)) return true;
-        if (SavageClawPvP.CanUse(out act, usedUp: true)) return true;
+        if (WickedTalonPvP.CanUse(out act)) return true;
+        if (SavageClawPvP.CanUse(out act)) return true;
         if (GnashingFangPvP.CanUse(out act, usedUp: true)) return true;
 
         if (!SavageClawPvPReady && !WickedTalonPvPReady)

@@ -1,4 +1,6 @@
-﻿namespace RotationSolver.Basic.Rotations.Basic;
+﻿using Dalamud.Interface.Colors;
+
+namespace RotationSolver.Basic.Rotations.Basic;
 
 partial class BlackMageRotation
 {
@@ -164,6 +166,13 @@ partial class BlackMageRotation
     protected static bool HasThunder => Player.HasStatus(true, StatusID.Thunderhead);
     #endregion
 
+    #region PvE Actions Unassignable
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ParadoxPvEReady => Service.GetAdjustedActionId(ActionID.FirePvE) == ActionID.ParadoxPvE;
+    #endregion
+
     #region Debug
     /// <inheritdoc/>
     public override void DisplayStatus()
@@ -183,6 +192,9 @@ partial class BlackMageRotation
         ImGui.Text("IsEnochianActive: " + IsEnochianActive.ToString());
         ImGui.Text("EnochianTimeRaw: " + EnochianTimeRaw.ToString());
         ImGui.Text("EnochianTime: " + EnochianTime.ToString());
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "PvE Actions");
+        ImGui.Text("ParadoxPvEReady: " + ParadoxPvEReady.ToString());
+        ImGui.TextColored(ImGuiColors.DalamudOrange, "PvP Actions");
         ImGui.Text("HasPvPAstralFire: " + HasPvPAstralFire.ToString());
         ImGui.Text("HasPvPUmbralIce: " + HasPvPUmbralIce.ToString());
     }
