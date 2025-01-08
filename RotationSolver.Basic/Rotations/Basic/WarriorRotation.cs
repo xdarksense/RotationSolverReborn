@@ -1,3 +1,5 @@
+using Dalamud.Interface.Colors;
+
 namespace RotationSolver.Basic.Rotations.Basic;
 
 partial class WarriorRotation
@@ -5,7 +7,7 @@ partial class WarriorRotation
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Strength;
 
-
+    #region Job Gauge
     /// <summary>
     /// 
     /// </summary>
@@ -39,7 +41,32 @@ partial class WarriorRotation
             return stacks == byte.MaxValue ? (byte)3 : stacks;
         }
     }
-    
+    #endregion
+
+    #region Actions Unassignable
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ChaoticCyclonePvEReady => Service.GetAdjustedActionId(ActionID.DecimatePvE) == ActionID.ChaoticCyclonePvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool InnerChaosPvEeady => Service.GetAdjustedActionId(ActionID.FellCleavePvE) == ActionID.InnerChaosPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool PrimalWrathPvEReady => Service.GetAdjustedActionId(ActionID.InnerReleasePvE) == ActionID.PrimalWrathPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool PrimalRuinationPvEReady => Service.GetAdjustedActionId(ActionID.PrimalRendPvE) == ActionID.PrimalRuinationPvE;
+    #endregion
+
+    #region Debug
     /// <inheritdoc/>
     public override void DisplayStatus()
     {
@@ -47,8 +74,15 @@ partial class WarriorRotation
         ImGui.Text("BerserkStacks: " + BerserkStacks.ToString());
         ImGui.Text("BeastGaugeValue: " + BeastGauge.ToString());
         ImGui.Text("OnslaughtMax: " + OnslaughtMax.ToString());
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "PvE Actions");
+        ImGui.Text("ChaoticCyclonePvEReady: " + ChaoticCyclonePvEReady.ToString());
+        ImGui.Text("InnerChaosPvEeady: " + InnerChaosPvEeady.ToString());
+        ImGui.Text("PrimalWrathPvEReady: " + PrimalWrathPvEReady.ToString());
+        ImGui.Text("PrimalRuinationPvEReady: " + PrimalRuinationPvEReady.ToString());
     }
+    #endregion
 
+    #region PvE Actions
     private sealed protected override IBaseAction TankStance => DefiancePvE;
 
     static partial void ModifyHeavySwingPvE(ref ActionSetting setting)
@@ -229,31 +263,11 @@ partial class WarriorRotation
         setting.StatusProvide = [StatusID.InnerRelease, StatusID.PrimalRendReady, StatusID.InnerStrength];
     }
 
-    static partial void ModifyChaoticCyclonePvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => BeastGauge >= 50 || Player.HasStatus(true, StatusID.InnerRelease);
-        setting.StatusNeed = [StatusID.NascentChaos];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 2,
-        };
-    }
-
     static partial void ModifyNascentFlashPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.NascentFlash];
         setting.TargetStatusProvide = [StatusID.NascentGlint];
         setting.IsFriendly = true;
-    }
-
-    static partial void ModifyInnerChaosPvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => BeastGauge >= 50 || Player.HasStatus(true, StatusID.InnerRelease);
-        setting.StatusNeed = [StatusID.NascentChaos];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
     }
 
     static partial void ModifyBloodwhettingPvE(ref ActionSetting setting)
@@ -288,24 +302,48 @@ partial class WarriorRotation
             AoeCount = 1,
         };
     }
+    #endregion
+
+    #region PvE Actions Unassignable
+
+    static partial void ModifyChaoticCyclonePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => BeastGauge >= 50 && InnerChaosPvEeady;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 2,
+        };
+    }
+
+    static partial void ModifyInnerChaosPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => BeastGauge >= 50 && InnerChaosPvEeady;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
 
     static partial void ModifyPrimalWrathPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Wrathful];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
-    }
-    static partial void ModifyPrimalRuinationPvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.PrimalRuinationReady];
+        setting.ActionCheck = () => PrimalWrathPvEReady;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
     }
 
+    static partial void ModifyPrimalRuinationPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => PrimalRuinationPvEReady;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+    #endregion
+
+    #region PvP Actions
     // PvP
     static partial void ModifyPrimalRendPvP(ref ActionSetting setting)
     {
@@ -326,6 +364,7 @@ partial class WarriorRotation
     {
         //setting.StatusNeed = [StatusID.NascentChaos_1992];
     }
+    #endregion
 
     /// <inheritdoc/>
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)

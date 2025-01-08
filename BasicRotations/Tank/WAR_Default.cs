@@ -27,7 +27,7 @@ public sealed class WAR_Default : WarriorRotation
 
     [Range(1, 20, ConfigUnitType.Yalms)]
     [RotationConfig(CombatType.PvE, Name = "Max distance you can be from the boss for Primal Rend use (Danger, setting too high will get you killed)")]
-    public float PrimalRendDistance { get; set; } = 2;
+    public float PrimalRendDistance2 { get; set; } = 3.5f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Nascent Flash Heal Threshold")]
@@ -182,7 +182,7 @@ public sealed class WAR_Default : WarriorRotation
         {
             if ((YEET || (!YEET && !IsMoving)) && PrimalRendPvE.CanUse(out act, skipAoeCheck: true))
             {
-                if (PrimalRendPvE.Target.Target?.DistanceToPlayer() < PrimalRendDistance) return true;
+                if (PrimalRendPvE.Target.Target?.DistanceToPlayer() < PrimalRendDistance2) return true;
             }
             if (PrimalRuinationPvE.CanUse(out act)) return true;
         }

@@ -107,7 +107,7 @@ public sealed class BLM_Beta : BlackMageRotation
     {
         if (!Infinity)
         {
-            if (IsMoving && HasHostilesInRange && TriplecastPvE.CanUse(out act, usedUp: true)) return true;
+            if (InCombat && IsMoving && HasHostilesInRange && TriplecastPvE.CanUse(out act, usedUp: true)) return true;
             if (LeylineMadness && InCombat && HasHostilesInRange && LeyLinesPvE.CanUse(out act, usedUp: Leyline2Madness)) return true;
             if (!IsLastAbility(ActionID.LeyLinesPvE) && UseRetrace && InCombat && HasHostilesInRange && RetracePvE.CanUse(out act)) return true;
         }
@@ -126,7 +126,7 @@ public sealed class BLM_Beta : BlackMageRotation
                     && !IsLastGCD(ActionID.ParadoxPvE))
                 {
                     if (SwiftcastPvE.CanUse(out act)) return true;
-                    if (TriplecastPvE.CanUse(out act, usedUp: true)) return true;
+                    if (InCombat && TriplecastPvE.CanUse(out act, usedUp: true)) return true;
                 }
 
                 if (UmbralIceStacks < 3 && LucidDreamingPvE.CanUse(out act)) return true;
@@ -134,7 +134,7 @@ public sealed class BLM_Beta : BlackMageRotation
 
             if (InAstralFire)
             {
-                if (TriplecastPvE.CanUse(out act, gcdCountForAbility: 5)) return true;
+                if (InCombat && TriplecastPvE.CanUse(out act, gcdCountForAbility: 5)) return true;
             }
 
             if (AmplifierPvE.CanUse(out act)) return true;
@@ -157,12 +157,12 @@ public sealed class BLM_Beta : BlackMageRotation
                 }
                 if (ThisManyInstantCasts > 6 && AstralSoulStacks < 6 && InAstralFire && ElementTime > 6 && Player.HasStatus(true, StatusID.Firestarter) && Player.CurrentMp > 9000)
                 {
-                    if (TriplecastPvE.CanUse(out act)) return true;
+                    if (InCombat && TriplecastPvE.CanUse(out act)) return true;
                 }
 
                 if (ThisManyInstantCasts > 3 && AstralSoulStacks == 3 && InAstralFire && ElementTime > 6)
                 {
-                    if (TriplecastPvE.CanUse(out act, usedUp: true)) return true;
+                    if (InCombat && TriplecastPvE.CanUse(out act, usedUp: true)) return true;
                 }
 
                 if (ThisManyInstantCasts == 1 && AstralSoulStacks == 6 && InAstralFire && ElementTime > 3)
@@ -232,7 +232,7 @@ public sealed class BLM_Beta : BlackMageRotation
                 if (ParadoxPvE.CanUse(out act)) return true;
             }
 
-            if (UmbralIceStacks == 3 && UmbralHearts == 3 && InUmbralIce)
+            if (InCombat && UmbralIceStacks == 3 && UmbralHearts == 3 && InUmbralIce)
             {
                 if (TransposePvE.CanUse(out act)) return true;
             }
@@ -424,7 +424,7 @@ public sealed class BLM_Beta : BlackMageRotation
             if (AddThunder(out act, 0)) return true;
         }
 
-        if (TriplecastPvE.CanUse(out act)) return true;
+        if (InCombat && TriplecastPvE.CanUse(out act)) return true;
 
         if (AddThunder(out act, 0) && Player.WillStatusEndGCD(1, 0, true,
             StatusID.Thundercloud)) return true;
@@ -513,7 +513,6 @@ public sealed class BLM_Beta : BlackMageRotation
         if (UmbralSoulPvE.CanUse(out act)) return true;
         if (InAstralFire && TransposePvE.CanUse(out act)) return true;
         
-
         return false;
     }
 
