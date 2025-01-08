@@ -104,6 +104,9 @@ internal partial class Configs : IPluginConfiguration
 
     [JobConfig, UI("Only used automatically if coded into the rotation", Filter = AutoActionUsage, PvPFilter = JobFilterType.NoJob)]
     private readonly TinctureUseType _TinctureType = TinctureUseType.Nowhere;
+    
+    [JobConfig, UI("Ignore Invincibility for PvP purposes.", Filter = AutoActionUsage)]
+    public bool IgnorePvPInvincibility { get; set; } = false;
 
     [ConditionBool, UI("Automatically use Anti-Knockback role actions (Arms Length, Surecast)", Filter = AutoActionUsage)]
     private static readonly bool _useKnockback = true;
