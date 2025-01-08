@@ -315,6 +315,12 @@ partial class CustomRotation
     [Description("Is in TOP duty")]
     public static bool IsInTOP => DataCenter.IsInTOP;
 
+    ///<summary>
+    /// Is player in FRU duty.
+    ///</summary>
+    [Description("Is in FRU duty")]
+    public static bool IsInFRU => DataCenter.IsInFRU
+
     /// <summary>
     /// Is player in duty.
     /// </summary>
