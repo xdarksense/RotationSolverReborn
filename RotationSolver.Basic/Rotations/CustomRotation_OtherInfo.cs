@@ -319,7 +319,7 @@ partial class CustomRotation
     /// Is player in FRU duty.
     ///</summary>
     [Description("Is in FRU duty")]
-    public static bool IsInFRU => DataCenter.IsInFRU
+    public static bool IsInFRU => DataCenter.IsInFRU;
 
     /// <summary>
     /// Is player in duty.
