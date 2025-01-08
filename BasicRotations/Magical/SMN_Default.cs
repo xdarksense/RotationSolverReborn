@@ -42,8 +42,10 @@ public sealed class SMN_Default : SummonerRotation
     [RotationConfig(CombatType.PvE, Name = "Use this if there's no other raid buff in your party")]
     public bool SecondTypeOpenerLogic { get; set; } = false;
 
-    #endregion
+    [RotationConfig(CombatType.PvE, Name = "Use Physick")]
+    public bool Healbot { get; set; } = false;
 
+    #endregion
 
     #region Countdown Logic
     protected override IAction? CountDownAction(float remainTime)
@@ -64,7 +66,6 @@ public sealed class SMN_Default : SummonerRotation
         return base.MoveForwardGCD(out act);
     }
     #endregion
-
 
     #region oGCD Logic
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
@@ -165,6 +166,13 @@ public sealed class SMN_Default : SummonerRotation
     #endregion
 
     #region GCD Logic
+    [RotationDesc(ActionID.PhysickPvE)]
+    protected override bool HealSingleGCD(out IAction? act)
+    {
+        if ((Healbot || Player.Level <= 20) && PhysickPvE.CanUse(out act)) return true;
+        return base.HealSingleGCD(out act);
+    }
+
     protected override bool GeneralGCD(out IAction? act)
     {
         if (SummonCarbunclePvE.CanUse(out act)) return true;

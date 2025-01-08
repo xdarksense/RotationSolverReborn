@@ -1,4 +1,6 @@
-﻿namespace RotationSolver.Basic.Rotations.Basic;
+﻿using Dalamud.Interface.Colors;
+
+namespace RotationSolver.Basic.Rotations.Basic;
 
 partial class SummonerRotation
 {
@@ -10,32 +12,34 @@ partial class SummonerRotation
     /// </summary>
     public override bool CanHealSingleSpell => false;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool InBahamut => Service.GetAdjustedActionId(ActionID.AstralFlowPvE) == ActionID.DeathflarePvE;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool InSolarBahamut => Service.GetAdjustedActionId(ActionID.AstralFlowPvE) == ActionID.SunflarePvE;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool InPhoenix => Service.GetAdjustedActionId(ActionID.AstralFlowPvE) == ActionID.RekindlePvE;
     private protected sealed override IBaseAction Raise => ResurrectionPvE;
 
     #region JobGauge
+
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasAetherflowStacks => (JobGauge.AetherFlags.HasFlag((Enum)FFXIVClientStructs.FFXIV.Client.Game.Gauge.AetherFlags.Aetherflow1) || JobGauge.AetherFlags.HasFlag((Enum)FFXIVClientStructs.FFXIV.Client.Game.Gauge.AetherFlags.Aetherflow2));
+    public static SummonPet ReturnSummons => JobGauge.ReturnSummon;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasAetherflowStacks => JobGauge.HasAetherflowStacks;
 
     /// <summary>
     /// 
     /// </summary>
     public static byte Attunement => JobGauge.Attunement;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool IsBahamutReady => JobGauge.IsBahamutReady;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool IsPhoenixReady => JobGauge.IsPhoenixReady;
 
     /// <summary>
     /// 
@@ -55,17 +59,22 @@ partial class SummonerRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool InIfrit => JobGauge.IsIfritAttuned;
-
-    /// <summary>
-    /// 
-    /// </summary>
     public static bool InTitan => JobGauge.IsTitanAttuned;
 
     /// <summary>
     /// 
     /// </summary>
+    public static bool InIfrit => JobGauge.IsIfritAttuned;
+
+    /// <summary>
+    /// 
+    /// </summary>
     public static bool InGaruda => JobGauge.IsGarudaAttuned;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static byte AetherflowStacks => JobGauge.AetherflowStacks;
 
     private static float SummonTimeRaw => JobGauge.SummonTimerRemaining / 1000f;
 
@@ -117,32 +126,205 @@ partial class SummonerRotation
     /// 
     /// </summary>
     private static bool HasSummon => DataCenter.HasPet && SummonTimeEndAfterGCD();
+    #endregion
+
+    #region PvE Actions Unassignable
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool AstralImpulsePvEReady => Service.GetAdjustedActionId(ActionID.RuinIiiPvE) == ActionID.AstralImpulsePvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool AstralFlarePvEReady => Service.GetAdjustedActionId(ActionID.TridisasterPvE) == ActionID.AstralFlarePvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool InBahamut => Service.GetAdjustedActionId(ActionID.AstralFlowPvE) == ActionID.DeathflarePvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool RubyRitePvEReady => Service.GetAdjustedActionId(ActionID.GemshinePvE) == ActionID.RubyRitePvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool TopazRitePvEReady => Service.GetAdjustedActionId(ActionID.GemshinePvE) == ActionID.TopazRitePvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool EmeraldRitePvEReady => Service.GetAdjustedActionId(ActionID.GemshinePvE) == ActionID.EmeraldRitePvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool SummonPhoenixPvEReady => Service.GetAdjustedActionId(ActionID.SummonBahamutPvE) == ActionID.SummonPhoenixPvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool FountainOfFirePvEReady => Service.GetAdjustedActionId(ActionID.RuinIiiPvE) == ActionID.FountainOfFirePvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool BrandOfPurgatoryPvEReady => Service.GetAdjustedActionId(ActionID.TridisasterPvE) == ActionID.BrandOfPurgatoryPvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool InPhoenix => Service.GetAdjustedActionId(ActionID.AstralFlowPvE) == ActionID.RekindlePvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool EnkindlePhoenixPvEReady => Service.GetAdjustedActionId(ActionID.EnkindleBahamutPvE) == ActionID.EnkindlePhoenixPvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool RubyCatastrophePvEReady => Service.GetAdjustedActionId(ActionID.PreciousBrilliancePvE) == ActionID.RubyCatastrophePvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool TopazCatastrophePvEReady => Service.GetAdjustedActionId(ActionID.PreciousBrilliancePvE) == ActionID.TopazCatastrophePvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool EmeraldCatastrophePvEReady => Service.GetAdjustedActionId(ActionID.PreciousBrilliancePvE) == ActionID.EmeraldCatastrophePvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool CrimsonCyclonePvEReady => Service.GetAdjustedActionId(ActionID.AstralFlowPvE) == ActionID.CrimsonCyclonePvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool CrimsonStrikePvEReady => Service.GetAdjustedActionId(ActionID.AstralFlowPvE) == ActionID.CrimsonStrikePvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool MountainBusterPvEReady => Service.GetAdjustedActionId(ActionID.AstralFlowPvE) == ActionID.MountainBusterPvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool SlipstreamPvEReady => Service.GetAdjustedActionId(ActionID.AstralFlowPvE) == ActionID.SlipstreamPvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool SummonSolarBahamutPvEReady => Service.GetAdjustedActionId(ActionID.SummonBahamutPvE) == ActionID.SummonSolarBahamutPvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool UmbralImpulsePvEReady => Service.GetAdjustedActionId(ActionID.RuinIiiPvE) == ActionID.UmbralImpulsePvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool UmbralFlarePvEReady => Service.GetAdjustedActionId(ActionID.TridisasterPvE) == ActionID.UmbralFlarePvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool InSolarBahamut => Service.GetAdjustedActionId(ActionID.AstralFlowPvE) == ActionID.SunflarePvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool EnkindleSolarBahamutPvEReady => Service.GetAdjustedActionId(ActionID.EnkindleBahamutPvE) == ActionID.EnkindleSolarBahamutPvE;
+    #endregion
+
+    #region Draw Debug
 
     /// <inheritdoc/>
     public override void DisplayStatus()
     {
-        ImGui.Text("CanHealSingleSpell: " + CanHealSingleSpell.ToString());
-        ImGui.Text("InBahamut: " + InBahamut.ToString());
-        ImGui.Text("InSolarBahamut: " + InSolarBahamut.ToString());
-        ImGui.Text("InPhoenix: " + InPhoenix.ToString());
+        ImGui.Text("ReturnSummons: " + ReturnSummons.ToString());
         ImGui.Text("HasAetherflowStacks: " + HasAetherflowStacks.ToString());
         ImGui.Text("Attunement: " + Attunement.ToString());
+        ImGui.Text("IsBahamutReady: " + IsBahamutReady.ToString());
+        ImGui.Text("IsPhoenixReady: " + IsPhoenixReady.ToString());
         ImGui.Text("IsIfritReady: " + IsIfritReady.ToString());
         ImGui.Text("IsTitanReady: " + IsTitanReady.ToString());
         ImGui.Text("IsGarudaReady: " + IsGarudaReady.ToString());
         ImGui.Text("InIfrit: " + InIfrit.ToString());
         ImGui.Text("InTitan: " + InTitan.ToString());
         ImGui.Text("InGaruda: " + InGaruda.ToString());
+        ImGui.Text("AetherflowStacks: " + AetherflowStacks.ToString());
         ImGui.Text("SummonTime: " + SummonTime.ToString());
         ImGui.Text("AttunmentTime: " + AttunmentTime.ToString());
         ImGui.Text("HasSummon: " + HasSummon.ToString());
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "PvE Actions");
+        ImGui.Text("AstralImpulsePvEReady: " + AstralImpulsePvEReady.ToString());
+        ImGui.Text("AstralFlarePvEReady: " + AstralFlarePvEReady.ToString());
+        ImGui.Text("InBahamut: " + InBahamut.ToString());
+        ImGui.Text("RubyRitePvEReady: " + RubyRitePvEReady.ToString());
+        ImGui.Text("TopazRitePvEReady: " + TopazRitePvEReady.ToString());
+        ImGui.Text("EmeraldRitePvEReady: " + EmeraldRitePvEReady.ToString());
+        ImGui.Text("SummonPhoenixPvEReady: " + SummonPhoenixPvEReady.ToString());
+        ImGui.Text("FountainOfFirePvEReady: " + FountainOfFirePvEReady.ToString());
+        ImGui.Text("BrandOfPurgatoryPvEReady: " + BrandOfPurgatoryPvEReady.ToString());
+        ImGui.Text("InPhoenix: " + InPhoenix.ToString());
+        ImGui.Text("EnkindlePhoenixPvEReady: " + EnkindlePhoenixPvEReady.ToString());
+        ImGui.Text("RubyCatastrophePvEReady: " + RubyCatastrophePvEReady.ToString());
+        ImGui.Text("TopazCatastrophePvEReady: " + TopazCatastrophePvEReady.ToString());
+        ImGui.Text("EmeraldCatastrophePvEReady: " + EmeraldCatastrophePvEReady.ToString());
+        ImGui.Text("CrimsonCyclonePvEReady: " + CrimsonCyclonePvEReady.ToString());
+        ImGui.Text("CrimsonStrikePvEReady: " + CrimsonStrikePvEReady.ToString());
+        ImGui.Text("MountainBusterPvEReady: " + MountainBusterPvEReady.ToString());
+        ImGui.Text("SlipstreamPvEReady: " + SlipstreamPvEReady.ToString());
+        ImGui.Text("SummonSolarBahamutPvEReady: " + SummonSolarBahamutPvEReady.ToString());
+        ImGui.Text("UmbralImpulsePvEReady: " + UmbralImpulsePvEReady.ToString());
+        ImGui.Text("UmbralFlarePvEReady: " + UmbralFlarePvEReady.ToString());
+        ImGui.Text("InSolarBahamut: " + InSolarBahamut.ToString());
+        ImGui.Text("EnkindleSolarBahamutPvEReady: " + EnkindleSolarBahamutPvEReady.ToString());
     }
     #endregion
+
+    #region PvE Actions
+
+    //Class Actions
+    static partial void ModifyRuinPvE(ref ActionSetting setting)
+    {
+
+    }
+
+    static RandomDelay _carbuncleDelay = new(() => (2, 2));
+    static partial void ModifySummonCarbunclePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => _carbuncleDelay.Delay(!DataCenter.HasPet && AttunmentTimeRaw == 0 && SummonTimeRaw == 0) && DataCenter.LastGCD is not ActionID.SummonCarbunclePvE;
+    }
+
+    static partial void ModifyRadiantAegisPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => HasSummon;
+    }
+
+    static partial void ModifyPhysickPvE(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyAetherchargePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => InCombat && HasSummon;
+    }
 
     static partial void ModifySummonRubyPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.IfritsFavor];
         setting.ActionCheck = () => SummonTime <= WeaponRemain && IsIfritReady;
+    }
+
+    static partial void ModifyGemshinePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Attunement > 0 && !AttunmentTimeEndAfter(ActionID.GemshinePvE.GetCastTime());
+    }
+
+    static partial void ModifyFesterPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => HasAetherflowStacks;
+    }
+
+    static partial void ModifyEnergyDrainPvE(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.FurtherRuin];
+        setting.ActionCheck = () => !HasAetherflowStacks;
+    }
+
+    static partial void ModifyResurrectionPvE(ref ActionSetting setting)
+    {
+ 
     }
 
     static partial void ModifySummonTopazPvE(ref ActionSetting setting)
@@ -157,15 +339,12 @@ partial class SummonerRotation
         setting.ActionCheck = () => SummonTime <= WeaponRemain && IsGarudaReady;
     }
 
-    static RandomDelay _carbuncleDelay = new(() => (2, 2));
-    static partial void ModifySummonCarbunclePvE(ref ActionSetting setting)
+    static partial void ModifyOutburstPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => _carbuncleDelay.Delay(!DataCenter.HasPet && AttunmentTimeRaw == 0 && SummonTimeRaw == 0) && DataCenter.LastGCD is not ActionID.SummonCarbunclePvE;
-    }
-
-    static partial void ModifyGemshinePvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => Attunement > 0 && !AttunmentTimeEndAfter(ActionID.GemshinePvE.GetCastTime());
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 3,
+        };
     }
 
     static partial void ModifyPreciousBrilliancePvE(ref ActionSetting setting)
@@ -173,137 +352,12 @@ partial class SummonerRotation
         setting.ActionCheck = () => Attunement > 0 && !AttunmentTimeEndAfter(ActionID.PreciousBrilliancePvE.GetCastTime());
     }
 
-    static partial void ModifyAetherchargePvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => InCombat && HasSummon;
-    }
-
-    static partial void ModifySummonSolarBahamutPvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => InCombat && SummonTime <= WeaponRemain;
-        setting.UnlockedByQuestID = 68165;
-    }
-
-    static partial void ModifySummonBahamutPvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => InCombat && SummonTime <= WeaponRemain;
-        setting.UnlockedByQuestID = 68165;
-    }
-
-    static partial void ModifyEnkindleBahamutPvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => InBahamut || InPhoenix;
-    }
-
-    static partial void ModifyEnkindleSolarBahamutPvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => InSolarBahamut;
-    }
-
-    static partial void ModifyDeathflarePvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => InBahamut;
-    }
-
-    static partial void ModifySunflarePvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => InSolarBahamut;
-    }
-
-    static partial void ModifySearingFlashPvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.RubysGlimmer];
-    }
-
-    static partial void ModifyLuxSolarisPvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.RefulgentLux];
-    }
-
-    static partial void ModifyRekindlePvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => InPhoenix;
-    }
-
-    static partial void ModifyCrimsonCyclonePvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.IfritsFavor];
-        setting.StatusProvide = [StatusID.CrimsonStrikeReady_4403];
-    }
-
-    static partial void ModifyCrimsonStrikePvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.CrimsonStrikeReady_4403];
-    }
-
-    static partial void ModifyCrimsonCyclonePvP(ref ActionSetting setting)
-    {
-        setting.SpecialType = SpecialActionType.MovingForward;
-    }
-
-    static partial void ModifyMountainBusterPvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.TitansFavor];
-    }
-
-    static partial void ModifySlipstreamPvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.GarudasFavor];
-    }
-
-    static partial void ModifyRuinIvPvE(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.FurtherRuin_2701];
-    }
-
-    static partial void ModifySearingLightPvE(ref ActionSetting setting)
-    {
-        setting.StatusProvide = [StatusID.SearingLight];
-        setting.ActionCheck = () => InCombat;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            TimeToKill = 15,
-        };
-    }
-
-    static partial void ModifyRadiantAegisPvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => HasSummon;
-    }
-
-    static partial void ModifyEnergyDrainPvE(ref ActionSetting setting)
-    {
-        setting.StatusProvide = [StatusID.FurtherRuin];
-        setting.ActionCheck = () => !HasAetherflowStacks;
-    }
-
-    static partial void ModifyFesterPvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => HasAetherflowStacks;
-    }
-
-    static partial void ModifyNecrotizePvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => HasAetherflowStacks;
-    }
-
-    static partial void ModifyEnergySiphonPvE(ref ActionSetting setting)
-    {
-        setting.StatusProvide = [StatusID.FurtherRuin];
-        setting.ActionCheck = () => !HasAetherflowStacks;
-        setting.UnlockedByQuestID = 67637;
-    }
-
-    static partial void ModifyPainflarePvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => HasAetherflowStacks;
-        setting.UnlockedByQuestID = 66629;
-    }
-
     static partial void ModifyRuinIiPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 65997;
     }
+
+    // Job Actions
 
     static partial void ModifySummonIfritPvE(ref ActionSetting setting)
     {
@@ -315,9 +369,22 @@ partial class SummonerRotation
         setting.UnlockedByQuestID = 66628;
     }
 
+    static partial void ModifyPainflarePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => HasAetherflowStacks;
+        setting.UnlockedByQuestID = 66629;
+    }
+
     static partial void ModifySummonGarudaPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 66631;
+    }
+
+    static partial void ModifyEnergySiphonPvE(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.FurtherRuin];
+        setting.ActionCheck = () => !HasAetherflowStacks;
+        setting.UnlockedByQuestID = 67637;
     }
 
     static partial void ModifyRuinIiiPvE(ref ActionSetting setting)
@@ -335,36 +402,185 @@ partial class SummonerRotation
         setting.UnlockedByQuestID = 67641;
     }
 
-
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.RadiantAegisPvE)]
-    protected sealed override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
+    static partial void ModifyRuinIvPvE(ref ActionSetting setting)
     {
-        if (RadiantAegisPvE.CanUse(out act)) return true;
-        return base.DefenseSingleAbility(nextGCD, out act);
+        setting.StatusNeed = [StatusID.FurtherRuin_2701];
     }
 
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.PhysickPvE)]
-    protected sealed override bool HealSingleGCD(out IAction? act)
+    static partial void ModifySearingLightPvE(ref ActionSetting setting)
     {
-        if (PhysickPvE.CanUse(out act)) return true;
-        return base.HealSingleGCD(out act);
+        setting.StatusProvide = [StatusID.SearingLight];
+        setting.ActionCheck = () => InCombat;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            TimeToKill = 15,
+        };
     }
 
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.AddlePvE)]
-    protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
+    static partial void ModifySummonBahamutPvE(ref ActionSetting setting)
     {
-        if (AddlePvE.CanUse(out act)) return true;
-        return base.DefenseAreaAbility(nextGCD, out act);
+        setting.ActionCheck = () => InCombat && SummonTime <= WeaponRemain;
+        setting.UnlockedByQuestID = 68165;
     }
 
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.CrimsonCyclonePvE)]
-    protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
+    static partial void ModifyEnkindleBahamutPvE(ref ActionSetting setting)
     {
-        if (CrimsonCyclonePvE.CanUse(out act)) return true;
-        return base.MoveForwardAbility(nextGCD, out act);
+        setting.ActionCheck = () => InBahamut || InPhoenix;
+    }
+
+    static partial void ModifyTridisasterPvE(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifySummonIfritIiPvE(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifySummonTitanIiPvE(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifySummonGarudaIiPvE(ref ActionSetting setting)
+    {
+        
+    }
+
+    static partial void ModifyNecrotizePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => HasAetherflowStacks;
+    }
+
+    static partial void ModifySearingFlashPvE(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.RubysGlimmer];
+    }
+
+    static partial void ModifyLuxSolarisPvE(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.RefulgentLux];
+    }
+    #endregion
+
+    #region PvE Actions Unassignable
+    static partial void ModifyAstralImpulsePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => AstralImpulsePvEReady;
+    }
+
+    static partial void ModifyAstralFlarePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => AstralFlarePvEReady;
+    }
+
+    static partial void ModifyDeathflarePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => InBahamut;
+    }
+
+    static partial void ModifyRubyRitePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => RubyRitePvEReady;
+    }
+
+    static partial void ModifyTopazRitePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => TopazRitePvEReady;
+    }
+
+    static partial void ModifyEmeraldRitePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => EmeraldRitePvEReady;
+    }
+
+    static partial void ModifySummonPhoenixPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => SummonPhoenixPvEReady;
+    }
+
+    static partial void ModifyFountainOfFirePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => FountainOfFirePvEReady;
+    }
+
+    static partial void ModifyBrandOfPurgatoryPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => BrandOfPurgatoryPvEReady;
+    }
+
+    static partial void ModifyRekindlePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => InPhoenix;
+    }
+
+    static partial void ModifyEnkindlePhoenixPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => EnkindlePhoenixPvEReady;
+    }
+
+    static partial void ModifyRubyCatastrophePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => RubyCatastrophePvEReady;
+    }
+
+    static partial void ModifyTopazCatastrophePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => TopazCatastrophePvEReady;
+    }
+
+    static partial void ModifyEmeraldCatastrophePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => EmeraldCatastrophePvEReady;
+    }
+
+    static partial void ModifyCrimsonCyclonePvE(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.CrimsonStrikeReady_4403];
+        setting.ActionCheck = () => CrimsonCyclonePvEReady;
+    }
+
+    static partial void ModifyCrimsonStrikePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => CrimsonStrikePvEReady;
+    }
+
+    static partial void ModifyMountainBusterPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => MountainBusterPvEReady;
+    }
+
+    static partial void ModifySlipstreamPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => SlipstreamPvEReady;
+    }
+
+    static partial void ModifySummonSolarBahamutPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => SummonSolarBahamutPvEReady && InCombat && SummonTime <= WeaponRemain;
+        setting.UnlockedByQuestID = 68165;
+
+    }
+
+    static partial void ModifyUmbralImpulsePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => UmbralImpulsePvEReady;
+    }
+
+    static partial void ModifySunflarePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => InSolarBahamut;
+    }
+
+    static partial void ModifyEnkindleSolarBahamutPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => EnkindleSolarBahamutPvEReady;
+    }
+    #endregion
+
+    static partial void ModifyCrimsonCyclonePvP(ref ActionSetting setting)
+    {
+        setting.SpecialType = SpecialActionType.MovingForward;
     }
 }

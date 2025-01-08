@@ -48,7 +48,6 @@ public class BaseAction : IBaseAction
     /// <inheritdoc/>
     public string Name => Info.Name;
 
-
     /// <inheritdoc/>
     public string Description => string.Empty;
 
@@ -94,11 +93,6 @@ public class BaseAction : IBaseAction
 
                 var classJob = Action.ClassJob.Value;
 
-                if (classJob.RowId != 0 && classJob.GetJobRole() == JobRole.Tank)
-                {
-                    value.AoeCount = 2;
-                }
-
                 if (value.TimeToUntargetable == 0)
                 {
                     value.TimeToUntargetable = value.TimeToKill;
@@ -106,7 +100,7 @@ public class BaseAction : IBaseAction
 
                 if (Setting.TargetStatusProvide != null)
                 {
-                    value.TimeToKill = 10;
+                    value.TimeToKill = 0;
                 }
             }
             return value;
