@@ -417,10 +417,68 @@ partial class DarkKnightRotation
             && Player.GetHealthRatio() <= Service.Config.HealthForDyingTanks) return true;
         return base.EmergencyAbility(nextGCD, out act);
     }
-
-    // PvP
+    #region PvP Actions Unassignable
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ScarletDeliriumPvPReady => Service.GetAdjustedActionId(ActionID.SouleaterPvP) == ActionID.ScarletDeliriumPvP;
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ComeuppancePvPReady => Service.GetAdjustedActionId(ActionID.SouleaterPvP) == ActionID.ComeuppancePvP;
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool TorcleaverPvPReady => Service.GetAdjustedActionId(ActionID.SouleaterPvP) == ActionID.TorcleaverPvP;
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool SaltAndDarknessPvPReady => Service.GetAdjustedActionId(ActionID.SaltedEarthPvP) == ActionID.SaltAndDarknessPvP;
+    #endregion
+    #region PvP Actions
+    /// <summary>
+    /// 
+    /// </summary>
+    static partial void ModifyShadowbringerPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Player.CurrentHp > 12000 || Player.HasStatus(true, StatusID.DarkArts_3034);
+        setting.MPOverride = () => 0;
+    }
     static partial void ModifyPlungePvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
     }
+
+    static partial void ModifyScarletDeliriumPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => ScarletDeliriumPvPReady;
+        setting.MPOverride = () => 0;
+    }
+
+    static partial void ModifyComeuppancePvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => ComeuppancePvPReady;
+        setting.MPOverride = () => 0;
+    }
+
+    static partial void ModifyTorcleaverPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => TorcleaverPvPReady;
+        setting.MPOverride = () => 0;
+    }
+
+    static partial void ModifyDisesteemPvP(ref ActionSetting setting)
+    {
+        setting.MPOverride = () => 0;
+    }
+
+    static partial void ModifySaltAndDarknessPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => SaltAndDarknessPvPReady;
+    }
+    
+    #endregion
 }
