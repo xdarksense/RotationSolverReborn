@@ -806,8 +806,7 @@ internal static class DataCenter
     public static bool IsCastingVfx(Func<VfxNewData, bool> isVfx)
     {
         // Create a copy of the VfxDataQueue to avoid modifying the collection while enumerating
-        var vfxDataQueueCopy = new List<VfxNewData>(VfxDataQueue.Count);
-        vfxDataQueueCopy.AddRange(VfxDataQueue);
+        var vfxDataQueueCopy = VfxDataQueue.ToList();
 
         foreach (var vfx in vfxDataQueueCopy)
         {

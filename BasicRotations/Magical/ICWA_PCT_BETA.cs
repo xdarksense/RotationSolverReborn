@@ -2,7 +2,7 @@
 
 namespace DefaultRotations.Magical;
 
-[Rotation("IcWa PCT BETA", CombatType.PvE, GameVersion = "7.15", Description = "Kindly created and donated by Rabbs and further update made by IcWa")]
+[Rotation("zIcWa PCT BETA", CombatType.PvE, GameVersion = "7.15", Description = "Kindly created and donated by Rabbs and further update made by IcWa")]
 [SourceCode(Path = "main/BasicRotations/Magical/ICWA_PCT_BETA.cs")]
 [Api(4)]
 public sealed class IcWaPctBeta : PictomancerRotation
@@ -163,11 +163,11 @@ public sealed class IcWaPctBeta : PictomancerRotation
         //Opener requirements
         if (CombatTime < 5)
         {
-            if (HolyInWhitePvE.CanUse(out act, skipCastingCheck: true, skipAoeCheck: true) && Paint > 0) return true;
-            if (PomMotifPvE.CanUse(out act) && CreatureMotifPvE.AdjustedID == PomMotifPvE.ID) return true;
-            if (WingMotifPvE.CanUse(out act) && CreatureMotifPvE.AdjustedID == WingMotifPvE.ID) return true;
-            if (ClawMotifPvE.CanUse(out act) && CreatureMotifPvE.AdjustedID == ClawMotifPvE.ID) return true;
-            if (MawMotifPvE.CanUse(out act) && CreatureMotifPvE.AdjustedID == MawMotifPvE.ID) return true;
+            if (HolyInWhitePvE.CanUse(out act) && Paint > 0) return true;
+            if (PomMotifPvE.CanUse(out act)) return true;
+            if (WingMotifPvE.CanUse(out act)) return true;
+            if (ClawMotifPvE.CanUse(out act)) return true;
+            if (MawMotifPvE.CanUse(out act)) return true;
         }
         // some gcd priority
         if (RainbowDripPvE.CanUse(out act, skipAoeCheck: true) && Player.HasStatus(true, StatusID.RainbowBright)) return true;
@@ -197,10 +197,10 @@ public sealed class IcWaPctBeta : PictomancerRotation
         }
         if ((LivingMusePvE.Cooldown.HasOneCharge || LivingMusePvE.Cooldown.RecastTimeRemainOneCharge <= CreatureMotifPvE.Info.CastTime * 1.7) && !Player.HasStatus(true, StatusID.StarryMuse) && !Player.HasStatus(true, StatusID.Hyperphantasia))
         {
-            if (PomMotifPvE.CanUse(out act) && CreatureMotifPvE.AdjustedID == PomMotifPvE.ID) return true;
-            if (WingMotifPvE.CanUse(out act) && CreatureMotifPvE.AdjustedID == WingMotifPvE.ID) return true;
-            if (ClawMotifPvE.CanUse(out act) && CreatureMotifPvE.AdjustedID == ClawMotifPvE.ID) return true;
-            if (MawMotifPvE.CanUse(out act) && CreatureMotifPvE.AdjustedID == MawMotifPvE.ID) return true;
+            if (PomMotifPvE.CanUse(out act)) return true;
+            if (WingMotifPvE.CanUse(out act)) return true;
+            if (ClawMotifPvE.CanUse(out act)) return true;
+            if (MawMotifPvE.CanUse(out act)) return true;
             ;
         }
         if ((SteelMusePvE.Cooldown.HasOneCharge || SteelMusePvE.Cooldown.RecastTimeRemainOneCharge <= WeaponMotifPvE.Info.CastTime) && !Player.HasStatus(true, StatusID.StarryMuse) && !Player.HasStatus(true, StatusID.Hyperphantasia))

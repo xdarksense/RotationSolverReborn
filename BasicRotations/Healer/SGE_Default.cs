@@ -251,6 +251,15 @@ public sealed class SGE_Default : SageRotation
     {
         act = null;
 
+        // If the last action performed matches any of a list of specific actions, it clears the Eukrasia aim.
+        // This serves as a reset/cleanup mechanism to ensure the decision logic starts fresh for the next cycle.
+        if (IsLastGCD(false, EukrasianPrognosisIiPvE, EukrasianPrognosisPvE,
+            EukrasianDiagnosisPvE, EukrasianDyskrasiaPvE, EukrasianDosisIiiPvE, EukrasianDosisIiPvE,
+            EukrasianDosisPvE) || !InCombat)
+        {
+            ClearEukrasia();
+        }
+
         if (!EukrasiaPvE.CanUse(out _)) return false;
         // Checks for Eukrasia status.
         // Attempts to set correct Eurkrasia action based on availablity and MergedStatus.
@@ -296,14 +305,6 @@ public sealed class SGE_Default : SageRotation
             return false;
         }
 
-        // If the last action performed matches any of a list of specific actions, it clears the Eukrasia aim.
-        // This serves as a reset/cleanup mechanism to ensure the decision logic starts fresh for the next cycle.
-        if (IsLastGCD(false, EukrasianPrognosisIiPvE, EukrasianPrognosisPvE,
-            EukrasianDiagnosisPvE, EukrasianDyskrasiaPvE, EukrasianDosisIiiPvE, EukrasianDosisIiPvE,
-            EukrasianDosisPvE) || !InCombat)
-        {
-            ClearEukrasia();
-        }
         return false; // Indicates that no specific Eukrasia action was chosen in this cycle.
     }
     #endregion
