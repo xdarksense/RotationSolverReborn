@@ -1,10 +1,13 @@
-﻿namespace RotationSolver.Basic.Rotations.Basic;
+﻿using Dalamud.Interface.Colors;
+
+namespace RotationSolver.Basic.Rotations.Basic;
 
 partial class DragoonRotation
 {
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Strength;
 
+    #region Job Gauge
     /// <summary>
     /// 
     /// </summary>
@@ -40,6 +43,32 @@ partial class DragoonRotation
     /// <returns></returns>
     protected static bool LOTDEndAfterGCD(uint gctCount = 0, float offset = 0)
         => LOTDEndAfter(GCDTime(gctCount, offset));
+    #endregion
+
+    #region PvE Actions Unassignable
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool DrakesbanePvEFangReady => Service.GetAdjustedActionId(ActionID.FangAndClawPvE) == ActionID.DrakesbanePvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool DrakesbanePvEWheelingReady => Service.GetAdjustedActionId(ActionID.WheelingThrustPvE) == ActionID.DrakesbanePvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool RaidenThrustPvEReady => Service.GetAdjustedActionId(ActionID.TrueThrustPvE) == ActionID.RaidenThrustPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool DraconianFuryPvEReady => Service.GetAdjustedActionId(ActionID.DoomSpikePvE) == ActionID.DraconianFuryPvE;
+    #endregion
+
+    #region Draw Debug
 
     /// <inheritdoc/>
     public override void DisplayStatus()
@@ -48,9 +77,15 @@ partial class DragoonRotation
         ImGui.Text("FocusCount: " + FocusCount.ToString());
         ImGui.Text("LOTDTimeRaw: " + LOTDTimeRaw.ToString());
         ImGui.Text("LOTDTime: " + LOTDTime.ToString());
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "PvE Actions");
+        ImGui.Text("DrakesbanePvEFangReady: " + DrakesbanePvEFangReady.ToString());
+        ImGui.Text("DrakesbanePvEWheelingReady: " + DrakesbanePvEWheelingReady.ToString());
+        ImGui.Text("RaidenThrustPvEReady: " + RaidenThrustPvEReady.ToString());
+        ImGui.Text("DraconianFuryPvEReady: " + DraconianFuryPvEReady.ToString());
     }
+    #endregion
 
-    //Job
+    #region PvE Actions
 
     static partial void ModifyTrueThrustPvE(ref ActionSetting setting)
     {
@@ -194,6 +229,7 @@ partial class DragoonRotation
 
     static partial void ModifyDrakesbanePvE(ref ActionSetting setting) //aka Kendrick Lamar
     {
+        setting.ActionCheck = () => DrakesbanePvEFangReady || DrakesbanePvEWheelingReady;
         setting.ComboIds = [ActionID.WheelingThrustPvE, ActionID.FangAndClawPvE];
         setting.StatusProvide = [StatusID.DraconianFire];
         setting.CreateConfig = () => new ActionConfig()
@@ -234,7 +270,7 @@ partial class DragoonRotation
 
     static partial void ModifyRaidenThrustPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.DraconianFire];
+        setting.ActionCheck = () => RaidenThrustPvEReady;
     }
 
     static partial void ModifyStardiverPvE(ref ActionSetting setting)
@@ -249,7 +285,7 @@ partial class DragoonRotation
 
     static partial void ModifyDraconianFuryPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.DraconianFire];
+        setting.ActionCheck = () => DraconianFuryPvEReady;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -313,6 +349,7 @@ partial class DragoonRotation
             AoeCount = 1,
         };
     }
+    #endregion
 
     // PvP
     static partial void ModifyHighJumpPvP(ref ActionSetting setting)

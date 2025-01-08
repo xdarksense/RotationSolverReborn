@@ -1,4 +1,6 @@
-﻿namespace RotationSolver.Basic.Rotations.Basic;
+﻿using Dalamud.Interface.Colors;
+
+namespace RotationSolver.Basic.Rotations.Basic;
 
 partial class BlackMageRotation
 {
@@ -164,6 +166,13 @@ partial class BlackMageRotation
     protected static bool HasThunder => Player.HasStatus(true, StatusID.Thunderhead);
     #endregion
 
+    #region PvE Actions Unassignable
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ParadoxPvEReady => Service.GetAdjustedActionId(ActionID.FirePvE) == ActionID.ParadoxPvE;
+    #endregion
+
     #region Debug
     /// <inheritdoc/>
     public override void DisplayStatus()
@@ -183,6 +192,9 @@ partial class BlackMageRotation
         ImGui.Text("IsEnochianActive: " + IsEnochianActive.ToString());
         ImGui.Text("EnochianTimeRaw: " + EnochianTimeRaw.ToString());
         ImGui.Text("EnochianTime: " + EnochianTime.ToString());
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "PvE Actions");
+        ImGui.Text("ParadoxPvEReady: " + ParadoxPvEReady.ToString());
+        ImGui.TextColored(ImGuiColors.DalamudOrange, "PvP Actions");
         ImGui.Text("HasPvPAstralFire: " + HasPvPAstralFire.ToString());
         ImGui.Text("HasPvPUmbralIce: " + HasPvPUmbralIce.ToString());
     }
@@ -246,7 +258,6 @@ partial class BlackMageRotation
 
     static partial void ModifyManafontPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InAstralFire && DataCenter.CurrentMp == 0 && UmbralHearts == 0 && !IsParadoxActive;
         setting.StatusProvide = [StatusID.Thunderhead];
         setting.UnlockedByQuestID = 66609;
     }
@@ -265,9 +276,6 @@ partial class BlackMageRotation
 
     static partial void ModifyUmbralSoulPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InUmbralIce && UmbralHearts <= 2 && DataCenter.DefaultGCDRemain <= ElementTimeRaw &&
-        ((UmbralIceStacks == 1 && DataCenter.CurrentMp <= 7500) || (UmbralIceStacks == 2 && DataCenter.CurrentMp <= 5000) || (UmbralIceStacks == 3 && DataCenter.CurrentMp == 0));
-        setting.StatusProvide = [StatusID.Thunderhead];
         setting.UnlockedByQuestID = 66609;
     }
 
@@ -318,7 +326,7 @@ partial class BlackMageRotation
 
     static partial void ModifyBlizzardIvPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InUmbralIce && UmbralHearts == 0 && !ElementTimeEndAfter(ActionID.BlizzardIvPvE.GetCastTime() - 0.1f);
+        setting.ActionCheck = () => InUmbralIce && !ElementTimeEndAfter(ActionID.BlizzardIvPvE.GetCastTime() - 0.1f);
         setting.UnlockedByQuestID = 67218;
     }
 

@@ -1,4 +1,6 @@
-﻿namespace RotationSolver.Basic.Rotations.Basic;
+﻿using Dalamud.Interface.Colors;
+
+namespace RotationSolver.Basic.Rotations.Basic;
 
 partial class DancerRotation
 {
@@ -7,6 +9,7 @@ partial class DancerRotation
     /// </summary>
     public override MedicineType MedicineType => MedicineType.Dexterity;
 
+    #region Job Gauge
     /// <summary>
     /// 
     /// </summary>
@@ -26,6 +29,42 @@ partial class DancerRotation
     /// 
     /// </summary>
     public static byte CompletedSteps => JobGauge.CompletedSteps;
+    #endregion
+
+    #region PvE Actions Unassignable
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool StandardFinishPvEReady => Service.GetAdjustedActionId(ActionID.StandardStepPvE) == ActionID.StandardFinishPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool TechnicalFinishPvEReady => Service.GetAdjustedActionId(ActionID.TechnicalStepPvE) == ActionID.TechnicalFinishPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ImprovisedFinishPvEReady => Service.GetAdjustedActionId(ActionID.ImprovisationPvE) == ActionID.ImprovisedFinishPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool TillanaPvEReady => Service.GetAdjustedActionId(ActionID.TechnicalStepPvE) == ActionID.TillanaPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool FinishingMovePvEReady => Service.GetAdjustedActionId(ActionID.StandardStepPvE) == ActionID.FinishingMovePvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool DanceOfTheDawnPvEReady => Service.GetAdjustedActionId(ActionID.SaberDancePvE) == ActionID.DanceOfTheDawnPvE;
+    #endregion
+
+    #region Debug Status
 
     /// <inheritdoc/>
     public override void DisplayStatus()
@@ -34,7 +73,15 @@ partial class DancerRotation
         ImGui.Text("Esprit: " + Esprit.ToString());
         ImGui.Text("Feathers: " + Feathers.ToString());
         ImGui.Text("CompletedSteps: " + CompletedSteps.ToString());
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "PvE Actions");
+        ImGui.Text("StandardFinishPvEReady: " + StandardFinishPvEReady.ToString());
+        ImGui.Text("TechnicalFinishPvE: " + TechnicalFinishPvE.ToString());
+        ImGui.Text("ImprovisedFinishPvEReady: " + ImprovisedFinishPvEReady.ToString());
+        ImGui.Text("TillanaPvEReady: " + TillanaPvEReady.ToString());
+        ImGui.Text("FinishingMovePvEReady: " + FinishingMovePvEReady.ToString());
+        ImGui.Text("DanceOfTheDawnPvEReady: " + DanceOfTheDawnPvEReady.ToString());
     }
+    #endregion
 
     static partial void ModifyCascadePvE(ref ActionSetting setting)
     {
@@ -182,8 +229,7 @@ partial class DancerRotation
 
     static partial void ModifyTillanaPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Esprit <= 50;
-        setting.StatusNeed = [StatusID.FlourishingFinish];
+        setting.ActionCheck = () => Esprit <= 50 && TillanaPvEReady;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -292,7 +338,7 @@ partial class DancerRotation
 
     static partial void ModifyFinishingMovePvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.FinishingMoveReady];
+        setting.ActionCheck = () => FinishingMovePvEReady;
         setting.StatusProvide = [StatusID.LastDanceReady];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -303,8 +349,7 @@ partial class DancerRotation
 
     static partial void ModifyDanceOfTheDawnPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Esprit >= 50;
-        setting.StatusNeed = [StatusID.DanceOfTheDawnReady];
+        setting.ActionCheck = () => Esprit >= 50 && DanceOfTheDawnPvEReady;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

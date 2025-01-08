@@ -44,12 +44,6 @@ public sealed class PLD_Beta : PaladinRotation
     public float ClemencyNoRequi { get; set; } = 0.4f;
     #endregion
 
-    private const ActionID ConfiteorPvEActionId = (ActionID)16459;
-    private new readonly IBaseAction ConfiteorPvE = new BaseAction(ConfiteorPvEActionId);
-
-    private const ActionID ImperatorPvEActionId = (ActionID)36921;
-    private new readonly IBaseAction ImperatorPvE = new BaseAction(ImperatorPvEActionId);
-
     #region Countdown Logic
     protected override IAction? CountDownAction(float remainTime)
     {
@@ -173,7 +167,7 @@ public sealed class PLD_Beta : PaladinRotation
         // if requiscat is not able to proc confiteor, use it as AOE tool if able, otherwise as Single Target
         if (!RequiescatMasteryTrait.EnoughLevel)
         {
-            if (HolyCirclePvE.EnoughLevel && NumberOfHostilesInRange > 1 && RequiescatPvE.CanUse(out act, skipAoeCheck: true, usedUp: true)) return true;
+            if (HolyCirclePvE.EnoughLevel && NumberOfHostilesInRange >= 1 && IsLastAbility(true, FightOrFlightPvE) && RequiescatPvE.CanUse(out act, skipAoeCheck: true, usedUp: true)) return true;
             if (!HolyCirclePvE.EnoughLevel && (NumberOfHostilesInRange == 1 || (RequiescatPvE.Target.Target?.IsBossFromIcon() ?? false)) && RequiescatPvE.CanUse(out act, skipAoeCheck: true, usedUp: true)) return true;
         }
 
@@ -213,13 +207,11 @@ public sealed class PLD_Beta : PaladinRotation
         if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
 
         // Confiteor Combo
-        if (BladeOfValorPvE.EnoughLevel && BladeOfValorPvE.CanUse(out act)) return true;
-        if (BladeOfTruthPvE.EnoughLevel && BladeOfTruthPvE.CanUse(out act)) return true;
-        if (BladeOfFaithPvE.EnoughLevel && BladeOfFaithPvE.CanUse(out act)) return true;
-        if (Player.HasStatus(true, StatusID.ConfiteorReady) && ConfiteorPvE.CanUse(out act, usedUp: true, skipAoeCheck: true)) return true;
+        if (ConfiteorPvE.CanUse(out act, usedUp: true, skipAoeCheck: true)) return true;
 
         if (GoringBladePvE.CanUse(out act)) return true;
 
+        // Atonement Combo
         if (SepulchrePvE.CanUse(out act)) return true;
         if (SupplicationPvE.CanUse(out act)) return true;
         if (AtonementPvE.CanUse(out act)) return true;

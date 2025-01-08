@@ -136,7 +136,7 @@ public sealed class DRK_Default : DarkKnightRotation
     #region GCD Logic
     protected override bool GeneralGCD(out IAction? act)
     {
-        if (DisesteemPvE.CanUse(out act)) return true;
+        if (DisesteemPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true)) return true;
 
         //AOE Delirium
         if (ImpalementPvE.CanUse(out act)) return true;

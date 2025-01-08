@@ -1,6 +1,6 @@
 ﻿namespace DefaultRotations.Tank;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.00", Description = "Beta Rotation")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.15", Description = "Beta Rotation")]
 [SourceCode(Path = "main/BasicRotations/PVPRotations/Tank/GNB_Default.PvP.cs")]
 [Api(4)]
 public sealed class GNB_DefaultPvP : GunbreakerRotation
@@ -79,13 +79,33 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
         return base.EmergencyAbility(nextGCD, out act);
     }
 
+    protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
+    {
+        act = null;
+        if (GuardCancel && Player.HasStatus(true, StatusID.Guard)) return false;
+
+        if (HeartOfCorundumPvP.CanUse(out act)) return true;
+
+        return base.DefenseSingleAbility(nextGCD, out act);
+    }
+
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
         if (GuardCancel && Player.HasStatus(true, StatusID.Guard)) return false;
 
+        if (HypervelocityPvP.CanUse(out act)) return true;
+        if (JugularRipPvP.CanUse(out act)) return true;
+        if (AbdomenTearPvP.CanUse(out act)) return true;
+        if (EyeGougePvP.CanUse(out act)) return true;
+        if (FatedBrandPvP.CanUse(out act)) return true;
+
+        if (BlastingZonePvP.CanUse(out act)) return true;
+        if (RoughDividePvP.CanUse(out act, usedUp: true)) return true;
+
         return base.AttackAbility(nextGCD, out act);
     }
+
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
@@ -93,6 +113,7 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
 
         return base.GeneralAbility(nextGCD, out act);
     }
+
     protected override bool GeneralGCD(out IAction? act)
     {
         act = null;
@@ -100,10 +121,20 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
         if (GuardCancel && Player.HasStatus(true, StatusID.Guard)) return false;
         if (!Player.HasStatus(true, StatusID.Guard) && UseSprintPvP && !Player.HasStatus(true, StatusID.Sprint) && !InCombat && SprintPvP.CanUse(out act)) return true;
 
-        if (SolidBarrelPvP.CanUse(out act)) return true;
-        if (BrutalShellPvP.CanUse(out act)) return true;
-        if (KeenEdgePvP.CanUse(out act)) return true;
+        if (!JugularRipPvPReady && !AbdomenTearPvPReady && !EyeGougePvPReady && !FatedBrandPvPReady && !HypervelocityPvPReady
+            && FatedCirclePvP.CanUse(out act)) return true;
 
+        if (WickedTalonPvP.CanUse(out act)) return true;
+        if (SavageClawPvP.CanUse(out act)) return true;
+        if (GnashingFangPvP.CanUse(out act, usedUp: true)) return true;
+
+        if (!SavageClawPvPReady && !WickedTalonPvPReady)
+        {
+            if (BurstStrikePvP.CanUse(out act)) return true;
+            if (SolidBarrelPvP.CanUse(out act)) return true;
+            if (BrutalShellPvP.CanUse(out act)) return true;
+            if (KeenEdgePvP.CanUse(out act)) return true;
+        }
 
         return base.GeneralGCD(out act);
     }

@@ -16,16 +16,6 @@ partial class PaladinRotation
     public override bool CanHealAreaAbility => false;
 
     /// <summary>
-    /// 
-    /// </summary>
-    public static bool HasDivineMight => !Player.WillStatusEndGCD(0, 0, true, StatusID.DivineMight);
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool HasFightOrFlight => !Player.WillStatusEndGCD(0, 0, true, StatusID.FightOrFlight);
-
-    /// <summary>
     /// Holds the remaining amount of Requiescat stacks
     /// </summary>
     public static byte RequiescatStacks
@@ -44,6 +34,30 @@ partial class PaladinRotation
     public static byte OathGauge => JobGauge.OathGauge;
     #endregion
 
+
+    #region Status Tracking
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasDivineMight => !Player.WillStatusEndGCD(0, 0, true, StatusID.DivineMight);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasFightOrFlight => !Player.WillStatusEndGCD(0, 0, true, StatusID.FightOrFlight);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasConfiteorReady => !Player.WillStatusEndGCD(0, 0, true, StatusID.ConfiteorReady);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasAtonementReady => !Player.WillStatusEndGCD(0, 0, true, StatusID.AtonementReady);
+    #endregion
+
     #region Actions Unassignable
 
     /// <summary>
@@ -54,7 +68,7 @@ partial class PaladinRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool SepulchreReady => Service.GetAdjustedActionId(ActionID.SupplicationPvE) == ActionID.SepulchrePvE;
+    public static bool SepulchreReady => Service.GetAdjustedActionId(ActionID.AtonementPvE) == ActionID.SepulchrePvE;
 
     /// <summary>
     /// 
@@ -64,12 +78,12 @@ partial class PaladinRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool BladeOfTruthReady => Service.GetAdjustedActionId(ActionID.BladeOfFaithPvE) == ActionID.BladeOfTruthPvE;
+    public static bool BladeOfTruthReady => Service.GetAdjustedActionId(ActionID.ConfiteorPvE) == ActionID.BladeOfTruthPvE;
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool BladeOfValorReady => Service.GetAdjustedActionId(ActionID.BladeOfTruthPvE) == ActionID.BladeOfValorPvE;
+    public static bool BladeOfValorReady => Service.GetAdjustedActionId(ActionID.ConfiteorPvE) == ActionID.BladeOfValorPvE;
 
     /// <summary>
     /// 
@@ -86,12 +100,16 @@ partial class PaladinRotation
         ImGui.Text("HasDivineMight: " + HasDivineMight.ToString());
         ImGui.Text("HasFightOrFlight: " + HasFightOrFlight.ToString());
         ImGui.Text("CanHealAreaAbility: " + CanHealAreaAbility.ToString());
-        ImGui.Text("SupplicationReady: " + SupplicationReady.ToString());
-        ImGui.Text("SepulchreReady: " + SepulchreReady.ToString());
+        ImGui.Spacing();
+        ImGui.Text("HasConfiteorReady: " + HasConfiteorReady.ToString());
         ImGui.Text("BladeOfFaithReady: " + BladeOfFaithReady.ToString());
         ImGui.Text("BladeOfTruthReady: " + BladeOfTruthReady.ToString());
         ImGui.Text("BladeOfValorReady: " + BladeOfValorReady.ToString());
         ImGui.Text("BladeOfHonorReady: " + BladeOfHonorReady.ToString());
+        ImGui.Spacing();
+        ImGui.Text("HasAtonementReady: " + HasAtonementReady.ToString());
+        ImGui.Text("SupplicationReady: " + SupplicationReady.ToString());
+        ImGui.Text("SepulchreReady: " + SepulchreReady.ToString());
     }
 
     #endregion
@@ -282,18 +300,18 @@ partial class PaladinRotation
 
     static partial void ModifyAtonementPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.AtonementReady];
+        setting.ActionCheck = () => HasAtonementReady;
         setting.StatusProvide = [StatusID.SupplicationReady];
     }
 
     static partial void ModifySepulchrePvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.SepulchreReady];
+        setting.ActionCheck = () => SepulchreReady;
     }
 
     static partial void ModifyConfiteorPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.ConfiteorReady];
+        setting.ActionCheck = () => HasConfiteorReady || BladeOfFaithReady || BladeOfTruthReady || BladeOfValorReady || IsLastAction(ActionID.ImperatorPvE) || (IsLastAction(ActionID.RequiescatPvE) && RequiescatMasteryTrait.EnoughLevel);
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -319,7 +337,6 @@ partial class PaladinRotation
     static partial void ModifyBladeOfFaithPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => BladeOfFaithReady;
-        setting.ComboIds = [ActionID.ConfiteorPvE];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -329,7 +346,6 @@ partial class PaladinRotation
     static partial void ModifyBladeOfTruthPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => BladeOfTruthReady;
-        setting.ComboIds = [ActionID.BladeOfFaithPvE];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -339,7 +355,6 @@ partial class PaladinRotation
     static partial void ModifyBladeOfValorPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => BladeOfValorReady;
-        setting.ComboIds = [ActionID.BladeOfTruthPvE];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -374,7 +389,6 @@ partial class PaladinRotation
     static partial void ModifySupplicationPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => SupplicationReady;
-        setting.StatusNeed = [StatusID.SupplicationReady];
         setting.StatusProvide = [StatusID.SepulchreReady];
     }
 

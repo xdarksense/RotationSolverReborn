@@ -13,8 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Resources\HostileCastingTank.json = Resources\HostileCastingTank.json
 		Resources\IncompatiblePlugins.json = Resources\IncompatiblePlugins.json
 		manifest.json = manifest.json
-		.github\workflows\publish.yaml = .github\workflows\publish.yaml
 		PrioTargetId.json = PrioTargetId.json
+		.github\workflows\publish.yaml = .github\workflows\publish.yaml
 		UpdateDownloads.ts = UpdateDownloads.ts
 	EndProjectSection
 EndProject

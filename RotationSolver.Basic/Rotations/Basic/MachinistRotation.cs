@@ -1,3 +1,5 @@
+using Dalamud.Interface.Colors;
+
 namespace RotationSolver.Basic.Rotations.Basic;
 
 partial class MachinistRotation
@@ -72,7 +74,21 @@ partial class MachinistRotation
     /// <returns></returns>
     protected static bool OverheatedEndAfterGCD(uint gctCount = 0, float offset = 0)
         => OverheatedEndAfter(GCDTime(gctCount, offset));
+    #endregion
 
+    #region PvE Actions Unassignable
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool DetonatorPvEReady => Service.GetAdjustedActionId(ActionID.WildfirePvE) == ActionID.DetonatorPvE;
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ExcavatorPvEReady => Service.GetAdjustedActionId(ActionID.ChainSawPvE) == ActionID.ExcavatorPvE;
+    #endregion
+
+    #region Debug Display
     /// <inheritdoc/>
     public override void DisplayStatus()
     {
@@ -86,6 +102,10 @@ partial class MachinistRotation
         ImGui.Text("OverheatTimeRemainingRaw: " + OverheatTimeRemainingRaw.ToString());
         ImGui.Text("OverheatTime: " + OverheatTime.ToString());
         ImGui.Text("OverheatedStacks: " + OverheatedStacks.ToString());
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "PvE Actions");
+        ImGui.Text("DetonatorPvEReady: " + DetonatorPvEReady.ToString());
+        ImGui.Text("ExcavatorPvEReady: " + ExcavatorPvEReady.ToString());
+        ImGui.Spacing();
     }
     #endregion
 
@@ -188,6 +208,11 @@ partial class MachinistRotation
         {
             TimeToKill = 10,
         };
+    }
+
+    static partial void ModifyDetonatorPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => DetonatorPvEReady;
     }
 
     static partial void ModifyRicochetPvE(ref ActionSetting setting)
@@ -377,7 +402,7 @@ partial class MachinistRotation
 
     static partial void ModifyExcavatorPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Player.HasStatus(true, StatusID.ExcavatorReady);
+        setting.ActionCheck = () => ExcavatorPvEReady;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
