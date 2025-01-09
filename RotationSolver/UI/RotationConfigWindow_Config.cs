@@ -33,7 +33,7 @@ public partial class RotationConfigWindow
         _baseHeader?.Draw();
     }
 
-    private static readonly CollapsingHeaderGroup _baseHeader = new CollapsingHeaderGroup(new()
+    private static readonly CollapsingHeaderGroup _baseHeader = new CollapsingHeaderGroup(new Dictionary<Func<string>, Action>
     {
         { UiString.ConfigWindow_Basic_Timer.GetDescription, DrawBasicTimer },
         { UiString.ConfigWindow_Basic_AutoSwitch.GetDescription, DrawBasicAutoSwitch },
@@ -110,7 +110,7 @@ public partial class RotationConfigWindow
         _allSearchable.DrawItems(Configs.BasicTimer);
     }
 
-    private static readonly CollapsingHeaderGroup _autoSwitch = new CollapsingHeaderGroup(new()
+    private static readonly CollapsingHeaderGroup _autoSwitch = new CollapsingHeaderGroup(new Dictionary<Func<string>, Action>
     {
         {
             UiString.ConfigWindow_Basic_SwitchCancelConditionSet.GetDescription,
@@ -259,7 +259,7 @@ public partial class RotationConfigWindow
         _UIHeader?.Draw();
     }
 
-    private static readonly CollapsingHeaderGroup _UIHeader = new CollapsingHeaderGroup(new()
+    private static readonly CollapsingHeaderGroup _UIHeader = new CollapsingHeaderGroup(new Dictionary<Func<string>, Action>
     {
         {
             UiString.ConfigWindow_UI_Information.GetDescription,
@@ -282,26 +282,37 @@ public partial class RotationConfigWindow
     private void DrawAuto()
     {
         ImGui.TextWrapped(UiString.ConfigWindow_Auto_Description.GetDescription());
-        DrawAutoStatusOrderConfig();
         _autoHeader?.Draw();
     }
 
-    private static readonly CollapsingHeaderGroup _autoHeader = new(new()
+    private static readonly CollapsingHeaderGroup _autoHeader = new(new Dictionary<Func<string>, Action>
     {
-        { UiString.ConfigWindow_Auto_ActionUsage.GetDescription, () =>
-            {
-                ImGui.TextWrapped(UiString.ConfigWindow_Auto_ActionUsage_Description.GetDescription());
-                ImGui.Separator();
-
-                _allSearchable.DrawItems(Configs.AutoActionUsage);
-            }
-        },
+        { UiString.ConfigWindow_Auto_PrioritiesOrganizer.GetDescription, DrawAutoStatusOrderConfig },
+        { UiString.ConfigWindow_Auto_ActionUsage.GetDescription, DrawActionUsageControl },
         { UiString.ConfigWindow_Auto_HealingCondition.GetDescription, DrawHealingActionCondition },
+        { UiString.ConfigWindow_Auto_PvPSpecific.GetDescription, DrawPvPSpecificControls },
         { UiString.ConfigWindow_Auto_StateCondition.GetDescription, () => _autoState?.Draw() },
     })
     {
         HeaderSize = HeaderSize,
     };
+
+    private static void DrawPvPSpecificControls()
+    {
+        ImGui.TextWrapped(UiString.ConfigWindow_Auto_PvPSpecific.GetDescription());
+        ImGui.Separator();
+        _allSearchable.DrawItems(Configs.PvPSpecificControls);
+    }
+    
+    /// <summary>
+    /// Draws the Action Usage and Control section.
+    /// </summary>
+    private static void DrawActionUsageControl()
+    {
+        ImGui.TextWrapped(UiString.ConfigWindow_Auto_ActionUsage_Description.GetDescription());
+        ImGui.Separator();
+        _allSearchable.DrawItems(Configs.AutoActionUsage);
+    }
 
     /// <summary>
     /// Draws the healing action condition section.
@@ -310,11 +321,10 @@ public partial class RotationConfigWindow
     {
         ImGui.TextWrapped(UiString.ConfigWindow_Auto_HealingCondition_Description.GetDescription());
         ImGui.Separator();
-
         _allSearchable.DrawItems(Configs.HealingActionCondition);
     }
 
-    private static readonly CollapsingHeaderGroup _autoState = new(new()
+    private static readonly CollapsingHeaderGroup _autoState = new(new Dictionary<Func<string>, Action>
     {
         {
             UiString.ConfigWindow_Auto_HealAreaConditionSet.GetDescription,
@@ -375,8 +385,8 @@ public partial class RotationConfigWindow
     /// <summary>
     /// Header group for target-related configurations.
     /// </summary>
-    private static readonly CollapsingHeaderGroup _targetHeader = new(new()
-{
+    private static readonly CollapsingHeaderGroup _targetHeader = new(new Dictionary<Func<string>, Action>
+    {
     { UiString.ConfigWindow_Target_Config.GetDescription, DrawTargetConfig },
     { UiString.ConfigWindow_List_Hostile.GetDescription, DrawTargetHostile },
     { UiString.ConfigWindow_List_TargetPriority.GetDescription, DrawTargetPriority },
@@ -488,8 +498,8 @@ public partial class RotationConfigWindow
         _extraHeader?.Draw();
     }
 
-    private static readonly CollapsingHeaderGroup _extraHeader = new(new()
-{
+    private static readonly CollapsingHeaderGroup _extraHeader = new(new Dictionary<Func<string>, Action>
+    {
     { UiString.ConfigWindow_EventItem.GetDescription, DrawEventTab },
     {
         UiString.ConfigWindow_Extra_Others.GetDescription,

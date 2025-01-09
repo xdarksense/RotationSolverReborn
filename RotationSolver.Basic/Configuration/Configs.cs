@@ -15,8 +15,8 @@ internal partial class Configs : IPluginConfiguration
         BasicParams = "BasicParams",
         UiInformation = "UiInformation",
         UiWindows = "UiWindows",
+        PvPSpecificControls = "PvPSpecificControls",
         AutoActionUsage = "AutoActionUsage",
-        AutoActionCondition = "AutoActionCondition",
         HealingActionCondition = "HealingActionCondition",
         TargetConfig = "TargetConfig",
         Extra = "Extra",
@@ -61,10 +61,6 @@ internal partial class Configs : IPluginConfiguration
         Filter = BasicAutoSwitch)]
     private static readonly bool _autoOffWhenDead = true;
 
-    [ConditionBool, UI("Auto turn off when dead in PvP.",
-        Filter = BasicAutoSwitch)]
-    private static readonly bool _autoOffWhenDeadPvP = true;
-
     [ConditionBool, UI("Auto turn off when duty completed.",
         Filter = BasicAutoSwitch)]
     private static readonly bool _autoOffWhenDutyCompleted = true;
@@ -104,9 +100,6 @@ internal partial class Configs : IPluginConfiguration
 
     [JobConfig, UI("Only used automatically if coded into the rotation", Filter = AutoActionUsage, PvPFilter = JobFilterType.NoJob)]
     private readonly TinctureUseType _TinctureType = TinctureUseType.Nowhere;
-    
-    [JobConfig, UI("Ignore Invincibility for PvP purposes.", Filter = AutoActionUsage)]
-    public bool IgnorePvPInvincibility { get; set; } = false;
 
     [ConditionBool, UI("Automatically use Anti-Knockback role actions (Arms Length, Surecast)", Filter = AutoActionUsage)]
     private static readonly bool _useKnockback = true;
@@ -118,10 +111,6 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Automatically use MP Potions", Description = "Experimental.",
         Filter = AutoActionUsage)]
     private static readonly bool _useMpPotions = false;
-
-    [JobConfig, UI("MP threshold under which to use Lucid Dreaming", Filter = AutoActionUsage)]
-    [Range(0, 10000, ConfigUnitType.None)]
-    public int LucidDreamingMpThreshold { get; set; } = 6000;
 
     [ConditionBool, UI("Prioritize mob/object targets with attack markers",
         Filter = TargetConfig)]
@@ -643,9 +632,26 @@ internal partial class Configs : IPluginConfiguration
         PvEFilter = JobFilterType.Tank)]
     [Range(1, 8, ConfigUnitType.None, 0.05f)]
     public int AutoDefenseNumber { get; set; } = 2;
-    #endregion
 
+    #endregion
+    
+    #region PvP
+    
+    [JobConfig, UI("Ignore Invincibility for PvP purposes.", Filter = PvPSpecificControls)]
+    private readonly bool _ignorePvPInvincibility = false;
+    
+    [ConditionBool, UI("Auto turn off when dead in PvP.",
+         Filter = PvPSpecificControls)]
+    private static readonly bool _autoOffWhenDeadPvP = true;
+    
+    #endregion
+    
     #region Jobs
+    
+    [JobConfig, UI("MP threshold under which to use Lucid Dreaming", Filter = HealingActionCondition)]
+    [Range(0, 10000, ConfigUnitType.None)]
+    private readonly int _lucidDreamingMpThreshold = 6000;
+    
     [JobConfig, Range(0, 1, ConfigUnitType.Percent)]
     private readonly float _healthAreaAbilityHot = 0.55f;
 
