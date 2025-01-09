@@ -145,7 +145,7 @@ internal static partial class TargetUpdater
             {
                 if (target == null) continue;
                 if (!target.IsEnemy() || !target.IsTargetable) continue;
-                if (target.StatusList?.Any(StatusHelper.IsInvincible) == true) continue;
+                if (target.StatusList?.Any(StatusHelper.IsInvincible) == true && (DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility || !DataCenter.IsPvP)) continue;
                 if (target.HasStatus(true, StatusID.StrongOfShield) && strongOfShieldPositional != target.FindEnemyPositional()) continue;
 
                 hostileTargets.Add(target);

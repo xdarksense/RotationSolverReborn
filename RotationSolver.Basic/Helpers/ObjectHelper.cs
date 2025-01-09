@@ -93,7 +93,7 @@ public static class ObjectHelper
 
         foreach (var status in battleChara.StatusList)
         {
-            if (StatusHelper.IsInvincible(status)) return false;
+            if (StatusHelper.IsInvincible(status) && (DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility || !DataCenter.IsPvP)) return false;
         }
 
         if (Svc.ClientState == null) return false;

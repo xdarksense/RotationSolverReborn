@@ -800,9 +800,9 @@ public partial class RotationConfigWindow : Window
         _aboutHeaders.Draw();
     }
 
-    private void DrawAutoStatusOrderConfig()
+    private static void DrawAutoStatusOrderConfig()
     {
-        ImGui.Text("Reorder AutoStatus Priorities:");
+        ImGui.Text(UiString.ConfigWindow_Auto_PrioritiesOrganizer.GetDescription());
         ImGui.Spacing();
 
         if (ImGui.Button("Reset to Default"))
@@ -2847,7 +2847,11 @@ public partial class RotationConfigWindow : Window
     {
         var target = Svc.Targets.Target;
         if (target == null) return;
-
+        
+        ImGui.Text($"Targetting through invuln:{(target.HasStatus(true, StatusID.Guard) && (DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility || !DataCenter.IsPvP))}");
+        ImGui.Text($"Guarding: {target.HasStatus(true, StatusID.Guard)}");
+        ImGui.Text($"IsPvP: {DataCenter.IsPvP}");
+        ImGui.Text($"IgnorePvPInvincibility: {Service.Config.IgnorePvPInvincibility}");
         ImGui.Text($"Height: {target.Struct()->Height}");
         ImGui.Text($"Kind: {target.GetObjectKind()}");
         ImGui.Text($"SubKind: {target.GetBattleNPCSubKind()}");

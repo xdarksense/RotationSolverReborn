@@ -639,6 +639,12 @@ partial class CustomRotation
     /// </summary>
     [Description("Health of dying tank")]
     public static float HealthForDyingTanks => Service.Config.HealthForDyingTanks;
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    [Description("Whether or not Invincibility should be ignored for a PvP action.")]
+    public static bool IgnorePvPInvincibility => Service.Config.IgnorePvPInvincibility;
     #endregion
 
     /// <summary>
