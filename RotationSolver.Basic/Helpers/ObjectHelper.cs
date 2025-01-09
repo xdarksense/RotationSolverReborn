@@ -47,7 +47,7 @@ public static class ObjectHelper
         {
             foreach (var n in ns1)
             {
-                if (!string.IsNullOrEmpty(n) && new Regex(n).Match(target.Name?.ExtractText() ?? string.Empty).Success)
+                if (!string.IsNullOrEmpty(n) && new Regex(n).Match(target.Name?.GetText() ?? string.Empty).Success)
                 {
                     return false;
                 }

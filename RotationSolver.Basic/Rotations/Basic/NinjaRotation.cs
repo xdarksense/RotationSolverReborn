@@ -41,7 +41,7 @@ partial class NinjaRotation
     /// <summary>
     /// Checks if no ninjutsu action is currently selected or if the Rabbit Medium has been invoked.
     /// </summary>
-    public static bool NoNinjutsu => AdjustId(ActionID.NinjutsuPvE) is ActionID.NinjutsuPvE or ActionID.RabbitMediumPvE;
+    public static bool NoNinjutsu => !IsExecutingMudra || RabbitMediumPvEActive;
 
     /// <summary>
     /// Holds the remaining amount of Delirium stacks
@@ -121,8 +121,48 @@ partial class NinjaRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool TenriJindoPvEReady => Service.GetAdjustedActionId(ActionID.TenChiJinPvE) == ActionID.TenriJindoPvE;
+    public static bool TenriJindoPvEReady => Service.GetAdjustedActionId(ActionID.TenChiJinPvE) == ActionID.TenriJindoPvE && !HasTenChiJin;
     #endregion
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasKassatsu => !Player.WillStatusEnd(0, true, StatusID.Kassatsu);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasRaijuReady => !Player.WillStatusEnd(0, true, StatusID.RaijuReady);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool IsExecutingMudra => !Player.WillStatusEnd(0, true, StatusID.Mudra);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasDoton => !Player.WillStatusEnd(0, true, StatusID.Doton);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool IsShadowWalking => !Player.WillStatusEnd(0, true, StatusID.ShadowWalker);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasPhantomKamaitachi => !Player.WillStatusEnd(0, true, StatusID.PhantomKamaitachiReady);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasTenChiJin => !Player.WillStatusEnd(0, true, StatusID.TenChiJin);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool IsHidden => !Player.WillStatusEnd(0, true, StatusID.Hidden);
 
     #region Draw Debug
     /// <inheritdoc/>
@@ -277,11 +317,12 @@ partial class NinjaRotation
     static partial void ModifyDreamWithinADreamPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 67222;
+        setting.ActionCheck = () => !HasTenChiJin;
     }
 
     static partial void ModifyHellfrogMediumPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Ninki >= 50;
+        setting.ActionCheck = () => Ninki >= 50 && !HasTenChiJin;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -292,7 +333,7 @@ partial class NinjaRotation
     {
         setting.StatusProvide = [StatusID.Higi];
         setting.TargetStatusProvide = [StatusID.Dokumori];
-        setting.ActionCheck = () => Ninki <= 60 && IsLongerThan(10);
+        setting.ActionCheck = () => Ninki <= 60 && IsLongerThan(10) && !HasTenChiJin;
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
@@ -305,31 +346,32 @@ partial class NinjaRotation
 
     static partial void ModifyBhavacakraPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Ninki >= 50;
+        setting.ActionCheck = () => Ninki >= 50 && !HasTenChiJin;
     }
 
     static partial void ModifyTenChiJinPvE(ref ActionSetting setting)
     {
+        setting.ActionCheck = () => !HasKassatsu;
         setting.StatusProvide = [StatusID.TenChiJin, StatusID.TenriJindoReady];
         setting.UnlockedByQuestID = 68488;
     }
-
+    
     static partial void ModifyMeisuiPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.ShadowWalker];
         setting.StatusProvide = [StatusID.Meisui];
-        setting.ActionCheck = () => !Player.HasStatus(true, StatusID.Kassatsu) && InCombat;
+        setting.ActionCheck = () => !HasKassatsu && InCombat && !HasTenChiJin;
     }
 
     static partial void ModifyBunshinPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Ninki >= 50;
+        setting.ActionCheck = () => Ninki >= 50 && !HasTenChiJin;
         setting.StatusProvide = [StatusID.Bunshin, StatusID.PhantomKamaitachiReady];
     }
 
     static partial void ModifyPhantomKamaitachiPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.PhantomKamaitachiReady];
+        setting.ActionCheck = () => HasPhantomKamaitachi;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -338,7 +380,7 @@ partial class NinjaRotation
 
     static partial void ModifyHollowNozuchiPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Doton];
+        setting.ActionCheck = () => HasDoton;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -347,17 +389,17 @@ partial class NinjaRotation
 
     static partial void ModifyForkedRaijuPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.RaijuReady];
+        setting.ActionCheck = () => HasRaijuReady;
     }
 
     static partial void ModifyFleetingRaijuPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.RaijuReady];
+        setting.ActionCheck = () => HasRaijuReady;
     }
 
     static partial void ModifyKunaisBanePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Player.HasStatus(true, StatusID.Hidden) || Player.HasStatus(true, StatusID.ShadowWalker);
+        setting.ActionCheck = () => (IsHidden || IsShadowWalking) && !HasTenChiJin;
         setting.TargetStatusProvide = [StatusID.KunaisBane];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -367,7 +409,7 @@ partial class NinjaRotation
 
     static partial void ModifyDeathfrogMediumPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Ninki <= 50 && DeathfrogMediumPvEReady;
+        setting.ActionCheck = () => Ninki <= 50 && DeathfrogMediumPvEReady && !HasTenChiJin;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -376,7 +418,7 @@ partial class NinjaRotation
 
     static partial void ModifyZeshoMeppoPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Ninki <= 50 && ZeshoMeppoPvEReady;
+        setting.ActionCheck = () => Ninki <= 50 && ZeshoMeppoPvEReady && !HasTenChiJin;
     }
 
     static partial void ModifyTenriJindoPvE(ref ActionSetting setting)
@@ -426,13 +468,11 @@ partial class NinjaRotation
     static partial void ModifyHyotonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => HyotonPvEReady;
-        setting.TargetStatusProvide = [StatusID.Blind];
     }
 
     static partial void ModifyHutonPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => HutonPvEReady;
-        setting.StatusProvide = [StatusID.ShadowWalker];
+        setting.ActionCheck = () => HutonPvEReady && !IsShadowWalking;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -457,7 +497,7 @@ partial class NinjaRotation
 
     static partial void ModifyGokaMekkyakuPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => GokaMekkyakuPvEReady;
+        setting.ActionCheck = () => HasKassatsu;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -466,7 +506,7 @@ partial class NinjaRotation
 
     static partial void ModifyHyoshoRanryuPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => HyoshoRanryuPvEReady;
+        setting.ActionCheck = () => HasKassatsu;
     }
     #endregion
 
