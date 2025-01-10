@@ -187,7 +187,7 @@ partial class DancerRotation
         setting.StatusProvide = [StatusID.ThreefoldFanDance];
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 2,
+            AoeCount = 3,
         };
     }
 
