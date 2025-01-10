@@ -96,7 +96,7 @@ public sealed class SMN_Default : SummonerRotation
             if (inBigInvocation && (elapsed1ChargeAfterInvocation || targetIsBossAndDying) && SunflarePvE.CanUse(out act, skipAoeCheck: true)) return true;
 
             if (RekindlePvE.CanUse(out act, skipAoeCheck: true)) return true;
-            if (MountainBusterPvE.CanUse(out act, skipAoeCheck: true)) return true;
+            if (MountainBusterPvE.CanUse(out act)) return true;
 
             if ((inSolarUnique && Player.HasStatus(false, StatusID.SearingLight) || !SearingLightPvE.EnoughLevel || isTargetBoss && isTargetDying) && EnergyDrainPvE.IsInCooldown && PainflarePvE.CanUse(out act)) return true;
             if ((inSolarUnique && Player.HasStatus(false, StatusID.SearingLight) || !SearingLightPvE.EnoughLevel || isTargetBoss && isTargetDying) && EnergyDrainPvE.IsInCooldown && FesterPvE.CanUse(out act)) return true;
@@ -128,7 +128,7 @@ public sealed class SMN_Default : SummonerRotation
             if (inBigInvocation && (elapsed4ChargeAfterInvocation || targetIsBossAndDying) && SunflarePvE.CanUse(out act, skipAoeCheck: true)) return true;
 
             if (RekindlePvE.CanUse(out act, skipAoeCheck: true)) return true;
-            if (MountainBusterPvE.CanUse(out act, skipAoeCheck: true)) return true;
+            if (MountainBusterPvE.CanUse(out act)) return true;
 
             if ((inSolarUnique && Player.HasStatus(false, StatusID.SearingLight) && elapsed2ChargeAfterInvocation && EnergyDrainPvE.Cooldown.WillHaveOneCharge(2) || !SearingLightPvE.EnoughLevel || isTargetBoss && isTargetDying) && EnergyDrainPvE.IsInCooldown && PainflarePvE.CanUse(out act)) return true;
             if ((inSolarUnique && Player.HasStatus(false, StatusID.SearingLight) && elapsed2ChargeAfterInvocation && EnergyDrainPvE.Cooldown.WillHaveOneCharge(2) || !SearingLightPvE.EnoughLevel || isTargetBoss && isTargetDying) && EnergyDrainPvE.IsInCooldown && FesterPvE.CanUse(out act)) return true;
