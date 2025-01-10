@@ -236,7 +236,7 @@ partial class CustomRotation
     /// <summary>
     /// Whether or not the player can use ST heal GCDs.
     /// </summary>
-    [Description("Can heal single area")]
+    [Description("Can heal single spell")]
     public virtual bool CanHealSingleSpell => true;
 
     /// <summary>

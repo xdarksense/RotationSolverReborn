@@ -207,30 +207,6 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         RSCommands.Enable();
     }
 
-    public async void Dispose()
-    {
-        RSCommands.Disable();
-        Watcher.Disable();
-
-        Svc.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
-        Svc.PluginInterface.UiBuilder.Draw -= OnDraw;
-
-        foreach (var item in _dis)
-        {
-            item.Dispose();
-        }
-        _dis?.Clear();
-
-        MajorUpdater.Dispose();
-        //HotbarHighlightDrawerManager.Dispose();
-        HotbarHighlightManager.Dispose();
-        await OtherConfiguration.Save();
-
-        ECommonsMain.Dispose();
-
-        Service.Config.Save();
-    }
-
     private void OnOpenConfigUi()
     {
         OpenConfigWindow();
@@ -274,5 +250,29 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
             }
         }
         return false;
+    }
+
+    public async void Dispose()
+    {
+        RSCommands.Disable();
+        Watcher.Disable();
+
+        Svc.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
+        Svc.PluginInterface.UiBuilder.Draw -= OnDraw;
+
+        foreach (var item in _dis)
+        {
+            item.Dispose();
+        }
+        _dis?.Clear();
+
+        MajorUpdater.Dispose();
+        //HotbarHighlightDrawerManager.Dispose();
+        HotbarHighlightManager.Dispose();
+        await OtherConfiguration.Save();
+
+        ECommonsMain.Dispose();
+
+        Service.Config.Save();
     }
 }

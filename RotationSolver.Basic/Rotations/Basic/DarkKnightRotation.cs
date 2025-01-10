@@ -311,7 +311,7 @@ partial class DarkKnightRotation
         setting.StatusProvide = [StatusID.Darkside];
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 2,
         };
     }
 

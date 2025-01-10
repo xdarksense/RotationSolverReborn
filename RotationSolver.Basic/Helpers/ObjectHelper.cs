@@ -335,7 +335,7 @@ public static class ObjectHelper
     /// </returns>
     internal static bool IsTopPriorityHostile(this IGameObject obj)
     {
-        if (obj == null) return false;
+        if (obj.IsAlliance() || obj.IsParty() || obj == null) return false;
 
         var fateId = DataCenter.FateId;
 
