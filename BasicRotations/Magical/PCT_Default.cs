@@ -105,7 +105,7 @@ public sealed class PCT_Default : PictomancerRotation
         // Bursts
         int adjustCombatTimeForOpener = Player.Level < 92 ? 2 : 5;
         if (StarryMusePvE.CanUse(out act) && CombatTime > adjustCombatTimeForOpener && IsBurst) return true;
-        if (CombatTime > adjustCombatTimeForOpener && StrikingMusePvE.CanUse(out act) && burstTimingCheckerStriking) return true;
+        if (CombatTime > adjustCombatTimeForOpener && StrikingMusePvE.CanUse(out act, usedUp: true) && burstTimingCheckerStriking) return true;
         if (SubtractivePalettePvE.CanUse(out act)) return true;
 
         if (HasStarryMuse)
@@ -115,7 +115,7 @@ public sealed class PCT_Default : PictomancerRotation
         }
         if (RetributionOfTheMadeenPvE.CanUse(out act)) return true;
         if (MogOfTheAgesPvE.CanUse(out act)) return true;
-        if (StrikingMusePvE.CanUse(out act) && burstTimingCheckerStriking) return true;
+        if (StrikingMusePvE.CanUse(out act, usedUp: true) && burstTimingCheckerStriking) return true;
         if (PomMusePvE.CanUse(out act, usedUp: true)) return true;
         if (WingedMusePvE.CanUse(out act, usedUp: true)) return true;
         if (ClawedMusePvE.CanUse(out act, usedUp: true)) return true;
