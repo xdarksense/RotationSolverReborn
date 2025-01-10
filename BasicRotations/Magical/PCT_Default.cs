@@ -101,7 +101,7 @@ public sealed class PCT_Default : PictomancerRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        bool burstTimingCheckerStriking = !ScenicMusePvE.Cooldown.WillHaveOneCharge(60) || HasStarryMuse;
+        bool burstTimingCheckerStriking = (!ScenicMusePvE.Cooldown.WillHaveOneCharge(60) || HasStarryMuse) || !StarryMusePvE.EnoughLevel;
         // Bursts
         int adjustCombatTimeForOpener = Player.Level < 92 ? 2 : 5;
         if (StarryMusePvE.CanUse(out act) && CombatTime > adjustCombatTimeForOpener && IsBurst) return true;
