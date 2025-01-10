@@ -1,12 +1,18 @@
-﻿namespace DefaultRotations.Tank;
+namespace DefaultRotations.Tank;
 
-[Rotation("Beta", CombatType.PvE, GameVersion = "7.15")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Tank/GNB_Default.cs")]
 [Api(4)]
-public sealed class GNB_Default : GunbreakerRotation
+public sealed class GNB_Default_Old : GunbreakerRotation
 {
-    #region Countdown Logic
+    #region Config Options
+    [RotationConfig(CombatType.PvE, Name = "Use experimental No Mercy logic for burst")]
+    public bool NoMercyLogic { get; set; } = false;
+    #endregion
 
+    private static bool InBurstStatus => !Player.WillStatusEnd(0, true, StatusID.NoMercy);
+
+    #region Countdown Logic
     protected override IAction? CountDownAction(float remainTime)
     {
         if (remainTime <= 0.7 && LightningShotPvE.CanUse(out var act)) return act;
@@ -15,33 +21,30 @@ public sealed class GNB_Default : GunbreakerRotation
     }
     #endregion
 
-    #region Additional oGCD Logic
-
-    [RotationDesc]
+    #region oGCD Logic
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        // Attempt to align Bloodfest with No Mercy during opener
+        if (base.EmergencyAbility(nextGCD, out act)) return true;
+
         if (InCombat && CombatElapsedLess(30))
         {
             if (!CombatElapsedLessGCD(2) && NoMercyPvE.CanUse(out act, skipAoeCheck: true)) return true;
-            if (Player.HasStatus(true, StatusID.NoMercy) && BloodfestPvE.CanUse(out act, skipAoeCheck: true)) return true;
+            if (InBurstStatus && BloodfestPvE.CanUse(out act, skipAoeCheck: true)) return true;
         }
+
+        if (AbdomenTearPvE.CanUse(out act)) return true;
+        if (EyeGougePvE.CanUse(out act)) return true;
+        if (FatedBrandPvE.CanUse(out act)) return true;
+        if (HypervelocityPvE.CanUse(out act)) return true;
 
         return base.EmergencyAbility(nextGCD, out act);
     }
 
-    [RotationDesc(ActionID.TrajectoryPvE)]
-    protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
-    {
-        if (TrajectoryPvE.CanUse(out act)) return true;
-        return base.MoveForwardAbility(nextGCD, out act);
-    }
-
     [RotationDesc(ActionID.HeartOfLightPvE, ActionID.ReprisalPvE)]
-    protected sealed override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
+    protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (!Player.HasStatus(true, StatusID.NoMercy) && HeartOfLightPvE.CanUse(out act, skipAoeCheck: true)) return true;
-        if (!Player.HasStatus(true, StatusID.NoMercy) && ReprisalPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (!InBurstStatus && HeartOfLightPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (!InBurstStatus && ReprisalPvE.CanUse(out act, skipAoeCheck: true)) return true;
         return base.DefenseAreaAbility(nextGCD, out act);
     }
 
@@ -69,21 +72,11 @@ public sealed class GNB_Default : GunbreakerRotation
         if (AuroraPvE.CanUse(out act, usedUp: true)) return true;
         return base.HealSingleAbility(nextGCD, out act);
     }
-    #endregion
-
-    #region oGCD Logic
-
-    protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
-    {
-        if (!CombatElapsedLessGCD(5) && NoMercyPvE.CanUse(out act, skipAoeCheck: true)) return true;
-        return base.GeneralAbility(nextGCD, out act);
-    }
-
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        //if (IsBurst && CanUseNoMercy(out act)) return true;
+        if (NoMercyLogic && IsBurst && CanUseNoMercy(out act)) return true;
 
-        if (!CombatElapsedLessGCD(5) && NoMercyPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (!NoMercyLogic && !CombatElapsedLessGCD(5) && NoMercyPvE.CanUse(out act, skipAoeCheck: true)) return true;
 
         if (JugularRipPvE.CanUse(out act)) return true;
 
@@ -92,47 +85,46 @@ public sealed class GNB_Default : GunbreakerRotation
 
             if (!IsFullParty && !(DangerZonePvE.Target.Target?.IsBossFromTTK() ?? false)) return true;
 
-            if (!GnashingFangPvE.EnoughLevel && (Player.HasStatus(true, StatusID.NoMercy) || !NoMercyPvE.Cooldown.WillHaveOneCharge(15))) return true;
+            if (!GnashingFangPvE.EnoughLevel && (InBurstStatus || !NoMercyPvE.Cooldown.WillHaveOneCharge(15))) return true;
 
-            if (Player.HasStatus(true, StatusID.NoMercy) && GnashingFangPvE.Cooldown.IsCoolingDown) return true;
+            if (InBurstStatus && GnashingFangPvE.Cooldown.IsCoolingDown) return true;
 
-            if (!Player.HasStatus(true, StatusID.NoMercy) && !GnashingFangPvE.Cooldown.WillHaveOneCharge(20)) return true;
+            if (!InBurstStatus && !GnashingFangPvE.Cooldown.WillHaveOneCharge(20)) return true;
         }
 
-        if (Player.HasStatus(true, StatusID.NoMercy) && CanUseBowShock(out act)) return true;
+        if (InBurstStatus && CanUseBowShock(out act)) return true;
 
         //if (TrajectoryPvE.CanUse(out act) && !IsMoving) return true;
         if (GnashingFangPvE.Cooldown.IsCoolingDown && DoubleDownPvE.Cooldown.IsCoolingDown && Ammo == 0 && BloodfestPvE.CanUse(out act)) return true;
 
-        if (AbdomenTearPvE.CanUse(out act)) return true;
-        if (EyeGougePvE.CanUse(out act)) return true;
-        if (FatedBrandPvE.CanUse(out act)) return true;
-        if (HypervelocityPvE.CanUse(out act)) return true;
+        bool areDDTargetsInRange = AllHostileTargets.Any(hostile => hostile.DistanceToPlayer() < 4.5f);
+
+        if (areDDTargetsInRange)
+        {
+            if (InBurstStatus && IsLastGCD(ActionID.DoubleDownPvE) && BlastingZonePvE.CanUse(out act)) return true;
+        }
+        if (NoMercyPvE.Cooldown.IsCoolingDown && BloodfestPvE.Cooldown.IsCoolingDown && BlastingZonePvE.CanUse(out act)) return true;
         return base.AttackAbility(nextGCD, out act);
     }
     #endregion
 
     #region GCD Logic
-
     protected override bool GeneralGCD(out IAction? act)
     {
         bool areDDTargetsInRange = AllHostileTargets.Any(hostile => hostile.DistanceToPlayer() < 4.5f);
 
-        if (Player.HasStatus(true, StatusID.NoMercy) && BloodfestPvE.CanUse(out act)) return true;
+        if (InBurstStatus && BloodfestPvE.CanUse(out act)) return true;
 
         if (IsLastGCD(false, NobleBloodPvE) && LionHeartPvE.CanUse(out act, skipComboCheck: true)) return true;
         if (IsLastGCD(false, ReignOfBeastsPvE) && NobleBloodPvE.CanUse(out act, skipComboCheck: true)) return true;
-        if (ReignOfBeastsPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (!InGnashingFang && ReignOfBeastsPvE.CanUse(out act, skipAoeCheck: true)) return true;
 
-        if (Player.HasStatus(true, StatusID.NoMercy) && SonicBreakPvE.CanUse(out act)) return true;
+        if (InBurstStatus && SonicBreakPvE.CanUse(out act)) return true;
 
         if (areDDTargetsInRange)
         {
-            if (Player.HasStatus(true, StatusID.NoMercy) && CanUseDoubleDown(out act)) return true;
-            if (Player.HasStatus(true, StatusID.NoMercy) && IsLastGCD(ActionID.DoubleDownPvE) && BlastingZonePvE.CanUse(out act)) return true;
+            if (InBurstStatus && CanUseDoubleDown(out act)) return true;
         }
-
-        if (NoMercyPvE.Cooldown.IsCoolingDown && BloodfestPvE.Cooldown.IsCoolingDown && BlastingZonePvE.CanUse(out act)) return true;
 
         if (CanUseGnashingFang(out act)) return true;
 
@@ -147,15 +139,17 @@ public sealed class GNB_Default : GunbreakerRotation
 
         if (Ammo == MaxAmmo && IsLastGCD(ActionID.BrutalShellPvE) && BurstStrikePvE.CanUse(out act)) return true;
 
-        if (SolidBarrelPvE.CanUse(out act)) return true;
-        if (BrutalShellPvE.CanUse(out act)) return true;
-        if (KeenEdgePvE.CanUse(out act)) return true;
+        if (!InGnashingFang)
+        {
+            if (SolidBarrelPvE.CanUse(out act)) return true;
+            if (BrutalShellPvE.CanUse(out act)) return true;
+            if (KeenEdgePvE.CanUse(out act)) return true;
+        }
 
         if (LightningShotPvE.CanUse(out act)) return true;
 
         return base.GeneralGCD(out act);
     }
-
     #endregion
 
     #region Extra Methods
@@ -163,24 +157,25 @@ public sealed class GNB_Default : GunbreakerRotation
 
     public override bool CanHealAreaSpell => false;
 
-    //private bool CanUseNoMercy(out IAction act)
-    //{
-    //    if (!NoMercy.CanUse(out act, CanUseOption.OnLastAbility)) return false;
+    private bool CanUseNoMercy(out IAction act)
+    {
+        var IsTargetBoss = HostileTarget?.IsBossFromIcon() ?? false;
 
-    //    if (!IsFullParty && !IsTargetBoss && !IsMoving && DemonSlice.CanUse(out _)) return true;
+        if (!NoMercyPvE.CanUse(out act)) return false;
 
-    //    if (!BurstStrike.EnoughLevel) return true;
+        if (!IsFullParty && !IsTargetBoss && !IsMoving && DemonSlicePvE.CanUse(out _)) return true;
 
-    //    if (BurstStrike.EnoughLevel)
-    //    {
-    //        if (IsLastGCD((ActionID)KeenEdge.ID) && Ammo == 1 && !GnashingFang.IsCoolingDown && !BloodFest.IsCoolingDown) return true;
-    //        else if (Ammo == (Level >= 88 ? 3 : 2)) return true;
-    //        else if (Ammo == 2 && GnashingFang.IsCoolingDown) return true;
-    //    }
+        if (!BurstStrikePvE.EnoughLevel) return true;
 
-    //    act = null;
-    //    return false;
-    //}
+        if (BurstStrikePvE.EnoughLevel)
+        {
+            if (IsLastGCD(ActionID.KeenEdgePvE) && Ammo == 1 && !GnashingFangPvE.Cooldown.IsCoolingDown && !BloodfestPvE.Cooldown.IsCoolingDown) return true;
+            else if (Ammo == MaxAmmo) return true;
+            else if (Ammo == 2 && GnashingFangPvE.Cooldown.IsCoolingDown) return true;
+        }
+
+        return false;
+    }
 
     private bool CanUseGnashingFang(out IAction? act)
     {
