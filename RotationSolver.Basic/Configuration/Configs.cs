@@ -640,6 +640,14 @@ internal partial class Configs : IPluginConfiguration
          Filter = PvPSpecificControls)]
     private static readonly bool _autoOffWhenDeadPvP = true;
     
+    [ConditionBool, UI("Auto turn off when PvP match ends.",
+         Filter = PvPSpecificControls)]
+    private static readonly bool _autoOffPvPMatchEnd = true;
+    
+    [ConditionBool, UI("Auto turn on when PvP match starts.",
+         Filter = PvPSpecificControls)]
+    private static readonly bool _autoOnPvPMatchStart = true;
+    
     #endregion
     
     #region Jobs
