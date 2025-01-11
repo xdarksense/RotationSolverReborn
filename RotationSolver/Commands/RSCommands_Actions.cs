@@ -182,7 +182,6 @@ namespace RotationSolver.Commands
                     (Service.Config.AutoOffWhenDead && DataCenter.Territory?.IsPvP == false && Player.Available && Player.Object?.CurrentHp == 0) ||
                     (Service.Config.AutoOffWhenDeadPvP && DataCenter.Territory?.IsPvP == true && Player.Available && Player.Object?.CurrentHp == 0) ||
                     (Service.Config.AutoOffPvPMatchEnd && Svc.Condition[ConditionFlag.PvPDisplayActive]) ||
-                    (Service.Config.AutoOnPvPMatchStart && Svc.Condition[ConditionFlag.BetweenAreas] && Svc.Condition[ConditionFlag.BoundByDuty] && DataCenter.Territory?.IsPvP == true) ||
                     (Service.Config.AutoOffCutScene && Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]) ||
                     (Service.Config.AutoOffSwitchClass && Player.Job != _previousJob) ||
                     (Service.Config.AutoOffBetweenArea && (Svc.Condition[ConditionFlag.BetweenAreas] || Svc.Condition[ConditionFlag.BetweenAreas51])) ||
@@ -193,6 +192,11 @@ namespace RotationSolver.Commands
                     CancelState();
                     if (Player.Job != _previousJob) _previousJob = Player.Job;
                     if (ActionUpdater.AutoCancelTime != DateTime.MinValue) ActionUpdater.AutoCancelTime = DateTime.MinValue;
+                }
+                else if ((Service.Config.AutoOnPvPMatchStart && Svc.Condition[ConditionFlag.BetweenAreas] &&
+                          Svc.Condition[ConditionFlag.BoundByDuty] && DataCenter.Territory?.IsPvP == true))
+                {
+                    DoStateCommandType(StateCommandType.Auto);
                 }
                 else if (Service.Config.StartOnAttackedBySomeone && target != null && !target.IsDummy())
                 {

@@ -2687,7 +2687,7 @@ public partial class RotationConfigWindow : Window
     private static readonly CollapsingHeaderGroup _debugHeader = new(new()
     {
         {() => DataCenter.RightNowRotation != null ? "Rotation" : string.Empty, DrawDebugRotationStatus},
-        {() => "Status", DrawStatus },
+        {() => "Player Status", DrawStatus },
         {() => "Party", DrawParty },
         {() => "Target Data", DrawTargetData },
         {() => "Next Action", DrawNextAction },

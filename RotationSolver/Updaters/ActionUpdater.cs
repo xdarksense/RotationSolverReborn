@@ -143,7 +143,7 @@ internal static class ActionUpdater
     private static DateTime _startDeadTime = DateTime.MinValue;
     private static DateTime _startAliveTime = DateTime.Now;
     private static bool _isDead = true;
-    private static void UpdateLifetime()
+    public static void UpdateLifetime()
     {
         if (Player.Object == null) return;
 

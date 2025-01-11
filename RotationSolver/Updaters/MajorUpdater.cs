@@ -32,6 +32,16 @@ internal static class MajorUpdater
         ActionSequencerUpdater.Enable(Svc.PluginInterface.ConfigDirectory.FullName + "\\Conditions");
         Svc.Framework.Update += RSRUpdate;
     }
+    
+    // "Transition locked" means when !MajorUpdater.IsValid
+    // TransitionSafeCommands are any function that are qualified safe for RSRUpdate to run, even when other updates should not happen.
+    // TransitionSafeCommands *should* be duplicated elsewhere for commands that should also run when otherwise safe to update.
+    // TransitionSafeCommands *should not* be used for commands that should *only* run when transition locked.
+    public static void TransitionSafeCommands()
+    {
+        RSCommands.UpdateRotationState();
+        ActionUpdater.UpdateLifetime();
+    }
 
     private unsafe static void RSRUpdate(IFramework framework)
     {
@@ -39,11 +49,8 @@ internal static class MajorUpdater
         RotationSolverPlugin.UpdateDisplayWindow();
 
         if (!IsValid)
-        {
-            if (Service.Config.AutoOffBetweenArea)
-            {
-                RSCommands.DoStateCommandType(StateCommandType.Off);
-            }
+        {   
+            TransitionSafeCommands();
             ActionUpdater.ClearNextAction();
             CustomRotation.MoveTarget = null;
             return;
