@@ -3,7 +3,7 @@ namespace DefaultRotations.Tank;
 [Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Tank/GNB_Default.cs")]
 [Api(4)]
-public sealed class GNB_Default : GunbreakerRotation
+public sealed class GNB_Default_Old : GunbreakerRotation
 {
     #region Config Options
     [RotationConfig(CombatType.PvE, Name = "Use experimental No Mercy logic for burst")]

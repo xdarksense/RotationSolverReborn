@@ -25,6 +25,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Duty\EmanationDefault" />
+    <Compile Include="Magical\ICWA_PCT_BETA" />
+    <Compile Include="Tank\PLD_Default_Old" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Tank\GNB_Default.cs" />
   </ItemGroup>
   <ItemGroup>
 	  <Reference Include="Dalamud">

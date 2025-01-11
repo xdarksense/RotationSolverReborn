@@ -1,9 +1,9 @@
 ﻿namespace DefaultRotations.Tank;
 
-[Rotation("Beta", CombatType.PvE, GameVersion = "7.15")]
-[SourceCode(Path = "main/BasicRotations/Tank/GNB_Beta.cs")]
+[Rotation("Old", CombatType.PvE, GameVersion = "7.15")]
+[SourceCode(Path = "main/BasicRotations/Tank/GNB_Default_old2.cs")]
 [Api(4)]
-public sealed class GNB_Beta : GunbreakerRotation
+public sealed class GNB_Default_old2 : GunbreakerRotation
 {
     #region Countdown Logic
 

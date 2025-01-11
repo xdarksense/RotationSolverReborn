@@ -197,7 +197,7 @@ partial class SummonerRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool MountainBusterPvEReady => Service.GetAdjustedActionId(ActionID.AstralFlowPvE) == ActionID.MountainBusterPvE;
+    public static bool MountainBusterPvEReady => Service.GetAdjustedActionId(ActionID.AstralFlowPvE) == ActionID.MountainBusterPvE_25836;
     /// <summary>
     /// 
     /// </summary>
@@ -245,29 +245,29 @@ partial class SummonerRotation
         ImGui.Text("AttunmentTime: " + AttunmentTime.ToString());
         ImGui.Text("HasSummon: " + HasSummon.ToString());
         ImGui.TextColored(ImGuiColors.DalamudViolet, "PvE Actions");
-        ImGui.Text("AstralImpulsePvEReady: " + AstralImpulsePvEReady.ToString());
-        ImGui.Text("AstralFlarePvEReady: " + AstralFlarePvEReady.ToString());
-        ImGui.Text("InBahamut: " + InBahamut.ToString());
-        ImGui.Text("RubyRitePvEReady: " + RubyRitePvEReady.ToString());
-        ImGui.Text("TopazRitePvEReady: " + TopazRitePvEReady.ToString());
-        ImGui.Text("EmeraldRitePvEReady: " + EmeraldRitePvEReady.ToString());
-        ImGui.Text("SummonPhoenixPvEReady: " + SummonPhoenixPvEReady.ToString());
-        ImGui.Text("FountainOfFirePvEReady: " + FountainOfFirePvEReady.ToString());
-        ImGui.Text("BrandOfPurgatoryPvEReady: " + BrandOfPurgatoryPvEReady.ToString());
-        ImGui.Text("InPhoenix: " + InPhoenix.ToString());
-        ImGui.Text("EnkindlePhoenixPvEReady: " + EnkindlePhoenixPvEReady.ToString());
-        ImGui.Text("RubyCatastrophePvEReady: " + RubyCatastrophePvEReady.ToString());
-        ImGui.Text("TopazCatastrophePvEReady: " + TopazCatastrophePvEReady.ToString());
-        ImGui.Text("EmeraldCatastrophePvEReady: " + EmeraldCatastrophePvEReady.ToString());
-        ImGui.Text("CrimsonCyclonePvEReady: " + CrimsonCyclonePvEReady.ToString());
-        ImGui.Text("CrimsonStrikePvEReady: " + CrimsonStrikePvEReady.ToString());
-        ImGui.Text("MountainBusterPvEReady: " + MountainBusterPvEReady.ToString());
-        ImGui.Text("SlipstreamPvEReady: " + SlipstreamPvEReady.ToString());
-        ImGui.Text("SummonSolarBahamutPvEReady: " + SummonSolarBahamutPvEReady.ToString());
-        ImGui.Text("UmbralImpulsePvEReady: " + UmbralImpulsePvEReady.ToString());
-        ImGui.Text("UmbralFlarePvEReady: " + UmbralFlarePvEReady.ToString());
-        ImGui.Text("InSolarBahamut: " + InSolarBahamut.ToString());
-        ImGui.Text("EnkindleSolarBahamutPvEReady: " + EnkindleSolarBahamutPvEReady.ToString());
+        ImGui.TextColored(AstralImpulsePvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "AstralImpulsePvEReady: " + AstralImpulsePvEReady.ToString());
+        ImGui.TextColored(AstralFlarePvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "AstralFlarePvEReady: " + AstralFlarePvEReady.ToString());
+        ImGui.TextColored(InBahamut ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "InBahamut: " + InBahamut.ToString());
+        ImGui.TextColored(RubyRitePvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "RubyRitePvEReady: " + RubyRitePvEReady.ToString());
+        ImGui.TextColored(TopazRitePvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "TopazRitePvEReady: " + TopazRitePvEReady.ToString());
+        ImGui.TextColored(EmeraldRitePvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "EmeraldRitePvEReady: " + EmeraldRitePvEReady.ToString());
+        ImGui.TextColored(SummonPhoenixPvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "SummonPhoenixPvEReady: " + SummonPhoenixPvEReady.ToString());
+        ImGui.TextColored(FountainOfFirePvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "FountainOfFirePvEReady: " + FountainOfFirePvEReady.ToString());
+        ImGui.TextColored(BrandOfPurgatoryPvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "BrandOfPurgatoryPvEReady: " + BrandOfPurgatoryPvEReady.ToString());
+        ImGui.TextColored(InPhoenix ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "InPhoenix: " + InPhoenix.ToString());
+        ImGui.TextColored(EnkindlePhoenixPvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "EnkindlePhoenixPvEReady: " + EnkindlePhoenixPvEReady.ToString());
+        ImGui.TextColored(RubyCatastrophePvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "RubyCatastrophePvEReady: " + RubyCatastrophePvEReady.ToString());
+        ImGui.TextColored(TopazCatastrophePvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "TopazCatastrophePvEReady: " + TopazCatastrophePvEReady.ToString());
+        ImGui.TextColored(EmeraldCatastrophePvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "EmeraldCatastrophePvEReady: " + EmeraldCatastrophePvEReady.ToString());
+        ImGui.TextColored(CrimsonCyclonePvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "CrimsonCyclonePvEReady: " + CrimsonCyclonePvEReady.ToString());
+        ImGui.TextColored(CrimsonStrikePvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "CrimsonStrikePvEReady: " + CrimsonStrikePvEReady.ToString());
+        ImGui.TextColored(SlipstreamPvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "SlipstreamPvEReady: " + SlipstreamPvEReady.ToString());
+        ImGui.TextColored(SummonSolarBahamutPvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "SummonSolarBahamutPvEReady: " + SummonSolarBahamutPvEReady.ToString());
+        ImGui.TextColored(UmbralImpulsePvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "UmbralImpulsePvEReady: " + UmbralImpulsePvEReady.ToString());
+        ImGui.TextColored(UmbralFlarePvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "UmbralFlarePvEReady: " + UmbralFlarePvEReady.ToString());
+        ImGui.TextColored(InSolarBahamut ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "InSolarBahamut: " + InSolarBahamut.ToString());
+        ImGui.TextColored(EnkindleSolarBahamutPvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "EnkindleSolarBahamutPvEReady: " + EnkindleSolarBahamutPvEReady.ToString());
+        ImGui.TextColored(MountainBusterPvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "MountainBusterPvEReady: " + MountainBusterPvEReady.ToString());
     }
     #endregion
 

@@ -137,7 +137,7 @@ partial class NinjaRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool IsExecutingMudra => !Player.WillStatusEnd(0, true, StatusID.Mudra);
+    public static bool IsExecutingMudra => !Player.WillStatusEnd(0, true, StatusID.Mudra) || !Player.WillStatusEnd(0, true, StatusID.TenChiJin);
 
     /// <summary>
     /// 

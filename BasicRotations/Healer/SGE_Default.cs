@@ -339,22 +339,8 @@ public sealed class SGE_Default : SageRotation
             if (PneumaPvE.CanUse(out act)) return true;
         }
 
-        if (Player.HasStatus(false, StatusID.EukrasianDiagnosis, StatusID.EukrasianPrognosis, StatusID.Galvanize))
+        if (!DoEukrasia(out _) && PrognosisPvE.CanUse(out act))
         {
-            if (PrognosisPvE.CanUse(out act)) return true;
-        }
-
-        if (EukrasianPrognosisIiPvE.CanUse(out _))
-        {
-            if (EukrasiaPvE.CanUse(out act)) return true;
-            act = EukrasianPrognosisIiPvE;
-            return true;
-        }
-
-        if (!EukrasianPrognosisIiPvE.EnoughLevel && EukrasianPrognosisPvE.CanUse(out _))
-        {
-            if (EukrasiaPvE.CanUse(out act)) return true;
-            act = EukrasianPrognosisPvE;
             return true;
         }
 
@@ -368,12 +354,9 @@ public sealed class SGE_Default : SageRotation
 
         if (HasSwift && SwiftLogic && EgeiroPvE.CanUse(out _)) return false;
 
-        if (DiagnosisPvE.CanUse(out _) && !EukrasianDiagnosisPvE.CanUse(out _, skipCastingCheck: true) && InCombat)
+        if (!DoEukrasia(out _) && DiagnosisPvE.CanUse(out act))
         {
-            if (DiagnosisPvE.CanUse(out act))
-            {
-                return true;
-            }
+            return true;
         }
         return base.HealSingleGCD(out act);
     }
@@ -411,7 +394,7 @@ public sealed class SGE_Default : SageRotation
     #region Extra Methods
     public override bool CanHealSingleSpell => base.CanHealSingleSpell && (GCDHeal || PartyMembers.GetJobCategory(JobRole.Healer).Count() < 2);
     public override bool CanHealAreaSpell => base.CanHealAreaSpell && (GCDHeal || PartyMembers.GetJobCategory(JobRole.Healer).Count() < 2);
-
+    
     public override void DisplayStatus()
     {
         ImGui.Text($"Eukrasian Action: {_EukrasiaActionAim}");
@@ -419,6 +402,8 @@ public sealed class SGE_Default : SageRotation
         ImGui.Text("Addersgall: " + Addersgall.ToString());
         ImGui.Text("Addersting: " + Addersting.ToString());
         ImGui.Text("AddersgallTime: " + AddersgallTime.ToString());
+        ImGui.Text("CanHealAreaSpell: " + CanHealAreaSpell.ToString());
+        ImGui.Text("CanHealSingleSpell: " + CanHealSingleSpell.ToString());
     }
     #endregion
 }

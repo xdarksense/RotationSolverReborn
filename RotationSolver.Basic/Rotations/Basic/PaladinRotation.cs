@@ -139,7 +139,7 @@ partial class PaladinRotation
     {
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 2,
         };
     }
 
@@ -195,7 +195,7 @@ partial class PaladinRotation
         setting.UnlockedByQuestID = 66593;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 2,
         };
     }
 
@@ -213,7 +213,7 @@ partial class PaladinRotation
         setting.TargetStatusProvide = [StatusID.CircleOfScorn];
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 1,
             TimeToKill = 0,
         };
     }
@@ -289,7 +289,7 @@ partial class PaladinRotation
     {
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 2,
         };
     }
 

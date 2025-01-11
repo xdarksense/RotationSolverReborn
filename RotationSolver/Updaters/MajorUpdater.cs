@@ -29,7 +29,13 @@ internal static class MajorUpdater
     private static DateTime _lastUpdatedWork = DateTime.Now;
     private static DateTime _warningsLastDisplayed = DateTime.MinValue;
 
-    private unsafe static void FrameworkUpdate(IFramework framework)
+    public static void Enable()
+    {
+        ActionSequencerUpdater.Enable(Svc.PluginInterface.ConfigDirectory.FullName + "\\Conditions");
+        Svc.Framework.Update += RSRUpdate;
+    }
+
+    private unsafe static void RSRUpdate(IFramework framework)
     {
         HotbarHighlightManager.HotbarIDs.Clear();
         RotationSolverPlugin.UpdateDisplayWindow();
@@ -215,12 +221,6 @@ internal static class MajorUpdater
         }
     }
 
-    public static void Enable()
-    {
-        ActionSequencerUpdater.Enable(Svc.PluginInterface.ConfigDirectory.FullName + "\\Conditions");
-        Svc.Framework.Update += FrameworkUpdate;
-    }
-
     static DateTime _closeWindowTime = DateTime.Now;
     private unsafe static void CloseWindow()
     {
@@ -301,7 +301,7 @@ internal static class MajorUpdater
 
     public static void Dispose()
     {
-        Svc.Framework.Update -= FrameworkUpdate;
+        Svc.Framework.Update -= RSRUpdate;
         PreviewUpdater.Dispose();
         ActionSequencerUpdater.SaveFiles();
         ActionUpdater.ClearNextAction();
