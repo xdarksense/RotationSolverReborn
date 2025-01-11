@@ -2,8 +2,6 @@
 using Dalamud.Interface.Windowing;
 using ECommons.DalamudServices;
 using RotationSolver.UI.HighlightTeachingMode;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace RotationSolver.UI;
 
@@ -37,7 +35,7 @@ internal class OverlayWindow : Window
         base.PreDraw();
     }
 
-    public override async void Draw()
+    public unsafe override void Draw()
     {
         if (!HotbarHighlightManager.Enable || Svc.ClientState == null || Svc.ClientState.LocalPlayer == null)
             return;
@@ -46,10 +44,17 @@ internal class OverlayWindow : Window
 
         try
         {
-            await UpdateDrawingElementsAsync();
+            UpdateDrawingElementsAsync().GetAwaiter().GetResult();
 
             if (HotbarHighlightManager._drawingElements2D != null)
             {
+                var drawList = ImGui.GetWindowDrawList();
+                if (drawList.NativePtr == null)
+                {
+                    Svc.Log.Warning($"{nameof(OverlayWindow)}: Window draw list is null.");
+                    return;
+                }
+
                 foreach (var item in HotbarHighlightManager._drawingElements2D.OrderBy(GetDrawingOrder))
                 {
                     item.Draw();
@@ -72,13 +77,14 @@ internal class OverlayWindow : Window
 
     private int GetDrawingOrder(object drawing)
     {
-        if (drawing is PolylineDrawing poly)
+        switch (drawing)
         {
-            return poly._thickness == 0 ? 0 : 1;
-        }
-        else
-        {
-            return 2;
+            case PolylineDrawing poly:
+                return poly._thickness == 0 ? 0 : 1;
+            case ImageDrawing:
+                return 1;
+            default:
+                return 2;
         }
     }
 

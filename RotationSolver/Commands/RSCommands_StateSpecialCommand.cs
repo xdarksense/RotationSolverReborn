@@ -12,14 +12,21 @@ namespace RotationSolver.Commands
 
         internal static string EntryString => $"{_stateString}{(DataCenter.SpecialTimeLeft < 0 ? string.Empty : $" - {_specialString}: {DataCenter.SpecialTimeLeft:F2}s")}";
 
+        private static string _lastToastMessage = string.Empty;
+
         private static void UpdateToast()
         {
             if (!Service.Config.ShowInfoOnToast) return;
 
-            Svc.Toasts.ShowQuest($" {EntryString}", new Dalamud.Game.Gui.Toast.QuestToastOptions
+            string currentMessage = $" {EntryString}";
+            if (currentMessage == _lastToastMessage) return;
+
+            Svc.Toasts.ShowQuest(currentMessage, new Dalamud.Game.Gui.Toast.QuestToastOptions
             {
                 IconId = 101,
             });
+
+            _lastToastMessage = currentMessage;
         }
 
         public static unsafe void DoStateCommandType(StateCommandType stateType, int index = -1) => DoOneCommandType((type, role) => type.ToStateString(role), role =>
