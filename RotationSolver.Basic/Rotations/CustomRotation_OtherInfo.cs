@@ -33,6 +33,12 @@ partial class CustomRotation
     public static bool IsMoving => DataCenter.IsMoving;
 
     /// <summary>
+    /// Check if the player is dead.
+    /// </summary>
+    [Description("Is Dead, or inversely, is Alive")]
+    public static bool IsDead => Player.IsDead;
+
+    /// <summary>
     /// Is in combat.
     /// </summary>
     [Description("In Combat")]
@@ -568,6 +574,19 @@ partial class CustomRotation
     /// </summary>
     [Description("Moving time")]
     public static float MovingTime => IsMoving ? DataCenter.MovingRaw + DataCenter.DefaultGCDRemain : 0;
+    /// <summary>
+    /// How long the player has been alive.
+    /// <br>WARNING: Do Not make this method the main of your rotation.</br>
+    /// </summary>
+    [Description("How long the player has been alive.")]
+    public static float AliveTime => Player.IsAlive() ? DataCenter.AliveTimeRaw + DataCenter.DefaultGCDRemain : 0;
+
+    /// <summary>
+    /// How long the player has been dead.
+    /// <br>WARNING: Do Not make this method the main of your rotation.</br>
+    /// </summary>
+    [Description("How long the player has been dead.")]
+    public static float DeadTime => Player.IsAlive() ? 0 : DataCenter.DeadTimeRaw + DataCenter.DefaultGCDRemain;
 
     /// <summary>
     /// Time from GCD.
@@ -648,7 +667,7 @@ partial class CustomRotation
     #endregion
 
     /// <summary>
-    /// In in the burst status.
+    /// In the burst status.
     /// </summary>
     [Description("Is burst")]
     public static bool IsBurst => MergedStatus.HasFlag(AutoStatus.Burst);

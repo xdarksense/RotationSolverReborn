@@ -573,6 +573,64 @@ public static class ObjectHelper
         return elapsedTime / hpRatioDifference * (wholeTime ? 1 : currentHpRatio);
     }
 
+    private static readonly ConcurrentDictionary<ulong, DateTime> _aliveStartTimes = new();
+
+    /// <summary>
+    /// Gets how long the character has been alive in seconds since their last death.
+    /// </summary>
+    /// <param name="b">The battle character to check.</param>
+    /// <returns>
+    /// The time in seconds since the character's last death or first appearance, or float.NaN if unable to determine.
+    /// </returns>
+    internal static float TimeAlive(this IBattleChara b)
+    {
+        if (b == null) return float.NaN;
+
+        // If the character is dead, reset their alive time
+        if (b.IsDead || Svc.Condition[ConditionFlag.BetweenAreas])
+        {
+            _aliveStartTimes.TryRemove(b.GameObjectId, out _);
+            return 0;
+        }
+
+        // If we haven't tracked this character yet, start tracking them
+        if (!_aliveStartTimes.ContainsKey(b.GameObjectId))
+        {
+            _aliveStartTimes[b.GameObjectId] = DateTime.Now;
+        }
+
+        return (float)(DateTime.Now - _aliveStartTimes[b.GameObjectId]).TotalSeconds;
+    } 
+    
+    private static readonly ConcurrentDictionary<ulong, DateTime> _deadStartTimes = new();
+
+    /// <summary>
+    /// Gets how long the character has been dead in seconds since their last death.
+    /// </summary>
+    /// <param name="b">The battle character to check.</param>
+    /// <returns>
+    /// The time in seconds since the character's death, or float.NaN if unable to determine or character is alive.
+    /// </returns>
+    internal static float TimeDead(this IBattleChara b)
+    {
+        if (b == null) return float.NaN;
+
+        // If the character is alive, reset their dead time
+        if (!b.IsDead)
+        {
+            _deadStartTimes.TryRemove(b.GameObjectId, out _);
+            return 0;
+        }
+
+        // If we haven't tracked this character's death yet, start tracking them
+        if (!_deadStartTimes.ContainsKey(b.GameObjectId))
+        {
+            _deadStartTimes[b.GameObjectId] = DateTime.Now;
+        }
+
+        return (float)(DateTime.Now - _deadStartTimes[b.GameObjectId]).TotalSeconds;
+    }
+
     /// <summary>
     /// Determines if the specified battle character has been attacked within the last second.
     /// </summary>

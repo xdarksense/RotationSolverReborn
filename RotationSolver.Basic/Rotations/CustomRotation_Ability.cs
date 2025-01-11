@@ -428,9 +428,7 @@ partial class CustomRotation
         }
 
         #region PvP
-        if (GuardPvP.CanUse(out act) &&
-            (Player.GetHealthRatio() <= Service.Config.HealthForGuard ||
-             DataCenter.CommandStatus.HasFlag(AutoStatus.Raise | AutoStatus.Shirk)))
+        if (GuardPvP.CanUse(out act) && Player.GetHealthRatio() <= Service.Config.HealthForGuard )
         {
             return true;
         }

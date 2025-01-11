@@ -155,7 +155,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = BasicAutoSwitch, Section = 1)]
     private static readonly bool _cancelStateOnCombatBeforeCountdown = false;
 
-    [ConditionBool, UI("Switch to manual and target attackers automatically.",
+    [ConditionBool, UI("Auto turn on manual mode when attacked.",
         Filter = BasicAutoSwitch, Section = 1)]
     private static readonly bool _startOnAttackedBySomeone = false;
 
@@ -639,6 +639,14 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Auto turn off when dead in PvP.",
          Filter = PvPSpecificControls)]
     private static readonly bool _autoOffWhenDeadPvP = true;
+    
+    [ConditionBool, UI("Auto turn off when PvP match ends.",
+         Filter = PvPSpecificControls)]
+    private static readonly bool _autoOffPvPMatchEnd = true;
+    
+    [ConditionBool, UI("Auto turn on when PvP match starts.",
+         Filter = PvPSpecificControls)]
+    private static readonly bool _autoOnPvPMatchStart = true;
     
     #endregion
     
