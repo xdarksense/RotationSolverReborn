@@ -42,7 +42,7 @@ public sealed class SMN_Default : SummonerRotation
     [RotationConfig(CombatType.PvE, Name = "Use this if there's no other raid buff in your party")]
     public bool SecondTypeOpenerLogic { get; set; } = false;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Physick")]
+    [RotationConfig(CombatType.PvE, Name = "Use Physick above level 30")]
     public bool Healbot { get; set; } = false;
 
     #endregion
@@ -169,7 +169,7 @@ public sealed class SMN_Default : SummonerRotation
     [RotationDesc(ActionID.PhysickPvE)]
     protected override bool HealSingleGCD(out IAction? act)
     {
-        if ((Healbot || Player.Level <= 20) && PhysickPvE.CanUse(out act)) return true;
+        if ((Healbot || Player.Level <= 30) && PhysickPvE.CanUse(out act)) return true;
         return base.HealSingleGCD(out act);
     }
 

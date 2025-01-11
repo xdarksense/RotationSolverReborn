@@ -17,20 +17,18 @@ namespace RotationSolver.UI
             try
             {
                 // Lock the handle to get the font
-                using (var lockedHandle = handle.Lock())
+                using var lockedHandle = handle.Lock();
+                var font = lockedHandle.ImFont;
+
+                // Check if the font pointer is valid
+                if (font.NativePtr == null)
                 {
-                    var font = lockedHandle.ImFont;
-
-                    // Check if the font pointer is valid
-                    if (font.NativePtr == null)
-                    {
-                        return ImGui.GetFont();
-                    }
-
-                    // Scale the font to the desired size
-                    font.Scale = size / font.FontSize;
-                    return font;
+                    return ImGui.GetFont();
                 }
+
+                // Scale the font to the desired size
+                font.Scale = size / font.FontSize;
+                return font;
             }
             catch (Exception)
             {

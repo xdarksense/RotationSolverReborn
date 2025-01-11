@@ -2829,8 +2829,8 @@ public partial class RotationConfigWindow : Window
 
     private static unsafe void DrawParty()
     {
-        ImGui.Text($"Party: {DataCenter.PartyMembers.Count()}");
-        ImGui.Text($"Alliance: {DataCenter.AllianceMembers.Count()}");
+        ImGui.Text($"Party: {DataCenter.PartyMembers.Count}");
+        ImGui.Text($"Alliance: {DataCenter.AllianceMembers.Count}");
 
         ImGui.Text($"PartyMembersAverHP: {DataCenter.PartyMembersAverHP}");
 

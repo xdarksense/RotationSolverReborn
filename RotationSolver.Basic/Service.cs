@@ -25,10 +25,8 @@ internal class Service : IDisposable
     private EzHook<ActorVfxCreateDelegate2> actorVfxCreateHook = null!;
     private unsafe delegate IntPtr ActorVfxCreateDelegate2(char* a1, nint a2, nint a3, float a4, char a5, ushort a6, char a7);
 
-
     // From https://GitHub.com/PunishXIV/Orbwalker/blame/master/Orbwalker/Memory.cs#L74-L76
-    [Signature("F3 0F 10 05 ?? ?? ?? ?? 0F 2E C7", ScanType = ScanType.StaticAddress,
-        Fallibility = Fallibility.Infallible)]
+    [Signature("F3 0F 10 05 ?? ?? ?? ?? 0F 2E C7", ScanType = ScanType.StaticAddress, Fallibility = Fallibility.Infallible)]
     static IntPtr forceDisableMovementPtr = IntPtr.Zero;
 
     private static unsafe ref int ForceDisableMovement => ref *(int*)(forceDisableMovementPtr + 4);
@@ -68,8 +66,6 @@ internal class Service : IDisposable
             {
                 throw new Exception("Failed to create object reference during VfxCreateDetour");
             }
-
-            //Svc.Log.Verbose($"{obj.Name} is casting {path}");
 
             var newVfx = new VfxNewData(obj.GameObjectId, path);
             DataCenter.VfxDataQueue.Add(newVfx);
@@ -122,7 +118,6 @@ internal class Service : IDisposable
     public static unsafe uint GetAdjustedActionId(uint id)
         => ActionManager.Instance()->GetAdjustedActionId(id);
 
-
     private static readonly ConcurrentDictionary<Type, AddonAttribute?> AddonCache = new();
 
     /// <summary>
@@ -159,11 +154,23 @@ internal class Service : IDisposable
     /// <summary>
     /// Releases unmanaged resources and performs other cleanup operations.
     /// </summary>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            if (!_canMove && ForceDisableMovement > 0)
+            {
+                ForceDisableMovement--;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Releases unmanaged resources and performs other cleanup operations.
+    /// </summary>
     public void Dispose()
     {
-        if (!_canMove && ForceDisableMovement > 0)
-        {
-            ForceDisableMovement--;
-        }
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 }

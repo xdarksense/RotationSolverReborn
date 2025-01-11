@@ -154,6 +154,8 @@ public sealed class SGE_Default : SageRotation
     [RotationDesc(ActionID.KeracholePvE, ActionID.PhysisPvE, ActionID.HolosPvE, ActionID.IxocholePvE)]
     protected override bool HealAreaAbility(IAction nextGCD, out IAction? act)
     {
+        if ((!MergedStatus.HasFlag(AutoStatus.DefenseArea) || !MergedStatus.HasFlag(AutoStatus.DefenseSingle)) && PepsisPvE.CanUse(out act)) return true;
+
         if (KeracholePvE.CanUse(out act) && EnhancedKeracholeTrait.EnoughLevel) return true;
 
         if (IxocholePvE.CanUse(out act)) return true;
@@ -212,8 +214,6 @@ public sealed class SGE_Default : SageRotation
         if (Addersgall <= 1 && RhizomataPvE.CanUse(out act)) return true;
 
         if (SoteriaPvE.CanUse(out act) && PartyMembers.Any(b => b.HasStatus(true, StatusID.Kardion) && b.GetHealthRatio() < HealthSingleAbility)) return true;
-
-        if (PepsisPvE.CanUse(out act)) return true;
 
         return base.GeneralAbility(nextGCD, out act);
     }
