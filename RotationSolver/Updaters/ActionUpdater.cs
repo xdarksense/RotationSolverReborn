@@ -143,9 +143,9 @@ internal static class ActionUpdater
             ? (float)(DateTime.Now - _startMovingTime).TotalSeconds
             : 0;
     }
-    static DateTime _startDeadTime = DateTime.MinValue;
-    static DateTime _startAliveTime = DateTime.Now;
-    static bool _isDead = true;
+    private static DateTime _startDeadTime = DateTime.MinValue;
+    private static DateTime _startAliveTime = DateTime.Now;
+    private static bool _isDead = true;
     private static void UpdateLifetime()
     {
         if (Player.Object == null) return;
@@ -153,13 +153,18 @@ internal static class ActionUpdater
         var lastDead = _isDead;
         _isDead = Player.Object.IsDead;
 
-        if (lastDead && !Player.Object.IsDead)
+        if (Svc.Condition[ConditionFlag.BetweenAreas])
         {
             _startAliveTime = DateTime.Now;
         }
-        else if (!lastDead && Player.Object.IsDead)
+        switch (lastDead)
         {
-            _startDeadTime = DateTime.Now;
+            case true when !Player.Object.IsDead:
+                _startAliveTime = DateTime.Now;
+                break;
+            case false when Player.Object.IsDead:
+                _startDeadTime = DateTime.Now;
+                break;
         }
 
         DataCenter.DeadTimeRaw = Player.Object.IsDead

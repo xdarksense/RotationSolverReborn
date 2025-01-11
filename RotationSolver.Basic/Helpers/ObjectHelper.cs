@@ -587,7 +587,7 @@ public static class ObjectHelper
         if (b == null) return float.NaN;
 
         // If the character is dead, reset their alive time
-        if (b.IsDead)
+        if (b.IsDead || Svc.Condition[ConditionFlag.BetweenAreas])
         {
             _aliveStartTimes.TryRemove(b.GameObjectId, out _);
             return 0;

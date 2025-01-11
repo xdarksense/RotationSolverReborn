@@ -214,6 +214,18 @@ namespace RotationSolver.Commands
                 {
                     CancelState();
                 }
+                else if (Service.Config.AutoOffPvPMatchEnd
+                    && Svc.Condition[ConditionFlag.PvPDisplayActive])
+                {
+                    CancelState();
+                }
+                else if (Service.Config.AutoOnPvPMatchStart 
+                         && Svc.Condition[ConditionFlag.BetweenAreas] 
+                         && Svc.Condition[ConditionFlag.BoundByDuty] 
+                         && DataCenter.Territory?.IsPvP == true)
+                {
+                    DoStateCommandType(StateCommandType.Auto);
+                }
 
                 // Auto manual on being attacked by someone.
                 else if (Service.Config.StartOnAttackedBySomeone

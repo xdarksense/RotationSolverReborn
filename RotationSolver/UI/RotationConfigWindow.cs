@@ -2714,6 +2714,12 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"Fate: {DataCenter.FateId}");
         }
         ImGui.Text($"Height: {Player.Character->ModelContainer.CalculateHeight()}");
+        var conditions = Svc.Condition.AsReadOnlySet().ToArray();
+        ImGui.Text("InternalCondition:");
+        foreach (var condition in conditions)
+        {
+            ImGui.Text($"    {condition}");
+        }
         ImGui.Text($"OnlineStatus: {Player.OnlineStatus}");
         ImGui.Text($"IsDead: {Player.Object.IsDead}");
         ImGui.Text($"Dead Time: {DataCenter.DeadTimeRaw}");
