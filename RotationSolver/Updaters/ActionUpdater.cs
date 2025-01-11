@@ -36,7 +36,7 @@ internal static class ActionUpdater
     }
 
     private static IBaseAction? _nextGCDAction;
-    const float gcdHeight = 5;
+    const float GcdHeight = 5;
     internal static IBaseAction? NextGCDAction
     {
         get => _nextGCDAction;
@@ -73,9 +73,7 @@ internal static class ActionUpdater
         }
         catch (Exception ex)
         {
-#pragma warning disable 0436
-            WarningHelper.AddSystemWarning($"Failed to update the next action in the rotation because: {ex.Message}");
-            Svc.Log.Error(ex, "Failed to update next action.");
+            LogError("Failed to update the next action in the rotation", ex);
         }
 
         NextAction = NextGCDAction = null;
@@ -98,7 +96,6 @@ internal static class ActionUpdater
     internal unsafe static void UpdateActionInfo()
     {
         SetAction(NextGCDAction?.AdjustedID ?? 0);
-        //UpdateWeaponTime();
         UpdateCombatTime();
         UpdateSlots();
         UpdateMoving();
@@ -226,6 +223,20 @@ internal static class ActionUpdater
 
     internal unsafe static bool CanDoAction()
     {
+        if (IsPlayerOccupied() || Player.Object.CurrentHp == 0) return false;
+
+        var nextAction = NextAction;
+        if (nextAction == null) return false;
+
+        // Skip when casting
+        if (Player.Object.TotalCastTime - DataCenter.ActionAhead > 0) return false;
+
+        // GCD
+        return RSCommands.CanDoAnAction(ActionHelper.CanUseGCD);
+    }
+
+    private unsafe static bool IsPlayerOccupied()
+    {
         if (Svc.Condition[ConditionFlag.OccupiedInQuestEvent]
             || Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]
             || Svc.Condition[ConditionFlag.Occupied33]
@@ -234,25 +245,32 @@ internal static class ActionUpdater
             || Svc.Condition[ConditionFlag.BetweenAreas]
             || Svc.Condition[ConditionFlag.BetweenAreas51]
             || Svc.Condition[ConditionFlag.Mounted]
-            //|| Svc.Condition[ConditionFlag.SufferingStatusAffliction] //Because of BLU30!
             || Svc.Condition[ConditionFlag.SufferingStatusAffliction2]
             || Svc.Condition[ConditionFlag.RolePlaying]
             || Svc.Condition[ConditionFlag.InFlight]
             || Svc.Condition[ConditionFlag.Diving]
             || Svc.Condition[ConditionFlag.Swimming]
             || Svc.Condition[ConditionFlag.Unconscious]
-            || Svc.Condition[ConditionFlag.MeldingMateria]
-            || (ActionManager.Instance()->ActionQueued && NextAction != null
-                && ActionManager.Instance()->QueuedActionId != NextAction.AdjustedID)
-            || Player.Object.CurrentHp == 0) return false;
+            || Svc.Condition[ConditionFlag.MeldingMateria])
+        {
+            return true;
+        }
 
-        var nextAction = NextAction;
-        if (nextAction == null) return false;
+        var actionManager = ActionManager.Instance();
+        if (actionManager->ActionQueued && NextAction != null
+            && actionManager->QueuedActionId != NextAction.AdjustedID)
+        {
+            return true;
+        }
 
-        //Skip when casting
-        if (Player.Object.TotalCastTime - DataCenter.ActionAhead > 0) return false;
+        return false;
+    }
 
-        //GCD
-        return RSCommands.CanDoAnAction(ActionHelper.CanUseGCD);
+    private static void LogError(string message, Exception ex)
+    {
+#pragma warning disable 0436
+
+        WarningHelper.AddSystemWarning($"{message} because: {ex.Message}");
+        Svc.Log.Error(ex, message);
     }
 }

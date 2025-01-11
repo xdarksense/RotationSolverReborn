@@ -2838,6 +2838,8 @@ public partial class RotationConfigWindow : Window
 
     private static unsafe void DrawParty()
     {
+        ImGui.Text($"Your combat state: {DataCenter.InCombat}");
+        
         ImGui.Text($"Number of Party Members: {DataCenter.PartyMembers.Count}");
         ImGui.Text($"Number of Alliance Members: {DataCenter.AllianceMembers.Count}");
         ImGui.Text($"Average Party HP Percent: {DataCenter.PartyMembersAverHP*100}");

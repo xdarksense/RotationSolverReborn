@@ -134,12 +134,12 @@ public static class ObjectHelper
         {
             TargetHostileType.AllTargetsCanAttack => true,
             TargetHostileType.TargetsHaveTarget => battleChara.TargetObject is IBattleChara,
-            TargetHostileType.AllTargetsWhenSolo => DataCenter.PartyMembers.Count() < 2 || battleChara.TargetObject is IBattleChara,
-            TargetHostileType.AllTargetsWhenSoloInDuty => (DataCenter.PartyMembers.Count() < 2 && (Svc.Condition[ConditionFlag.BoundByDuty] || Svc.Condition[ConditionFlag.BoundByDuty56]))
+            TargetHostileType.AllTargetsWhenSolo => DataCenter.PartyMembers.Count < 2 || battleChara.TargetObject is IBattleChara,
+            TargetHostileType.AllTargetsWhenSoloInDuty => (DataCenter.PartyMembers.Count < 2 && (Svc.Condition[ConditionFlag.BoundByDuty] || Svc.Condition[ConditionFlag.BoundByDuty56]))
                 || battleChara.TargetObject is IBattleChara,
             TargetHostileType.TargetIsInEnemiesList => battleChara.TargetObject is IBattleChara target && target.IsInEnemiesList(),
-            TargetHostileType.AllTargetsWhenSoloTargetIsInEnemiesList => (DataCenter.PartyMembers.Count() < 2 && (Svc.Condition[ConditionFlag.BoundByDuty] || Svc.Condition[ConditionFlag.BoundByDuty56])) || battleChara.TargetObject is IBattleChara target && target.IsInEnemiesList(),
-            TargetHostileType.AllTargetsWhenSoloInDutyTargetIsInEnemiesList => DataCenter.PartyMembers.Count() < 2 || battleChara.TargetObject is IBattleChara target && target.IsInEnemiesList(),
+            TargetHostileType.AllTargetsWhenSoloTargetIsInEnemiesList => (DataCenter.PartyMembers.Count < 2 && (Svc.Condition[ConditionFlag.BoundByDuty] || Svc.Condition[ConditionFlag.BoundByDuty56])) || battleChara.TargetObject is IBattleChara target && target.IsInEnemiesList(),
+            TargetHostileType.AllTargetsWhenSoloInDutyTargetIsInEnemiesList => DataCenter.PartyMembers.Count < 2 || battleChara.TargetObject is IBattleChara target && target.IsInEnemiesList(),
             _ => true,
         };
         }

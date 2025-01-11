@@ -24,8 +24,8 @@ internal static partial class TargetUpdater
         DataCenter.DeathTarget = GetDeathTarget();
         DataCenter.DispelTarget = GetDispelTarget();
         DataCenter.AllHostileTargets = GetAllHostileTargets();
-        DataCenter.ProvokeTarget = DataCenter.AllHostileTargets.FirstOrDefault(ObjectHelper.CanProvoke);
-        DataCenter.InterruptTarget = DataCenter.AllHostileTargets.FirstOrDefault(ObjectHelper.CanInterrupt);
+        DataCenter.ProvokeTarget = GetFirstHostileTarget(ObjectHelper.CanProvoke);
+        DataCenter.InterruptTarget = GetFirstHostileTarget(ObjectHelper.CanInterrupt);
         UpdateTimeToKill();
     }
 
@@ -145,7 +145,8 @@ internal static partial class TargetUpdater
             {
                 if (target == null) continue;
                 if (!target.IsEnemy() || !target.IsTargetable) continue;
-                if (target.StatusList?.Any(StatusHelper.IsInvincible) == true && (DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility || !DataCenter.IsPvP)) continue;
+                if (target.StatusList != null && target.StatusList.Any(StatusHelper.IsInvincible) &&
+                    (DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility || !DataCenter.IsPvP)) continue;
                 if (target.HasStatus(true, StatusID.StrongOfShield) && strongOfShieldPositional != target.FindEnemyPositional()) continue;
 
                 hostileTargets.Add(target);
@@ -158,76 +159,82 @@ internal static partial class TargetUpdater
         return hostileTargets;
     }
 
+    private static IBattleChara? GetFirstHostileTarget(Func<IBattleChara, bool> predicate)
+    {
+        foreach (var target in DataCenter.AllHostileTargets)
+        {
+            if (predicate(target))
+            {
+                return target;
+            }
+        }
+        return null;
+    }
+
     private static IBattleChara? GetDeathTarget()
     {
-        var rotation = DataCenter.RightNowRotation;
         if (Player.Job == Job.WHM || Player.Job == Job.SCH || Player.Job == Job.AST || Player.Job == Job.SGE ||
             Player.Job == Job.SMN || Player.Job == Job.RDM)
         {
             try
             {
-                var deathAll = DataCenter.AllianceMembers?.GetDeath() ?? new List<IBattleChara>();
-                var deathParty = DataCenter.PartyMembers?.GetDeath() ?? new List<IBattleChara>();
-                var deathNPC = DataCenter.FriendlyNPCMembers?.GetDeath() ?? new List<IBattleChara>();
+                var deathAll = DataCenter.AllianceMembers?.GetDeath().ToList() ?? new List<IBattleChara>();
+                var deathParty = DataCenter.PartyMembers?.GetDeath().ToList() ?? new List<IBattleChara>();
+                var deathNPC = DataCenter.FriendlyNPCMembers?.GetDeath().ToList() ?? new List<IBattleChara>();
 
-                if (deathParty.Any())
+                var deathTarget = GetPriorityDeathTarget(deathParty);
+                if (deathTarget != null) return deathTarget;
+
+                deathTarget = GetPriorityDeathTarget(deathAll, Service.Config.RaiseType);
+                if (deathTarget != null) return deathTarget;
+
+                if (Service.Config.FriendlyPartyNpcHealRaise2)
                 {
-                    var deathT = deathParty.GetJobCategory(JobRole.Tank).ToList();
-                    var deathH = deathParty.GetJobCategory(JobRole.Healer).ToList();
-
-                    if (deathT.Count > 1) return deathT.FirstOrDefault();
-                    if (deathH.Any()) return deathH.FirstOrDefault();
-                    if (deathT.Any()) return deathT.FirstOrDefault();
-
-                    return deathParty.FirstOrDefault();
-                }
-
-                if (deathAll.Any())
-                {
-                    if (Service.Config.RaiseType == RaiseType.PartyAndAllianceHealers)
-                    {
-                        var deathAllH = deathAll.GetJobCategory(JobRole.Healer).ToList();
-                        if (deathAllH.Any()) return deathAllH.FirstOrDefault();
-                    }
-
-                    if (Service.Config.RaiseType == RaiseType.PartyAndAlliance)
-                    {
-                        var deathAllH = deathAll.GetJobCategory(JobRole.Healer).ToList();
-                        var deathAllT = deathAll.GetJobCategory(JobRole.Tank).ToList();
-
-                        if (deathAllH.Any()) return deathAllH.FirstOrDefault();
-                        if (deathAllT.Any()) return deathAllT.FirstOrDefault();
-
-                        return deathAll.FirstOrDefault();
-                    }
-                }
-
-                if (deathNPC.Any() && Service.Config.FriendlyPartyNpcHealRaise2)
-                {
-                    var deathNPCT = deathNPC.GetJobCategory(JobRole.Tank).ToList();
-                    var deathNPCH = deathNPC.GetJobCategory(JobRole.Healer).ToList();
-
-                    if (deathNPCT.Count > 1) return deathNPCT.FirstOrDefault();
-                    if (deathNPCH.Any()) return deathNPCH.FirstOrDefault();
-                    if (deathNPCT.Any()) return deathNPCT.FirstOrDefault();
-
-                    return deathNPC.FirstOrDefault();
+                    deathTarget = GetPriorityDeathTarget(deathNPC);
+                    if (deathTarget != null) return deathTarget;
                 }
             }
             catch (Exception ex)
             {
                 Svc.Log.Error($"Error in GetDeathTarget: {ex.Message}");
             }
+        }
+        return null;
+    }
 
-            return null;
+    private static IBattleChara? GetPriorityDeathTarget(List<IBattleChara> deathList, RaiseType raiseType = RaiseType.PartyOnly)
+    {
+        if (deathList.Count == 0) return null;
+
+        var deathTanks = new List<IBattleChara>();
+        var deathHealers = new List<IBattleChara>();
+
+        foreach (var chara in deathList)
+        {
+            if (chara.IsJobCategory(JobRole.Tank))
+            {
+                deathTanks.Add(chara);
+            }
+            else if (chara.IsJobCategory(JobRole.Healer))
+            {
+                deathHealers.Add(chara);
+            }
         }
 
-        return null;
+        if (raiseType == RaiseType.PartyAndAllianceHealers && deathHealers.Count > 0)
+        {
+            return deathHealers[0];
+        }
+
+        if (deathTanks.Count > 1) return deathTanks[0];
+        if (deathHealers.Count > 0) return deathHealers[0];
+        if (deathTanks.Count > 0) return deathTanks[0];
+
+        return deathList[0];
     }
 
     private static IBattleChara? GetDispelTarget()
     {
-        var rotation = DataCenter.RightNowRotation;
         if (Player.Job == Job.WHM || Player.Job == Job.SCH || Player.Job == Job.AST || Player.Job == Job.SGE ||
             Player.Job == Job.BRD)
         {
@@ -235,47 +242,51 @@ internal static partial class TargetUpdater
             var weakenNPC = new List<IBattleChara>();
             var dyingPeople = new List<IBattleChara>();
 
-            if (DataCenter.PartyMembers != null)
-            {
-                foreach (var member in DataCenter.PartyMembers)
-                {
-                    if (member is IBattleChara b && b.StatusList != null &&
-                        b.StatusList.Any(status => status != null && status.CanDispel()))
-                    {
-                        weakenPeople.Add(b);
-                    }
-                }
-            }
-
-            if (DataCenter.FriendlyNPCMembers != null)
-            {
-                foreach (var npc in DataCenter.FriendlyNPCMembers)
-                {
-                    if (npc is IBattleChara b && b.StatusList != null &&
-                        b.StatusList.Any(status => status != null && status.CanDispel()))
-                    {
-                        weakenNPC.Add(b);
-                    }
-                }
-            }
+            AddDispelTargets(DataCenter.PartyMembers, weakenPeople);
+            AddDispelTargets(DataCenter.FriendlyNPCMembers, weakenNPC);
 
             foreach (var person in weakenPeople)
             {
-                if (person is IBattleChara b && b.StatusList != null &&
-                    b.StatusList.Any(status => status != null && status.IsDangerous()))
+                if (person.StatusList != null && person.StatusList.Any(status => status != null && status.IsDangerous()))
                 {
-                    dyingPeople.Add(b);
+                    dyingPeople.Add(person);
                 }
             }
 
-            return dyingPeople.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault()
-                   ?? weakenPeople.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault()
-                   ?? weakenNPC.OrderBy(ObjectHelper.DistanceToPlayer).FirstOrDefault();
+            return GetClosestTarget(dyingPeople) ?? GetClosestTarget(weakenPeople) ?? GetClosestTarget(weakenNPC);
         }
-        else
+        return null;
+    }
+
+    private static void AddDispelTargets(List<IBattleChara>? members, List<IBattleChara> targetList)
+    {
+        if (members == null) return;
+
+        foreach (var member in members)
         {
-            return null;
+            if (member.StatusList != null && member.StatusList.Any(status => status != null && status.CanDispel()))
+            {
+                targetList.Add(member);
+            }
         }
+    }
+
+    private static IBattleChara? GetClosestTarget(List<IBattleChara> targets)
+    {
+        IBattleChara? closestTarget = null;
+        float closestDistance = float.MaxValue;
+
+        foreach (var target in targets)
+        {
+            var distance = ObjectHelper.DistanceToPlayer(target);
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closestTarget = target;
+            }
+        }
+
+        return closestTarget;
     }
 
     private static void UpdateTimeToKill()

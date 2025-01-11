@@ -5,8 +5,6 @@
 [Api(4)]
 public sealed class PCT_Default : PictomancerRotation
 {
-    private const float CountdownBuffer = 0.2f;
-
     #region Config Options
     [RotationConfig(CombatType.PvE, Name = "Use HolyInWhite or CometInBlack while moving")]
     public bool HolyCometMoving { get; set; } = true;
@@ -41,7 +39,7 @@ public sealed class PCT_Default : PictomancerRotation
             if (!LandscapeMotifDrawn && StarrySkyMotifPvE.CanUse(out act) && !HasHyperphantasia) return act;
         }
 
-        if (remainTime <= RainbowDripPvE.Info.CastTime + CountdownBuffer + CountDownAhead && RainbowDripPvE.CanUse(out act))
+        if (remainTime <= RainbowDripPvE.Info.CastTime + CountDownAhead && RainbowDripPvE.CanUse(out act))
         {
             return act;
         }
@@ -146,7 +144,7 @@ public sealed class PCT_Default : PictomancerRotation
         if (Paint == HolyCometMax && HolyInWhitePvE.CanUse(out act)) return true;
 
         // Landscape Paining Burst
-        if (RainbowDripPvE.CanUse(out act)) return true;
+        if (HasRainbowBright && RainbowDripPvE.CanUse(out act, skipCastingCheck: HasRainbowBright)) return true;
         if (StarPrismPvE.CanUse(out act)) return true;
 
         // timings for motif casting

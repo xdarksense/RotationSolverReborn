@@ -348,6 +348,11 @@ public partial class PictomancerRotation
     public static bool HasStarryMuse => !Player.WillStatusEnd(0, true, StatusID.StarryMuse);
 
     /// <summary>
+    /// Indicates if the player has Rainbow Bright.
+    /// </summary>
+    public static bool HasRainbowBright => !Player.WillStatusEnd(0, true, StatusID.RainbowBright);
+
+    /// <summary>
     /// Holds the remaining amount of HammerTime stacks
     /// </summary>
     public static byte HammerStacks
@@ -500,7 +505,6 @@ public partial class PictomancerRotation
 
     static partial void ModifyRainbowDripPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.RainbowBright];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
