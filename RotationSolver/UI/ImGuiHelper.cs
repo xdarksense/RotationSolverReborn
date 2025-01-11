@@ -70,14 +70,14 @@ internal static class ImGuiHelper
         // Display a draggable integer input for the macro index
         if (ImGui.DragInt($"{UiString.ConfigWindow_Events_MacroIndex.GetDescription()}##MacroIndex{info.GetHashCode()}", ref info.MacroIndex, 1, -1, 99))
         {
-            SaveConfig();
+            Service.Config.Save();
         }
 
         // Display a checkbox for the shared macro option
         ImGui.SameLine();
         if (ImGui.Checkbox($"{UiString.ConfigWindow_Events_ShareMacro.GetDescription()}##ShareMacro{info.GetHashCode()}", ref info.IsShared))
         {
-            SaveConfig();
+            Service.Config.Save();
         }
     }
 
@@ -87,7 +87,7 @@ internal static class ImGuiHelper
         if (ImGui.InputText($"{UiString.ConfigWindow_Events_ActionName.GetDescription()}##ActionName{info.GetHashCode()}", ref name, 100))
         {
             info.Name = name;
-            SaveConfig();
+            Service.Config.Save();
         }
 
         info.DisplayMacro();
@@ -527,7 +527,7 @@ internal static class ImGuiHelper
         ConfigUnitType.Degree => " °",
         ConfigUnitType.Pixels => " p",
         ConfigUnitType.Yalms => " y",
-        ConfigUnitType.Percent => " %",
+        ConfigUnitType.Percent => " %%",
         _ => string.Empty,
     };
 
@@ -550,18 +550,6 @@ internal static class ImGuiHelper
         {
             if (!first) ImGui.SameLine();
             ImGui.TextColored(ImGuiColors.DalamudRed, " None of PvE or PvP!");
-        }
-    }
-
-    private static void SaveConfig()
-    {
-        try
-        {
-            Service.Config.Save();
-        }
-        catch (Exception ex)
-        {
-            Svc.Log.Warning(ex, "Failed to save configuration.");
         }
     }
 }
