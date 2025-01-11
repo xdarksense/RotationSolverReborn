@@ -19,13 +19,15 @@ public sealed class NIN_Default : NinjaRotation
 
     [RotationConfig(CombatType.PvE, Name = "Use Mudras Outside of Combat when enemies are near")]
     public bool CommbatMudra { get; set; } = true;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Forked Raiju instead of Fleeting Raiju if you are outside of range (Dangerous)")]
+    public bool ForkedUse { get; set; } = false;
     #endregion
 
     #region Tracking Properties
     // Properties to track RabbitMediumPvE failures and related information.
     private int _rabbitMediumFailures = 0;
     private IBaseAction? _lastNinActionAim = null;
-    private IAction? _followUpGCDAction = null;
     #endregion
 
     #region CountDown Logic
@@ -399,13 +401,17 @@ public sealed class NIN_Default : NinjaRotation
     {
         act = null;
 
-        if (RabbitMediumPvE.CanUse(out act)) return true;
+        if (_ninActionAim == null && RabbitMediumPvE.CanUse(out act)) return true;
 
         if (!IsExecutingMudra && (InTrickAttack || InMug) && NoNinjutsu && !HasRaijuReady
             && !Player.HasStatus(true, StatusID.TenChiJin)
             && PhantomKamaitachiPvE.CanUse(out act)) return true;
 
-        if (!IsExecutingMudra && FleetingRaijuPvE.CanUse(out act)) return true;
+        if (!IsExecutingMudra)
+        {
+            if (FleetingRaijuPvE.CanUse(out act)) return true;
+            if (ForkedUse && ForkedRaijuPvE.CanUse(out act)) return true;
+        }
 
         if ((InCombat || (CommbatMudra && HasHostilesInMaxRange)) && ChoiceNinjutsu(out act)) return true;
         if (((!InCombat && CommbatMudra && HasHostilesInMaxRange) || !CombatElapsedLess(7)) && DoNinjutsu(out act)) return true;

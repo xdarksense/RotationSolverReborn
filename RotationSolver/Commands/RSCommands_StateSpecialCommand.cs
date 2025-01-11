@@ -10,13 +10,13 @@ namespace RotationSolver.Commands
     {
         public static string _stateString = "Off", _specialString = string.Empty;
 
-        internal static string EntryString => _stateString + (DataCenter.SpecialTimeLeft < 0 ? string.Empty : $" - {_specialString}: {DataCenter.SpecialTimeLeft:F2}s");
+        internal static string EntryString => $"{_stateString}{(DataCenter.SpecialTimeLeft < 0 ? string.Empty : $" - {_specialString}: {DataCenter.SpecialTimeLeft:F2}s")}";
 
         private static void UpdateToast()
         {
             if (!Service.Config.ShowInfoOnToast) return;
 
-            Svc.Toasts.ShowQuest(" " + EntryString, new Dalamud.Game.Gui.Toast.QuestToastOptions()
+            Svc.Toasts.ShowQuest($" {EntryString}", new Dalamud.Game.Gui.Toast.QuestToastOptions
             {
                 IconId = 101,
             });
@@ -26,32 +26,45 @@ namespace RotationSolver.Commands
         {
             if (DataCenter.State)
             {
-                if (DataCenter.IsManual && stateType == StateCommandType.Manual
-                    && Service.Config.ToggleManual)
-                {
-                    stateType = StateCommandType.Off;
-                }
-                else if (stateType == StateCommandType.Auto)
-                {
-                    if (Service.Config.ToggleAuto)
-                    {
-                        stateType = StateCommandType.Off;
-                    }
-                    else
-                    {
-                        if (index == -1)
-                        {
-                            // Increment the TargetingIndex to cycle through the TargetingTypes
-                            index = Service.Config.TargetingIndex + 1;
-                        }
-                        // Ensure the index wraps around if it exceeds the number of TargetingTypes
-                        index %= Service.Config.TargetingTypes.Count;
-                        // Update the TargetingIndex in the configuration
-                        Service.Config.TargetingIndex = index;
-                    }
-                }
+                stateType = AdjustStateType(stateType, ref index);
             }
 
+            UpdateState(stateType, role);
+            return stateType;
+        });
+
+        private static StateCommandType AdjustStateType(StateCommandType stateType, ref int index)
+        {
+            if (DataCenter.IsManual && stateType == StateCommandType.Manual && Service.Config.ToggleManual)
+            {
+                return StateCommandType.Off;
+            }
+            else if (stateType == StateCommandType.Auto)
+            {
+                if (Service.Config.ToggleAuto)
+                {
+                    return StateCommandType.Off;
+                }
+                else
+                {
+                    UpdateTargetingIndex(ref index);
+                }
+            }
+            return stateType;
+        }
+
+        private static void UpdateTargetingIndex(ref int index)
+        {
+            if (index == -1)
+            {
+                index = Service.Config.TargetingIndex + 1;
+            }
+            index %= Service.Config.TargetingTypes.Count;
+            Service.Config.TargetingIndex = index;
+        }
+
+        private static void UpdateState(StateCommandType stateType, JobRole role)
+        {
             switch (stateType)
             {
                 case StateCommandType.Off:
@@ -75,8 +88,7 @@ namespace RotationSolver.Commands
 
             _stateString = stateType.ToStateString(role);
             UpdateToast();
-            return stateType;
-        });
+        }
 
         private static void DoSpecialCommandType(SpecialCommandType specialType, bool sayout = true) => DoOneCommandType((type, role) => type.ToSpecialString(role), role =>
         {
@@ -89,14 +101,12 @@ namespace RotationSolver.Commands
         private static void DoOneCommandType<T>(Func<T, JobRole, string> sayout, Func<JobRole, T> doingSomething)
             where T : struct, Enum
         {
-            //Get job role.
             var role = Player.Object?.ClassJob.Value.GetJobRole() ?? JobRole.None;
 
             if (role == JobRole.None) return;
 
             T type = doingSomething(role);
 
-            //Saying out.
             if (Service.Config.SayOutStateChanged) SpeechHelper.Speak(sayout(type, role));
         }
     }

@@ -5,7 +5,7 @@ namespace RotationSolver.UI;
 
 internal class CollapsingHeaderGroup
 {
-    private readonly Dictionary<Func<string>, Action> _headers = new Dictionary<Func<string>, Action>();
+    private readonly Dictionary<Func<string>, Action> _headers;
     private int _openedIndex = -1;
 
     public float HeaderSize { get; set; } = 24;
@@ -17,14 +17,14 @@ internal class CollapsingHeaderGroup
 
     public void AddCollapsingHeader(Func<string> name, Action action)
     {
-        if (name == null) throw new ArgumentNullException(nameof(name));
-        if (action == null) throw new ArgumentNullException(nameof(action));
-        _headers.Add(name, action);
+        if (name is null) throw new ArgumentNullException(nameof(name));
+        if (action is null) throw new ArgumentNullException(nameof(action));
+        _headers[name] = action;
     }
 
     public void RemoveCollapsingHeader(Func<string> name)
     {
-        if (name == null) throw new ArgumentNullException(nameof(name));
+        if (name is null) throw new ArgumentNullException(nameof(name));
         _headers.Remove(name);
     }
 
@@ -40,8 +40,7 @@ internal class CollapsingHeaderGroup
         {
             index++;
 
-            if (header.Key == null) continue;
-            if (header.Value == null) continue;
+            if (header.Key is null || header.Value is null) continue;
 
             var name = header.Key();
             if (string.IsNullOrEmpty(name)) continue;
@@ -72,7 +71,7 @@ internal class CollapsingHeaderGroup
             }
             catch (Exception ex)
             {
-                Svc.Log.Warning(ex, "An error occurred while drawing the header.");
+                Svc.Log.Warning($"An error occurred while drawing the header '{name}': {ex}");
             }
         }
     }

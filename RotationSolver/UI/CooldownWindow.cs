@@ -35,7 +35,15 @@ internal class CooldownWindow() : CtrlWindow(nameof(CooldownWindow))
             uint itemIndex = 0;
             foreach (var item in showItems)
             {
-                ControlWindow.DrawIAction(item, width, 1f);
+                try
+                {
+                    ControlWindow.DrawIAction(item, width, 1f);
+                }
+                catch (Exception ex)
+                {
+                    // Log the exception or handle it as needed
+                    Console.WriteLine($"Error drawing action: {ex.Message}");
+                }
                 itemIndex++;
                 if (itemIndex % count != 0)
                 {

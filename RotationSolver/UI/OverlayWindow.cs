@@ -2,6 +2,8 @@
 using Dalamud.Interface.Windowing;
 using ECommons.DalamudServices;
 using RotationSolver.UI.HighlightTeachingMode;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace RotationSolver.UI;
 
@@ -35,7 +37,7 @@ internal class OverlayWindow : Window
         base.PreDraw();
     }
 
-    public override void Draw()
+    public override async void Draw()
     {
         if (!HotbarHighlightManager.Enable || Svc.ClientState == null || Svc.ClientState.LocalPlayer == null)
             return;
@@ -44,24 +46,11 @@ internal class OverlayWindow : Window
 
         try
         {
-            if (!HotbarHighlightManager.UseTaskToAccelerate)
-            {
-                HotbarHighlightManager._drawingElements2D = HotbarHighlightManager.To2DAsync().Result;
-            }
+            await UpdateDrawingElementsAsync();
 
             if (HotbarHighlightManager._drawingElements2D != null)
             {
-                foreach (var item in HotbarHighlightManager._drawingElements2D.OrderBy(drawing =>
-                {
-                    if (drawing is PolylineDrawing poly)
-                    {
-                        return poly._thickness == 0 ? 0 : 1;
-                    }
-                    else
-                    {
-                        return 2;
-                    }
-                }))
+                foreach (var item in HotbarHighlightManager._drawingElements2D.OrderBy(GetDrawingOrder))
                 {
                     item.Draw();
                 }
@@ -70,6 +59,26 @@ internal class OverlayWindow : Window
         catch (Exception ex)
         {
             Svc.Log.Warning(ex, $"{nameof(OverlayWindow)} failed to draw on Screen.");
+        }
+    }
+
+    private async Task UpdateDrawingElementsAsync()
+    {
+        if (!HotbarHighlightManager.UseTaskToAccelerate)
+        {
+            HotbarHighlightManager._drawingElements2D = await HotbarHighlightManager.To2DAsync();
+        }
+    }
+
+    private int GetDrawingOrder(object drawing)
+    {
+        if (drawing is PolylineDrawing poly)
+        {
+            return poly._thickness == 0 ? 0 : 1;
+        }
+        else
+        {
+            return 2;
         }
     }
 

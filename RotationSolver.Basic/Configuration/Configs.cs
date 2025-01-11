@@ -375,10 +375,6 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Record knockback actions", Filter = List2)]
     private static readonly bool _recordKnockbackies = false;
 
-    [JobConfig, UI("Override Action Ahead Timer", Description = "If you don't know what this does, you don't need to modify it",
-        Filter = BasicTimer)]
-    private static readonly bool _overrideActionAheadTimer = false;
-
     [UI("Use additional conditions", Filter = BasicParams)]
     public bool UseAdditionalConditions { get; set; } = false;
 
@@ -634,9 +630,9 @@ internal partial class Configs : IPluginConfiguration
     public int AutoDefenseNumber { get; set; } = 2;
 
     #endregion
-    
+
     #region PvP
-    
+
     [JobConfig, UI("Ignore Invincibility for PvP purposes.", Filter = PvPSpecificControls)]
     private readonly bool _ignorePvPInvincibility = false;
     
@@ -687,14 +683,18 @@ internal partial class Configs : IPluginConfiguration
         PvEFilter = JobFilterType.Tank)]
     private readonly float _healthForAutoDefense = 1;
 
-    [JobConfig, Range(0, 1.0f, ConfigUnitType.Seconds)]
-    [UI("Action Ahead (How far in advance of GCD being available RSR will try to queue the next GCD)",
-        Description = "This setting controls how many oGCDs RSR will try to fit in a single GCD window\nLower numbers mean more oGCDs, but potentially more GCD clipping",
-        Parent = nameof(OverrideActionAheadTimer))]
-    private readonly float _action4head = 0.4f;
-
     [JobConfig, UI("Engage settings", Filter = TargetConfig, PvPFilter = JobFilterType.NoJob)]
     private readonly TargetHostileType _hostileType = TargetHostileType.AllTargetsWhenSoloInDuty;
+
+    [JobConfig, UI("Override Action Ahead Timer", Description = "If you don't know what this does, you don't need to modify it",
+        Filter = BasicTimer)]
+    private readonly bool _overrideActionAheadTimer = false;
+
+    [JobConfig, Range(0, 1.0f, ConfigUnitType.Seconds)]
+    [UI("Action Ahead (How far in advance of GCD being available RSR will try to queue the next GCD)",
+    Description = "This setting controls how many oGCDs RSR will try to fit in a single GCD window\nLower numbers mean more oGCDs, but potentially more GCD clipping",
+    Parent = nameof(OverrideActionAheadTimer))]
+    private readonly float _action4head = 0.4f;
 
     [JobConfig]
     private readonly string _PvPRotationChoice = string.Empty;

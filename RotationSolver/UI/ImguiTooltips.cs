@@ -6,7 +6,7 @@ namespace RotationSolver.UI;
 
 internal static class ImguiTooltips
 {
-    const ImGuiWindowFlags TOOLTIP_FLAG =
+    private const ImGuiWindowFlags TooltipFlag =
           ImGuiWindowFlags.Tooltip |
           ImGuiWindowFlags.NoMove |
           ImGuiWindowFlags.NoSavedSettings |
@@ -15,7 +15,7 @@ internal static class ImguiTooltips
           ImGuiWindowFlags.NoInputs |
           ImGuiWindowFlags.AlwaysAutoResize;
 
-    const string TOOLTIP_ID = "RotationSolverReborn Tooltips";
+    private const string TooltipId = "RotationSolverReborn Tooltips";
 
     /// <summary>
     /// Displays a tooltip when the item is hovered.
@@ -45,9 +45,9 @@ internal static class ImguiTooltips
     /// Displays a tooltip with the specified action.
     /// </summary>
     /// <param name="act">The action to perform to render the tooltip content.</param>
-    public static void ShowTooltip(Action act)
+    public static void ShowTooltip(Action? act)
     {
-        if (act == null || Service.Config == null || !Service.Config.ShowTooltips) return;
+        if (act == null || Service.Config.ShowTooltips != true) return;
 
         ImGui.SetNextWindowBgAlpha(1);
 
@@ -55,9 +55,9 @@ internal static class ImguiTooltips
 
         var globalScale = ImGuiHelpers.GlobalScale;
         ImGui.SetNextWindowSizeConstraints(new Vector2(150, 0) * globalScale, new Vector2(1200, 1500) * globalScale);
-        ImGui.SetWindowPos(TOOLTIP_ID, ImGui.GetIO().MousePos);
+        ImGui.SetWindowPos(TooltipId, ImGui.GetIO().MousePos);
 
-        if (ImGui.Begin(TOOLTIP_ID, TOOLTIP_FLAG))
+        if (ImGui.Begin(TooltipId, TooltipFlag))
         {
             act();
             ImGui.End();

@@ -9,6 +9,9 @@ using ECommons.LanguageHelpers;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Commands;
 using RotationSolver.Data;
+using System;
+using System.Collections.Generic;
+using System.Numerics;
 
 namespace RotationSolver.UI;
 
@@ -65,34 +68,16 @@ internal static class ImGuiHelper
         ImGui.SetNextItemWidth(50);
 
         // Display a draggable integer input for the macro index
-        if (ImGui.DragInt($"{UiString.ConfigWindow_Events_MacroIndex.GetDescription()}##MacroIndex{info.GetHashCode()}",
-            ref info.MacroIndex, 1, -1, 99))
+        if (ImGui.DragInt($"{UiString.ConfigWindow_Events_MacroIndex.GetDescription()}##MacroIndex{info.GetHashCode()}", ref info.MacroIndex, 1, -1, 99))
         {
-            // Save the configuration if the value changes
-            try
-            {
-                Service.Config.Save();
-            }
-            catch (Exception ex)
-            {
-                Svc.Log.Warning(ex, "Failed to save configuration.");
-            }
+            SaveConfig();
         }
 
         // Display a checkbox for the shared macro option
         ImGui.SameLine();
-        if (ImGui.Checkbox($"{UiString.ConfigWindow_Events_ShareMacro.GetDescription()}##ShareMacro{info.GetHashCode()}",
-            ref info.IsShared))
+        if (ImGui.Checkbox($"{UiString.ConfigWindow_Events_ShareMacro.GetDescription()}##ShareMacro{info.GetHashCode()}", ref info.IsShared))
         {
-            // Save the configuration if the value changes
-            try
-            {
-                Service.Config.Save();
-            }
-            catch (Exception ex)
-            {
-                Svc.Log.Warning(ex, "Failed to save configuration.");
-            }
+            SaveConfig();
         }
     }
 
@@ -102,7 +87,7 @@ internal static class ImGuiHelper
         if (ImGui.InputText($"{UiString.ConfigWindow_Events_ActionName.GetDescription()}##ActionName{info.GetHashCode()}", ref name, 100))
         {
             info.Name = name;
-            Service.Config.Save();
+            SaveConfig();
         }
 
         info.DisplayMacro();
@@ -131,16 +116,21 @@ internal static class ImGuiHelper
 
         var searchingKey = searchTxt;
 
-        var members = items.Select(m => (m, getSearchName(m)))
-            .OrderByDescending(s => SearchableCollection.Similarity(s.Item2, searchingKey));
+        var members = new List<(T, string)>();
+        foreach (var item in items)
+        {
+            members.Add((item, getSearchName(item)));
+        }
 
-        ImGui.SetNextItemWidth(Math.Max(50 * ImGuiHelpers.GlobalScale, members.Max(i => ImGuiHelpers.GetButtonSize(i.Item2).X)));
+        members.Sort((x, y) => SearchableCollection.Similarity(y.Item2, searchingKey).CompareTo(SearchableCollection.Similarity(x.Item2, searchingKey)));
+
+        ImGui.SetNextItemWidth(Math.Max(50 * ImGuiHelpers.GlobalScale, GetMaxButtonSize(members)));
         ImGui.InputTextWithHint("##Searching the member", searchingHint, ref searchTxt, 128);
 
         ImGui.Spacing();
 
         ImRaii.IEndObject? child = null;
-        if (members.Count() >= 15)
+        if (members.Count >= 15)
         {
             ImGui.SetNextWindowSizeConstraints(new Vector2(0, 300), new Vector2(500, 300));
             child = ImRaii.Child(popId);
@@ -151,11 +141,25 @@ internal static class ImGuiHelper
         {
             if (ImGui.Selectable(member.Item2))
             {
-                selectAction?.Invoke(member.m);
+                selectAction?.Invoke(member.Item1);
                 ImGui.CloseCurrentPopup();
             }
         }
         child?.Dispose();
+    }
+
+    private static float GetMaxButtonSize<T>(List<(T, string)> members)
+    {
+        float maxSize = 0;
+        foreach (var member in members)
+        {
+            var size = ImGuiHelpers.GetButtonSize(member.Item2).X;
+            if (size > maxSize)
+            {
+                maxSize = size;
+            }
+        }
+        return maxSize;
     }
 
     public static unsafe bool SelectableCombo(string popUp, string[] items, ref int index, ImFontPtr? font = null, Vector4? color = null)
@@ -315,10 +319,10 @@ internal static class ImGuiHelper
     {
         var offsets = new Vector2[]
         {
-        new Vector2(0, -width),
-        new Vector2(0, width),
-        new Vector2(-width, 0),
-        new Vector2(width, 0)
+            new Vector2(0, -width),
+            new Vector2(0, width),
+            new Vector2(-width, 0),
+            new Vector2(width, 0)
         };
 
         var drawList = ImGui.GetWindowDrawList();
@@ -339,11 +343,8 @@ internal static class ImGuiHelper
             {
                 ImGui.SetCursorPos(cursor - new Vector2(pixPerUnit * 3, pixPerUnit * 4));
 
-                //var step = new Vector2(88f / cover.Width, 96f / cover.Height);
                 var start = new Vector2((96f * 0 + 4f) / cover.Width, (96f * 2) / cover.Height);
 
-                //Out Size is 88, 96
-                //Inner Size is 82, 82
                 ImGui.Image(cover.ImGuiHandle, new Vector2(pixPerUnit * 88, pixPerUnit * 94),
                     start, start + new Vector2(88f / cover.Width, 94f / cover.Height));
             }
@@ -356,12 +357,9 @@ internal static class ImGuiHelper
 
                 var P = (int)(percent * 81);
 
-
                 var step = new Vector2(88f / cover.Width, 96f / cover.Height);
                 var start = new Vector2(P % 9 * step.X, P / 9 * step.Y);
 
-                //Out Size is 88, 96
-                //Inner Size is 82, 82
                 ImGui.Image(cover.ImGuiHandle, new Vector2(pixPerUnit * 88, pixPerUnit * 94),
                     start, start + new Vector2(88f / cover.Width, 94f / cover.Height));
             }
@@ -370,11 +368,8 @@ internal static class ImGuiHelper
         {
             if (IconSet.GetTexture("ui/uld/icona_frame_hr1.tex", out var cover))
             {
-
                 ImGui.SetCursorPos(cursor - new Vector2(pixPerUnit * 3, pixPerUnit * 4));
 
-                //Out Size is 88, 96
-                //Inner Size is 82, 82
                 ImGui.Image(cover.ImGuiHandle, new Vector2(pixPerUnit * 88, pixPerUnit * 94),
                     new Vector2(4f / cover.Width, 0f / cover.Height),
                     new Vector2(92f / cover.Width, 94f / cover.Height));
@@ -392,8 +387,6 @@ internal static class ImGuiHelper
                 var step = new Vector2(88f / cover.Width, 96f / cover.Height);
                 var start = new Vector2((P % 9 + 9) * step.X, P / 9 * step.Y);
 
-                //Out Size is 88, 96
-                //Inner Size is 82, 82
                 ImGui.Image(cover.ImGuiHandle, new Vector2(pixPerUnit * 88, pixPerUnit * 94),
                     start, start + new Vector2(88f / cover.Width, 94f / cover.Height));
             }
@@ -480,7 +473,7 @@ internal static class ImGuiHelper
         Notify.Success($"\"{command}\" copied to clipboard.");
     }
 
-    private static readonly SortedList<string, bool> _lastChecked = [];
+    private static readonly Dictionary<string, bool> _lastChecked = new();
     private static void ExecuteHotKeys(Action action, params VirtualKey[] keys)
     {
         if (action == null) return;
@@ -489,7 +482,15 @@ internal static class ImGuiHelper
         var name = string.Join(' ', keys);
 
         if (!_lastChecked.TryGetValue(name, out var last)) last = false;
-        var now = keys.All(k => Svc.KeyState[k]);
+        var now = true;
+        foreach (var key in keys)
+        {
+            if (!Svc.KeyState[key])
+            {
+                now = false;
+                break;
+            }
+        }
         _lastChecked[name] = now;
 
         if (!last && now) action();
@@ -526,7 +527,7 @@ internal static class ImGuiHelper
         ConfigUnitType.Degree => " °",
         ConfigUnitType.Pixels => " p",
         ConfigUnitType.Yalms => " y",
-        ConfigUnitType.Percent => " %%",
+        ConfigUnitType.Percent => " %",
         _ => string.Empty,
     };
 
@@ -549,6 +550,18 @@ internal static class ImGuiHelper
         {
             if (!first) ImGui.SameLine();
             ImGui.TextColored(ImGuiColors.DalamudRed, " None of PvE or PvP!");
+        }
+    }
+
+    private static void SaveConfig()
+    {
+        try
+        {
+            Service.Config.Save();
+        }
+        catch (Exception ex)
+        {
+            Svc.Log.Warning(ex, "Failed to save configuration.");
         }
     }
 }

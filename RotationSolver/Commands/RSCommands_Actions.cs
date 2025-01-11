@@ -2,7 +2,6 @@
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Updaters;
 
@@ -17,6 +16,7 @@ namespace RotationSolver.Commands
         internal static uint _lastActionID;
         static float _lastCountdownTime = 0;
         static Job _previousJob = Job.ADV;
+        static readonly Random random = new();
 
         public static void IncrementState()
         {
@@ -38,7 +38,7 @@ namespace RotationSolver.Commands
             if (!Player.Available) return false;
 
             // Do not click the button in random time.
-            if (DateTime.Now - _lastClickTime < TimeSpan.FromMilliseconds(new Random().Next(
+            if (DateTime.Now - _lastClickTime < TimeSpan.FromMilliseconds(random.Next(
                 (int)(Service.Config.ClickingDelay.X * 1000), (int)(Service.Config.ClickingDelay.Y * 1000)))) return false;
             _lastClickTime = DateTime.Now;
 
@@ -127,7 +127,7 @@ namespace RotationSolver.Commands
             started = true;
             try
             {
-                int pulseCount = new Random().Next((int)Service.Config.KeyboardNoise.X, (int)Service.Config.KeyboardNoise.Y);
+                int pulseCount = random.Next((int)Service.Config.KeyboardNoise.X, (int)Service.Config.KeyboardNoise.Y);
                 PulseAction(id, pulseCount);
             }
             catch (Exception ex)
@@ -151,17 +151,14 @@ namespace RotationSolver.Commands
             }
 
             PreviewUpdater.PulseActionBar(id);
-            var time = Service.Config.ClickingDelay.X + new Random().NextDouble() * (Service.Config.ClickingDelay.Y - Service.Config.ClickingDelay.X);
+            var time = Service.Config.ClickingDelay.X + random.NextDouble() * (Service.Config.ClickingDelay.Y - Service.Config.ClickingDelay.X);
             Svc.Framework.RunOnTick(() =>
             {
                 PulseAction(id, remainingPulses - 1);
             }, TimeSpan.FromSeconds(time));
         }
 
-        internal static void ResetSpecial()
-        {
-            DoSpecialCommandType(SpecialCommandType.EndSpecial, false);
-        }
+        internal static void ResetSpecial() => DoSpecialCommandType(SpecialCommandType.EndSpecial, false);
 
         internal static void CancelState()
         {
@@ -181,62 +178,28 @@ namespace RotationSolver.Commands
                 var target = DataCenter.AllHostileTargets
                     .FirstOrDefault(t => t != null && t.TargetObjectId == Player.Object?.GameObjectId);
 
-                if (Svc.Condition[ConditionFlag.LoggingOut])
+                if (Svc.Condition[ConditionFlag.LoggingOut] ||
+                    (Service.Config.AutoOffWhenDead && Player.Available && Player.Object?.CurrentHp == 0) ||
+                    (Service.Config.AutoOffWhenDeadPvP && DataCenter.Territory?.IsPvP == true && Player.Available && Player.Object?.CurrentHp == 0) ||
+                    (Service.Config.AutoOffCutScene && Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]) ||
+                    (Service.Config.AutoOffSwitchClass && Player.Job != _previousJob) ||
+                    (Service.Config.AutoOffBetweenArea && (Svc.Condition[ConditionFlag.BetweenAreas] || Svc.Condition[ConditionFlag.BetweenAreas51])) ||
+                    (Service.Config.CancelStateOnCombatBeforeCountdown && Service.CountDownTime > 0.2f && DataCenter.InCombat) ||
+                    (ActionUpdater.AutoCancelTime != DateTime.MinValue && DateTime.Now > ActionUpdater.AutoCancelTime) ||
+                    (DataCenter.RightSet.SwitchCancelConditionSet?.IsTrue(DataCenter.RightNowRotation) ?? false))
                 {
                     CancelState();
+                    if (Player.Job != _previousJob) _previousJob = Player.Job;
+                    if (ActionUpdater.AutoCancelTime != DateTime.MinValue) ActionUpdater.AutoCancelTime = DateTime.MinValue;
                 }
-                else if (Service.Config.AutoOffWhenDead
-                    && Player.Available
-                    && Player.Object?.CurrentHp == 0)
-                {
-                    CancelState();
-                }
-                else if (Service.Config.AutoOffWhenDeadPvP && DataCenter.Territory?.IsPvP == true
-                    && Player.Available
-                    && Player.Object?.CurrentHp == 0)
-                {
-                    CancelState();
-                }
-                else if (Service.Config.AutoOffCutScene
-                    && Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent])
-                {
-                    CancelState();
-                }
-                else if (Service.Config.AutoOffSwitchClass
-                    && Player.Job != _previousJob)
-                {
-                    _previousJob = Player.Job;
-                    CancelState();
-                }
-                else if (Service.Config.AutoOffBetweenArea
-                    && (Svc.Condition[ConditionFlag.BetweenAreas]
-                    || Svc.Condition[ConditionFlag.BetweenAreas51]))
-                {
-                    CancelState();
-                }
-
-                // Auto manual on being attacked by someone.
-                else if (Service.Config.StartOnAttackedBySomeone
-                    && target != null
-                    && !target.IsDummy())
+                else if (Service.Config.StartOnAttackedBySomeone && target != null && !target.IsDummy())
                 {
                     if (!DataCenter.State)
                     {
                         DoStateCommandType(StateCommandType.Manual);
                     }
                 }
-
-                // Cancel state if combat starts before countdown is finished
-                else if (Service.Config.CancelStateOnCombatBeforeCountdown
-                    && Service.CountDownTime > 0.2f
-                    && DataCenter.InCombat)
-                {
-                    CancelState();
-                }
-
-                // Auto start at count down.
-                else if (Service.Config.StartOnCountdown
-                    && Service.CountDownTime > 0)
+                else if (Service.Config.StartOnCountdown && Service.CountDownTime > 0)
                 {
                     _lastCountdownTime = Service.CountDownTime;
                     if (!DataCenter.State)
@@ -251,25 +214,9 @@ namespace RotationSolver.Commands
                         }
                     }
                 }
-
-                // Holds state if countdown is running and setting is enabled
                 else if (Service.Config.StartOnCountdown && Service.CountDownTime == 0 && _lastCountdownTime > 0.2f)
                 {
                     _lastCountdownTime = 0;
-                    CancelState();
-                }
-
-                // Cancel when after combat.
-                else if (ActionUpdater.AutoCancelTime != DateTime.MinValue
-                    && DateTime.Now > ActionUpdater.AutoCancelTime)
-                {
-                    CancelState();
-                    ActionUpdater.AutoCancelTime = DateTime.MinValue;
-                }
-
-                // Auto switch conditions.
-                else if (DataCenter.RightSet.SwitchCancelConditionSet?.IsTrue(DataCenter.RightNowRotation) ?? false)
-                {
                     CancelState();
                 }
                 else if (DataCenter.RightSet.SwitchManualConditionSet?.IsTrue(DataCenter.RightNowRotation) ?? false)
@@ -292,6 +239,5 @@ namespace RotationSolver.Commands
                 Svc.Log.Error(ex, "Exception in UpdateRotationState");
             }
         }
-
     }
 }

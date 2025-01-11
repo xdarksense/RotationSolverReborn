@@ -126,12 +126,15 @@ internal static class StateUpdater
     {
         if (DataCenter.DispelTarget != null)
         {
-            if (DataCenter.DispelTarget.StatusList.Any(StatusHelper.IsDangerous))
+            foreach (var status in DataCenter.DispelTarget.StatusList)
             {
-                return true;
+                if (StatusHelper.IsDangerous(status))
+                {
+                    return true;
+                }
             }
-            else if (!DataCenter.HasHostilesInRange || Service.Config.DispelAll
-                || DataCenter.IsPvP)
+
+            if (!DataCenter.HasHostilesInRange || Service.Config.DispelAll || DataCenter.IsPvP)
             {
                 return true;
             }
@@ -146,39 +149,25 @@ internal static class StateUpdater
 
     private static bool ShouldAddPositional()
     {
-        // Check if the player's role is Melee and if there is a next GCD (Global Cooldown) action
-        // Also, check if the configuration allows automatic use of True North
-        if (DataCenter.Role == JobRole.Melee && ActionUpdater.NextGCDAction != null
-            && Service.Config.AutoUseTrueNorth)
+        if (DataCenter.Role == JobRole.Melee && ActionUpdater.NextGCDAction != null && Service.Config.AutoUseTrueNorth)
         {
-            // Get the ID of the next GCD action
             var id = ActionUpdater.NextGCDAction.ID;
-            // Get the target of the next GCD action
             var target = ActionUpdater.NextGCDAction.Target.Target;
 
-            // Check if the action ID has a positional requirement
             if (ConfigurationHelper.ActionPositional.TryGetValue((ActionID)id, out var positional)
-            // Check if the positional requirement is not met by the target's current position
-            && positional != target?.FindEnemyPositional()
-            // Check if the target has positional requirements
-            && target?.HasPositional() == true
-            // Check if the target does not have a status that turns target into a wallboss
-            && !target.HasStatus(true, StatusID.DirectionalDisregard))
+                && positional != target?.FindEnemyPositional()
+                && target?.HasPositional() == true
+                && !target.HasStatus(true, StatusID.DirectionalDisregard))
             {
-                // If all conditions are met, return true to add the Positional flag
                 return true;
             }
         }
-        // If any condition is not met, return false
         return false;
     }
 
     private static bool ShouldAddDefenseArea()
     {
-        if (!DataCenter.InCombat || !Service.Config.UseDefenseAbility)
-            return false;
-
-        return DataCenter.IsHostileCastingAOE;
+        return DataCenter.InCombat && Service.Config.UseDefenseAbility && DataCenter.IsHostileCastingAOE;
     }
 
     private static bool ShouldAddDefenseSingle()
@@ -188,29 +177,43 @@ internal static class StateUpdater
 
         if (DataCenter.Role == JobRole.Healer)
         {
-            if (DataCenter.PartyMembers.Any((tank) =>
+            foreach (var tank in DataCenter.PartyMembers)
             {
-                var attackingTankObj = DataCenter.AllHostileTargets.Where(t => t.TargetObjectId == tank.GameObjectId);
+                int attackingTankCount = 0;
+                foreach (var hostile in DataCenter.AllHostileTargets)
+                {
+                    if (hostile.TargetObjectId == tank.GameObjectId)
+                    {
+                        attackingTankCount++;
+                    }
+                }
 
-                if (attackingTankObj.Count() != 1)
-                    return false;
-
-                return DataCenter.IsHostileCastingToTank;
-            }))
-            {
-                return true;
+                if (attackingTankCount == 1 && DataCenter.IsHostileCastingToTank)
+                {
+                    return true;
+                }
             }
         }
 
         if (DataCenter.Role == JobRole.Tank)
         {
-            var movingHere = (float)DataCenter.NumberOfHostilesInRange / DataCenter.NumberOfHostilesInMaxRange > 0.3f;
+            bool movingHere = (float)DataCenter.NumberOfHostilesInRange / DataCenter.NumberOfHostilesInMaxRange > 0.3f;
 
-            var tarOnMe = DataCenter.AllHostileTargets.Where(t => t.DistanceToPlayer() <= 3
-            && t.TargetObject == Player.Object);
-            var tarOnMeCount = tarOnMe.Count();
-            var attackedCount = tarOnMe.Count(ObjectHelper.IsAttacked);
-            var attacked = (float)attackedCount / tarOnMeCount > 0.7f;
+            int tarOnMeCount = 0;
+            int attackedCount = 0;
+            foreach (var hostile in DataCenter.AllHostileTargets)
+            {
+                if (hostile.DistanceToPlayer() <= 3 && hostile.TargetObject == Player.Object)
+                {
+                    tarOnMeCount++;
+                    if (ObjectHelper.IsAttacked(hostile))
+                    {
+                        attackedCount++;
+                    }
+                }
+            }
+
+            bool attacked = (float)attackedCount / tarOnMeCount > 0.7f;
 
             if (tarOnMeCount >= Service.Config.AutoDefenseNumber
                 && Player.Object.GetHealthRatio() <= Service.Config.HealthForAutoDefense
@@ -233,15 +236,15 @@ internal static class StateUpdater
         if (!DataCenter.HPNotFull || !CanUseHealAction)
             return false;
 
-        var singleAbility = ShouldHealSingle(StatusHelper.SingleHots,
+        int singleAbility = ShouldHealSingle(StatusHelper.SingleHots,
             Service.Config.HealthSingleAbility,
             Service.Config.HealthSingleAbilityHot);
 
-        var canHealAreaAbility = singleAbility > 2;
+        bool canHealAreaAbility = singleAbility > 2;
 
-        if (DataCenter.PartyMembers.Count() > 2)
+        if (DataCenter.PartyMembers.Count > 2)
         {
-            var ratio = GetHealingOfTimeRatio(Player.Object, StatusHelper.AreaHots);
+            float ratio = GetHealingOfTimeRatio(Player.Object, StatusHelper.AreaHots);
 
             if (!canHealAreaAbility)
                 canHealAreaAbility = DataCenter.PartyMembersDifferHP < Service.Config.HealthDifference
@@ -256,15 +259,15 @@ internal static class StateUpdater
         if (!DataCenter.HPNotFull || !CanUseHealAction)
             return false;
 
-        var singleSpell = ShouldHealSingle(StatusHelper.SingleHots,
+        int singleSpell = ShouldHealSingle(StatusHelper.SingleHots,
             Service.Config.HealthSingleSpell,
             Service.Config.HealthSingleSpellHot);
 
-        var canHealAreaSpell = singleSpell > 2;
+        bool canHealAreaSpell = singleSpell > 2;
 
-        if (DataCenter.PartyMembers.Count() > 2)
+        if (DataCenter.PartyMembers.Count > 2)
         {
-            var ratio = GetHealingOfTimeRatio(Player.Object, StatusHelper.AreaHots);
+            float ratio = GetHealingOfTimeRatio(Player.Object, StatusHelper.AreaHots);
 
             if (!canHealAreaSpell)
                 canHealAreaSpell = DataCenter.PartyMembersDifferHP < Service.Config.HealthDifference
@@ -279,7 +282,7 @@ internal static class StateUpdater
         if (!DataCenter.HPNotFull || !CanUseHealAction)
             return false;
 
-        var onlyHealSelf = Service.Config.OnlyHealSelfWhenNoHealer
+        bool onlyHealSelf = Service.Config.OnlyHealSelfWhenNoHealer
             && DataCenter.Role != JobRole.Healer;
 
         if (onlyHealSelf)
@@ -289,7 +292,7 @@ internal static class StateUpdater
         }
         else
         {
-            var singleAbility = ShouldHealSingle(StatusHelper.SingleHots,
+            int singleAbility = ShouldHealSingle(StatusHelper.SingleHots,
                 Service.Config.HealthSingleAbility,
                 Service.Config.HealthSingleAbilityHot);
 
@@ -302,7 +305,7 @@ internal static class StateUpdater
         if (!DataCenter.HPNotFull || !CanUseHealAction)
             return false;
 
-        var onlyHealSelf = Service.Config.OnlyHealSelfWhenNoHealer
+        bool onlyHealSelf = Service.Config.OnlyHealSelfWhenNoHealer
             && DataCenter.Role != JobRole.Healer;
 
         if (onlyHealSelf)
@@ -312,7 +315,7 @@ internal static class StateUpdater
         }
         else
         {
-            var singleSpell = ShouldHealSingle(StatusHelper.SingleHots,
+            int singleSpell = ShouldHealSingle(StatusHelper.SingleHots,
                 Service.Config.HealthSingleSpell,
                 Service.Config.HealthSingleSpellHot);
 
@@ -322,10 +325,7 @@ internal static class StateUpdater
 
     private static bool ShouldAddAntiKnockback()
     {
-        if (!DataCenter.InCombat || !Service.Config.UseKnockback)
-            return false;
-
-        return DataCenter.AreHostilesCastingKnockback;
+        return DataCenter.InCombat && Service.Config.UseKnockback && DataCenter.AreHostilesCastingKnockback;
     }
 
     private static bool ShouldAddProvoke()
@@ -335,7 +335,7 @@ internal static class StateUpdater
 
         if (DataCenter.Role == JobRole.Tank
             && (Service.Config.AutoProvokeForTank
-                || DataCenter.AllianceMembers.Count(o => o.IsJobCategory(JobRole.Tank)) < 2)
+                || CountAllianceTanks() < 2)
             && DataCenter.ProvokeTarget != null)
         {
             return true;
@@ -346,10 +346,7 @@ internal static class StateUpdater
 
     private static bool ShouldAddInterrupt()
     {
-        if (!DataCenter.InCombat)
-            return false;
-
-        return DataCenter.InterruptTarget != null && Service.Config.InterruptibleMoreCheck;
+        return DataCenter.InCombat && DataCenter.InterruptTarget != null && Service.Config.InterruptibleMoreCheck;
     }
 
     private static bool ShouldAddTankStance()
@@ -357,8 +354,7 @@ internal static class StateUpdater
         if (!Service.Config.AutoTankStance || DataCenter.Role != JobRole.Tank)
             return false;
 
-        if (!DataCenter.AllianceMembers.Any(t => t.IsJobCategory(JobRole.Tank) && t.CurrentHp != 0 && t.HasStatus(false, StatusHelper.TankStanceStatus))
-            && !CustomRotation.HasTankStance)
+        if (!AnyAllianceTankWithStance() && !CustomRotation.HasTankStance)
         {
             return true;
         }
@@ -377,21 +373,31 @@ internal static class StateUpdater
     {
         const float buffWholeTime = 15;
 
-        var buffTime = target.StatusTime(false, statusIds);
+        float buffTime = target.StatusTime(false, statusIds);
 
         return Math.Min(1, buffTime / buffWholeTime);
     }
 
     static int ShouldHealSingle(StatusID[] hotStatus, float healSingle, float healSingleHot)
-        => DataCenter.PartyMembers.Count(p => ShouldHealSingle(p, hotStatus, healSingle, healSingleHot));
+    {
+        int count = 0;
+        foreach (var member in DataCenter.PartyMembers)
+        {
+            if (ShouldHealSingle(member, hotStatus, healSingle, healSingleHot))
+            {
+                count++;
+            }
+        }
+        return count;
+    }
 
     static bool ShouldHealSingle(IBattleChara target, StatusID[] hotStatus, float healSingle, float healSingleHot)
     {
         if (target == null) return false;
 
-        var ratio = GetHealingOfTimeRatio(target, hotStatus);
+        float ratio = GetHealingOfTimeRatio(target, hotStatus);
 
-        var h = target.GetHealthRatio();
+        float h = target.GetHealthRatio();
         if (h == 0 || !target.NeedHealing()) return false;
 
         return h < Lerp(healSingle, healSingleHot, ratio);
@@ -458,5 +464,30 @@ internal static class StateUpdater
         if (status.HasFlag(flag) || !getValue()) return;
 
         status |= flag;
+    }
+
+    private static int CountAllianceTanks()
+    {
+        int count = 0;
+        foreach (var member in DataCenter.AllianceMembers)
+        {
+            if (member.IsJobCategory(JobRole.Tank))
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private static bool AnyAllianceTankWithStance()
+    {
+        foreach (var member in DataCenter.AllianceMembers)
+        {
+            if (member.IsJobCategory(JobRole.Tank) && member.CurrentHp != 0 && member.HasStatus(false, StatusHelper.TankStanceStatus))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }
