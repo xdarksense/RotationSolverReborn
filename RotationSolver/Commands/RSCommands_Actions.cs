@@ -182,7 +182,7 @@ namespace RotationSolver.Commands
             {
                 CancelState();
             }
-            else if (Service.Config.AutoOffWhenDead
+            else if (Service.Config.AutoOffWhenDead && DataCenter.Territory?.IsPvP == false
                 && Player.Available
                 && Player.Object.CurrentHp == 0)
             {

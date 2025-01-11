@@ -102,6 +102,7 @@ internal static class ActionUpdater
         UpdateCombatTime();
         UpdateSlots();
         UpdateMoving();
+        UpdateLifetime();
         UpdateMPTimer();
     }
 
@@ -141,6 +142,33 @@ internal static class ActionUpdater
         DataCenter.MovingRaw = DataCenter.IsMoving
             ? (float)(DateTime.Now - _startMovingTime).TotalSeconds
             : 0;
+    }
+    static DateTime _startDeadTime = DateTime.MinValue;
+    static DateTime _startAliveTime = DateTime.Now;
+    static bool _isDead = true;
+    private static void UpdateLifetime()
+    {
+        if (Player.Object == null) return;
+
+        var lastDead = _isDead;
+        _isDead = Player.Object.IsDead;
+
+        if (lastDead && !Player.Object.IsDead)
+        {
+            _startAliveTime = DateTime.Now;
+        }
+        else if (!lastDead && Player.Object.IsDead)
+        {
+            _startDeadTime = DateTime.Now;
+        }
+
+        DataCenter.DeadTimeRaw = Player.Object.IsDead
+            ? (float)(DateTime.Now - _startDeadTime).TotalSeconds
+            : 0;
+
+        DataCenter.AliveTimeRaw = Player.Object.IsDead
+            ? 0
+            : (float)(DateTime.Now - _startAliveTime).TotalSeconds;
     }
 
     static DateTime _startCombatTime = DateTime.MinValue;

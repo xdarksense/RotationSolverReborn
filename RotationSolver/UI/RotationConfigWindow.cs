@@ -2715,6 +2715,9 @@ public partial class RotationConfigWindow : Window
         }
         ImGui.Text($"Height: {Player.Character->ModelContainer.CalculateHeight()}");
         ImGui.Text($"OnlineStatus: {Player.OnlineStatus}");
+        ImGui.Text($"IsDead: {Player.Object.IsDead}");
+        ImGui.Text($"Dead Time: {DataCenter.DeadTimeRaw}");
+        ImGui.Text($"Alive Time: {DataCenter.AliveTimeRaw}");
         ImGui.Text($"Moving: {DataCenter.IsMoving}");
         ImGui.Text($"Moving Time: {DataCenter.MovingRaw}");
         ImGui.Text($"Stop Moving: {DataCenter.StopMovingRaw}");
@@ -2829,17 +2832,17 @@ public partial class RotationConfigWindow : Window
 
     private static unsafe void DrawParty()
     {
-        ImGui.Text($"Party: {DataCenter.PartyMembers.Count()}");
-        ImGui.Text($"Alliance: {DataCenter.AllianceMembers.Count()}");
-
-        ImGui.Text($"PartyMembersAverHP: {DataCenter.PartyMembersAverHP}");
-
-        ImGui.Text($"Your combat state: {DataCenter.InCombat}");
-        ImGui.Text($"Your character combat: {Player.Object.InCombat()}");
+        ImGui.Text($"Number of Party Members: {DataCenter.PartyMembers.Count}");
+        ImGui.Text($"Number of Alliance Members: {DataCenter.AllianceMembers.Count}");
+        ImGui.Text($"Average Party HP Percent: {DataCenter.PartyMembersAverHP*100}");
         foreach (var p in Svc.Party)
         {
             if (p.GameObject is not IBattleChara b) continue;
-            ImGui.Text($"In Combat: {b.InCombat()}");
+
+            var text = $"Name: {b.Name}, In Combat: {b.InCombat()}";
+            if (b.TimeAlive() > 0) text += $", Time Alive: {b.TimeAlive()}";
+            if (b.TimeDead() > 0) text += $", Time Dead: {b.TimeDead()}";
+            ImGui.Text(text);
         }
     }
 
@@ -2848,10 +2851,6 @@ public partial class RotationConfigWindow : Window
         var target = Svc.Targets.Target;
         if (target == null) return;
         
-        ImGui.Text($"Targetting through invuln:{(target.HasStatus(true, StatusID.Guard) && (DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility || !DataCenter.IsPvP))}");
-        ImGui.Text($"Guarding: {target.HasStatus(true, StatusID.Guard)}");
-        ImGui.Text($"IsPvP: {DataCenter.IsPvP}");
-        ImGui.Text($"IgnorePvPInvincibility: {Service.Config.IgnorePvPInvincibility}");
         ImGui.Text($"Height: {target.Struct()->Height}");
         ImGui.Text($"Kind: {target.GetObjectKind()}");
         ImGui.Text($"SubKind: {target.GetBattleNPCSubKind()}");
