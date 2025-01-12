@@ -189,7 +189,7 @@ public struct ActionTargetInfo(IBaseAction action)
     {
         if (!gameObject.IsTargetable) return false;
 
-        if (Service.Config.RaiseType == RaiseType.PartyOnly && !gameObject.IsParty())
+        if (Service.Config.RaiseType == RaiseType.PartyOnly && gameObject.IsAllianceMember() && !gameObject.IsParty())
         {
             return false;
         }
