@@ -1,6 +1,6 @@
 ﻿using RotationSolver.Basic.Rotations.Duties;
 
-namespace DefaultRotations.Duty;
+namespace RebornRotations.Duty;
 
 [Rotation("Variant Default", CombatType.PvE)]
 

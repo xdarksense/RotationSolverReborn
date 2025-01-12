@@ -1,4 +1,4 @@
-namespace DefaultRotations.Tank;
+namespace RebornRotations.Tank;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Tank/GNB_Default.cs")]

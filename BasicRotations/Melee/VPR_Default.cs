@@ -1,4 +1,4 @@
-﻿namespace DefaultRotations.Melee;
+﻿namespace RebornRotations.Melee;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Melee/VPR_Default.cs")]

@@ -1,4 +1,4 @@
-﻿namespace DefaultRotations.Magical;
+﻿namespace RebornRotations.Magical;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Magical/PCT_Default.cs")]
@@ -93,13 +93,21 @@ public sealed class PCT_Default : PictomancerRotation
         return base.DefenseAreaAbility(nextGCD, out act);
     }
 
+    [RotationDesc(ActionID.TemperaCoatPvE)]
+    protected sealed override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
+    {
+        // Mitigations
+        if (TemperaCoatPvE.CanUse(out act)) return true;
+        return base.DefenseAreaAbility(nextGCD, out act);
+    }
+
     #endregion
 
     #region oGCD Logic
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        bool burstTimingCheckerStriking = (!ScenicMusePvE.Cooldown.WillHaveOneCharge(60) || HasStarryMuse) || !StarryMusePvE.EnoughLevel;
+        bool burstTimingCheckerStriking = !ScenicMusePvE.Cooldown.WillHaveOneCharge(60) || HasStarryMuse || !StarryMusePvE.EnoughLevel;
         // Bursts
         int adjustCombatTimeForOpener = Player.Level < 92 ? 2 : 5;
         if (StarryMusePvE.CanUse(out act) && CombatTime > adjustCombatTimeForOpener && IsBurst) return true;
@@ -122,6 +130,13 @@ public sealed class PCT_Default : PictomancerRotation
         //if (ScenicMusePvE.CanUse(out act)) return true;
         //if (SteelMusePvE.CanUse(out act, usedUp: true)) return true;
         //if (LivingMusePvE.CanUse(out act, usedUp: true)) return true;
+        return base.AttackAbility(nextGCD, out act);
+    }
+
+    protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
+    {
+        if ((MergedStatus.HasFlag(AutoStatus.DefenseArea) || Player.WillStatusEndGCD(2, 0, true, StatusID.TemperaCoat)) && TemperaGrassaPvE.CanUse(out act)) return true;
+
         return base.AttackAbility(nextGCD, out act);
     }
     #endregion

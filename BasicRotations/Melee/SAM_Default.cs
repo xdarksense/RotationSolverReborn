@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace DefaultRotations.Melee;
+namespace RebornRotations.Melee;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Melee/SAM_Default.cs")]

@@ -1,4 +1,4 @@
-//namespace DefaultRotations.Ranged;
+//namespace RebornRotations.Ranged;
 
 //[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
 //[SourceCode(Path = "main/BasicRotations/Limited Jobs/BSM_Default.cs")]

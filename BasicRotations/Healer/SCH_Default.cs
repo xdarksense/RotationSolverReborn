@@ -1,4 +1,4 @@
-namespace DefaultRotations.Healer;
+namespace RebornRotations.Healer;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Healer/SCH_Default.cs")]
@@ -187,7 +187,7 @@ public sealed class SCH_Default : ScholarRotation
         act = null;
 
         if (HasSwift && SwiftLogic && ResurrectionPvE.CanUse(out _)) return false;
-        
+
         if (AdloquiumPvE.CanUse(out act)) return true;
         if (ManifestationPvE.CanUse(out act, skipCastingCheck: true)) return true;
         if (PhysickPvE.CanUse(out act)) return true;
@@ -236,7 +236,7 @@ public sealed class SCH_Default : ScholarRotation
 
         //Single Instant for when moving.
         if (MovingTime > RuinTime && RuinIiPvE.CanUse(out act)) return true;
-        
+
         //Add dot while moving.
         if (MovingTime > DOTTime && BiolysisPvE.CanUse(out act, skipStatusProvideCheck: DOTUpkeep)) return true;
         if (MovingTime > DOTTime && BioIiPvE.CanUse(out act, skipStatusProvideCheck: DOTUpkeep)) return true;

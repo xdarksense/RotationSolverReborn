@@ -1,4 +1,4 @@
-namespace DefaultRotations.Healer;
+namespace RebornRotations.Healer;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Healer/SGE_Default.cs")]
@@ -394,7 +394,7 @@ public sealed class SGE_Default : SageRotation
     #region Extra Methods
     public override bool CanHealSingleSpell => base.CanHealSingleSpell && (GCDHeal || PartyMembers.GetJobCategory(JobRole.Healer).Count() < 2);
     public override bool CanHealAreaSpell => base.CanHealAreaSpell && (GCDHeal || PartyMembers.GetJobCategory(JobRole.Healer).Count() < 2);
-    
+
     public override void DisplayStatus()
     {
         ImGui.Text($"Eukrasian Action: {_EukrasiaActionAim}");

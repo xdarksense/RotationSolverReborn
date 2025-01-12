@@ -9,9 +9,6 @@ using ECommons.LanguageHelpers;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Commands;
 using RotationSolver.Data;
-using System;
-using System.Collections.Generic;
-using System.Numerics;
 
 namespace RotationSolver.UI;
 

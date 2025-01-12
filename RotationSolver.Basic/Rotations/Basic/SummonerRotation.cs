@@ -324,7 +324,7 @@ partial class SummonerRotation
 
     static partial void ModifyResurrectionPvE(ref ActionSetting setting)
     {
- 
+
     }
 
     static partial void ModifySummonTopazPvE(ref ActionSetting setting)
@@ -445,7 +445,7 @@ partial class SummonerRotation
 
     static partial void ModifySummonGarudaIiPvE(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyNecrotizePvE(ref ActionSetting setting)

@@ -658,7 +658,7 @@ partial class CustomRotation
     /// </summary>
     [Description("Health of dying tank")]
     public static float HealthForDyingTanks => Service.Config.HealthForDyingTanks;
-    
+
     /// <summary>
     /// 
     /// </summary>

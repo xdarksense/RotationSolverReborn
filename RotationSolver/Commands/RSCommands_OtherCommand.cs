@@ -2,7 +2,6 @@
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Data;
 using RotationSolver.Updaters;
-using System.Reflection;
 
 namespace RotationSolver.Commands;
 
@@ -85,13 +84,21 @@ public static partial class RSCommands
 
             if (property.PropertyType == typeof(ConditionBoolean))
             {
-                var relay = (ConditionBoolean)property.GetValue(Service.Config)!;
-                relay.Value = (bool)convertedValue;
-                convertedValue = relay;
+                if (convertedValue is bool boolValue)
+                {
+                    var relay = (ConditionBoolean)property.GetValue(Service.Config)!;
+                    relay.Value = boolValue;
+                    convertedValue = relay;
+                }
+                else
+                {
+                    Svc.Chat.PrintError("Failed to parse the value as boolean.");
+                    return;
+                }
             }
 
             property.SetValue(Service.Config, convertedValue);
-            command = convertedValue.ToString();
+            command = convertedValue?.ToString();
 
             if (Service.Config.ShowToggledActionInChat)
             {

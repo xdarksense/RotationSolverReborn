@@ -635,27 +635,27 @@ internal partial class Configs : IPluginConfiguration
 
     [JobConfig, UI("Ignore Invincibility for PvP purposes.", Filter = PvPSpecificControls)]
     private readonly bool _ignorePvPInvincibility = false;
-    
+
     [ConditionBool, UI("Auto turn off when dead in PvP.",
          Filter = PvPSpecificControls)]
     private static readonly bool _autoOffWhenDeadPvP = true;
-    
+
     [ConditionBool, UI("Auto turn off when PvP match ends.",
          Filter = PvPSpecificControls)]
     private static readonly bool _autoOffPvPMatchEnd = true;
-    
+
     [ConditionBool, UI("Auto turn on when PvP match starts.",
          Filter = PvPSpecificControls)]
     private static readonly bool _autoOnPvPMatchStart = true;
-    
+
     #endregion
-    
+
     #region Jobs
-    
+
     [JobConfig, UI("MP threshold under which to use Lucid Dreaming", Filter = HealingActionCondition)]
     [Range(0, 10000, ConfigUnitType.None)]
     private readonly int _lucidDreamingMpThreshold = 6000;
-    
+
     [JobConfig, Range(0, 1, ConfigUnitType.Percent)]
     private readonly float _healthAreaAbilityHot = 0.55f;
 
