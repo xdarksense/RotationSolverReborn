@@ -276,6 +276,7 @@ partial class BlackMageRotation
 
     static partial void ModifyUmbralSoulPvE(ref ActionSetting setting)
     {
+        setting.ActionCheck = () => InUmbralIce;
         setting.UnlockedByQuestID = 66609;
     }
 
@@ -584,7 +585,7 @@ partial class BlackMageRotation
             AoeCount = 1,
         };
     }
-    
+
     static partial void ModifyFrostStarPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.ElementalStar];

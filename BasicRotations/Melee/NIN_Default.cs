@@ -1,6 +1,6 @@
 using Dalamud.Interface.Colors;
 
-namespace DefaultRotations.Melee;
+namespace RebornRotations.Melee;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Melee/NIN_Default.cs")]

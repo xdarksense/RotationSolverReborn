@@ -198,7 +198,7 @@ partial class NinjaRotation
     {
         setting.ActionCheck = () => RabbitMediumPvEActive;
     }
-    
+
     static partial void ModifySpinningEdgePvE(ref ActionSetting setting)
     {
 
@@ -355,7 +355,7 @@ partial class NinjaRotation
         setting.StatusProvide = [StatusID.TenChiJin, StatusID.TenriJindoReady];
         setting.UnlockedByQuestID = 68488;
     }
-    
+
     static partial void ModifyMeisuiPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.ShadowWalker];

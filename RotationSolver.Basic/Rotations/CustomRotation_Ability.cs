@@ -428,7 +428,7 @@ partial class CustomRotation
         }
 
         #region PvP
-        if (GuardPvP.CanUse(out act) && Player.GetHealthRatio() <= Service.Config.HealthForGuard )
+        if (GuardPvP.CanUse(out act) && Player.GetHealthRatio() <= Service.Config.HealthForGuard)
         {
             return true;
         }

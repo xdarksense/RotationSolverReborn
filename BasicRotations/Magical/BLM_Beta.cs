@@ -1,4 +1,4 @@
-﻿namespace DefaultRotations.Magical;
+﻿namespace RebornRotations.Magical;
 
 [Rotation("Beta", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Magical/BLM_Beta.cs")]
@@ -512,7 +512,7 @@ public sealed class BLM_Beta : BlackMageRotation
         if (CombatElapsedLess(6)) return false;
         if (UmbralSoulPvE.CanUse(out act)) return true;
         if (InAstralFire && TransposePvE.CanUse(out act)) return true;
-        
+
         return false;
     }
 

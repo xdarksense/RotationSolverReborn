@@ -1,4 +1,4 @@
-﻿namespace DefaultRotations.Magical;
+﻿namespace RebornRotations.PVPRotations.Magical;
 
 [Rotation("Default PVP", CombatType.PvP, GameVersion = "7.00", Description = "Beta Rotation")]
 [SourceCode(Path = "main/BasicRotations/PVPRotations/Magical/RDM_Default.PVP.cs")]

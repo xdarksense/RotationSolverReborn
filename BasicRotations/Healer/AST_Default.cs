@@ -1,4 +1,4 @@
-namespace DefaultRotations.Healer;
+namespace RebornRotations.Healer;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Healer/AST_Default.cs")]

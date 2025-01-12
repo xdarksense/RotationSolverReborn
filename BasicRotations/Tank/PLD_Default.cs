@@ -1,4 +1,4 @@
-﻿namespace DefaultRotations.Tank;
+﻿namespace RebornRotations.Tank;
 
 [Rotation("Beta", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Tank/PLD_Default.cs")]

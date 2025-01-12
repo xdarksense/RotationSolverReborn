@@ -17,7 +17,7 @@ partial class DarkKnightRotation
     /// 
     /// </summary>
     public static bool HasDarkArts => JobGauge.HasDarkArts;
-    
+
     /// <summary>
     /// 
     /// </summary>
@@ -422,17 +422,17 @@ partial class DarkKnightRotation
     /// 
     /// </summary>
     public static bool ScarletDeliriumPvPReady => Service.GetAdjustedActionId(ActionID.SouleaterPvP) == ActionID.ScarletDeliriumPvP;
-    
+
     /// <summary>
     /// 
     /// </summary>
     public static bool ComeuppancePvPReady => Service.GetAdjustedActionId(ActionID.SouleaterPvP) == ActionID.ComeuppancePvP;
-    
+
     /// <summary>
     /// 
     /// </summary>
     public static bool TorcleaverPvPReady => Service.GetAdjustedActionId(ActionID.SouleaterPvP) == ActionID.TorcleaverPvP;
-    
+
     /// <summary>
     /// 
     /// </summary>
@@ -479,6 +479,6 @@ partial class DarkKnightRotation
     {
         setting.ActionCheck = () => SaltAndDarknessPvPReady;
     }
-    
+
     #endregion
 }

@@ -1,4 +1,4 @@
-﻿namespace DefaultRotations.Melee;
+﻿namespace RebornRotations.PVPRotations.Melee;
 
 [Rotation("Default PVP", CombatType.PvP, GameVersion = "7.05", Description = "Beta Rotation")]
 [SourceCode(Path = "main/BasicRotations/PVPRotations/Tank/VPR_Default.PvP.cs")]

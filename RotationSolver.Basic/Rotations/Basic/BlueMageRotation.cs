@@ -1,6 +1,4 @@
-﻿using ECommons;
-
-namespace RotationSolver.Basic.Rotations.Basic;
+﻿namespace RotationSolver.Basic.Rotations.Basic;
 
 partial class BlueMageRotation
 {
@@ -176,7 +174,7 @@ partial class BlueMageRotation
 
     static partial void ModifySharpenedKnifePvE(ref ActionSetting setting)
     {
-        
+
     }
 
     static partial void ModifyChocoMeteorPvE(ref ActionSetting setting)

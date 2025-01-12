@@ -1,4 +1,4 @@
-namespace DefaultRotations.Magical;
+namespace RebornRotations.Magical;
 
 [Rotation("Basic BLU", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Limited Jobs/BLU_Basic.cs")]

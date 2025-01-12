@@ -6,7 +6,6 @@ using ECommons.DalamudServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Client.UI;
@@ -142,7 +141,7 @@ public static class ObjectHelper
             TargetHostileType.AllTargetsWhenSoloInDutyTargetIsInEnemiesList => DataCenter.PartyMembers.Count < 2 || battleChara.TargetObject is IBattleChara target && target.IsInEnemiesList(),
             _ => true,
         };
-        }
+    }
 
     private static string RemoveControlCharacters(string input)
     {
@@ -600,8 +599,8 @@ public static class ObjectHelper
         }
 
         return (float)(DateTime.Now - _aliveStartTimes[b.GameObjectId]).TotalSeconds;
-    } 
-    
+    }
+
     private static readonly ConcurrentDictionary<ulong, DateTime> _deadStartTimes = new();
 
     /// <summary>

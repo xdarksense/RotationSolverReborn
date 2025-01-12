@@ -681,10 +681,10 @@ namespace RotationSolver.Data
 
         [Description("Recent Changes:")]
         WelcomeWindow_Changelog,
-        
+
         [Description("Reorder AutoStatus Priorities")]
         ConfigWindow_Auto_PrioritiesOrganizer,
-        
+
         [Description("PvP Specific Controls")]
         ConfigWindow_Auto_PvPSpecific,
     }

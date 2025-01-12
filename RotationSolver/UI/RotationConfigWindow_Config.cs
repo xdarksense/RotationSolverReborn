@@ -303,7 +303,7 @@ public partial class RotationConfigWindow
         ImGui.Separator();
         _allSearchable.DrawItems(Configs.PvPSpecificControls);
     }
-    
+
     /// <summary>
     /// Draws the Action Usage and Control section.
     /// </summary>

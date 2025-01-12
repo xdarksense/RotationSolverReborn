@@ -1,4 +1,4 @@
-﻿namespace DefaultRotations.Ranged;
+﻿namespace RebornRotations.PVPRotations.Ranged;
 
 [Rotation("Default PVP", CombatType.PvP, GameVersion = "7.00", Description = "Beta Rotation")]
 [SourceCode(Path = "main/BasicRotations/PVPRotations/Ranged/DNC_Default.PvP.cs")]

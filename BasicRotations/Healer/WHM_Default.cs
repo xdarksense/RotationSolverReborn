@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace DefaultRotations.Healer;
+namespace RebornRotations.Healer;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Healer/WHM_Default.cs")]
@@ -8,6 +8,9 @@ namespace DefaultRotations.Healer;
 public sealed class WHM_Default : WhiteMageRotation
 {
     #region Config Options
+    [RotationConfig(CombatType.PvE, Name = "Use Tincture/Gemdraught when about to use Prescense of Mind")]
+    public bool UseMedicine { get; set; } = true;
+
     [RotationConfig(CombatType.PvE, Name = "Enable Swiftcast Restriction Logic to attempt to prevent actions other than Raise when you have swiftcast")]
     public bool SwiftLogic { get; set; } = true;
 
@@ -63,7 +66,7 @@ public sealed class WHM_Default : WhiteMageRotation
     {
         if (remainTime < StonePvE.Info.CastTime + CountDownAhead
             && StonePvE.CanUse(out var act)) return act;
-
+        if (remainTime < 3 && UseBurstMedicine(out act)) return act;
         if (UsePreRegen && remainTime <= 5 && remainTime > 3)
         {
             if (RegenPvE.CanUse(out act)) return act;
@@ -76,7 +79,9 @@ public sealed class WHM_Default : WhiteMageRotation
     #region oGCD Logic
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        if (Player.WillStatusEndGCD(0, 3, true, StatusID.DivineGrace) && DivineCaressPvE.CanUse(out act)) return true;
+        if (Player.WillStatusEndGCD(2, 0, true, StatusID.DivineGrace) && DivineCaressPvE.CanUse(out act)) return true;
+        
+        if (UseMedicine && !PresenceOfMindPvE.Cooldown.IsCoolingDown && UseBurstMedicine(out act)) return true;
 
         bool useLastThinAirCharge = ThinAirLastChargeUsage == ThinAirUsageStrategy.UseAllCharges || (ThinAirLastChargeUsage == ThinAirUsageStrategy.ReserveLastChargeForRaise && nextGCD == RaisePvE);
         if (nextGCD is IBaseAction action && action.Info.MPNeed >= ThinAirNeed &&
@@ -203,7 +208,6 @@ public sealed class WHM_Default : WhiteMageRotation
     {
 
         act = null;
-
         if (HasSwift && SwiftLogic && RaisePvE.CanUse(out _)) return false;
 
         //if (NotInCombatDelay && RegenDefense.CanUse(out act)) return true;
@@ -237,11 +241,6 @@ public sealed class WHM_Default : WhiteMageRotation
     #endregion
 
     #region Extra Methods
-    public WHM_Default()
-    {
-        AfflatusRapturePvE.Setting.RotationCheck = () => BloodLily < 3;
-        AfflatusSolacePvE.Setting.RotationCheck = () => BloodLily < 3;
-    }
     public override bool CanHealSingleSpell => base.CanHealSingleSpell && (GCDHeal || PartyMembers.GetJobCategory(JobRole.Healer).Count() < 2);
     public override bool CanHealAreaSpell => base.CanHealAreaSpell && (GCDHeal || PartyMembers.GetJobCategory(JobRole.Healer).Count() < 2);
 

@@ -1,4 +1,4 @@
-﻿namespace DefaultRotations.Melee;
+﻿namespace RebornRotations.PVPRotations.Melee;
 
 [Rotation("Default PVP", CombatType.PvP, GameVersion = "7.00", Description = "Beta Rotation")]
 [SourceCode(Path = "main/BasicRotations/PVPRotations/Tank/NIN_Default.PvP.cs")]
