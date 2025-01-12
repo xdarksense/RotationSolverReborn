@@ -84,7 +84,7 @@ partial class CustomRotation
     /// Whether the number of party members is 8.
     /// </summary>
     [Description("Is Full Party")]
-    public static bool IsFullParty => PartyMembers.Count() is 8;
+    public static bool IsFullParty => PartyMembers.Count() is 8 or 9;
 
     /// <summary>
     /// party members HP.
@@ -292,6 +292,12 @@ partial class CustomRotation
     public static bool IsInHighEndDuty => DataCenter.Territory?.IsHighEndDuty ?? false;
 
     /// <summary>
+    /// Is player in a normal or chaotic Alliance Raid.
+    /// </summary>
+    [Description("Is in an Alliance Raid (including Chaotic)")]
+    public static bool IsInAllianceRaid => DataCenter.IsInAllianceRaid;
+
+    /// <summary>
     /// Is player in UCoB duty.
     /// </summary>
     [Description("Is in UCoB duty")]
@@ -327,11 +333,17 @@ partial class CustomRotation
     [Description("Is in FRU duty")]
     public static bool IsInFRU => DataCenter.IsInFRU;
 
+    ///<summary>
+    /// Is player in COD duty.
+    ///</summary>
+    [Description("Is in FRU duty")]
+    public static bool IsInCOD => DataCenter.IsInCOD;
+
     /// <summary>
-    /// Is player in duty.
+    /// Is player in any instanced duty.
     /// </summary>
     [Description("Is player in duty")]
-    public static bool IsInDuty => Svc.Condition[ConditionFlag.BoundByDuty];
+    public static bool IsInDuty => DataCenter.IsInDuty;
 
     /// <summary>
     /// Your ping.

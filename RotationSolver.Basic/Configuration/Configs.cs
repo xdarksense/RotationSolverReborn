@@ -382,12 +382,12 @@ internal partial class Configs : IPluginConfiguration
     [UI("isLastAbilityTimer", Description = "Don't fuck with this if you dont know what it does",
         Filter = Extra)]
     [Range(0.100f, 2.500f, ConfigUnitType.Seconds, 0.001f)]
-    public float isLastAbilityTimer { get; set; } = 0.800f;
+    public float IsLastAbilityTimer { get; set; } = 0.800f;
 
     [UI("isFirstAbilityTimer", Description = "Don't fuck with this if you dont know what it does",
         Filter = Extra)]
     [Range(0.100f, 2.500f, ConfigUnitType.Seconds, 0.001f)]
-    public float isFirstAbilityTimer { get; set; } = 0.600f;
+    public float IsFirstAbilityTimer { get; set; } = 0.600f;
 
     [UI("Auto turn off RSR when combat is over more for more then...",
         Parent = nameof(AutoOffAfterCombat))]
@@ -477,6 +477,10 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Heal/Dance partner your chocobo", Description = "Experimental.",
         Filter = HealingActionCondition, Section = 3)]
     private static readonly bool _chocoboPartyMember = false;
+
+    [ConditionBool, UI("Treat focus targeted player as party member in alliance raids", Description = "Experimental, includes Chaotic.",
+        Filter = HealingActionCondition, Section = 3)]
+    private static readonly bool _focusTargetIsParty = false;
 
     [ConditionBool, UI("Heal party members with GCD if there is nothing to do in combat.",
         Filter = HealingActionCondition, Section = 3)]

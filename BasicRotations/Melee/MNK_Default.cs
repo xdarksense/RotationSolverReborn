@@ -17,6 +17,13 @@ public sealed class MNK_Default : MonkRotation
         [Description("Perfect Balance")] PerfectBalance,
     }
 
+    public enum MasterfulBlitzUse : byte
+    {
+        [Description("Use Immediately")] UseAsAble,
+
+        [Description("With ROF burst logic")] RiddleOfFireUse,
+    }
+
     [RotationConfig(CombatType.PvE, Name = "Use Form Shift")]
     public bool AutoFormShift { get; set; } = true;
 
@@ -31,6 +38,9 @@ public sealed class MNK_Default : MonkRotation
 
     [RotationConfig(CombatType.PvE, Name = "Enable TEA Checker.")]
     public bool EnableTEAChecker { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Masterful Blitz abilites as soon as they are available.")]
+    public MasterfulBlitzUse MBAbilities { get; set; } = MasterfulBlitzUse.RiddleOfFireUse;
 
     [RotationConfig(CombatType.PvE, Name = "Use Riddle of Fire after this ability")]
     public RiddleOfFireFirst ROFFirst { get; set; } = RiddleOfFireFirst.Brotherhood;
@@ -91,11 +101,16 @@ public sealed class MNK_Default : MonkRotation
             // 'If you are in brotherhood and forbidden chakra is available, use it.'
             if (TheForbiddenChakraPvE.CanUse(out act)) return true;
         }
-        if (!InBrotherhood)
+        else
         {
             // 'If you are not in brotherhood and brotherhood is about to be available, hold for burst.'
-            if (BrotherhoodPvE.Cooldown.WillHaveOneChargeGCD(1) && TheForbiddenChakraPvE.CanUse(out act)) return false;
+            if (BrotherhoodPvE.Cooldown.WillHaveOneChargeGCD(1) && TheForbiddenChakraPvE.CanUse(out act)) return true;
             // 'If you are not in brotherhood use it.'
+            if (TheForbiddenChakraPvE.CanUse(out act)) return true;
+        }
+        if (!BrotherhoodPvE.EnoughLevel)
+        {
+            // 'If you are not high enough level for brotherhood, use it.'
             if (TheForbiddenChakraPvE.CanUse(out act)) return true;
         }
         if (!TheForbiddenChakraPvE.EnoughLevel)
@@ -239,22 +254,47 @@ public sealed class MNK_Default : MonkRotation
 
         // bullet proofed finisher - use when during burst
         // or if burst was missed, and next burst is not arriving in time, use it better than waste it, otherwise, hold it for next rof
-        if (!BeastChakras.Contains(BeastChakra.NONE) && (Player.HasStatus(true, StatusID.RiddleOfFire) || RiddleOfFirePvE.Cooldown.JustUsedAfter(42)))
+        if (!BeastChakras.Contains(BeastChakra.NONE))
         {
-            // Both Nadi and 3 beasts
-            if (PhantomRushPvE.CanUse(out act)) return true;
-            if (TornadoKickPvE.CanUse(out act)) return true;
+            switch (MBAbilities)
+            {
+                case MasterfulBlitzUse.UseAsAble:
+                default:
+                    if (PhantomRushPvE.CanUse(out act)) return true;
+                    if (TornadoKickPvE.CanUse(out act)) return true;
 
-            // Needing Solar Nadi and has 3 different beasts
-            if (RisingPhoenixPvE.CanUse(out act)) return true;
-            if (FlintStrikePvE.CanUse(out act)) return true;
+                    // Needing Solar Nadi and has 3 different beasts
+                    if (RisingPhoenixPvE.CanUse(out act)) return true;
+                    if (FlintStrikePvE.CanUse(out act)) return true;
 
-            // Needing Lunar Nadi and has 3 of the same beasts
-            if (ElixirBurstPvE.CanUse(out act)) return true;
-            if (ElixirFieldPvE.CanUse(out act)) return true;
+                    // Needing Lunar Nadi and has 3 of the same beasts
+                    if (ElixirBurstPvE.CanUse(out act)) return true;
+                    if (ElixirFieldPvE.CanUse(out act)) return true;
 
-            // No Nadi and 3 beasts
-            if (CelestialRevolutionPvE.CanUse(out act)) return true;
+                    // No Nadi and 3 beasts
+                    if (CelestialRevolutionPvE.CanUse(out act)) return true;
+                    break;
+
+                case MasterfulBlitzUse.RiddleOfFireUse:
+                    if (Player.HasStatus(true, StatusID.RiddleOfFire) || RiddleOfFirePvE.Cooldown.JustUsedAfter(42))
+                    {
+                        // Both Nadi and 3 beasts
+                        if (PhantomRushPvE.CanUse(out act)) return true;
+                        if (TornadoKickPvE.CanUse(out act)) return true;
+
+                        // Needing Solar Nadi and has 3 different beasts
+                        if (RisingPhoenixPvE.CanUse(out act)) return true;
+                        if (FlintStrikePvE.CanUse(out act)) return true;
+
+                        // Needing Lunar Nadi and has 3 of the same beasts
+                        if (ElixirBurstPvE.CanUse(out act)) return true;
+                        if (ElixirFieldPvE.CanUse(out act)) return true;
+
+                        // No Nadi and 3 beasts
+                        if (CelestialRevolutionPvE.CanUse(out act)) return true;
+                    }
+                    break;
+            }
         }
 
         // 'Because Fire¡¯s Reply grants formless, we have an imposed restriction that we prefer not to use it while under PB, or if we have a formless already.' + 'Cast Fire's Reply after an opo gcd'

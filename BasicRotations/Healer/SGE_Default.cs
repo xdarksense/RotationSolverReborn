@@ -253,7 +253,7 @@ public sealed class SGE_Default : SageRotation
 
         // If the last action performed matches any of a list of specific actions, it clears the Eukrasia aim.
         // This serves as a reset/cleanup mechanism to ensure the decision logic starts fresh for the next cycle.
-        if (IsLastGCD(false, EukrasianPrognosisIiPvE, EukrasianPrognosisPvE,
+        if (IsLastGCD(true, EukrasianPrognosisIiPvE, EukrasianPrognosisPvE,
             EukrasianDiagnosisPvE, EukrasianDyskrasiaPvE, EukrasianDosisIiiPvE, EukrasianDosisIiPvE,
             EukrasianDosisPvE) || !InCombat)
         {
