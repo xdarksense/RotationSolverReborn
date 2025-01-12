@@ -84,7 +84,7 @@ partial class CustomRotation
     /// Whether the number of party members is 8.
     /// </summary>
     [Description("Is Full Party")]
-    public static bool IsFullParty => PartyMembers.Count() is 8;
+    public static bool IsFullParty => PartyMembers.Count() is 8 or 9;
 
     /// <summary>
     /// party members HP.

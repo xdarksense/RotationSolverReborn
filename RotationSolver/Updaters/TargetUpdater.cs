@@ -76,7 +76,7 @@ internal static partial class TargetUpdater
             {
                 foreach (var target in DataCenter.AllTargets)
                 {
-                    if (ObjectHelper.IsAlliance(target) && target.Character() != null &&
+                    if (ObjectHelper.IsAllianceMember(target) && target.Character() != null &&
                         target.Character()->CharacterData.OnlineStatus != 15 &&
                         target.Character()->CharacterData.OnlineStatus != 5 && target.IsTargetable)
                     {

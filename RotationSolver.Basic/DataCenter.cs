@@ -271,8 +271,8 @@ internal static class DataCenter
     public static bool LastAbilityv2 => DataCenter.InCombat && !ActionHelper.CanUseGCD && (ActionManagerHelper.GetCurrentAnimationLock() == 0) && !Player.Object.IsCasting && (DataCenter.DefaultGCDElapsed >= DataCenter.DefaultGCDRemain);
     public static bool FirstAbilityv2 => DataCenter.InCombat && !ActionHelper.CanUseGCD && (ActionManagerHelper.GetCurrentAnimationLock() == 0) && !Player.Object.IsCasting && (DataCenter.DefaultGCDRemain >= DataCenter.DefaultGCDElapsed);
 
-    public static bool LastAbilityorNot => DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD <= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.isLastAbilityTimer);
-    public static bool FirstAbilityorNot => DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD >= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.isFirstAbilityTimer);
+    public static bool LastAbilityorNot => DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD <= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.IsLastAbilityTimer);
+    public static bool FirstAbilityorNot => DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD >= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.IsFirstAbilityTimer);
     #endregion
 
     public static uint[] BluSlots { get; internal set; } = new uint[24];

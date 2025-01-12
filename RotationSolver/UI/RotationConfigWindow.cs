@@ -2882,7 +2882,7 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"Is Alive: {battleChara.IsAlive()}");
             ImGui.Text($"Is Party: {battleChara.IsParty()}");
             ImGui.Text($"Is Healer: {battleChara.IsJobCategory(JobRole.Healer)}");
-            ImGui.Text($"Is Alliance: {battleChara.IsAlliance()}");
+            ImGui.Text($"Is Alliance: {battleChara.IsAllianceMember()}");
             ImGui.Text($"Is Enemy: {battleChara.IsEnemy()}");
             ImGui.Text($"Distance To Player: {battleChara.DistanceToPlayer()}");
             ImGui.Text($"Is In EnemiesList: {battleChara.IsInEnemiesList()}");

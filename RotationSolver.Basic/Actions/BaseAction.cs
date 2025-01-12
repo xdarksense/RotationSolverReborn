@@ -173,7 +173,7 @@ public class BaseAction : IBaseAction
         {
             return IsLastAbilityv2Usable();
         }
-        return DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD <= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.isLastAbilityTimer);
+        return DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD <= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.IsLastAbilityTimer);
     }
 
     private bool IsFirstAbilityUsable()
@@ -182,7 +182,7 @@ public class BaseAction : IBaseAction
         {
             return IsFirstAbilityv2Usable();
         }
-        return DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD >= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.isFirstAbilityTimer);
+        return DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD >= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.IsFirstAbilityTimer);
     }
 
     private bool IsLastAbilityv2Usable()

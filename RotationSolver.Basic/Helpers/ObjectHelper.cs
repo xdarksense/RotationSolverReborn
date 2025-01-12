@@ -83,7 +83,7 @@ public static class ObjectHelper
 
     internal static bool IsAttackable(this IBattleChara battleChara)
     {
-        if (battleChara.IsAlliance() == true) return false;
+        if (battleChara.IsAllianceMember() == true) return false;
 
         // Dead.
         if (Service.Config.FilterOneHpInvincible && battleChara.CurrentHp <= 1) return false;
@@ -245,7 +245,7 @@ public static class ObjectHelper
     => obj != null
     && ActionManager.CanUseActionOnTarget((uint)ActionID.BlizzardPvE, obj.Struct());
 
-    internal static unsafe bool IsAlliance(this IGameObject obj)
+    internal static unsafe bool IsAllianceMember(this IGameObject obj)
         => obj.GameObjectId is not 0
         && (!DataCenter.IsPvP && DataCenter.IsInAllianceRaid && obj is IPlayerCharacter
         || DataCenter.IsInAllianceRaid && ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, obj.Struct()));
@@ -268,7 +268,7 @@ public static class ObjectHelper
             if (Service.Config.FriendlyPartyNpcHealRaise2 && gameObject.GetBattleNPCSubKind() == BattleNpcSubKind.NpcPartyMember) return true;
             if (Service.Config.ChocoboPartyMember && gameObject.GetNameplateKind() == NameplateKind.PlayerCharacterChocobo) return true;
             if (Service.Config.FriendlyBattleNpcHeal && gameObject.GetNameplateKind() == NameplateKind.FriendlyBattleNPC) return true;
-            if (Service.Config.FocusTargetIsParty && gameObject.IsFocusTarget() == true && gameObject.IsAlliance() == true) return true;
+            if (Service.Config.FocusTargetIsParty && gameObject.IsFocusTarget() == true && gameObject.IsAllianceMember() == true) return true;
         }
         return false;
     }
@@ -342,7 +342,7 @@ public static class ObjectHelper
     /// </returns>
     internal static bool IsTopPriorityHostile(this IGameObject obj)
     {
-        if (obj.IsAlliance() || obj.IsParty() || obj == null) return false;
+        if (obj.IsAllianceMember() || obj.IsParty() || obj == null) return false;
 
         var fateId = DataCenter.FateId;
 
