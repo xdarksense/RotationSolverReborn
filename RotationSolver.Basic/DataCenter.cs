@@ -104,6 +104,18 @@ internal static class DataCenter
     public static TerritoryInfo? Territory { get; set; }
 
     public static bool IsPvP => Territory?.IsPvP ?? false;
+    public static bool IsInDuty => Svc.Condition[ConditionFlag.BoundByDuty] || Svc.Condition[ConditionFlag.BoundByDuty56];
+    public static bool IsInAllianceRaid
+    {
+        get
+        {
+            var allianceTerritoryIds = new HashSet<ushort>
+        {
+            151, 174, 372, 508, 556, 627, 734, 776, 826, 882, 917, 966, 1054, 1118, 1178, 1248, 1241
+        };
+            return allianceTerritoryIds.Contains(TerritoryID);
+        }
+    }
 
     public static ushort TerritoryID => Svc.ClientState.TerritoryType;
     public static bool IsInUCoB => TerritoryID == 733;
@@ -112,6 +124,8 @@ internal static class DataCenter
     public static bool IsInDSR => TerritoryID == 968;
     public static bool IsInTOP => TerritoryID == 1122;
     public static bool IsInFRU => TerritoryID == 1238;
+    public static bool IsInCOD => TerritoryID == 1241;
+
 
     public static AutoStatus MergedStatus => AutoStatus | CommandStatus;
 
@@ -322,13 +336,13 @@ internal static class DataCenter
         }
     }
 
-    public static List<IBattleChara> PartyMembers { get; set; } = new();
+    public static List<IBattleChara> PartyMembers { get; set; } = [];
 
-    public static List<IBattleChara> AllianceMembers { get; set; } = new();
+    public static List<IBattleChara> AllianceMembers { get; set; } = [];
 
-    public static List<IBattleChara> FriendlyNPCMembers { get; set; } = new();
+    public static List<IBattleChara> FriendlyNPCMembers { get; set; } = [];
 
-    public static List<IBattleChara> AllHostileTargets { get; set; } = new();
+    public static List<IBattleChara> AllHostileTargets { get; set; } = [];
 
     public static IBattleChara? InterruptTarget { get; set; }
 
@@ -338,7 +352,7 @@ internal static class DataCenter
 
     public static IBattleChara? DispelTarget { get; set; }
 
-    public static List<IBattleChara> AllTargets { get; set; } = new();
+    public static List<IBattleChara> AllTargets { get; set; } = [];
 
     public static ulong[] TreasureCharas
     {

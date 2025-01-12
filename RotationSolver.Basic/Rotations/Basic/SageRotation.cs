@@ -198,16 +198,6 @@ partial class SageRotation
 
     static partial void ModifyPepsisPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () =>
-        {
-            foreach (var chara in DataCenter.PartyMembers)
-            {
-                if (chara.HasStatus(true, StatusID.EukrasianDiagnosis, StatusID.EukrasianPrognosis)
-                && chara.GetHealthRatio() < 0.9) return true;
-            }
-
-            return false;
-        };
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

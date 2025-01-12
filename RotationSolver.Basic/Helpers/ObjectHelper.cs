@@ -11,6 +11,7 @@ using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using FFXIVClientStructs.FFXIV.Component.GUI;
+using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
@@ -246,9 +247,8 @@ public static class ObjectHelper
 
     internal static unsafe bool IsAlliance(this IGameObject obj)
         => obj.GameObjectId is not 0
-        && (!DataCenter.IsPvP && obj is IPlayerCharacter
-        || ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, obj.Struct()));
-
+        && (!DataCenter.IsPvP && DataCenter.IsInAllianceRaid && obj is IPlayerCharacter
+        || DataCenter.IsInAllianceRaid && ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, obj.Struct()));
 
     private static readonly object _lock = new object();
 
@@ -268,8 +268,15 @@ public static class ObjectHelper
             if (Service.Config.FriendlyPartyNpcHealRaise2 && gameObject.GetBattleNPCSubKind() == BattleNpcSubKind.NpcPartyMember) return true;
             if (Service.Config.ChocoboPartyMember && gameObject.GetNameplateKind() == NameplateKind.PlayerCharacterChocobo) return true;
             if (Service.Config.FriendlyBattleNpcHeal && gameObject.GetNameplateKind() == NameplateKind.FriendlyBattleNPC) return true;
+            if (Service.Config.FocusTargetIsParty && gameObject.IsFocusTarget() == true && gameObject.IsAlliance() == true) return true;
         }
         return false;
+    }
+
+    internal static bool IsFocusTarget(this IGameObject gameObject)
+    {
+        var focusTarget = Svc.Targets.FocusTarget;
+        return focusTarget != null && focusTarget.GameObjectId == gameObject.GameObjectId;
     }
 
     internal static bool IsTargetOnSelf(this IBattleChara IBattleChara)
@@ -301,7 +308,8 @@ public static class ObjectHelper
     /// </summary>
     /// <param name="obj"></param>
     /// <returns></returns>
-    public static unsafe ObjectKind GetObjectKind(this IGameObject obj) => (ObjectKind)obj.Struct()->ObjectKind;
+    public static unsafe Dalamud.Game.ClientState.Objects.Enums.ObjectKind GetObjectKind(this IGameObject obj)
+    => (Dalamud.Game.ClientState.Objects.Enums.ObjectKind)obj.Struct()->ObjectKind;
 
     /// <summary>
     /// Determines whether the specified game object is a top priority hostile target based on its name being listed.

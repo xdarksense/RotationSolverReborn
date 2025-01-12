@@ -2709,6 +2709,7 @@ public partial class RotationConfigWindow : Window
 
     private static unsafe void DrawStatus()
     {
+        ImGui.Text($"Merged Status: {DataCenter.MergedStatus}");
         if ((IntPtr)FateManager.Instance() != IntPtr.Zero)
         {
             ImGui.Text($"Fate: {DataCenter.FateId}");
@@ -2729,7 +2730,6 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Stop Moving: {DataCenter.StopMovingRaw}");
         ImGui.Text($"CountDownTime: {Service.CountDownTime}");
         ImGui.Text($"Combo Time: {DataCenter.ComboTime}");
-        ImGui.Text($"Merged Status: {DataCenter.MergedStatus}");
         ImGui.Text($"TargetingType: {DataCenter.TargetingType}");
         ImGui.Text($"DeathTarget: {DataCenter.DeathTarget}");
         foreach (var item in DataCenter.AttackedTargets)
@@ -2839,8 +2839,8 @@ public partial class RotationConfigWindow : Window
     private static unsafe void DrawParty()
     {
         ImGui.Text($"Your combat state: {DataCenter.InCombat}");
-
         ImGui.Text($"Number of Party Members: {DataCenter.PartyMembers.Count}");
+        ImGui.Text($"Is in Alliance Raid: {DataCenter.IsInAllianceRaid}");
         ImGui.Text($"Number of Alliance Members: {DataCenter.AllianceMembers.Count}");
         ImGui.Text($"Average Party HP Percent: {DataCenter.PartyMembersAverHP * 100}");
         foreach (var p in Svc.Party)
@@ -2872,6 +2872,7 @@ public partial class RotationConfigWindow : Window
         if (target is IBattleChara battleChara)
         {
             ImGui.Text($"HP: {battleChara.CurrentHp} / {battleChara.MaxHp}");
+            ImGui.Text($"Is Current Focus Target: {battleChara.IsFocusTarget()}");
             ImGui.Text($"TTK: {battleChara.GetTimeToKill()}");
             ImGui.Text($"Is Boss TTK: {battleChara.IsBossFromTTK()}");
             ImGui.Text($"Is Boss Icon: {battleChara.IsBossFromIcon()}");
