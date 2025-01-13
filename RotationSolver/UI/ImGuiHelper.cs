@@ -470,7 +470,7 @@ internal static class ImGuiHelper
         Notify.Success($"\"{command}\" copied to clipboard.");
     }
 
-    private static readonly Dictionary<string, bool> _lastChecked = new();
+    private static readonly SortedList<string, bool> _lastChecked = [];
     private static void ExecuteHotKeys(Action action, params VirtualKey[] keys)
     {
         if (action == null) return;
@@ -479,15 +479,7 @@ internal static class ImGuiHelper
         var name = string.Join(' ', keys);
 
         if (!_lastChecked.TryGetValue(name, out var last)) last = false;
-        var now = true;
-        foreach (var key in keys)
-        {
-            if (!Svc.KeyState[key])
-            {
-                now = false;
-                break;
-            }
-        }
+        var now = keys.All(k => Svc.KeyState[k]);
         _lastChecked[name] = now;
 
         if (!last && now) action();

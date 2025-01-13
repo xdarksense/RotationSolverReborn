@@ -190,7 +190,7 @@ namespace RotationSolver.Commands
                     (DataCenter.RightSet.SwitchCancelConditionSet?.IsTrue(DataCenter.RightNowRotation) ?? false))
                 {
                     CancelState();
-                    if (Player.Job != _previousJob) _previousJob = Player.Job;
+                    if (Player.Job != null && Player.Job != _previousJob) _previousJob = Player.Job;
                     if (ActionUpdater.AutoCancelTime != DateTime.MinValue) ActionUpdater.AutoCancelTime = DateTime.MinValue;
                 }
                 else if ((Service.Config.AutoOnPvPMatchStart && Svc.Condition[ConditionFlag.BetweenAreas] &&
