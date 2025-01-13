@@ -58,7 +58,10 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
         var result = new List<IDrawing2D>();
 
         var hotBarIndex = 0;
-        foreach (var intPtr in GetAddons<AddonActionBar>())
+        foreach (var intPtr in GetAddons<AddonActionBar>()
+            .Union(GetAddons<AddonActionBarX>())
+            .Union(GetAddons<AddonActionCross>())
+            .Union(GetAddons<AddonActionDoubleCrossBase>()))
         {
             var actionBar = (AddonActionBarBase*)intPtr;
             if (actionBar != null && IsVisible(actionBar->AtkUnitBase))
@@ -139,16 +142,9 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
     {
         if (typeof(T).GetCustomAttribute<AddonAttribute>() is not AddonAttribute on) return Array.Empty<nint>();
 
-        var result = new List<nint>();
-        foreach (var str in on.AddonIdentifiers)
-        {
-            var ptr = Svc.GameGui.GetAddonByName(str, 1);
-            if (ptr != nint.Zero)
-            {
-                result.Add(ptr);
-            }
-        }
-        return result;
+        return on.AddonIdentifiers
+            .Select(str => Svc.GameGui.GetAddonByName(str, 1))
+            .Where(ptr => ptr != nint.Zero);
     }
 
     private static unsafe bool IsVisible(AtkUnitBase unit)
@@ -243,6 +239,12 @@ public interface IDrawing2D
     void Draw();
 }
 
+/// <summary> Drawing the image. </summary>
+/// <remarks> </remarks>
+/// <param name="texture"> </param>
+/// <param name="pt1">     </param>
+/// <param name="pt2">     </param>
+/// <param name="col">     </param>
 public readonly struct ImageDrawing(IDalamudTextureWrap texture, Vector2 pt1, Vector2 pt2, uint col = uint.MaxValue) : IDrawing2D
 {
     /// <summary> </summary>
@@ -260,16 +262,10 @@ public readonly struct ImageDrawing(IDalamudTextureWrap texture, Vector2 pt1, Ve
         _uv2 = uv2;
     }
 
-    public unsafe void Draw()
+    /// <summary> Draw on the <seealso cref="ImGui" /> </summary>
+    public void Draw()
     {
-        if (_texture == null)
-            return;
-
-        var drawList = ImGui.GetWindowDrawList();
-        if (drawList.NativePtr == null)
-            return;
-
-        drawList.AddImage(_texture.ImGuiHandle, _pt1, _pt2, _uv1, _uv2, _col);
+        ImGui.GetWindowDrawList().AddImage(_texture.ImGuiHandle, _pt1, _pt2, _uv1, _uv2, _col);
     }
 
     private readonly uint _col = col;

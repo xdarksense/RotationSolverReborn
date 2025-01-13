@@ -7,7 +7,7 @@
 public sealed class BLM_Beta : BlackMageRotation
 {
     #region Config Options
-    [RotationConfig(CombatType.PvE, Name = "Use Infinite Paradox Rotation (Requires Level 90)")]
+    [RotationConfig(CombatType.PvE, Name = "Use Infinite Paradox Rotation when at level 100)")]
     public bool Infinity { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "(Standard Rotation) Use Leylines in combat when standing still")]
@@ -140,7 +140,7 @@ public sealed class BLM_Beta : BlackMageRotation
             if (AmplifierPvE.CanUse(out act)) return true;
         }
 
-        if (ParadoxPvE.EnoughLevel && Infinity)
+        if (FlareStarPvE.EnoughLevel && Infinity)
         {
             if (UseMedicine && UseBurstMedicine(out act)) return true;
 
@@ -199,7 +199,7 @@ public sealed class BLM_Beta : BlackMageRotation
             if (MaintainStatus(out act)) return true;
         }
 
-        if (ParadoxPvE.EnoughLevel && Infinity)
+        if (FlareStarPvE.EnoughLevel && Infinity)
         {
 
             if (InAstralFire && ElementTime < 4 && Player.HasStatus(true, StatusID.Firestarter))

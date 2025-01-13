@@ -1,6 +1,6 @@
 ﻿namespace RebornRotations.Tank;
 
-[Rotation("Beta", CombatType.PvE, GameVersion = "7.15")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Tank/PLD_Default.cs")]
 [Api(4)]
 
@@ -31,6 +31,9 @@ public sealed class PLD_Default : PaladinRotation
 
     [RotationConfig(CombatType.PvE, Name = "Use Holy Spirit when out of melee range")]
     private bool UseHolyWhenAway { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Clemency with Requiescat")]
+    private bool RequiescatHealBot { get; set; } = true;
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Clemency with Requiescat")]
@@ -186,8 +189,8 @@ public sealed class PLD_Default : PaladinRotation
     {
         act = null;
         if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
-        if (ClemencyPvE.Target.Target?.GetHealthRatio() < ClemencyRequi && RequiescatStacks > 0 && ClemencyPvE.CanUse(out act, skipCastingCheck: true)) return true;
-        if (HealBot && ClemencyPvE.Target.Target?.GetHealthRatio() < ClemencyNoRequi && ClemencyPvE.CanUse(out act)) return true;
+        if (RequiescatHealBot && RequiescatStacks > 0 && ClemencyPvE.CanUse(out act, skipCastingCheck: true) && ClemencyPvE.Target.Target?.GetHealthRatio() < ClemencyRequi) return true;
+        if (HealBot && ClemencyPvE.CanUse(out act) && ClemencyPvE.Target.Target?.GetHealthRatio() < ClemencyNoRequi) return true;
         return base.HealSingleGCD(out act);
     }
 
