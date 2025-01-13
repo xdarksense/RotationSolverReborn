@@ -466,13 +466,13 @@ internal partial class Configs : IPluginConfiguration
         Filter = HealingActionCondition, Section = 3)]
     private static readonly bool _healOutOfCombat = false;
 
-    [ConditionBool, UI("Heal solo instance NPCs", Description = "Experimental.",
+    [ConditionBool, UI("Heal solo instance NPCs (Only enable as needed)", Description = "Experimental.",
         Filter = HealingActionCondition, Section = 3)]
     private static readonly bool _friendlyBattleNPCHeal = false;
 
-    [ConditionBool, UI("Heal and raise Party NPCs.", Description = "Experimental, only enable as needed.",
+    [ConditionBool, UI("Heal and raise Party NPCs.",
         Filter = HealingActionCondition, Section = 3)]
-    private static readonly bool _friendlyPartyNPCHealRaise2 = false;
+    private static readonly bool _friendlyPartyNPCHealRaise2 = true;
 
     [ConditionBool, UI("Heal/Dance partner your chocobo", Description = "Experimental.",
         Filter = HealingActionCondition, Section = 3)]

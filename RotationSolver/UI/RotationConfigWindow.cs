@@ -1741,18 +1741,26 @@ public partial class RotationConfigWindow : Window
 
             if (_activeAction is IBaseAction action)
             {
-
                 try
                 {
                     ImGui.Text("ID: " + action.Info.ID.ToString());
 #if DEBUG
                     ImGui.Text("Is Real GCD: " + action.Info.IsRealGCD.ToString());
-                    ImGui.Text("Resources: " + ActionManager.Instance()->CheckActionResources(ActionType.Action, action.AdjustedID).ToString());
-                    ImGui.Text("Status: " + ActionManager.Instance()->GetActionStatus(ActionType.Action, action.AdjustedID).ToString());
+
+                    // Ensure ActionManager.Instance() is not null
+                    if (ActionManager.Instance() != null)
+                    {
+                        ImGui.Text("Resources: " + ActionManager.Instance()->CheckActionResources(ActionType.Action, action.AdjustedID).ToString());
+                        ImGui.Text("Status: " + ActionManager.Instance()->GetActionStatus(ActionType.Action, action.AdjustedID).ToString());
+                    }
+
                     ImGui.Text("Cast Time: " + action.Info.CastTime.ToString());
                     ImGui.Text("MP: " + action.Info.MPNeed.ToString());
 #endif
                     ImGui.Text("AttackType: " + action.Info.AttackType.ToString());
+                    ImGui.Text("Level: " + action.Info.Level.ToString());
+                    ImGui.Text("Range: " + action.Info.Range.ToString());
+                    ImGui.Text("EffectRange: " + action.Info.EffectRange.ToString());
                     ImGui.Text("Aspect: " + action.Info.Aspect.ToString());
                     ImGui.Text("Has One:" + action.Cooldown.HasOneCharge.ToString());
                     ImGui.Text("Recast One: " + action.Cooldown.RecastTimeOneChargeRaw.ToString());
@@ -1764,19 +1772,24 @@ public partial class RotationConfigWindow : Window
                     ImGui.Text("Target Name: " + action.Target.Target?.Name ?? string.Empty);
                     ImGui.Text($"SpellUnlocked: {action.Info.SpellUnlocked} ({action.Action.UnlockLink.RowId})");
                 }
-                catch
+                catch (Exception ex)
                 {
-
+                    ImGui.TextColored(ImGuiColors.DalamudRed, "Error: " + ex.Message);
                 }
             }
             else if (_activeAction is IBaseItem item)
             {
                 try
                 {
-                    ImGui.Text("Status: " + ActionManager.Instance()->GetActionStatus(ActionType.Item, item.ID).ToString());
-                    ImGui.Text("Status HQ: " + ActionManager.Instance()->GetActionStatus(ActionType.Item, item.ID + 1000000).ToString());
-                    var remain = ActionManager.Instance()->GetRecastTime(ActionType.Item, item.ID) - ActionManager.Instance()->GetRecastTimeElapsed(ActionType.Item, item.ID);
-                    ImGui.Text("remain: " + remain.ToString());
+                    // Ensure ActionManager.Instance() is not null
+                    if (ActionManager.Instance() != null)
+                    {
+                        ImGui.Text("Status: " + ActionManager.Instance()->GetActionStatus(ActionType.Item, item.ID).ToString());
+                        ImGui.Text("Status HQ: " + ActionManager.Instance()->GetActionStatus(ActionType.Item, item.ID + 1000000).ToString());
+                        var remain = ActionManager.Instance()->GetRecastTime(ActionType.Item, item.ID) - ActionManager.Instance()->GetRecastTimeElapsed(ActionType.Item, item.ID);
+                        ImGui.Text("remain: " + remain.ToString());
+                    }
+
                     ImGui.Text("CanUse: " + item.CanUse(out _, true).ToString());
 
                     if (item is HpPotionItem healPotionItem)
@@ -1784,9 +1797,9 @@ public partial class RotationConfigWindow : Window
                         ImGui.Text("MaxHP:" + healPotionItem.MaxHp.ToString());
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-
+                    ImGui.TextColored(ImGuiColors.DalamudRed, "Error: " + ex.Message);
                 }
             }
         }
@@ -2775,7 +2788,7 @@ public partial class RotationConfigWindow : Window
 
         // Display all party members
         var partyMembers = DataCenter.PartyMembers;
-        if (partyMembers.Any())
+        if (partyMembers.Count != 0)
         {
             ImGui.Text("Party Members:");
             foreach (var member in partyMembers)
@@ -2790,7 +2803,7 @@ public partial class RotationConfigWindow : Window
 
         // Display all party members
         var friendlyNPCMembers = DataCenter.FriendlyNPCMembers;
-        if (friendlyNPCMembers.Any())
+        if (friendlyNPCMembers.Count != 0)
         {
             ImGui.Text("Friendly NPC Members:");
             foreach (var member in friendlyNPCMembers)
@@ -2878,6 +2891,9 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"Is Boss Icon: {battleChara.IsBossFromIcon()}");
             ImGui.Text($"Rank: {battleChara.GetObjectNPC()?.Rank.ToString() ?? string.Empty}");
             ImGui.Text($"Has Positional: {battleChara.HasPositional()}");
+            ImGui.Text($"IsNpcPartyMember: {battleChara.IsNpcPartyMember()}");
+            ImGui.Text($"IsPlayerCharacterChocobo: {battleChara.IsPlayerCharacterChocobo()}");
+            ImGui.Text($"IsFriendlyBattleNPC: {battleChara.IsFriendlyBattleNPC()}");
             ImGui.Text($"Is Dying: {battleChara.IsDying()}");
             ImGui.Text($"Is Alive: {battleChara.IsAlive()}");
             ImGui.Text($"Is Party: {battleChara.IsParty()}");

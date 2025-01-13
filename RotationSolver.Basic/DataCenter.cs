@@ -804,7 +804,10 @@ internal static class DataCenter
 
     public static bool IsCastingTankVfx()
     {
-        return IsCastingVfx(s =>
+        // Create a copy of the VfxDataQueue to avoid modification during enumeration
+        var vfxDataQueueCopy = VfxDataQueue.ToList();
+
+        return IsCastingVfx(vfxDataQueueCopy, s =>
         {
             if (!s.Path.StartsWith("vfx/lockon/eff/tank_lockon")) return false;
             if (!Player.Available) return false;
@@ -816,20 +819,19 @@ internal static class DataCenter
 
     public static bool IsCastingAreaVfx()
     {
-        return IsCastingVfx(s => s.Path.StartsWith("vfx/lockon/eff/coshare"));
+        var vfxDataQueueCopy = VfxDataQueue.ToArray();
+        return IsCastingVfx([.. vfxDataQueueCopy], s => s.Path.StartsWith("vfx/lockon/eff/coshare"));
     }
 
-    public static bool IsCastingVfx(Func<VfxNewData, bool> isVfx)
+    public static bool IsCastingVfx(List<VfxNewData> vfxDataQueueCopy, Func<VfxNewData, bool> isVfx)
     {
         // Ensure the list is not empty
-        if (VfxDataQueue.Count == 0)
+        if (vfxDataQueueCopy.Count == 0)
         {
             return false;
         }
 
-        // Create a copy of the VfxDataQueue to avoid modification during enumeration
-        var vfxDataQueueCopy = VfxDataQueue.ToList();
-
+        // Iterate over the copied list
         foreach (var vfx in vfxDataQueueCopy)
         {
             if (isVfx(vfx))

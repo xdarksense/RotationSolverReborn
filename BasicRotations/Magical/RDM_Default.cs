@@ -106,13 +106,7 @@ public sealed class RDM_Default : RedMageRotation
         ActionID.EnchantedMoulinetPvE,
         ActionID.MoulinetPvE
         //I dont know at this point if nextGCD.IsTheSameTo even working, but stil gonna left it in here.
-    }) && !nextGCD.IsTheSameTo(new[]
-        {
-        ActionID.RipostePvE,
-        ActionID.EnchantedRipostePvE,
-        ActionID.MoulinetPvE,
-        ActionID.EnchantedMoulinetPvE
-    });
+    }) && !nextGCD.IsTheSameTo(true, ActionID.RipostePvE, ActionID.EnchantedRipostePvE, ActionID.MoulinetPvE, ActionID.EnchantedMoulinetPvE);
 
         //i really hate this.
         bool ambatumelee = Player.HasStatus(true, StatusID.Manafication, StatusID.MagickedSwordplay);

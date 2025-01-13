@@ -30,6 +30,16 @@ public readonly struct ActionBasicInfo
     public readonly uint ID => _action.Action.RowId;
 
     /// <summary>
+    /// The Range of the action.
+    /// </summary>
+    public readonly sbyte Range => _action.Action.Range;
+
+    /// <summary>
+    /// The EffectRange of the action.
+    /// </summary>
+    public readonly byte EffectRange => _action.Action.EffectRange;
+
+    /// <summary>
     /// The icon of the action.
     /// </summary>
     public readonly uint IconID => ID == (uint)ActionID.SprintPvE ? 104u : _action.Action.Icon;

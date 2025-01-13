@@ -112,18 +112,19 @@ public static class IActionHelper
     /// <returns>True if the action is the same as any of the provided actions, otherwise false.</returns>
     public static bool IsTheSameTo(this IAction action, bool isAdjust, params IAction[] actions)
     {
-        return actions != null && action.IsTheSameTo(GetIDFromActions(isAdjust, actions));
+        return actions != null && action.IsTheSameTo(isAdjust, GetIDFromActions(isAdjust, actions));
     }
 
     /// <summary>
     /// Determines if the action is the same as any of the provided action IDs.
     /// </summary>
     /// <param name="action">The action to check.</param>
+    /// <param name="isAdjust">Whether to use the adjusted ID.</param>
     /// <param name="actions">The action IDs to check against.</param>
     /// <returns>True if the action is the same as any of the provided action IDs, otherwise false.</returns>
-    public static bool IsTheSameTo(this IAction action, params ActionID[] actions)
+    public static bool IsTheSameTo(this IAction action, bool isAdjust, params ActionID[] actions)
     {
-        return action != null && actions != null && IsActionID((ActionID)action.AdjustedID, actions);
+        return action != null && actions != null && IsActionID(isAdjust ? (ActionID)action.AdjustedID : (ActionID)action.ID, actions);
     }
 
     /// <summary>

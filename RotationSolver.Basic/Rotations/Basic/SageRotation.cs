@@ -14,12 +14,12 @@ partial class SageRotation
     /// <summary>
     /// Gets the amount of Addersgall available.
     /// </summary>
-    public static byte Addersgall => JobGauge.Addersgall;
+    public static byte Addersgall => AddersgallTrait.EnoughLevel ? JobGauge.Addersgall : (byte)0;
 
     /// <summary>
     /// Gets the amount of Addersting available.
     /// </summary>
-    public static byte Addersting => JobGauge.Addersting;
+    public static byte Addersting => AdderstingTrait.EnoughLevel ? JobGauge.Addersting : (byte)0;
 
     static float AddersgallTimerRaw => JobGauge.AddersgallTimer / 1000f;
 
@@ -27,7 +27,7 @@ partial class SageRotation
     /// Gets the amount of milliseconds elapsed until the next Addersgall is available.
     /// This counts from 0 to 20_000.
     /// </summary>
-    public static float AddersgallTime => AddersgallTimerRaw - DataCenter.DefaultGCDRemain;
+    public static float AddersgallTime => AddersgallTrait.EnoughLevel ? AddersgallTimerRaw - DataCenter.DefaultGCDRemain : 0;
 
     /// <summary>
     /// Used to determine if the cooldown for the next Addersgall will end within a specified time frame.
@@ -71,7 +71,8 @@ partial class SageRotation
     static partial void ModifyKardiaPvE(ref ActionSetting setting)
     {
         setting.TargetType = TargetType.Tank;
-        setting.ActionCheck = () => !DataCenter.AllianceMembers.Any(m => m.HasStatus(true, StatusID.Kardion));
+        setting.TargetStatusProvide = [StatusID.Kardion];
+        setting.ActionCheck = () => !DataCenter.PartyMembers.Any(m => m.HasStatus(true, StatusID.Kardion));
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 0,
