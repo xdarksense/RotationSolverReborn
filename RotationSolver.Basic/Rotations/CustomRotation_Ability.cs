@@ -1,3 +1,5 @@
+using RotationSolver.Basic.Helpers;
+
 namespace RotationSolver.Basic.Rotations;
 
 partial class CustomRotation
@@ -416,7 +418,7 @@ partial class CustomRotation
 
         if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
         {
-            if (Role is JobRole.Healer && SwiftcastPvE.CanUse(out act, isFirstAbility: true))
+            if (Role is JobRole.Healer && nextGCD.IsTheSameTo(true, ActionID.RaisePvE, ActionID.EgeiroPvE, ActionID.ResurrectionPvE, ActionID.AscendPvE) && SwiftcastPvE.CanUse(out act))
             {
                 return true;
             }

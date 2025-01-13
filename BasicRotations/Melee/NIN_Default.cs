@@ -317,6 +317,8 @@ public sealed class NIN_Default : NinjaRotation
         // Initializes the action to null, indicating no action has been chosen yet.
         act = null;
 
+        if ((InCombat || (CommbatMudra && HasHostilesInMaxRange)) && ChoiceNinjutsu(out act)) return true;
+
         // If Ninjutsu is available or not in combat, defers to the base class's emergency ability logic.
         if (!NoNinjutsu || !InCombat) return base.EmergencyAbility(nextGCD, out act);
 
@@ -413,7 +415,6 @@ public sealed class NIN_Default : NinjaRotation
             if (ForkedUse && ForkedRaijuPvE.CanUse(out act)) return true;
         }
 
-        if ((InCombat || (CommbatMudra && HasHostilesInMaxRange)) && ChoiceNinjutsu(out act)) return true;
         if (((!InCombat && CommbatMudra && HasHostilesInMaxRange) || !CombatElapsedLess(7)) && DoNinjutsu(out act)) return true;
 
         //No Ninjutsu

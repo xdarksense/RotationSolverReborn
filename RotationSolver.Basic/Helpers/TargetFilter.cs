@@ -24,7 +24,6 @@ public static class TargetFilter
             if (item == null || !item.IsDead || item.CurrentHp != 0 || !item.IsTargetable) return false;
             if (item.HasStatus(false, StatusID.Raise)) return false;
             if (!Service.Config.RaiseBrinkOfDeath && item.HasStatus(false, StatusID.BrinkOfDeath)) return false;
-            if (DataCenter.AllianceMembers.Any(c => c.CastTargetObjectId == item.GameObjectId)) return false;
             return true;
         });
     }
