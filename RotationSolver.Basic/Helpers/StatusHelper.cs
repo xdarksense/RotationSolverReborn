@@ -1,5 +1,6 @@
 ﻿using Dalamud.Game.ClientState.Statuses;
 using ECommons.Automation;
+using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using ECommons.Logging;
 using RotationSolver.Basic.Configuration;
@@ -339,11 +340,27 @@ public static class StatusHelper
         if (obj is not IBattleChara b) return Enumerable.Empty<Status>();
 
         var playerId = Player.Object?.GameObjectId ?? 0;
-        // Ensure b.StatusList is not null
-        return b.StatusList?.Where(status => !isFromSelf
-                                              || status.SourceId == playerId
-                                              || status.SourceObject?.OwnerId == playerId)
-                             ?? Enumerable.Empty<Status>();
+
+        try
+        {
+            // Ensure b.StatusList is not null
+            if (b.StatusList == null)
+            {
+                PluginLog.Error("StatusList is null. Cannot get statuses.");
+                return Enumerable.Empty<Status>();
+            }
+
+            return b.StatusList.Where(status => !isFromSelf
+                                                || status.SourceId == playerId
+                                                || status.SourceObject?.OwnerId == playerId)
+                               ?? Enumerable.Empty<Status>();
+        }
+        catch (Exception ex)
+        {
+            // Log the exception
+            Svc.Log.Error($"Failed to get statuses: {ex.Message}");
+            return Enumerable.Empty<Status>();
+        }
     }
 
     /// <summary>

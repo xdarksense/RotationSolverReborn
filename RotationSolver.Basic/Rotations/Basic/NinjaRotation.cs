@@ -528,7 +528,7 @@ partial class NinjaRotation
     [RotationDesc(ActionID.FeintPvE)]
     protected sealed override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (FeintPvE.CanUse(out act)) return true;
+        if (FeintPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.Mudra)) return true;
         return base.DefenseAreaAbility(nextGCD, out act);
     }
 

@@ -190,7 +190,9 @@ namespace RotationSolver.Commands
                     (DataCenter.RightSet.SwitchCancelConditionSet?.IsTrue(DataCenter.RightNowRotation) ?? false))
                 {
                     CancelState();
+#pragma warning disable CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
                     if (Player.Job != null && Player.Job != _previousJob) _previousJob = Player.Job;
+#pragma warning restore CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
                     if (ActionUpdater.AutoCancelTime != DateTime.MinValue) ActionUpdater.AutoCancelTime = DateTime.MinValue;
                 }
                 else if ((Service.Config.AutoOnPvPMatchStart && Svc.Condition[ConditionFlag.BetweenAreas] &&

@@ -40,7 +40,7 @@ partial class CustomRotation
         var role = DataCenter.Role;
 
         IBaseAction.TargetOverride = TargetType.Interrupt;
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.Interrupt) && MyInterruptAbility(role, nextGCD, out act))
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.Interrupt) && !Player.HasStatus(true, StatusID.Mudra) && MyInterruptAbility(role, nextGCD, out act))
         {
             return true;
         }
@@ -71,7 +71,7 @@ partial class CustomRotation
         {
             IBaseAction.ShouldEndSpecial = true;
         }
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.AntiKnockback) && AntiKnockback(role, nextGCD, out act))
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.AntiKnockback) && !Player.HasStatus(true, StatusID.Mudra) && AntiKnockback(role, nextGCD, out act))
         {
             return true;
         }
@@ -81,7 +81,7 @@ partial class CustomRotation
         {
             IBaseAction.ShouldEndSpecial = true;
         }
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.Positional) && TrueNorthPvE.Cooldown.CurrentCharges > 0 && !IsLastAbility(true, TrueNorthPvE) && TrueNorthPvE.CanUse(out act, skipComboCheck: true, usedUp: true))
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.Positional) && !Player.HasStatus(true, StatusID.Mudra) && TrueNorthPvE.Cooldown.CurrentCharges > 0 && !IsLastAbility(true, TrueNorthPvE) && TrueNorthPvE.CanUse(out act, skipComboCheck: true, usedUp: true))
         {
             return true;
         }
@@ -271,7 +271,7 @@ partial class CustomRotation
                 break;
 
             case JobRole.Melee:
-                if (LegSweepPvE.CanUse(out act)) return true;
+                if (LegSweepPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.Mudra)) return true;
                 break;
 
             case JobRole.RangedPhysical:
@@ -312,7 +312,7 @@ partial class CustomRotation
         {
             case JobRole.Tank:
             case JobRole.Melee:
-                if (ArmsLengthPvE.CanUse(out act)) return true;
+                if (ArmsLengthPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.Mudra)) return true;
                 break;
             case JobRole.Healer:
             case JobRole.RangedMagical:
@@ -372,8 +372,8 @@ partial class CustomRotation
                 break;
 
             case JobRole.Melee:
-                if (SecondWindPvE.CanUse(out act)) return true;
-                if (BloodbathPvE.CanUse(out act)) return true;
+                if (SecondWindPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.Mudra)) return true;
+                if (BloodbathPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.Mudra)) return true;
                 break;
 
             case JobRole.Healer:

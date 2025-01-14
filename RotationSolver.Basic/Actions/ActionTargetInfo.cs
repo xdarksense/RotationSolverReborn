@@ -254,27 +254,39 @@ public struct ActionTargetInfo(IBaseAction action)
     /// </returns>
     private bool CheckResistance(IGameObject gameObject)
     {
-        if (action.Info.AttackType == AttackType.Magic)
+        if (gameObject == null) return false;
+
+        try
         {
-            if (gameObject.HasStatus(false, StatusHelper.MagicResistance))
+            if (action.Info.AttackType == AttackType.Magic)
             {
-                return false;
+                if (gameObject.HasStatus(false, StatusHelper.MagicResistance))
+                {
+                    return false;
+                }
+            }
+            else if (action.Info.Aspect != Aspect.Piercing) // Physical
+            {
+                if (gameObject.HasStatus(false, StatusHelper.PhysicalResistance))
+                {
+                    return false;
+                }
+            }
+            if (Range >= 20) // Range
+            {
+                if (gameObject.HasStatus(false, StatusID.RangedResistance, StatusID.EnergyField))
+                {
+                    return false;
+                }
             }
         }
-        else if (action.Info.Aspect != Aspect.Piercing) // Physical
+        catch (Exception ex)
         {
-            if (gameObject.HasStatus(false, StatusHelper.PhysicalResistance))
-            {
-                return false;
-            }
+            // Log the exception for debugging purposes
+            Svc.Log.Error($"Error checking resistance: {ex.Message}");
+            return false;
         }
-        if (Range >= 20) // Range
-        {
-            if (gameObject.HasStatus(false, StatusID.RangedResistance, StatusID.EnergyField))
-            {
-                return false;
-            }
-        }
+
         return true;
     }
 
