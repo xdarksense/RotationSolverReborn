@@ -199,6 +199,7 @@ partial class SageRotation
 
     static partial void ModifyPepsisPvE(ref ActionSetting setting)
     {
+        setting.StatusNeed = [StatusID.EukrasianPrognosis];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
