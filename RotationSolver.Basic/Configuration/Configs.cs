@@ -347,10 +347,6 @@ internal partial class Configs : IPluginConfiguration
         Filter = Extra)]
     private static readonly bool _autoOpenChest = true;
 
-    [ConditionBool, UI("Use experimental FirstAbility and LastAbility checks",
-        Filter = Extra)]
-    private static readonly bool _useV2AbilityChecks = false;
-
     [ConditionBool, UI("Enable RSR click counter in main menu",
         Filter = Extra)]
     private static readonly bool _enableClickingCount = true;
@@ -444,6 +440,22 @@ internal partial class Configs : IPluginConfiguration
         Filter = HealingActionCondition, Section = 2,
         PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _raiseBrinkOfDeath = true;
+
+    [JobConfig, UI("Raise non-Healers from bottom of party list to the top (Light Party 2 Healer Behaviour, Experimental)",
+        Filter = HealingActionCondition, Section = 2,
+        PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
+    private static readonly bool _h2 = false;
+
+    [JobConfig, UI("Raise Red Mage and Summoners first if no Tanks or Healers are dead (Experimental)",
+        Filter = HealingActionCondition, Section = 2,
+        PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
+    private static readonly bool _offRaiserRaise = false;
+
+    [JobConfig, UI("How early before next GCD should RSR use swiftcast for raise (Experimental)",
+        Filter = HealingActionCondition, Section = 2,
+        PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
+    [Range(0, 1.0f, ConfigUnitType.Seconds, 0.01f)]
+    public float SwiftcastBuffer { get; set; } = 0.6f;
 
     [UI("Random delay range for resurrecting players.",
         Filter = HealingActionCondition, Section = 2,
@@ -706,7 +718,7 @@ internal partial class Configs : IPluginConfiguration
     [UI("Action Ahead (How far in advance of GCD being available RSR will try to queue the next GCD)",
     Description = "This setting controls how many oGCDs RSR will try to fit in a single GCD window\nLower numbers mean more oGCDs, but potentially more GCD clipping",
     Parent = nameof(OverrideActionAheadTimer))]
-    private readonly float _action4head = 0.4f;
+    private readonly float _action4head = 0.3f;
 
     [JobConfig]
     private readonly string _PvPRotationChoice = string.Empty;

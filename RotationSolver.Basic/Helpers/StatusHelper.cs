@@ -206,12 +206,19 @@ public static class StatusHelper
     {
         if (obj == null)
         {
-            // Log or handle the case where obj is null
             PluginLog.Error("IGameObject is null. Cannot get status times.");
             return Enumerable.Empty<float>();
         }
 
-        return obj.GetStatus(isFromSelf, statusIDs).Select(status => status.RemainingTime == 0 ? float.MaxValue : status.RemainingTime);
+        var statuses = obj.GetStatus(isFromSelf, statusIDs);
+        var result = new List<float>();
+
+        foreach (var status in statuses)
+        {
+            result.Add(status.RemainingTime == 0 ? float.MaxValue : status.RemainingTime);
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -240,12 +247,19 @@ public static class StatusHelper
     {
         if (obj == null)
         {
-            // Log or handle the case where obj is null
             PluginLog.Error("IGameObject is null. Cannot get status stacks.");
             return Enumerable.Empty<byte>();
         }
 
-        return obj.GetStatus(isFromSelf, statusIDs).Select(status => status.StackCount == 0 ? byte.MaxValue : status.StackCount);
+        var statuses = obj.GetStatus(isFromSelf, statusIDs);
+        var result = new List<byte>();
+
+        foreach (var status in statuses)
+        {
+            result.Add(status.StackCount == 0 ? byte.MaxValue : status.StackCount);
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -323,10 +337,19 @@ public static class StatusHelper
     /// <returns>An enumerable of statuses.</returns>
     private static IEnumerable<Status> GetStatus(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
     {
-        // Convert statusIDs to a HashSet for faster lookups
         var newEffects = new HashSet<uint>(statusIDs.Select(a => (uint)a));
         var allStatuses = obj.GetAllStatus(isFromSelf);
-        return allStatuses.Where(status => newEffects.Contains(status.StatusId));
+        var result = new List<Status>();
+
+        foreach (var status in allStatuses)
+        {
+            if (newEffects.Contains(status.StatusId))
+            {
+                result.Add(status);
+            }
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -340,24 +363,28 @@ public static class StatusHelper
         if (obj is not IBattleChara b) return Enumerable.Empty<Status>();
 
         var playerId = Player.Object?.GameObjectId ?? 0;
+        var result = new List<Status>();
 
         try
         {
-            // Ensure b.StatusList is not null
             if (b.StatusList == null)
             {
                 PluginLog.Error("StatusList is null. Cannot get statuses.");
                 return Enumerable.Empty<Status>();
             }
 
-            return b.StatusList.Where(status => !isFromSelf
-                                                || status.SourceId == playerId
-                                                || status.SourceObject?.OwnerId == playerId)
-                               ?? Enumerable.Empty<Status>();
+            foreach (var status in b.StatusList)
+            {
+                if (!isFromSelf || status.SourceId == playerId || status.SourceObject?.OwnerId == playerId)
+                {
+                    result.Add(status);
+                }
+            }
+
+            return result;
         }
         catch (Exception ex)
         {
-            // Log the exception
             Svc.Log.Error($"Failed to get statuses: {ex.Message}");
             return Enumerable.Empty<Status>();
         }

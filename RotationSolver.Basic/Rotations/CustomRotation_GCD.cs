@@ -113,9 +113,18 @@ partial class CustomRotation
                     {
                         IBaseAction.TargetOverride = TargetType.Heal;
 
-                        if (DataCenter.PartyMembersDifferHP < Service.Config.HealthDifference
-                            && DataCenter.PartyMembersHP.Count(i => i < 1) > 2
-                            && HealAreaGCD(out act)) return act;
+                        if (DataCenter.PartyMembersDifferHP < Service.Config.HealthDifference)
+                        {
+                            int count = 0;
+                            foreach (var hp in DataCenter.PartyMembersHP)
+                            {
+                                if (hp < 1)
+                                {
+                                    count++;
+                                }
+                            }
+                            if (count > 2 && HealAreaGCD(out act)) return act;
+                        }
                         if (HealSingleGCD(out act)) return act;
 
                         IBaseAction.TargetOverride = null;
@@ -139,18 +148,18 @@ partial class CustomRotation
     }
 
 
-    private bool UseLimitBreak(out IAction? act)
-    {
-        act = null;
+    //private bool UseLimitBreak(out IAction? act)
+    //{
+    //    act = null;
 
-        return LimitBreakLevel switch
-        {
-            1 => (DataCenter.IsPvP ? LimitBreakPvP?.CanUse(out act, skipAoeCheck: true) : LimitBreak1?.CanUse(out act, skipAoeCheck: true)) ?? false,
-            2 => LimitBreak2?.CanUse(out act, skipAoeCheck: true) ?? false,
-            3 => LimitBreak3?.CanUse(out act, skipAoeCheck: true) ?? false,
-            _ => false,
-        };
-    }
+    //    return LimitBreakLevel switch
+    //    {
+    //        1 => (DataCenter.IsPvP ? LimitBreakPvP?.CanUse(out act, skipAoeCheck: true) : LimitBreak1?.CanUse(out act, skipAoeCheck: true)) ?? false,
+    //        2 => LimitBreak2?.CanUse(out act, skipAoeCheck: true) ?? false,
+    //        3 => LimitBreak3?.CanUse(out act, skipAoeCheck: true) ?? false,
+    //        _ => false,
+    //    };
+    //}
 
     private bool RaiseSpell(out IAction? act, bool mustUse)
     {
@@ -169,7 +178,7 @@ partial class CustomRotation
 
         if (RaiseAction(out act, true))
         {
-            if (HasSwift) return true;
+            if (HasSwift || IsLastAction(ActionID.SwiftcastPvE)) return true;
 
             if (Service.Config.RaisePlayerBySwift && !SwiftcastPvE.Cooldown.IsCoolingDown && SwiftcastPvE.CanUse(out act))
             {
@@ -291,6 +300,8 @@ partial class CustomRotation
     [RotationDesc(DescType.HealSingleGCD)]
     protected virtual bool HealSingleGCD(out IAction? act)
     {
+        act = null;
+        if (ShouldSkipAction()) return false;
         if (DataCenter.CommandStatus.HasFlag(AutoStatus.HealSingleSpell))
         {
             IBaseAction.ShouldEndSpecial = true;
@@ -369,13 +380,11 @@ partial class CustomRotation
     protected virtual bool GeneralGCD(out IAction? act)
     {
         act = null;
-
+        if (ShouldSkipAction()) return false;
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.NoCasting))
         {
             return false;
         }
-
-        if (ShouldSkipAction()) return false;
 
         if (DataCenter.RightNowDutyRotation?.GeneralGCD(out act) ?? false) return true;
         act = null; return false;
@@ -383,6 +392,6 @@ partial class CustomRotation
 
     private bool ShouldSkipAction()
     {
-        return DataCenter.CommandStatus.HasFlag(AutoStatus.Raise) && Role is JobRole.Healer && HasSwift;
+        return DataCenter.CommandStatus.HasFlag(AutoStatus.Raise) && Role is JobRole.Healer && (HasSwift || IsLastAction(ActionID.SwiftcastPvE));
     }
 }
