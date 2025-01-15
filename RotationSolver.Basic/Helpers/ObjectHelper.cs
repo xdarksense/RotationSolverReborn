@@ -89,6 +89,9 @@ public static class ObjectHelper
         // Check if the target is invincible.
         if (battleChara.IsJeunoBossImmune()) return false;
 
+        // Ensure StatusList is not null before accessing it
+        if (battleChara.StatusList == null) return false;
+
         foreach (var status in battleChara.StatusList)
         {
             if (StatusHelper.IsInvincible(status) && (DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility || !DataCenter.IsPvP)) return false;
@@ -427,20 +430,28 @@ public static class ObjectHelper
     /// </returns>
     internal static bool CanInterrupt(this IGameObject o)
     {
-        if (o is not IBattleChara b) return false;
+        try
+        {
+            if (o is not IBattleChara b) return false;
 
-        var baseCheck = b.IsCasting && b.IsCastInterruptible && b.TotalCastTime >= 2;
-        if (!baseCheck) return false;
-        if (!Service.Config.InterruptibleMoreCheck) return false;
+            var baseCheck = b.IsCasting && b.IsCastInterruptible && b.TotalCastTime >= 2;
+            if (!baseCheck) return false;
+            if (!Service.Config.InterruptibleMoreCheck) return false;
 
-        var id = b.CastActionId;
-        if (_effectRangeCheck.TryGetValue(id, out var check)) return check;
+            var id = b.CastActionId;
+            if (_effectRangeCheck.TryGetValue(id, out var check)) return check;
 
-        var act = Service.GetSheet<Lumina.Excel.Sheets.Action>().GetRow(b.CastActionId);
-        if (act.RowId == 0) return _effectRangeCheck[id] = false;
-        if (act.CastType == 3 || act.CastType == 4 || (act.EffectRange > 0 && act.EffectRange < 8)) return _effectRangeCheck[id] = false;
+            var act = Service.GetSheet<Lumina.Excel.Sheets.Action>().GetRow(b.CastActionId);
+            if (act.RowId == 0) return _effectRangeCheck[id] = false;
+            if (act.CastType == 3 || act.CastType == 4 || (act.EffectRange > 0 && act.EffectRange < 8)) return _effectRangeCheck[id] = false;
 
-        return _effectRangeCheck[id] = true;
+            return _effectRangeCheck[id] = true;
+        }
+        catch (AccessViolationException ex)
+        {
+            Svc.Log.Error($"Access violation in CanInterrupt: {ex}");
+            return false;
+        }
     }
 
     internal static bool IsDummy(this IBattleChara obj) => obj?.NameId == 541;

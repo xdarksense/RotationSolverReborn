@@ -175,12 +175,20 @@ namespace RotationSolver.Commands
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                 }
 
+                var playerObject = Player.Object;
+                if (playerObject == null)
+                {
+                    if (Service.Config.InDebug)
+                        Svc.Log.Error("Player object is null.");
+                    return;
+                }
+
                 var target = DataCenter.AllHostileTargets
-                    .FirstOrDefault(t => t != null && t.TargetObjectId == Player.Object?.GameObjectId);
+                    .FirstOrDefault(t => t != null && t.TargetObjectId == playerObject.GameObjectId);
 
                 if (Svc.Condition[ConditionFlag.LoggingOut] ||
-                    (Service.Config.AutoOffWhenDead && DataCenter.Territory?.IsPvP == false && Player.Available && Player.Object?.CurrentHp == 0) ||
-                    (Service.Config.AutoOffWhenDeadPvP && DataCenter.Territory?.IsPvP == true && Player.Available && Player.Object?.CurrentHp == 0) ||
+                    (Service.Config.AutoOffWhenDead && DataCenter.Territory?.IsPvP == false && Player.Available && playerObject.CurrentHp == 0) ||
+                    (Service.Config.AutoOffWhenDeadPvP && DataCenter.Territory?.IsPvP == true && Player.Available && playerObject.CurrentHp == 0) ||
                     (Service.Config.AutoOffPvPMatchEnd && Svc.Condition[ConditionFlag.PvPDisplayActive]) ||
                     (Service.Config.AutoOffCutScene && Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]) ||
                     (Service.Config.AutoOffSwitchClass && Player.Job != _previousJob) ||
@@ -247,5 +255,6 @@ namespace RotationSolver.Commands
                 Svc.Log.Error(ex, "Exception in UpdateRotationState");
             }
         }
+
     }
 }
