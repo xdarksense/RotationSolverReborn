@@ -485,11 +485,13 @@ partial class GunbreakerRotation
     static partial void ModifyHypervelocityPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => HypervelocityPvPReady;
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyFatedBrandPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => FatedBrandPvPReady;
+        setting.MPOverride = () => 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -499,16 +501,19 @@ partial class GunbreakerRotation
     static partial void ModifyJugularRipPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => JugularRipPvPReady;
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyAbdomenTearPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => AbdomenTearPvPReady;
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyEyeGougePvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => EyeGougePvPReady;
+        setting.MPOverride = () => 0;
     }
     #endregion
 

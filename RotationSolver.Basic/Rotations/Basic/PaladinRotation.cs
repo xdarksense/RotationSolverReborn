@@ -115,12 +115,12 @@ partial class PaladinRotation
     #endregion
 
     private protected sealed override IBaseAction TankStance => IronWillPvE;
-
+    #region PvE
     static partial void ModifyFastBladePvE(ref ActionSetting setting)
     {
 
     }
-
+    
     static partial void ModifyFightOrFlightPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.GoringBladeReady];
@@ -391,10 +391,121 @@ partial class PaladinRotation
         setting.ActionCheck = () => SupplicationReady;
         setting.StatusProvide = [StatusID.SepulchreReady];
     }
+    #endregion
+    #region PvP
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool BladeOfTruthPvPReady => Service.GetAdjustedActionId(ActionID.BladeOfFaithPvP) == ActionID.BladeOfTruthPvP;
 
-    // PvP
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool BladeOfValorPvPReady => Service.GetAdjustedActionId(ActionID.BladeOfFaithPvP) == ActionID.BladeOfValorPvP;
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ConfiteorPvPReady => Service.GetAdjustedActionId(ActionID.ImperatorPvP) == ActionID.ConfiteorPvP;
+    static partial void ModifyFastBladePvP(ref ActionSetting setting)
+    {
+        
+    }
+
+    static partial void ModifyRiotBladePvP(ref ActionSetting setting)
+    {
+        setting.ComboIds = [ActionID.FastBladePvP];
+    }
+
+    static partial void ModifyRoyalAuthorityPvP(ref ActionSetting setting)
+    {
+        setting.ComboIds = [ActionID.RiotBladePvP];
+    }
+
+    static partial void ModifyAtonementPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.AtonementReady_2015];
+        setting.MPOverride = () => 0;
+    }
+
+    static partial void ModifySupplicationPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.SupplicationReady_4281];
+        setting.MPOverride = () => 0;
+    }
+
+    static partial void ModifySepulchrePvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.SepulchreReady_4282];
+        setting.MPOverride = () => 0;
+    }
+
+    static partial void ModifyHolySpiritPvP(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyShieldSmitePvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1
+        };
+    }
+
+    static partial void ModifyImperatorPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1
+        };
+    }
+
+    static partial void ModifyHolySheltronPvP(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyConfiteorPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => ConfiteorPvPReady;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1
+        };
+    }
+
     static partial void ModifyIntervenePvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
     }
+
+    static partial void ModifyBladeOfFaithPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.BladeOfFaithReady];
+        setting.MPOverride = () => 0;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1
+        };
+    }
+
+    static partial void ModifyBladeOfTruthPvP(ref ActionSetting setting)
+    {
+        // setting.ActionCheck = () => BladeOfTruthPvPReady;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1
+        };
+    }
+
+    static partial void ModifyBladeOfValorPvP(ref ActionSetting setting)
+    {
+        // setting.ActionCheck = () => BladeOfValorPvPReady;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1
+        };
+    }
+    #endregion
 }

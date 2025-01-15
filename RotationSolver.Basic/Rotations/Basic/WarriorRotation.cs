@@ -363,6 +363,7 @@ partial class WarriorRotation
     static partial void ModifyPrimalRuinationPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.PrimalRuinationReady_4285];
+        setting.MPOverride = () => 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -399,6 +400,7 @@ partial class WarriorRotation
     static partial void ModifyChaoticCyclonePvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.ChaoticCycloneReady];
+        setting.MPOverride = () => 0;
     }
     #endregion
 
