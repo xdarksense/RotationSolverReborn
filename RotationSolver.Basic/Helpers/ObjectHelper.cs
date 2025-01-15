@@ -16,6 +16,7 @@ using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using ECommons.ExcelServices;
 
 namespace RotationSolver.Basic.Helpers;
 
@@ -378,6 +379,8 @@ public static class ObjectHelper
             if (Player.Object == null) return false;
             // Check IBattleChara against the priority target list of OIDs
             if (PriorityTargetHelper.IsPriorityTarget(b.DataId)) return true;
+            
+            if (Player.Job == Job.MCH && obj.HasStatus(true, StatusID.Wildfire)) return true;
 
             // Ensure StatusList is not null before calling Any
             foreach (var status in b.StatusList)
