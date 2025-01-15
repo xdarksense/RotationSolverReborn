@@ -171,8 +171,7 @@ public sealed class SCH_Default : ScholarRotation
     protected override bool HealAreaGCD(out IAction? act)
     {
         act = null;
-
-        if (HasSwift && SwiftLogic && ResurrectionPvE.CanUse(out _)) return false;
+        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
 
         if (SuccorPvE.CanUse(out act)) return true;
         if (ConcitationPvE.CanUse(out act, skipCastingCheck: true)) return true;
@@ -185,8 +184,7 @@ public sealed class SCH_Default : ScholarRotation
     protected override bool HealSingleGCD(out IAction? act)
     {
         act = null;
-
-        if (HasSwift && SwiftLogic && ResurrectionPvE.CanUse(out _)) return false;
+        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
 
         if (AdloquiumPvE.CanUse(out act)) return true;
         if (ManifestationPvE.CanUse(out act, skipCastingCheck: true)) return true;
@@ -199,8 +197,7 @@ public sealed class SCH_Default : ScholarRotation
     protected override bool DefenseAreaGCD(out IAction? act)
     {
         act = null;
-
-        if (HasSwift && SwiftLogic && ResurrectionPvE.CanUse(out _)) return false;
+        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
 
         if (SuccorPvE.CanUse(out act)) return true;
         if (ConcitationPvE.CanUse(out act, skipCastingCheck: true)) return true;
@@ -212,8 +209,7 @@ public sealed class SCH_Default : ScholarRotation
     protected override bool GeneralGCD(out IAction? act)
     {
         act = null;
-
-        if (HasSwift && SwiftLogic && ResurrectionPvE.CanUse(out _)) return false;
+        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
 
         // Summon Eos
         if (SummonEosPvE.CanUse(out act)) return true;

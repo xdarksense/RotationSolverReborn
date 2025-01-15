@@ -168,9 +168,16 @@ internal static partial class TargetUpdater
     {
         foreach (var target in DataCenter.AllHostileTargets)
         {
-            if (predicate(target))
+            try
             {
-                return target;
+                if (predicate(target))
+                {
+                    return target;
+                }
+            }
+            catch (Exception ex)
+            {
+                Svc.Log.Error($"Error in GetFirstHostileTarget: {ex.Message}");
             }
         }
         return null;
@@ -204,47 +211,27 @@ internal static partial class TargetUpdater
                 {
                     validRaiseTargets.AddRange(deathParty);
                 }
-
-                if (raisetype == RaiseType.PartyAndAllianceSupports)
+                else if (raisetype == RaiseType.PartyAndAllianceSupports)
                 {
                     validRaiseTargets.AddRange(raisePartyAndAllianceSupports);
                 }
-
-                if (raisetype == RaiseType.PartyAndAllianceHealers)
+                else if (raisetype == RaiseType.PartyAndAllianceHealers)
                 {
                     validRaiseTargets.AddRange(raisePartyAndAllianceHealers);
                 }
-
-                if (raisetype == RaiseType.All)
+                else if (raisetype == RaiseType.All)
                 {
                     validRaiseTargets.AddRange(deathAll);
                 }
 
-                if (Service.Config.FriendlyPartyNpcHealRaise2)
+                if (Service.Config.FriendlyPartyNpcHealRaise2 || Service.Config.FocusTargetIsParty)
                 {
                     validRaiseTargets.AddRange(deathNPC);
                 }
 
-                if (Service.Config.FocusTargetIsParty)
+                foreach (var type in Enum.GetValues(typeof(RaiseType)).Cast<RaiseType>())
                 {
-                    validRaiseTargets.AddRange(deathNPC);
-                }
-
-                var deathTarget = GetPriorityDeathTarget(validRaiseTargets, RaiseType.PartyOnly);
-                if (deathTarget != null) return deathTarget;
-
-                deathTarget = GetPriorityDeathTarget(validRaiseTargets, RaiseType.PartyAndAllianceSupports);
-                if (deathTarget != null) return deathTarget;
-
-                deathTarget = GetPriorityDeathTarget(validRaiseTargets, RaiseType.PartyAndAllianceHealers);
-                if (deathTarget != null) return deathTarget;
-
-                deathTarget = GetPriorityDeathTarget(validRaiseTargets, RaiseType.All);
-                if (deathTarget != null) return deathTarget;
-
-                if (Service.Config.FriendlyPartyNpcHealRaise2)
-                {
-                    deathTarget = GetPriorityDeathTarget(validRaiseTargets, Service.Config.RaiseType);
+                    var deathTarget = GetPriorityDeathTarget(validRaiseTargets, type);
                     if (deathTarget != null) return deathTarget;
                 }
             }
@@ -280,38 +267,9 @@ internal static partial class TargetUpdater
             }
         }
 
-        if (raiseType == RaiseType.PartyAndAllianceHealers)
+        if (raiseType == RaiseType.PartyAndAllianceHealers && deathHealers.Count > 0)
         {
-            foreach (var chara in validRaiseTargets)
-            {
-                if (chara.IsJobCategory(JobRole.Healer))
-                {
-                    deathHealers.Add(chara);
-                }
-            }
-        }
-        else if (raiseType == RaiseType.PartyAndAllianceSupports)
-        {
-            foreach (var chara in validRaiseTargets)
-            {
-                if (chara.IsJobCategory(JobRole.Tank))
-                {
-                    deathTanks.Add(chara);
-                }
-                else if (chara.IsJobCategory(JobRole.Healer))
-                {
-                    deathHealers.Add(chara);
-                }
-                else
-                {
-                    deathOthers.Add(chara);
-                }
-            }
-        }
-
-        if (raiseType == RaiseType.PartyAndAllianceHealers)
-        {
-            if (deathHealers.Count > 0) return deathHealers[0];
+            return deathHealers[0];
         }
 
         if (deathTanks.Count > 1) return deathTanks[0];

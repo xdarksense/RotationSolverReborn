@@ -804,10 +804,7 @@ internal static class DataCenter
 
     public static bool IsCastingTankVfx()
     {
-        // Create a copy of the VfxDataQueue to avoid modification during enumeration
-        var vfxDataQueueCopy = VfxDataQueue.ToList();
-
-        return IsCastingVfx(vfxDataQueueCopy, s =>
+        return IsCastingVfx(VfxDataQueue, s =>
         {
             if (!s.Path.StartsWith("vfx/lockon/eff/tank_lockon")) return false;
             if (!Player.Available) return false;
@@ -867,8 +864,17 @@ internal static class DataCenter
         // Check if h is null
         if (h == null) return false;
 
-        // Check if the hostile character is casting
-        if (!h.IsCasting) return false;
+        try
+        {
+            // Check if the hostile character is casting
+            if (!h.IsCasting) return false;
+        }
+        catch (AccessViolationException ex)
+        {
+            // Log the exception and return false
+            Svc.Log.Error($"AccessViolationException: {ex.Message}");
+            return false;
+        }
 
         // Check if the cast is interruptible
         if (h.IsCastInterruptible) return false;

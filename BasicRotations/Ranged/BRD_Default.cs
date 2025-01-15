@@ -243,8 +243,8 @@ public sealed class BRD_Default : BardRotation
         }
         else
         {
-            if (WindbitePvE.CanUse(out act)) return true;
-            if (VenomousBitePvE.CanUse(out act)) return true;
+            if (WindbitePvE.CanUse(out act, skipTTKCheck: true)) return true;
+            if (VenomousBitePvE.CanUse(out act, skipTTKCheck: true)) return true;
         }
 
 

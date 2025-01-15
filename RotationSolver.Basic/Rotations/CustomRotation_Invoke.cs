@@ -106,8 +106,18 @@ partial class CustomRotation
         ActionDefenseSingleGCD = DefenseSingleGCD(out act) ? act : null;
         IBaseAction.TargetOverride = null;
 
-        ActionDefenseAreaAbility = DefenseAreaAbility(AddlePvE, out act) ? act : null;
-        ActionDefenseSingleAbility = DefenseSingleAbility(AddlePvE, out act) ? act : null;
+        try
+        {
+            ActionDefenseAreaAbility = DefenseAreaAbility(AddlePvE, out act) ? act : null;
+            ActionDefenseSingleAbility = DefenseSingleAbility(AddlePvE, out act) ? act : null;
+        }
+        catch (MissingMethodException ex)
+        {
+            // Log the exception or handle it as needed
+            WarningHelper.AddSystemWarning($"Exception in UpdateDefenseActions method: {ex.Message}");
+            // Optionally, set actions to null in case of an exception
+            ActionDefenseAreaAbility = ActionDefenseSingleAbility = null;
+        }
     }
 
     private void UpdateDispelAndRaiseActions(JobRole role, out IAction? act)
