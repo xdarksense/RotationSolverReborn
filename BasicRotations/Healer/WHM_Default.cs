@@ -170,7 +170,7 @@ public sealed class WHM_Default : WhiteMageRotation
     protected override bool HealAreaGCD(out IAction? act)
     {
         act = null;
-        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
+        if ((HasSwift || IsLastAction(ActionID.SwiftcastPvE)) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
 
         if (AfflatusRapturePvE.CanUse(out act)) return true;
 
@@ -189,7 +189,7 @@ public sealed class WHM_Default : WhiteMageRotation
     protected override bool HealSingleGCD(out IAction? act)
     {
         act = null;
-        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
+        if ((HasSwift || IsLastAction(ActionID.SwiftcastPvE)) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
 
         if (AfflatusSolacePvE.CanUse(out act)) return true;
 
@@ -205,7 +205,7 @@ public sealed class WHM_Default : WhiteMageRotation
     protected override bool GeneralGCD(out IAction? act)
     {
         act = null;
-        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
+        if ((HasSwift || IsLastAction(ActionID.SwiftcastPvE)) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
 
         //if (NotInCombatDelay && RegenDefense.CanUse(out act)) return true;
 

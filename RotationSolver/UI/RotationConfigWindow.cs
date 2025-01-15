@@ -2952,10 +2952,6 @@ public partial class RotationConfigWindow : Window
         ImGui.Text(DataCenter.SpecialType.ToString());
 
         ImGui.Text(ActionUpdater.NextAction?.Name ?? "null");
-        ImGui.Text($"LastAbilityorNot: {DataCenter.LastAbilityorNot}");
-        ImGui.Text($"FirstAbilityorNot: {DataCenter.FirstAbilityorNot}");
-        ImGui.Text($"LastAbilityv2: {DataCenter.LastAbilityv2}");
-        ImGui.Text($"FirstAbilityv2: {DataCenter.FirstAbilityv2}");
         ImGui.Text($"GCD Total: {DataCenter.DefaultGCDTotal}");
         ImGui.Text($"GCD Remain: {DataCenter.DefaultGCDRemain}");
         ImGui.Text($"GCD Elapsed: {DataCenter.DefaultGCDElapsed}");
@@ -2989,32 +2985,6 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"GCD Elapsed: {DataCenter.DefaultGCDElapsed}");
         ImGui.Text($"GCD Remain: {DataCenter.DefaultGCDRemain}");
         ImGui.Text($"GCD Total: {DataCenter.DefaultGCDTotal}");
-
-        // Change text color based on LastAbilityv2
-        if (DataCenter.LastAbilityv2)
-        {
-            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.ParsedGreen);
-            ImGui.Text("LastAbilityv2: true");
-        }
-        else
-        {
-            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudRed);
-            ImGui.Text("LastAbilityv2: false");
-        }
-        ImGui.PopStyleColor();
-
-        // Change text color based on FirstAbilityv2
-        if (DataCenter.FirstAbilityv2)
-        {
-            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.ParsedGreen);
-            ImGui.Text("FirstAbilityv2: true");
-        }
-        else
-        {
-            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudRed);
-            ImGui.Text("FirstAbilityv2: false");
-        }
-        ImGui.PopStyleColor();
 
         // Visualize the GCD and oGCD slots
         float gcdTotal = DataCenter.DefaultGCDElapsed + DataCenter.DefaultGCDRemain;

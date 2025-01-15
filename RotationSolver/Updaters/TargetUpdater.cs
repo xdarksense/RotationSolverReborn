@@ -194,15 +194,30 @@ internal static partial class TargetUpdater
                 var deathAll = DataCenter.AllTargets?.GetDeath().ToList() ?? new List<IBattleChara>();
                 var deathNPC = DataCenter.FriendlyNPCMembers?.GetDeath().ToList() ?? new List<IBattleChara>();
                 var deathAllianceMembers = DataCenter.AllianceMembers?.GetDeath().ToList() ?? new List<IBattleChara>();
-                var deathAllianceHealers = DataCenter.AllianceMembers?.Where(member => member.IsJobCategory(JobRole.Healer))
-                    .GetDeath().ToList() ?? new List<IBattleChara>();
-                var deathAllianceSupports = DataCenter.AllianceMembers?
-                    .Where(member => member.IsJobCategory(JobRole.Healer) || member.IsJobCategory(JobRole.Tank))
-                    .GetDeath()
-                    .ToList() ?? new List<IBattleChara>();
+                var deathAllianceHealers = new List<IBattleChara>();
+                var deathAllianceSupports = new List<IBattleChara>();
 
-                var raisePartyAndAllianceSupports = deathParty.Concat(deathAllianceSupports).ToList();
-                var raisePartyAndAllianceHealers = deathParty.Concat(deathAllianceHealers).ToList();
+                if (DataCenter.AllianceMembers != null)
+                {
+                    foreach (var member in DataCenter.AllianceMembers)
+                    {
+                        if (member.IsJobCategory(JobRole.Healer))
+                        {
+                            deathAllianceHealers.Add(member);
+                        }
+                        if (member.IsJobCategory(JobRole.Healer) || member.IsJobCategory(JobRole.Tank))
+                        {
+                            deathAllianceSupports.Add(member);
+                        }
+                    }
+                }
+
+                var raisePartyAndAllianceSupports = new List<IBattleChara>(deathParty);
+                raisePartyAndAllianceSupports.AddRange(deathAllianceSupports);
+
+                var raisePartyAndAllianceHealers = new List<IBattleChara>(deathParty);
+                raisePartyAndAllianceHealers.AddRange(deathAllianceHealers);
+
                 var raisetype = Service.Config.RaiseType;
 
                 var validRaiseTargets = new List<IBattleChara>();
@@ -229,7 +244,7 @@ internal static partial class TargetUpdater
                     validRaiseTargets.AddRange(deathNPC);
                 }
 
-                foreach (var type in Enum.GetValues(typeof(RaiseType)).Cast<RaiseType>())
+                foreach (RaiseType type in Enum.GetValues(typeof(RaiseType)))
                 {
                     var deathTarget = GetPriorityDeathTarget(validRaiseTargets, type);
                     if (deathTarget != null) return deathTarget;
@@ -249,6 +264,7 @@ internal static partial class TargetUpdater
 
         var deathTanks = new List<IBattleChara>();
         var deathHealers = new List<IBattleChara>();
+        var deathOffHealers = new List<IBattleChara>();
         var deathOthers = new List<IBattleChara>();
 
         foreach (var chara in validRaiseTargets)
@@ -261,6 +277,10 @@ internal static partial class TargetUpdater
             {
                 deathHealers.Add(chara);
             }
+            else if (Service.Config.OffRaiserRaise && chara.IsJobs(Job.SMN, Job.RDM))
+            {
+                deathOffHealers.Add(chara);
+            }
             else
             {
                 deathOthers.Add(chara);
@@ -272,9 +292,16 @@ internal static partial class TargetUpdater
             return deathHealers[0];
         }
 
+        if (Service.Config.H2)
+        {
+            deathOffHealers.Reverse();
+            deathOthers.Reverse();
+        }
+
         if (deathTanks.Count > 1) return deathTanks[0];
         if (deathHealers.Count > 0) return deathHealers[0];
         if (deathTanks.Count > 0) return deathTanks[0];
+        if (Service.Config.OffRaiserRaise && deathOffHealers.Count > 0) return deathOffHealers[0];
 
         return deathOthers.Count > 0 ? deathOthers[0] : null;
     }

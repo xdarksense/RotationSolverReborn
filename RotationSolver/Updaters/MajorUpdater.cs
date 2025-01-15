@@ -186,18 +186,21 @@ internal static class MajorUpdater
     private static void RemoveExpiredVfxData()
     {
         var expiredVfx = new List<VfxNewData>();
-        for (int i = 0; i < DataCenter.VfxDataQueue.Count; i++)
+        lock (DataCenter.VfxDataQueue)
         {
-            var vfx = DataCenter.VfxDataQueue[i];
-            if (vfx.TimeDuration > TimeSpan.FromSeconds(10))
+            for (int i = 0; i < DataCenter.VfxDataQueue.Count; i++)
             {
-                expiredVfx.Add(vfx);
+                var vfx = DataCenter.VfxDataQueue[i];
+                if (vfx.TimeDuration > TimeSpan.FromSeconds(10))
+                {
+                    expiredVfx.Add(vfx);
+                }
             }
-        }
 
-        foreach (var vfx in expiredVfx)
-        {
-            DataCenter.VfxDataQueue.Remove(vfx);
+            foreach (var vfx in expiredVfx)
+            {
+                DataCenter.VfxDataQueue.Remove(vfx);
+            }
         }
     }
 
