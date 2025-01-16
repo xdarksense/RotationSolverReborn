@@ -150,7 +150,13 @@ public class BaseAction : IBaseAction
 
         if (!skipTTKCheck)
         {
-            if (!IsTimeToKillValid()) return false;
+            switch (DataCenter.IsPvP)
+            {
+                case true when Service.Config.IgnorePvPttk:
+                    break;
+                case false when !IsTimeToKillValid():
+                    return false;
+            }
         }
 
         PreviewTarget = TargetInfo.FindTarget(skipAoeCheck, skipStatusProvideCheck);
