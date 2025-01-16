@@ -82,7 +82,8 @@ partial class DancerRotation
         ImGui.Text("DanceOfTheDawnPvEReady: " + DanceOfTheDawnPvEReady.ToString());
     }
     #endregion
-
+    
+    #region PvE Actions
     static partial void ModifyCascadePvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.SilkenSymmetry];
@@ -241,11 +242,6 @@ partial class DancerRotation
         setting.IsFriendly = true;
     }
 
-    static partial void ModifyEnAvantPvP(ref ActionSetting setting)
-    {
-        setting.SpecialType = SpecialActionType.MovingForward;
-    }
-
     static partial void ModifyClosedPositionPvE(ref ActionSetting setting)
     {
         setting.IsFriendly = true;
@@ -356,6 +352,7 @@ partial class DancerRotation
         };
         //setting.ActionCheck = () => !IsDancing
     }
+    #endregion
 
     #region Step
     /// <summary>
@@ -417,5 +414,153 @@ partial class DancerRotation
         if (PirouettePvE.CanUse(out act)) return true;
         return false;
     }
+    #endregion
+
+    #region PvP
+
+    /// <summary>
+    /// 
+    /// </summary>
+
+    static partial void ModifyCascadePvP(ref ActionSetting setting)
+    {
+        
+    }
+
+    static partial void ModifyFountainPvP(ref ActionSetting setting)
+    {
+        setting.ComboIds = [ActionID.CascadePvP, ActionID.ReverseCascadePvP];
+    }
+
+    static partial void ModifyClosedPositionPvP(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+        setting.StatusProvide = [StatusID.ClosedPosition];
+        setting.TargetStatusProvide = [StatusID.DancePartner];
+        setting.TargetType = TargetType.DancePartner;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            ShouldCheckStatus = false,
+        };
+    }
+    
+    static partial void ModifyEnAvantPvP(ref ActionSetting setting)
+    {
+        setting.SpecialType = SpecialActionType.MovingForward;
+        setting.IsFriendly = true;
+        setting.StatusProvide = [StatusID.EnAvant];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            ShouldCheckStatus = false,
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyStarfallDancePvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+        setting.StatusProvide = [StatusID.StarfallDance];
+    }
+
+    static partial void ModifyFanDancePvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+        setting.StatusProvide = [StatusID.FanDance];
+    }
+
+    static partial void ModifyCuringWaltzPvP(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+    }
+
+    static partial void ModifyReverseCascadePvP(ref ActionSetting setting)
+    {
+        setting.MPOverride = () => 0;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+        setting.StatusNeed = [StatusID.EnAvant];
+        setting.StatusProvide = [StatusID.Bladecatcher];
+    }
+
+    static partial void ModifyFountainfallPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+        setting.MPOverride = () => 0;
+        setting.StatusNeed = [StatusID.EnAvant];
+        setting.StatusProvide = [StatusID.Bladecatcher];
+    }
+
+    static partial void ModifySaberDancePvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+        setting.MPOverride = () => 0;
+        setting.StatusNeed = [StatusID.FlourishingSaberDance];
+        setting.StatusProvide = [StatusID.SaberDance];
+    }
+
+    static partial void ModifyDanceOfTheDawnPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () =>
+        {
+            if (Player.HasStatus(true, StatusID.FlourishingSaberDance) && Player.HasStatus(true, StatusID.SoloStep))
+            {
+                return true;
+            }
+            return false;
+        };
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+        setting.MPOverride = () => 0;
+        setting.StatusNeed = [StatusID.FlourishingSaberDance, StatusID.SoloStep];
+    }
+
+    static partial void ModifyHoningDancePvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+        setting.StatusProvide = [StatusID.HoningDance];
+        
+    }
+    
+    static partial void ModifyHoningOvationPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+        setting.StatusProvide = [StatusID.HoningOvation];
+    }
+    
     #endregion
 }
