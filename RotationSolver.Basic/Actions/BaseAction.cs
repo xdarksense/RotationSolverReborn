@@ -79,9 +79,7 @@ public class BaseAction : IBaseAction
     {
         get
         {
-            if (!Service.Config.RotationActionConfig.TryGetValue(ID, out var value))
-            {
-                value = Setting.CreateConfig?.Invoke() ?? new ActionConfig();
+                var value = Setting.CreateConfig?.Invoke() ?? new ActionConfig();
                 Service.Config.RotationActionConfig[ID] = value;
 
                 if (!Action.ClassJob.IsValid)
@@ -102,8 +100,7 @@ public class BaseAction : IBaseAction
                 {
                     value.TimeToKill = 0;
                 }
-            }
-            return value;
+                return value;
         }
     }
 
