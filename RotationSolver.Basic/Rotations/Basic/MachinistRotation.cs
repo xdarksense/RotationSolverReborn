@@ -108,7 +108,7 @@ partial class MachinistRotation
         ImGui.Spacing();
     }
     #endregion
-
+    #region PvE
     static partial void ModifySplitShotPvE(ref ActionSetting setting)
     {
 
@@ -417,4 +417,34 @@ partial class MachinistRotation
             AoeCount = 1,
         };
     }
+    #endregion
+    #region PvP
+
+    static partial void ModifyAnalysisPvP(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+        setting.StatusProvide = [StatusID.Analysis];
+        setting.ActionCheck = () => !Player.HasStatus(true, StatusID.Analysis);
+    }
+
+    static partial void ModifyDrillPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.DrillPrimed];
+    }
+    
+    static partial void ModifyBioblasterPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.BioblasterPrimed];
+    }
+
+    static partial void ModifyAirAnchorPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.AirAnchorPrimed];
+    }
+
+    static partial void ModifyChainSawPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.ChainSawPrimed];
+    }
+    #endregion
 }

@@ -405,12 +405,17 @@ partial class BardRotation
 
     static partial void ModifyRepellingShotPvP(ref ActionSetting setting)
     {
+        setting.SpecialType = SpecialActionType.MovingBackward;
+    }
 
+    static partial void ModifyEncoreOfLightPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.EncoreOfLightReady];
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyTheWardensPaeanPvP(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.Repertoire];
         setting.TargetStatusProvide = [StatusID.WardensGrace];
         setting.TargetType = TargetType.Dispel;
     }

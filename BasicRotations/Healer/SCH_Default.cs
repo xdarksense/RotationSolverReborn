@@ -180,7 +180,7 @@ public sealed class SCH_Default : ScholarRotation
         return base.HealAreaGCD(out act);
     }
 
-    [RotationDesc(ActionID.AdloquiumPvE, ActionID.PhysickPvE)]
+    [RotationDesc(ActionID.AdloquiumPvE, ActionID.ManifestationPvE, ActionID.PhysickPvE)]
     protected override bool HealSingleGCD(out IAction? act)
     {
         act = null;
@@ -193,7 +193,7 @@ public sealed class SCH_Default : ScholarRotation
         return base.HealSingleGCD(out act);
     }
 
-    [RotationDesc(ActionID.SuccorPvE)]
+    [RotationDesc(ActionID.SuccorPvE, ActionID.ConcitationPvE, ActionID.AccessionPvE)]
     protected override bool DefenseAreaGCD(out IAction? act)
     {
         act = null;

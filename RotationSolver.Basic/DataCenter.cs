@@ -244,36 +244,45 @@ internal static class DataCenter
     }
 
     #region GCD
-    // Returns the time remaining until the next GCD (Global Cooldown) after considering the current animation lock.
-    public static float NextAbilityToNextGCD => DefaultGCDRemain - Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock);
+    /// <summary>
+    /// Returns the time remaining until the next GCD (Global Cooldown) after considering the current animation lock.
+    /// </summary>
+    public static float NextAbilityToNextGCD => DefaultGCDRemain - Math.Min(ActionManagerHelper.GetCurrentAnimationLock(), MinAnimationLock);
 
-    // Returns the total duration of the default GCD.
+    /// <summary>
+    /// Returns the total duration of the default GCD.
+    /// </summary>
     public static float DefaultGCDTotal => ActionManagerHelper.GetDefaultRecastTime();
 
-    // Returns the remaining time for the default GCD by subtracting the elapsed time from the total recast time.
-    public static float DefaultGCDRemain =>
-        ActionManagerHelper.GetDefaultRecastTime() - ActionManagerHelper.GetDefaultRecastTimeElapsed();
+    /// <summary>
+    /// Returns the remaining time for the default GCD by subtracting the elapsed time from the total recast time.
+    /// </summary>
+    public static float DefaultGCDRemain => DefaultGCDTotal - DefaultGCDElapsed;
 
-    // Returns the elapsed time since the start of the default GCD.
+    /// <summary>
+    /// Returns the elapsed time since the start of the default GCD.
+    /// </summary>
     public static float DefaultGCDElapsed => ActionManagerHelper.GetDefaultRecastTimeElapsed();
 
-    // Returns the action ahead time, which can be overridden by a configuration setting.
-    public static float ActionAhead =>
-        Service.Config.OverrideActionAheadTimer ? Service.Config.Action4Head : CalculatedActionAhead;
+    /// <summary>
+    /// Returns the action ahead time, which can be overridden by a configuration setting.
+    /// </summary>
+    public static float ActionAhead => Service.Config.OverrideActionAheadTimer ? Service.Config.Action4Head : CalculatedActionAhead;
 
-    // Returns the calculated action ahead time as 25% of the total GCD time.
-    public static float CalculatedActionAhead => Math.Min(DefaultGCDTotal * 0.25f, DataCenter.MinAnimationLock);
+    /// <summary>
+    /// Calculates the action ahead time based on the default GCD total and minimum animation lock.
+    /// </summary>
+    public static float CalculatedActionAhead => Math.Min(DefaultGCDTotal * 0.20f, MinAnimationLock);
 
-    // Calculates the total GCD time for a given number of GCDs and an optional offset.
-    public static float GCDTime(uint gcdCount = 0, float offset = 0)
-        => ActionManagerHelper.GetDefaultRecastTime() * gcdCount + offset;
-
-    public static bool LastAbilityv2 => DataCenter.InCombat && !ActionHelper.CanUseGCD && (ActionManagerHelper.GetCurrentAnimationLock() == 0) && !Player.Object.IsCasting && (DataCenter.DefaultGCDElapsed >= DataCenter.DefaultGCDRemain);
-    public static bool FirstAbilityv2 => DataCenter.InCombat && !ActionHelper.CanUseGCD && (ActionManagerHelper.GetCurrentAnimationLock() == 0) && !Player.Object.IsCasting && (DataCenter.DefaultGCDRemain >= DataCenter.DefaultGCDElapsed);
-
-    public static bool LastAbilityorNot => DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD <= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.IsLastAbilityTimer);
-    public static bool FirstAbilityorNot => DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD >= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.IsFirstAbilityTimer);
+    /// <summary>
+    /// Calculates the total GCD time for a given number of GCDs and an optional offset.
+    /// </summary>
+    /// <param name="gcdCount">The number of GCDs.</param>
+    /// <param name="offset">The optional offset.</param>
+    /// <returns>The total GCD time.</returns>
+    public static float GCDTime(uint gcdCount = 0, float offset = 0) => DefaultGCDTotal * gcdCount + offset;
     #endregion
+
 
     public static uint[] BluSlots { get; internal set; } = new uint[24];
 
