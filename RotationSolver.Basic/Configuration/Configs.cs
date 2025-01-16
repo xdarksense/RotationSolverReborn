@@ -651,6 +651,9 @@ internal partial class Configs : IPluginConfiguration
 
     [JobConfig, UI("Ignore Invincibility for PvP purposes.", Filter = PvPSpecificControls)]
     private readonly bool _ignorePvPInvincibility = false;
+    
+    [JobConfig, UI("Ignore TTK for PvP purposes.", Filter = PvPSpecificControls)]
+    private readonly bool _ignorePvPTTK = false;
 
     [ConditionBool, UI("Auto turn off when dead in PvP.",
          Filter = PvPSpecificControls)]
