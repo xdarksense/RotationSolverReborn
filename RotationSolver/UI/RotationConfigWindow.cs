@@ -1743,32 +1743,35 @@ public partial class RotationConfigWindow : Window
             {
                 try
                 {
-                    ImGui.Text("ID: " + action.Info.ID.ToString());
+                    ImGui.Text("ID: " + action.Info.ID);
+                    ImGui.Text("AdjustedID: " + Service.GetAdjustedActionId(action.Info.ID));
+                    ImGui.Text("AoeCount: " + action.Config.AoeCount);
+                    ImGui.Text("ShouldCheckStatus: " + action.Config.ShouldCheckStatus);
 #if DEBUG
-                    ImGui.Text("Is Real GCD: " + action.Info.IsRealGCD.ToString());
+                    ImGui.Text("Is Real GCD: " + action.Info.IsRealGCD);
 
                     // Ensure ActionManager.Instance() is not null
                     if (ActionManager.Instance() != null)
                     {
-                        ImGui.Text("Resources: " + ActionManager.Instance()->CheckActionResources(ActionType.Action, action.AdjustedID).ToString());
-                        ImGui.Text("Status: " + ActionManager.Instance()->GetActionStatus(ActionType.Action, action.AdjustedID).ToString());
+                        ImGui.Text("Resources: " + ActionManager.Instance()->CheckActionResources(ActionType.Action, action.AdjustedID));
+                        ImGui.Text("Status: " + ActionManager.Instance()->GetActionStatus(ActionType.Action, action.AdjustedID));
                     }
 
-                    ImGui.Text("Cast Time: " + action.Info.CastTime.ToString());
-                    ImGui.Text("MP: " + action.Info.MPNeed.ToString());
+                    ImGui.Text("Cast Time: " + action.Info.CastTime);
+                    ImGui.Text("MP: " + action.Info.MPNeed);
 #endif
-                    ImGui.Text("AttackType: " + action.Info.AttackType.ToString());
-                    ImGui.Text("Level: " + action.Info.Level.ToString());
-                    ImGui.Text("Range: " + action.Info.Range.ToString());
-                    ImGui.Text("EffectRange: " + action.Info.EffectRange.ToString());
-                    ImGui.Text("Aspect: " + action.Info.Aspect.ToString());
-                    ImGui.Text("Has One:" + action.Cooldown.HasOneCharge.ToString());
-                    ImGui.Text("Recast One: " + action.Cooldown.RecastTimeOneChargeRaw.ToString());
-                    ImGui.Text("Recast Elapsed: " + action.Cooldown.RecastTimeElapsedRaw.ToString());
+                    ImGui.Text("AttackType: " + action.Info.AttackType);
+                    ImGui.Text("Level: " + action.Info.Level);
+                    ImGui.Text("Range: " + action.Info.Range);
+                    ImGui.Text("EffectRange: " + action.Info.EffectRange);
+                    ImGui.Text("Aspect: " + action.Info.Aspect);
+                    ImGui.Text("Has One:" + action.Cooldown.HasOneCharge);
+                    ImGui.Text("Recast One: " + action.Cooldown.RecastTimeOneChargeRaw);
+                    ImGui.Text("Recast Elapsed: " + action.Cooldown.RecastTimeElapsedRaw);
                     ImGui.Text($"Charges: {action.Cooldown.CurrentCharges} / {action.Cooldown.MaxCharges}");
 
                     ImGui.Text($"Can Use: {action.CanUse(out _)} ");
-                    ImGui.Text("IgnoreCastCheck:" + action.CanUse(out _, skipCastingCheck: true).ToString());
+                    ImGui.Text("IgnoreCastCheck:" + action.CanUse(out _, skipCastingCheck: true));
                     ImGui.Text("Target Name: " + action.Target.Target?.Name ?? string.Empty);
                     ImGui.Text($"SpellUnlocked: {action.Info.SpellUnlocked} ({action.Action.UnlockLink.RowId})");
                 }
