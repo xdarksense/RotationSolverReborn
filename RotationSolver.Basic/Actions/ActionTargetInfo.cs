@@ -1094,9 +1094,15 @@ public struct ActionTargetInfo(IBaseAction action)
             {
                 var orderedGameObjects = DataCenter.TargetingType switch
                 {
-                    TargetingType.HunterKillerHealers => IGameObjects.Where(p => p.IsJobs(JobRole.Healer.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
-                    TargetingType.HunterKillerTanks => IGameObjects.Where(p => p.IsJobs(JobRole.Tank.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
-                    TargetingType.HunterKillerDPS => IGameObjects.Where(p => p.IsJobs(JobRole.AllDPS.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
+                    TargetingType.HunterKillerHealers => IGameObjects.Where(p => p.IsJobs(JobRole.Healer.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer()).Any() 
+                        ? IGameObjects.Where(p => p.IsJobs(JobRole.Healer.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer())
+                        : IGameObjects.OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
+                    TargetingType.HunterKillerTanks => IGameObjects.Where(p => p.IsJobs(JobRole.Tank.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer()).Any()
+                        ? IGameObjects.Where(p => p.IsJobs(JobRole.Tank.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer())
+                        : IGameObjects.OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
+                    TargetingType.HunterKillerDPS => IGameObjects.Where(p => p.IsJobs(JobRole.AllDPS.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer()).Any()
+                        ? IGameObjects.Where(p => p.IsJobs(JobRole.AllDPS.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer())
+                        : IGameObjects.OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
                     TargetingType.Small => IGameObjects.OrderBy<IGameObject, float>(p => p.HitboxRadius),
                     TargetingType.HighHP => IGameObjects.OrderByDescending<IGameObject, uint>(p => p is IBattleChara b ? b.CurrentHp : 0),
                     TargetingType.LowHP => IGameObjects.OrderBy<IGameObject, uint>(p => p is IBattleChara b ? b.CurrentHp : 0),
