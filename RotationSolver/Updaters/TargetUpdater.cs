@@ -142,8 +142,6 @@ internal static partial class TargetUpdater
     private static List<IBattleChara> GetAllHostileTargets()
     {
         var hostileTargets = new List<IBattleChara>();
-        var strongOfShieldPositional = EnemyPositional.Front;
-
         try
         {
             foreach (var target in DataCenter.AllTargets)
@@ -152,7 +150,6 @@ internal static partial class TargetUpdater
                 if (!target.IsEnemy() || !target.IsTargetable) continue;
                 if (target.StatusList != null && target.StatusList.Any(StatusHelper.IsInvincible) &&
                     (DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility || !DataCenter.IsPvP)) continue;
-                if (target.HasStatus(true, StatusID.StrongOfShield) && strongOfShieldPositional != target.FindEnemyPositional()) continue;
 
                 hostileTargets.Add(target);
             }

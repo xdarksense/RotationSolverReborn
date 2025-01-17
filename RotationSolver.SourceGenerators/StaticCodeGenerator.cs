@@ -1,11 +1,19 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 
 namespace RotationSolver.SourceGenerators;
 
+/// <summary>
+/// A source generator that generates static code for various enums and classes.
+/// </summary>
 [Generator(LanguageNames.CSharp)]
 public class StaticCodeGenerator : IIncrementalGenerator
 {
+    /// <summary>
+    /// Initializes the generator with the provided context.
+    /// </summary>
+    /// <param name="context">The initialization context.</param>
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var provider = context.SyntaxProvider.CreateSyntaxProvider(
@@ -17,17 +25,38 @@ public class StaticCodeGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(compilation, (spc, source) => Execute(spc));
     }
 
+    /// <summary>
+    /// Executes the source generation process.
+    /// </summary>
+    /// <param name="context">The source production context.</param>
     private static void Execute(SourceProductionContext context)
     {
-        GenerateStatus(context);
-        GenerateActionID(context);
-        GenerateContentType(context);
-        GenerateActionCate(context);
-        GenerateBaseRotation(context);
-        GenerateRotations(context);
-        GenerateOpCode(context);
+        try
+        {
+            GenerateStatus(context);
+            GenerateActionID(context);
+            GenerateContentType(context);
+            GenerateActionCate(context);
+            GenerateBaseRotation(context);
+            GenerateRotations(context);
+            GenerateOpCode(context);
+        }
+        catch (Exception ex)
+        {
+            context.ReportDiagnostic(Diagnostic.Create(new DiagnosticDescriptor(
+                "SG0001",
+                "Source Generation Error",
+                $"An error occurred during source generation: {ex.Message}",
+                "SourceGenerator",
+                DiagnosticSeverity.Error,
+                isEnabledByDefault: true), Location.None));
+        }
     }
 
+    /// <summary>
+    /// Generates the OpCode enum source code.
+    /// </summary>
+    /// <param name="context">The source production context.</param>
     private static void GenerateOpCode(SourceProductionContext context)
     {
         var code = $$"""
@@ -49,6 +78,10 @@ public class StaticCodeGenerator : IIncrementalGenerator
         context.AddSource("OpCode.g.cs", code);
     }
 
+    /// <summary>
+    /// Generates the StatusID enum source code.
+    /// </summary>
+    /// <param name="context">The source production context.</param>
     private static void GenerateStatus(SourceProductionContext context)
     {
         var code = $$"""
@@ -70,6 +103,10 @@ public class StaticCodeGenerator : IIncrementalGenerator
         context.AddSource("StatusID.g.cs", code);
     }
 
+    /// <summary>
+    /// Generates the TerritoryContentType enum source code.
+    /// </summary>
+    /// <param name="context">The source production context.</param>
     private static void GenerateContentType(SourceProductionContext context)
     {
         var code = $$"""
@@ -91,6 +128,10 @@ public class StaticCodeGenerator : IIncrementalGenerator
         context.AddSource("TerritoryContentType.g.cs", code);
     }
 
+    /// <summary>
+    /// Generates the ActionCate enum source code.
+    /// </summary>
+    /// <param="context">The source production context.</param>
     private static void GenerateActionCate(SourceProductionContext context)
     {
         var code = $$"""
@@ -112,6 +153,10 @@ public class StaticCodeGenerator : IIncrementalGenerator
         context.AddSource("ActionCate.g.cs", code);
     }
 
+    /// <summary>
+    /// Generates the ActionID enum source code.
+    /// </summary>
+    /// <param="context">The source production context.</param>
     private static void GenerateActionID(SourceProductionContext context)
     {
         var code = $$"""
@@ -133,14 +178,22 @@ public class StaticCodeGenerator : IIncrementalGenerator
         context.AddSource("ActionID.g.cs", code);
     }
 
+    /// <summary>
+    /// Generates the base rotation source code.
+    /// </summary>
+    /// <param="context">The source production context.</param>
     private static void GenerateBaseRotation(SourceProductionContext context)
     {
         context.AddSource("CustomRotation.g.cs", Properties.Resources.Action);
         context.AddSource("DutyRotation.g.cs", Properties.Resources.DutyAction);
     }
 
+    /// <summary>
+    /// Generates the rotations source code.
+    /// </summary>
+    /// <param="context">The source production context.</param>
     private static void GenerateRotations(SourceProductionContext context)
     {
-        context.AddSource($"BaseRotations.g.cs", Properties.Resources.Rotation);
+        context.AddSource("BaseRotations.g.cs", Properties.Resources.Rotation);
     }
 }
