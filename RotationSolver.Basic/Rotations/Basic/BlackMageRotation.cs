@@ -479,6 +479,7 @@ partial class BlackMageRotation
     static partial void ModifyParadoxPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.Paradox];
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyXenoglossyPvP(ref ActionSetting setting)
@@ -502,6 +503,7 @@ partial class BlackMageRotation
         {
             AoeCount = 1,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyFireIiiPvP(ref ActionSetting setting)
@@ -533,6 +535,7 @@ partial class BlackMageRotation
         {
             AoeCount = 1,
         };
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyBlizzardIiiPvP(ref ActionSetting setting)
@@ -564,6 +567,7 @@ partial class BlackMageRotation
         {
             AoeCount = 1,
         };
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyWreathOfFirePvP(ref ActionSetting setting)
@@ -584,6 +588,7 @@ partial class BlackMageRotation
         {
             AoeCount = 1,
         };
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyFrostStarPvP(ref ActionSetting setting)
@@ -594,6 +599,7 @@ partial class BlackMageRotation
         {
             AoeCount = 1,
         };
+        setting.MPOverride = () => 0;
     }
 
     #endregion
