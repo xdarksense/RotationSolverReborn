@@ -5,93 +5,106 @@ using System.Collections.Immutable;
 
 namespace RotationSolver.SourceGenerators;
 
+/// <summary>
+/// Source generator for creating job configuration properties.
+/// </summary>
 [Generator(LanguageNames.CSharp)]
 public class JobConfigGenerator : IIncrementalGenerator
 {
+    /// <summary>
+    /// Initializes the generator.
+    /// </summary>
+    /// <param name="context">The initialization context.</param>
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var provider = context.SyntaxProvider.ForAttributeWithMetadataName
-            ("RotationSolver.Basic.Attributes.JobConfigAttribute",
-            static (node, _) => node is VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Parent: FieldDeclarationSyntax { Parent: ClassDeclarationSyntax or StructDeclarationSyntax } } },
-            static (n, ct) => ((VariableDeclaratorSyntax)n.TargetNode, n.SemanticModel))
+        var provider = context.SyntaxProvider
+            .ForAttributeWithMetadataName(
+                "RotationSolver.Basic.Attributes.JobConfigAttribute",
+                static (node, _) => node is VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Parent: FieldDeclarationSyntax { Parent: ClassDeclarationSyntax or StructDeclarationSyntax } } },
+                static (n, ct) => ((VariableDeclaratorSyntax)n.TargetNode, n.SemanticModel))
             .Where(m => m.Item1 != null);
+
         context.RegisterSourceOutput(provider.Collect(), Execute);
     }
 
+    /// <summary>
+    /// Executes the source generation.
+    /// </summary>
+    /// <param name="context">The source production context.</param>
+    /// <param name="array">The collected syntax nodes and semantic models.</param>
     private void Execute(SourceProductionContext context, ImmutableArray<(VariableDeclaratorSyntax, SemanticModel SemanticModel)> array)
     {
-        var typeGrps = array.GroupBy(variable => variable.Item1.Parent!.Parent!.Parent!);
+        var typeGroups = array.GroupBy(variable => variable.Item1.Parent!.Parent!.Parent!);
 
-        foreach (var grp in typeGrps)
+        foreach (var group in typeGroups)
         {
-            var type = (TypeDeclarationSyntax)grp.Key;
-
-            var nameSpace = type.GetParent<BaseNamespaceDeclarationSyntax>()?.Name.ToString() ?? "Null";
-
+            var type = (TypeDeclarationSyntax)group.Key;
+            var namespaceName = type.GetParent<BaseNamespaceDeclarationSyntax>()?.Name.ToString() ?? "Null";
             var classType = type is ClassDeclarationSyntax ? "class" : "struct";
-
             var className = type.Identifier.Text;
 
             var propertyCodes = new List<string>();
-            foreach (var (variableInfo, model) in grp)
+            foreach (var (variableInfo, model) in group)
             {
                 var typeSymbol = model.GetDeclaredSymbol(type) as ITypeSymbol;
-
                 var field = (FieldDeclarationSyntax)variableInfo.Parent!.Parent!;
-
                 var variableName = variableInfo.Identifier.ToString();
                 var propertyName = variableName.ToPascalCase();
 
                 if (variableName == propertyName)
                 {
-                    //context.DiagnosticWarning(variableInfo.Identifier.GetLocation(),
-                    //    "Please don't use Pascal Case to name your field!");
+                    context.ReportDiagnostic(Diagnostic.Create(new DiagnosticDescriptor(
+                        "RS001",
+                        "Field name should not be in Pascal Case",
+                        "Please don't use Pascal Case to name your field '{0}'",
+                        "Naming",
+                        DiagnosticSeverity.Warning,
+                        isEnabledByDefault: true), variableInfo.Identifier.GetLocation(), variableName));
                     continue;
                 }
 
-                var key = string.Join(".", nameSpace, className, propertyName);
-
+                var key = string.Join(".", namespaceName, className, propertyName);
                 var fieldTypeStr = field.Declaration.Type;
                 var fieldType = model.GetTypeInfo(fieldTypeStr).Type!;
                 var fieldStr = fieldType.GetFullMetadataName();
 
-                var names = new List<string>();
+                var attributeNames = new List<string>();
                 foreach (var attrSet in field.AttributeLists)
                 {
                     if (attrSet == null) continue;
                     foreach (var attr in attrSet.Attributes)
                     {
-                        if (model.GetSymbolInfo(attr).Symbol?.GetFullMetadataName()
-                            is "RotationSolver.Basic.Attributes.UIAttribute"
+                        var attrSymbol = model.GetSymbolInfo(attr).Symbol?.GetFullMetadataName();
+                        if (attrSymbol is "RotationSolver.Basic.Attributes.UIAttribute"
                             or "RotationSolver.Basic.Attributes.UnitAttribute"
                             or "RotationSolver.Basic.Attributes.RangeAttribute"
                             or "RotationSolver.Basic.Attributes.JobConfigAttribute"
                             or "RotationSolver.Basic.Attributes.LinkDescriptionAttribute")
                         {
-                            names.Add(attr.ToString());
+                            attributeNames.Add(attr.ToString());
                         }
                     }
                 }
 
-                var attributeStr = names.Count == 0 ? "" : $"[{string.Join(", ", names)}]";
+                var attributeStr = attributeNames.Count == 0 ? "" : $"[{string.Join(", ", attributeNames)}]";
                 var propertyCode = $$"""
-                        [JsonProperty]
-                        private Dictionary<Job, {{fieldStr}}> {{variableName}}Dict = [];
+                    [JsonProperty]
+                    private Dictionary<Job, {{fieldStr}}> {{variableName}}Dict = new();
 
-                        [JsonIgnore]
-                        {{attributeStr}}
-                        public {{fieldStr}} {{propertyName}}
+                    [JsonIgnore]
+                    {{attributeStr}}
+                    public {{fieldStr}} {{propertyName}}
+                    {
+                        get
                         {
-                            get
-                            {
-                                if ({{variableName}}Dict.TryGetValue(DataCenter.Job, out var value)) return value;
-                                return {{variableName}}Dict[DataCenter.Job] = {{variableName}};
-                            }
-                            set
-                            {
-                                {{variableName}}Dict[DataCenter.Job] = value;
-                            }
+                            if ({{variableName}}Dict.TryGetValue(DataCenter.Job, out var value)) return value;
+                            return {{variableName}}Dict[DataCenter.Job] = {{variableName}};
                         }
+                        set
+                        {
+                            {{variableName}}Dict[DataCenter.Job] = value;
+                        }
+                    }
                 """;
 
                 propertyCodes.Add(propertyCode);
@@ -100,20 +113,18 @@ public class JobConfigGenerator : IIncrementalGenerator
             if (propertyCodes.Count == 0) continue;
 
             var code = $$"""
-             using ECommons.ExcelServices;
+                using ECommons.ExcelServices;
 
-             namespace {{nameSpace}}
-             {
-                 partial {{classType}} {{className}}
-                 {
+                namespace {{namespaceName}}
+                {
+                    partial {{classType}} {{className}}
+                    {
+                        {{string.Join("\n\n", propertyCodes)}}
+                    }
+                }
+            """;
 
-             {{string.Join("\n \n", propertyCodes)}}
-
-                 }
-             }
-             """;
-
-            context.AddSource($"{nameSpace}_{className}.g.cs", code);
+            context.AddSource($"{namespaceName}_{className}.g.cs", code);
         }
     }
 }
