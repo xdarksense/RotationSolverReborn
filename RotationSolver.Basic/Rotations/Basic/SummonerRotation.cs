@@ -579,8 +579,94 @@ partial class SummonerRotation
     }
     #endregion
 
+    #region PvP Actions
+    static partial void ModifyRuinIiiPvP(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyRuinIvPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.RuinIiiPvP) == ActionID.RuinIvPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyMountainBusterPvP(ref ActionSetting setting) 
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+        setting.TargetStatusProvide = [StatusID.Stun_1343];
+    }
+
+    static partial void ModifySlipstreamPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            ShouldCheckStatus = false,
+            AoeCount = 1,
+        };
+        setting.TargetStatusProvide = [StatusID.Slipping];
+    }
+
     static partial void ModifyCrimsonCyclonePvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
+        setting.StatusProvide = [StatusID.CrimsonStrikeReady_4403];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
     }
+
+    static partial void ModifyCrimsonStrikePvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.CrimsonCyclonePvP) == ActionID.CrimsonStrikePvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            ShouldCheckStatus = false,
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyRadiantAegisPvP(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.RadiantAegis_3224];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            ShouldCheckStatus = false,
+        };
+    }
+
+    static partial void ModifyNecrotizePvP(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.FurtherRuin_4399];
+    }
+
+    static partial void ModifyDeathflarePvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.DreadwyrmTrance_3228];
+    }
+
+    static partial void ModifyAstralImpulsePvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.RuinIiiPvP) == ActionID.AstralImpulsePvP;
+    }
+
+    static partial void ModifyBrandOfPurgatoryPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.FirebirdTrance];
+    }
+
+    static partial void ModifyFountainOfFirePvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.RuinIiiPvP) == ActionID.FountainOfFirePvP;
+    }
+    #endregion
+
 }
