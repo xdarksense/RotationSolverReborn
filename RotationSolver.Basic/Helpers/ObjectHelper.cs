@@ -88,7 +88,9 @@ public static class ObjectHelper
         if (Service.Config.FilterOneHpInvincible && battleChara.CurrentHp <= 1) return false;
 
         // Check if the target is invincible.
-        if (battleChara.IsJeunoBossImmune()) return false;
+        if (Service.Config.CodTarget && battleChara.IsCODBossImmune()) return false;
+        if (Service.Config.JeunoTarget && battleChara.IsJeunoBossImmune()) return false;
+        if (Service.Config.StrongOfSheildTarget && battleChara.IsHanselorGretelSheilded()) return false;
 
         // Ensure StatusList is not null before accessing it
         if (battleChara.StatusList == null) return false;
@@ -437,6 +439,12 @@ public static class ObjectHelper
         {
             if (o is not IBattleChara b) return false;
 
+            // Ensure the IBattleChara object is valid before accessing its properties
+            unsafe
+            {
+                if (b.Struct() == null) return false;
+            }
+
             var baseCheck = b.IsCasting && b.IsCastInterruptible && b.TotalCastTime >= 2;
             if (!baseCheck) return false;
             if (!Service.Config.InterruptibleMoreCheck) return false;
@@ -496,6 +504,74 @@ public static class ObjectHelper
                 if (Service.Config.InDebug)
                 {
                     Svc.Log.Information("IsJeunoBossImmune: FatedVillain status found");
+                }
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Is target COD Boss immune.
+    /// </summary>
+    /// <param name="obj">the object.</param>
+    /// <returns></returns>
+    public static bool IsCODBossImmune(this IBattleChara obj)
+    {
+        var player = Player.Object;
+
+        var StygianStatus = StatusID.UnnamedStatus_4388;
+        var CloudOfDarknessStatus = StatusID.VeilOfDarkness;
+        var AntiCloudOfDarknessStatus = StatusID.Rsv41781100S74Cfc3B0E74Cfc3B0;
+        var AntiStygianStatus = StatusID.Rsv41771100S74Cfc3B0E74Cfc3B0;
+
+        if (obj.IsEnemy())
+        {
+            if (obj.HasStatus(false, CloudOfDarknessStatus) &&
+                player.HasStatus(false, AntiCloudOfDarknessStatus))
+            {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("IsCODBossImmune: VeilOfDarkness status found, CloudOfDarkness immune");
+                }
+                return true;
+            }
+
+            if (obj.HasStatus(false, StygianStatus) &&
+                player.HasStatus(false, AntiStygianStatus))
+            {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("IsCODBossImmune: UnnamedStatus4388 status found, Stygian immune");
+                }
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Is target Jeuno Boss immune.
+    /// </summary>
+    /// <param name="obj">the object.</param>
+    /// <returns></returns>
+    public static bool IsHanselorGretelSheilded(this IBattleChara obj)
+    {
+        var player = Player.Object;
+
+        var strongOfShieldPositional = EnemyPositional.Front;
+        var strongOfShieldStatus = StatusID.StrongOfShield;
+
+        if (obj.IsEnemy())
+        {
+            if (obj.HasStatus(false, strongOfShieldStatus) &&
+                strongOfShieldPositional != obj.FindEnemyPositional())
+            {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("IsHanselorGretelSheilded: StrongOfShield status found, ignoring status haver if player is out of position");
                 }
                 return true;
             }

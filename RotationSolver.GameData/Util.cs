@@ -1,9 +1,18 @@
 ﻿using Lumina.Excel.GeneratedSheets;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace RotationSolver.GameData;
+/// <summary>
+/// Utility class for various helper methods.
+/// </summary>
 internal static partial class Util
 {
+    /// <summary>
+    /// Determines if the job category represents a single job for combat.
+    /// </summary>
+    /// <param name="jobCategory">The job category to check.</param>
+    /// <returns>True if the job category represents a single job for combat; otherwise, false.</returns>
     public static bool IsSingleJobForCombat(this ClassJobCategory jobCategory)
     {
         if (jobCategory.RowId == 68) return true; // ACN SMN SCH 
@@ -13,29 +22,49 @@ internal static partial class Util
         return true;
     }
 
+    /// <summary>
+    /// Indents each line of the string with four spaces.
+    /// </summary>
+    /// <param name="str">The string to indent.</param>
+    /// <returns>The indented string.</returns>
     public static string Table(this string str) => "    " + str.Replace("\n", "\n    ");
 
+    /// <summary>
+    /// Inserts spaces before each uppercase letter in the string.
+    /// </summary>
+    /// <param name="str">The string to modify.</param>
+    /// <returns>The modified string with spaces.</returns>
     public static string Space(this string str)
     {
-        string result = string.Empty;
-
+        var result = new StringBuilder();
         bool lower = false;
+
         foreach (var c in str)
         {
             var isLower = char.IsLower(c);
             if (lower && !isLower)
             {
-                result += ' ';
+                result.Append(' ');
             }
             lower = isLower;
-            result += c;
+            result.Append(c);
         }
 
-        return result;
+        return result.ToString();
     }
 
+    /// <summary>
+    /// Removes non-ASCII characters from the string.
+    /// </summary>
+    /// <param name="input">The input string.</param>
+    /// <returns>The string containing only ASCII characters.</returns>
     public static string OnlyAscii(this string input) => new(input.Where(char.IsAscii).ToArray());
 
+    /// <summary>
+    /// Converts the string to PascalCase.
+    /// </summary>
+    /// <param name="input">The input string.</param>
+    /// <returns>The PascalCase string.</returns>
     public static string ToPascalCase(this string input)
     {
         var pascalCase = InvalidCharsRgx().Replace(WhiteSpace().Replace(input, "_"), string.Empty)
@@ -67,6 +96,14 @@ internal static partial class Util
     [GeneratedRegex("(?<=[A-Z])[A-Z]+?((?=[A-Z][a-z])|(?=[0-9]))")]
     private static partial Regex UpperCaseInside();
 
+    /// <summary>
+    /// Generates a property with an array of names.
+    /// </summary>
+    /// <param name="propertyName">The name of the property.</param>
+    /// <param name="propertyType">The type of the property.</param>
+    /// <param name="modifier">The modifier for the property.</param>
+    /// <param name="items">The items to include in the array.</param>
+    /// <returns>The generated property code.</returns>
     public static string ArrayNames(string propertyName, string propertyType, string modifier, params string[] items)
     {
         var thisItems = $"""
@@ -83,6 +120,15 @@ internal static partial class Util
         """;
     }
 
+    /// <summary>
+    /// Generates code for an action.
+    /// </summary>
+    /// <param name="item">The action item.</param>
+    /// <param name="actionName">The name of the action.</param>
+    /// <param name="actionDescName">The description name of the action.</param>
+    /// <param name="desc">The description of the action.</param>
+    /// <param name="isDuty">Indicates if the action is a duty action.</param>
+    /// <returns>The generated action code.</returns>
     public static string ToCode(this Lumina.Excel.GeneratedSheets.Action item,
         string actionName, string actionDescName, string desc, bool isDuty)
     {
@@ -118,6 +164,11 @@ internal static partial class Util
         """;
     }
 
+    /// <summary>
+    /// Gets the description name for an action.
+    /// </summary>
+    /// <param name="action">The action.</param>
+    /// <returns>The description name of the action.</returns>
     public static string GetDescName(this Lumina.Excel.GeneratedSheets.Action action)
     {
         var jobs = action.ClassJobCategory.Value?.Name.RawString;

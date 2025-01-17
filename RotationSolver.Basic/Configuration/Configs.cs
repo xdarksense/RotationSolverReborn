@@ -132,6 +132,18 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig)]
     private static readonly bool _filterOneHPInvincible = true;
 
+    [ConditionBool, UI("Ignore immune Ark Angels in Jenuo: The First Walk.",
+        Filter = TargetConfig)]
+    private static readonly bool _jeunoTarget = true;
+
+    [ConditionBool, UI("Ignore immune targets in Cloud of Darkenss Chaotic.",
+        Filter = TargetConfig)]
+    private static readonly bool _cODTarget = true;
+
+    [ConditionBool, UI("Ignore Strong of Shield target (Hansel and Gretel) in The Tower at Paradigm's Breach if you will hit shield.",
+        Filter = TargetConfig)]
+    private static readonly bool _strongOfSheildTarget = true;
+
     [ConditionBool, UI("Teaching mode", Filter = UiInformation)]
     private static readonly bool _teachingMode = false;
 

@@ -184,7 +184,7 @@ namespace RotationSolver.Commands
                 }
 
                 var target = DataCenter.AllHostileTargets
-                    .FirstOrDefault(t => t != null && t.TargetObjectId == playerObject.GameObjectId);
+                    .FirstOrDefault(t => t != null && t is IBattleChara battleChara && battleChara.TargetObjectId == playerObject.GameObjectId);
 
                 if (Svc.Condition[ConditionFlag.LoggingOut] ||
                     (Service.Config.AutoOffWhenDead && DataCenter.Territory?.IsPvP == false && Player.Available && playerObject.CurrentHp == 0) ||
@@ -255,6 +255,7 @@ namespace RotationSolver.Commands
                 Svc.Log.Error(ex, "Exception in UpdateRotationState");
             }
         }
+
 
     }
 }
