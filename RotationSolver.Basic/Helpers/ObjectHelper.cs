@@ -523,7 +523,7 @@ public static class ObjectHelper
 
         var StygianStatus = StatusID.UnnamedStatus_4388;
         var CloudOfDarknessStatus = StatusID.VeilOfDarkness;
-        var AntiCloudOfDarknessStatus = StatusID.Rsv41771100S74Cfc3B0E74Cfc3B0;
+        var AntiCloudOfDarknessStatus = StatusID.Rsv41781100S74Cfc3B0E74Cfc3B0;
         var AntiStygianStatus = StatusID.Rsv41771100S74Cfc3B0E74Cfc3B0;
 
         if (obj.IsEnemy())
