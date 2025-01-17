@@ -2,17 +2,31 @@
 
 namespace RotationSolver.GameData.Getters;
 
+/// <summary>
+/// Class responsible for getting and processing items from the game data.
+/// </summary>
 internal class ItemGetter(Lumina.GameData gameData)
     : ExcelRowGetter<Item>(gameData)
 {
-    public List<string> AddedNames { get; } = [];
+    /// <summary>
+    /// Gets the list of added item names.
+    /// </summary>
+    public List<string> AddedNames { get; } = new List<string>();
 
+    /// <summary>
+    /// Clears the list of added item names before creating the list of items.
+    /// </summary>
     protected override void BeforeCreating()
     {
         AddedNames.Clear();
         base.BeforeCreating();
     }
 
+    /// <summary>
+    /// Determines whether the specified item should be added to the list.
+    /// </summary>
+    /// <param name="item">The item to check.</param>
+    /// <returns>True if the item should be added; otherwise, false.</returns>
     protected override bool AddToList(Item item)
     {
         if (item.ItemSearchCategory.Row != 43) return false;
@@ -21,12 +35,17 @@ internal class ItemGetter(Lumina.GameData gameData)
         return true;
     }
 
+    /// <summary>
+    /// Converts the specified item to its code representation.
+    /// </summary>
+    /// <param name="item">The item to convert.</param>
+    /// <returns>The code representation of the item.</returns>
     protected override string ToCode(Item item)
     {
         var name = item.Singular.RawString.ToPascalCase();
         if (AddedNames.Contains(name))
         {
-            name += "_" + item.RowId.ToString();
+            name += $"_{item.RowId}";
         }
         else
         {
@@ -34,7 +53,6 @@ internal class ItemGetter(Lumina.GameData gameData)
         }
 
         var desc = item.Description.RawString ?? string.Empty;
-
         desc = $"<para>{desc.Replace("\n", "</para>\n/// <para>")}</para>";
 
         var descName = $"<see href=\"https://garlandtools.org/db/#item/{item.RowId}\"><strong>{item.Name.RawString}</strong></see> [{item.RowId}]";
