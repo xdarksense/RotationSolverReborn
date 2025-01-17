@@ -79,8 +79,9 @@ public class BaseAction : IBaseAction
     {
         get
         {
-            if (!Service.Config.RotationActionConfig.TryGetValue(ID, out var value))
+            if (!Service.Config.RotationActionConfig.TryGetValue(ID, out var value) || DataCenter.ResetActionConfigs)
             {
+                DataCenter.ResetActionConfigs = false;
                 value = Setting.CreateConfig?.Invoke() ?? new ActionConfig();
                 Service.Config.RotationActionConfig[ID] = value;
 
