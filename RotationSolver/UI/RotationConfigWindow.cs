@@ -2689,6 +2689,10 @@ public partial class RotationConfigWindow : Window
 
         _debugHeader?.Draw();
 
+        if (ImGui.Button("Reset Action Configs"))
+        {
+            DataCenter.ResetActionConfigs = DataCenter.ResetActionConfigs != true;
+        }
         // Add a button to test adding a system warning
         if (ImGui.Button("Add Test Warning"))
         {
