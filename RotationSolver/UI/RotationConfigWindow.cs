@@ -2695,8 +2695,9 @@ public partial class RotationConfigWindow : Window
         // Add a button to test adding a system warning
         if (ImGui.Button("Reset Action Configs"))
         {
-            DataCenter.ResetActionConfigs = true;
+            DataCenter.ResetActionConfigs = DataCenter.ResetActionConfigs != true;
         }
+        ImGui.Text($"Reset Action Configs: {DataCenter.ResetActionConfigs}");
         if (ImGui.Button("Add Test Warning"))
         {
 #pragma warning disable CS0436
