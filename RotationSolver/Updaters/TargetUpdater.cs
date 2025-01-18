@@ -100,7 +100,7 @@ internal static partial class TargetUpdater
     private static List<IBattleChara> GetFriendlyNPCs()
     {
         var friendlyNpcs = new List<IBattleChara>();
-        if (!Service.Config.FriendlyBattleNpcHeal && !Service.Config.FriendlyPartyNpcHealRaise2)
+        if (!Service.Config.FriendlyBattleNpcHeal && !Service.Config.FriendlyPartyNpcHealRaise3)
         {
             return friendlyNpcs;
         }
@@ -236,7 +236,7 @@ internal static partial class TargetUpdater
                     validRaiseTargets.AddRange(deathAll);
                 }
 
-                if (Service.Config.FriendlyPartyNpcHealRaise2 || Service.Config.FocusTargetIsParty)
+                if (Service.Config.FriendlyPartyNpcHealRaise3 || Service.Config.FocusTargetIsParty)
                 {
                     validRaiseTargets.AddRange(deathNPC);
                 }
