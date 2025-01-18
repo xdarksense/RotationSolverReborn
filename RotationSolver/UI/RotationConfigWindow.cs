@@ -1073,10 +1073,10 @@ public partial class RotationConfigWindow : Window
         }
 
         // Display the current NPC Heal/Raise Support status
-        ImGui.TextWrapped($"NPC Heal/Raise Support Enabled: {Service.Config.FriendlyPartyNpcHealRaise2}");
+        ImGui.TextWrapped($"NPC Heal/Raise Support Enabled: {Service.Config.FriendlyPartyNpcHealRaise3}");
         if (ImGui.Button("Enable NPC Heal/Raise Support"))
         {
-            Service.Config.FriendlyPartyNpcHealRaise2.Value = true;
+            Service.Config.FriendlyPartyNpcHealRaise3.Value = true;
         }
         ImGui.Spacing();
         // Display the Auto Load Rotations status
