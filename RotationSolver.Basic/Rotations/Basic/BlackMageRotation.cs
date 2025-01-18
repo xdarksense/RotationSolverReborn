@@ -578,6 +578,7 @@ partial class BlackMageRotation
     static partial void ModifyWreathOfIcePvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => WreathOfIceReady;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyFlareStarPvP(ref ActionSetting setting)
