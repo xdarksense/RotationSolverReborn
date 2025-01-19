@@ -3,7 +3,7 @@
 /// <summary>
 /// The way to place the beneficial area action.
 /// </summary>
-public enum BeneficialAreaStrategy : byte
+public enum BeneficialAreaStrategy2 : byte
 {
     /// <summary>
     /// Should use predefined location.
@@ -11,17 +11,17 @@ public enum BeneficialAreaStrategy : byte
     [Description("On predefined location")]
     OnLocations,
 
-    /// <summary>
-    /// Should use only predefined location.
-    /// </summary>
-    [Description("Only on predefined location")]
-    OnlyOnLocations,
+    ///// <summary>
+    ///// Should use only predefined location.
+    ///// </summary>
+    //[Description("Only on predefined List location")]
+    //OnlyOnLocations,
 
-    /// <summary>
-    /// Should use target.
-    /// </summary>
-    [Description("On target")]
-    OnTarget,
+    ///// <summary>
+    ///// Should use target.
+    ///// </summary>
+    //[Description("On target")]
+    //OnTarget,
 
     /// <summary>
     /// Should use the calculated location.

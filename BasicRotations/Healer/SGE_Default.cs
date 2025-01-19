@@ -6,6 +6,12 @@ namespace RebornRotations.Healer;
 public sealed class SGE_Default : SageRotation
 {
     #region Config Options
+    [RotationConfig(CombatType.PvE, Name = "Use Eukrasia when out of combat")]
+    public bool OOCEukrasia { get; set; } = true;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Rhizomata when out of combat")]
+    public bool OOCRhizomata { get; set; } = false;
+
     [RotationConfig(CombatType.PvE, Name = "Use spells with cast times to heal. (Ignored if you are the only healer in party)")]
     public bool GCDHeal { get; set; } = false;
 
@@ -197,9 +203,10 @@ public sealed class SGE_Default : SageRotation
             }
         }
 
-        var tank = PartyMembers.GetJobCategory(JobRole.Tank);
-        foreach (var t in tank)
+        var tank = PartyMembers.GetJobCategory(JobRole.Tank).ToList();
+        for (int i = 0; i < tank.Count; i++)
         {
+            var t = tank[i];
             if (Addersgall < 1 && t.GetHealthRatio() < OGCDTankHeal)
             {
                 if (HaimaPvE.CanUse(out act)) return true;
@@ -210,16 +217,18 @@ public sealed class SGE_Default : SageRotation
             }
         }
 
-        foreach (var t in tank)
+        for (int i = 0; i < tank.Count; i++)
         {
+            var t = tank[i];
             if (t.GetHealthRatio() < ZoeHeal)
             {
                 if (ZoePvE.CanUse(out act)) return true;
             }
         }
 
-        foreach (var t in tank)
+        for (int i = 0; i < tank.Count; i++)
         {
+            var t = tank[i];
             if (t.GetHealthRatio() < KrasisTankHeal)
             {
                 if (KrasisPvE.CanUse(out act)) return true;
@@ -244,8 +253,9 @@ public sealed class SGE_Default : SageRotation
         if (!InCombat && !Player.HasStatus(true, StatusID.Kardia) && KardiaPvE.CanUse(out act)) return true;
 
         if (KardiaPvE.CanUse(out act)) return true;
-
-        if (Addersgall <= 1 && RhizomataPvE.CanUse(out act)) return true;
+        
+        if (OOCRhizomata && !InCombat && Addersgall <= 1 && RhizomataPvE.CanUse(out act)) return true;
+        if (InCombat && Addersgall <= 1 && RhizomataPvE.CanUse(out act)) return true;
 
         if (SoteriaPvE.CanUse(out act) && PartyMembers.Any(b => b.HasStatus(true, StatusID.Kardion) && b.GetHealthRatio() < HealthSingleAbility)) return true;
 
@@ -452,7 +462,7 @@ public sealed class SGE_Default : SageRotation
         if ( DoEukrasianDosis(out act)) return true;
         if (DosisPvE.CanUse(out act)) return true;
 
-        if (!InCombat && !Player.HasStatus(true, StatusID.Eukrasia) && EukrasiaPvE.CanUse(out act)) return true;
+        if (OOCEukrasia && !InCombat && !Player.HasStatus(true, StatusID.Eukrasia) && EukrasiaPvE.CanUse(out act)) return true;
         if (InCombat && !HasHostilesInRange && EukrasiaPvE.CanUse(out act)) return true;
         return base.GeneralGCD(out act);
     }

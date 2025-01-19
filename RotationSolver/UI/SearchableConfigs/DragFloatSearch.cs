@@ -12,24 +12,27 @@ internal class DragFloatSearch : Searchable
         get
         {
             var baseDesc = base.Description;
-            if (!string.IsNullOrEmpty(baseDesc))
-            {
-                return baseDesc + "\n" + Unit.ToString();
-            }
-            else
-            {
-                return Unit.ToString();
-            }
+            return !string.IsNullOrEmpty(baseDesc) ? baseDesc + "\n" + Unit.ToString() : Unit.ToString();
         }
     }
 
     public DragFloatSearch(PropertyInfo property) : base(property)
     {
         var range = _property.GetCustomAttribute<RangeAttribute>();
-        Min = range?.MinValue ?? 0f;
-        Max = range?.MaxValue ?? 1f;
-        Speed = range?.Speed ?? 0.001f;
-        Unit = range?.UnitType ?? ConfigUnitType.None;
+        if (range != null)
+        {
+            Min = range.MinValue;
+            Max = range.MaxValue;
+            Speed = range.Speed;
+            Unit = range.UnitType;
+        }
+        else
+        {
+            Min = 0f;
+            Max = 1f;
+            Speed = 0.001f;
+            Unit = ConfigUnitType.None;
+        }
     }
 
     protected float Value
@@ -49,9 +52,12 @@ internal class DragFloatSearch : Searchable
         // Draw slider or drag float based on unit type
         if (Unit == ConfigUnitType.Percent)
         {
-            if (ImGui.SliderFloat($"##Config_{ID}{hashCode}", ref value, Min, Max, $"{value * 100f:F1}{Unit.ToSymbol()}"))
+            // Convert the value to percentage for display
+            float displayValue = value * 100f;
+            if (ImGui.SliderFloat($"##Config_{ID}{hashCode}", ref displayValue, Min * 100f, Max * 100f, $"{displayValue:F1}{Unit.ToSymbol()}"))
             {
-                Value = value;
+                // Convert the display value back to the original scale
+                Value = displayValue / 100f;
             }
         }
         else
