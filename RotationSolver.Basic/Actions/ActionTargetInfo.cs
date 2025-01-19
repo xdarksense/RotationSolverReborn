@@ -1155,10 +1155,8 @@ public struct ActionTargetInfo(IBaseAction action)
             {
                 return null;
             }
-
-            if (!DataCenter.IsPvP)
-            {
-                var orderedGameObjects = DataCenter.TargetingType switch
+            
+            var orderedGameObjects = DataCenter.TargetingType switch
                 {
                     TargetingType.Small => IGameObjects.OrderBy<IGameObject, float>(p => p.HitboxRadius),
                     TargetingType.HighHP => IGameObjects.OrderByDescending<IGameObject, uint>(p => p is IBattleChara b ? b.CurrentHp : 0),
@@ -1169,15 +1167,6 @@ public struct ActionTargetInfo(IBaseAction action)
                     TargetingType.LowMaxHP => IGameObjects.OrderBy<IGameObject, uint>(p => p is IBattleChara b ? b.MaxHp : 0),
                     TargetingType.Nearest => IGameObjects.OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
                     TargetingType.Farthest => IGameObjects.OrderByDescending<IGameObject, float>(p => p.DistanceToPlayer()),
-                    _ => IGameObjects.OrderByDescending<IGameObject, float>(p => p.HitboxRadius),
-                };
-                
-                return orderedGameObjects.FirstOrDefault() as IBattleChara;
-            }
-            else 
-            {
-                var orderedGameObjects = DataCenter.TargetingType switch
-                {
                     TargetingType.HunterKillerHealers => IGameObjects.Where(p => p.IsJobs(JobRole.Healer.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer()).Any() 
                         ? IGameObjects.Where(p => p.IsJobs(JobRole.Healer.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer())
                         : IGameObjects.OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
@@ -1187,21 +1176,11 @@ public struct ActionTargetInfo(IBaseAction action)
                     TargetingType.HunterKillerDPS => IGameObjects.Where(p => p.IsJobs(JobRole.AllDPS.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer()).Any()
                         ? IGameObjects.Where(p => p.IsJobs(JobRole.AllDPS.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer())
                         : IGameObjects.OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
-                    TargetingType.Small => IGameObjects.OrderBy<IGameObject, float>(p => p.HitboxRadius),
-                    TargetingType.HighHP => IGameObjects.OrderByDescending<IGameObject, uint>(p => p is IBattleChara b ? b.CurrentHp : 0),
-                    TargetingType.LowHP => IGameObjects.OrderBy<IGameObject, uint>(p => p is IBattleChara b ? b.CurrentHp : 0),
-                    TargetingType.HighHPPercent => IGameObjects.OrderByDescending<IGameObject, float>(p => p is IBattleChara b ? b.CurrentHp / b.MaxHp : 0),
-                    TargetingType.LowHPPercent => IGameObjects.OrderBy<IGameObject, float>(p => p is IBattleChara b ? b.CurrentHp / b.MaxHp : 0),
-                    TargetingType.HighMaxHP => IGameObjects.OrderByDescending<IGameObject, uint>(p => p is IBattleChara b ? b.MaxHp : 0),
-                    TargetingType.LowMaxHP => IGameObjects.OrderBy<IGameObject, uint>(p => p is IBattleChara b ? b.MaxHp : 0),
-                    TargetingType.Nearest => IGameObjects.OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
-                    TargetingType.Farthest => IGameObjects.OrderByDescending<IGameObject, float>(p => p.DistanceToPlayer()),
-                    _ => IGameObjects.OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
+                    _ => IGameObjects.OrderByDescending<IGameObject, float>(p => p.HitboxRadius),
                 };
                 
                 return orderedGameObjects.FirstOrDefault() as IBattleChara;
             };
-        }
 
         IBattleChara? FindBeAttackedTarget()
         {
