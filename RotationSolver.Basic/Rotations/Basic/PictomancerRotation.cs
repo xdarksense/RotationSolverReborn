@@ -1,4 +1,5 @@
 using Dalamud.Interface.Colors;
+using ECommons;
 
 namespace RotationSolver.Basic.Rotations.Basic;
 
@@ -711,6 +712,288 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
+        };
+    }
+    #endregion
+    
+    #region PvP Actions
+    static partial void ModifyFireInRedPvP(ref ActionSetting setting)
+    {
+        // setting.ActionCheck = () => true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+    }
+
+    static partial void ModifyHolyInWhitePvP(ref ActionSetting setting) 
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+    }
+
+    static partial void ModifyCreatureMotifPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.CreatureMotifPvP) != ActionID.CreatureMotifPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyLivingMusePvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.LivingMusePvP) != ActionID.LivingMusePvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+    }
+
+    static partial void ModifyMogOfTheAgesPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.MooglePortrait];
+        setting.TargetStatusProvide = [StatusID.Silence_1347];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifySmudgePvP(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.Smudge_4113, StatusID.QuickSketch];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyTemperaCoatPvP(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.TemperaCoat_4114];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifySubtractivePalettePvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SubtractivePalettePvP) == ActionID.SubtractivePalettePvP;
+        setting.StatusProvide = [StatusID.SubtractivePalette_4102];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyAdventOfChocobastionPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+    }
+
+    static partial void ModifyAeroInGreenPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.Aetherhues_4100];
+        setting.StatusProvide = [StatusID.AetherhuesIi_4101];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+    }
+
+    static partial void ModifyWaterInBluePvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.AetherhuesIi_4101];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+    }
+
+    static partial void ModifyBlizzardInCyanPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.SubtractivePalette_4102];
+        setting.StatusProvide = [StatusID.Aetherhues_4100];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+    }
+
+    static partial void ModifyStoneInYellowPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.SubtractivePalette_4102, StatusID.Aetherhues_4100];
+        setting.StatusProvide = [StatusID.AetherhuesIi_4101];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+    }
+
+    static partial void ModifyThunderInMagentaPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.SubtractivePalette_4102, StatusID.AetherhuesIi_4101];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+    }
+
+    static partial void ModifyCometInBlackPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.SubtractivePalette_4102];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+    }
+    
+    static partial void ModifyPomMotifPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.PomSketch];
+        setting.StatusProvide = [StatusID.PomMotif];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyWingMotifPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.WingSketch];
+        // setting.StatusProvide = [StatusID.WingMotif];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyClawMotifPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.ClawSketch];
+        // setting.StatusProvide = [StatusID.ClawMotif];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyMawMotifPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.MawSketch];
+        setting.StatusProvide = [StatusID.MawMotif];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyPomMusePvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.PomMotif];
+        setting.StatusProvide = [StatusID.WingSketch];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+    }
+
+    static partial void ModifyWingedMusePvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.WingMotif];
+        setting.StatusProvide = [StatusID.ClawSketch];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+    }
+
+    static partial void ModifyClawedMusePvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.ClawMotif];
+        setting.StatusProvide = [StatusID.MawSketch];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+    }
+
+    static partial void ModifyFangedMusePvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.MawMotif];
+        setting.StatusProvide = [StatusID.PomSketch, StatusID.MadeenPortrait];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+    }
+
+    static partial void ModifyRetributionOfTheMadeenPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.MadeenPortrait];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+    }
+
+    static partial void ModifyTemperaGrassaPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.TemperaCoat];
+        setting.StatusProvide = [StatusID.TemperaGrassa];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
+        };
+    }
+
+    static partial void ModifyStarPrismPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.StarPrism];
+        setting.StatusProvide = [StatusID.StarPrism];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+            ShouldCheckStatus = false,
         };
     }
     #endregion
