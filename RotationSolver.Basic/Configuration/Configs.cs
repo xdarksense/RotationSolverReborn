@@ -335,7 +335,7 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Use movement speed increase abilities when out of combat.", Parent = nameof(UseAbility))]
     private static readonly bool _autoSpeedOutOfCombat = true;
 
-    [ConditionBool, UI("Use beneficial ground-targeted actions", Parent = nameof(UseAbility))]
+    [ConditionBool, UI("Use beneficial ground-targeted actions", Filter = HealingActionCondition, Section = 3)]
     private static readonly bool _useGroundBeneficialAbility = true;
 
     [ConditionBool, UI("Use beneficial AoE actions when moving.", Parent = nameof(UseGroundBeneficialAbility))]
@@ -387,16 +387,6 @@ internal partial class Configs : IPluginConfiguration
     public bool UseAdditionalConditions { get; set; } = false;
 
     #region Float
-    [UI("isLastAbilityTimer", Description = "Don't fuck with this if you dont know what it does",
-        Filter = Extra)]
-    [Range(0.100f, 2.500f, ConfigUnitType.Seconds, 0.001f)]
-    public float IsLastAbilityTimer { get; set; } = 0.800f;
-
-    [UI("isFirstAbilityTimer", Description = "Don't fuck with this if you dont know what it does",
-        Filter = Extra)]
-    [Range(0.100f, 2.500f, ConfigUnitType.Seconds, 0.001f)]
-    public float IsFirstAbilityTimer { get; set; } = 0.600f;
-
     [UI("Auto turn off RSR when combat is over more for more then...",
         Parent = nameof(AutoOffAfterCombat))]
     [Range(0, 600, ConfigUnitType.Seconds)]
@@ -482,7 +472,7 @@ internal partial class Configs : IPluginConfiguration
     public int LessMPNoRaise { get; set; }
 
     [UI("HP for standard deviation for using AoE heal.", Description = "Basically the health difference between a single party member and the whole party, used for deciding between healing a single party member or AOE healing. Leave this alone if you don't undertand its use.",
-        Filter = HealingActionCondition, Section = 3)]
+        Filter = Extra)]
     [Range(0, 0.5f, ConfigUnitType.Percent, 0.02f)]
     public float HealthDifference { get; set; } = 0.25f;
 
@@ -496,7 +486,7 @@ internal partial class Configs : IPluginConfiguration
 
     [ConditionBool, UI("Heal and raise Party NPCs.",
         Filter = HealingActionCondition, Section = 3)]
-    private static readonly bool _friendlyPartyNPCHealRaise2 = true;
+    private static readonly bool _friendlyPartyNPCHealRaise3 = true;
 
     [ConditionBool, UI("Heal/Dance partner your chocobo", Description = "Experimental.",
         Filter = HealingActionCondition, Section = 3)]
@@ -649,8 +639,8 @@ internal partial class Configs : IPluginConfiguration
     [Range(0, 10, ConfigUnitType.None)]
     public int TargetingIndex { get; set; }
 
-    [UI("Beneficial AoE strategy", Parent = nameof(UseGroundBeneficialAbility))]
-    public BeneficialAreaStrategy BeneficialAreaStrategy { get; set; } = BeneficialAreaStrategy.OnTarget;
+    [UI("Beneficial AOE Logic", Parent = nameof(UseGroundBeneficialAbility))]
+    public BeneficialAreaStrategy2 BeneficialAreaStrategy2 { get; set; } = BeneficialAreaStrategy2.OnCalculated;
 
     [UI("Number of hostiles", Parent = nameof(UseDefenseAbility),
         PvEFilter = JobFilterType.Tank)]

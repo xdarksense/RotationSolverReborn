@@ -35,8 +35,7 @@ internal class StatusGetter(Lumina.GameData gameData)
         }
 
         // Perform usual checks for statuses with a name
-        return item.ClassJobCategory.Row != 0 &&
-               name.All(char.IsAscii) &&
+        return name.All(char.IsAscii) &&
                item.Icon != 0;
     }
 
@@ -62,6 +61,12 @@ internal class StatusGetter(Lumina.GameData gameData)
             name += "_" + item.RowId.ToString();
         }
 
+        // Ensure the name does not start with an underscore
+        if (name.StartsWith("_"))
+        {
+            name = "Status" + name;
+        }
+
         var desc = item.Description.RawString;
         var jobs = item.ClassJobCategory.Value?.Name.RawString;
         jobs = string.IsNullOrEmpty(jobs) ? string.Empty : $" ({jobs})";
@@ -77,19 +82,19 @@ internal class StatusGetter(Lumina.GameData gameData)
         if (!name.StartsWith("UnnamedStatus"))
         {
             sb.AppendLine($"""
-        /// <summary>
-        /// <see href="https://garlandtools.org/db/#status/{item.RowId}"><strong>{item.Name.RawString.Replace("&", "and")}</strong></see>{cate}{jobs}
-        /// <para>{desc.Replace("\n", "</para>\n/// <para>")}</para>
-        /// </summary>
-        """);
+    /// <summary>
+    /// <see href="https://garlandtools.org/db/#status/{item.RowId}"><strong>{item.Name.RawString.Replace("&", "and")}</strong></see>{cate}{jobs}
+    /// <para>{desc.Replace("\n", "</para>\n/// <para>")}</para>
+    /// </summary>
+    """);
         }
         else
         {
             sb.AppendLine($"""
-        /// <summary>
-        /// <para>{desc.Replace("\n", "</para>\n/// <para>")}</para>
-        /// </summary>
-        """);
+    /// <summary>
+    /// <para>{desc.Replace("\n", "</para>\n/// <para>")}</para>
+    /// </summary>
+    """);
         }
         sb.AppendLine($"{name} = {item.RowId},");
 

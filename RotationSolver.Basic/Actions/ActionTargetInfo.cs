@@ -69,11 +69,19 @@ public struct ActionTargetInfo(IBaseAction action)
         var playerObjectId = Player.Object?.GameObjectId;
         var targetObjectId = Svc.Targets.Target?.GameObjectId;
 
-        return validTargets.Where(b => isAuto || b.GameObjectId == targetObjectId || b.GameObjectId == playerObjectId)
-                           .Where(InViewTarget)
-                           .Where(CanUseTo)
-                           .Where(action.Setting.CanTarget)
-                           .ToList();
+        var result = new List<IBattleChara>();
+        foreach (var b in validTargets)
+        {
+            if (isAuto || b.GameObjectId == targetObjectId || b.GameObjectId == playerObjectId)
+            {
+                if (InViewTarget(b) && CanUseTo(b) && action.Setting.CanTarget(b))
+                {
+                    result.Add(b);
+                }
+            }
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -98,7 +106,15 @@ public struct ActionTargetInfo(IBaseAction action)
 
         if (type == TargetType.Heal)
         {
-            items = items.Where(i => i.GetHealthRatio() < 1);
+            var filteredItems = new List<IBattleChara>();
+            foreach (var i in items)
+            {
+                if (i.GetHealthRatio() < 1)
+                {
+                    filteredItems.Add(i);
+                }
+            }
+            items = filteredItems;
         }
 
         var validTargets = new List<IBattleChara>(items.Count());
@@ -391,12 +407,33 @@ public struct ActionTargetInfo(IBaseAction action)
     {
         if (canTargets == null || canAffects == null) return null;
 
-        var target = GetMostCanTargetObjects(canTargets, canAffects, aoeCount)
-            .OrderByDescending(ObjectHelper.GetHealthRatio).FirstOrDefault();
+        IBattleChara? target = null;
+        var mostCanTargetObjects = GetMostCanTargetObjects(canTargets, canAffects, aoeCount);
+        var enumerator = mostCanTargetObjects.GetEnumerator();
+
+        while (enumerator.MoveNext())
+        {
+            var t = enumerator.Current;
+            if (target == null || ObjectHelper.GetHealthRatio(t) > ObjectHelper.GetHealthRatio(target))
+            {
+                target = t;
+            }
+        }
 
         if (target == null) return null;
 
-        return new TargetResult(target, GetAffects(target, canAffects).ToArray(), target.Position);
+        var affectedTargets = new List<IBattleChara>();
+        var affectsEnumerator = canAffects.GetEnumerator();
+        while (affectsEnumerator.MoveNext())
+        {
+            var t = affectsEnumerator.Current;
+            if (Vector3.Distance(target.Position, t.Position) - t.HitboxRadius <= EffectRange)
+            {
+                affectedTargets.Add(t);
+            }
+        }
+
+        return new TargetResult(target, affectedTargets.ToArray(), target.Position);
     }
 
     /// <summary>
@@ -439,8 +476,17 @@ public struct ActionTargetInfo(IBaseAction action)
         }
         else
         {
-            var availableCharas = DataCenter.AllTargets.Where(b => b.GameObjectId != player.GameObjectId);
-            var target = FindTargetByType(TargetFilter.GetObjectInRadius(availableCharas, range), TargetType.Move, action.Config.AutoHealRatio, action.Setting.SpecialType);
+            var availableCharas = new List<IBattleChara>();
+            foreach (var availableTarget in DataCenter.AllTargets)
+            {
+                if (availableTarget.GameObjectId != player.GameObjectId)
+                {
+                    availableCharas.Add(availableTarget);
+                }
+            }
+
+            var targetList = TargetFilter.GetObjectInRadius(availableCharas, range);
+            var target = FindTargetByType(targetList, TargetType.Move, action.Config.AutoHealRatio, action.Setting.SpecialType);
             if (target == null) return null;
 
             return new TargetResult(target, Array.Empty<IBattleChara>(), target.Position);
@@ -466,11 +512,10 @@ public struct ActionTargetInfo(IBaseAction action)
             return new TargetResult(player, GetAffects(player.Position, canAffects).ToArray(), player.Position);
         }
 
-        var strategy = Service.Config.BeneficialAreaStrategy;
+        var strategy = Service.Config.BeneficialAreaStrategy2;
         switch (strategy)
         {
-            case BeneficialAreaStrategy.OnLocations: // Find from list
-            case BeneficialAreaStrategy.OnlyOnLocations: // Only the list
+            case BeneficialAreaStrategy2.OnLocations: // Only the list
                 OtherConfiguration.BeneficialPositions.TryGetValue(Svc.ClientState.TerritoryType, out var pts);
                 pts ??= Array.Empty<Vector3>();
 
@@ -479,18 +524,42 @@ public struct ActionTargetInfo(IBaseAction action)
                 {
                     if (DataCenter.Territory?.ContentType == TerritoryContentType.Trials ||
                         (DataCenter.Territory?.ContentType == TerritoryContentType.Raids &&
-                         DataCenter.AllianceMembers.Count(p => p is IPlayerCharacter) >= 8))
+                         DataCenter.PartyMembers.Count(p => p is IPlayerCharacter) >= 8))
                     {
                         var fallbackPoints = new[] { Vector3.Zero, new Vector3(100, 0, 100) };
-                        var closestFallback = fallbackPoints.MinBy(p => Vector3.Distance(player.Position, p));
-                        pts = pts.Concat(new[] { closestFallback }).ToArray();
+                        var closestFallback = fallbackPoints[0];
+                        var minDistance = Vector3.Distance(player.Position, fallbackPoints[0]);
+
+                        for (int i = 1; i < fallbackPoints.Length; i++)
+                        {
+                            var distance = Vector3.Distance(player.Position, fallbackPoints[i]);
+                            if (distance < minDistance)
+                            {
+                                closestFallback = fallbackPoints[i];
+                                minDistance = distance;
+                            }
+                        }
+
+                        pts = new[] { closestFallback };
                     }
                 }
 
                 // Find the closest point and apply a random offset
                 if (pts.Length > 0)
                 {
-                    var closest = pts.MinBy(p => Vector3.Distance(player.Position, p));
+                    var closest = pts[0];
+                    var minDistance = Vector3.Distance(player.Position, pts[0]);
+
+                    for (int i = 1; i < pts.Length; i++)
+                    {
+                        var distance = Vector3.Distance(player.Position, pts[i]);
+                        if (distance < minDistance)
+                        {
+                            closest = pts[i];
+                            minDistance = distance;
+                        }
+                    }
+
                     var random = new Random();
                     var rotation = random.NextDouble() * Math.Tau;
                     var radius = random.NextDouble();
@@ -504,28 +573,43 @@ public struct ActionTargetInfo(IBaseAction action)
                     }
                 }
 
-                // Return null if strategy is OnlyOnLocations and no valid point is found
-                if (strategy == BeneficialAreaStrategy.OnlyOnLocations) return null;
+                // Return null if strategy is OnLocations and no valid point is found
+                if (strategy == BeneficialAreaStrategy2.OnLocations) return null;
                 break;
 
-            case BeneficialAreaStrategy.OnTarget: // Target
-                if (Svc.Targets.Target != null && Svc.Targets.Target.DistanceToPlayer() < range)
-                {
-                    var target = Svc.Targets.Target as IBattleChara;
-                    return new TargetResult(target, GetAffects(target?.Position, canAffects).ToArray(), target?.Position);
-                }
-                break;
+            //case BeneficialAreaStrategy2.OnTarget: // Target
+            //    if (Svc.Targets.Target != null && Svc.Targets.Target.DistanceToPlayer() < range)
+            //    {
+            //        var target = Svc.Targets.Target as IBattleChara;
+            //        if (target != null && !target.HasPositional() && target.HitboxRadius <= 8)
+            //        {
+            //            return new TargetResult(player, GetAffects(player.Position, canAffects).ToArray(), player.Position);
+            //        }
+            //        return new TargetResult(target, GetAffects(target?.Position, canAffects).ToArray(), target?.Position);
+            //    }
+            //    break;
 
-            case BeneficialAreaStrategy.OnCalculated: // OnCalculated
+            case BeneficialAreaStrategy2.OnCalculated: // OnCalculated
                 if (Svc.Targets.Target is IBattleChara b && b.DistanceToPlayer() < range &&
-                    b.IsBossFromIcon() && b.HasPositional() && b.HitboxRadius <= 8)
+                b.IsBossFromIcon() && b.HasPositional() && b.HitboxRadius <= 8)
                 {
-                    return new TargetResult(b, GetAffects(b.Position, canAffects).ToArray(), b.Position);
+                    // Ensure the player's position is within the range of the ability
+                    if (Vector3.Distance(player.Position, b.Position) <= range)
+                    {
+                        return new TargetResult(b, GetAffects(b.Position, canAffects).ToArray(), b.Position);
+                    }
+                    else
+                    {
+                        // Adjust the position to be within the range
+                        Vector3 directionToTarget = b.Position - player.Position;
+                        Vector3 adjustedPosition = player.Position + directionToTarget / directionToTarget.Length() * range;
+                        return new TargetResult(b, GetAffects(adjustedPosition, canAffects).ToArray(), adjustedPosition);
+                    }
                 }
                 else
                 {
                     var effectRange = EffectRange;
-                    var attackT = FindTargetByType(DataCenter.AllianceMembers.GetObjectInRadius(range + effectRange),
+                    var attackT = FindTargetByType(DataCenter.PartyMembers.GetObjectInRadius(range + effectRange),
                         TargetType.BeAttacked, action.Config.AutoHealRatio, action.Setting.SpecialType);
 
                     if (attackT == null)

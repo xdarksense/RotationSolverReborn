@@ -816,18 +816,26 @@ internal static class DataCenter
     {
         return IsCastingVfx(VfxDataQueue, s =>
         {
-            if (!s.Path.StartsWith("vfx/lockon/eff/tank_lockon")) return false;
+            if (!s.Path.StartsWith("vfx/lockon/eff/tank_lockon")
+            && !s.Path.StartsWith("vfx/lockon/eff/tank_laser")) return false;
+
             if (!Player.Available) return false;
             if (Player.Object.IsJobCategory(JobRole.Tank) && s.ObjectId != Player.Object.GameObjectId) return false;
-
             return true;
         });
     }
 
     public static bool IsCastingAreaVfx()
     {
-        var vfxDataQueueCopy = VfxDataQueue.ToArray();
-        return IsCastingVfx([.. vfxDataQueueCopy], s => s.Path.StartsWith("vfx/lockon/eff/coshare"));
+        return IsCastingVfx(VfxDataQueue, s =>
+        {
+            if (!s.Path.StartsWith("vfx/lockon/eff/coshare") 
+            && !s.Path.StartsWith("vfx/lockon/eff/share_laser")
+            && !s.Path.StartsWith("vfx/lockon/eff/com_share")) return false;
+
+            if (!Player.Available) return false;
+            return true;
+        });
     }
 
     public static bool IsCastingVfx(List<VfxNewData> vfxDataQueueCopy, Func<VfxNewData, bool> isVfx)

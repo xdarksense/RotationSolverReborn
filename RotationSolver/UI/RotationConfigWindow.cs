@@ -1073,10 +1073,10 @@ public partial class RotationConfigWindow : Window
         }
 
         // Display the current NPC Heal/Raise Support status
-        ImGui.TextWrapped($"NPC Heal/Raise Support Enabled: {Service.Config.FriendlyPartyNpcHealRaise2}");
+        ImGui.TextWrapped($"NPC Heal/Raise Support Enabled: {Service.Config.FriendlyPartyNpcHealRaise3}");
         if (ImGui.Button("Enable NPC Heal/Raise Support"))
         {
-            Service.Config.FriendlyPartyNpcHealRaise2.Value = true;
+            Service.Config.FriendlyPartyNpcHealRaise3.Value = true;
         }
         ImGui.Spacing();
         // Display the Auto Load Rotations status
@@ -2769,11 +2769,12 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Is Casting Tank VFX: {DataCenter.IsCastingTankVfx()}");
         ImGui.Text($"Is Casting Area VFX: {DataCenter.IsCastingAreaVfx()}");
         ImGui.Text($"Is Hostile Casting Stop: {DataCenter.IsHostileCastingStop}");
+        ImGui.Text($"VfxDataQueue: {DataCenter.VfxDataQueue.Count}");
 
         // Check and display VFX casting status
         ImGui.Text("Casting Vfx:");
         var filteredVfx = DataCenter.VfxDataQueue
-            .Where(s => s.Path.StartsWith("vfx/lockon/eff/coshare") && s.TimeDuration.TotalSeconds is > 1 and < 5);
+            .Where(s => s.Path.StartsWith("vfx/lockon/eff/") && s.TimeDuration.TotalSeconds is > 0 and < 6);
         foreach (var vfx in filteredVfx)
         {
             ImGui.Text($"Path: {vfx.Path}");

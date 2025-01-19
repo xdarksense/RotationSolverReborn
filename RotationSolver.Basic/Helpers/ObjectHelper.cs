@@ -268,7 +268,7 @@ public static class ObjectHelper
                     if (p?.GameObject?.GameObjectId == gameObject.GameObjectId) return true;
                 }
 
-                if (Service.Config.FriendlyPartyNpcHealRaise2 && gameObject.IsNpcPartyMember()) return true;
+                if (Service.Config.FriendlyPartyNpcHealRaise3 && gameObject.IsNpcPartyMember()) return true;
                 if (Service.Config.ChocoboPartyMember && gameObject.IsPlayerCharacterChocobo()) return true;
                 if (Service.Config.FriendlyBattleNpcHeal && gameObject.IsFriendlyBattleNPC()) return true;
                 if (Service.Config.FocusTargetIsParty && gameObject.IsFocusTarget() && gameObject.IsAllianceMember()) return true;
