@@ -191,7 +191,7 @@ internal static class MajorUpdater
             for (int i = 0; i < DataCenter.VfxDataQueue.Count; i++)
             {
                 var vfx = DataCenter.VfxDataQueue[i];
-                if (vfx.TimeDuration > TimeSpan.FromSeconds(10))
+                if (vfx.TimeDuration > TimeSpan.FromSeconds(6))
                 {
                     expiredVfx.Add(vfx);
                 }
