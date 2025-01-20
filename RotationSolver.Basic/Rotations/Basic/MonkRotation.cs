@@ -439,9 +439,93 @@ partial class MonkRotation
     }
     #endregion
 
-    // PvP
+    #region PvP Actions
+
+    static partial void ModifyDragonKickPvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyTwinSnakesPvP(ref ActionSetting setting) 
+    {
+    }
+
+    static partial void ModifyDemolishPvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyLeapingOpoPvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyRisingRaptorPvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyPouncingCoeurlPvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyPhantomRushPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyFlintsReplyPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.FlintsReplyPvP) == ActionID.FiresReplyPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyWindsReplyPvP(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.WindsRumination];
+        setting.TargetStatusProvide = [StatusID.PressurePoint];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyRisingPhoenixPvP(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.FiresRumination_4301, StatusID.FireResonance];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyRiddleOfEarthPvP(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.EarthResonance];
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyFiresReplyPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.FiresRumination_4301];
+    }
+
+    static partial void ModifyEarthsReplyPvP(ref ActionSetting setting)
+    {
+        setting.TargetStatusNeed = [StatusID.EarthResonance];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
     static partial void ModifyThunderclapPvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
     }
+
+
+    #endregion
 }

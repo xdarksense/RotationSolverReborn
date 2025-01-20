@@ -246,11 +246,6 @@ partial class NinjaRotation
         };
     }
 
-    static partial void ModifyAeolianEdgePvP(ref ActionSetting setting)
-    {
-        setting.ComboIds = [ActionID.GustSlashPvE];
-    }
-
     static partial void ModifyTenPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 65748;
@@ -510,11 +505,95 @@ partial class NinjaRotation
     }
     #endregion
 
-    // PvP
+    #region PvP Actions
+
+    protected void SpeedAbility(ref ActionSetting setting)
+    {
+        
+    }
+    static partial void ModifySpinningEdgePvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyGustSlashPvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyAeolianEdgePvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyFumaShurikenPvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyDokumoriPvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyThreeMudraPvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyBunshinPvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyZeshoMeppoPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SpinningEdgePvP) == ActionID.ZeshoMeppoPvP;
+    }
+
+    static partial void ModifyAssassinatePvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SpinningEdgePvP) == ActionID.AssassinatePvP;
+    }
+
+    static partial void ModifyForkedRaijuPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SpinningEdgePvP) == ActionID.ForkedRaijuPvP;
+    }
+
+    static partial void ModifyFleetingRaijuPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SpinningEdgePvP) == ActionID.FleetingRaijuPvP;
+    }
+
+    static partial void ModifyHyoshoRanryuPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.FumaShurikenPvP) == ActionID.HyoshoRanryuPvP;
+    }
+
+    static partial void ModifyGokaMekkyakuPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.DokumoriPvP) == ActionID.GokaMekkyakuPvP;
+    }
+
+    static partial void ModifyMeisuiPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.ThreeMudraPvP) == ActionID.MeisuiPvP;
+    }
+
+    static partial void ModifyHollowNozuchiPvP(ref ActionSetting setting)
+    {
+        //this isn't a real action
+    }
+    static partial void ModifyHutonPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.BunshinPvP) == ActionID.HutonPvP;
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyDotonPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.ShukuchiPvP) == ActionID.DotonPvP;
+    }
+
     static partial void ModifyShukuchiPvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
     }
+    #endregion
 
     /// <inheritdoc/>
     [RotationDesc(ActionID.ShukuchiPvE)]

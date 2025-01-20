@@ -91,11 +91,14 @@ public readonly struct ActionBasicInfo
     {
         get
         {
+            if (IsPvP && ID != 29711) return 0;
+            
             var mpOver = _action.Setting.MPOverride?.Invoke();
             if (mpOver.HasValue) return mpOver.Value;
 
             var mp = (uint)ActionManager.GetActionCost(ActionType.Action, AdjustedID, 0, 0, 0, 0);
             if (mp < 100) return 0;
+            
             return mp;
         }
     }
