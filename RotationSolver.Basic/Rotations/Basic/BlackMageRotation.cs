@@ -461,10 +461,6 @@ partial class BlackMageRotation
     static partial void ModifyFirePvP(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Paradox, StatusID.AstralFire_3212];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            ShouldCheckStatus = false
-        };
     }
 
     static partial void ModifyBlizzardPvP(ref ActionSetting setting)
@@ -514,31 +510,18 @@ partial class BlackMageRotation
     {
         setting.StatusNeed = [StatusID.AstralFire_3212];
         setting.StatusProvide = [StatusID.AstralFireIi_3213];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            ShouldCheckStatus = false
-        };
     }
 
     static partial void ModifyFireIvPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.AstralFireIi_3213];
         setting.StatusProvide = [StatusID.AstralFireIii_3381];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            ShouldCheckStatus = false
-        };
     }
 
     static partial void ModifyHighFireIiPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.AstralFireIii_3381];
         setting.StatusProvide = [StatusID.AstralFire_3212];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-            ShouldCheckStatus = false,
-        };
     }
 
     static partial void ModifyFlarePvP(ref ActionSetting setting)
@@ -555,20 +538,12 @@ partial class BlackMageRotation
     {
         setting.StatusNeed = [StatusID.UmbralIce_3214];
         setting.StatusProvide = [StatusID.UmbralIceIi_3215];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            ShouldCheckStatus = false
-        };
     }
 
     static partial void ModifyBlizzardIvPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.UmbralIceIi_3215];
         setting.StatusProvide = [StatusID.UmbralIceIii_3382];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            ShouldCheckStatus = false
-        };
     }
 
     static partial void ModifyHighBlizzardIiPvP(ref ActionSetting setting)
@@ -578,7 +553,7 @@ partial class BlackMageRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
+            // Removed ShouldCheckStatus = false
         };
     }
 

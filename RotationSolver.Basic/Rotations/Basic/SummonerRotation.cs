@@ -607,7 +607,6 @@ partial class SummonerRotation
     {
         setting.CreateConfig = () => new ActionConfig()
         {
-            ShouldCheckStatus = false,
             AoeCount = 1,
         };
         setting.TargetStatusProvide = [StatusID.Slipping];
@@ -620,7 +619,6 @@ partial class SummonerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
     }
 
@@ -629,7 +627,6 @@ partial class SummonerRotation
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.CrimsonCyclonePvP) == ActionID.CrimsonStrikePvP;
         setting.CreateConfig = () => new ActionConfig()
         {
-            ShouldCheckStatus = false,
             AoeCount = 1,
         };
     }
@@ -637,10 +634,6 @@ partial class SummonerRotation
     static partial void ModifyRadiantAegisPvP(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.RadiantAegis_3224];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            ShouldCheckStatus = false,
-        };
     }
 
     static partial void ModifyNecrotizePvP(ref ActionSetting setting)
