@@ -78,8 +78,14 @@ public static partial class RSCommands
             var type = property.PropertyType == typeof(ConditionBoolean) ? typeof(bool) : property.PropertyType;
             if (!TryConvertValue(type, command, out var convertedValue))
             {
-                Svc.Chat.PrintError("Failed to parse the value.");
-                return;
+                if (property.GetValue(Service.Config) is ConditionBoolean config)
+                {
+                    config.Value = !config.Value;
+                    convertedValue = config.Value;
+                } else {
+                    Svc.Chat.PrintError("Failed to parse the value.");
+                    return;
+                }
             }
 
             if (property.PropertyType == typeof(ConditionBoolean))
