@@ -64,4 +64,22 @@ public enum TargetingType
     /// </summary>
     [Description("Farthest")]
     Farthest,
+    
+    /// <summary>
+    /// PVP: Find the nearest Healer.
+    /// </summary>
+    [Description("Hunter Killer: Healers")]
+    HunterKillerHealers,
+    
+    /// <summary>
+    /// PVP: Find the nearest Tank.
+    /// </summary>
+    [Description("Hunter Killer: Tanks")]
+    HunterKillerTanks,
+    
+    /// <summary>
+    /// PVP: Find the nearest DPS.
+    /// </summary>
+    [Description("Hunter Killer: DPS")]
+    HunterKillerDPS
 }

@@ -18,6 +18,8 @@ namespace RotationSolver.Basic;
 internal static class DataCenter
 {
     private static ulong _hostileTargetId = 0;
+    
+    public static bool ResetActionConfigs { get; set; } = false;
 
     public static bool IsActivated() => State || IsManual || Service.Config.TeachingMode;
 
