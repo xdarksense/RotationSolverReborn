@@ -34,7 +34,6 @@ partial class PaladinRotation
     public static byte OathGauge => JobGauge.OathGauge;
     #endregion
 
-
     #region Status Tracking
 
     /// <summary>

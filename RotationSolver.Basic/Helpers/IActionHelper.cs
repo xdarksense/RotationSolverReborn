@@ -154,4 +154,34 @@ public static class IActionHelper
         }
         return result;
     }
+
+    /// <summary>
+    /// Determines if the last combo action matches any of the provided actions.
+    /// </summary>
+    /// <param name="isAdjust">Whether to use the adjusted ID.</param>
+    /// <param name="actions">The actions to check against.</param>
+    /// <returns>True if the last combo action matches any of the provided actions, otherwise false.</returns>
+    internal static bool IsLastComboAction(bool isAdjust, params IAction[] actions)
+    {
+        return actions != null && IsLastComboAction(GetIDFromActions(isAdjust, actions));
+    }
+
+    /// <summary>
+    /// Determines if the last combo action matches any of the provided action IDs.
+    /// </summary>
+    /// <param name="ids">The action IDs to check against.</param>
+    /// <returns>True if the last combo action matches any of the provided action IDs, otherwise false.</returns>
+    internal static bool IsLastComboAction(params ActionID[] ids)
+    {
+        return IsActionID(DataCenter.LastComboAction, ids);
+    }
+
+    /// <summary>
+    /// Determines if the last action was a combo action.
+    /// </summary>
+    /// <returns>True if the last action was a combo action, otherwise false.</returns>
+    public static bool IsLastActionCombo()
+    {
+        return DataCenter.LastAction == DataCenter.LastComboAction;
+    }
 }
