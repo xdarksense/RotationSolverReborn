@@ -833,7 +833,7 @@ public partial class PictomancerRotation
 
     static partial void ModifyStoneInYellowPvP(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.SubtractivePalette_4102, StatusID.Aetherhues_4100];
+        setting.StatusNeed = [StatusID.Aetherhues_4100];
         setting.StatusProvide = [StatusID.AetherhuesIi_4101];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -843,7 +843,7 @@ public partial class PictomancerRotation
 
     static partial void ModifyThunderInMagentaPvP(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.SubtractivePalette_4102, StatusID.AetherhuesIi_4101];
+        setting.StatusNeed = [StatusID.AetherhuesIi_4101];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
