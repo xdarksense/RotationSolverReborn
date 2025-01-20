@@ -183,6 +183,11 @@ partial class CustomRotation
     protected static IEnumerable<IBattleChara> AllHostileTargets => DataCenter.AllHostileTargets;
 
     /// <summary>
+    /// All targets. This includes both hostile and friendly targets.
+    /// </summary>
+    protected static IEnumerable<IBattleChara> AllTargets => DataCenter.AllTargets;
+
+    /// <summary>
     /// Average time to kill for all targets.
     /// </summary>
     [Description("Average time to kill")]
@@ -499,6 +504,32 @@ partial class CustomRotation
     {
         CountingOfLastUsing++;
         return IActionHelper.IsLastAction(ids);
+    }
+
+    /// <summary>
+    /// Last used Combo Action.
+    /// <br>WARNING: Do Not make this method the main of your rotation.</br>
+    /// </summary>
+    /// <param name="isAdjust">Check for adjust id not raw id.</param>
+    /// <param name="actions">True if any of this is matched.</param>
+    /// <returns></returns>
+    [Description("Just used Combo Action")]
+    public static bool IsLastComboAction(bool isAdjust, params IAction[] actions)
+    {
+        CountingOfLastUsing++;
+        return IActionHelper.IsLastComboAction(isAdjust, actions);
+    }
+
+    /// <summary>
+    /// Last used Combo Action.
+    /// <br>WARNING: Do Not make this method the main of your rotation.</br>
+    /// </summary>
+    /// <param name="ids">True if any of this is matched.</param>
+    /// <returns></returns>
+    public static bool IsLastComboAction(params ActionID[] ids)
+    {
+        CountingOfLastUsing++;
+        return IActionHelper.IsLastComboAction(ids);
     }
 
     /// <summary>

@@ -83,7 +83,8 @@ public sealed class PLD_Default : PaladinRotation
         if (!RageOfHalonePvE.EnoughLevel && nextGCD.IsTheSameTo(true, RiotBladePvE, TotalEclipsePvE) && FightOrFlightPvE.CanUse(out act)) return true;
         if (!ProminencePvE.EnoughLevel && nextGCD.IsTheSameTo(true, RageOfHalonePvE, TotalEclipsePvE) && FightOrFlightPvE.CanUse(out act)) return true;
         if (!AtonementPvE.EnoughLevel && nextGCD.IsTheSameTo(true, RoyalAuthorityPvE, ProminencePvE) && FightOrFlightPvE.CanUse(out act)) return true;
-        if (AtonementPvE.EnoughLevel && (Player.HasStatus(true, StatusID.AtonementReady) || IsLastAction(true, RoyalAuthorityPvE)) && FightOrFlightPvE.CanUse(out act)) return true;
+        if (AtonementPvE.EnoughLevel && (Player.HasStatus(true, StatusID.AtonementReady, StatusID.SepulchreReady, StatusID.SupplicationReady, StatusID.DivineMight) || IsLastAction(true, RoyalAuthorityPvE)) && FightOrFlightPvE.CanUse(out act)) return true;
+
 
         // if requiscat is able to proc confiteor, use it immediately after Fight or Flight
         if (RequiescatMasteryTrait.EnoughLevel)
@@ -215,9 +216,16 @@ public sealed class PLD_Default : PaladinRotation
         if (GoringBladePvE.CanUse(out act)) return true;
 
         // Atonement Combo
-        if (SepulchrePvE.CanUse(out act)) return true;
-        if (SupplicationPvE.CanUse(out act)) return true;
-        if (AtonementPvE.CanUse(out act)) return true;
+        if ((!FightOrFlightPvE.Cooldown.WillHaveOneCharge(1) || HasFightOrFlight || Player.WillStatusEndGCD(1, 0, true, StatusID.AtonementReady)) && AtonementPvE.CanUse(out act)) return true;
+        if (((!HasAtonementReady && (SepulchreReady || SupplicationReady || HasDivineMight)) ||
+             (HasAtonementReady && !HasDivineMight)) &&
+            !Player.HasStatus(true, StatusID.Medicated) && !HasFightOrFlight && !RageOfHalonePvE.CanUse(out act, skipComboCheck: false))
+        {
+            if (RiotBladePvE.CanUse(out act) || FastBladePvE.CanUse(out act)) return true;
+        }
+        if ((RageOfHalonePvE.CanUse(out _, skipComboCheck: false) || HasFightOrFlight || Player.WillStatusEndGCD(1, 0, true, StatusID.SupplicationReady)) && SupplicationPvE.CanUse(out act)) return true;
+        if (RequiescatStacks > 0 && IsLastGCD(true, SupplicationPvE) && !HasFightOrFlight && HolySpiritPvE.CanUse(out act, skipCastingCheck: true)) return true;
+        if ((RageOfHalonePvE.CanUse(out _, skipComboCheck: false) || HasFightOrFlight || Player.WillStatusEndGCD(1, 0, true, StatusID.SepulchreReady)) && SepulchrePvE.CanUse(out act)) return true;
 
         //AoE
         if ((HasDivineMight || RequiescatStacks > 0) && HolyCirclePvE.CanUse(out act, skipCastingCheck: true)) return true;
@@ -227,7 +235,7 @@ public sealed class PLD_Default : PaladinRotation
         //Single Target
         if ((HasDivineMight || RequiescatStacks > 0) && HolySpiritPvE.CanUse(out act, skipCastingCheck: true)) return true;
 
-        if (RoyalAuthorityPvE.CanUse(out act)) return true;
+        if (!SupplicationReady && !SepulchreReady && !HasAtonementReady && !HasDivineMight && RoyalAuthorityPvE.CanUse(out act)) return true;
         if (RageOfHalonePvE.CanUse(out act)) return true;
         if (RiotBladePvE.CanUse(out act)) return true;
         if (FastBladePvE.CanUse(out act)) return true;

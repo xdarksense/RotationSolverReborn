@@ -21,10 +21,14 @@ public sealed class SMN_Default : SummonerRotation
         [Description("Ruby-Emerald-Topaz")] RubyEmeraldTopaz,
     }
 
-    [RotationConfig(CombatType.PvE, Name = "Use Crimson Cyclone. Will use at any range, regardless of saftey use with caution.")]
+    [RotationConfig(CombatType.PvE, Name = "Use Crimson Cyclone at any range, regardless of saftey use with caution (Enabling this ignores the below distance setting).")]
     public bool AddCrimsonCyclone { get; set; } = true;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Crimson Cyclone. Even When MOVING")]
+    [Range(1, 20, ConfigUnitType.Yalms)]
+    [RotationConfig(CombatType.PvE, Name = "Max distance you can be from the target for Crimson Cyclone use")]
+    public float CrimsonCycloneDistance { get; set; } = 3.0f;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Crimson Cyclone when moving")]
     public bool AddCrimsonCycloneMoving { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Use Swiftcast on Garuda")]
@@ -190,7 +194,7 @@ public sealed class SMN_Default : SummonerRotation
 
         if (GemshinePvE.CanUse(out act)) return true;
 
-        if ((!IsMoving || AddCrimsonCycloneMoving) && AddCrimsonCyclone && CrimsonCyclonePvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if ((!IsMoving || AddCrimsonCycloneMoving) && (AddCrimsonCyclone || CrimsonCyclonePvE.Target.Target?.DistanceToPlayer() <= CrimsonCycloneDistance) && CrimsonCyclonePvE.CanUse(out act, skipAoeCheck: true)) return true;
 
         if (!SummonBahamutPvE.EnoughLevel && HasHostilesInRange && AetherchargePvE.CanUse(out act)) return true;
 
