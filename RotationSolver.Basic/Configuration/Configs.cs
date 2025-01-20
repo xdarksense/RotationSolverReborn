@@ -197,7 +197,7 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Stop casting if the target dies.", Filter = Extra)]
     private static readonly bool _useStopCasting = false;
 
-    [ConditionBool, UI("Cleanse all dispellable debuffs.",
+    [ConditionBool, UI("Cleanse all dispellable debuffs (not just those in the status list).",
         Filter = AutoActionUsage, Section = 3,
         PvEFilter = JobFilterType.Dispel, PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _dispelAll = false;
