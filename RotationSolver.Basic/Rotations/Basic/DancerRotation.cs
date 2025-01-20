@@ -440,7 +440,6 @@ partial class DancerRotation
         setting.TargetType = TargetType.DancePartner;
         setting.CreateConfig = () => new ActionConfig()
         {
-            ShouldCheckStatus = false,
         };
     }
     
@@ -451,7 +450,6 @@ partial class DancerRotation
         setting.StatusProvide = [StatusID.EnAvant];
         setting.CreateConfig = () => new ActionConfig()
         {
-            ShouldCheckStatus = false,
             AoeCount = 1,
         };
     }
@@ -461,7 +459,6 @@ partial class DancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
         setting.StatusProvide = [StatusID.StarfallDance];
     }
@@ -471,7 +468,6 @@ partial class DancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
         setting.StatusProvide = [StatusID.FanDance];
     }
@@ -482,7 +478,6 @@ partial class DancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
     }
 
@@ -492,7 +487,6 @@ partial class DancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
         setting.StatusNeed = [StatusID.EnAvant];
         setting.StatusProvide = [StatusID.Bladecatcher];
@@ -503,7 +497,6 @@ partial class DancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
         setting.MPOverride = () => 0;
         setting.StatusNeed = [StatusID.EnAvant];
@@ -515,7 +508,6 @@ partial class DancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
         setting.MPOverride = () => 0;
         setting.StatusNeed = [StatusID.FlourishingSaberDance];
@@ -535,7 +527,6 @@ partial class DancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
         setting.MPOverride = () => 0;
         setting.StatusNeed = [StatusID.FlourishingSaberDance, StatusID.SoloStep];
@@ -546,7 +537,6 @@ partial class DancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
         setting.StatusProvide = [StatusID.HoningDance];
         
@@ -557,7 +547,6 @@ partial class DancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
         setting.StatusProvide = [StatusID.HoningOvation];
     }

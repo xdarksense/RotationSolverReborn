@@ -235,10 +235,8 @@ partial class RedMageRotation
         setting.StatusProvide = [StatusID.Dualcast_1393];        
         setting.CreateConfig = () => new ActionConfig()
         {
-            ShouldCheckStatus = false,
             AoeCount = 1,
         };
-        
     }
     
     static partial void ModifyGrandImpactPvP(ref ActionSetting setting)
@@ -254,30 +252,18 @@ partial class RedMageRotation
     static partial void ModifyEnchantedRipostePvP(ref ActionSetting setting) 
     {
         setting.StatusProvide = [StatusID.EnchantedRiposte];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            ShouldCheckStatus = false,
-        };
     }
 
     static partial void ModifyEnchantedZwerchhauPvP(ref ActionSetting setting)
     {
         setting.ComboIds = [ActionID.EnchantedRipostePvP];
         setting.StatusProvide = [StatusID.EnchantedZwerchhau_3238];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            ShouldCheckStatus = false,
-        };
     }
 
     static partial void ModifyEnchantedRedoublementPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.EnchantedRipostePvP) == ActionID.EnchantedRedoublementPvP;
         setting.StatusProvide = [StatusID.EnchantedRedoublement_3239];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            ShouldCheckStatus = false,
-        };
     }
     
     static partial void ModifyScorchPvP(ref ActionSetting setting)
@@ -285,7 +271,6 @@ partial class RedMageRotation
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.EnchantedRipostePvP) == ActionID.ScorchPvP;
         setting.CreateConfig = () => new ActionConfig()
         {
-            ShouldCheckStatus = false,
             AoeCount = 1,
         };
     }
@@ -295,7 +280,6 @@ partial class RedMageRotation
         setting.TargetStatusProvide = [StatusID.Silence_1347];
         setting.CreateConfig = () => new ActionConfig()
         {
-            ShouldCheckStatus = false,
             AoeCount = 1,
         };
     }
@@ -303,10 +287,6 @@ partial class RedMageRotation
     static partial void ModifyEmboldenPvP(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Embolden_2282, StatusID.PrefulgenceReady_4322];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            ShouldCheckStatus = false,
-        };
     }
 
     static partial void ModifyCorpsacorpsPvP(ref ActionSetting setting)
@@ -317,19 +297,11 @@ partial class RedMageRotation
     static partial void ModifyDisplacementPvP(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Displacement_3243];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            ShouldCheckStatus = false,
-        };
     }
 
     static partial void ModifyFortePvP(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Forte];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            ShouldCheckStatus = false,
-        };
     }
 
     static partial void ModifyPrefulgencePvP(ref ActionSetting setting)

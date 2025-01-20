@@ -723,7 +723,6 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
     }
 
@@ -732,7 +731,6 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
     }
 
@@ -742,7 +740,6 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
         setting.IsFriendly = true;
     }
@@ -753,7 +750,6 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
     }
 
@@ -773,7 +769,6 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
         setting.IsFriendly = true;
     }
@@ -784,7 +779,6 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
         setting.IsFriendly = true;
     }
@@ -796,7 +790,6 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
         setting.IsFriendly = true;
     }
@@ -806,7 +799,6 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
     }
 
@@ -817,7 +809,6 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
     }
 
@@ -827,7 +818,6 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
     }
 
@@ -838,28 +828,25 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
     }
 
     static partial void ModifyStoneInYellowPvP(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.SubtractivePalette_4102, StatusID.Aetherhues_4100];
+        setting.StatusNeed = [StatusID.Aetherhues_4100];
         setting.StatusProvide = [StatusID.AetherhuesIi_4101];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
     }
 
     static partial void ModifyThunderInMagentaPvP(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.SubtractivePalette_4102, StatusID.AetherhuesIi_4101];
+        setting.StatusNeed = [StatusID.AetherhuesIi_4101];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
     }
 
@@ -869,7 +856,6 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
     }
     
@@ -880,7 +866,6 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
         setting.IsFriendly = true;
     }
@@ -888,11 +873,10 @@ public partial class PictomancerRotation
     static partial void ModifyWingMotifPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.WingSketch];
-        // setting.StatusProvide = [StatusID.WingMotif];
+        setting.StatusProvide = [StatusID.WingMotif];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
         setting.IsFriendly = true;
     }
@@ -900,11 +884,10 @@ public partial class PictomancerRotation
     static partial void ModifyClawMotifPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.ClawSketch];
-        // setting.StatusProvide = [StatusID.ClawMotif];
+        setting.StatusProvide = [StatusID.ClawMotif];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
         setting.IsFriendly = true;
     }
@@ -916,7 +899,6 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
         setting.IsFriendly = true;
     }
@@ -928,7 +910,6 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
     }
 
@@ -939,7 +920,6 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
     }
 
@@ -950,7 +930,6 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
     }
 
@@ -961,7 +940,6 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
     }
 
@@ -971,7 +949,6 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
     }
 
@@ -982,7 +959,6 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
     }
 
@@ -993,7 +969,6 @@ public partial class PictomancerRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            ShouldCheckStatus = false,
         };
     }
     #endregion
