@@ -1463,9 +1463,10 @@ public partial class RotationConfigWindow : Window
 
                     if (f.UnitType == ConfigUnitType.Percent)
                     {
-                        if (ImGui.SliderFloat(name, ref val, f.Min, f.Max, $"{val * 100:F1}{f.UnitType.ToSymbol()}"))
+                        float displayValue = val * 100;
+                        if (ImGui.SliderFloat(name, ref displayValue, f.Min * 100, f.Max * 100, $"{displayValue:F1}{f.UnitType.ToSymbol()}"))
                         {
-                            config.Value = val.ToString();
+                            config.Value = (displayValue / 100).ToString();
                         }
                     }
                     else
