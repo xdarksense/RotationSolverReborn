@@ -506,11 +506,6 @@ partial class NinjaRotation
     #endregion
 
     #region PvP Actions
-
-    protected void SpeedAbility(ref ActionSetting setting)
-    {
-        
-    }
     static partial void ModifySpinningEdgePvP(ref ActionSetting setting)
     {
     }
