@@ -424,19 +424,16 @@ partial class PaladinRotation
     static partial void ModifyAtonementPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.AtonementReady_2015];
-        setting.MPOverride = () => 0;
     }
 
     static partial void ModifySupplicationPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.SupplicationReady_4281];
-        setting.MPOverride = () => 0;
     }
 
     static partial void ModifySepulchrePvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.SepulchreReady_4282];
-        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyHolySpiritPvP(ref ActionSetting setting)
@@ -482,7 +479,6 @@ partial class PaladinRotation
     static partial void ModifyBladeOfFaithPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.BladeOfFaithReady];
-        setting.MPOverride = () => 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1

@@ -535,7 +535,6 @@ partial class CustomRotation
     [RotationDesc(ActionID.SprintPvE)]
     protected virtual bool SpeedAbility(IAction nextGCD, out IAction? act)
     {
-        if (SprintPvP.CanUse(out act)) return true;
         if (PelotonPvE.CanUse(out act, skipAoeCheck: true)) return true;
         if (SprintPvE.CanUse(out act)) return true;
 

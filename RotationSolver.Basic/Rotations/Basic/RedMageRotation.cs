@@ -242,7 +242,6 @@ partial class RedMageRotation
     static partial void ModifyGrandImpactPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.Dualcast_1393];
-        setting.MPOverride = () => 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -307,7 +306,6 @@ partial class RedMageRotation
     static partial void ModifyPrefulgencePvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.EmboldenPvP) == ActionID.PrefulgencePvP;
-        setting.MPOverride = () => 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -317,7 +315,6 @@ partial class RedMageRotation
     static partial void ModifyViceOfThornsPvP(ref ActionSetting setting)
     {   
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.FortePvP) == ActionID.ViceOfThornsPvP;
-        setting.MPOverride = () => 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
