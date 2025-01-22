@@ -229,6 +229,8 @@ public readonly struct ActionBasicInfo
 
     private readonly bool CheckForCombo()
     {
+        if (!_action.Config.ShouldCheckCombo) return true;
+
         if (_action.Setting.ComboIdsNot != null)
         {
             if (_action.Setting.ComboIdsNot.Contains(DataCenter.LastComboAction)) return false;

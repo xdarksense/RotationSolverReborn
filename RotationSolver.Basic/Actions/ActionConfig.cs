@@ -22,6 +22,11 @@ public class ActionConfig()
     public bool ShouldCheckStatus { get; set; } = true;
 
     /// <summary>
+    /// Should check the combo for this action.
+    /// </summary>
+    public bool ShouldCheckCombo { get; set; } = true;
+
+    /// <summary>
     /// The status count in gcd for adding the status.
     /// </summary>
     public byte StatusGcdCount { get; set; } = 2;

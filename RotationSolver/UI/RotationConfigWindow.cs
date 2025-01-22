@@ -1746,18 +1746,19 @@ public partial class RotationConfigWindow : Window
                 {
                     ImGui.Text("ID: " + action.Info.ID);
                     ImGui.Text("AdjustedID: " + Service.GetAdjustedActionId(action.Info.ID));
+                    ImGui.Text($"Can Use: {action.CanUse(out _)} ");
                     ImGui.Text("AoeCount: " + action.Config.AoeCount);
                     ImGui.Text("ShouldCheckStatus: " + action.Config.ShouldCheckStatus);
 #if DEBUG
                     ImGui.Text("Is Real GCD: " + action.Info.IsRealGCD);
-
+                    
                     // Ensure ActionManager.Instance() is not null
                     if (ActionManager.Instance() != null)
                     {
                         ImGui.Text("Resources: " + ActionManager.Instance()->CheckActionResources(ActionType.Action, action.AdjustedID));
                         ImGui.Text("Status: " + ActionManager.Instance()->GetActionStatus(ActionType.Action, action.AdjustedID));
                     }
-
+            
                     ImGui.Text("Cast Time: " + action.Info.CastTime);
                     ImGui.Text("MP: " + action.Info.MPNeed);
 #endif
@@ -1771,7 +1772,6 @@ public partial class RotationConfigWindow : Window
                     ImGui.Text("Recast Elapsed: " + action.Cooldown.RecastTimeElapsedRaw);
                     ImGui.Text($"Charges: {action.Cooldown.CurrentCharges} / {action.Cooldown.MaxCharges}");
 
-                    ImGui.Text($"Can Use: {action.CanUse(out _)} ");
                     ImGui.Text("IgnoreCastCheck:" + action.CanUse(out _, skipCastingCheck: true));
                     ImGui.Text("Target Name: " + action.Target.Target?.Name ?? string.Empty);
                     ImGui.Text($"SpellUnlocked: {action.Info.SpellUnlocked} ({action.Action.UnlockLink.RowId})");
