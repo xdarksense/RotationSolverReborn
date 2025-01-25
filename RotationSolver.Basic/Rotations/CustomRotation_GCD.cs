@@ -212,7 +212,7 @@ partial class CustomRotation
         act = null;
         if (ShouldSkipAction()) return false;
 
-        if (DataCenter.RightNowDutyRotation?.MyInterruptGCD(out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.MyInterruptGCD(out act) ?? false) return true;
         act = null; return false;
     }
 
@@ -227,7 +227,7 @@ partial class CustomRotation
         {
             IBaseAction.ShouldEndSpecial = true;
         }
-        if (DataCenter.RightNowDutyRotation?.RaiseGCD(out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.RaiseGCD(out act) ?? false) return true;
         IBaseAction.ShouldEndSpecial = false;
         act = null; return false;
     }
@@ -246,7 +246,7 @@ partial class CustomRotation
             IBaseAction.ShouldEndSpecial = true;
         }
         if (!HasSwift && EsunaPvE.CanUse(out act)) return true;
-        if (DataCenter.RightNowDutyRotation?.DispelGCD(out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.DispelGCD(out act) ?? false) return true;
         IBaseAction.ShouldEndSpecial = false;
         return false;
     }
@@ -267,7 +267,7 @@ partial class CustomRotation
         act = null;
         if (ShouldSkipAction()) return false;
 
-        if (DataCenter.RightNowDutyRotation?.EmergencyGCD(out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.EmergencyGCD(out act) ?? false) return true;
 
         act = null!; return false;
     }
@@ -287,7 +287,7 @@ partial class CustomRotation
             IBaseAction.ShouldEndSpecial = true;
         }
 
-        if (DataCenter.RightNowDutyRotation?.MoveForwardGCD(out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.MoveForwardGCD(out act) ?? false) return true;
         IBaseAction.ShouldEndSpecial = false;
         act = null; return false;
     }
@@ -307,7 +307,7 @@ partial class CustomRotation
             IBaseAction.ShouldEndSpecial = true;
         }
 
-        if (DataCenter.RightNowDutyRotation?.HealSingleGCD(out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.HealSingleGCD(out act) ?? false) return true;
         IBaseAction.ShouldEndSpecial = false;
         act = null; return false;
     }
@@ -327,7 +327,7 @@ partial class CustomRotation
             IBaseAction.ShouldEndSpecial = true;
         }
 
-        if (DataCenter.RightNowDutyRotation?.HealAreaGCD(out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.HealAreaGCD(out act) ?? false) return true;
         IBaseAction.ShouldEndSpecial = false;
         act = null!; return false;
     }
@@ -347,7 +347,7 @@ partial class CustomRotation
             IBaseAction.ShouldEndSpecial = true;
         }
 
-        if (DataCenter.RightNowDutyRotation?.DefenseSingleGCD(out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.DefenseSingleGCD(out act) ?? false) return true;
         IBaseAction.ShouldEndSpecial = false;
         act = null!; return false;
     }
@@ -367,7 +367,7 @@ partial class CustomRotation
             IBaseAction.ShouldEndSpecial = true;
         }
 
-        if (DataCenter.RightNowDutyRotation?.DefenseAreaGCD(out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.DefenseAreaGCD(out act) ?? false) return true;
         IBaseAction.ShouldEndSpecial = false;
         act = null; return false;
     }
@@ -386,7 +386,7 @@ partial class CustomRotation
             return false;
         }
 
-        if (DataCenter.RightNowDutyRotation?.GeneralGCD(out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.GeneralGCD(out act) ?? false) return true;
         act = null; return false;
     }
 

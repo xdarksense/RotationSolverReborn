@@ -456,7 +456,7 @@ internal static class StateUpdater
 
     private static void AddStatus(ref AutoStatus status, AutoStatus flag, ConditionSet set)
     {
-        AddStatus(ref status, flag, () => set.IsTrue(DataCenter.RightNowRotation));
+        AddStatus(ref status, flag, () => set.IsTrue(DataCenter.CurrentRotation));
     }
 
     private static void AddStatus(ref AutoStatus status, AutoStatus flag, Func<bool> getValue)

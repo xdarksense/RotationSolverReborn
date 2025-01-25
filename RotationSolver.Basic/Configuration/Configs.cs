@@ -11,7 +11,7 @@ internal partial class Configs : IPluginConfiguration
     [JsonIgnore]
     public const string
         BasicTimer = "BasicTimer",
-        BasicAutoSwitch = "BasicAutoSwitch",
+        BasicAutoSwitch = "BasicAutoSwitch", 
         BasicParams = "BasicParams",
         UiInformation = "UiInformation",
         UiWindows = "UiWindows",
@@ -53,7 +53,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = BasicAutoSwitch)]
     private static readonly bool _autoOffCutScene = true;
 
-    [ConditionBool, UI("Auto turn off when switching job",
+    [ConditionBool, UI("Auto turn off when switching jobs",
                Filter = BasicAutoSwitch)]
     private static readonly bool _autoOffSwitchClass = true;
 
@@ -61,7 +61,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = BasicAutoSwitch)]
     private static readonly bool _autoOffWhenDead = true;
 
-    [ConditionBool, UI("Auto turn off when duty completed.",
+    [ConditionBool, UI("Auto turn off when duty is completed.",
         Filter = BasicAutoSwitch)]
     private static readonly bool _autoOffWhenDutyCompleted = true;
 
@@ -70,7 +70,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig, Section = 2)]
     private static readonly bool _moveTowardsScreenCenter = false;
 
-    [ConditionBool, UI("Audio notification for when the status changes",
+    [ConditionBool, UI("Audio notification when status changes",
         Filter = UiInformation)]
     private static readonly bool _sayOutStateChanged = false;
 
@@ -82,11 +82,11 @@ internal partial class Configs : IPluginConfiguration
         Filter = UiInformation)]
     private static readonly bool _showInfoOnDtr = true;
 
-    [ConditionBool, UI("Display plugin status on toast popup",
+    [ConditionBool, UI("Display plugin status in toast popup",
         Filter = UiInformation)]
     private static readonly bool _showInfoOnToast = false;
 
-    [ConditionBool, UI("Lock the movement when casting or when doing some actions.", Filter = Extra)]
+    [ConditionBool, UI("Lock movement when casting or performing certain actions.", Filter = Extra)]
     private static readonly bool _poslockCasting = false;
 
     [UI("", Action = ActionID.PassageOfArmsPvE, Parent = nameof(PoslockCasting))]
@@ -136,7 +136,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig)]
     private static readonly bool _jeunoTarget = true;
 
-    [ConditionBool, UI("Ignore immune targets in Cloud of Darkenss Chaotic.",
+    [ConditionBool, UI("Ignore immune targets in Cloud of Darkness Chaotic.",
         Filter = TargetConfig)]
     private static readonly bool _cODTarget = true;
 
@@ -151,7 +151,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = UiInformation)]
     private static readonly bool _keyBoardNoise = true;
 
-    [ConditionBool, UI("Move to the furthest position for targeting are movement actions.",
+    [ConditionBool, UI("Move to the furthest position for targeting area movement actions.",
         Filter = TargetConfig, Section = 2)]
     private static readonly bool _moveAreaActionFarthest = false;
 
@@ -163,7 +163,7 @@ internal partial class Configs : IPluginConfiguration
                Parent = nameof(StartOnCountdown))]
     private static readonly bool _countdownStartsManualMode = false;
 
-    [ConditionBool, UI("Cancel auto mode if combat is started early during countdown",
+    [ConditionBool, UI("Cancel auto mode if combat starts early during countdown",
         Filter = BasicAutoSwitch, Section = 1)]
     private static readonly bool _cancelStateOnCombatBeforeCountdown = false;
 
@@ -171,7 +171,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = BasicAutoSwitch, Section = 1)]
     private static readonly bool _startOnAttackedBySomeone = false;
 
-    [ConditionBool, UI("Don't attack new mobs by AoE. (Dangerous)", Description = "Never use any AoE action when this may attack the mobs that are not hostile targets.",
+    [ConditionBool, UI("Don't attack new mobs by AoE. (Dangerous)", Description = "Never use any AoE action when this may attack mobs that are not hostile targets.",
         Filter = BasicAutoSwitch)]
     private static readonly bool _noNewHostiles = false;
 
@@ -180,7 +180,7 @@ internal partial class Configs : IPluginConfiguration
         PvEFilter = JobFilterType.NoHealer, PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _useHealWhenNotAHealer = true;
 
-    [ConditionBool, UI("Hard Target enemies for hostile actions", Description = "If this is disabled, RSR will only softtarget allies for heals, shields, etc.",
+    [ConditionBool, UI("Hard Target enemies for hostile actions", Description = "If this is disabled, RSR will only soft-target allies for heals, shields, etc.",
         Filter = TargetConfig, Section = 3)]
     private static readonly bool _switchTargetFriendly = false;
 
@@ -202,11 +202,11 @@ internal partial class Configs : IPluginConfiguration
         PvEFilter = JobFilterType.Dispel, PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _dispelAll = false;
 
-    [ConditionBool, UI("Only attack the target in view.",
+    [ConditionBool, UI("Only attack targets in view.",
         Filter = TargetConfig, Section = 1)]
     private static readonly bool _onlyAttackInView = false;
 
-    [ConditionBool, UI("Only attack the targets in vision cone",
+    [ConditionBool, UI("Only attack targets in vision cone",
                 Filter = TargetConfig, Section = 1)]
     private static readonly bool _onlyAttackInVisionCone = false;
 
@@ -228,15 +228,15 @@ internal partial class Configs : IPluginConfiguration
                Filter = Rotations)]
     private static readonly bool _autoReloadRotations = false;
 
-    [ConditionBool, UI("Make /rotation Manual as a toggle command.",
+    [ConditionBool, UI("Make /rotation Manual a toggle command.",
         Filter = BasicParams)]
     private static readonly bool _toggleManual = false;
 
-    [ConditionBool, UI("Make /rotation Auto as a toggle command. (Normal behavior cycles between targetting settings)",
+    [ConditionBool, UI("Make /rotation Auto a toggle command. (Normal behavior cycles between targeting settings)",
         Filter = BasicParams)]
     private static readonly bool _toggleAuto = false;
 
-    [ConditionBool, UI("Only show these windows if there are enemies in or in duty",
+    [ConditionBool, UI("Only show these windows if there are enemies or in duty",
         Filter = UiWindows)]
     private static readonly bool _onlyShowWithHostileOrInDuty = false;
 
@@ -244,7 +244,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = UiWindows)]
     private static readonly bool _showControlWindow = false;
 
-    [ConditionBool, UI("Is Control Window Lock",
+    [ConditionBool, UI("Lock Control Window",
         Filter = UiWindows)]
     private static readonly bool _isControlWindowLock = false;
 
@@ -276,7 +276,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = UiInformation)]
     private static readonly bool _showTooltips = true;
 
-    [ConditionBool, UI("Target Hunt/Relic/Leve priority. (Relic behaviour bugged)",
+    [ConditionBool, UI("Target Hunt/Relic/Leve priority. (Relic behavior bugged)",
         Filter = TargetConfig, Section = 1)]
     private static readonly bool _targetHuntingRelicLevePriority = true;
 
@@ -284,7 +284,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig, Section = 1)]
     private static readonly bool _targetQuestPriority = true;
 
-    [ConditionBool, UI("Block targetting quest mobs belonging to other players (Broken).",
+    [ConditionBool, UI("Block targeting quest mobs belonging to other players (Broken).",
         Filter = TargetConfig, Section = 1)]
     private static readonly bool targetQuestThings = true;
 
@@ -296,10 +296,10 @@ internal partial class Configs : IPluginConfiguration
         Filter = UiInformation)]
     private static readonly bool _showToastsAboutDoAction = false;
 
-    [ConditionBool, UI("Allow rotations that use this config to use abilties definied in the rotation as burst", Filter = AutoActionUsage, Section = 4)]
+    [ConditionBool, UI("Allow rotations that use this config to use abilities defined in the rotation as burst", Filter = AutoActionUsage, Section = 4)]
     private static readonly bool _autoBurst = true;
 
-    [ConditionBool, UI("Disable hostile actions if something is casting an action on the Gaze/Stop list (EXPEREMENTAL)", Filter = AutoActionUsage, Section = 4)]
+    [ConditionBool, UI("Disable hostile actions if something is casting an action on the Gaze/Stop list (EXPERIMENTAL)", Filter = AutoActionUsage, Section = 4)]
     private static readonly bool _castingStop = false;
 
     [UI("Configurable amount of time before the cast finishes that RSR stops taking actions", Filter = AutoActionUsage, Section = 4, Parent = nameof(CastingStop))]
@@ -327,7 +327,7 @@ internal partial class Configs : IPluginConfiguration
         Parent = nameof(UseAbility), PvEFilter = JobFilterType.Tank)]
     private static readonly bool _autoProvokeForTank = true;
 
-    [ConditionBool, UI("Auto TrueNorth (Melee DPS)",
+    [ConditionBool, UI("Auto True North (Melee DPS)",
         Parent = nameof(UseAbility),
         PvEFilter = JobFilterType.Melee)]
     private static readonly bool _autoUseTrueNorth = true;
@@ -351,11 +351,11 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig, Section = 1)]
     private static readonly bool _targetFatePriority = true;
 
-    [ConditionBool, UI("Auto turn off RSR when combat is over more for more then...",
+    [ConditionBool, UI("Auto turn off RSR when combat is over for more than:",
         Filter = BasicAutoSwitch)]
     private static readonly bool _autoOffAfterCombat = true;
 
-    [ConditionBool, UI("Auto Open the treasure chest",
+    [ConditionBool, UI("Auto Open treasure chests",
         Filter = Extra)]
     private static readonly bool _autoOpenChest = true;
 
@@ -387,7 +387,7 @@ internal partial class Configs : IPluginConfiguration
     public bool UseAdditionalConditions { get; set; } = false;
 
     #region Float
-    [UI("Auto turn off RSR when combat is over more for more then...",
+    [UI("Auto turn off RSR when combat is over for more than...",
         Parent = nameof(AutoOffAfterCombat))]
     [Range(0, 600, ConfigUnitType.Seconds)]
     public float AutoOffAfterCombatTime { get; set; } = 30;
@@ -418,12 +418,12 @@ internal partial class Configs : IPluginConfiguration
     [Range(0, 1, ConfigUnitType.Percent, 0.02f)]
     public float HealthHealerRatio { get; set; } = 0.4f;
 
-    [JobConfig, UI("Hard cast Raise players while Swiftcast is on cooldown", Description = "If this is enabled and Swiftcast is on cooldown, you will only attempt to raise while standing still.",
+    [JobConfig, UI("Hard cast Raise on players while Swiftcast is on cooldown", Description = "If this is enabled and Swiftcast is on cooldown, you will only attempt to raise while standing still.",
         Filter = HealingActionCondition, Section = 2,
         PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _raisePlayerByCasting = true;
 
-    [JobConfig, UI("Raise player by using Swiftcast/Dualcast if avaliable", Description = "If this is disabled, you will never use Swiftcast/Dualcast to raise players.",
+    [JobConfig, UI("Raise player by using Swiftcast/Dualcast if available", Description = "If this is disabled, you will never use Swiftcast/Dualcast to raise players.",
         Filter = HealingActionCondition, Section = 2,
         PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _raisePlayerBySwift = true;
@@ -443,7 +443,7 @@ internal partial class Configs : IPluginConfiguration
         PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _raiseBrinkOfDeath = true;
 
-    [JobConfig, UI("Raise non-Healers from bottom of party list to the top (Light Party 2 Healer Behaviour, Experimental)",
+    [JobConfig, UI("Raise non-Healers from bottom of party list to the top (Light Party 2 Healer Behavior, Experimental)",
         Filter = HealingActionCondition, Section = 2,
         PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _h2 = false;
@@ -471,7 +471,7 @@ internal partial class Configs : IPluginConfiguration
         PvEFilter = JobFilterType.Raise)]
     public int LessMPNoRaise { get; set; }
 
-    [UI("HP for standard deviation for using AoE heal.", Description = "Basically the health difference between a single party member and the whole party, used for deciding between healing a single party member or AOE healing. Leave this alone if you don't undertand its use.",
+    [UI("HP standard deviation for using AoE heal.", Description = "The health difference between a single party member and the whole party, used for deciding between healing a single party member or AOE healing. Leave this alone if you don't understand its use.",
         Filter = Extra)]
     [Range(0, 0.5f, ConfigUnitType.Percent, 0.02f)]
     public float HealthDifference { get; set; } = 0.25f;
@@ -549,7 +549,7 @@ internal partial class Configs : IPluginConfiguration
     public float CountDownAhead { get; set; } = 0.4f;
 
     [UI("The size of the sector angle that can be selected as the moveable target",
-        Description = "If the selection mode is based on character facing, i.e., targets within the character's viewpoint are moveable targets. \nIf the selection mode is screen-centered, i.e., targets within a sector drawn upward from the character's point are movable targets.",
+        Description = "If the selection mode is based on character facing, i.e., targets within the character's viewpoint are moveable targets.\nIf the selection mode is screen-centered, i.e., targets within a sector drawn upward from the character's point are movable targets.",
         Filter = TargetConfig, Section = 2)]
     [Range(0, 90, ConfigUnitType.Degree, 0.02f)]
     public float MoveTargetAngle { get; set; } = 24;
@@ -559,12 +559,12 @@ internal partial class Configs : IPluginConfiguration
     [Range(10, 1800, ConfigUnitType.Seconds, 0.02f)]
     public float BossTimeToKill { get; set; } = 90;
 
-    [UI("If target's TTK is lower than this, regard it is dying.",
+    [UI("If target's TTK is lower than this, regard it as dying.",
                 Filter = TargetConfig, Section = 1)]
     [Range(0, 60, ConfigUnitType.Seconds, 0.02f)]
     public float DyingTimeToKill { get; set; } = 10;
 
-    [UI("If target's HP percentage is lower than this, regard it is dying.",
+    [UI("If target's HP percentage is lower than this, regard it as dying.",
                 Filter = TargetConfig, Section = 1)]
     [Range(0, 0.1f, ConfigUnitType.Percent, 0.01f)]
     public float IsDyingConfig { get; set; } = 0.02f;
@@ -589,16 +589,16 @@ internal partial class Configs : IPluginConfiguration
     [Range(2, 30, ConfigUnitType.Yalms)]
     public float ControlProgressHeight { get; set; } = 8;
 
-    [UI("Use gapcloser as a damage ability if the distance to your target is less then this.",
+    [UI("Use gapcloser as a damage ability if the distance to your target is less than this.",
         Filter = TargetConfig, Section = 2)]
     [Range(0, 30, ConfigUnitType.Yalms, 1f)]
     public float DistanceForMoving { get; set; } = 1.2f;
 
-    [UI("Stop healing when time to kill is lower then...", Parent = nameof(UseHealWhenNotAHealer))]
+    [UI("Stop healing when time to kill is lower than:", Parent = nameof(UseHealWhenNotAHealer))]
     [Range(0, 30, ConfigUnitType.Seconds, 0.02f)]
     public float AutoHealTimeToKill { get; set; } = 8f;
 
-    [UI("The minimum time between updating RSR information. (Setting too low will negatively effect framerate, setting too high will lead to poor performance)",
+    [UI("The minimum time between updating RSR information. (Setting too low will negatively affect framerate, setting too high will lead to poor performance)",
         Filter = BasicTimer)]
     [JobConfig, Range(0, 0.3f, ConfigUnitType.Seconds, 0.002f)]
     public float MinUpdatingTime { get; set; } = 0.01f;
@@ -629,7 +629,7 @@ internal partial class Configs : IPluginConfiguration
 
     public int ActionSequencerIndex { get; set; }
 
-    [UI("The modifier key to unlock the movement temporary", Description = "RB is for gamepad player", Parent = nameof(PoslockCasting))]
+    [UI("The modifier key to unlock the movement temporarily", Description = "RB is for gamepad player", Parent = nameof(PoslockCasting))]
     public ConsoleModifiers PoslockModifier { get; set; }
 
     [Range(0, 5, ConfigUnitType.None, 1)]

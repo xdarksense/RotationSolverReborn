@@ -293,7 +293,7 @@ partial class CustomRotation
     /// <returns>True if the interrupt ability can be used; otherwise, false.</returns>
     protected virtual bool InterruptAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.RightNowDutyRotation?.InterruptAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.InterruptAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;
     }
@@ -337,7 +337,7 @@ partial class CustomRotation
     /// <returns>True if the anti-knockback ability can be used; otherwise, false.</returns>
     protected virtual bool AntiKnockbackAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.RightNowDutyRotation?.AntiKnockbackAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.AntiKnockbackAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;
     }
@@ -350,7 +350,7 @@ partial class CustomRotation
     /// <returns>True if the provoke ability can be used; otherwise, false.</returns>
     protected virtual bool ProvokeAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.RightNowDutyRotation?.ProvokeAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.ProvokeAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;
     }
@@ -424,7 +424,7 @@ partial class CustomRotation
             }
         }
 
-        if (DataCenter.RightNowDutyRotation?.EmergencyAbility(nextGCD, out act) ?? false)
+        if (DataCenter.CurrentDutyRotation?.EmergencyAbility(nextGCD, out act) ?? false)
         {
             return true;
         }
@@ -449,7 +449,7 @@ partial class CustomRotation
     [RotationDesc(DescType.MoveForwardAbility)]
     protected virtual bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.RightNowDutyRotation?.MoveForwardAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.MoveForwardAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;
     }
@@ -463,7 +463,7 @@ partial class CustomRotation
     [RotationDesc(DescType.MoveBackAbility)]
     protected virtual bool MoveBackAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.RightNowDutyRotation?.MoveBackAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.MoveBackAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;
     }
@@ -478,7 +478,7 @@ partial class CustomRotation
     protected virtual bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
         if (RecuperatePvP.CanUse(out act)) return true;
-        if (DataCenter.RightNowDutyRotation?.HealSingleAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.HealSingleAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;
     }
@@ -492,7 +492,7 @@ partial class CustomRotation
     [RotationDesc(DescType.HealAreaAbility)]
     protected virtual bool HealAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.RightNowDutyRotation?.HealAreaAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.HealAreaAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;
     }
@@ -506,7 +506,7 @@ partial class CustomRotation
     [RotationDesc(DescType.DefenseSingleAbility)]
     protected virtual bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.RightNowDutyRotation?.DefenseSingleAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.DefenseSingleAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;
     }
@@ -520,7 +520,7 @@ partial class CustomRotation
     [RotationDesc(DescType.DefenseAreaAbility)]
     protected virtual bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.RightNowDutyRotation?.DefenseAreaAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.DefenseAreaAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;
     }
@@ -538,7 +538,7 @@ partial class CustomRotation
         if (PelotonPvE.CanUse(out act, skipAoeCheck: true)) return true;
         if (SprintPvE.CanUse(out act)) return true;
 
-        if (DataCenter.RightNowDutyRotation?.SpeedAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.SpeedAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;
     }
@@ -556,7 +556,7 @@ partial class CustomRotation
             act = null;
         }
 
-        if (DataCenter.RightNowDutyRotation?.GeneralAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.GeneralAbility(nextGCD, out act) ?? false) return true;
 
         act = null;
         return false;
@@ -575,7 +575,7 @@ partial class CustomRotation
             act = null;
         }
 
-        if (DataCenter.RightNowDutyRotation?.AttackAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.AttackAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;
     }

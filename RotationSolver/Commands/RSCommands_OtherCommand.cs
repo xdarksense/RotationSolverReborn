@@ -35,7 +35,7 @@ public static partial class RSCommands
 
     private static void ExecuteRotationCommand(string str)
     {
-        var customCombo = DataCenter.RightNowRotation;
+        var customCombo = DataCenter.CurrentRotation;
         if (customCombo == null) return;
 
         DoRotationCommand(customCombo, str);

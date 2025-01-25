@@ -134,7 +134,7 @@ public static class ObjectHelper
         if (battleChara.TargetObject == Player.Object
             || battleChara.TargetObject?.OwnerId == Player.Object.GameObjectId) return true;
 
-        return DataCenter.RightNowTargetToHostileType switch
+        return DataCenter.CurrentTargetToHostileType switch
         {
             TargetHostileType.AllTargetsCanAttack => true,
             TargetHostileType.TargetsHaveTarget => battleChara.TargetObject is IBattleChara,

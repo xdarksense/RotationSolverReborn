@@ -6,7 +6,7 @@ internal class CooldownWindow() : CtrlWindow(nameof(CooldownWindow))
 {
     public override void Draw()
     {
-        if (DataCenter.RightNowRotation == null) return;
+        if (DataCenter.CurrentRotation == null) return;
 
         var config = Service.Config;
         var width = config.CooldownWindowIconSize;

@@ -105,7 +105,7 @@ internal class ControlWindow : CtrlWindow
 
     private static void DrawSpecials()
     {
-        var rotation = DataCenter.RightNowRotation;
+        var rotation = DataCenter.CurrentRotation;
 
         DrawCommandAction(rotation?.ActionHealAreaGCD, rotation?.ActionHealAreaAbility,
             SpecialCommandType.HealArea, ImGuiColors.HealerGreen);
@@ -181,7 +181,7 @@ internal class ControlWindow : CtrlWindow
         {
             if (group)
             {
-                ImGui.Text(DataCenter.RightNowTargetToHostileType.GetDescription());
+                ImGui.Text(DataCenter.CurrentTargetToHostileType.GetDescription());
                 ImGui.Text("Auto: " + DataCenter.AutoStatus.ToString());
             }
         }
