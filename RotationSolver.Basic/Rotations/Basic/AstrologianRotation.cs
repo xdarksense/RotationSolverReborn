@@ -75,7 +75,7 @@ partial class AstrologianRotation
     }
     #endregion
 
-
+    #region PvE Actions
     private sealed protected override IBaseAction? Raise => AscendPvE;
 
     private static readonly StatusID[] CombustStatus =
@@ -449,4 +449,100 @@ partial class AstrologianRotation
             AoeCount = 1,
         };
     }
+#endregion
+
+    #region PvP Actions
+    static partial void ModifyFallMaleficPvP(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyAspectedBeneficPvP(ref ActionSetting setting) 
+    {
+
+    }
+
+    static partial void ModifyGravityIiPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyDoubleCastPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.DoubleCastPvP) != ActionID.DoubleCastPvP;
+        setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyMacrocosmosPvP(ref ActionSetting setting)
+    {
+        setting.IsFriendly = false;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyMicrocosmosPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.MacrocosmosPvP) == ActionID.MicrocosmosPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+    
+    static partial void ModifyMinorArcanaPvP(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyLadyOfCrownsPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.MinorArcanaPvP) == ActionID.LadyOfCrownsPvP;
+        setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyLordOfCrownsPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.MinorArcanaPvP) == ActionID.LordOfCrownsPvP;
+        setting.IsFriendly = false;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyOraclePvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Player.HasStatus(true, StatusID.Divining_4332);
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyEpicyclePvP(ref ActionSetting setting)
+    {
+        setting.SpecialType = SpecialActionType.MovingForward;
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyRetrogradePvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Player.HasStatus(true, StatusID.RetrogradeReady);
+        setting.IsFriendly = true;
+        setting.SpecialType = SpecialActionType.MovingBackward;
+    }
+    #endregion
 }
