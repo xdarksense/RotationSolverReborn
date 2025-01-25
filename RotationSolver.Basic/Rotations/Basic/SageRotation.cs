@@ -55,6 +55,7 @@ partial class SageRotation
     }
     #endregion
 
+    #region PvE Actions
     private protected sealed override IBaseAction Raise => EgeiroPvE;
 
     static partial void ModifyDosisPvE(ref ActionSetting setting)
@@ -384,18 +385,81 @@ partial class SageRotation
             AoeCount = 1,
         };
     }
+    #endregion
 
-    // PvP
+    #region PvP Actions
+    static partial void ModifyDosisIiiPvP(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyPhlegmaIiiPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyPneumaPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+
+    }
+
+    static partial void ModifyEukrasiaPvP(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+    }
+
     static partial void ModifyIcarusPvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
     }
 
+    static partial void ModifyToxikonPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyKardiaPvP(ref ActionSetting setting)
+    {
+
+    }
+
+
+    static partial void ModifyEukrasianDosisIiiPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.DosisIiiPvP) == ActionID.EukrasianDosisIiiPvP;
+    }
+
+    static partial void ModifyPsychePvP(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyToxikonIiPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Player.HasStatus(true, StatusID.Addersting);
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+
     /// <inheritdoc/>
     [RotationDesc(ActionID.IcarusPvE)]
-    protected sealed override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
+    protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
         if (IcarusPvE.CanUse(out act)) return true;
         return base.MoveForwardAbility(nextGCD, out act);
     }
+    #endregion
 }
