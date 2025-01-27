@@ -39,7 +39,7 @@ public sealed class NIN_Default : NinjaRotation
         if (remainTime > 6) ClearNinjutsu();
 
         // Decision-making for ninjutsu actions based on remaining time until combat starts.
-        if (DoNinjutsu(out var act))
+        if (DoSuiton(out var act))
         {
             if (act == SuitonPvE && remainTime > CountDownAhead) return null;
             return act;
@@ -56,240 +56,6 @@ public sealed class NIN_Default : NinjaRotation
 
         }
         return base.CountDownAction(remainTime);
-    }
-    #endregion
-
-    #region Ninjutsu Logic
-    // Sets the target ninjutsu action to be performed next.
-    // If the action is null, or currently set to Rabbit Medium (indicating a failed Ninjutsu attempt), it exits early.
-    // If the current action aim is not null and the last action matches certain conditions, it exits early.
-    // Finally, updates the current ninjutsu action aim if it's different from the incoming action.
-    private void SetNinjutsu(IBaseAction act)
-    {
-        if (act == null || AdjustId(ActionID.NinjutsuPvE) == ActionID.RabbitMediumPvE) return;
-
-        if (_ninActionAim != null && IsLastAction(false, TenPvE, JinPvE, ChiPvE, FumaShurikenPvE_18873, FumaShurikenPvE_18874, FumaShurikenPvE_18875)) return;
-
-        if (_ninActionAim != act)
-        {
-            _ninActionAim = act;
-        }
-    }
-
-    // Clears the ninjutsu action aim, effectively resetting any planned ninjutsu action.
-    private void ClearNinjutsu()
-    {
-        if (_ninActionAim != null)
-        {
-            _lastNinActionAim = _ninActionAim;
-            _ninActionAim = null;
-        }
-    }
-
-    // Logic for choosing which ninjutsu action to set up next, based on various game state conditions.
-    private bool ChoiceNinjutsu(out IAction? act)
-    {
-        act = null;
-
-        // If the last action performed matches any of a list of specific actions, it clears the Ninjutsu aim.
-        // This serves as a reset/cleanup mechanism to ensure the decision logic starts fresh for the next cycle.
-        if (IsLastAction(true, DotonPvE, SuitonPvE,
-            RabbitMediumPvE, FumaShurikenPvE, KatonPvE, RaitonPvE,
-            HyotonPvE, HutonPvE, DotonPvE, SuitonPvE, GokaMekkyakuPvE, HyoshoRanryuPvE))
-        {
-            ClearNinjutsu();
-        }
-
-        if (!TenPvE.Cooldown.HasOneCharge && TenPvE.EnoughLevel) return false;
-        // Ensures that the action ID currently considered for Ninjutsu is actually valid for Ninjutsu execution.
-        //if (AdjustId(ActionID.NinjutsuPvE) != ActionID.NinjutsuPvE) return false;
-        // If more than 4.5 seconds have passed since the last action, it clears any pending Ninjutsu to avoid stale actions.
-        if (TimeSinceLastAction.TotalSeconds > 4.5) ClearNinjutsu();
-
-        // Checks for Kassatsu status to prioritize high-impact Ninjutsu due to its buff.
-        if (Player.HasStatus(true, StatusID.Kassatsu))
-        {
-            // Attempts to set high-damage AoE Ninjutsu if available under Kassatsu's effect.
-            // These are prioritized due to Kassatsu's enhancement of Ninjutsu abilities.
-            if (GokaMekkyakuPvE.EnoughLevel && JinPvE.Cooldown.HasOneCharge)
-            {
-                SetNinjutsu(GokaMekkyakuPvE);
-            }
-            if (HyoshoRanryuPvE.EnoughLevel && JinPvE.Cooldown.HasOneCharge)
-            {
-                SetNinjutsu(HyoshoRanryuPvE);
-            }
-
-            if (!HyoshoRanryuPvE.EnoughLevel && HutonPvE.EnoughLevel && TenPvE.CanUse(out _) && JinPvE.Cooldown.HasOneCharge)
-            {
-                SetNinjutsu(HutonPvE);
-            }
-
-            if (!HyoshoRanryuPvE.EnoughLevel && KatonPvE.EnoughLevel && TenPvE.Cooldown.HasOneCharge)
-            {
-                SetNinjutsu(KatonPvE);
-            }
-
-            if (!HyoshoRanryuPvE.EnoughLevel && RaitonPvE.EnoughLevel && TenPvE.Cooldown.HasOneCharge)
-            {
-                SetNinjutsu(RaitonPvE);
-            }
-            else return false;
-        }
-        else
-        {
-            // If Suiton is active but no specific Ninjutsu is currently aimed, it clears the Ninjutsu aim.
-            // This check is relevant for managing Suiton's effect, particularly for enabling Trick Attack.
-            if (Player.HasStatus(true, StatusID.ShadowWalker)
-                && _ninActionAim == SuitonPvE)
-            {
-                ClearNinjutsu();
-            }
-
-            // Chooses buffs or AoE actions based on combat conditions and cooldowns.
-            // For instance, setting Huton for speed buff or choosing AoE Ninjutsu like Katon or Doton based on enemy positioning.
-            // Also considers using Suiton for vulnerability debuff on the enemy if conditions are optimal.
-
-            //Aoe
-            if (NumberOfHostilesInRange > 1 && KatonPvE.EnoughLevel && ChiPvE.CanUse(out _) && TenPvE.CanUse(out _))
-            {
-                if (!HasDoton && !IsMoving && !IsLastGCD(false, DotonPvE) && (!TenChiJinPvE.Cooldown.WillHaveOneCharge(6)) || !HasDoton && !TenChiJinPvE.Cooldown.IsCoolingDown && TenPvE.CanUse(out _) && ChiPvE.CanUse(out _) && JinPvE.CanUse(out _))
-                    SetNinjutsu(DotonPvE);
-                else SetNinjutsu(KatonPvE);
-            }
-
-            //Single
-            if (!ShadowWalkerNeeded && TenPvE.CanUse(out _, usedUp: InTrickAttack && !HasRaijuReady))
-            {
-                if (RaitonPvE.EnoughLevel && TenPvE.Cooldown.HasOneCharge)
-                {
-                    SetNinjutsu(RaitonPvE);
-                    return false;
-                }
-
-                if (FumaShurikenPvE.EnoughLevel && TenPvE.Cooldown.HasOneCharge)
-                {
-                    SetNinjutsu(FumaShurikenPvE);
-                    return false;
-                }
-            }
-
-            //Vulnerable
-            if (ShadowWalkerNeeded && (!MeisuiPvE.Cooldown.IsCoolingDown || !TrickAttackPvE.Cooldown.IsCoolingDown || KunaisBanePvE.Cooldown.IsCoolingDown) && !IsShadowWalking && !HasTenChiJin && SuitonPvE.EnoughLevel && JinPvE.Cooldown.HasOneCharge)
-            {
-                SetNinjutsu(SuitonPvE);
-                return false;
-            }
-        }
-        return false; // Indicates that no specific Ninjutsu action was chosen in this cycle.
-    }
-    #endregion
-
-    #region Ninjutsu Execution
-    // Attempts to perform a ninjutsu action, based on the current game state and conditions.
-    private bool DoNinjutsu(out IAction? act)
-    {
-        act = null;
-
-        //TenChiJin
-        if (HasTenChiJin)
-        {
-            uint tenId = AdjustId(TenPvE.ID);
-            uint chiId = AdjustId(ChiPvE.ID);
-            uint jinId = AdjustId(JinPvE.ID);
-
-            //First
-            if (tenId == FumaShurikenPvE_18873.ID
-                && !IsLastAction(false, FumaShurikenPvE_18875, FumaShurikenPvE_18873))
-            {
-                //AOE
-                if (KatonPvE.CanUse(out _))
-                {
-                    if (FumaShurikenPvE_18875.CanUse(out act)) return true;
-                }
-                //Single
-                if (FumaShurikenPvE_18873.CanUse(out act)) return true;
-            }
-
-            //Second
-            else if (tenId == KatonPvE_18876.ID && !IsLastAction(false, KatonPvE_18876))
-            {
-                if (KatonPvE_18876.CanUse(out act, skipAoeCheck: true)) return true;
-            }
-            else if (chiId == RaitonPvE_18877.ID && !IsLastAction(false, RaitonPvE_18877))
-            {
-                if (RaitonPvE_18877.CanUse(out act, skipAoeCheck: true)) return true;
-            }
-            //Others
-            else if (jinId == SuitonPvE_18881.ID && !IsLastAction(false, SuitonPvE_18881))
-            {
-                if (SuitonPvE_18881.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: true)) return true;
-            }
-            else if (chiId == DotonPvE_18880.ID && !IsLastAction(false, DotonPvE_18880) && !HasDoton)
-            {
-                if (DotonPvE_18880.CanUse(out act, skipAoeCheck: true)) return true;
-            }
-        }
-
-        //Keep Kassatsu in Burst.
-        if (!Player.WillStatusEnd(3, false, StatusID.Kassatsu)
-            && HasKassatsu && !InTrickAttack) return false;
-        if (_ninActionAim == null) return false;
-
-        var id = AdjustId(ActionID.NinjutsuPvE);
-
-        //Failed
-        if ((uint)id == RabbitMediumPvE.ID)
-        {
-            _rabbitMediumFailures++;
-            ClearNinjutsu();
-            act = null;
-            return false;
-        }
-        //First
-        else if (id == ActionID.NinjutsuPvE)
-        {
-            //Can't use.
-            if (!Player.HasStatus(true, StatusID.Kassatsu, StatusID.TenChiJin)
-                && !TenPvE.CanUse(out _, usedUp: true)
-                && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![0]))
-            {
-                return false;
-            }
-            act = _ninActionAim.Setting.Ninjutsu![0];
-            return true;
-        }
-        //Second
-        else if ((uint)id == _ninActionAim.ID)
-        {
-            if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
-            if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
-            {
-                act = _ninActionAim;
-                return true;
-            }
-        }
-        //Third
-        else if ((uint)id == FumaShurikenPvE.ID)
-        {
-            if (_ninActionAim.Setting.Ninjutsu!.Length > 1
-                && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![1]))
-            {
-                act = _ninActionAim.Setting.Ninjutsu![1];
-                return true;
-            }
-        }
-        //Finished
-        else if ((uint)id == KatonPvE.ID || (uint)id == RaitonPvE.ID || (uint)id == HyotonPvE.ID)
-        {
-            if (_ninActionAim.Setting.Ninjutsu!.Length > 2
-                && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![2]))
-            {
-                act = _ninActionAim.Setting.Ninjutsu![2];
-                return true;
-            }
-        }
-        return false;
     }
     #endregion
 
@@ -317,6 +83,15 @@ public sealed class NIN_Default : NinjaRotation
         // Initializes the action to null, indicating no action has been chosen yet.
         act = null;
 
+        // If the last action performed matches any of a list of specific actions, it clears the Ninjutsu aim.
+        // This serves as a reset/cleanup mechanism to ensure the decision logic starts fresh for the next cycle.
+        if (IsLastAction(true, RabbitMediumPvE, FumaShurikenPvE, KatonPvE, RaitonPvE,
+            HyotonPvE, HutonPvE, DotonPvE, SuitonPvE, GokaMekkyakuPvE, HyoshoRanryuPvE) || (Player.HasStatus(true, StatusID.ShadowWalker)
+                && (_ninActionAim == SuitonPvE || _ninActionAim == HutonPvE)))
+        {
+            ClearNinjutsu();
+        }
+
         if ((InCombat || (CommbatMudra && HasHostilesInMaxRange)) && ChoiceNinjutsu(out act)) return true;
 
         // If Ninjutsu is available or not in combat, defers to the base class's emergency ability logic.
@@ -324,7 +99,6 @@ public sealed class NIN_Default : NinjaRotation
 
         // First priority is given to Kassatsu if it's available, allowing for an immediate powerful Ninjutsu.
         if (NoNinjutsu && KassatsuPvE.CanUse(out act)) return true;
-        if ((!TenChiJinPvE.Cooldown.IsCoolingDown || Player.WillStatusEndGCD(2, 0, true, StatusID.ShadowWalker)) && MeisuiPvE.CanUse(out act)) return true;
 
         if (TenriJindoPvE.CanUse(out act)) return true;
 
@@ -341,6 +115,8 @@ public sealed class NIN_Default : NinjaRotation
             // If Trick Attack is on cooldown but will not be ready soon, considers using Meisui to recover Ninki.
             if (TrickAttackPvE.Cooldown.IsCoolingDown && !TrickAttackPvE.Cooldown.WillHaveOneCharge(19) && TenChiJinPvE.Cooldown.IsCoolingDown && MeisuiPvE.CanUse(out act)) return true;
         }
+
+        if ((TenChiJinPvE.Cooldown.IsCoolingDown || Player.WillStatusEndGCD(2, 0, true, StatusID.ShadowWalker)) && MeisuiPvE.CanUse(out act)) return true;
 
         // If none of the specific conditions are met, falls back to the base class's emergency ability logic.
         return base.EmergencyAbility(nextGCD, out act);
@@ -398,12 +174,749 @@ public sealed class NIN_Default : NinjaRotation
     }
     #endregion
 
+    #region Ninjutsu Logic
+    private void SetNinjutsu(IBaseAction act)
+    {
+        if (act == null || AdjustId(ActionID.NinjutsuPvE) == ActionID.RabbitMediumPvE || (_ninActionAim != null && IsLastAction(true, _ninActionAim))) return;
+
+        if (_ninActionAim != null && IsLastAction(false, TenPvE, JinPvE, ChiPvE, FumaShurikenPvE_18873, FumaShurikenPvE_18874, FumaShurikenPvE_18875)) return;
+
+        _ninActionAim = act;
+    }
+
+    // Clears the ninjutsu action aim, effectively resetting any planned ninjutsu action.
+    private void ClearNinjutsu()
+    {
+        if (_ninActionAim != null)
+        {
+            _lastNinActionAim = _ninActionAim;
+            _ninActionAim = null;
+        }
+    }
+
+    // Logic for choosing which ninjutsu action to set up next, based on various game state conditions.
+    private bool ChoiceNinjutsu(out IAction? act)
+    {
+        act = null;
+
+        if (!TenPvE.CanUse(out _) && !HasKassatsu) return false;
+
+        // Ensures that the action ID currently considered for Ninjutsu is actually valid for Ninjutsu execution.
+        //if (AdjustId(ActionID.NinjutsuPvE) != ActionID.NinjutsuPvE) return false;
+        // If more than 4.5 seconds have passed since the last action, it clears any pending Ninjutsu to avoid stale actions.
+        if (TimeSinceLastAction.TotalSeconds > 4.5) ClearNinjutsu();
+
+        // Checks for Kassatsu status to prioritize high-impact Ninjutsu due to its buff.
+        if (Player.HasStatus(true, StatusID.Kassatsu))
+        {
+            // Attempts to set high-damage AoE Ninjutsu if available under Kassatsu's effect.
+            // These are prioritized due to Kassatsu's enhancement of Ninjutsu abilities.
+            if (DeathBlossomPvE.CanUse(out _) && GokaMekkyakuPvE.EnoughLevel)
+            {
+                SetNinjutsu(GokaMekkyakuPvE);
+            }
+            if (!DeathBlossomPvE.CanUse(out _) && HyoshoRanryuPvE.EnoughLevel)
+            {
+                SetNinjutsu(HyoshoRanryuPvE);
+            }
+
+            if (!IsShadowWalking && ShadowWalkerNeeded && !HyoshoRanryuPvE.EnoughLevel)
+            {
+                SetNinjutsu(HutonPvE);
+            }
+
+            if (DeathBlossomPvE.CanUse(out _) && !HyoshoRanryuPvE.EnoughLevel)
+            {
+                SetNinjutsu(KatonPvE);
+            }
+
+            if (!DeathBlossomPvE.CanUse(out _) && !HyoshoRanryuPvE.EnoughLevel)
+            {
+                SetNinjutsu(RaitonPvE);
+            }
+            else return false;
+        }
+        else
+        {
+            // Chooses buffs or AoE actions based on combat conditions and cooldowns.
+            // For instance, setting Huton for speed buff or choosing AoE Ninjutsu like Katon or Doton based on enemy positioning.
+            // Also considers using Suiton for vulnerability debuff on the enemy if conditions are optimal.
+
+            //Vulnerable
+            if (ShadowWalkerNeeded && (!MeisuiPvE.Cooldown.IsCoolingDown || !TrickAttackPvE.Cooldown.IsCoolingDown || KunaisBanePvE.Cooldown.IsCoolingDown) && !IsShadowWalking && !HasTenChiJin && SuitonPvE.EnoughLevel && TenPvE.Cooldown.HasOneCharge)
+            {
+                if (DeathBlossomPvE.CanUse(out _))
+                    SetNinjutsu(HutonPvE);
+                else
+                    SetNinjutsu(SuitonPvE);
+                return false;
+            }
+
+            //Aoe
+            if (DeathBlossomPvE.CanUse(out _) && KatonPvE.EnoughLevel && TenPvE.CanUse(out _))
+            {
+                if (!HasDoton && !IsMoving && !IsLastGCD(true, DotonPvE) && (!TenChiJinPvE.Cooldown.WillHaveOneCharge(6)) || !HasDoton && !TenChiJinPvE.Cooldown.IsCoolingDown)
+                    SetNinjutsu(DotonPvE);
+                else SetNinjutsu(KatonPvE);
+            }
+
+            //Single
+            if (!DeathBlossomPvE.CanUse(out _) && !ShadowWalkerNeeded && TenPvE.CanUse(out _, usedUp: InTrickAttack && !HasRaijuReady))
+            {
+                if (RaitonPvE.EnoughLevel && TenPvE.Cooldown.HasOneCharge)
+                {
+                    SetNinjutsu(RaitonPvE);
+                    return false;
+                }
+
+                if (FumaShurikenPvE.EnoughLevel && TenPvE.Cooldown.HasOneCharge)
+                {
+                    SetNinjutsu(FumaShurikenPvE);
+                    return false;
+                }
+            }
+        }
+        return false; // Indicates that no specific Ninjutsu action was chosen in this cycle.
+    }
+    #endregion
+
+    #region Ninjutsu Execution
+    private bool DoRabbitMedium(out IAction? act)
+    {
+        act = null;
+        uint ninjutsunId = AdjustId(NinjutsuPvE.ID);
+        if (ninjutsunId == RabbitMediumPvE.ID)
+        {
+            _rabbitMediumFailures++;
+            if (RabbitMediumPvE.CanUse(out act)) return true;
+            ClearNinjutsu();
+        }
+        return false;
+    }
+
+    private bool DoTenChiJin(out IAction? act)
+    {
+        act = null;
+
+        if (HasTenChiJin)
+        {
+            uint tenId = AdjustId(TenPvE.ID);
+            uint chiId = AdjustId(ChiPvE.ID);
+            uint jinId = AdjustId(JinPvE.ID);
+
+            //First
+            if (tenId == FumaShurikenPvE_18873.ID
+                && !IsLastAction(false, FumaShurikenPvE_18875, FumaShurikenPvE_18873))
+            {
+                //AOE
+                if (DeathBlossomPvE.CanUse(out _))
+                {
+                    if (FumaShurikenPvE_18875.CanUse(out act)) return true;
+                }
+                //Single
+                if (FumaShurikenPvE_18873.CanUse(out act)) return true;
+            }
+
+            //Second
+            else if (tenId == KatonPvE_18876.ID && !IsLastAction(false, KatonPvE_18876))
+            {
+                if (KatonPvE_18876.CanUse(out act, skipAoeCheck: true)) return true;
+            }
+            else if (chiId == RaitonPvE_18877.ID && !IsLastAction(false, RaitonPvE_18877))
+            {
+                if (RaitonPvE_18877.CanUse(out act, skipAoeCheck: true)) return true;
+            }
+            //Others
+            else if (jinId == SuitonPvE_18881.ID && !IsLastAction(false, SuitonPvE_18881))
+            {
+                if (SuitonPvE_18881.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: true)) return true;
+            }
+            else if (chiId == DotonPvE_18880.ID && !IsLastAction(false, DotonPvE_18880) && !HasDoton)
+            {
+                if (DotonPvE_18880.CanUse(out act, skipAoeCheck: true)) return true;
+            }
+        }
+        return false;
+    }
+
+    private bool DoSuiton(out IAction? act)
+    {
+        act = null;
+
+        if (_ninActionAim != null && (_ninActionAim == SuitonPvE))
+        {
+            var id = AdjustId(ActionID.NinjutsuPvE);
+
+            //Failed
+            if ((uint)id == RabbitMediumPvE.ID)
+            {
+                _rabbitMediumFailures++;
+                ClearNinjutsu();
+                act = null;
+                return false;
+            }
+            //First
+            else if (id == ActionID.NinjutsuPvE)
+            {
+                //Can't use.
+                if (!Player.HasStatus(true, StatusID.Kassatsu, StatusID.TenChiJin)
+                    && !TenPvE.CanUse(out _, usedUp: true)
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![0]))
+                {
+                    return false;
+                }
+                act = _ninActionAim.Setting.Ninjutsu![0];
+                return true;
+            }
+            //Second
+            else if ((uint)id == _ninActionAim.ID)
+            {
+                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
+                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
+                {
+                    act = _ninActionAim;
+                    return true;
+                }
+            }
+            //Third
+            else if ((uint)id == FumaShurikenPvE.ID)
+            {
+                if (_ninActionAim.Setting.Ninjutsu!.Length > 1
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![1]))
+                {
+                    act = _ninActionAim.Setting.Ninjutsu![1];
+                    return true;
+                }
+            }
+            //Finished
+            else if ((uint)id == KatonPvE.ID || (uint)id == RaitonPvE.ID || (uint)id == HyotonPvE.ID)
+            {
+                if (_ninActionAim.Setting.Ninjutsu!.Length > 2
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![2]))
+                {
+                    act = _ninActionAim.Setting.Ninjutsu![2];
+                    return true;
+                }
+            }
+
+            act = _ninActionAim;
+            return true;
+        }
+        return false;
+    }
+
+    private bool DoHyoshoRanryu(out IAction? act)
+    {
+        act = null;
+
+        if (_ninActionAim != null && (_ninActionAim == HyoshoRanryuPvE) && HasKassatsu)
+        {
+            var id = AdjustId(ActionID.NinjutsuPvE);
+
+            //Failed
+            if ((uint)id == RabbitMediumPvE.ID)
+            {
+                _rabbitMediumFailures++;
+                ClearNinjutsu();
+                act = null;
+                return false;
+            }
+            //First
+            else if (id == ActionID.NinjutsuPvE)
+            {
+                //Can't use.
+                if (!Player.HasStatus(true, StatusID.Kassatsu, StatusID.TenChiJin)
+                    && !TenPvE.CanUse(out _, usedUp: true)
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![0]))
+                {
+                    return false;
+                }
+                act = _ninActionAim.Setting.Ninjutsu![0];
+                return true;
+            }
+            //Second
+            else if ((uint)id == _ninActionAim.ID)
+            {
+                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
+                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
+                {
+                    act = _ninActionAim;
+                    return true;
+                }
+            }
+            //Third
+            else if ((uint)id == FumaShurikenPvE.ID)
+            {
+                if (_ninActionAim.Setting.Ninjutsu!.Length > 1
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![1]))
+                {
+                    act = _ninActionAim.Setting.Ninjutsu![1];
+                    return true;
+                }
+            }
+            //Finished
+            else if ((uint)id == KatonPvE.ID || (uint)id == RaitonPvE.ID || (uint)id == HyotonPvE.ID)
+            {
+                if (_ninActionAim.Setting.Ninjutsu!.Length > 2
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![2]))
+                {
+                    act = _ninActionAim.Setting.Ninjutsu![2];
+                    return true;
+                }
+            }
+
+            act = _ninActionAim;
+            return true;
+        }
+        return false;
+    }
+
+    private bool DoGokaMekkyaku(out IAction? act)
+    {
+        act = null;
+
+        if (_ninActionAim != null && (_ninActionAim == GokaMekkyakuPvE) && HasKassatsu)
+        {
+            var id = AdjustId(ActionID.NinjutsuPvE);
+
+            //Failed
+            if ((uint)id == RabbitMediumPvE.ID)
+            {
+                _rabbitMediumFailures++;
+                ClearNinjutsu();
+                act = null;
+                return false;
+            }
+            //First
+            else if (id == ActionID.NinjutsuPvE)
+            {
+                //Can't use.
+                if (!Player.HasStatus(true, StatusID.Kassatsu, StatusID.TenChiJin)
+                    && !TenPvE.CanUse(out _, usedUp: true)
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![0]))
+                {
+                    return false;
+                }
+                act = _ninActionAim.Setting.Ninjutsu![0];
+                return true;
+            }
+            //Second
+            else if ((uint)id == _ninActionAim.ID)
+            {
+                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
+                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
+                {
+                    act = _ninActionAim;
+                    return true;
+                }
+            }
+            //Third
+            else if ((uint)id == FumaShurikenPvE.ID)
+            {
+                if (_ninActionAim.Setting.Ninjutsu!.Length > 1
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![1]))
+                {
+                    act = _ninActionAim.Setting.Ninjutsu![1];
+                    return true;
+                }
+            }
+            //Finished
+            else if ((uint)id == KatonPvE.ID || (uint)id == RaitonPvE.ID || (uint)id == HyotonPvE.ID)
+            {
+                if (_ninActionAim.Setting.Ninjutsu!.Length > 2
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![2]))
+                {
+                    act = _ninActionAim.Setting.Ninjutsu![2];
+                    return true;
+                }
+            }
+
+            act = _ninActionAim;
+            return true;
+        }
+        return false;
+    }
+
+    private bool DoDoton(out IAction? act)
+    {
+        act = null;
+
+        if (_ninActionAim != null && (_ninActionAim == DotonPvE))
+        {
+            var id = AdjustId(ActionID.NinjutsuPvE);
+
+            //Failed
+            if ((uint)id == RabbitMediumPvE.ID)
+            {
+                _rabbitMediumFailures++;
+                ClearNinjutsu();
+                act = null;
+                return false;
+            }
+            //First
+            else if (id == ActionID.NinjutsuPvE)
+            {
+                //Can't use.
+                if (!Player.HasStatus(true, StatusID.Kassatsu, StatusID.TenChiJin)
+                    && !TenPvE.CanUse(out _, usedUp: true)
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![0]))
+                {
+                    return false;
+                }
+                act = _ninActionAim.Setting.Ninjutsu![0];
+                return true;
+            }
+            //Second
+            else if ((uint)id == _ninActionAim.ID)
+            {
+                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
+                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
+                {
+                    act = _ninActionAim;
+                    return true;
+                }
+            }
+            //Third
+            else if ((uint)id == FumaShurikenPvE.ID)
+            {
+                if (_ninActionAim.Setting.Ninjutsu!.Length > 1
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![1]))
+                {
+                    act = _ninActionAim.Setting.Ninjutsu![1];
+                    return true;
+                }
+            }
+            //Finished
+            else if ((uint)id == KatonPvE.ID || (uint)id == RaitonPvE.ID || (uint)id == HyotonPvE.ID)
+            {
+                if (_ninActionAim.Setting.Ninjutsu!.Length > 2
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![2]))
+                {
+                    act = _ninActionAim.Setting.Ninjutsu![2];
+                    return true;
+                }
+            }
+
+            act = _ninActionAim;
+            return true;
+        }
+        return false;
+    }
+
+    private bool DoHuton(out IAction? act)
+    {
+        act = null;
+
+        if (_ninActionAim != null && (_ninActionAim == HutonPvE))
+        {
+            var id = AdjustId(ActionID.NinjutsuPvE);
+
+            //Failed
+            if ((uint)id == RabbitMediumPvE.ID)
+            {
+                _rabbitMediumFailures++;
+                ClearNinjutsu();
+                act = null;
+                return false;
+            }
+            //First
+            else if (id == ActionID.NinjutsuPvE)
+            {
+                //Can't use.
+                if (!Player.HasStatus(true, StatusID.Kassatsu, StatusID.TenChiJin)
+                    && !TenPvE.CanUse(out _, usedUp: true)
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![0]))
+                {
+                    return false;
+                }
+                act = _ninActionAim.Setting.Ninjutsu![0];
+                return true;
+            }
+            //Second
+            else if ((uint)id == _ninActionAim.ID)
+            {
+                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
+                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
+                {
+                    act = _ninActionAim;
+                    return true;
+                }
+            }
+            //Third
+            else if ((uint)id == FumaShurikenPvE.ID)
+            {
+                if (_ninActionAim.Setting.Ninjutsu!.Length > 1
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![1]))
+                {
+                    act = _ninActionAim.Setting.Ninjutsu![1];
+                    return true;
+                }
+            }
+            //Finished
+            else if ((uint)id == KatonPvE.ID || (uint)id == RaitonPvE.ID || (uint)id == HyotonPvE.ID)
+            {
+                if (_ninActionAim.Setting.Ninjutsu!.Length > 2
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![2]))
+                {
+                    act = _ninActionAim.Setting.Ninjutsu![2];
+                    return true;
+                }
+            }
+
+            act = _ninActionAim;
+            return true;
+        }
+        return false;
+    }
+
+    private bool DoHyoton(out IAction? act)
+    {
+        act = null;
+
+        if (_ninActionAim != null && (_ninActionAim == HyotonPvE))
+        {
+            var id = AdjustId(ActionID.NinjutsuPvE);
+
+            //Failed
+            if ((uint)id == RabbitMediumPvE.ID)
+            {
+                _rabbitMediumFailures++;
+                ClearNinjutsu();
+                act = null;
+                return false;
+            }
+            //First
+            else if (id == ActionID.NinjutsuPvE)
+            {
+                //Can't use.
+                if (!Player.HasStatus(true, StatusID.Kassatsu, StatusID.TenChiJin)
+                    && !TenPvE.CanUse(out _, usedUp: true)
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![0]))
+                {
+                    return false;
+                }
+                act = _ninActionAim.Setting.Ninjutsu![0];
+                return true;
+            }
+            //Second
+            else if ((uint)id == _ninActionAim.ID)
+            {
+                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
+                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
+                {
+                    act = _ninActionAim;
+                    return true;
+                }
+            }
+            //Third
+            else if ((uint)id == FumaShurikenPvE.ID)
+            {
+                if (_ninActionAim.Setting.Ninjutsu!.Length > 1
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![1]))
+                {
+                    act = _ninActionAim.Setting.Ninjutsu![1];
+                    return true;
+                }
+            }
+            //Finished
+            else if ((uint)id == KatonPvE.ID || (uint)id == RaitonPvE.ID || (uint)id == HyotonPvE.ID)
+            {
+                if (_ninActionAim.Setting.Ninjutsu!.Length > 2
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![2]))
+                {
+                    act = _ninActionAim.Setting.Ninjutsu![2];
+                    return true;
+                }
+            }
+
+            act = _ninActionAim;
+            return true;
+        }
+        return false;
+    }
+
+    private bool DoRaiton(out IAction? act)
+    {
+        act = null;
+
+        if (_ninActionAim != null && (_ninActionAim == RaitonPvE))
+        {
+            var id = AdjustId(ActionID.NinjutsuPvE);
+
+            //Failed
+            if ((uint)id == RabbitMediumPvE.ID)
+            {
+                _rabbitMediumFailures++;
+                ClearNinjutsu();
+                act = null;
+                return false;
+            }
+            //First
+            else if (id == ActionID.NinjutsuPvE)
+            {
+                //Can't use.
+                if (!Player.HasStatus(true, StatusID.Kassatsu, StatusID.TenChiJin)
+                    && !TenPvE.CanUse(out _, usedUp: true)
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![0]))
+                {
+                    return false;
+                }
+                act = _ninActionAim.Setting.Ninjutsu![0];
+                return true;
+            }
+            //Second
+            else if ((uint)id == _ninActionAim.ID)
+            {
+                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
+                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
+                {
+                    act = _ninActionAim;
+                    return true;
+                }
+            }
+            //Third
+            else if ((uint)id == FumaShurikenPvE.ID)
+            {
+                if (_ninActionAim.Setting.Ninjutsu!.Length > 1
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![1]))
+                {
+                    act = _ninActionAim.Setting.Ninjutsu![1];
+                    return true;
+                }
+            }
+            //Finished
+            else if ((uint)id == KatonPvE.ID || (uint)id == RaitonPvE.ID || (uint)id == HyotonPvE.ID)
+            {
+                if (_ninActionAim.Setting.Ninjutsu!.Length > 2
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![2]))
+                {
+                    act = _ninActionAim.Setting.Ninjutsu![2];
+                    return true;
+                }
+            }
+
+            act = _ninActionAim;
+            return true;
+        }
+        return false;
+    }
+
+    private bool DoKaton(out IAction? act)
+    {
+        act = null;
+
+        if (_ninActionAim != null && (_ninActionAim == KatonPvE))
+        {
+            var id = AdjustId(ActionID.NinjutsuPvE);
+
+            //Failed
+            if ((uint)id == RabbitMediumPvE.ID)
+            {
+                _rabbitMediumFailures++;
+                ClearNinjutsu();
+                act = null;
+                return false;
+            }
+            //First
+            else if (id == ActionID.NinjutsuPvE)
+            {
+                //Can't use.
+                if (!Player.HasStatus(true, StatusID.Kassatsu, StatusID.TenChiJin)
+                    && !TenPvE.CanUse(out _, usedUp: true)
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![0]))
+                {
+                    return false;
+                }
+                act = _ninActionAim.Setting.Ninjutsu![0];
+                return true;
+            }
+            //Second
+            else if ((uint)id == _ninActionAim.ID)
+            {
+                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
+                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
+                {
+                    act = _ninActionAim;
+                    return true;
+                }
+            }
+            //Third
+            else if ((uint)id == FumaShurikenPvE.ID)
+            {
+                if (_ninActionAim.Setting.Ninjutsu!.Length > 1
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![1]))
+                {
+                    act = _ninActionAim.Setting.Ninjutsu![1];
+                    return true;
+                }
+            }
+            //Finished
+            else if ((uint)id == KatonPvE.ID || (uint)id == RaitonPvE.ID || (uint)id == HyotonPvE.ID)
+            {
+                if (_ninActionAim.Setting.Ninjutsu!.Length > 2
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![2]))
+                {
+                    act = _ninActionAim.Setting.Ninjutsu![2];
+                    return true;
+                }
+            }
+
+            act = _ninActionAim;
+            return true;
+        }
+        return false;
+    }
+
+    private bool DoFumaShuriken(out IAction? act)
+    {
+        act = null;
+
+        if (_ninActionAim != null && (_ninActionAim == FumaShurikenPvE))
+        {
+            //Keep Kassatsu in Burst.
+            if (!Player.WillStatusEnd(4, true, StatusID.Kassatsu) && !InTrickAttack) return false;
+
+            var id = AdjustId(ActionID.NinjutsuPvE);
+
+            //Failed
+            if ((uint)id == RabbitMediumPvE.ID)
+            {
+                _rabbitMediumFailures++;
+                ClearNinjutsu();
+                act = null;
+                return false;
+            }
+            //First
+            else if (id == ActionID.NinjutsuPvE)
+            {
+                //Can't use.
+                if (!Player.HasStatus(true, StatusID.Kassatsu, StatusID.TenChiJin)
+                    && !TenPvE.CanUse(out _, usedUp: true)
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![0]))
+                {
+                    return false;
+                }
+                act = _ninActionAim.Setting.Ninjutsu![0];
+                return true;
+            }
+            else if ((uint)id == FumaShurikenPvE.ID)
+            {
+                if (_ninActionAim.Setting.Ninjutsu!.Length > 1
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![1]))
+                {
+                    act = _ninActionAim.Setting.Ninjutsu![1];
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    #endregion
+
     #region GCD Logic
     protected override bool GeneralGCD(out IAction? act)
     {
         act = null;
-
-        if (_ninActionAim == null && RabbitMediumPvE.CanUse(out act)) return true;
 
         if (!IsExecutingMudra && (InTrickAttack || InMug) && NoNinjutsu && !HasRaijuReady
             && !Player.HasStatus(true, StatusID.TenChiJin)
@@ -415,22 +928,41 @@ public sealed class NIN_Default : NinjaRotation
             if (ForkedUse && ForkedRaijuPvE.CanUse(out act)) return true;
         }
 
-        if (((!InCombat && CommbatMudra && HasHostilesInMaxRange) || !CombatElapsedLess(7)) && DoNinjutsu(out act)) return true;
-
-        //No Ninjutsu
-        if (NoNinjutsu)
-        {
-            if (!CombatElapsedLess(10) && FleetingRaijuPvE.CanUse(out act)) return true;
-            if (HasRaijuReady) return false;
-        }
+        if (DoTenChiJin(out act)) return true;
+        if (DoRabbitMedium(out act)) return true;
 
         //AOE
+        if (DoGokaMekkyaku(out act)) return true;
+        if (DoHuton(out act)) return true;
+        if (DoDoton(out act)) return true;
+        if (DoKaton(out act)) return true;
+
         if (HakkeMujinsatsuPvE.CanUse(out act)) return true;
         if (DeathBlossomPvE.CanUse(out act)) return true;
 
+        if (DoHyoshoRanryu(out act)) return true;
+        if (DoSuiton(out act)) return true;
+        if (DoHuton(out act)) return true;
+        if (DoHyoton(out act)) return true;
+        if (DoRaiton(out act)) return true;
+        if (DoFumaShuriken(out act)) return true;
+
         //Single
-        if (!InTrickAttack && Kazematoi < 4 && ArmorCrushPvE.CanUse(out act)) return true;
-        if (AeolianEdgePvE.CanUse(out act)) return true;
+        if (AeolianEdgePvE.EnoughLevel)
+        {
+            // If ArmorCrushPvE is not yet available, checks if AeolianEdgePvE can be used.
+            if (!ArmorCrushPvE.EnoughLevel)
+            {
+                if (AeolianEdgePvE.CanUse(out act)) return true;
+            }
+            else
+            {
+                if (Kazematoi == 0 && ArmorCrushPvE.CanUse(out act)) return true;
+                else if (Kazematoi > 0 && AeolianEdgePvE.CanUse(out act) && AeolianEdgePvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, AeolianEdgePvE.Target.Target)) return true;
+                else if (Kazematoi < 4 && ArmorCrushPvE.CanUse(out act) && ArmorCrushPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, ArmorCrushPvE.Target.Target)) return true;
+                else if (Kazematoi > 0 && AeolianEdgePvE.CanUse(out act)) return true;
+            }
+        }
         if (GustSlashPvE.CanUse(out act)) return true;
         if (SpinningEdgePvE.CanUse(out act)) return true;
 

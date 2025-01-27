@@ -81,7 +81,10 @@ public static class StatusHelper
         StatusID.TheEwer_3891,
     };
 
-    internal static StatusID[] TankStanceStatus { get; } =
+    /// <summary>
+    /// 
+    /// </summary>
+    public static StatusID[] TankStanceStatus { get; } =
     {
         StatusID.Grit,
         StatusID.RoyalGuard_1833,
@@ -89,7 +92,10 @@ public static class StatusHelper
         StatusID.Defiance,
     };
 
-    internal static StatusID[] NoNeedHealingStatus { get; } =
+    /// <summary>
+    /// 
+    /// </summary>
+    public static StatusID[] NoNeedHealingStatus { get; } =
     {
         StatusID.Holmgang_409,
         StatusID.LivingDead,
@@ -97,14 +103,20 @@ public static class StatusHelper
         StatusID.Superbolide,
     };
 
-    internal static StatusID[] SwiftcastStatus { get; } =
+    /// <summary>
+    /// 
+    /// </summary>
+    public static StatusID[] SwiftcastStatus { get; } =
     {
         StatusID.Swiftcast,
         StatusID.Triplecast,
         StatusID.Dualcast,
     };
 
-    internal static StatusID[] AstCardStatus { get; } =
+    /// <summary>
+    /// 
+    /// </summary>
+    public static StatusID[] AstCardStatus { get; } =
     {
         StatusID.TheBalance_3887,
         StatusID.TheSpear_3889,
@@ -112,7 +124,10 @@ public static class StatusHelper
         StatusID.BrinkOfDeath,
     };
 
-    internal static StatusID[] RampartStatus { get; } =
+    /// <summary>
+    /// 
+    /// </summary>
+    public static StatusID[] RampartStatus { get; } =
     {
         StatusID.Superbolide,
         StatusID.HallowedGround,
@@ -129,7 +144,10 @@ public static class StatusHelper
         StatusID.Superbolide,
     };
 
-    internal static StatusID[] NoPositionalStatus { get; } =
+    /// <summary>
+    /// 
+    /// </summary>
+    public static StatusID[] NoPositionalStatus { get; } =
     {
         StatusID.TrueNorth,
         StatusID.RightEye,
