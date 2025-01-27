@@ -1,7 +1,7 @@
 ﻿namespace RebornRotations.PVPRotations.Melee;
 
 [Rotation("Default PVP", CombatType.PvP, GameVersion = "7.00", Description = "Beta Rotation")]
-[SourceCode(Path = "main/BasicRotations/PVPRotations/Tank/DRG_Default.PvP.cs")]
+[SourceCode(Path = "main/BasicRotations/PVPRotations/Melee/DRG_Default.PvP.cs")]
 [Api(4)]
 public sealed class DRG_DefaultPvP : DragoonRotation
 {
