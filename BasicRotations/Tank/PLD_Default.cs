@@ -25,6 +25,9 @@ public sealed class PLD_Default : PaladinRotation
     [RotationConfig(CombatType.PvE, Name = "Health threshold for Intervention (Set to 0 to disable)")]
     private float InterventionRatio { get; set; } = 0.6f;
 
+    [RotationConfig(CombatType.PvE, Name = "Attempt to use intevention on CoTank during tankbusters")]
+    private bool InterventionTank { get; set; } = false;
+
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Health threshold for Cover (Set to 0 to disable)")]
     private float CoverRatio { get; set; } = 0.3f;
@@ -131,6 +134,8 @@ public sealed class PLD_Default : PaladinRotation
     {
         act = null;
         if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
+
+        if (InterventionTank && InterventionPvE.Target.Target?.HasStatus(false, StatusID.Grit, StatusID.RoyalGuard_1833, StatusID.IronWill, StatusID.Defiance) == true && InterventionPvE.CanUse(out act)) return true;
 
         // If the player has the Hallowed Ground status, don't use any abilities.
         if (!Player.HasStatus(true, StatusID.HallowedGround))

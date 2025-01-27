@@ -406,7 +406,7 @@ public sealed class SGE_Default : SageRotation
             if (PneumaPvE.CanUse(out act)) return true;
         }
 
-        if (_EukrasiaActionAim != null && PrognosisPvE.CanUse(out act))
+        if (_EukrasiaActionAim == null && PrognosisPvE.CanUse(out act))
         {
             return true;
         }
@@ -419,7 +419,7 @@ public sealed class SGE_Default : SageRotation
     {
         act = null;
         if (IsLastAction(ActionID.SwiftcastPvE) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
-        if (_EukrasiaActionAim != null && DiagnosisPvE.CanUse(out act))
+        if (_EukrasiaActionAim == null && DiagnosisPvE.CanUse(out act))
         {
             return true;
         }
@@ -453,13 +453,13 @@ public sealed class SGE_Default : SageRotation
 
         if (DoEukrasianDyskrasia(out act)) return true;
 
-        if ((_EukrasiaActionAim != EukrasianDiagnosisPvE || _EukrasiaActionAim != EukrasianPrognosisPvE || _EukrasiaActionAim != EukrasianPrognosisIiPvE || _EukrasiaActionAim != EukrasianDyskrasiaPvE)
+        if ((_EukrasiaActionAim == null)
             && DyskrasiaPvE.CanUse(out act)) return true;
 
         if (DoEukrasianPrognosis(out act)) return true;
         if (DoEukrasianDiagnosis(out act)) return true;
 
-        if ( DoEukrasianDosis(out act)) return true;
+        if (DoEukrasianDosis(out act)) return true;
         if (DosisPvE.CanUse(out act)) return true;
 
         if (OOCEukrasia && !InCombat && !Player.HasStatus(true, StatusID.Eukrasia) && EukrasiaPvE.CanUse(out act)) return true;
