@@ -26,7 +26,7 @@ public sealed class NIN_Default : NinjaRotation
 
     #region Tracking Properties
     // Properties to track RabbitMediumPvE failures and related information.
-    private int _rabbitMediumFailures = 0;
+    //private int _rabbitMediumFailures = GetActionUsageCount((uint)ActionID.RabbitMediumPvE);
     private IBaseAction? _lastNinActionAim = null;
     #endregion
 
@@ -99,6 +99,7 @@ public sealed class NIN_Default : NinjaRotation
 
         // First priority is given to Kassatsu if it's available, allowing for an immediate powerful Ninjutsu.
         if (NoNinjutsu && KassatsuPvE.CanUse(out act)) return true;
+        if ((!TenChiJinPvE.Cooldown.IsCoolingDown || Player.WillStatusEndGCD(2, 0, true, StatusID.ShadowWalker)) && MeisuiPvE.CanUse(out act)) return true;
 
         if (TenriJindoPvE.CanUse(out act)) return true;
 
@@ -115,8 +116,6 @@ public sealed class NIN_Default : NinjaRotation
             // If Trick Attack is on cooldown but will not be ready soon, considers using Meisui to recover Ninki.
             if (TrickAttackPvE.Cooldown.IsCoolingDown && !TrickAttackPvE.Cooldown.WillHaveOneCharge(19) && TenChiJinPvE.Cooldown.IsCoolingDown && MeisuiPvE.CanUse(out act)) return true;
         }
-
-        if ((TenChiJinPvE.Cooldown.IsCoolingDown || Player.WillStatusEndGCD(2, 0, true, StatusID.ShadowWalker)) && MeisuiPvE.CanUse(out act)) return true;
 
         // If none of the specific conditions are met, falls back to the base class's emergency ability logic.
         return base.EmergencyAbility(nextGCD, out act);
@@ -177,11 +176,14 @@ public sealed class NIN_Default : NinjaRotation
     #region Ninjutsu Logic
     private void SetNinjutsu(IBaseAction act)
     {
-        if (act == null || AdjustId(ActionID.NinjutsuPvE) == ActionID.RabbitMediumPvE || (_ninActionAim != null && IsLastAction(true, _ninActionAim))) return;
+        if (act == null || AdjustId(ActionID.NinjutsuPvE) == ActionID.RabbitMediumPvE) return;
 
         if (_ninActionAim != null && IsLastAction(false, TenPvE, JinPvE, ChiPvE, FumaShurikenPvE_18873, FumaShurikenPvE_18874, FumaShurikenPvE_18875)) return;
 
-        _ninActionAim = act;
+        if (_ninActionAim != act)
+        {
+            _ninActionAim = act;
+        }
     }
 
     // Clears the ninjutsu action aim, effectively resetting any planned ninjutsu action.
@@ -198,8 +200,6 @@ public sealed class NIN_Default : NinjaRotation
     private bool ChoiceNinjutsu(out IAction? act)
     {
         act = null;
-
-        if (!TenPvE.CanUse(out _) && !HasKassatsu) return false;
 
         // Ensures that the action ID currently considered for Ninjutsu is actually valid for Ninjutsu execution.
         //if (AdjustId(ActionID.NinjutsuPvE) != ActionID.NinjutsuPvE) return false;
@@ -236,7 +236,7 @@ public sealed class NIN_Default : NinjaRotation
             }
             else return false;
         }
-        else
+        else if (TenPvE.CanUse(out _, usedUp: InTrickAttack))
         {
             // Chooses buffs or AoE actions based on combat conditions and cooldowns.
             // For instance, setting Huton for speed buff or choosing AoE Ninjutsu like Katon or Doton based on enemy positioning.
@@ -287,7 +287,6 @@ public sealed class NIN_Default : NinjaRotation
         uint ninjutsunId = AdjustId(NinjutsuPvE.ID);
         if (ninjutsunId == RabbitMediumPvE.ID)
         {
-            _rabbitMediumFailures++;
             if (RabbitMediumPvE.CanUse(out act)) return true;
             ClearNinjutsu();
         }
@@ -343,6 +342,11 @@ public sealed class NIN_Default : NinjaRotation
     {
         act = null;
 
+        //Keep Kassatsu in Burst.
+        if (!Player.WillStatusEnd(3, false, StatusID.Kassatsu)
+            && HasKassatsu && !InTrickAttack) return false;
+        if (_ninActionAim == null) return false;
+
         if (_ninActionAim != null && (_ninActionAim == SuitonPvE))
         {
             var id = AdjustId(ActionID.NinjutsuPvE);
@@ -350,7 +354,6 @@ public sealed class NIN_Default : NinjaRotation
             //Failed
             if ((uint)id == RabbitMediumPvE.ID)
             {
-                _rabbitMediumFailures++;
                 ClearNinjutsu();
                 act = null;
                 return false;
@@ -361,7 +364,7 @@ public sealed class NIN_Default : NinjaRotation
                 //Can't use.
                 if (!Player.HasStatus(true, StatusID.Kassatsu, StatusID.TenChiJin)
                     && !TenPvE.CanUse(out _, usedUp: true)
-                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![0]))
+                    && !IsLastAction(true, _ninActionAim.Setting.Ninjutsu![0]))
                 {
                     return false;
                 }
@@ -382,7 +385,7 @@ public sealed class NIN_Default : NinjaRotation
             else if ((uint)id == FumaShurikenPvE.ID)
             {
                 if (_ninActionAim.Setting.Ninjutsu!.Length > 1
-                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![1]))
+                    && !IsLastAction(true, _ninActionAim.Setting.Ninjutsu![1]))
                 {
                     act = _ninActionAim.Setting.Ninjutsu![1];
                     return true;
@@ -392,7 +395,7 @@ public sealed class NIN_Default : NinjaRotation
             else if ((uint)id == KatonPvE.ID || (uint)id == RaitonPvE.ID || (uint)id == HyotonPvE.ID)
             {
                 if (_ninActionAim.Setting.Ninjutsu!.Length > 2
-                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![2]))
+                    && !IsLastAction(true, _ninActionAim.Setting.Ninjutsu![2]))
                 {
                     act = _ninActionAim.Setting.Ninjutsu![2];
                     return true;
@@ -409,14 +412,18 @@ public sealed class NIN_Default : NinjaRotation
     {
         act = null;
 
-        if (_ninActionAim != null && (_ninActionAim == HyoshoRanryuPvE) && HasKassatsu)
+        //Keep Kassatsu in Burst.
+        if (!Player.WillStatusEnd(3, false, StatusID.Kassatsu)
+            && HasKassatsu && !InTrickAttack) return false;
+        if (_ninActionAim == null) return false;
+
+        if (_ninActionAim != null && (_ninActionAim == HyoshoRanryuPvE))
         {
             var id = AdjustId(ActionID.NinjutsuPvE);
 
             //Failed
             if ((uint)id == RabbitMediumPvE.ID)
             {
-                _rabbitMediumFailures++;
                 ClearNinjutsu();
                 act = null;
                 return false;
@@ -475,14 +482,18 @@ public sealed class NIN_Default : NinjaRotation
     {
         act = null;
 
-        if (_ninActionAim != null && (_ninActionAim == GokaMekkyakuPvE) && HasKassatsu)
+        //Keep Kassatsu in Burst.
+        if (!Player.WillStatusEnd(3, false, StatusID.Kassatsu)
+            && HasKassatsu && !InTrickAttack) return false;
+        if (_ninActionAim == null) return false;
+
+        if (_ninActionAim != null && (_ninActionAim == GokaMekkyakuPvE))
         {
             var id = AdjustId(ActionID.NinjutsuPvE);
 
             //Failed
             if ((uint)id == RabbitMediumPvE.ID)
             {
-                _rabbitMediumFailures++;
                 ClearNinjutsu();
                 act = null;
                 return false;
@@ -541,6 +552,11 @@ public sealed class NIN_Default : NinjaRotation
     {
         act = null;
 
+        //Keep Kassatsu in Burst.
+        if (!Player.WillStatusEnd(3, false, StatusID.Kassatsu)
+            && HasKassatsu && !InTrickAttack) return false;
+        if (_ninActionAim == null) return false;
+
         if (_ninActionAim != null && (_ninActionAim == DotonPvE))
         {
             var id = AdjustId(ActionID.NinjutsuPvE);
@@ -548,7 +564,6 @@ public sealed class NIN_Default : NinjaRotation
             //Failed
             if ((uint)id == RabbitMediumPvE.ID)
             {
-                _rabbitMediumFailures++;
                 ClearNinjutsu();
                 act = null;
                 return false;
@@ -607,6 +622,11 @@ public sealed class NIN_Default : NinjaRotation
     {
         act = null;
 
+        //Keep Kassatsu in Burst.
+        if (!Player.WillStatusEnd(3, false, StatusID.Kassatsu)
+            && HasKassatsu && !InTrickAttack) return false;
+        if (_ninActionAim == null) return false;
+
         if (_ninActionAim != null && (_ninActionAim == HutonPvE))
         {
             var id = AdjustId(ActionID.NinjutsuPvE);
@@ -614,7 +634,6 @@ public sealed class NIN_Default : NinjaRotation
             //Failed
             if ((uint)id == RabbitMediumPvE.ID)
             {
-                _rabbitMediumFailures++;
                 ClearNinjutsu();
                 act = null;
                 return false;
@@ -673,6 +692,11 @@ public sealed class NIN_Default : NinjaRotation
     {
         act = null;
 
+        //Keep Kassatsu in Burst.
+        if (!Player.WillStatusEnd(3, false, StatusID.Kassatsu)
+            && HasKassatsu && !InTrickAttack) return false;
+        if (_ninActionAim == null) return false;
+
         if (_ninActionAim != null && (_ninActionAim == HyotonPvE))
         {
             var id = AdjustId(ActionID.NinjutsuPvE);
@@ -680,7 +704,6 @@ public sealed class NIN_Default : NinjaRotation
             //Failed
             if ((uint)id == RabbitMediumPvE.ID)
             {
-                _rabbitMediumFailures++;
                 ClearNinjutsu();
                 act = null;
                 return false;
@@ -739,6 +762,11 @@ public sealed class NIN_Default : NinjaRotation
     {
         act = null;
 
+        //Keep Kassatsu in Burst.
+        if (!Player.WillStatusEnd(3, false, StatusID.Kassatsu)
+            && HasKassatsu && !InTrickAttack) return false;
+        if (_ninActionAim == null) return false;
+
         if (_ninActionAim != null && (_ninActionAim == RaitonPvE))
         {
             var id = AdjustId(ActionID.NinjutsuPvE);
@@ -746,7 +774,6 @@ public sealed class NIN_Default : NinjaRotation
             //Failed
             if ((uint)id == RabbitMediumPvE.ID)
             {
-                _rabbitMediumFailures++;
                 ClearNinjutsu();
                 act = null;
                 return false;
@@ -805,6 +832,11 @@ public sealed class NIN_Default : NinjaRotation
     {
         act = null;
 
+        //Keep Kassatsu in Burst.
+        if (!Player.WillStatusEnd(3, false, StatusID.Kassatsu)
+            && HasKassatsu && !InTrickAttack) return false;
+        if (_ninActionAim == null) return false;
+
         if (_ninActionAim != null && (_ninActionAim == KatonPvE))
         {
             var id = AdjustId(ActionID.NinjutsuPvE);
@@ -812,7 +844,6 @@ public sealed class NIN_Default : NinjaRotation
             //Failed
             if ((uint)id == RabbitMediumPvE.ID)
             {
-                _rabbitMediumFailures++;
                 ClearNinjutsu();
                 act = null;
                 return false;
@@ -871,17 +902,18 @@ public sealed class NIN_Default : NinjaRotation
     {
         act = null;
 
+        //Keep Kassatsu in Burst.
+        if (!Player.WillStatusEnd(3, false, StatusID.Kassatsu)
+            && HasKassatsu && !InTrickAttack) return false;
+        if (_ninActionAim == null) return false;
+
         if (_ninActionAim != null && (_ninActionAim == FumaShurikenPvE))
         {
-            //Keep Kassatsu in Burst.
-            if (!Player.WillStatusEnd(4, true, StatusID.Kassatsu) && !InTrickAttack) return false;
-
             var id = AdjustId(ActionID.NinjutsuPvE);
 
             //Failed
             if ((uint)id == RabbitMediumPvE.ID)
             {
-                _rabbitMediumFailures++;
                 ClearNinjutsu();
                 act = null;
                 return false;
@@ -899,6 +931,17 @@ public sealed class NIN_Default : NinjaRotation
                 act = _ninActionAim.Setting.Ninjutsu![0];
                 return true;
             }
+            //Second
+            else if ((uint)id == _ninActionAim.ID)
+            {
+                if (_ninActionAim.CanUse(out act, skipAoeCheck: true)) return true;
+                if (_ninActionAim.ID == DotonPvE.ID && !InCombat)
+                {
+                    act = _ninActionAim;
+                    return true;
+                }
+            }
+            //Third
             else if ((uint)id == FumaShurikenPvE.ID)
             {
                 if (_ninActionAim.Setting.Ninjutsu!.Length > 1
@@ -908,6 +951,19 @@ public sealed class NIN_Default : NinjaRotation
                     return true;
                 }
             }
+            //Finished
+            else if ((uint)id == KatonPvE.ID || (uint)id == RaitonPvE.ID || (uint)id == HyotonPvE.ID)
+            {
+                if (_ninActionAim.Setting.Ninjutsu!.Length > 2
+                    && !IsLastAction(false, _ninActionAim.Setting.Ninjutsu![2]))
+                {
+                    act = _ninActionAim.Setting.Ninjutsu![2];
+                    return true;
+                }
+            }
+
+            act = _ninActionAim;
+            return true;
         }
         return false;
     }
@@ -928,6 +984,9 @@ public sealed class NIN_Default : NinjaRotation
             if (ForkedUse && ForkedRaijuPvE.CanUse(out act)) return true;
         }
 
+        if ((InCombat || (CommbatMudra && HasHostilesInMaxRange)) && ChoiceNinjutsu(out act)) return true;
+
+
         if (DoTenChiJin(out act)) return true;
         if (DoRabbitMedium(out act)) return true;
 
@@ -946,6 +1005,8 @@ public sealed class NIN_Default : NinjaRotation
         if (DoHyoton(out act)) return true;
         if (DoRaiton(out act)) return true;
         if (DoFumaShuriken(out act)) return true;
+
+        if (IsExecutingMudra) return base.GeneralGCD(out act);
 
         //Single
         if (AeolianEdgePvE.EnoughLevel)
@@ -989,7 +1050,7 @@ public sealed class NIN_Default : NinjaRotation
     public override void DisplayStatus()
     {
         ImGui.Text($"Ninjutsu Action: {_ninActionAim}");
-        ImGui.Text($"Mudra Failure Count: {_rabbitMediumFailures}");
+        //ImGui.Text($"Mudra Failure Count: {_rabbitMediumFailures}");
         ImGui.Text($"Last Ninjutsu Action Cleared From Queue: {_lastNinActionAim}");
         ImGui.Text($"Ninki: {Ninki}");
         ImGui.Text($"Kazematoi: {Kazematoi}");
