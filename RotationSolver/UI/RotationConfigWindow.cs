@@ -71,13 +71,27 @@ public partial class RotationConfigWindow : Window
                 ImGui.TableSetupColumn("Rotation Config Side Bar", ImGuiTableColumnFlags.WidthFixed, 100 * Scale);
                 ImGui.TableNextColumn();
 
-                try { DrawSideBar(); }
-                catch (Exception ex) { Svc.Log.Warning(ex, "Something wrong with side bar."); }
+                try
+                {
+                    DrawSideBar();
+                }
+
+                catch (Exception ex)
+                {
+                    Svc.Log.Warning(ex, "Something wrong with sideBar");
+                }
 
                 ImGui.TableNextColumn();
 
-                try { DrawBody(); }
-                catch (Exception ex) { Svc.Log.Warning(ex, "Something wrong with body."); }
+                try
+                {
+                    DrawBody();
+                }
+
+                catch (Exception ex)
+                {
+                    Svc.Log.Warning(ex, "Something wrong with body");
+                }
 
             }
 
@@ -622,19 +636,59 @@ public partial class RotationConfigWindow : Window
                 // Display content based on the active tab
                 switch (_activeTab)
                 {
-                    case RotationConfigWindowTab.AutoDuty: DrawAutoduty(); break;
-                    case RotationConfigWindowTab.About: DrawAbout(); break;
-                    case RotationConfigWindowTab.Rotation: DrawRotation(); break;
-                    case RotationConfigWindowTab.Actions: DrawActions(); break;
-                    case RotationConfigWindowTab.Rotations: DrawRotations(); break;
-                    case RotationConfigWindowTab.List: DrawList(); break;
-                    case RotationConfigWindowTab.Basic: DrawBasic(); break;
-                    case RotationConfigWindowTab.UI: DrawUI(); break;
-                    case RotationConfigWindowTab.Auto: DrawAuto(); break;
-                    case RotationConfigWindowTab.Target: DrawTarget(); break;
-                    case RotationConfigWindowTab.Extra: DrawExtra(); break;
-                    case RotationConfigWindowTab.Debug: DrawDebug(); break;
-                    default: ImGui.Text("Unknown tab selected."); break;
+
+                    case RotationConfigWindowTab.AutoDuty:
+                        DrawAutoduty();
+                        break;
+
+                    case RotationConfigWindowTab.About:
+                        DrawAbout();
+                        break;
+
+                    case RotationConfigWindowTab.Rotation:
+                        DrawRotation();
+                        break;
+
+                    case RotationConfigWindowTab.Actions:
+                        DrawActions();
+                        break;
+
+                    case RotationConfigWindowTab.Rotations:
+                        DrawRotations();
+                        break;
+
+                    case RotationConfigWindowTab.List:
+                        DrawList();
+                        break;
+
+                    case RotationConfigWindowTab.Basic:
+                        DrawBasic();
+                        break;
+
+                    case RotationConfigWindowTab.UI:
+                        DrawUI();
+                        break;
+
+                    case RotationConfigWindowTab.Auto:
+                        DrawAuto();
+                        break;
+
+                    case RotationConfigWindowTab.Target:
+                        DrawTarget();
+                        break;
+
+                    case RotationConfigWindowTab.Extra:
+                        DrawExtra();
+                        break;
+
+                    case RotationConfigWindowTab.Debug:
+                        DrawDebug();
+                        break;
+
+                    default:
+                        // Handle unexpected tab values
+                        ImGui.Text("Unknown tab selected.");
+                        break;
                 }
             }
         }
@@ -2682,32 +2736,71 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Is Hostile Casting Stop: {DataCenter.IsHostileCastingStop}");
         ImGui.Text($"VfxDataQueue: {DataCenter.VfxDataQueue.Count}");
 
+        // Check and display VFX casting status
         ImGui.Text("Casting Vfx:");
-        foreach (var vfx in DataCenter.VfxDataQueue.Where(s => s.Path.StartsWith("vfx/lockon/eff/") && s.TimeDuration.TotalSeconds is > 0 and < 6))
+        var filteredVfx = DataCenter.VfxDataQueue
+            .Where(s => s.Path.StartsWith("vfx/lockon/eff/") && s.TimeDuration.TotalSeconds is > 0 and < 6);
+        foreach (var vfx in filteredVfx)
         {
             ImGui.Text($"Path: {vfx.Path}");
         }
 
-        ImGui.Text(DataCenter.PartyMembers.GetDeath().Any() ? "Dead Party Members:" : "Dead Party Members: None");
-        foreach (var member in DataCenter.PartyMembers.GetDeath())
+        // Display dead party members
+        var deadPartyMembers = DataCenter.PartyMembers.GetDeath();
+        if (deadPartyMembers.Any())
         {
-            ImGui.Text($"- {member.Name}");
+            ImGui.Text("Dead Party Members:");
+            foreach (var member in deadPartyMembers)
+            {
+                ImGui.Text($"- {member.Name}");
+            }
+        }
+        else
+        {
+            ImGui.Text("Dead Party Members: None");
         }
 
-        ImGui.Text(DataCenter.PartyMembers.Count > 0 ? "Party Members:" : "Party Members: None"); 
-        foreach (var member in DataCenter.PartyMembers)
+        // Display all party members
+        var partyMembers = DataCenter.PartyMembers;
+        if (partyMembers.Count != 0)
         {
-            ImGui.Text($"- {member.Name}");
+            ImGui.Text("Party Members:");
+            foreach (var member in partyMembers)
+            {
+                ImGui.Text($"- {member.Name}");
+            }
+        }
+        else
+        {
+            ImGui.Text("Party Members: None");
         }
 
-        ImGui.Text(DataCenter.FriendlyNPCMembers.Count > 0 ? "Friendly NPC Members:" : "Friendly NPC Members: None");
-        foreach (var member in DataCenter.FriendlyNPCMembers)
+        // Display all party members
+        var friendlyNPCMembers = DataCenter.FriendlyNPCMembers;
+        if (friendlyNPCMembers.Count != 0)
         {
-            ImGui.Text($"- {member.Name}");
+            ImGui.Text("Friendly NPC Members:");
+            foreach (var member in friendlyNPCMembers)
+            {
+                ImGui.Text($"- {member.Name}");
+            }
+        }
+        else
+        {
+            ImGui.Text("Friendly NPC Members: None");
         }
 
-        ImGui.Text(DataCenter.DispelTarget != null ? "Dispel Target:" : "Dispel Target: None");
-        if (DataCenter.DispelTarget != null) ImGui.Text($"- {DataCenter.DispelTarget.Name}");
+        // Display dispel target
+        var dispelTarget = DataCenter.DispelTarget;
+        if (dispelTarget != null)
+        {
+            ImGui.Text("Dispel Target:");
+            ImGui.Text($"- {dispelTarget.Name}");
+        }
+        else
+        {
+            ImGui.Text("Dispel Target: None");
+        }
 
         ImGui.Text($"TerritoryType: {DataCenter.Territory?.ContentType}");
         ImGui.Text($"DPSTaken: {DataCenter.DPSTaken}");
