@@ -457,9 +457,19 @@ partial class AstrologianRotation
 
     }
 
+    static partial void ModifyFallMaleficPvP_29246(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.DoubleCastPvP) == ActionID.FallMaleficPvP_29246;
+    }
+
     static partial void ModifyAspectedBeneficPvP(ref ActionSetting setting) 
     {
 
+    }
+
+    static partial void ModifyAspectedBeneficPvP_29247(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.DoubleCastPvP) == ActionID.AspectedBeneficPvP_29247;
     }
 
     static partial void ModifyGravityIiPvP(ref ActionSetting setting)
@@ -470,14 +480,20 @@ partial class AstrologianRotation
         };
     }
 
-    static partial void ModifyDoubleCastPvP(ref ActionSetting setting)
+    static partial void ModifyGravityIiPvP_29248(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.DoubleCastPvP) != ActionID.DoubleCastPvP;
-        setting.IsFriendly = true;
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.DoubleCastPvP) == ActionID.GravityIiPvP_29248;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
+    }
+
+    static partial void ModifyDoubleCastPvP(ref ActionSetting setting)
+    {
+        // You should never send the server this Action.
+        setting.ActionCheck = () => false;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyMacrocosmosPvP(ref ActionSetting setting)

@@ -475,7 +475,6 @@ partial class MonkRotation
 
     static partial void ModifyFlintsReplyPvP(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.FlintsReplyPvP) == ActionID.FiresReplyPvP;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

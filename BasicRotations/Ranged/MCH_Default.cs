@@ -9,6 +9,9 @@ public sealed class MCH_Default : MachinistRotation
     [RotationConfig(CombatType.PvE, Name = "Prioritize Barrel Stabilizer use")]
     private bool BSPrio { get; set; } = true;
 
+    [RotationConfig(CombatType.PvE, Name = "Use Automation Queen as soon as its available")]
+    private bool DumbQueen { get; set; } = false;
+
     [RotationConfig(CombatType.PvE, Name = "Delay Drill for combo GCD if have one charge and about to break combo")]
     private bool HoldDrillForCombo { get; set; } = true;
 
@@ -106,6 +109,7 @@ public sealed class MCH_Default : MachinistRotation
         }
 
         // Rook Autoturret/Queen Logic
+        if (DumbQueen && InCombat && RookAutoturretPvE.CanUse(out act)) return true;
         if (CanUseQueenMeow(out act, nextGCD)) return true;
 
         // Use Ricochet and Gauss

@@ -524,6 +524,10 @@ partial class NinjaRotation
 
     static partial void ModifyDokumoriPvP(ref ActionSetting setting)
     {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyThreeMudraPvP(ref ActionSetting setting)
@@ -546,7 +550,8 @@ partial class NinjaRotation
 
     static partial void ModifyForkedRaijuPvP(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SpinningEdgePvP) == ActionID.ForkedRaijuPvP;
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SpinningEdgePvP) == ActionID.ForkedRaijuPvP &&
+                                    !Player.HasStatus(true, StatusID.SealedForkedRaiju);
     }
 
     static partial void ModifyFleetingRaijuPvP(ref ActionSetting setting)
@@ -556,27 +561,32 @@ partial class NinjaRotation
 
     static partial void ModifyHyoshoRanryuPvP(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.FumaShurikenPvP) == ActionID.HyoshoRanryuPvP;
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.FumaShurikenPvP) == ActionID.HyoshoRanryuPvP &&
+                                    !Player.HasStatus(true, StatusID.SealedHyoshoRanryu);
     }
 
     static partial void ModifyGokaMekkyakuPvP(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.DokumoriPvP) == ActionID.GokaMekkyakuPvP;
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.DokumoriPvP) == ActionID.GokaMekkyakuPvP &&
+                                    !Player.HasStatus(true, StatusID.SealedGokaMekkyaku);
     }
 
     static partial void ModifyMeisuiPvP(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.ThreeMudraPvP) == ActionID.MeisuiPvP;
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.ThreeMudraPvP) == ActionID.MeisuiPvP &&
+                                    !Player.HasStatus(true, StatusID.SealedMeisui);
+    }
+    
+    static partial void ModifyHutonPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.BunshinPvP) == ActionID.HutonPvP &&
+                                    !Player.HasStatus(true, StatusID.SealedHuton);
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyHollowNozuchiPvP(ref ActionSetting setting)
     {
         //this isn't a real action
-    }
-    static partial void ModifyHutonPvP(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.BunshinPvP) == ActionID.HutonPvP;
-        setting.IsFriendly = true;
     }
 
     static partial void ModifyDotonPvP(ref ActionSetting setting)
