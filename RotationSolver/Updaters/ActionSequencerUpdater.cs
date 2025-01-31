@@ -9,7 +9,7 @@ internal class ActionSequencerUpdater
     public static void UpdateActionSequencerAction()
     {
         if (DataCenter.ConditionSets == null) return;
-        var customRotation = DataCenter.RightNowRotation;
+        var customRotation = DataCenter.CurrentRotation;
         if (customRotation == null) return;
 
         var allActions = RotationUpdater.RightRotationActions;

@@ -438,8 +438,8 @@ internal static class RotationUpdater
 
     public static IEnumerable<IGrouping<string, IAction>>? AllGroupedActions
         => GroupActions([
-            .. DataCenter.RightNowRotation?.AllActions ?? [],
-            .. DataCenter.RightNowDutyRotation?.AllActions ?? []]);
+            .. DataCenter.CurrentRotation?.AllActions ?? [],
+            .. DataCenter.CurrentDutyRotation?.AllActions ?? []]);
 
     public static IEnumerable<IGrouping<string, IAction>>? GroupActions(IEnumerable<IAction> actions)
        => actions?.GroupBy(a =>
@@ -507,10 +507,10 @@ internal static class RotationUpdater
         Service.Config.DutyRotationChoice.TryGetValue(Svc.ClientState.TerritoryType, out var value);
         var name = value ?? string.Empty;
         var type = GetChosenType(rotations, name);
-        if (type != DataCenter.RightNowDutyRotation?.GetType())
+        if (type != DataCenter.CurrentDutyRotation?.GetType())
         {
-            DataCenter.RightNowDutyRotation?.Dispose();
-            DataCenter.RightNowDutyRotation = GetRotation(type);
+            DataCenter.CurrentDutyRotation?.Dispose();
+            DataCenter.CurrentDutyRotation = GetRotation(type);
         }
 
         static DutyRotation? GetRotation(Type? t)
@@ -538,7 +538,7 @@ internal static class RotationUpdater
 
             var rotation = GetChosenRotation(group);
 
-            if (rotation != DataCenter.RightNowRotation?.GetType())
+            if (rotation != DataCenter.CurrentRotation?.GetType())
             {
                 var instance = GetRotation(rotation);
                 if (instance == null)
@@ -550,15 +550,15 @@ internal static class RotationUpdater
                 }
 
                 instance.OnTerritoryChanged();
-                DataCenter.RightNowRotation = instance;
+                DataCenter.CurrentRotation = instance;
             }
 
-            RightRotationActions = DataCenter.RightNowRotation?.AllActions ?? Array.Empty<IAction>();
+            RightRotationActions = DataCenter.CurrentRotation?.AllActions ?? Array.Empty<IAction>();
             return;
         }
 
         CustomRotation.MoveTarget = null;
-        DataCenter.RightNowRotation = null;
+        DataCenter.CurrentRotation = null;
         RightRotationActions = Array.Empty<IAction>();
 
         static ICustomRotation? GetRotation(Type? t)

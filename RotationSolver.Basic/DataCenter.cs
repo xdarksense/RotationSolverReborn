@@ -66,8 +66,8 @@ internal static class DataCenter
     internal static Queue<(DateTime time, SortedList<ulong, float> hpRatios)> RecordedHP { get; } =
         new(HP_RECORD_TIME + 1);
 
-    public static ICustomRotation? RightNowRotation { get; internal set; }
-    public static DutyRotation? RightNowDutyRotation { get; internal set; }
+    public static ICustomRotation? CurrentRotation { get; internal set; }
+    public static DutyRotation? CurrentDutyRotation { get; internal set; }
 
     public static Dictionary<string, DateTime> SystemWarnings { get; set; } = new();
 
@@ -192,8 +192,8 @@ internal static class DataCenter
         NextActs.Sort((a, b) => a.DeadTime.CompareTo(b.DeadTime));
     }
 
-    public static TargetHostileType RightNowTargetToHostileType => Service.Config.HostileType;
-    public static TinctureUseType RightNowTinctureUseType => Service.Config.TinctureType;
+    public static TargetHostileType CurrentTargetToHostileType => Service.Config.HostileType;
+    public static TinctureUseType CurrentTinctureUseType => Service.Config.TinctureType;
 
     public static unsafe ActionID LastComboAction => (ActionID)ActionManager.Instance()->Combo.Action;
     public static unsafe float ComboTime => ActionManager.Instance()->Combo.Timer;

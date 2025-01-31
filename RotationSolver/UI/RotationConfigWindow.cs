@@ -1,5 +1,4 @@
 ﻿using Dalamud.Game.ClientState.Keys;
-using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
@@ -105,7 +104,7 @@ public partial class RotationConfigWindow : Window
 
     private static void DrawDutyRotation()
     {
-        var dutyRotation = DataCenter.RightNowDutyRotation;
+        var dutyRotation = DataCenter.CurrentDutyRotation;
         if (dutyRotation == null) return;
 
         var rot = dutyRotation.GetType().GetCustomAttribute<RotationAttribute>();
@@ -147,45 +146,13 @@ public partial class RotationConfigWindow : Window
     {
         var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
 
-        bool hasIncompatiblePlugin = false;
-        foreach (var item in incompatiblePlugins)
-        {
-            if ((item.Name == "XIV Combo" || item.Name == "XIV Combo Expanded" || item.Name == "XIVSlothCombo" || item.Name == "Wrath Combo") && item.IsInstalled)
-            {
-                hasIncompatiblePlugin = true;
-                break;
-            }
-        }
+        bool hasIncompatiblePlugin = incompatiblePlugins.Any(p => p.IsInstalled);
 
         if (hasIncompatiblePlugin)
         {
             string message = "Disable incompatible plugin";
-            foreach (var plugin in incompatiblePlugins)
-            {
-                if (plugin.IsInstalled)
-                {
-                    if (plugin.Name == "XIV Combo")
-                    {
-                        message = "Disable XIV Combo plugin, causes targetting issues";
-                        break;
-                    }
-                    else if (plugin.Name == "XIV Combo Expanded")
-                    {
-                        message = "Disable XIV Combo Expanded plugin, causes targetting issues";
-                        break;
-                    }
-                    else if (plugin.Name == "XIVSlothCombo")
-                    {
-                        message = "Disable XIVSlothCombo plugin, causes targetting issues";
-                        break;
-                    }
-                    else if (plugin.Name == "Wrath Combo")
-                    {
-                        message = "Disable Wrath Combo plugin, causes targetting issues";
-                        break;
-                    }
-                }
-            }
+            var installedPlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled);
+            message = $"Disable {installedPlugin.Name}, causes targetting issues.";
 
             float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
             using (var color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudOrange)))
@@ -229,16 +196,14 @@ public partial class RotationConfigWindow : Window
             }
         }
 
-        IPlayerCharacter localPlayer = Player.Object;
-
-        if (localPlayer != null && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
+        if (Player.Object != null && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
         Player.Job == Job.LTW || Player.Job == Job.WVR || Player.Job == Job.ALC || Player.Job == Job.CUL ||
         Player.Job == Job.MIN || Player.Job == Job.FSH || Player.Job == Job.BTN))
         {
             float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
             ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
             ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudOrange); // Set text color to DalamudOrange
-            ImGui.Text("You are on an unsupported class (Crafter/Gatherer)");
+            ImGui.Text($"You are on an unsupported class: {Player.Job}");
             ImGui.PopStyleColor(); // Reset text color
             ImGui.PopTextWrapPos(); // Reset text wrapping position
         }
@@ -382,7 +347,7 @@ public partial class RotationConfigWindow : Window
         {
             if (_showText) // Conditionally render the text
             {
-                ImGui.TextWrapped("Click RSR icon for main menu");
+                ImGui.TextWrapped("Click RSR icon for main menu.");
                 ImGui.Spacing();
             }
 
@@ -414,7 +379,7 @@ public partial class RotationConfigWindow : Window
             ImGui.Spacing();
         }
 
-        var rotation = DataCenter.RightNowRotation;
+        var rotation = DataCenter.CurrentRotation;
 
         if (rotation == null && !(Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
         Player.Job == Job.LTW || Player.Job == Job.WVR || Player.Job == Job.ALC || Player.Job == Job.CUL ||
@@ -1055,7 +1020,7 @@ public partial class RotationConfigWindow : Window
 
     private void DrawAutoduty()
     {
-        ImGui.TextWrapped("This is a gentle reminder that RSR is not a botting tool, and while I have taken steps to help it work better with Autoduty please keep that in mind");
+        ImGui.TextWrapped("While the RSR Team has made effort to make RSRcompatible with Autoduty, please keep in mind that RSR is not a botting tool.");
         ImGui.Spacing();
         ImGui.TextWrapped("This menu is mostly for troubleshooting purposes and is a good first step to share to get assistance.");
         ImGui.Spacing();
@@ -1064,7 +1029,7 @@ public partial class RotationConfigWindow : Window
         ImGui.Separator();
         ImGui.Spacing();
         // Display the current HostileType
-        ImGui.TextWrapped($"Current Targeting Mode: {GetHostileTypeDescription(DataCenter.RightNowTargetToHostileType)}");
+        ImGui.TextWrapped($"Current Targeting Mode: {GetHostileTypeDescription(DataCenter.CurrentTargetToHostileType)}");
 
         // Add a button to change the targeting to AllTargetsCanAttack (type 0) aka Autoduty Mode
         if (ImGui.Button("Change Targeting to Autoduty Mode"))
@@ -1207,7 +1172,7 @@ public partial class RotationConfigWindow : Window
     #region Rotation
     private static void DrawRotation()
     {
-        var rotation = DataCenter.RightNowRotation;
+        var rotation = DataCenter.CurrentRotation;
         if (rotation == null) return;
 
         var desc = rotation.Description;
@@ -1264,7 +1229,7 @@ public partial class RotationConfigWindow : Window
     private const float DESC_SIZE = 24;
     private static void DrawRotationDescription()
     {
-        var rotation = DataCenter.RightNowRotation;
+        var rotation = DataCenter.CurrentRotation;
         if (rotation == null) return;
 
         var wholeWidth = ImGui.GetWindowWidth();
@@ -1377,7 +1342,7 @@ public partial class RotationConfigWindow : Window
 
     private static string GetRotationStatusHead()
     {
-        var rotation = DataCenter.RightNowRotation;
+        var rotation = DataCenter.CurrentRotation;
         var status = UiString.ConfigWindow_Rotation_Status.GetDescription();
         if (Service.Config.InDebug)
         {
@@ -1389,7 +1354,7 @@ public partial class RotationConfigWindow : Window
 
     private static void DrawRotationStatus()
     {
-        DataCenter.RightNowRotation?.DisplayStatus();
+        DataCenter.CurrentRotation?.DisplayStatus();
     }
 
     private static string ToCommandStr(OtherCommandType type, string str, string extra = "")
@@ -1400,7 +1365,7 @@ public partial class RotationConfigWindow : Window
     }
     private static void DrawRotationConfiguration()
     {
-        var rotation = DataCenter.RightNowRotation;
+        var rotation = DataCenter.CurrentRotation;
         if (rotation == null) return;
 
         var enable = rotation.IsEnabled;
@@ -1515,7 +1480,7 @@ public partial class RotationConfigWindow : Window
 
     private static void DrawRotationInformation()
     {
-        var rotation = DataCenter.RightNowRotation;
+        var rotation = DataCenter.CurrentRotation;
         if (rotation == null) return;
 
         var youtubeLink = rotation.GetType().GetCustomAttribute<YoutubeLinkAttribute>()?.ID;
@@ -1593,7 +1558,7 @@ public partial class RotationConfigWindow : Window
             {
                 _actionsList.ClearCollapsingHeader();
 
-                if (DataCenter.RightNowRotation != null && RotationUpdater.AllGroupedActions != null)
+                if (DataCenter.CurrentRotation != null && RotationUpdater.AllGroupedActions != null)
                 {
                     var size = 30 * Scale;
                     var count = Math.Max(1, (int)MathF.Floor(ImGui.GetColumnWidth() / (size * 1.1f + ImGui.GetStyle().ItemSpacing.X)));
@@ -1822,7 +1787,7 @@ public partial class RotationConfigWindow : Window
         {
             ImGui.TextWrapped(UiString.ConfigWindow_Actions_ForcedConditionSet_Description.GetDescription());
 
-            var rotation = DataCenter.RightNowRotation;
+            var rotation = DataCenter.CurrentRotation;
             var set = DataCenter.RightSet;
 
             if (set == null || _activeAction == null || rotation == null) return;
@@ -1833,7 +1798,7 @@ public partial class RotationConfigWindow : Window
         {
             ImGui.TextWrapped(UiString.ConfigWindow_Actions_DisabledConditionSet_Description.GetDescription());
 
-            var rotation = DataCenter.RightNowRotation;
+            var rotation = DataCenter.CurrentRotation;
             var set = DataCenter.RightSet;
 
             if (set == null || _activeAction == null || rotation == null) return;
@@ -2707,7 +2672,7 @@ public partial class RotationConfigWindow : Window
 
     private static readonly CollapsingHeaderGroup _debugHeader = new(new()
     {
-        {() => DataCenter.RightNowRotation != null ? "Rotation" : string.Empty, DrawDebugRotationStatus},
+        {() => DataCenter.CurrentRotation != null ? "Rotation" : string.Empty, DrawDebugRotationStatus},
         {() => "Player Status", DrawStatus },
         {() => "Party", DrawParty },
         {() => "Target Data", DrawTargetData },
@@ -2725,7 +2690,7 @@ public partial class RotationConfigWindow : Window
 
     private static void DrawDebugRotationStatus()
     {
-        DataCenter.RightNowRotation?.DisplayStatus();
+        DataCenter.CurrentRotation?.DisplayStatus();
     }
 
     private static unsafe void DrawStatus()
@@ -2840,7 +2805,7 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"TerritoryType: {DataCenter.Territory?.ContentType}");
         ImGui.Text($"DPSTaken: {DataCenter.DPSTaken}");
         ImGui.Text($"IsHostileCastingToTank: {DataCenter.IsHostileCastingToTank}");
-        ImGui.Text($"RightNowRotation: {DataCenter.RightNowRotation}");
+        ImGui.Text($"CurrentRotation: {DataCenter.CurrentRotation}");
         ImGui.Text($"Job: {DataCenter.Job}");
         ImGui.Text($"JobRange: {DataCenter.JobRange}");
         ImGui.Text($"Job Role: {DataCenter.Role}");
@@ -2927,19 +2892,6 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"Is Others Players: {battleChara.IsOthersPlayers()}");
             ImGui.Text($"Targetable: {battleChara.Struct()->Character.GameObject.TargetableStatus}");
 
-            var npc = battleChara.GetObjectNPC();
-            if (npc != null)
-            {
-                // ImGui.Text($"Unknown12: {npc.Unknown12}"); commented out for now as broken with Lumina5 and unsure its purposed tbh
-
-                // Uncomment these lines if needed
-                // ImGui.Text($"Unknown15: {npc.Unknown15}");
-                // ImGui.Text($"Unknown18: {npc.Unknown18}");
-                // ImGui.Text($"Unknown19: {npc.Unknown19}");
-                // ImGui.Text($"Unknown20: {npc.Unknown20}");
-                // ImGui.Text($"Unknown21: {npc.Unknown21}");
-            }
-
             foreach (var status in battleChara.StatusList)
             {
                 var source = status.SourceId == Player.Object.GameObjectId ? "You" : Svc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
@@ -2957,7 +2909,7 @@ public partial class RotationConfigWindow : Window
 
     private static void DrawNextAction()
     {
-        ImGui.Text(DataCenter.RightNowRotation?.GetType().GetCustomAttribute<RotationAttribute>()!.Name);
+        ImGui.Text(DataCenter.CurrentRotation?.GetType().GetCustomAttribute<RotationAttribute>()!.Name);
         ImGui.Text(DataCenter.SpecialType.ToString());
 
         ImGui.Text(ActionUpdater.NextAction?.Name ?? "null");

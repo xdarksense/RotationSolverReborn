@@ -28,34 +28,34 @@ internal enum RotationConfigWindowTab : byte
     [TabSkip] About,
     [TabSkip] Rotation,
 
-    [Description("The abilities and custom conditions for your current Job.")]
+    [Description("Configure abilities and custom conditions for your current job.")]
     [TabIcon(Icon = 4)] Actions,
 
-    [Description("All rotations that RSR has loaded")]
+    [Description("View and manage all loaded RSR rotations.")]
     [TabIcon(Icon = 47)] Rotations,
 
-    [Description("Reactive action and statuses lists")]
+    [Description("Configure reactive actions and status effect lists.")]
     [TabIcon(Icon = 21)] List,
 
-    [Description("Basic settings")]
+    [Description("Configure basic settings.")]
     [TabIcon(Icon = 14)] Basic,
 
-    [Description("User interface settings")]
+    [Description("Configure user interface settings.")]
     [TabIcon(Icon = 42)] UI,
 
-    [Description("General Action usage and control")]
+    [Description("Configure general action usage and control settings.")]
     [TabIcon(Icon = 29)] Auto,
 
-    [Description("Targeting settings")]
+    [Description("Configure targeting settings.")]
     [TabIcon(Icon = 16)] Target,
 
-    [Description("Features that are not core to RSR but are helpful")]
+    [Description("Configure optional helpful features.")]
     [TabIcon(Icon = 51)] Extra,
 
-    [Description("Debug stuff for developers and rotation writers. Please do not leave this enabled.")]
+    [Description("Debug options for developers and rotation writers (disable when not in use).")]
     [TabIcon(Icon = 5)] Debug,
 
-    [Description("Specific Autoduty related settings and information")]
+    [Description("Configure AutoDuty settings and view related information.")]
     [TabIcon(Icon = 4)] AutoDuty,
 }
 

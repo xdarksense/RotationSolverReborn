@@ -4,7 +4,7 @@ namespace RotationSolver.Data
 {
     internal enum UiString
     {
-        [Description("The condition set you chose, click to modify.")]
+        [Description("The condition set you chose. Click to modify.")]
         ConfigWindow_ConditionSetDesc,
 
         [Description("Condition Set")]
@@ -28,25 +28,25 @@ namespace RotationSolver.Data
         [Description("Territory Condition")]
         ConfigWindow_Territoryset,
 
-        [Description("No rotations loaded! Please see the rotations tab!")]
+        [Description("No rotations loaded! Please check the rotations tab!")]
         ConfigWindow_NoRotation,
 
-        [Description("The duty rotation you chose, click to modify.")]
+        [Description("The duty rotation you chose. Click to modify.")]
         ConfigWindow_DutyRotationDesc,
 
         [Description("Remove")]
         ConfigWindow_List_Remove,
 
-        [Description("Load From folder.")]
+        [Description("Load from folder")]
         ActionSequencer_Load,
 
-        [Description("Analyses PvE combat information in every frame and finds the best action.")]
+        [Description("Analyzes PvE combat information in every frame and finds the best action.")]
         ConfigWindow_About_Punchline,
 
         [Description("Game")]
         ConfigWindow_Helper_GameVersion,
 
-        [Description("Invalid Rotation! \nPlease update to the latest version or contact to the {0}!")]
+        [Description("Invalid Rotation! \nPlease update to the latest version or contact {0}!")]
         ConfigWindow_Rotation_InvalidRotation,
 
         [Description("Beta Rotation!")]
@@ -61,16 +61,16 @@ namespace RotationSolver.Data
         [Description("Well, you must be a lazy player!")]
         ConfigWindow_About_Clicking100k,
 
-        [Description("You're tiring RSR out, give it a break!")]
+        [Description("You're tiring RSR out - give it a break!")]
         ConfigWindow_About_Clicking500k,
 
-        [Description("This means almost all the information available in one frame in combat, including the status of all players in the party, the status of any hostile targets, skill cooldowns, the MP and HP of characters, the location of characters, casting status of the hostile target, combo, combat duration, player level, etc.\n\nThen, it will highlight the best action on the hot bar, or help you to click on it.")]
+        [Description("This includes almost all information available in one combat frame, including the status of all party members, hostile target statuses, skill cooldowns, MP and HP of characters, character locations, hostile target casting status, combo state, combat duration, player level, etc.\n\nIt will then highlight the best action on the hotbar, or help you click it.")]
         ConfigWindow_About_Description,
 
-        [Description("It is designed for GENERAL COMBAT, not for savage or ultimate. Use it carefully.")]
+        [Description("This is designed for GENERAL COMBAT, not for Savage or Ultimate content. Use it carefully.")]
         ConfigWindow_About_Warning,
 
-        [Description("RSR helped you by clicking actions {0:N0} times.")]
+        [Description("RSR has helped you by clicking actions {0:N0} times.")]
         ConfigWindow_About_ClickingCount,
 
         [Description("Macro")]
@@ -94,19 +94,19 @@ namespace RotationSolver.Data
         [Description("Warning Time")]
         ConfigWindow_About_Warnings_Time,
 
-        [Description("Literally, Rotation Solver helps you to choose the target and then click the action. So any plugin that changes these will affect its decision.\n\nHere is a list of known incompatible plugins:")]
+        [Description("Rotation Solver helps you choose targets and click actions. Any plugin that changes these will affect its decisions.\n\nHere is a list of known incompatible plugins:")]
         ConfigWindow_About_Compatibility_Description,
 
-        [Description("Can't properly execute the behavior that RSR wants to do.")]
+        [Description("Cannot properly execute the behavior that RSR wants to perform.")]
         ConfigWindow_About_Compatibility_Mistake,
 
-        [Description("Conflicts with RSR decision making")]
+        [Description("Conflicts with RSR decision-making")]
         ConfigWindow_About_Compatibility_Mislead,
 
-        [Description("Causes the game to crash.")]
+        [Description("Causes the game to crash")]
         ConfigWindow_About_Compatibility_Crash,
 
-        [Description("Many thanks to the sponsors.")]
+        [Description("Many thanks to our sponsors.")]
         ConfigWindow_About_ThanksToSupporters,
 
         [Description("Open Config Folder")]
@@ -124,43 +124,43 @@ namespace RotationSolver.Data
         [Description("Status")]
         ConfigWindow_Rotation_Status,
 
-        [Description("Used to customize when RSR uses specific actions automatically, click on an action's icon in the left list. Below, you may set the conditions for when that specific action is used. Each action can have a different set of conditions to override the default rotation behavior.")]
+        [Description("Used to customize when RSR uses specific actions automatically. Click on an action's icon in the left list. Below, you may set the conditions for when that specific action is used. Each action can have different conditions to override the default rotation behavior.")]
         ConfigWindow_Actions_Description,
 
         [Description("Show on CD window")]
         ConfigWindow_Actions_ShowOnCDWindow,
 
-        [Description("TTK that this action needs the target be before it is used.")]
+        [Description("Time-to-kill threshold required for this action to be used")]
         ConfigWindow_Actions_TTK,
 
-        [Description("How many targets are needed to use this action.")]
+        [Description("Number of targets needed to use this action")]
         ConfigWindow_Actions_AoeCount,
 
-        [Description("Should this action check the status.")]
+        [Description("Should this action check status effects")]
         ConfigWindow_Actions_CheckStatus,
 
-        [Description("How many gcds before the dot is reapplied.")]
+        [Description("Number of GCDs before the DoT is reapplied")]
         ConfigWindow_Actions_GcdCount,
 
-        [Description("The HP ratio to auto heal")]
+        [Description("HP ratio for automatic healing")]
         ConfigWindow_Actions_HealRatio,
 
-        [Description("Forced Conditions have a higher priority. If Forced Conditions are met, Disabled Condition will be ignored.")]
+        [Description("Forced Conditions have higher priority. If Forced Conditions are met, Disabled Conditions will be ignored.")]
         ConfigWindow_Actions_ConditionDescription,
 
         [Description("Forced Condition")]
         ConfigWindow_Actions_ForcedConditionSet,
 
-        [Description("Conditions for forced automatic use of action.")]
+        [Description("Conditions for forced automatic use of action")]
         ConfigWindow_Actions_ForcedConditionSet_Description,
 
         [Description("Disabled Condition")]
         ConfigWindow_Actions_DisabledConditionSet,
 
-        [Description("Conditions for automatic use of action being disabled.")]
+        [Description("Conditions that disable automatic use of an action")]
         ConfigWindow_Actions_DisabledConditionSet_Description,
 
-        [Description("Custom rotations are just like plugins and have full access to the game and your computer")]
+        [Description("Custom rotations are like plugins and have full access to the game and your computer")]
         ConfigWindow_Rotations_Warning,
 
         [Description("Please only load rotations from sources that you trust")]
@@ -169,13 +169,13 @@ namespace RotationSolver.Data
         [Description("Update Rotations")]
         ConfigWindow_Rotations_Download,
 
-        [Description("Reset To Defaults")]
+        [Description("Reset to Defaults")]
         ConfigWindow_Rotations_Reset,
 
         [Description("Rotation Sources:")]
         ConfigWindow_Rotations_Sources,
 
-        [Description("Links of the rotations online")]
+        [Description("Links to online rotations")]
         ConfigWindow_Rotations_Links,
 
         [Description("Settings")]
@@ -184,13 +184,13 @@ namespace RotationSolver.Data
         [Description("Loaded")]
         ConfigWindow_Rotations_Loaded,
 
-        [Description("Github")]
+        [Description("GitHub")]
         ConfigWindow_Rotations_GitHub,
 
         [Description("Libraries")]
         ConfigWindow_Rotations_Libraries,
 
-        [Description("User Name")]
+        [Description("Username")]
         ConfigWindow_Rotations_UserName,
 
         [Description("Repository")]
@@ -199,10 +199,10 @@ namespace RotationSolver.Data
         [Description("File Name")]
         ConfigWindow_Rotations_FileName,
 
-        [Description("The folder contains the rotation library or the download url for the rotation library.")]
+        [Description("The folder containing the rotation library or the download URL for the rotation library")]
         ConfigWindow_Rotations_Library,
 
-        [Description("In this window, you can set the parameters that can be customised using lists.")]
+        [Description("In this window, you can set parameters that can be customized using lists.")]
         ConfigWindow_List_Description,
 
         [Description("Statuses")]
@@ -211,10 +211,10 @@ namespace RotationSolver.Data
         [Description("Actions")]
         ConfigWindow_List_Actions,
 
-        [Description("Map specific settings")]
+        [Description("Map-specific settings")]
         ConfigWindow_List_Territories,
 
-        [Description("Status name or id")]
+        [Description("Status name or ID")]
         ConfigWindow_List_StatusNameOrId,
 
         [Description("Invulnerability")]
@@ -226,7 +226,7 @@ namespace RotationSolver.Data
         [Description("Dispellable debuffs")]
         ConfigWindow_List_DangerousStatus,
 
-        [Description("No Casting debuffs")]
+        [Description("No-casting debuffs")]
         ConfigWindow_List_NoCastingStatus,
 
         [Description("Ignores target if it has one of these statuses")]
@@ -238,7 +238,7 @@ namespace RotationSolver.Data
         [Description("Dispellable debuffs list")]
         ConfigWindow_List_DangerousStatusDesc,
 
-        [Description("Do no action if you have one of these debuffs")]
+        [Description("Do not take action if you have one of these debuffs")]
         ConfigWindow_List_NoCastingStatusDesc,
 
         [Description("Copy to Clipboard")]
@@ -250,7 +250,7 @@ namespace RotationSolver.Data
         [Description("Add Status")]
         ConfigWindow_List_AddStatus,
 
-        [Description("Action name or id")]
+        [Description("Action name or ID")]
         ConfigWindow_List_ActionNameOrId,
 
         [Description("Tank Buster")]
@@ -289,22 +289,22 @@ namespace RotationSolver.Data
         [Description("Beneficial AoE locations")]
         ConfigWindow_List_BeneficialPositions,
 
-        [Description("Enemies that will be prioritized. This system is under construction and experimental, but should be stable.")]
+        [Description("Enemies that will be prioritized. This system is under construction and experimental but should be stable.")]
         ConfigWindow_List_PrioTargetDesc,
 
-        [Description("Enemies that will never be targeted.")]
+        [Description("Enemies that will never be targeted")]
         ConfigWindow_List_NoHostileDesc,
 
-        [Description("The name of the enemy that you want to be prioritized.")]
+        [Description("The name of the enemy that you want to prioritize")]
         ConfigWindow_List_PrioTargetName,
 
-        [Description("The name of the enemy that you don't want to be targeted")]
+        [Description("The name of the enemy that you don't want to target")]
         ConfigWindow_List_NoHostilesName,
 
-        [Description("Enemies that will never be provoked.")]
+        [Description("Enemies that will never be provoked")]
         ConfigWindow_List_NoProvokeDesc,
 
-        [Description("The name of the enemy that you don't want to be provoked")]
+        [Description("The name of the enemy that you don't want to provoke")]
         ConfigWindow_List_NoProvokeName,
 
         [Description("Add beneficial AoE location")]
@@ -325,16 +325,16 @@ namespace RotationSolver.Data
         [Description("Targets with Heal-over-Time")]
         HotTargets,
 
-        [Description("HP for AoE healing oGCDs")]
+        [Description("HP threshold for AoE healing oGCDs")]
         HpAoe0Gcd,
 
-        [Description("HP for AoE healing GCDs")]
+        [Description("HP threshold for AoE healing GCDs")]
         HpAoeGcd,
 
-        [Description("HP for ST healing oGCDs")]
+        [Description("HP threshold for single-target healing oGCDs")]
         HpSingle0Gcd,
 
-        [Description("HP for ST healing GCDs")]
+        [Description("HP threshold for single-target healing GCDs")]
         HpSingleGcd,
 
         [Description("No Move")]
@@ -343,7 +343,7 @@ namespace RotationSolver.Data
         [Description("Move")]
         InfoWindowMove,
 
-        [Description("Search... ")]
+        [Description("Search...")]
         ConfigWindow_Searching,
 
         [Description("Timer")]
@@ -358,28 +358,28 @@ namespace RotationSolver.Data
         [Description("Others")]
         ConfigWindow_Basic_Others,
 
-        [Description("The ping time.\nIn RSR, it means the time from sending the action request to receiving the using success message from the server.")]
+        [Description("The ping time.\nIn RSR, this means the time from sending the action request to receiving the success message from the server.")]
         ConfigWindow_Basic_Ping,
 
-        [Description("The Animation lock time from individual actions. Here is 0.6s for example.")]
+        [Description("The animation lock time for individual actions. For example, 0.6s.")]
         ConfigWindow_Basic_AnimationLockTime,
 
-        [Description("The clicking duration, RSR will try to click at this moment.")]
+        [Description("The clicking duration - RSR will try to click at this moment.")]
         ConfigWindow_Basic_ClickingDuration,
 
-        [Description("The ideal click time.")]
+        [Description("The ideal click time")]
         ConfigWindow_Basic_IdealClickingTime,
 
-        [Description("The real click time.")]
+        [Description("The actual click time")]
         ConfigWindow_Basic_RealClickingTime,
 
-        [Description("Auto turn off conditions")]
+        [Description("Auto turn-off conditions")]
         ConfigWindow_Basic_SwitchCancelConditionSet,
 
-        [Description("Auto turn manual conditions")]
+        [Description("Auto manual mode conditions")]
         ConfigWindow_Basic_SwitchManualConditionSet,
 
-        [Description("Auto turn auto conditions")]
+        [Description("Auto automatic mode conditions")]
         ConfigWindow_Basic_SwitchAutoConditionSet,
 
         [Description("Condition Name")]
@@ -394,13 +394,13 @@ namespace RotationSolver.Data
         [Description("Windows")]
         ConfigWindow_UI_Windows,
 
-        [Description("Change the way that RSR automatically uses actions.")]
+        [Description("Change how RSR automatically uses actions")]
         ConfigWindow_Auto_Description,
 
         [Description("Action Usage and Control")]
         ConfigWindow_Auto_ActionUsage,
 
-        [Description("Which actions RSR can use.")]
+        [Description("Which actions RSR can use")]
         ConfigWindow_Auto_ActionUsage_Description,
 
         [Description("Healing Usage and Control")]
@@ -424,10 +424,10 @@ namespace RotationSolver.Data
         [Description("Defense Single Forced Condition")]
         ConfigWindow_Auto_DefenseSingleConditionSet,
 
-        [Description("Dispel Stance Positional Forced Condition")]
+        [Description("Dispel/Stance/Positional Forced Condition")]
         ConfigWindow_Auto_DispelStancePositionalConditionSet,
 
-        [Description("Raise Shirk Forced Condition")]
+        [Description("Raise/Shirk Forced Condition")]
         ConfigWindow_Auto_RaiseShirkConditionSet,
 
         [Description("Move Forward Forced Condition")]
@@ -436,7 +436,7 @@ namespace RotationSolver.Data
         [Description("Move Back Forced Condition")]
         ConfigWindow_Auto_MoveBackConditionSet,
 
-        [Description("Anti Knockback Forced Condition")]
+        [Description("Anti-Knockback Forced Condition")]
         ConfigWindow_Auto_AntiKnockbackConditionSet,
 
         [Description("Speed Forced Condition")]
@@ -445,7 +445,7 @@ namespace RotationSolver.Data
         [Description("No Casting Condition Set")]
         ConfigWindow_Auto_NoCastingConditionSet,
 
-        [Description("This will change the way that RSR uses actions.")]
+        [Description("This will change how RSR uses actions")]
         ConfigWindow_Auto_ActionCondition_Description,
 
         [Description("Configuration")]
@@ -469,7 +469,7 @@ namespace RotationSolver.Data
         [Description("Hostile target selection condition")]
         ConfigWindow_Param_HostileCondition,
 
-        [Description("RSR focuses on the rotation itself. These are side features. If there are some other plugins can do that, these features will be deleted.")]
+        [Description("RSR focuses on the rotation itself. These are side features. Subject to removal at any time.")]
         ConfigWindow_Extra_Description,
 
         [Description("Event")]
@@ -481,7 +481,7 @@ namespace RotationSolver.Data
         [Description("Add Events")]
         ConfigWindow_Events_AddEvent,
 
-        [Description("In this window, you can set what macro will be trigger after using an action.")]
+        [Description("In this window, you can set which macro will be triggered after using an action.")]
         ConfigWindow_Events_Description,
 
         [Description("Duty Start: ")]
@@ -493,22 +493,22 @@ namespace RotationSolver.Data
         [Description("Delete Event")]
         ConfigWindow_Events_RemoveEvent,
 
-        [Description("Click to make it reverse.\nIs reversed : {0}")]
+        [Description("Click to make it reverse.\nIs reversed: {0}")]
         ActionSequencer_NotDescription,
 
         [Description("Member Name")]
         ConfigWindow_Actions_MemberName,
 
-        [Description("Rotation is null, please login or switch the job!")]
+        [Description("Rotation is null. Please log in or switch jobs!")]
         ConfigWindow_Condition_RotationNullWarning,
 
-        [Description("Delay its turning to true.")]
+        [Description("Delay its transition to true")]
         ActionSequencer_Delay_Description,
 
-        [Description("Delay its turning.")]
+        [Description("Delay its transition")]
         ActionSequencer_Offset_Description,
 
-        [Description("Enough Level")]
+        [Description("Sufficient Level")]
         ActionConditionType_EnoughLevel,
 
         [Description("Time Offset")]
@@ -532,7 +532,7 @@ namespace RotationSolver.Data
         [Description("From Self")]
         ActionSequencer_StatusSelf,
 
-        [Description("You'd better not use it. Because this target isn't the action's target. Try to pick it from action.")]
+        [Description("You should not use this, as this target isn't the action's target. Try selecting it from the action instead.")]
         ConfigWindow_Condition_TargetWarning,
 
         [Description("Territory Name")]
@@ -541,25 +541,25 @@ namespace RotationSolver.Data
         [Description("Duty Name")]
         ConfigWindow_Condition_DutyName,
 
-        [Description("Please separately keybind damage reduction / shield cooldowns in case RSR fails at a crucial moment in {0}!")]
+        [Description("Please separately bind damage reduction/shield cooldowns in case RSR fails at a crucial moment in {0}!")]
         HighEndWarning,
 
-        [Description("Avarice addon was not detected, please install it if you want to get the positional indicators for RSRs overlay!")]
+        [Description("Avarice addon was not detected. Please install it if you want positional indicators for RSR's overlay!")]
         AvariceWarning,
 
-        [Description("TextToTalk addon was not detected, please install it to make RSR give audio notifications!")]
+        [Description("TextToTalk addon was not detected. Please install it to enable RSR's audio notifications!")]
         TextToTalkWarning,
 
         [Description("Use Forced Enable Condition")]
         ForcedEnableCondition,
 
-        [Description("The conditions of forced to make it true.")]
+        [Description("The conditions that force this to be true")]
         ForcedEnableConditionDesc,
 
         [Description("Use Forced Disable Condition")]
         ForcedDisableCondition,
 
-        [Description("The conditions of forced to make it false.")]
+        [Description("The conditions that force this to be false")]
         ForcedDisableConditionDesc,
 
         [Description("Click to execute the command")]
@@ -580,19 +580,19 @@ namespace RotationSolver.Data
         [Description("Modify {0} to {1}")]
         CommandsChangeSettingsValue,
 
-        [Description("Failed to find the config in this rotation, please check it.")]
+        [Description("Failed to find the config in this rotation. Please check it.")]
         CommandsCannotFindConfig,
 
         [Description("Will use it within {0}s")]
         CommandsInsertAction,
 
-        [Description("Can not find the action, please check the action name.")]
+        [Description("Cannot find the action. Please check the action name.")]
         CommandsInsertActionFailure,
 
-        [Description("Failed to get both value and config from string. Please make sure you provide both a config option and value")]
+        [Description("Failed to get both value and config from string. Please make sure you provide both a config option and value.")]
         CommandsMissingArgument,
 
-        [Description("Start ")]
+        [Description("Start")]
         SpecialCommandType_Start,
 
         [Description("Cancel")]
@@ -631,7 +631,7 @@ namespace RotationSolver.Data
         [Description("Move Back")]
         SpecialCommandType_MoveBack,
 
-        [Description("Anti Knockback")]
+        [Description("Anti-Knockback")]
         SpecialCommandType_AntiKnockback,
 
         [Description("Burst")]
@@ -649,7 +649,7 @@ namespace RotationSolver.Data
         [Description("No Casting")]
         SpecialCommandType_NoCasting,
 
-        [Description("Auto Target ")]
+        [Description("Auto Target")]
         SpecialCommandType_Smart,
 
         [Description("Manual Target")]
@@ -658,22 +658,22 @@ namespace RotationSolver.Data
         [Description("Off")]
         SpecialCommandType_Off,
 
-        [Description("Open config window.")]
+        [Description("Open config window")]
         Commands_Rotation,
 
         [Description("Rotation Solver Reborn Settings v")]
         ConfigWindowHeader,
 
-        [Description("This config is job specific")]
+        [Description("This config is job-specific")]
         JobConfigTip,
 
-        [Description("This option is unavailable while using your current job\n \nRoles or jobs needed:\n{0}")]
+        [Description("This option is unavailable with your current job\n \nRoles or jobs needed:\n{0}")]
         NotInJob,
 
         [Description("Welcome to Rotation Solver Reborn!")]
         WelcomeWindow_Header,
 
-        [Description("Here's what you missed since the last time you were here")]
+        [Description("Here's what you missed since you were last here")]
         WelcomeWindow_WelcomeBack,
 
         [Description("It looks like you might be new here! Let's get you started!")]
@@ -685,7 +685,7 @@ namespace RotationSolver.Data
         [Description("Reorder AutoStatus Priorities")]
         ConfigWindow_Auto_PrioritiesOrganizer,
 
-        [Description("PvP Specific Controls")]
+        [Description("PvP-Specific Controls")]
         ConfigWindow_Auto_PvPSpecific,
     }
 

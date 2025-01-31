@@ -144,7 +144,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
             try
             {
-                DataCenter.RightNowRotation?.OnTerritoryChanged();
+                DataCenter.CurrentRotation?.OnTerritoryChanged();
             }
             catch (Exception ex)
             {
@@ -222,7 +222,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
     internal static void UpdateDisplayWindow()
     {
         var isValid = validDelay.Delay(MajorUpdater.IsValid
-            && DataCenter.RightNowRotation != null
+            && DataCenter.CurrentRotation != null
             && !Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]
             && !Svc.Condition[ConditionFlag.Occupied38] //Treasure hunt.
             && !Svc.Condition[ConditionFlag.WaitingForDuty]

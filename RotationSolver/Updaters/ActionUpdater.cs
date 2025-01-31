@@ -59,7 +59,7 @@ internal static class ActionUpdater
     internal static void UpdateNextAction()
     {
         IPlayerCharacter localPlayer = Player.Object;
-        var customRotation = DataCenter.RightNowRotation;
+        var customRotation = DataCenter.CurrentRotation;
 
         try
         {
