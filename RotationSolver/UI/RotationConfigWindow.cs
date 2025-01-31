@@ -145,22 +145,17 @@ public partial class RotationConfigWindow : Window
     private void DrawErrorZone()
     {
         var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
+        var installedIncompatiblePlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type == 5);
 
-        bool hasIncompatiblePlugin = incompatiblePlugins.Any(p => p.IsInstalled);
-
-        if (hasIncompatiblePlugin)
+        if (installedIncompatiblePlugin.Name != null)
         {
-            string message = "Disable incompatible plugin";
-            var installedPlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled);
-            message = $"Disable {installedPlugin.Name}, causes targetting issues.";
+            string message = $"Disable {installedIncompatiblePlugin.Name}, causes targetting issues.";
 
             float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
-            using (var color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudOrange)))
-            {
-                ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
-                ImGui.Text(message);
-                ImGui.PopTextWrapPos(); // Reset text wrapping position
-            }
+            using var color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudOrange));
+            ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
+            ImGui.Text(message);
+            ImGui.PopTextWrapPos(); // Reset text wrapping position
         }
 
         if (DataCenter.SystemWarnings != null && DataCenter.SystemWarnings.Any())
