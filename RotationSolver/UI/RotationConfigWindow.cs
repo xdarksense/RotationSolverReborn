@@ -142,25 +142,52 @@ public partial class RotationConfigWindow : Window
         }
     }
 
-    private void DrawErrorZone()
-    {
+    private bool CheckErrors(){
         var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
         var installedIncompatiblePlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type == 5);
 
         if (installedIncompatiblePlugin.Name != null)
         {
-            string message = $"Disable {installedIncompatiblePlugin.Name}, causes targetting issues.";
-
-            float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
-            using var color = ImRaii.PushColor(ImGuiCol.Text, ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudOrange));
-            ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
-            ImGui.Text(message);
-            ImGui.PopTextWrapPos(); // Reset text wrapping position
+            return true;
         }
 
         if (DataCenter.SystemWarnings != null && DataCenter.SystemWarnings.Any())
         {
-            float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
+            return true;
+        }
+
+        if (Player.Object != null && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
+        Player.Job == Job.LTW || Player.Job == Job.WVR || Player.Job == Job.ALC || Player.Job == Job.CUL ||
+        Player.Job == Job.MIN || Player.Job == Job.FSH || Player.Job == Job.BTN))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private void DrawErrorZone()
+    {
+        var errorText = "No internal errors.";
+        float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
+
+        var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
+        var installedIncompatiblePlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type == 5);
+
+        if (installedIncompatiblePlugin.Name != null)
+        {
+            errorText = $"Disable {installedIncompatiblePlugin.Name}, causes targetting issues.";
+        }
+
+        if (Player.Object != null && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
+        Player.Job == Job.LTW || Player.Job == Job.WVR || Player.Job == Job.ALC || Player.Job == Job.CUL ||
+        Player.Job == Job.MIN || Player.Job == Job.FSH || Player.Job == Job.BTN))
+        {
+            errorText = $"You are on an unsupported class: {Player.Job}";
+        }
+
+        if (DataCenter.SystemWarnings != null && DataCenter.SystemWarnings.Any())
+        {
             var warningsToRemove = new List<string>();
 
             foreach (var warning in DataCenter.SystemWarnings.Keys)
@@ -189,25 +216,14 @@ public partial class RotationConfigWindow : Window
             {
                 DataCenter.SystemWarnings.Remove(warning);
             }
-        }
-
-        if (Player.Object != null && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
-        Player.Job == Job.LTW || Player.Job == Job.WVR || Player.Job == Job.ALC || Player.Job == Job.CUL ||
-        Player.Job == Job.MIN || Player.Job == Job.FSH || Player.Job == Job.BTN))
+        } 
+        
+        if (errorText != "No internal errors.") 
         {
-            float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
             ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
             ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudOrange); // Set text color to DalamudOrange
-            ImGui.Text($"You are on an unsupported class: {Player.Job}");
+            ImGui.Text(errorText);
             ImGui.PopStyleColor(); // Reset text color
-            ImGui.PopTextWrapPos(); // Reset text wrapping position
-        }
-
-        else
-        {
-            float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
-            ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
-            ImGui.Text("No Errors");
             ImGui.PopTextWrapPos(); // Reset text wrapping position
         }
     }
@@ -230,43 +246,17 @@ public partial class RotationConfigWindow : Window
             if (wholeWidth > JOB_ICON_WIDTH * Scale)
             {
                 DrawDutyRotation();
-                DrawErrorZone();
+                if (CheckErrors()) {
+                    DrawErrorZone();
 
-                ImGui.Separator();
-                ImGui.Spacing();
+                    ImGui.Separator();
+                    ImGui.Spacing();
+                }
 
                 ImGui.SetNextItemWidth(wholeWidth);
                 SearchingBox();
 
                 ImGui.Spacing();
-            }
-            else
-            {
-                if (IconSet.GetTexture(46, out var icon))
-                {
-                    ImGuiHelper.DrawItemMiddle(() =>
-                    {
-                        using var popup = ImRaii.Popup("Searching Popup");
-                        if (popup)
-                        {
-                            ImGui.SetNextItemWidth(200 * Scale);
-                            SearchingBox();
-                            if (ImGui.IsKeyDown(ImGuiKey.Enter))
-                            {
-                                ImGui.CloseCurrentPopup();
-                            }
-                        }
-
-                        var cursor = ImGui.GetCursorPos();
-                        if (ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, Vector2.One * iconSize))
-                        {
-                            ImGui.OpenPopup("Searching Popup");
-                        }
-                        ImGuiHelper.DrawActionOverlay(cursor, iconSize, -1);
-                        ImguiTooltips.HoveredTooltip("Search");
-
-                    }, Math.Max(Scale * MIN_COLUMN_WIDTH, wholeWidth), iconSize);
-                }
             }
 
             foreach (var item in Enum.GetValues<RotationConfigWindowTab>())
@@ -440,48 +430,14 @@ public partial class RotationConfigWindow : Window
             var iconSize = Math.Max(Scale * MIN_COLUMN_WIDTH, Math.Min(wholeWidth, Scale * JOB_ICON_WIDTH));
             var comboSize = ImGui.CalcTextSize(rot.Name).X;
 
-            const string slash = " - ";
-            var gameVersionSize = ImGui.CalcTextSize(slash + rot.GameVersion).X + ImGui.GetStyle().ItemSpacing.X;
-            var gameVersion = UiString.ConfigWindow_Helper_GameVersion.GetDescription() + ": ";
-            var drawCenter = ImGui.CalcTextSize(slash + gameVersion + rot.GameVersion).X + iconSize + ImGui.GetStyle().ItemSpacing.X * 3 < wholeWidth;
-            if (drawCenter) gameVersionSize += ImGui.CalcTextSize(gameVersion).X + ImGui.GetStyle().ItemSpacing.X;
-
-            var horizonalWholeWidth = Math.Max(comboSize, gameVersionSize) + iconSize + ImGui.GetStyle().ItemSpacing.X;
-
-            if (horizonalWholeWidth > wholeWidth)
+            ImGuiHelper.DrawItemMiddle(() =>
             {
-                ImGuiHelper.DrawItemMiddle(() =>
-                {
-                    DrawRotationIcon(rotation, iconSize);
-                }, wholeWidth, iconSize);
+                DrawRotationIcon(rotation, iconSize);
+            }, wholeWidth, iconSize);
 
-                if (Scale * JOB_ICON_WIDTH < wholeWidth)
-                {
-                    DrawRotationCombo(comboSize, rotations, rotation, gameVersion);
-                }
-            }
-            else
+            if (Scale * JOB_ICON_WIDTH < wholeWidth)
             {
-                ImGuiHelper.DrawItemMiddle(() =>
-                {
-                    DrawRotationIcon(rotation, iconSize);
-
-                    ImGui.SameLine();
-
-                    using var group = ImRaii.Group();
-
-                    DrawRotationCombo(comboSize, rotations, rotation, gameVersion);
-                    ImGui.TextDisabled(slash);
-                    ImGui.SameLine();
-
-                    if (drawCenter)
-                    {
-                        ImGui.TextDisabled(gameVersion);
-                        ImGui.SameLine();
-                    }
-                    ImGui.Text(rot.GameVersion);
-
-                }, wholeWidth, horizonalWholeWidth);
+                DrawRotationCombo(comboSize, rotations, rotation);
             }
         }
     }
@@ -527,7 +483,7 @@ public partial class RotationConfigWindow : Window
         }
     }
 
-    private static void DrawRotationCombo(float comboSize, Type[] rotations, ICustomRotation rotation, string gameVersion)
+    private static void DrawRotationCombo(float comboSize, Type[] rotations, ICustomRotation rotation)
     {
         ImGui.SetNextItemWidth(comboSize);
         const string popUp = "Rotation Solver Select Rotation";
@@ -589,7 +545,7 @@ public partial class RotationConfigWindow : Window
             }
         }
 
-        var warning = gameVersion + rot.GameVersion;
+        var warning = "Game version: " + rot.GameVersion;
         if (!rotation.IsValid) warning += "\n" + string.Format(UiString.ConfigWindow_Rotation_InvalidRotation.GetDescription(),
                 rotation.GetType().Assembly.GetInfo().Author);
 

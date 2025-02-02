@@ -500,7 +500,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = HealingActionCondition, Section = 3)]
     private static readonly bool _healWhenNothingTodo = true;
 
-    [UI("The duration of special windows set by commands",
+    [UI("The duration of special windows opened by /macro commands by default.",
         Filter = BasicTimer, Section = 1)]
     [Range(1, 20, ConfigUnitType.Seconds, 1f)]
     public float SpecialDuration { get; set; } = 3;
