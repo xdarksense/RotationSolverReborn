@@ -316,7 +316,7 @@ public struct ActionTargetInfo(IBaseAction action)
     private bool CheckTimeToKill(IGameObject gameObject)
     {
         if (gameObject is not IBattleChara b) return false;
-        var time = b.GetTimeToKill();
+        var time = b.GetTTK();
         return float.IsNaN(time) || time >= action.Config.TimeToKill;
     }
 

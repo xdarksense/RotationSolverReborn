@@ -191,7 +191,7 @@ partial class CustomRotation
     /// Average time to kill for all targets.
     /// </summary>
     [Description("Average time to kill")]
-    public static float AverageTimeToKill => DataCenter.AverageTimeToKill;
+    public static float AverageTTK => DataCenter.AverageTTK;
 
     /// <summary>
     /// The level of the LB.
@@ -209,14 +209,14 @@ partial class CustomRotation
     }
 
     /// <summary>
-    /// Is the <see cref="AverageTimeToKill"/> larger than <paramref name="time"/>.
+    /// Is the <see cref="AverageTTK"/> larger than <paramref name="time"/>.
     /// </summary>
     /// <param name="time">Time</param>
     /// <returns>Is Longer.</returns>
     public static bool IsLongerThan(float time)
     {
         if (IsInHighEndDuty) return true;
-        return AverageTimeToKill > time;
+        return AverageTTK > time;
     }
 
     /// <summary>
