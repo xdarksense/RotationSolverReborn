@@ -467,7 +467,7 @@ internal static class DataCenter
         }
     }
 
-    public static float AverageTimeToKill
+    public static float AverageTTK
     {
         get
         {
@@ -475,10 +475,10 @@ internal static class DataCenter
             int count = 0;
             foreach (var b in AllHostileTargets)
             {
-                var timeToKill = b.GetTimeToKill();
-                if (!float.IsNaN(timeToKill))
+                var tTK = b.GetTTK();
+                if (!float.IsNaN(tTK))
                 {
-                    total += timeToKill;
+                    total += tTK;
                     count++;
                 }
             }
@@ -841,14 +841,17 @@ internal static class DataCenter
 
     public static bool IsCastingVfx(List<VfxNewData> vfxDataQueueCopy, Func<VfxNewData, bool> isVfx)
     {
+        // Create a copy of the list to avoid modification during enumeration
+        var vfxDataQueueSnapshot = new List<VfxNewData>(vfxDataQueueCopy);
+
         // Ensure the list is not empty
-        if (vfxDataQueueCopy.Count == 0)
+        if (vfxDataQueueSnapshot.Count == 0)
         {
             return false;
         }
 
         // Iterate over the copied list
-        foreach (var vfx in vfxDataQueueCopy)
+        foreach (var vfx in vfxDataQueueSnapshot)
         {
             if (isVfx(vfx))
             {

@@ -592,7 +592,7 @@ public static class ObjectHelper
         if (obj.IsDummy()) return true;
 
         //Fate
-        return obj.GetTimeToKill(true) >= Service.Config.BossTimeToKill;
+        return obj.GetTTK(true) >= Service.Config.BossTimeToKill;
     }
 
     /// <summary>
@@ -619,7 +619,7 @@ public static class ObjectHelper
     public static bool IsDying(this IBattleChara b)
     {
         if (b == null || b.IsDummy()) return false;
-        return b.GetTimeToKill() <= Service.Config.DyingTimeToKill || b.GetHealthRatio() < Service.Config.IsDyingConfig;
+        return b.GetTTK() <= Service.Config.DyingTimeToKill || b.GetHealthRatio() < Service.Config.IsDyingConfig;
     }
 
     /// <summary>
@@ -645,7 +645,7 @@ public static class ObjectHelper
     /// <returns>
     /// The estimated time to kill the battle character in seconds, or <see cref="float.NaN"/> if the calculation cannot be performed.
     /// </returns>
-    internal static float GetTimeToKill(this IBattleChara b, bool wholeTime = false)
+    internal static float GetTTK(this IBattleChara b, bool wholeTime = false)
     {
         if (b == null) return float.NaN;
         if (b.IsDummy()) return 999.99f;

@@ -172,7 +172,7 @@ public class BaseAction : IBaseAction
 
     private bool IsTimeToKillValid()
     {
-        return DataCenter.AverageTimeToKill >= Config.TimeToKill && DataCenter.AverageTimeToKill >= Config.TimeToUntargetable;
+        return DataCenter.AverageTTK >= Config.TimeToKill && DataCenter.AverageTTK >= Config.TimeToUntargetable;
     }
 
 
