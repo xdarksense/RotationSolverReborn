@@ -2811,7 +2811,7 @@ public partial class RotationConfigWindow : Window
         {
             ImGui.Text($"HP: {battleChara.CurrentHp} / {battleChara.MaxHp}");
             ImGui.Text($"Is Current Focus Target: {battleChara.IsFocusTarget()}");
-            ImGui.Text($"TTK: {battleChara.GetTimeToKill()}");
+            ImGui.Text($"TTK: {battleChara.GetTTK()}");
             ImGui.Text($"Is Boss TTK: {battleChara.IsBossFromTTK()}");
             ImGui.Text($"Is Boss Icon: {battleChara.IsBossFromIcon()}");
             ImGui.Text($"Rank: {battleChara.GetObjectNPC()?.Rank.ToString() ?? string.Empty}");

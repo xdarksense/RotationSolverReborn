@@ -226,7 +226,7 @@ public sealed class PLD_Default : PaladinRotation
              (HasAtonementReady && !HasDivineMight)) &&
             !Player.HasStatus(true, StatusID.Medicated) && !HasFightOrFlight && !RageOfHalonePvE.CanUse(out act, skipComboCheck: false))
         {
-            if (RiotBladePvE.CanUse(out act) || FastBladePvE.CanUse(out act)) return true;
+            if (!TotalEclipsePvE.CanUse(out _) && (RiotBladePvE.CanUse(out act) || FastBladePvE.CanUse(out act))) return true;
         }
         if ((RageOfHalonePvE.CanUse(out _, skipComboCheck: false) || HasFightOrFlight || Player.WillStatusEndGCD(1, 0, true, StatusID.SupplicationReady)) && SupplicationPvE.CanUse(out act)) return true;
         if (RequiescatStacks > 0 && IsLastGCD(true, SupplicationPvE) && !HasFightOrFlight && HolySpiritPvE.CanUse(out act, skipCastingCheck: true)) return true;
