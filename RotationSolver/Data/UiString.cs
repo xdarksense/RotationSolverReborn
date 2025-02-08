@@ -4,10 +4,10 @@ namespace RotationSolver.Data
 {
     internal enum UiString
     {
-        [Description("The condition set you chose. Click to modify.")]
+        [Description("The condition value you chose. Click to modify.")]
         ConfigWindow_ConditionSetDesc,
 
-        [Description("Condition Set")]
+        [Description("Condition Value")]
         ConfigWindow_ConditionSet,
 
         [Description("Action Condition")]

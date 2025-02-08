@@ -6,7 +6,7 @@ internal class NamedCondition : DelayCondition
     public string ConditionName = "Not Chosen";
     protected override bool IsTrueInside(ICustomRotation rotation)
     {
-        foreach (var pair in DataCenter.RightSet.NamedConditions)
+        foreach (var pair in DataCenter.CurrentConditionValue.NamedConditions)
         {
             if (pair.Name != ConditionName) continue;
 

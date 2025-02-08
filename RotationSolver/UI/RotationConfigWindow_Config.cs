@@ -113,15 +113,15 @@ public partial class RotationConfigWindow
     {
         {
             UiString.ConfigWindow_Basic_SwitchCancelConditionSet.GetDescription,
-            () => DataCenter.RightSet.SwitchCancelConditionSet?.DrawMain(DataCenter.CurrentRotation)
+            () => DataCenter.CurrentConditionValue.SwitchCancelConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Basic_SwitchManualConditionSet.GetDescription,
-            () => DataCenter.RightSet.SwitchManualConditionSet?.DrawMain(DataCenter.CurrentRotation)
+            () => DataCenter.CurrentConditionValue.SwitchManualConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Basic_SwitchAutoConditionSet.GetDescription,
-            () => DataCenter.RightSet.SwitchAutoConditionSet?.DrawMain(DataCenter.CurrentRotation)
+            () => DataCenter.CurrentConditionValue.SwitchAutoConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
     })
     {
@@ -133,15 +133,15 @@ public partial class RotationConfigWindow
     private static void DrawBasicNamedConditions()
     {
         // Ensure there is always an empty named condition at the end
-        if (!DataCenter.RightSet.NamedConditions.Any(c => string.IsNullOrEmpty(c.Name)))
+        if (!DataCenter.CurrentConditionValue.NamedConditions.Any(c => string.IsNullOrEmpty(c.Name)))
         {
-            DataCenter.RightSet.NamedConditions = DataCenter.RightSet.NamedConditions.Append((string.Empty, new ConditionSet())).ToArray();
+            DataCenter.CurrentConditionValue.NamedConditions = DataCenter.CurrentConditionValue.NamedConditions.Append((string.Empty, new ConditionSet())).ToArray();
         }
 
         ImGui.Spacing();
 
         int removeIndex = -1;
-        for (int i = 0; i < DataCenter.RightSet.NamedConditions.Length; i++)
+        for (int i = 0; i < DataCenter.CurrentConditionValue.NamedConditions.Length; i++)
         {
             var value = _isOpen.TryGetValue(i, out var open) && open;
 
@@ -152,7 +152,7 @@ public partial class RotationConfigWindow
 
             ImGui.SetNextItemWidth(width);
             ImGui.InputTextWithHint($"##Rotation Solver Named Condition{i}", UiString.ConfigWindow_Condition_ConditionName.GetDescription(),
-                ref DataCenter.RightSet.NamedConditions[i].Name, 1024);
+                ref DataCenter.CurrentConditionValue.NamedConditions[i].Name, 1024);
 
             ImGui.SameLine();
 
@@ -170,22 +170,22 @@ public partial class RotationConfigWindow
 
             if (value && DataCenter.CurrentRotation != null)
             {
-                DataCenter.RightSet.NamedConditions[i].Condition?.DrawMain(DataCenter.CurrentRotation);
+                DataCenter.CurrentConditionValue.NamedConditions[i].Condition?.DrawMain(DataCenter.CurrentRotation);
             }
         }
 
         // Remove the named condition if needed
         if (removeIndex > -1)
         {
-            var list = DataCenter.RightSet.NamedConditions.ToList();
+            var list = DataCenter.CurrentConditionValue.NamedConditions.ToList();
             list.RemoveAt(removeIndex);
-            DataCenter.RightSet.NamedConditions = list.ToArray();
+            DataCenter.CurrentConditionValue.NamedConditions = list.ToArray();
         }
     }
 
     private static void DrawBasicOthers()
     {
-        var set = DataCenter.RightSet;
+        var set = DataCenter.CurrentConditionValue;
 
         const string popUpId = "Right Set Popup";
         if (ImGui.Selectable(set.Name, false, ImGuiSelectableFlags.None, new Vector2(0, 20)))
@@ -208,7 +208,7 @@ public partial class RotationConfigWindow
                 if (combos[i].Name == set.Name)
                 {
                     ImGuiHelper.SetNextWidthWithName(set.Name);
-                    ImGui.InputText("##MajorConditionSet", ref set.Name, 100);
+                    ImGui.InputText("##MajorConditionValue", ref set.Name, 100);
                 }
                 else
                 {
@@ -328,47 +328,47 @@ public partial class RotationConfigWindow
     {
         {
             UiString.ConfigWindow_Auto_HealAreaConditionSet.GetDescription,
-            () => DataCenter.RightSet.HealAreaConditionSet?.DrawMain(DataCenter.CurrentRotation)
+            () => DataCenter.CurrentConditionValue.HealAreaConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Auto_HealSingleConditionSet.GetDescription,
-            () => DataCenter.RightSet.HealSingleConditionSet?.DrawMain(DataCenter.CurrentRotation)
+            () => DataCenter.CurrentConditionValue.HealSingleConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Auto_DefenseAreaConditionSet.GetDescription,
-            () => DataCenter.RightSet.DefenseAreaConditionSet?.DrawMain(DataCenter.CurrentRotation)
+            () => DataCenter.CurrentConditionValue.DefenseAreaConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Auto_DefenseSingleConditionSet.GetDescription,
-            () => DataCenter.RightSet.DefenseSingleConditionSet?.DrawMain(DataCenter.CurrentRotation)
+            () => DataCenter.CurrentConditionValue.DefenseSingleConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Auto_DispelStancePositionalConditionSet.GetDescription,
-            () => DataCenter.RightSet.DispelStancePositionalConditionSet?.DrawMain(DataCenter.CurrentRotation)
+            () => DataCenter.CurrentConditionValue.DispelStancePositionalConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Auto_RaiseShirkConditionSet.GetDescription,
-            () => DataCenter.RightSet.RaiseShirkConditionSet?.DrawMain(DataCenter.CurrentRotation)
+            () => DataCenter.CurrentConditionValue.RaiseShirkConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Auto_MoveForwardConditionSet.GetDescription,
-            () => DataCenter.RightSet.MoveForwardConditionSet?.DrawMain(DataCenter.CurrentRotation)
+            () => DataCenter.CurrentConditionValue.MoveForwardConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Auto_MoveBackConditionSet.GetDescription,
-            () => DataCenter.RightSet.MoveBackConditionSet?.DrawMain(DataCenter.CurrentRotation)
+            () => DataCenter.CurrentConditionValue.MoveBackConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Auto_AntiKnockbackConditionSet.GetDescription,
-            () => DataCenter.RightSet.AntiKnockbackConditionSet?.DrawMain(DataCenter.CurrentRotation)
+            () => DataCenter.CurrentConditionValue.AntiKnockbackConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Auto_SpeedConditionSet.GetDescription,
-            () => DataCenter.RightSet.SpeedConditionSet?.DrawMain(DataCenter.CurrentRotation)
+            () => DataCenter.CurrentConditionValue.SpeedConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Auto_NoCastingConditionSet.GetDescription,
-            () => DataCenter.RightSet.NoCastingConditionSet?.DrawMain(DataCenter.CurrentRotation)
+            () => DataCenter.CurrentConditionValue.NoCastingConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
     })
     {

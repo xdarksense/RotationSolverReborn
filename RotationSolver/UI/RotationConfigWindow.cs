@@ -1739,7 +1739,7 @@ public partial class RotationConfigWindow : Window
             ImGui.TextWrapped(UiString.ConfigWindow_Actions_ForcedConditionSet_Description.GetDescription());
 
             var rotation = DataCenter.CurrentRotation;
-            var set = DataCenter.RightSet;
+            var set = DataCenter.CurrentConditionValue;
 
             if (set == null || _activeAction == null || rotation == null) return;
             set.GetCondition(_activeAction.ID)?.DrawMain(rotation);
@@ -1750,7 +1750,7 @@ public partial class RotationConfigWindow : Window
             ImGui.TextWrapped(UiString.ConfigWindow_Actions_DisabledConditionSet_Description.GetDescription());
 
             var rotation = DataCenter.CurrentRotation;
-            var set = DataCenter.RightSet;
+            var set = DataCenter.CurrentConditionValue;
 
             if (set == null || _activeAction == null || rotation == null) return;
             set.GetDisabledCondition(_activeAction.ID)?.DrawMain(rotation);

@@ -376,9 +376,9 @@ internal partial class Configs : IPluginConfiguration
         PvPFilter = JobFilterType.NoHealer, PvEFilter = JobFilterType.NoHealer)]
     private static readonly bool _onlyHealSelfWhenNoHealer = false;
 
-    [ConditionBool, UI("Show action toggled action and state feedback in chat.",
+    [ConditionBool, UI("Show toggled setting and new value in chat.",
         Filter = UiInformation)]
-    private static readonly bool _showToggledActionInChat = false;
+    private static readonly bool _ShowToggledSettingInChat = false;
 
     [ConditionBool, UI("Record knockback actions", Filter = List2)]
     private static readonly bool _recordKnockbackies = false;

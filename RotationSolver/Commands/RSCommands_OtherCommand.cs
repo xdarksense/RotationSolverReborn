@@ -106,7 +106,7 @@ public static partial class RSCommands
             property.SetValue(Service.Config, convertedValue);
             command = convertedValue?.ToString();
 
-            if (Service.Config.ShowToggledActionInChat)
+            if (Service.Config.ShowToggledSettingInChat)
             {
                 Svc.Chat.Print($"Changed setting {property.Name} to {command}");
             }
@@ -227,14 +227,14 @@ public static partial class RSCommands
 
     private static void ToggleActionCommand(string str)
     {
-        foreach (var act in RotationUpdater.RightRotationActions)
+        foreach (var act in RotationUpdater.CurrentRotationActions)
         {
             if (str.StartsWith(act.Name))
             {
                 var flag = str[act.Name.Length..].Trim();
                 act.IsEnabled = bool.TryParse(flag, out var parse) ? parse : !act.IsEnabled;
 
-                if (Service.Config.ShowToggledActionInChat)
+                if (Service.Config.ShowToggledSettingInChat)
                 {
                     Svc.Chat.Print($"Toggled {act.Name} : {act.IsEnabled}");
                 }
@@ -258,7 +258,7 @@ public static partial class RSCommands
 
         if (double.TryParse(timeStr, out var time))
         {
-            foreach (var iAct in RotationUpdater.RightRotationActions)
+            foreach (var iAct in RotationUpdater.CurrentRotationActions)
             {
                 if (actName.Equals(iAct.Name, StringComparison.OrdinalIgnoreCase))
                 {
@@ -288,7 +288,7 @@ public static partial class RSCommands
         {
             if (config.DoCommand(configs, str))
             {
-                if (Service.Config.ShowToggledActionInChat)
+                if (Service.Config.ShowToggledSettingInChat)
                 {
                     Svc.Chat.Print($"Changed setting {config.DisplayName} to {config.Value}");
                     return;

@@ -12,9 +12,9 @@ internal class ActionSequencerUpdater
         var customRotation = DataCenter.CurrentRotation;
         if (customRotation == null) return;
 
-        var allActions = RotationUpdater.RightRotationActions;
+        var allActions = RotationUpdater.CurrentRotationActions;
 
-        var set = DataCenter.RightSet;
+        var set = DataCenter.CurrentConditionValue;
         if (set == null) return;
 
         var disabledActions = new HashSet<uint>();
@@ -75,7 +75,7 @@ internal class ActionSequencerUpdater
     {
         if (_actionSequencerFolder == null) return;
 
-        DataCenter.ConditionSets = MajorConditionSet.Read(_actionSequencerFolder);
+        DataCenter.ConditionSets = MajorConditionValue.Read(_actionSequencerFolder);
     }
 
     public static void AddNew()
@@ -92,9 +92,9 @@ internal class ActionSequencerUpdater
 
         if (!hasUnnamed)
         {
-            var newConditionSets = new List<MajorConditionSet>(DataCenter.ConditionSets)
+            var newConditionSets = new List<MajorConditionValue>(DataCenter.ConditionSets)
             {
-                new MajorConditionSet()
+                new MajorConditionValue()
             };
             DataCenter.ConditionSets = newConditionSets.ToArray();
         }
@@ -102,7 +102,7 @@ internal class ActionSequencerUpdater
 
     public static void Delete(string name)
     {
-        var newConditionSets = new List<MajorConditionSet>();
+        var newConditionSets = new List<MajorConditionValue>();
         foreach (var conditionSet in DataCenter.ConditionSets)
         {
             if (conditionSet.Name != name)
