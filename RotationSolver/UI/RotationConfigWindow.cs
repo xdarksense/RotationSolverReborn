@@ -2814,7 +2814,9 @@ public partial class RotationConfigWindow : Window
         foreach (var status in Player.Object.StatusList)
         {
             var source = status.SourceId == Player.Object.GameObjectId ? "You" : Svc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
-            ImGui.Text($"{status.GameData.Value.Name}: {status.StatusId} From: {source}");
+            byte stacks = Player.Object.StatusStack(true, (StatusID)status.StatusId);
+            string stackDisplay = stacks == byte.MaxValue ? "N/A" : stacks.ToString(); // Convert 255 to "N/A"
+            ImGui.Text($"{status.GameData.Value.Name}: {status.StatusId} From: {source} Stacks: {stackDisplay}");
         }
     }
 
