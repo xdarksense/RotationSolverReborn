@@ -26,6 +26,9 @@ public sealed class MCH_Default : MachinistRotation
 
     [RotationConfig(CombatType.PvE, Name = "Prevent the use of defense abilties during hypercharge burst")]
     private bool BurstDefense { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Bioblaster while moving")]
+    private bool BioMove { get; set; } = true;
     #endregion
 
     #region Countdown logic
@@ -131,7 +134,7 @@ public sealed class MCH_Default : MachinistRotation
         if (HeatBlastPvE.CanUse(out act)) return true;
 
         // drill's aoe version
-        if (BioblasterPvE.CanUse(out act, usedUp: true)) return true;
+        if ((BioMove || (!IsMoving && !BioMove)) && BioblasterPvE.CanUse(out act, usedUp: true)) return true;
 
         // single target --- need to update this strange condition writing!!!
         if (!SpreadShotPvE.CanUse(out _))
