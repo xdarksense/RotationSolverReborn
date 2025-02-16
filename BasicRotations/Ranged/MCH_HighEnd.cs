@@ -14,6 +14,9 @@ public sealed class MCH_HighEnd : MachinistRotation
 
     [RotationConfig(CombatType.PvE, Name = "Use burst medicine midfight when Air Anchor, Barrel Stabilizer, and Wildfire are about to come off cooldown")]
     private bool MidfightBurstMeds { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Bioblaster while moving")]
+    private bool BioMove { get; set; } = true;
     #endregion
 
     private const float HYPERCHARGE_DURATION = 8f;
@@ -147,7 +150,7 @@ public sealed class MCH_HighEnd : MachinistRotation
         if (HeatBlastPvE.CanUse(out act)) return true;
 
         // drill's aoe version
-        if (BioblasterPvE.CanUse(out act, usedUp: true)) return true;
+        if ((BioMove || (!IsMoving && !BioMove)) && BioblasterPvE.CanUse(out act, usedUp: true)) return true;
 
         // single target --- need to update this strange condition writing!!!
         if (!SpreadShotPvE.CanUse(out _))
