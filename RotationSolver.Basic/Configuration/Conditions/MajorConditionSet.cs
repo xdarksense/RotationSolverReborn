@@ -3,7 +3,7 @@ using ECommons.ExcelServices;
 
 namespace RotationSolver.Basic.Configuration.Conditions;
 
-internal class MajorConditionSet(string name = MajorConditionSet.conditionName)
+internal class MajorConditionValue(string name = MajorConditionValue.conditionName)
 {
     const string conditionName = "Unnamed";
 
@@ -114,7 +114,7 @@ internal class MajorConditionSet(string name = MajorConditionSet.conditionName)
         File.WriteAllText(path, str);
     }
 
-    public static MajorConditionSet[] Read(string folder)
+    public static MajorConditionValue[] Read(string folder)
     {
         if (!Directory.Exists(folder)) return [];
 
@@ -124,7 +124,7 @@ internal class MajorConditionSet(string name = MajorConditionSet.conditionName)
 
             try
             {
-                return JsonConvert.DeserializeObject<MajorConditionSet>(str, new IConditionConverter());
+                return JsonConvert.DeserializeObject<MajorConditionValue>(str, new IConditionConverter());
             }
             catch (Exception ex)
             {
@@ -132,6 +132,6 @@ internal class MajorConditionSet(string name = MajorConditionSet.conditionName)
                 Svc.Chat.Print($"Failed to load the ConditionSet from {p}");
                 return null;
             }
-        }).OfType<MajorConditionSet>().Where(set => !string.IsNullOrEmpty(set.Name)).ToArray();
+        }).OfType<MajorConditionValue>().Where(set => !string.IsNullOrEmpty(set.Name)).ToArray();
     }
 }

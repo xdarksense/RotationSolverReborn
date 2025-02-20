@@ -432,24 +432,24 @@ internal static class StateUpdater
             _ => AutoStatus.None,
         };
 
-        AddStatus(ref status, AutoStatus.HealAreaSpell | AutoStatus.HealAreaAbility, DataCenter.RightSet.HealAreaConditionSet);
-        AddStatus(ref status, AutoStatus.HealSingleSpell | AutoStatus.HealSingleAbility, DataCenter.RightSet.HealSingleConditionSet);
-        AddStatus(ref status, AutoStatus.DefenseArea, DataCenter.RightSet.DefenseAreaConditionSet);
-        AddStatus(ref status, AutoStatus.DefenseSingle, DataCenter.RightSet.DefenseSingleConditionSet);
+        AddStatus(ref status, AutoStatus.HealAreaSpell | AutoStatus.HealAreaAbility, DataCenter.CurrentConditionValue.HealAreaConditionSet);
+        AddStatus(ref status, AutoStatus.HealSingleSpell | AutoStatus.HealSingleAbility, DataCenter.CurrentConditionValue.HealSingleConditionSet);
+        AddStatus(ref status, AutoStatus.DefenseArea, DataCenter.CurrentConditionValue.DefenseAreaConditionSet);
+        AddStatus(ref status, AutoStatus.DefenseSingle, DataCenter.CurrentConditionValue.DefenseSingleConditionSet);
 
         AddStatus(ref status, AutoStatus.Dispel | AutoStatus.TankStance | AutoStatus.Positional,
-            DataCenter.RightSet.DispelStancePositionalConditionSet);
-        AddStatus(ref status, AutoStatus.Raise | AutoStatus.Shirk, DataCenter.RightSet.RaiseShirkConditionSet);
-        AddStatus(ref status, AutoStatus.MoveForward, DataCenter.RightSet.MoveForwardConditionSet);
-        AddStatus(ref status, AutoStatus.MoveBack, DataCenter.RightSet.MoveBackConditionSet);
-        AddStatus(ref status, AutoStatus.AntiKnockback, DataCenter.RightSet.AntiKnockbackConditionSet);
+            DataCenter.CurrentConditionValue.DispelStancePositionalConditionSet);
+        AddStatus(ref status, AutoStatus.Raise | AutoStatus.Shirk, DataCenter.CurrentConditionValue.RaiseShirkConditionSet);
+        AddStatus(ref status, AutoStatus.MoveForward, DataCenter.CurrentConditionValue.MoveForwardConditionSet);
+        AddStatus(ref status, AutoStatus.MoveBack, DataCenter.CurrentConditionValue.MoveBackConditionSet);
+        AddStatus(ref status, AutoStatus.AntiKnockback, DataCenter.CurrentConditionValue.AntiKnockbackConditionSet);
 
         if (!status.HasFlag(AutoStatus.Burst) && Service.Config.AutoBurst)
         {
             status |= AutoStatus.Burst;
         }
-        AddStatus(ref status, AutoStatus.Speed, DataCenter.RightSet.SpeedConditionSet);
-        AddStatus(ref status, AutoStatus.NoCasting, DataCenter.RightSet.NoCastingConditionSet);
+        AddStatus(ref status, AutoStatus.Speed, DataCenter.CurrentConditionValue.SpeedConditionSet);
+        AddStatus(ref status, AutoStatus.NoCasting, DataCenter.CurrentConditionValue.NoCastingConditionSet);
 
         return status;
     }

@@ -324,7 +324,7 @@ internal static class ConditionDrawer
     private static void DrawAfter(this NamedCondition namedCondition, ICustomRotation _)
     {
         ImGuiHelper.SearchCombo($"##Comparation{namedCondition.GetHashCode()}", namedCondition.ConditionName, ref searchTxt,
-            DataCenter.RightSet.NamedConditions.Select(p => p.Name).ToArray(), i => i.ToString(), i =>
+            DataCenter.CurrentConditionValue.NamedConditions.Select(p => p.Name).ToArray(), i => i.ToString(), i =>
             {
                 namedCondition.ConditionName = i;
             }, UiString.ConfigWindow_Condition_ConditionName.GetDescription());

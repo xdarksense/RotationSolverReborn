@@ -17,7 +17,7 @@ internal static class RotationUpdater
     internal static CustomRotationGroup[] CustomRotations { get; set; } = [];
     internal static SortedList<uint, Type[]> DutyRotations { get; set; } = [];
 
-    public static IAction[] RightRotationActions { get; private set; } = [];
+    public static IAction[] CurrentRotationActions { get; private set; } = [];
 
     private static DateTime LastRunTime;
 
@@ -553,13 +553,13 @@ internal static class RotationUpdater
                 DataCenter.CurrentRotation = instance;
             }
 
-            RightRotationActions = DataCenter.CurrentRotation?.AllActions ?? Array.Empty<IAction>();
+            CurrentRotationActions = DataCenter.CurrentRotation?.AllActions ?? Array.Empty<IAction>();
             return;
         }
 
         CustomRotation.MoveTarget = null;
         DataCenter.CurrentRotation = null;
-        RightRotationActions = Array.Empty<IAction>();
+        CurrentRotationActions = Array.Empty<IAction>();
 
         static ICustomRotation? GetRotation(Type? t)
         {

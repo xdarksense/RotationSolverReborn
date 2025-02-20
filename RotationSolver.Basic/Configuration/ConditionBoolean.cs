@@ -56,7 +56,7 @@ internal class ConditionBoolean
     {
         if (!Service.Config.UseAdditionalConditions) return condition.Value;
         var rotation = DataCenter.CurrentRotation;
-        var set = DataCenter.RightSet;
+        var set = DataCenter.CurrentConditionValue;
         if (rotation != null)
         {
             if (condition.Enable && set.GetEnableCondition(condition.Key).IsTrue(rotation)) return true;

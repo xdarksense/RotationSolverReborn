@@ -376,9 +376,9 @@ internal partial class Configs : IPluginConfiguration
         PvPFilter = JobFilterType.NoHealer, PvEFilter = JobFilterType.NoHealer)]
     private static readonly bool _onlyHealSelfWhenNoHealer = false;
 
-    [ConditionBool, UI("Show action toggled action and state feedback in chat.",
+    [ConditionBool, UI("Show toggled setting and new value in chat.",
         Filter = UiInformation)]
-    private static readonly bool _showToggledActionInChat = false;
+    private static readonly bool _ShowToggledSettingInChat = false;
 
     [ConditionBool, UI("Record knockback actions", Filter = List2)]
     private static readonly bool _recordKnockbackies = false;
@@ -500,7 +500,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = HealingActionCondition, Section = 3)]
     private static readonly bool _healWhenNothingTodo = true;
 
-    [UI("The duration of special windows set by commands",
+    [UI("The duration of special windows opened by /macro commands by default.",
         Filter = BasicTimer, Section = 1)]
     [Range(1, 20, ConfigUnitType.Seconds, 1f)]
     public float SpecialDuration { get; set; } = 3;

@@ -195,7 +195,7 @@ namespace RotationSolver.Commands
                     (Service.Config.AutoOffBetweenArea && (Svc.Condition[ConditionFlag.BetweenAreas] || Svc.Condition[ConditionFlag.BetweenAreas51])) ||
                     (Service.Config.CancelStateOnCombatBeforeCountdown && Service.CountDownTime > 0.2f && DataCenter.InCombat) ||
                     (ActionUpdater.AutoCancelTime != DateTime.MinValue && DateTime.Now > ActionUpdater.AutoCancelTime) ||
-                    (DataCenter.RightSet.SwitchCancelConditionSet?.IsTrue(DataCenter.CurrentRotation) ?? false))
+                    (DataCenter.CurrentConditionValue.SwitchCancelConditionSet?.IsTrue(DataCenter.CurrentRotation) ?? false))
                 {
                     CancelState();
 #pragma warning disable CS0472 // The result of the expression is always the same since a value of this type is never equal to 'null'
@@ -235,14 +235,14 @@ namespace RotationSolver.Commands
                     _lastCountdownTime = 0;
                     CancelState();
                 }
-                else if (DataCenter.RightSet.SwitchManualConditionSet?.IsTrue(DataCenter.CurrentRotation) ?? false)
+                else if (DataCenter.CurrentConditionValue.SwitchManualConditionSet?.IsTrue(DataCenter.CurrentRotation) ?? false)
                 {
                     if (!DataCenter.State)
                     {
                         DoStateCommandType(StateCommandType.Manual);
                     }
                 }
-                else if (DataCenter.RightSet.SwitchAutoConditionSet?.IsTrue(DataCenter.CurrentRotation) ?? false)
+                else if (DataCenter.CurrentConditionValue.SwitchAutoConditionSet?.IsTrue(DataCenter.CurrentRotation) ?? false)
                 {
                     if (!DataCenter.State)
                     {

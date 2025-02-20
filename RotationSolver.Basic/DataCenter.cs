@@ -37,13 +37,13 @@ internal static class DataCenter
     /// <summary>
     /// This one never be null.
     /// </summary>
-    public static MajorConditionSet RightSet
+    public static MajorConditionValue CurrentConditionValue
     {
         get
         {
             if (ConditionSets == null || ConditionSets.Length == 0)
             {
-                ConditionSets = new[] { new MajorConditionSet() };
+                ConditionSets = new[] { new MajorConditionValue() };
             }
 
             var index = Service.Config.ActionSequencerIndex;
@@ -56,7 +56,7 @@ internal static class DataCenter
         }
     }
 
-    internal static MajorConditionSet[] ConditionSets { get; set; } = Array.Empty<MajorConditionSet>();
+    internal static MajorConditionValue[] ConditionSets { get; set; } = Array.Empty<MajorConditionValue>();
 
     /// <summary>
     /// Only recorded 15s hps.

@@ -4,10 +4,10 @@ namespace RotationSolver.Data
 {
     internal enum UiString
     {
-        [Description("The condition set you chose. Click to modify.")]
+        [Description("The condition value you chose. Click to modify.")]
         ConfigWindow_ConditionSetDesc,
 
-        [Description("Condition Set")]
+        [Description("Condition Value")]
         ConfigWindow_ConditionSet,
 
         [Description("Action Condition")]
@@ -42,9 +42,6 @@ namespace RotationSolver.Data
 
         [Description("Analyzes PvE combat information in every frame and finds the best action.")]
         ConfigWindow_About_Punchline,
-
-        [Description("Game")]
-        ConfigWindow_Helper_GameVersion,
 
         [Description("Invalid Rotation! \nPlease update to the latest version or contact {0}!")]
         ConfigWindow_Rotation_InvalidRotation,
@@ -343,7 +340,7 @@ namespace RotationSolver.Data
         [Description("Move")]
         InfoWindowMove,
 
-        [Description("Search...")]
+        [Description("Setting Search")]
         ConfigWindow_Searching,
 
         [Description("Timer")]
