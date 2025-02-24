@@ -191,8 +191,8 @@ internal static partial class TargetUpdater
                 var deathAll = DataCenter.AllTargets?.GetDeath().ToList() ?? new List<IBattleChara>();
                 var deathNPC = DataCenter.FriendlyNPCMembers?.GetDeath().ToList() ?? new List<IBattleChara>();
                 var deathAllianceMembers = DataCenter.AllianceMembers?.GetDeath().ToList() ?? new List<IBattleChara>();
-                var deathAllianceHealers = new List<IBattleChara>();
-                var deathAllianceSupports = new List<IBattleChara>();
+                var deathAllianceHealers = new List<IBattleChara>(deathParty);
+                var deathAllianceSupports = new List<IBattleChara>(deathParty);
 
                 if (DataCenter.AllianceMembers != null)
                 {
@@ -254,6 +254,7 @@ internal static partial class TargetUpdater
         }
         return null;
     }
+
 
     private static IBattleChara? GetPriorityDeathTarget(List<IBattleChara> validRaiseTargets, RaiseType raiseType = RaiseType.PartyOnly)
     {
