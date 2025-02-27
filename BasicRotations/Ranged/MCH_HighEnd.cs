@@ -88,6 +88,9 @@ public sealed class MCH_HighEnd : MachinistRotation
         // If Wildfire is active, use Hypercharge.....Period
         if (Player.HasStatus(true, StatusID.Wildfire_1946) && HyperchargePvE.CanUse(out act)) return true;
 
+        // If you cant use Wildfire, use Hypercharge freely
+        if (!WildfirePvE.EnoughLevel && HyperchargePvE.CanUse(out act)) return true;
+
         // don't do anything that might fuck with burst timings at 100
         if (nextGCD.IsTheSameTo(true, FullMetalFieldPvE) || IsLastGCD(true, FullMetalFieldPvE))
         {

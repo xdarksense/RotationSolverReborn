@@ -85,6 +85,9 @@ public sealed class MCH_Default : MachinistRotation
         // If Wildfire is active, use Hypercharge.....Period
         if (Player.HasStatus(true, StatusID.Wildfire_1946) && HyperchargePvE.CanUse(out act)) return true;
 
+        // If you cant use Wildfire, use Hypercharge freely
+        if (!WildfirePvE.EnoughLevel && HyperchargePvE.CanUse(out act)) return true;
+
         // Start Ricochet/Gauss cooldowns rolling
         if (!RicochetPvE.Cooldown.IsCoolingDown && RicochetPvE.CanUse(out act)) return true;
         if (!GaussRoundPvE.Cooldown.IsCoolingDown && GaussRoundPvE.CanUse(out act)) return true;
