@@ -13,7 +13,7 @@ internal static partial class TargetUpdater
         _raiseAllTargets = new(() => Service.Config.RaiseDelay);
 
     private static DateTime _lastUpdateTimeToKill = DateTime.MinValue;
-    private static readonly TimeSpan TimeToKillUpdateInterval = TimeSpan.FromSeconds(0.5);
+    private static readonly TimeSpan TimeToKillUpdateInterval = TimeSpan.FromSeconds(0.1);
 
     internal static void UpdateTargets()
     {
@@ -187,10 +187,10 @@ internal static partial class TargetUpdater
         {
             try
             {
-                var deathParty = DataCenter.PartyMembers?.GetDeath().ToList() ?? new List<IBattleChara>();
-                var deathAll = DataCenter.AllTargets?.GetDeath().ToList() ?? new List<IBattleChara>();
-                var deathNPC = DataCenter.FriendlyNPCMembers?.GetDeath().ToList() ?? new List<IBattleChara>();
-                var deathAllianceMembers = DataCenter.AllianceMembers?.GetDeath().ToList() ?? new List<IBattleChara>();
+                var deathParty = DataCenter.PartyMembers?.GetDeath().ToList() ?? [];
+                var deathAll = DataCenter.AllTargets?.GetDeath().ToList() ?? [];
+                var deathNPC = DataCenter.FriendlyNPCMembers?.GetDeath().ToList() ?? [];
+                var deathAllianceMembers = DataCenter.AllianceMembers?.GetDeath().ToList() ?? [];
                 var deathAllianceHealers = new List<IBattleChara>(deathParty);
                 var deathAllianceSupports = new List<IBattleChara>(deathParty);
 
