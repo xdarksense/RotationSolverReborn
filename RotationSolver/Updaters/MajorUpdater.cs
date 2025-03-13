@@ -286,6 +286,7 @@ internal static class MajorUpdater
     private unsafe static void OpenChest()
     {
         if (!Service.Config.AutoOpenChest) return;
+        if (DataCenter.InCombat) return;
         var player = Player.Object;
 
         var treasure = Svc.Objects.FirstOrDefault(o =>
