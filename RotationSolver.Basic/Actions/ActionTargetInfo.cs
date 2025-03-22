@@ -186,6 +186,7 @@ public struct ActionTargetInfo(IBaseAction action)
         ActionID.AethericMimicryPvE,
         ActionID.EruptionPvE,
         ActionID.BishopAutoturretPvP,
+        ActionID.FeatherRainPvE,
     };
 
     private bool IsSpecialAbility(uint iD)
