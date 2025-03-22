@@ -78,6 +78,11 @@ partial class BlueMageRotation
         /// 
         /// </summary>
         ChocoMeteor,
+
+        /// <summary>
+        ///
+        /// </summary>
+        FeatherRain,
     }
 
     /// <summary>
@@ -511,6 +516,7 @@ partial class BlueMageRotation
     static partial void ModifyFeatherRainPvE(ref ActionSetting setting)
     {
         setting.TargetStatusProvide = [StatusID.Windburn_1723];
+        setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
