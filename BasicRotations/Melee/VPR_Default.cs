@@ -1,6 +1,6 @@
 ﻿namespace RebornRotations.Melee;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
 [SourceCode(Path = "main/BasicRotations/Melee/VPR_Default.cs")]
 [Api(4)]
 public sealed class VPR_Default : ViperRotation

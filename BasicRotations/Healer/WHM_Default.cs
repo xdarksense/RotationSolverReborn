@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RebornRotations.Healer;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
 [SourceCode(Path = "main/BasicRotations/Healer/WHM_Default.cs")]
 [Api(4)]
 public sealed class WHM_Default : WhiteMageRotation

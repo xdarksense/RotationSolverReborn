@@ -32,8 +32,9 @@
 		  <Private>False</Private>
 	  </Reference>
 	  <Reference Include="InteropGenerator.Runtime">
-	    <HintPath>..\..\..\..\XIVLauncher\addon\Hooks\dev\InteropGenerator.Runtime.dll</HintPath>
-	  </Reference>
+             <HintPath>$(DalamudLibPath)InteropGenerator.Runtime.dll</HintPath>
+             <Private>False</Private>
+         </Reference>
 	  <Reference Include="Lumina">
 		  <HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
 		  <Private>False</Private>
@@ -51,7 +52,7 @@
 		  <Private>False</Private>
 	  </Reference>
 
-    <PackageReference Include="DalamudPackager" Version="11.0.0" />
+    <PackageReference Include="DalamudPackager" Version="12.0.0" />
   </ItemGroup>
 
 	<ItemGroup>

@@ -53,6 +53,7 @@ public readonly struct ActionBasicInfo
     /// The attack type of this action.
     /// </summary>
     public readonly AttackType AttackType => (AttackType)(_action.Action.AttackType.RowId != 0 ? _action.Action.AttackType.RowId : byte.MaxValue);
+    
     /// <summary>
     /// The aspect of this action.
     /// </summary>
@@ -157,7 +158,7 @@ public readonly struct ActionBasicInfo
         IsLimitBreak = (ActionCate?)_action.Action.ActionCategory.Value.RowId
             is ActionCate.LimitBreak or ActionCate.LimitBreak_15;
         IsDutyAction = isDutyAction;
-        Aspect = (Aspect)_action.Action.CastType;
+        //Aspect = (Aspect)_action.Action.Aspect; temporarily removing this line. Aspect was removed from lumina for some reason
     }
 
     internal readonly bool BasicCheck(bool skipStatusProvideCheck, bool skipComboCheck, bool skipCastingCheck)

@@ -35,8 +35,9 @@
 		  <Private>False</Private>
 	  </Reference>
 	  <Reference Include="InteropGenerator.Runtime">
-	    <HintPath>..\..\..\..\XIVLauncher\addon\Hooks\dev\InteropGenerator.Runtime.dll</HintPath>
-	  </Reference>
+             <HintPath>$(DalamudLibPath)InteropGenerator.Runtime.dll</HintPath>
+             <Private>False</Private>
+         </Reference>
 	  <Reference Include="Lumina">
 		  <HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
 		  <Private>False</Private>
@@ -76,7 +77,7 @@
 		  <PrivateAssets>all</PrivateAssets>
 	  </ProjectReference>
 	  
-	  <PackageReference Include="System.Drawing.Common" Version="9.0.1" />
+	  <PackageReference Include="System.Drawing.Common" Version="9.0.3" />
 	  <ProjectReference Include="..\RotationSolver.SourceGenerators\RotationSolver.SourceGenerators.csproj" OutputItemType="Analyzer" ExcludeAssets="All" />
 
 	  <None Include="..\COPYING.LESSER">
