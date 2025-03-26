@@ -25,10 +25,10 @@ namespace RotationSolver.Basic.Helpers;
 /// </summary>
 public static class ObjectHelper
 {
-    static readonly EventHandlerType[] _eventType =
+    static readonly EventHandlerContent[] _eventType =
     {
-        EventHandlerType.TreasureHuntDirector,
-        EventHandlerType.Quest,
+        FFXIVClientStructs.FFXIV.Client.Game.Event.EventHandlerContent.TreasureHuntDirector,
+        EventHandlerContent.Quest,
     };
 
     internal static Lumina.Excel.Sheets.BNpcBase? GetObjectNPC(this IGameObject obj)
@@ -221,18 +221,18 @@ public static class ObjectHelper
                         continue;
 
                     // Read the enemy's name
-                    var enemyNameRaw = Marshal.PtrToStringUTF8((IntPtr)textNode->NodeText.StringPtr);
-                    if (string.IsNullOrEmpty(enemyNameRaw))
-                        continue;
+                    //var enemyNameRaw = Marshal.PtrToStringUTF8((IntPtr)textNode->NodeText.StringPtr);
+                    //if (string.IsNullOrEmpty(enemyNameRaw))
+                    //    continue;
 
-                    // Remove control characters from the enemy's name
-                    var enemyName = RemoveControlCharacters(enemyNameRaw);
+                    //// Remove control characters from the enemy's name
+                    //var enemyName = RemoveControlCharacters(enemyNameRaw);
 
-                    // Compare with battleChara's name
-                    if (string.Equals(enemyName, battleChara.Name.TextValue, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return true;
-                    }
+                    //// Compare with battleChara's name
+                    //if (string.Equals(enemyName, battleChara.Name.TextValue, StringComparison.OrdinalIgnoreCase))
+                    //{
+                    //    return true;
+                    //}
                 }
             }
         }
@@ -404,7 +404,7 @@ public static class ObjectHelper
         //71244 Leve Target
 
         // Quest
-        if (Service.Config.TargetQuestPriority && (icon == 71204 || icon == 71144 || icon == 71224 || icon == 71344 || obj.GetEventType() == EventHandlerType.Quest)) return true;
+        if (Service.Config.TargetQuestPriority && (icon == 71204 || icon == 71144 || icon == 71224 || icon == 71344 || obj.GetEventType() == EventHandlerContent.Quest)) return true;
         //71204 Main Quest
         //71144 Major Quest
         //71224 Other Quest
@@ -418,7 +418,7 @@ public static class ObjectHelper
 
     internal static unsafe uint GetNamePlateIcon(this IGameObject obj) => obj.Struct()->NamePlateIconId;
 
-    internal static unsafe EventHandlerType GetEventType(this IGameObject obj) => obj.Struct()->EventId.ContentId;
+    internal static unsafe EventHandlerContent GetEventType(this IGameObject obj) => obj.Struct()->EventId.ContentId;
 
     internal static unsafe BattleNpcSubKind GetBattleNPCSubKind(this IGameObject obj) => (BattleNpcSubKind)obj.Struct()->SubKind;
 
@@ -523,8 +523,8 @@ public static class ObjectHelper
 
         var StygianStatus = StatusID.UnnamedStatus_4388;
         var CloudOfDarknessStatus = StatusID.VeilOfDarkness;
-        var AntiCloudOfDarknessStatus = StatusID.Rsv41781100S74Cfc3B0E74Cfc3B0;
-        var AntiStygianStatus = StatusID.Rsv41771100S74Cfc3B0E74Cfc3B0;
+        var AntiCloudOfDarknessStatus = StatusID.InnerDarkness;
+        var AntiStygianStatus = StatusID.OuterDarkness;
 
         if (obj.IsEnemy())
         {

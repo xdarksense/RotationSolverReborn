@@ -211,7 +211,7 @@ partial class BardRotation
 
     static partial void ModifyPitchPerfectPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Song == Song.WANDERER && Repertoire > 0;
+        setting.ActionCheck = () => Song == Song.Wanderer && Repertoire > 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -334,7 +334,7 @@ partial class BardRotation
 
     static partial void ModifyRadiantFinalePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => JobGauge.Coda.Any(s => s != Song.NONE);
+        setting.ActionCheck = () => JobGauge.Coda.Any(s => s != Song.None);
         setting.StatusProvide = [StatusID.RadiantEncoreReady];
         setting.CreateConfig = () => new ActionConfig()
         {
