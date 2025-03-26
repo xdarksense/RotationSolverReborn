@@ -112,7 +112,7 @@ internal static class ActionUpdater
         }
         for (ushort i = 0; i < DataCenter.DutyActions.Length; i++)
         {
-            DataCenter.DutyActions[i] = ActionManager.GetDutyActionId(i);
+            DataCenter.DutyActions[i] = DutyActionManager.GetDutyActionId(i);
         }
     }
 
@@ -122,7 +122,7 @@ internal static class ActionUpdater
     private unsafe static void UpdateMoving()
     {
         var last = DataCenter.IsMoving;
-        DataCenter.IsMoving = AgentMap.Instance()->IsPlayerMoving > 0;
+        DataCenter.IsMoving = AgentMap.Instance()->IsPlayerMoving;
         if (last && !DataCenter.IsMoving)
         {
             _stopMovingTime = DateTime.Now;

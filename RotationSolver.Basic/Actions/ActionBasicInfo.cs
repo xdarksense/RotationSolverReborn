@@ -157,7 +157,7 @@ public readonly struct ActionBasicInfo
         IsLimitBreak = (ActionCate?)_action.Action.ActionCategory.Value.RowId
             is ActionCate.LimitBreak or ActionCate.LimitBreak_15;
         IsDutyAction = isDutyAction;
-        Aspect = (Aspect)_action.Action.Aspect;
+        Aspect = (Aspect)_action.Action.CastType;
     }
 
     internal readonly bool BasicCheck(bool skipStatusProvideCheck, bool skipComboCheck, bool skipCastingCheck)

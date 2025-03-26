@@ -16,32 +16,32 @@ partial class AstrologianRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasBalance => DrawnCard.Any(card => card == CardType.BALANCE);
+    public static bool HasBalance => DrawnCard.Any(card => card == CardType.Balance);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasBole => DrawnCard.Any(card => card == CardType.BOLE);
+    public static bool HasBole => DrawnCard.Any(card => card == CardType.Bole);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasArrow => DrawnCard.Any(card => card == CardType.ARROW);
+    public static bool HasArrow => DrawnCard.Any(card => card == CardType.Arrow);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasSpear => DrawnCard.Any(card => card == CardType.SPEAR);
+    public static bool HasSpear => DrawnCard.Any(card => card == CardType.Spear);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasEwer => DrawnCard.Any(card => card == CardType.EWER);
+    public static bool HasEwer => DrawnCard.Any(card => card == CardType.Ewer);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasSpire => DrawnCard.Any(card => card == CardType.SPIRE);
+    public static bool HasSpire => DrawnCard.Any(card => card == CardType.Spire);
 
     /// <summary>
     /// Indicates the state of Minor Arcana and which card will be used next when activating Minor Arcana, LORD = 7, LADY = 8
@@ -51,12 +51,12 @@ partial class AstrologianRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasLord => DrawnCrownCard == CardType.LORD;
+    public static bool HasLord => DrawnCrownCard == CardType.Lord;
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasLady => DrawnCrownCard == CardType.LADY;
+    public static bool HasLady => DrawnCrownCard == CardType.Lady;
 
     /// <summary>
     ///  Can use Umbral or Astral draw, active draw matching what the next draw will be, ASTRAL, UMBRAL
@@ -137,12 +137,12 @@ partial class AstrologianRotation
 
     static partial void ModifyAstralDrawPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ActiveDraw == DrawType.ASTRAL && DrawnCard.All(card => card != CardType.SPEAR);
+        setting.ActionCheck = () => ActiveDraw == DrawType.Astral && DrawnCard.All(card => card != CardType.Spear);
     }
 
     static partial void ModifyUmbralDrawPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ActiveDraw == DrawType.UMBRAL && DrawnCard.All(card => card != CardType.BALANCE);
+        setting.ActionCheck = () => ActiveDraw == DrawType.Umbral && DrawnCard.All(card => card != CardType.Balance);
     }
 
     static partial void ModifyPlayIPvE(ref ActionSetting setting) //37019
