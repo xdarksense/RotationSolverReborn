@@ -124,9 +124,9 @@ internal static class MajorUpdater
         {
             switch (Service.Config.FrameworkStyle)
             {
-                case FrameworkStyle.WorkTask:
-                    await Task.Run(() => UpdateWork());
-                    break;
+                //case FrameworkStyle.WorkTask:
+                //    await Task.Run(() => UpdateWork());
+                //    break;
                 case FrameworkStyle.RunOnTick:
                     await Svc.Framework.RunOnTick(() => UpdateWork());
                     break;

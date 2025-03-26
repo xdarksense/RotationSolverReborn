@@ -99,7 +99,7 @@ partial class SummonerRotation
     protected static bool SummonTimeEndAfterGCD(uint gcdCount = 0, float offset = 0)
         => SummonTimeEndAfter(GCDTime(gcdCount, offset));
 
-    private static float AttunmentTimeRaw => JobGauge.AttunmentTimerRemaining / 1000f;
+    private static float AttunmentTimeRaw => JobGauge.AttunementTimerRemaining / 1000f;
 
     /// <summary>
     /// 

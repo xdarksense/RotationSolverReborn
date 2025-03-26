@@ -2,7 +2,7 @@ using Dalamud.Interface.Colors;
 
 namespace RebornRotations.Melee;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
 [SourceCode(Path = "main/BasicRotations/Melee/NIN_Default.cs")]
 [Api(4)]
 

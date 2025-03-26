@@ -1,6 +1,6 @@
 namespace RebornRotations.Magical;
 
-[Rotation("DOES NOT WORK", CombatType.PvE, GameVersion = "7.15")]
+[Rotation("DOES NOT WORK", CombatType.PvE, GameVersion = "7.2")]
 [SourceCode(Path = "main/BasicRotations/Limited Jobs/BLU_Default.cs")]
 [Api(4)]
 public sealed class Blue_Default : BlueMageRotation

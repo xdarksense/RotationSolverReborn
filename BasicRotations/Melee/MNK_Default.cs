@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RebornRotations.Melee;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.15", Description = "Uses Lunar Solar Opener from The Balance")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.2", Description = "Uses Lunar Solar Opener from The Balance")]
 [SourceCode(Path = "main/BasicRotations/Melee/MNK_Default.cs")]
 [Api(4)]
 
@@ -254,7 +254,7 @@ public sealed class MNK_Default : MonkRotation
 
         // bullet proofed finisher - use when during burst
         // or if burst was missed, and next burst is not arriving in time, use it better than waste it, otherwise, hold it for next rof
-        if (!BeastChakras.Contains(BeastChakra.NONE))
+        if (!BeastChakras.Contains(BeastChakra.None))
         {
             switch (MBAbilities)
             {
@@ -311,9 +311,9 @@ public sealed class MNK_Default : MonkRotation
         if (Player.HasStatus(true, StatusID.PerfectBalance) && !HasSolar)
         {
             // SolarNadi - fill the missing one - this order is needed for opener
-            if (!BeastChakras.Contains(BeastChakra.RAPTOR) && RaptorForm(out act)) return true;
-            if (!BeastChakras.Contains(BeastChakra.COEURL) && CoerlForm(out act)) return true;
-            if (!BeastChakras.Contains(BeastChakra.OPOOPO) && OpoOpoForm(out act)) return true;
+            if (!BeastChakras.Contains(BeastChakra.Raptor) && RaptorForm(out act)) return true;
+            if (!BeastChakras.Contains(BeastChakra.Coeurl) && CoerlForm(out act)) return true;
+            if (!BeastChakras.Contains(BeastChakra.OpoOpo) && OpoOpoForm(out act)) return true;
         }
 
         if (Player.HasStatus(true, StatusID.PerfectBalance) && HasSolar)

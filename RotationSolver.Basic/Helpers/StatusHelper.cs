@@ -274,7 +274,7 @@ public static class StatusHelper
 
         foreach (var status in statuses)
         {
-            result.Add(status.StackCount == 0 ? byte.MaxValue : status.StackCount);
+            result.Add((byte)(status.Param == 0 ? byte.MaxValue : status.Param));
         }
 
         return result;
@@ -439,7 +439,7 @@ public static class StatusHelper
     {
         if (status == null) return false;
         if (!status.CanDispel()) return false;
-        if (status.StackCount > 2) return true;
+        if (status.Param > 2) return true;
         if (status.RemainingTime > 20) return true;
         return OtherConfiguration.DangerousStatus.Any(id => id == status.StatusId);
     }

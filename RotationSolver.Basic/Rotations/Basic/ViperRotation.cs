@@ -361,12 +361,12 @@ public partial class ViperRotation
 
     static partial void ModifyDeathRattlePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SerpentCombo == SerpentCombo.DEATHRATTLE;
+        setting.ActionCheck = () => SerpentCombo == SerpentCombo.DeathRattle;
     }
 
     static partial void ModifyLastLashPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SerpentCombo == SerpentCombo.LASTLASH;
+        setting.ActionCheck = () => SerpentCombo == SerpentCombo.LastLash;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -380,12 +380,12 @@ public partial class ViperRotation
 
     static partial void ModifyHuntersCoilPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (DreadCombo == DreadCombo.Dreadwinder || DreadCombo == DreadCombo.SwiftskinsCoil) && SerpentCombo == SerpentCombo.NONE;
+        setting.ActionCheck = () => (DreadCombo == DreadCombo.Dreadwinder || DreadCombo == DreadCombo.SwiftskinsCoil) && SerpentCombo == SerpentCombo.None;
     }
 
     static partial void ModifySwiftskinsCoilPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (DreadCombo == DreadCombo.Dreadwinder || DreadCombo == DreadCombo.HuntersCoil) && SerpentCombo == SerpentCombo.NONE;
+        setting.ActionCheck = () => (DreadCombo == DreadCombo.Dreadwinder || DreadCombo == DreadCombo.HuntersCoil) && SerpentCombo == SerpentCombo.None;
     }
 
     static partial void ModifyVicepitPvE(ref ActionSetting setting)
@@ -399,7 +399,7 @@ public partial class ViperRotation
 
     static partial void ModifyHuntersDenPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DreadCombo == DreadCombo.PitOfDread && SerpentCombo == SerpentCombo.NONE;
+        setting.ActionCheck = () => DreadCombo == DreadCombo.PitOfDread && SerpentCombo == SerpentCombo.None;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -408,7 +408,7 @@ public partial class ViperRotation
 
     static partial void ModifySwiftskinsDenPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DreadCombo == DreadCombo.HuntersDen && SerpentCombo == SerpentCombo.NONE;
+        setting.ActionCheck = () => DreadCombo == DreadCombo.HuntersDen && SerpentCombo == SerpentCombo.None;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -499,7 +499,7 @@ public partial class ViperRotation
 
     static partial void ModifyFirstGenerationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 5) || (MaxAnguine == 4 && AnguineTribute == 4)) && SerpentCombo == SerpentCombo.NONE;
+        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 5) || (MaxAnguine == 4 && AnguineTribute == 4)) && SerpentCombo == SerpentCombo.None;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -508,7 +508,7 @@ public partial class ViperRotation
 
     static partial void ModifySecondGenerationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 4) || (MaxAnguine == 4 && AnguineTribute == 3)) && SerpentCombo == SerpentCombo.NONE;
+        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 4) || (MaxAnguine == 4 && AnguineTribute == 3)) && SerpentCombo == SerpentCombo.None;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -517,7 +517,7 @@ public partial class ViperRotation
 
     static partial void ModifyThirdGenerationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 3) || (MaxAnguine == 4 && AnguineTribute == 2)) && SerpentCombo == SerpentCombo.NONE;
+        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 3) || (MaxAnguine == 4 && AnguineTribute == 2)) && SerpentCombo == SerpentCombo.None;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -526,7 +526,7 @@ public partial class ViperRotation
 
     static partial void ModifyFourthGenerationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 2) || (MaxAnguine == 4 && AnguineTribute == 1)) && SerpentCombo == SerpentCombo.NONE;
+        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 2) || (MaxAnguine == 4 && AnguineTribute == 1)) && SerpentCombo == SerpentCombo.None;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -544,7 +544,7 @@ public partial class ViperRotation
 
     static partial void ModifyFirstLegacyPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SerpentCombo == SerpentCombo.FIRSTLEGACY;
+        setting.ActionCheck = () => SerpentCombo == SerpentCombo.FirstLegacy;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -553,7 +553,7 @@ public partial class ViperRotation
 
     static partial void ModifySecondLegacyPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SerpentCombo == SerpentCombo.SECONDLEGACY;
+        setting.ActionCheck = () => SerpentCombo == SerpentCombo.SecondLegacy;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -562,7 +562,7 @@ public partial class ViperRotation
 
     static partial void ModifyThirdLegacyPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SerpentCombo == SerpentCombo.THIRDLEGACY;
+        setting.ActionCheck = () => SerpentCombo == SerpentCombo.ThirdLegacy;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -571,7 +571,7 @@ public partial class ViperRotation
 
     static partial void ModifyFourthLegacyPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SerpentCombo == SerpentCombo.FOURTHLEGACY;
+        setting.ActionCheck = () => SerpentCombo == SerpentCombo.FourthLegacy;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

@@ -20,17 +20,17 @@ partial class MonkRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasSolar => JobGauge.Nadi.HasFlag(Nadi.SOLAR);
+    public static bool HasSolar => JobGauge.Nadi.HasFlag(Nadi.Solar);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasLunar => JobGauge.Nadi.HasFlag(Nadi.LUNAR);
+    public static bool HasLunar => JobGauge.Nadi.HasFlag(Nadi.Lunar);
 
     /// <summary>
     /// .
     /// </summary>
-    public static bool NoNadi => JobGauge.Nadi.HasFlag(Nadi.NONE);
+    public static bool NoNadi => JobGauge.Nadi.HasFlag(Nadi.None);
 
     /// <summary>
     /// Gets the amount of available Opo-opo Fury stacks.
@@ -228,7 +228,7 @@ partial class MonkRotation
 
     static partial void ModifyPerfectBalancePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => BeastChakras.Distinct().Count() == 1 && BeastChakras.Any(chakra => chakra == BeastChakra.NONE);
+        setting.ActionCheck = () => BeastChakras.Distinct().Count() == 1 && BeastChakras.Any(chakra => chakra == BeastChakra.None);
         setting.UnlockedByQuestID = 66602;
         setting.StatusProvide = [StatusID.PerfectBalance];
     }
@@ -257,7 +257,7 @@ partial class MonkRotation
 
     static partial void ModifyTornadoKickPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => HasSolar && HasLunar && BeastChakras.Any(chakra => chakra != BeastChakra.NONE);
+        setting.ActionCheck = () => HasSolar && HasLunar && BeastChakras.Any(chakra => chakra != BeastChakra.None);
         setting.StatusProvide = [StatusID.FormlessFist];
         setting.CreateConfig = () => new ActionConfig()
         {

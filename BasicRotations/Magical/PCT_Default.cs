@@ -1,6 +1,6 @@
 ﻿namespace RebornRotations.Magical;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
 [SourceCode(Path = "main/BasicRotations/Magical/PCT_Default.cs")]
 [Api(4)]
 public sealed class PCT_Default : PictomancerRotation
