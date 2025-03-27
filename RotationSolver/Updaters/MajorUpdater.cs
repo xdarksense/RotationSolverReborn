@@ -21,7 +21,7 @@ internal static class MajorUpdater
         && !Svc.Condition[ConditionFlag.BetweenAreas]
         && !Svc.Condition[ConditionFlag.BetweenAreas51]
         && !Svc.Condition[ConditionFlag.LoggingOut]
-        && Player.Available;
+        && Player.AvailableThreadSafe;
 
     private static Exception? _threadException;
     private static DateTime _lastUpdatedWork = DateTime.Now;
@@ -124,9 +124,6 @@ internal static class MajorUpdater
         {
             switch (Service.Config.FrameworkStyle)
             {
-                //case FrameworkStyle.WorkTask:
-                //    await Task.Run(() => UpdateWork());
-                //    break;
                 case FrameworkStyle.RunOnTick:
                     await Svc.Framework.RunOnTick(() => UpdateWork());
                     break;
