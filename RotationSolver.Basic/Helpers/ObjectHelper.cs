@@ -221,18 +221,18 @@ public static class ObjectHelper
                         continue;
 
                     // Read the enemy's name
-                    //var enemyNameRaw = Marshal.PtrToStringUTF8((IntPtr)textNode->NodeText.StringPtr);
-                    //if (string.IsNullOrEmpty(enemyNameRaw))
-                    //    continue;
+                    var enemyNameRaw = textNode->NodeText.StringPtr.ToString();
+                    if (string.IsNullOrEmpty(enemyNameRaw))
+                        continue;
 
-                    //// Remove control characters from the enemy's name
-                    //var enemyName = RemoveControlCharacters(enemyNameRaw);
+                    // Remove control characters from the enemy's name
+                    var enemyName = RemoveControlCharacters(enemyNameRaw);
 
                     //// Compare with battleChara's name
-                    //if (string.Equals(enemyName, battleChara.Name.TextValue, StringComparison.OrdinalIgnoreCase))
-                    //{
-                    //    return true;
-                    //}
+                    if (string.Equals(enemyName, battleChara.Name.TextValue, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
                 }
             }
         }

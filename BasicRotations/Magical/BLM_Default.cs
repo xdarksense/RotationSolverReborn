@@ -276,12 +276,12 @@ public class BLM_Default : BlackMageRotation
                 break;
         }
 
-        if (ElementTimeEndAfterGCD(ExtendTimeSafely ? 3u : 2u))
-        {
-            if (CurrentMp >= FirePvE.Info.MPNeed * 2 + 800 && FirePvE.CanUse(out act)) return true;
-            if (FlarePvE.CanUse(out act)) return true;
-            if (DespairPvE.CanUse(out act)) return true;
-        }
+        //if (ElementTimeEndAfterGCD(ExtendTimeSafely ? 3u : 2u))
+        //{
+        //    if (CurrentMp >= FirePvE.Info.MPNeed * 2 + 800 && FirePvE.CanUse(out act)) return true;
+        //    if (FlarePvE.CanUse(out act)) return true;
+        //    if (DespairPvE.CanUse(out act)) return true;
+        //}
 
         return false;
     }
