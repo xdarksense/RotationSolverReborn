@@ -81,29 +81,6 @@ partial class BlackMageRotation
     protected static bool EnochianEndAfterGCD(uint gcdCount = 0, float offset = 0)
         => EnochianEndAfter(GCDTime(gcdCount, offset));
 
-    static float ElementTimeRaw => JobGauge.ElementTimeRemaining / 1000f;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    protected static float ElementTime => ElementTimeRaw - DataCenter.DefaultGCDRemain;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="time"></param>
-    /// <returns></returns>
-    protected static bool ElementTimeEndAfter(float time) => ElementTime <= time;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="gctCount"></param>
-    /// <param name="offset"></param>
-    /// <returns></returns>
-    protected static bool ElementTimeEndAfterGCD(uint gctCount = 0, float offset = 0)
-        => ElementTimeEndAfter(GCDTime(gctCount, offset));
-
     /// <summary>
     /// 
     /// </summary>
@@ -214,7 +191,7 @@ partial class BlackMageRotation
 
     static partial void ModifyTransposePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DataCenter.DefaultGCDRemain <= ElementTimeRaw;
+        //setting.ActionCheck = () => DataCenter.DefaultGCDRemain <= ElementTimeRaw;
     }
 
     static partial void ModifyThunderPvE(ref ActionSetting setting)
@@ -282,7 +259,7 @@ partial class BlackMageRotation
 
     static partial void ModifyFreezePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InUmbralIce && !ElementTimeEndAfter(ActionID.FreezePvE.GetCastTime() - 0.1f) && UmbralHearts == 0;
+        setting.ActionCheck = () => InUmbralIce && UmbralHearts == 0;
         setting.UnlockedByQuestID = 66611;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -304,7 +281,7 @@ partial class BlackMageRotation
 
     static partial void ModifyFlarePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InAstralFire && AstralSoulStacks <= 3 && !ElementTimeEndAfter(ActionID.FlarePvE.GetCastTime() - 0.1f);
+        setting.ActionCheck = () => InAstralFire && AstralSoulStacks <= 3;
         setting.UnlockedByQuestID = 66614;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -327,13 +304,13 @@ partial class BlackMageRotation
 
     static partial void ModifyBlizzardIvPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InUmbralIce && !ElementTimeEndAfter(ActionID.BlizzardIvPvE.GetCastTime() - 0.1f);
+        setting.ActionCheck = () => InUmbralIce;
         setting.UnlockedByQuestID = 67218;
     }
 
     static partial void ModifyFireIvPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InAstralFire && AstralSoulStacks <= 5 && !ElementTimeEndAfter(ActionID.FireIvPvE.GetCastTime() - 0.1f);
+        setting.ActionCheck = () => InAstralFire && AstralSoulStacks <= 5;
         setting.UnlockedByQuestID = 67219;
     }
 
@@ -373,7 +350,7 @@ partial class BlackMageRotation
 
     static partial void ModifyDespairPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InAstralFire && !ElementTimeEndAfter(ActionID.DespairPvE.GetCastTime() - 0.1f);
+        setting.ActionCheck = () => InAstralFire;
     }
 
     static partial void ModifyXenoglossyPvE(ref ActionSetting setting)

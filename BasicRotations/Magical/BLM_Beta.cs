@@ -144,28 +144,28 @@ public sealed class BLM_Beta : BlackMageRotation
         {
             if (UseMedicine && UseBurstMedicine(out act)) return true;
 
-            if (ElementTime > 0 && ElementTimeEndAfter(1))
-            {
-                if (TransposePvE.CanUse(out act)) return true;
-            }
+            //if (ElementTime > 0 && ElementTimeEndAfter(1))
+            //{
+            //    if (TransposePvE.CanUse(out act)) return true;
+            //}
 
             if (InCombat)
             {
-                if (ThisManyInstantCasts > 6 && AstralSoulStacks < 6 && InAstralFire && ElementTime > 6 && Player.HasStatus(true, StatusID.Firestarter))
+                if (ThisManyInstantCasts > 6 && AstralSoulStacks < 6 && InAstralFire && Player.HasStatus(true, StatusID.Firestarter))
                 {
                     if (ManafontPvE.CanUse(out act)) return true;
                 }
-                if (ThisManyInstantCasts > 6 && AstralSoulStacks < 6 && InAstralFire && ElementTime > 6 && Player.HasStatus(true, StatusID.Firestarter) && Player.CurrentMp > 9000)
+                if (ThisManyInstantCasts > 6 && AstralSoulStacks < 6 && InAstralFire && Player.HasStatus(true, StatusID.Firestarter) && Player.CurrentMp > 9000)
                 {
                     if (InCombat && TriplecastPvE.CanUse(out act)) return true;
                 }
 
-                if (ThisManyInstantCasts > 3 && AstralSoulStacks == 3 && InAstralFire && ElementTime > 6)
+                if (ThisManyInstantCasts > 3 && AstralSoulStacks == 3 && InAstralFire)
                 {
                     if (InCombat && TriplecastPvE.CanUse(out act, usedUp: true)) return true;
                 }
 
-                if (ThisManyInstantCasts == 1 && AstralSoulStacks == 6 && InAstralFire && ElementTime > 3)
+                if (ThisManyInstantCasts == 1 && AstralSoulStacks == 6 && InAstralFire)
                 {
                     if (SwiftcastPvE.CanUse(out act)) return true;
                 }
@@ -202,7 +202,7 @@ public sealed class BLM_Beta : BlackMageRotation
         if (FlareStarPvE.EnoughLevel && Infinity)
         {
 
-            if (InAstralFire && ElementTime < 4 && Player.HasStatus(true, StatusID.Firestarter))
+            if (InAstralFire && Player.HasStatus(true, StatusID.Firestarter))
             {
                 if (FireIiiPvE.CanUse(out act)) return true;
             }
@@ -403,12 +403,12 @@ public sealed class BLM_Beta : BlackMageRotation
                 break;
         }
 
-        if (ElementTimeEndAfterGCD(false ? 3u : 2u))
-        {
-            if (CurrentMp >= FirePvE.Info.MPNeed * 2 + 800 && FirePvE.CanUse(out act)) return true;
-            if (FlarePvE.CanUse(out act)) return true;
-            if (DespairPvE.CanUse(out act)) return true;
-        }
+        //if (ElementTimeEndAfterGCD(false ? 3u : 2u))
+        //{
+        //    if (CurrentMp >= FirePvE.Info.MPNeed * 2 + 800 && FirePvE.CanUse(out act)) return true;
+        //    if (FlarePvE.CanUse(out act)) return true;
+        //    if (DespairPvE.CanUse(out act)) return true;
+        //}
 
         return false;
     }
