@@ -164,6 +164,7 @@ partial class MachinistRotation
         {
             TimeToKill = 10,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyHeatBlastPvE(ref ActionSetting setting)
@@ -285,6 +286,7 @@ partial class MachinistRotation
     {
         setting.StatusProvide = [StatusID.Hypercharged, StatusID.FullMetalMachinist];
         setting.ActionCheck = () => InCombat;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyBlazingShotPvE(ref ActionSetting setting)
