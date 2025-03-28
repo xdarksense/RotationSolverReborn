@@ -95,6 +95,7 @@ partial class DancerRotation
         {
             AoeCount = 1,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyShieldSambaPvE(ref ActionSetting setting)
@@ -249,12 +250,18 @@ partial class DancerRotation
         setting.ActionCheck = () => !IsDancing && !AllianceMembers.Any(b => b.HasStatus(true, StatusID.ClosedPosition_2026));
     }
 
+    static partial void ModifyEndingPvE(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+    }
+
     static partial void ModifyDevilmentPvE(ref ActionSetting setting)
     {
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyFlourishPvE(ref ActionSetting setting)
@@ -262,6 +269,7 @@ partial class DancerRotation
         setting.StatusNeed = [StatusID.StandardFinish];
         setting.StatusProvide = [StatusID.ThreefoldFanDance, StatusID.FourfoldFanDance, StatusID.FinishingMoveReady];
         setting.ActionCheck = () => InCombat;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyTechnicalStepPvE(ref ActionSetting setting)
@@ -305,21 +313,25 @@ partial class DancerRotation
     static partial void ModifyEmboitePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => (ActionID)JobGauge.NextStep == ActionID.EmboitePvE;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyEntrechatPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => (ActionID)JobGauge.NextStep == ActionID.EntrechatPvE;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyJetePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => (ActionID)JobGauge.NextStep == ActionID.JetePvE;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyPirouettePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => (ActionID)JobGauge.NextStep == ActionID.PirouettePvE;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyLastDancePvE(ref ActionSetting setting)
