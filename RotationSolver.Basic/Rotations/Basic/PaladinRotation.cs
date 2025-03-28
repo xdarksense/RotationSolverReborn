@@ -127,6 +127,7 @@ partial class PaladinRotation
         {
             TimeToKill = 0,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyRiotBladePvE(ref ActionSetting setting)
@@ -185,6 +186,7 @@ partial class PaladinRotation
     static partial void ModifySentinelPvE(ref ActionSetting setting)
     {
         setting.TargetType = TargetType.Self;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyProminencePvE(ref ActionSetting setting)
@@ -205,6 +207,7 @@ partial class PaladinRotation
         setting.ActionCheck = () => OathGauge >= 50;
         setting.UnlockedByQuestID = 66595;
         setting.TargetType = TargetType.BeAttacked;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyCircleOfScornPvE(ref ActionSetting setting)
@@ -222,11 +225,13 @@ partial class PaladinRotation
         setting.StatusProvide = [StatusID.HallowedGround];
         setting.UnlockedByQuestID = 66596;
         setting.ActionCheck = () => InCombat;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyBulwarkPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Bulwark];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyGoringBladePvE(ref ActionSetting setting)
@@ -239,6 +244,7 @@ partial class PaladinRotation
     {
         setting.UnlockedByQuestID = 67571;
         setting.StatusProvide = [StatusID.DivineVeil_1362];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyClemencyPvE(ref ActionSetting setting)
@@ -249,6 +255,7 @@ partial class PaladinRotation
             if (t.HasStatus(false, StatusHelper.TankStanceStatus)) return false;
             return true;
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyRoyalAuthorityPvE(ref ActionSetting setting)
@@ -282,6 +289,7 @@ partial class PaladinRotation
     {
         setting.StatusProvide = [StatusID.PassageOfArms];
         setting.UnlockedByQuestID = 68111;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyHolyCirclePvE(ref ActionSetting setting)
@@ -323,6 +331,7 @@ partial class PaladinRotation
         setting.StatusProvide = [StatusID.HolySheltron];
         setting.UnlockedByQuestID = 66592;
         setting.TargetType = TargetType.Self;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyExpiacionPvE(ref ActionSetting setting)
@@ -364,6 +373,7 @@ partial class PaladinRotation
     {
         setting.StatusProvide = StatusHelper.RampartStatus;
         setting.TargetType = TargetType.Self;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyImperatorPvE(ref ActionSetting setting)
