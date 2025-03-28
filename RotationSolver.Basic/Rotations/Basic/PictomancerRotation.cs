@@ -394,6 +394,7 @@ public partial class PictomancerRotation
     static partial void ModifySmudgePvE(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyFireIiInRedPvE(ref ActionSetting setting)
