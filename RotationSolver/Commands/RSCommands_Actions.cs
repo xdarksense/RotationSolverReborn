@@ -179,7 +179,7 @@ namespace RotationSolver.Commands
                 if (playerObject == null)
                 {
                     if (Service.Config.InDebug)
-                        Svc.Log.Error("Player object is null.");
+                        Svc.Log.Information("Player object is null.");
                     return;
                 }
 

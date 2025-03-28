@@ -523,8 +523,8 @@ public static class ObjectHelper
 
         var StygianStatus = StatusID.UnnamedStatus_4388;
         var CloudOfDarknessStatus = StatusID.VeilOfDarkness;
-        var AntiCloudOfDarknessStatus = StatusID.InnerDarkness;
-        var AntiStygianStatus = StatusID.OuterDarkness;
+        var AntiCloudOfDarknessStatus = StatusID.OuterDarkness;
+        var AntiStygianStatus = StatusID.InnerDarkness;
 
         if (obj.IsEnemy())
         {
@@ -533,7 +533,7 @@ public static class ObjectHelper
             {
                 if (Service.Config.InDebug)
                 {
-                    Svc.Log.Information("IsCODBossImmune: VeilOfDarkness status found, CloudOfDarkness immune");
+                    Svc.Log.Information("IsCODBossImmune: OuterDarkness status found, CloudOfDarkness immune");
                 }
                 return true;
             }
@@ -543,7 +543,7 @@ public static class ObjectHelper
             {
                 if (Service.Config.InDebug)
                 {
-                    Svc.Log.Information("IsCODBossImmune: UnnamedStatus4388 status found, Stygian immune");
+                    Svc.Log.Information("IsCODBossImmune: InnerDarkness status found, Stygian immune");
                 }
                 return true;
             }
