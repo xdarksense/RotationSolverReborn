@@ -173,10 +173,16 @@ public partial class RotationConfigWindow : Window
 
         var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
         var installedIncompatiblePlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type == 5);
+        var installedCautionaryPlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type != 5);
 
         if (installedIncompatiblePlugin.Name != null)
         {
             errorText = $"Disable {installedIncompatiblePlugin.Name}, causes targetting issues.";
+        }
+
+        if (installedCautionaryPlugin.Name != null)
+        {
+            errorText = $"Caution: {installedCautionaryPlugin.Name}, {installedCautionaryPlugin.Features} ; Consider disabling if you experience issues.";
         }
 
         if (Player.Object != null && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
