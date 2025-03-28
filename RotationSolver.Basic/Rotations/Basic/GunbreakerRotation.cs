@@ -158,6 +158,7 @@ partial class GunbreakerRotation
         {
             TimeToKill = 5,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyBrutalShellPvE(ref ActionSetting setting)
@@ -180,6 +181,16 @@ partial class GunbreakerRotation
     }
 
     private protected sealed override IBaseAction TankStance => RoyalGuardPvE;
+
+    static partial void ModifyRoyalGuardPvE(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyReleaseRoyalGuardPvE(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+    }
 
     static partial void ModifyLightningShotPvE(ref ActionSetting setting)
     {
@@ -220,6 +231,7 @@ partial class GunbreakerRotation
     static partial void ModifyAuroraPvE(ref ActionSetting setting)
     {
         setting.TargetStatusProvide = [StatusID.Aurora];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifySuperbolidePvE(ref ActionSetting setting)
@@ -227,6 +239,7 @@ partial class GunbreakerRotation
         setting.StatusProvide = [StatusID.Superbolide];
         setting.ActionCheck = () => InCombat;
         setting.TargetType = TargetType.Self;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifySonicBreakPvE(ref ActionSetting setting)
@@ -270,6 +283,7 @@ partial class GunbreakerRotation
         {
             AoeCount = 1,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyHeartOfStonePvE(ref ActionSetting setting)
@@ -326,6 +340,7 @@ partial class GunbreakerRotation
     {
         setting.StatusProvide = [StatusID.CatharsisOfCorundum, StatusID.ClarityOfCorundum];
         setting.ActionCheck = () => Player.IsParty() || Player.IsTargetOnSelf();
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyHypervelocityPvE(ref ActionSetting setting)
@@ -375,8 +390,6 @@ partial class GunbreakerRotation
         {
             AoeCount = 1
         };
-        //setting.ComboIds = [ActionID.ReignOfBeastsPvE];
-        // TODO: Having configs here breaks the rotation, investigate why
     }
 
     static partial void ModifyLionHeartPvE(ref ActionSetting setting)
@@ -386,7 +399,6 @@ partial class GunbreakerRotation
         {
             AoeCount = 1
         };
-        //setting.ComboIds = [ActionID.NobleBloodPvE];
     }
 
     #endregion
