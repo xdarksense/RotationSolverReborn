@@ -182,11 +182,13 @@ partial class MonkRotation
     {
         setting.SpecialType = SpecialActionType.MovingForward;
         setting.UnlockedByQuestID = 66598;
+        setting.IsFriendly = false;
     }
 
     static partial void ModifyInspiritedMeditationPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => (!InBrotherhood && Chakra < 5 || InBrotherhood && Chakra < 10);
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyHowlingFistPvE(ref ActionSetting setting)
@@ -207,6 +209,7 @@ partial class MonkRotation
             TimeToKill = 10,
             AoeCount = 1,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyFourpointFuryPvE(ref ActionSetting setting)
@@ -231,17 +234,20 @@ partial class MonkRotation
         setting.ActionCheck = () => BeastChakras.Distinct().Count() == 1 && BeastChakras.Any(chakra => chakra == BeastChakra.None);
         setting.UnlockedByQuestID = 66602;
         setting.StatusProvide = [StatusID.PerfectBalance];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyFormShiftPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.FormlessFist];
         setting.UnlockedByQuestID = 67563;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyForbiddenMeditationPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => (!InBrotherhood && Chakra < 5 || InBrotherhood && Chakra < 10);
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyTheForbiddenChakraPvE(ref ActionSetting setting)
@@ -322,6 +328,7 @@ partial class MonkRotation
         {
             TimeToKill = 10,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyBrotherhoodPvE(ref ActionSetting setting)
@@ -342,11 +349,13 @@ partial class MonkRotation
         {
             TimeToKill = 10,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyEnlightenedMeditationPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => (!InBrotherhood && Chakra < 5 || InBrotherhood && Chakra < 10);
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyEnlightenmentPvE(ref ActionSetting setting)
