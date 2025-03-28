@@ -209,11 +209,13 @@ partial class ReaperRotation
     static partial void ModifyHellsIngressPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.EnhancedHarpe, StatusID.Bind];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyHellsEgressPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.EnhancedHarpe, StatusID.Bind];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifySpinningScythePvE(ref ActionSetting setting)
@@ -309,6 +311,7 @@ partial class ReaperRotation
     {
         setting.StatusProvide = [StatusID.Soulsow];
         setting.ActionCheck = () => !InCombat;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyPlentifulHarvestPvE(ref ActionSetting setting)
@@ -339,6 +342,7 @@ partial class ReaperRotation
     static partial void ModifyRegressPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => RegressPvEIngressReady || RegressPvEEgressReady;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyVoidReapingPvE(ref ActionSetting setting)

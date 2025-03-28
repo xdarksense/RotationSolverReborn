@@ -78,6 +78,7 @@ partial class SageRotation
         {
             TimeToKill = 0,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyPrognosisPvE(ref ActionSetting setting)
@@ -115,6 +116,7 @@ partial class SageRotation
     {
         setting.ActionCheck = () => !HasEukrasia;
         setting.StatusProvide = [StatusID.Eukrasia];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyEukrasianDiagnosisPvE(ref ActionSetting setting)
