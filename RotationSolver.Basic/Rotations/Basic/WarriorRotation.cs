@@ -103,6 +103,7 @@ partial class WarriorRotation
         {
             TimeToKill = 0,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyOverpowerPvE(ref ActionSetting setting)
@@ -115,12 +116,12 @@ partial class WarriorRotation
 
     static partial void ModifyDefiancePvE(ref ActionSetting setting)
     {
-
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyReleaseDefiancePvE(ref ActionSetting setting)
     {
-
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyTomahawkPvE(ref ActionSetting setting)
@@ -139,6 +140,7 @@ partial class WarriorRotation
     {
         setting.StatusProvide = [StatusID.ThrillOfBattle];
         setting.UnlockedByQuestID = 65855;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyInnerBeastPvE(ref ActionSetting setting)
@@ -151,6 +153,7 @@ partial class WarriorRotation
     {
         setting.StatusProvide = StatusHelper.RampartStatus;
         setting.ActionCheck = Player.IsTargetOnSelf;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyMythrilTempestPvE(ref ActionSetting setting)
@@ -169,6 +172,7 @@ partial class WarriorRotation
         setting.StatusProvide = [StatusID.Holmgang_409];
         setting.TargetType = TargetType.Self;
         setting.ActionCheck = () => InCombat;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifySteelCyclonePvE(ref ActionSetting setting)
@@ -200,6 +204,7 @@ partial class WarriorRotation
             TimeToKill = 0,
         };
         setting.UnlockedByQuestID = 66590;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyFellCleavePvE(ref ActionSetting setting)
@@ -214,6 +219,7 @@ partial class WarriorRotation
         setting.ActionCheck = Player.IsTargetOnSelf;
         setting.StatusProvide = [StatusID.RawIntuition];
         setting.UnlockedByQuestID = 66132;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyEquilibriumPvE(ref ActionSetting setting)
@@ -221,6 +227,7 @@ partial class WarriorRotation
         setting.UnlockedByQuestID = 66134;
         setting.ActionCheck = Player.IsTargetOnSelf;
         setting.StatusProvide = [StatusID.Equilibrium];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyDecimatePvE(ref ActionSetting setting)
@@ -251,6 +258,7 @@ partial class WarriorRotation
         {
             AoeCount = 1,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyInnerReleasePvE(ref ActionSetting setting)
@@ -261,6 +269,7 @@ partial class WarriorRotation
         };
         setting.UnlockedByQuestID = 68440;
         setting.StatusProvide = [StatusID.InnerRelease, StatusID.PrimalRendReady, StatusID.InnerStrength];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyNascentFlashPvE(ref ActionSetting setting)
@@ -273,6 +282,7 @@ partial class WarriorRotation
     static partial void ModifyBloodwhettingPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.StemTheTide, StatusID.StemTheFlow];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyOrogenyPvE(ref ActionSetting setting)
