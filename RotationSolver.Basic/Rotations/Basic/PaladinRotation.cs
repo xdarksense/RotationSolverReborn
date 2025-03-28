@@ -115,6 +115,17 @@ partial class PaladinRotation
 
     private protected sealed override IBaseAction TankStance => IronWillPvE;
     #region PvE
+
+    static partial void ModifyIronWillPvE(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyReleaseIronWillPvE(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+    }
+
     static partial void ModifyFastBladePvE(ref ActionSetting setting)
     {
 
