@@ -136,6 +136,7 @@ partial class MonkRotation
     static partial void ModifySteeledMeditationPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => (!InBrotherhood && Chakra < 5 || InBrotherhood && Chakra < 10);
+        setting.IsFriendly = true;
     }
 
     static partial void ModifySteelPeakPvE(ref ActionSetting setting)
