@@ -143,6 +143,7 @@ partial class WhiteMageRotation
         };
         setting.UnlockedByQuestID = 66615;
         setting.StatusProvide = [StatusID.SacredSight];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyRegenPvE(ref ActionSetting setting)
@@ -167,6 +168,7 @@ partial class WhiteMageRotation
     static partial void ModifyAetherialShiftPvE(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyHolyPvE(ref ActionSetting setting)
@@ -234,6 +236,7 @@ partial class WhiteMageRotation
     {
         setting.UnlockedByQuestID = 67259;
         setting.StatusProvide = [StatusID.ThinAir];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyTetragrammatonPvE(ref ActionSetting setting)
@@ -296,6 +299,7 @@ partial class WhiteMageRotation
     static partial void ModifyTemperancePvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Temperance, StatusID.DivineGrace];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyGlareIiiPvE(ref ActionSetting setting)
