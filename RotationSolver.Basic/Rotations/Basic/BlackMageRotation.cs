@@ -192,6 +192,7 @@ partial class BlackMageRotation
     static partial void ModifyTransposePvE(ref ActionSetting setting)
     {
         //setting.ActionCheck = () => DataCenter.DefaultGCDRemain <= ElementTimeRaw;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyThunderPvE(ref ActionSetting setting)
@@ -231,12 +232,14 @@ partial class BlackMageRotation
     {
         setting.StatusProvide = [StatusID.Manaward];
         setting.UnlockedByQuestID = 65889;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyManafontPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Thunderhead];
         setting.UnlockedByQuestID = 66609;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyFireIiiPvE(ref ActionSetting setting)
@@ -317,6 +320,7 @@ partial class BlackMageRotation
     static partial void ModifyBetweenTheLinesPvE(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingBackward;
+        setting.IsFriendly = true;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -336,6 +340,7 @@ partial class BlackMageRotation
     static partial void ModifyTriplecastPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = StatusHelper.SwiftcastStatus;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyFoulPvE(ref ActionSetting setting)
@@ -377,6 +382,7 @@ partial class BlackMageRotation
     static partial void ModifyAmplifierPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => (InAstralFire || InUmbralIce) && !EnochianEndAfter(10) && !IsPolyglotStacksMaxed;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyParadoxPvE(ref ActionSetting setting)
