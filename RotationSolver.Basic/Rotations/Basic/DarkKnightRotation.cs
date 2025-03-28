@@ -172,12 +172,12 @@ partial class DarkKnightRotation
 
     static partial void ModifyGritPvE(ref ActionSetting setting)
     {
-
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyReleaseGritPvE(ref ActionSetting setting)
     {
-
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyUnmendPvE(ref ActionSetting setting)
@@ -209,12 +209,14 @@ partial class DarkKnightRotation
             TimeToKill = 10,
         };
         setting.UnlockedByQuestID = 67591;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyShadowWallPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = StatusHelper.RampartStatus;
         setting.ActionCheck = Player.IsTargetOnSelf;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyStalwartSoulPvE(ref ActionSetting setting)
@@ -236,6 +238,7 @@ partial class DarkKnightRotation
     static partial void ModifyDarkMindPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.DarkMind];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyLivingDeadPvE(ref ActionSetting setting)
@@ -244,6 +247,7 @@ partial class DarkKnightRotation
         setting.ActionCheck = () => InCombat;
         setting.TargetType = TargetType.Self;
         setting.UnlockedByQuestID = 67594;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifySaltedEarthPvE(ref ActionSetting setting)
@@ -296,6 +300,7 @@ partial class DarkKnightRotation
         {
             TimeToKill = 10,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyTheBlackestNightPvE(ref ActionSetting setting)
@@ -303,6 +308,7 @@ partial class DarkKnightRotation
         setting.StatusProvide = [StatusID.BlackestNight];
         setting.ActionCheck = Player.IsTargetOnSelf;
         setting.UnlockedByQuestID = 68455;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyFloodOfShadowPvE(ref ActionSetting setting)
@@ -329,6 +335,7 @@ partial class DarkKnightRotation
         {
             AoeCount = 1,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyLivingShadowPvE(ref ActionSetting setting)
@@ -344,6 +351,7 @@ partial class DarkKnightRotation
         {
             AoeCount = 1,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifySaltAndDarknessPvE(ref ActionSetting setting)
@@ -368,6 +376,7 @@ partial class DarkKnightRotation
     static partial void ModifyShadowedVigilPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = StatusHelper.RampartStatus;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyScarletDeliriumPvE(ref ActionSetting setting)

@@ -95,6 +95,7 @@ partial class BardRotation
 
     static partial void ModifyRagingStrikesPvE(ref ActionSetting setting)
     {
+        setting.IsFriendly = true;
         setting.StatusProvide = [StatusID.RagingStrikes];
         setting.CreateConfig = () => new()
         {
@@ -168,6 +169,7 @@ partial class BardRotation
 
     static partial void ModifyBarragePvE(ref ActionSetting setting)
     {
+        setting.IsFriendly = true;
         setting.StatusProvide = [StatusID.Barrage, StatusID.ResonantArrowReady];
     }
 

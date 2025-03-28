@@ -73,6 +73,7 @@ partial class ScholarRotation
     static partial void ModifySummonEosPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => !DataCenter.HasPet && !Player.HasStatus(true, StatusID.Dissipation);
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyResurrectionPvE(ref ActionSetting setting)
@@ -233,6 +234,7 @@ partial class ScholarRotation
         {
             TimeToKill = 10,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyAetherpactPvE(ref ActionSetting setting)

@@ -172,6 +172,7 @@ partial class RedMageRotation
             TimeToKill = 10,
         };
         setting.UnlockedByQuestID = 68118;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyCorpsacorpsPvE(ref ActionSetting setting)
