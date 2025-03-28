@@ -101,6 +101,7 @@ partial class DragoonRotation
     {
         setting.StatusProvide = [StatusID.LifeSurge];
         setting.ActionCheck = () => !IsLastAbility(ActionID.LifeSurgePvE);
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyPiercingTalonPvE(ref ActionSetting setting)
@@ -132,6 +133,7 @@ partial class DragoonRotation
         };
         setting.StatusProvide = [StatusID.LanceCharge];
         setting.UnlockedByQuestID = 65975;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyJumpPvE(ref ActionSetting setting)
@@ -144,6 +146,7 @@ partial class DragoonRotation
     {
         setting.UnlockedByQuestID = 66604;
         setting.StatusProvide = [StatusID.EnhancedPiercingTalon];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyDoomSpikePvE(ref ActionSetting setting)
