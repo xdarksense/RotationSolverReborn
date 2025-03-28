@@ -158,7 +158,7 @@ public readonly struct ActionBasicInfo
         IsLimitBreak = (ActionCate?)_action.Action.ActionCategory.Value.RowId
             is ActionCate.LimitBreak or ActionCate.LimitBreak_15;
         IsDutyAction = isDutyAction;
-        //Aspect = (Aspect)_action.Action.Aspect; temporarily removing this line. Aspect was removed from lumina for some reason
+        //Aspect = (Aspect)_action.Action.Aspect; Resolved on next lumina update
     }
 
     internal readonly bool BasicCheck(bool skipStatusProvideCheck, bool skipComboCheck, bool skipCastingCheck)
