@@ -5,7 +5,7 @@ namespace RotationSolver.Basic.Helpers
 {
     internal class PriorityTargetHelper
     {
-        private static readonly string FilePath = "PriorityId.json";
+        private static readonly string FilePath = "PrioTargetId.json";
 
         // List of OIDs (DataId)
         private static HashSet<uint> priorityOids = LoadPriorityOids();
