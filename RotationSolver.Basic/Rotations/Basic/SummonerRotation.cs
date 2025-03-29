@@ -1,4 +1,4 @@
-﻿using Dalamud.Interface.Colors;
+using Dalamud.Interface.Colors;
 
 namespace RotationSolver.Basic.Rotations.Basic;
 
@@ -128,7 +128,7 @@ partial class SummonerRotation
     private static bool HasSummon => DataCenter.HasPet && SummonTimeEndAfterGCD();
     #endregion
 
-    #region PvE Actions Unassignable
+    #region PvE Actions Unassignable Status
 
     /// <summary>
     /// 
@@ -457,6 +457,10 @@ partial class SummonerRotation
     static partial void ModifySearingFlashPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.RubysGlimmer];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyLuxSolarisPvE(ref ActionSetting setting)
@@ -474,11 +478,32 @@ partial class SummonerRotation
     static partial void ModifyAstralFlarePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => AstralFlarePvEReady;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 3,
+        };
     }
 
     static partial void ModifyDeathflarePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => InBahamut;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyWyrmwavePvE(ref ActionSetting setting)
+    {
+        
+    }
+
+    static partial void ModifyAkhMornPvE(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyRubyRitePvE(ref ActionSetting setting)
@@ -521,6 +546,24 @@ partial class SummonerRotation
         setting.ActionCheck = () => EnkindlePhoenixPvEReady;
     }
 
+    static partial void ModifyEverlastingFlightPvE(ref ActionSetting setting)
+    {
+        
+    }
+
+    static partial void ModifyScarletFlamePvE(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyRevelationPvE(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
     static partial void ModifyRubyCatastrophePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => RubyCatastrophePvEReady;
@@ -540,21 +583,37 @@ partial class SummonerRotation
     {
         setting.StatusProvide = [StatusID.CrimsonStrikeReady_4403];
         setting.ActionCheck = () => CrimsonCyclonePvEReady;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyCrimsonStrikePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => CrimsonStrikePvEReady;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyMountainBusterPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => MountainBusterPvEReady;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifySlipstreamPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => SlipstreamPvEReady;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifySummonSolarBahamutPvE(ref ActionSetting setting)
@@ -569,14 +628,41 @@ partial class SummonerRotation
         setting.ActionCheck = () => UmbralImpulsePvEReady;
     }
 
+    static partial void ModifyUmbralFlarePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => UmbralFlarePvEReady;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 3,
+        };
+    }
+    
     static partial void ModifySunflarePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => InSolarBahamut;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyEnkindleSolarBahamutPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => EnkindleSolarBahamutPvEReady;
+    }
+
+    static partial void ModifyLuxwavePvE(ref ActionSetting setting)
+    {
+        
+    }
+
+    static partial void ModifyExodusPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => InSolarBahamut;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
     #endregion
 
