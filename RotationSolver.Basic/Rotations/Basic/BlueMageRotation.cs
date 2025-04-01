@@ -117,28 +117,6 @@ partial class BlueMageRotation
     /// <summary>
     /// 
     /// </summary>
-    public BlueMageRotation()
-    {
-        BluDPSSpellActions.Add(BluDPSSpell.WaterCannon, WaterCannonPvE);
-        BluDPSSpellActions.Add(BluDPSSpell.SonicBoom, SonicBoomPvE);
-        BluDPSSpellActions.Add(BluDPSSpell.GoblinPunch, GoblinPunchPvE);
-
-        BluHealSpellActions.Add(BluHealSpell.WhiteWind, WhiteWindPvE);
-        BluHealSpellActions.Add(BluHealSpell.AngelsSnack, AngelsSnackPvE);
-
-        BluAOESpellActions.Add(BluAOESpell.Glower, GlowerPvE);
-        BluAOESpellActions.Add(BluAOESpell.FlyingFrenzy, FlyingFrenzyPvE);
-        BluAOESpellActions.Add(BluAOESpell.FlameThrower, FlameThrowerPvE);
-        BluAOESpellActions.Add(BluAOESpell.DrillCannons, DrillCannonsPvE);
-        BluAOESpellActions.Add(BluAOESpell.Plaincracker, PlaincrackerPvE);
-        BluAOESpellActions.Add(BluAOESpell.HighVoltage, HighVoltagePvE);
-        BluAOESpellActions.Add(BluAOESpell.MindBlast, MindBlastPvE);
-        BluAOESpellActions.Add(BluAOESpell.ThousandNeedles, _1000NeedlesPvE);
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
     public Dictionary<BluDPSSpell, IBaseAction> BluDPSSpellActions = [];
 
     /// <summary>
@@ -232,8 +210,6 @@ partial class BlueMageRotation
     /// 
     /// </summary>
     public CombatRole BlueId { get; protected set; } = CombatRole.DPS;
-    [RotationConfig(CombatType.PvE, Name = "Aetheric Mimicry Role")]
-    public static BLUID BlueId { get; set; } = BLUID.DPS;
 
     static partial void ModifyWaterCannonPvE(ref ActionSetting setting)
     {

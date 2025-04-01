@@ -718,7 +718,7 @@ internal static class DataCenter
     private static readonly Queue<ActionRec> _actions = new(QUEUECAPACITY);
     private static readonly Queue<DamageRec> _damages = new(QUEUECAPACITY);
 
-    internal static CombatRole? BluRole => (RightNowRotation as BlueMageRotation)?.BlueId;
+    internal static CombatRole? BluRole => (CurrentRotation as BlueMageRotation)?.BlueId;
 
     public static float DPSTaken
     {
