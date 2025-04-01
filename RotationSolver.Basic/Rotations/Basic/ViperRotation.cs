@@ -230,7 +230,7 @@ public partial class ViperRotation
     }
     #endregion
 
-    #region Actions
+    #region PvE Actions
 
     static partial void ModifyWrithingSnapPvE(ref ActionSetting setting)
     {
@@ -361,12 +361,12 @@ public partial class ViperRotation
 
     static partial void ModifyDeathRattlePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SerpentCombo == SerpentCombo.DEATHRATTLE;
+        setting.ActionCheck = () => SerpentCombo == SerpentCombo.DeathRattle;
     }
 
     static partial void ModifyLastLashPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SerpentCombo == SerpentCombo.LASTLASH;
+        setting.ActionCheck = () => SerpentCombo == SerpentCombo.LastLash;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -380,12 +380,12 @@ public partial class ViperRotation
 
     static partial void ModifyHuntersCoilPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (DreadCombo == DreadCombo.Dreadwinder || DreadCombo == DreadCombo.SwiftskinsCoil) && SerpentCombo == SerpentCombo.NONE;
+        setting.ActionCheck = () => (DreadCombo == DreadCombo.Dreadwinder || DreadCombo == DreadCombo.SwiftskinsCoil) && SerpentCombo == SerpentCombo.None;
     }
 
     static partial void ModifySwiftskinsCoilPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (DreadCombo == DreadCombo.Dreadwinder || DreadCombo == DreadCombo.HuntersCoil) && SerpentCombo == SerpentCombo.NONE;
+        setting.ActionCheck = () => (DreadCombo == DreadCombo.Dreadwinder || DreadCombo == DreadCombo.HuntersCoil) && SerpentCombo == SerpentCombo.None;
     }
 
     static partial void ModifyVicepitPvE(ref ActionSetting setting)
@@ -399,7 +399,7 @@ public partial class ViperRotation
 
     static partial void ModifyHuntersDenPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DreadCombo == DreadCombo.PitOfDread && SerpentCombo == SerpentCombo.NONE;
+        setting.ActionCheck = () => DreadCombo == DreadCombo.PitOfDread && SerpentCombo == SerpentCombo.None;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -408,7 +408,7 @@ public partial class ViperRotation
 
     static partial void ModifySwiftskinsDenPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DreadCombo == DreadCombo.HuntersDen && SerpentCombo == SerpentCombo.NONE;
+        setting.ActionCheck = () => DreadCombo == DreadCombo.HuntersDen && SerpentCombo == SerpentCombo.None;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -499,7 +499,7 @@ public partial class ViperRotation
 
     static partial void ModifyFirstGenerationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 5) || (MaxAnguine == 4 && AnguineTribute == 4)) && SerpentCombo == SerpentCombo.NONE;
+        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 5) || (MaxAnguine == 4 && AnguineTribute == 4)) && SerpentCombo == SerpentCombo.None;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -508,7 +508,7 @@ public partial class ViperRotation
 
     static partial void ModifySecondGenerationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 4) || (MaxAnguine == 4 && AnguineTribute == 3)) && SerpentCombo == SerpentCombo.NONE;
+        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 4) || (MaxAnguine == 4 && AnguineTribute == 3)) && SerpentCombo == SerpentCombo.None;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -517,7 +517,7 @@ public partial class ViperRotation
 
     static partial void ModifyThirdGenerationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 3) || (MaxAnguine == 4 && AnguineTribute == 2)) && SerpentCombo == SerpentCombo.NONE;
+        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 3) || (MaxAnguine == 4 && AnguineTribute == 2)) && SerpentCombo == SerpentCombo.None;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -526,7 +526,7 @@ public partial class ViperRotation
 
     static partial void ModifyFourthGenerationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 2) || (MaxAnguine == 4 && AnguineTribute == 1)) && SerpentCombo == SerpentCombo.NONE;
+        setting.ActionCheck = () => ((MaxAnguine == 5 && AnguineTribute == 2) || (MaxAnguine == 4 && AnguineTribute == 1)) && SerpentCombo == SerpentCombo.None;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -544,7 +544,7 @@ public partial class ViperRotation
 
     static partial void ModifyFirstLegacyPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SerpentCombo == SerpentCombo.FIRSTLEGACY;
+        setting.ActionCheck = () => SerpentCombo == SerpentCombo.FirstLegacy;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -553,7 +553,7 @@ public partial class ViperRotation
 
     static partial void ModifySecondLegacyPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SerpentCombo == SerpentCombo.SECONDLEGACY;
+        setting.ActionCheck = () => SerpentCombo == SerpentCombo.SecondLegacy;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -562,7 +562,7 @@ public partial class ViperRotation
 
     static partial void ModifyThirdLegacyPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SerpentCombo == SerpentCombo.THIRDLEGACY;
+        setting.ActionCheck = () => SerpentCombo == SerpentCombo.ThirdLegacy;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -571,7 +571,219 @@ public partial class ViperRotation
 
     static partial void ModifyFourthLegacyPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SerpentCombo == SerpentCombo.FOURTHLEGACY;
+        setting.ActionCheck = () => SerpentCombo == SerpentCombo.FourthLegacy;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+    #endregion
+
+    #region PvP Actions
+    static partial void ModifyRavenousBitePvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig();
+    }
+
+    static partial void ModifySwiftskinsStingPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig();
+    }
+
+    static partial void ModifyPiercingFangsPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig();
+    }
+
+    static partial void ModifyBarbarousBitePvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig();
+    }
+
+    static partial void ModifyHuntersStingPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig();
+    }
+
+    static partial void ModifySteelFangsPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig();
+    }
+
+    static partial void ModifyBloodcoilPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig();
+    }
+
+    static partial void ModifyUncoiledFuryPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifySerpentsTailPvP(ref ActionSetting setting)
+    {
+        // technically not a real move
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifySlitherPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig();
+    }
+
+    static partial void ModifySnakeScalesPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig();
+    }
+
+    static partial void ModifyRattlingCoilPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig();
+    }
+
+    static partial void ModifyFirstGenerationPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SteelFangsPvP) == ActionID.FirstGenerationPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifySecondGenerationPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SteelFangsPvP) == ActionID.SecondGenerationPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyThirdGenerationPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SteelFangsPvP) == ActionID.ThirdGenerationPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyFourthGenerationPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SteelFangsPvP) == ActionID.FourthGenerationPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifySanguineFeastPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.BloodcoilPvP) == ActionID.SanguineFeastPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            ShouldCheckCombo = false,
+        };
+    }
+
+    static partial void ModifyOuroborosPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.BloodcoilPvP) == ActionID.OuroborosPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyDeathRattlePvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.DeathRattlePvP;
+        setting.CreateConfig = () => new ActionConfig();
+    }
+
+    static partial void ModifyTwinfangBitePvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.TwinfangBitePvP;
+        setting.CreateConfig = () => new ActionConfig();
+    }
+
+    static partial void ModifyTwinbloodBitePvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.TwinbloodBitePvP;
+        setting.CreateConfig = () => new ActionConfig();
+    }
+
+    static partial void ModifyUncoiledTwinfangPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.UncoiledTwinfangPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyUncoiledTwinbloodPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.UncoiledTwinbloodPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyFirstLegacyPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.FirstLegacyPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifySecondLegacyPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.SecondLegacyPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyThirdLegacyPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.ThirdLegacyPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyFourthLegacyPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SerpentsTailPvP) == ActionID.FourthLegacyPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyBacklashPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SnakeScalesPvP) == ActionID.BacklashPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+        static partial void ModifyFuriousBacklashPvP(ref ActionSetting setting)
+    {
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

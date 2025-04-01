@@ -41,7 +41,7 @@ namespace RotationSolver.Basic.Helpers
         internal unsafe static long GetMarker(HeadMarker index)
         {
             var instance = MarkingController.Instance();
-            if (instance == null || instance->Markers == null) return 0;
+            if (instance == null || instance->Markers.Length == 0) return 0;
             return instance->Markers[(int)index].ObjectId;
         }
 

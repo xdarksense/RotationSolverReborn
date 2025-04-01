@@ -33,8 +33,8 @@ internal class CheckBoxSearchCondition(PropertyInfo property, params ISearchable
             _condition = (ConditionBoolean)property.GetValue(Service.Config)!;
             AdditionalDraw = () =>
             {
-                if (DataCenter.RightNowRotation == null) return;
-                GetCondition()?.DrawMain(DataCenter.RightNowRotation);
+                if (DataCenter.CurrentRotation == null) return;
+                GetCondition()?.DrawMain(DataCenter.CurrentRotation);
             };
         }
 
@@ -60,7 +60,7 @@ internal class CheckBoxSearchCondition(PropertyInfo property, params ISearchable
 
         protected override ConditionSet GetCondition()
         {
-            return DataCenter.RightSet.GetDisableCondition(_condition.Key);
+            return DataCenter.CurrentConditionValue.GetDisableCondition(_condition.Key);
         }
     }
 
@@ -78,7 +78,7 @@ internal class CheckBoxSearchCondition(PropertyInfo property, params ISearchable
 
         protected override ConditionSet GetCondition()
         {
-            return DataCenter.RightSet.GetEnableCondition(_condition.Key);
+            return DataCenter.CurrentConditionValue.GetEnableCondition(_condition.Key);
         }
     }
 

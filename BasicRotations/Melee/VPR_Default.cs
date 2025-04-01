@@ -1,6 +1,6 @@
-﻿namespace DefaultRotations.Melee;
+﻿namespace RebornRotations.Melee;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
 [SourceCode(Path = "main/BasicRotations/Melee/VPR_Default.cs")]
 [Api(4)]
 public sealed class VPR_Default : ViperRotation
@@ -53,7 +53,7 @@ public sealed class VPR_Default : ViperRotation
         if (TwinbloodBitePvE.CanUse(out act)) return true;
 
         // Use burst medicine if cooldown for Technical Step has elapsed sufficiently
-        if (SerpentCombo == SerpentCombo.NONE && BurstMed && SerpentsIrePvE.EnoughLevel && SerpentsIrePvE.Cooldown.ElapsedAfter(115)
+        if (SerpentCombo == SerpentCombo.None && BurstMed && SerpentsIrePvE.EnoughLevel && SerpentsIrePvE.Cooldown.ElapsedAfter(115)
             && UseBurstMedicine(out act)) return true;
 
         return base.EmergencyAbility(nextGCD, out act);
@@ -69,29 +69,29 @@ public sealed class VPR_Default : ViperRotation
     [RotationDesc]
     protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
-        if (SerpentCombo == SerpentCombo.NONE && SecondWindPvE.CanUse(out act)) return true;
-        if (SerpentCombo == SerpentCombo.NONE && BloodbathPvE.CanUse(out act)) return true;
+        if (SerpentCombo == SerpentCombo.None && SecondWindPvE.CanUse(out act)) return true;
+        if (SerpentCombo == SerpentCombo.None && BloodbathPvE.CanUse(out act)) return true;
         return base.HealSingleAbility(nextGCD, out act);
     }
 
     [RotationDesc]
     protected sealed override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (SerpentCombo == SerpentCombo.NONE && FeintPvE.CanUse(out act)) return true;
+        if (SerpentCombo == SerpentCombo.None && FeintPvE.CanUse(out act)) return true;
         return base.DefenseAreaAbility(nextGCD, out act);
     }
 
     [RotationDesc]
     protected sealed override bool AntiKnockbackAbility(IAction nextGCD, out IAction? act)
     {
-        if (SerpentCombo == SerpentCombo.NONE && ArmsLengthPvE.CanUse(out act)) return true;
+        if (SerpentCombo == SerpentCombo.None && ArmsLengthPvE.CanUse(out act)) return true;
         return base.AntiKnockbackAbility(nextGCD, out act);
     }
 
     [RotationDesc]
     protected sealed override bool InterruptAbility(IAction nextGCD, out IAction? act)
     {
-        if (SerpentCombo == SerpentCombo.NONE && LegSweepPvE.CanUse(out act)) return true;
+        if (SerpentCombo == SerpentCombo.None && LegSweepPvE.CanUse(out act)) return true;
         return base.InterruptAbility(nextGCD, out act);
     }
     #endregion
@@ -139,18 +139,18 @@ public sealed class VPR_Default : ViperRotation
         }
 
         // Uncoiled Fury Overcap protection
-        if ((MaxRattling == RattlingCoilStacks || RattlingCoilStacks >= MaxUncoiledStacksUser) && !Player.HasStatus(true, StatusID.ReadyToReawaken) && SerpentCombo == SerpentCombo.NONE)
+        if ((MaxRattling == RattlingCoilStacks || RattlingCoilStacks >= MaxUncoiledStacksUser) && !Player.HasStatus(true, StatusID.ReadyToReawaken) && SerpentCombo == SerpentCombo.None)
         {
             if (UncoiledFuryPvE.CanUse(out act, usedUp: true)) return true;
         }
 
-        if (BurstUncoiledFury && Player.HasStatus(true, StatusID.Medicated) && !Player.HasStatus(true, StatusID.ReadyToReawaken) && SerpentCombo == SerpentCombo.NONE)
+        if (BurstUncoiledFury && Player.HasStatus(true, StatusID.Medicated) && !Player.HasStatus(true, StatusID.ReadyToReawaken) && SerpentCombo == SerpentCombo.None)
         {
             if (UncoiledFuryPvE.CanUse(out act, usedUp: true)) return true;
         }
 
         //Uncoiled fury use
-        if (SerpentsIrePvE.Cooldown.JustUsedAfter(30) && !Player.HasStatus(true, StatusID.ReadyToReawaken) && SerpentCombo == SerpentCombo.NONE)
+        if (SerpentsIrePvE.Cooldown.JustUsedAfter(30) && !Player.HasStatus(true, StatusID.ReadyToReawaken) && SerpentCombo == SerpentCombo.None)
         {
             if (UncoiledFuryPvE.CanUse(out act, usedUp: true)) return true;
         }
@@ -202,8 +202,8 @@ public sealed class VPR_Default : ViperRotation
         if (SteelFangsPvE.CanUse(out act)) return true;
 
         //Ranged
-        if ((UFGhosting || (!UFGhosting && SerpentCombo == SerpentCombo.NONE)) && UncoiledFuryPvE.CanUse(out act, usedUp: true)) return true;
-        if ((UFGhosting || (!UFGhosting && SerpentCombo == SerpentCombo.NONE)) && WrithingSnapPvE.CanUse(out act)) return true;
+        if ((UFGhosting || (!UFGhosting && SerpentCombo == SerpentCombo.None)) && UncoiledFuryPvE.CanUse(out act, usedUp: true)) return true;
+        if ((UFGhosting || (!UFGhosting && SerpentCombo == SerpentCombo.None)) && WrithingSnapPvE.CanUse(out act)) return true;
 
         return base.GeneralGCD(out act);
     }

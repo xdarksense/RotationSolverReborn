@@ -101,6 +101,7 @@ partial class DragoonRotation
     {
         setting.StatusProvide = [StatusID.LifeSurge];
         setting.ActionCheck = () => !IsLastAbility(ActionID.LifeSurgePvE);
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyPiercingTalonPvE(ref ActionSetting setting)
@@ -132,6 +133,7 @@ partial class DragoonRotation
         };
         setting.StatusProvide = [StatusID.LanceCharge];
         setting.UnlockedByQuestID = 65975;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyJumpPvE(ref ActionSetting setting)
@@ -144,6 +146,7 @@ partial class DragoonRotation
     {
         setting.UnlockedByQuestID = 66604;
         setting.StatusProvide = [StatusID.EnhancedPiercingTalon];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyDoomSpikePvE(ref ActionSetting setting)
@@ -350,10 +353,85 @@ partial class DragoonRotation
         };
     }
     #endregion
+    
+    #region PvP Actions
 
-    // PvP
+    static partial void ModifyRaidenThrustPvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyFangAndClawPvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyWheelingThrustPvP(ref ActionSetting setting) 
+    {
+    }
+
+    static partial void ModifyDrakesbanePvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyChaoticSpringPvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyHorridRoarPvP(ref ActionSetting setting)
+    {
+        setting.IsFriendly = false;
+    }
+
+    static partial void ModifyHeavensThrustPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.RaidenThrustPvP) == ActionID.HeavensThrustPvP;
+    }
+
+    static partial void ModifyStarcrossPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.RaidenThrustPvP) == ActionID.StarcrossPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+        static partial void ModifyGeirskogulPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 2,
+        };
+    }
+
+    static partial void ModifyNastrondPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.GeirskogulPvP) == ActionID.NastrondPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 2,
+        };
+    }
+
+    static partial void ModifyElusiveJumpPvP(ref ActionSetting setting)
+    {
+        setting.SpecialType = SpecialActionType.MovingBackward;
+        setting.IsFriendly = true;
+    }
+
+        static partial void ModifyWyrmwindThrustPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.ElusiveJumpPvP) == ActionID.WyrmwindThrustPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
     static partial void ModifyHighJumpPvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
     }
+    #endregion
+    
+
 }

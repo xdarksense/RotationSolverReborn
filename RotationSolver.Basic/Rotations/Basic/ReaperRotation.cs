@@ -209,11 +209,13 @@ partial class ReaperRotation
     static partial void ModifyHellsIngressPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.EnhancedHarpe, StatusID.Bind];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyHellsEgressPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.EnhancedHarpe, StatusID.Bind];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifySpinningScythePvE(ref ActionSetting setting)
@@ -309,6 +311,7 @@ partial class ReaperRotation
     {
         setting.StatusProvide = [StatusID.Soulsow];
         setting.ActionCheck = () => !InCombat;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyPlentifulHarvestPvE(ref ActionSetting setting)
@@ -339,6 +342,7 @@ partial class ReaperRotation
     static partial void ModifyRegressPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => RegressPvEIngressReady || RegressPvEEgressReady;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyVoidReapingPvE(ref ActionSetting setting)
@@ -399,10 +403,113 @@ partial class ReaperRotation
     #endregion
 
     #region PvP Actions
+    static partial void ModifySlicePvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyWaxingSlicePvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyInfernalSlicePvP(ref ActionSetting setting)
+    {
+    }
+    static partial void ModifyHarvestMoonPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyPlentifulHarvestPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyGrimSwathePvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyDeathWarrantPvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyArcaneCrestPvP(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyVoidReapingPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.Enshrouded];
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SlicePvP) == ActionID.VoidReapingPvP;
+    }
+
+    static partial void ModifyExecutionersGuillotinePvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SlicePvP) == ActionID.ExecutionersGuillotinePvP;
+    }
+
+    static partial void ModifyCrossReapingPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.Enshrouded];
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SlicePvP) == ActionID.CrossReapingPvP;
+    }
+
+    static partial void ModifyLemuresSlicePvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.GrimSwathePvP) == ActionID.LemuresSlicePvP;
+        setting.StatusNeed = [StatusID.Enshrouded];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyFateSealedPvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyPerfectioPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.PerfectioParata_4309];
+        setting.IsFriendly = false;
+    }
+
+    static partial void ModifyCommunioPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.Enshrouded];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyRegressPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.HellsIngressPvP) == ActionID.RegressPvP;
+        setting.SpecialType = SpecialActionType.MovingBackward;
+        setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
     static partial void ModifyHellsIngressPvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
+        setting.IsFriendly = true;
     }
+
     #endregion
 
     /// <inheritdoc/>

@@ -33,6 +33,12 @@ partial class CustomRotation
     public static bool IsMoving => DataCenter.IsMoving;
 
     /// <summary>
+    /// Check if the player is dead.
+    /// </summary>
+    [Description("Is Dead, or inversely, is Alive")]
+    public static bool IsDead => Player.IsDead;
+
+    /// <summary>
     /// Is in combat.
     /// </summary>
     [Description("In Combat")]
@@ -78,7 +84,7 @@ partial class CustomRotation
     /// Whether the number of party members is 8.
     /// </summary>
     [Description("Is Full Party")]
-    public static bool IsFullParty => PartyMembers.Count() is 8;
+    public static bool IsFullParty => PartyMembers.Count() is 8 or 9;
 
     /// <summary>
     /// party members HP.
@@ -177,10 +183,15 @@ partial class CustomRotation
     protected static IEnumerable<IBattleChara> AllHostileTargets => DataCenter.AllHostileTargets;
 
     /// <summary>
+    /// All targets. This includes both hostile and friendly targets.
+    /// </summary>
+    protected static IEnumerable<IBattleChara> AllTargets => DataCenter.AllTargets;
+
+    /// <summary>
     /// Average time to kill for all targets.
     /// </summary>
     [Description("Average time to kill")]
-    public static float AverageTimeToKill => DataCenter.AverageTimeToKill;
+    public static float AverageTTK => DataCenter.AverageTTK;
 
     /// <summary>
     /// The level of the LB.
@@ -198,14 +209,14 @@ partial class CustomRotation
     }
 
     /// <summary>
-    /// Is the <see cref="AverageTimeToKill"/> larger than <paramref name="time"/>.
+    /// Is the <see cref="AverageTTK"/> larger than <paramref name="time"/>.
     /// </summary>
     /// <param name="time">Time</param>
     /// <returns>Is Longer.</returns>
     public static bool IsLongerThan(float time)
     {
         if (IsInHighEndDuty) return true;
-        return AverageTimeToKill > time;
+        return AverageTTK > time;
     }
 
     /// <summary>
@@ -236,7 +247,7 @@ partial class CustomRotation
     /// <summary>
     /// Whether or not the player can use ST heal GCDs.
     /// </summary>
-    [Description("Can heal single area")]
+    [Description("Can heal single spell")]
     public virtual bool CanHealSingleSpell => true;
 
     /// <summary>
@@ -286,6 +297,12 @@ partial class CustomRotation
     public static bool IsInHighEndDuty => DataCenter.Territory?.IsHighEndDuty ?? false;
 
     /// <summary>
+    /// Is player in a normal or chaotic Alliance Raid.
+    /// </summary>
+    [Description("Is in an Alliance Raid (including Chaotic)")]
+    public static bool IsInAllianceRaid => DataCenter.IsInAllianceRaid;
+
+    /// <summary>
     /// Is player in UCoB duty.
     /// </summary>
     [Description("Is in UCoB duty")]
@@ -321,11 +338,17 @@ partial class CustomRotation
     [Description("Is in FRU duty")]
     public static bool IsInFRU => DataCenter.IsInFRU;
 
+    ///<summary>
+    /// Is player in COD duty.
+    ///</summary>
+    [Description("Is in FRU duty")]
+    public static bool IsInCOD => DataCenter.IsInCOD;
+
     /// <summary>
-    /// Is player in duty.
+    /// Is player in any instanced duty.
     /// </summary>
     [Description("Is player in duty")]
-    public static bool IsInDuty => Svc.Condition[ConditionFlag.BoundByDuty];
+    public static bool IsInDuty => DataCenter.IsInDuty;
 
     /// <summary>
     /// Your ping.
@@ -484,6 +507,32 @@ partial class CustomRotation
     }
 
     /// <summary>
+    /// Last used Combo Action.
+    /// <br>WARNING: Do Not make this method the main of your rotation.</br>
+    /// </summary>
+    /// <param name="isAdjust">Check for adjust id not raw id.</param>
+    /// <param name="actions">True if any of this is matched.</param>
+    /// <returns></returns>
+    [Description("Just used Combo Action")]
+    public static bool IsLastComboAction(bool isAdjust, params IAction[] actions)
+    {
+        CountingOfLastUsing++;
+        return IActionHelper.IsLastComboAction(isAdjust, actions);
+    }
+
+    /// <summary>
+    /// Last used Combo Action.
+    /// <br>WARNING: Do Not make this method the main of your rotation.</br>
+    /// </summary>
+    /// <param name="ids">True if any of this is matched.</param>
+    /// <returns></returns>
+    public static bool IsLastComboAction(params ActionID[] ids)
+    {
+        CountingOfLastUsing++;
+        return IActionHelper.IsLastComboAction(ids);
+    }
+
+    /// <summary>
     /// <br>WARNING: Do Not make this method the main of your rotation.</br>
     /// </summary>
     /// <param name="GCD"></param>
@@ -568,6 +617,19 @@ partial class CustomRotation
     /// </summary>
     [Description("Moving time")]
     public static float MovingTime => IsMoving ? DataCenter.MovingRaw + DataCenter.DefaultGCDRemain : 0;
+    /// <summary>
+    /// How long the player has been alive.
+    /// <br>WARNING: Do Not make this method the main of your rotation.</br>
+    /// </summary>
+    [Description("How long the player has been alive.")]
+    public static float AliveTime => Player.IsAlive() ? DataCenter.AliveTimeRaw + DataCenter.DefaultGCDRemain : 0;
+
+    /// <summary>
+    /// How long the player has been dead.
+    /// <br>WARNING: Do Not make this method the main of your rotation.</br>
+    /// </summary>
+    [Description("How long the player has been dead.")]
+    public static float DeadTime => Player.IsAlive() ? 0 : DataCenter.DeadTimeRaw + DataCenter.DefaultGCDRemain;
 
     /// <summary>
     /// Time from GCD.
@@ -639,10 +701,16 @@ partial class CustomRotation
     /// </summary>
     [Description("Health of dying tank")]
     public static float HealthForDyingTanks => Service.Config.HealthForDyingTanks;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [Description("Whether or not Invincibility should be ignored for a PvP action.")]
+    public static bool IgnorePvPInvincibility => Service.Config.IgnorePvPInvincibility;
     #endregion
 
     /// <summary>
-    /// In in the burst status.
+    /// In the burst status.
     /// </summary>
     [Description("Is burst")]
     public static bool IsBurst => MergedStatus.HasFlag(AutoStatus.Burst);

@@ -1,6 +1,6 @@
-namespace DefaultRotations.Healer;
+namespace RebornRotations.Healer;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
 [SourceCode(Path = "main/BasicRotations/Healer/AST_Default.cs")]
 [Api(4)]
 public sealed class AST_Default : AstrologianRotation
@@ -23,6 +23,9 @@ public sealed class AST_Default : AstrologianRotation
 
     [RotationConfig(CombatType.PvE, Name = "Simple Lord of Crowns logic (use under divinaiton)")]
     public bool SimpleLord { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Detonate Earlthy Star when you have Giant Dominance")]
+    public bool StellarNow { get; set; } = false;
 
     [Range(4, 20, ConfigUnitType.Seconds)]
     [RotationConfig(CombatType.PvE, Name = "Use Earthly Star during countdown timer.")]
@@ -84,6 +87,8 @@ public sealed class AST_Default : AstrologianRotation
 
         if (DivinationPvE.CanUse(out _)
             && UseBurstMedicine(out act)) return true;
+
+        if (StellarNow && Player.HasStatus(true, StatusID.GiantDominance) && StellarDetonationPvE.CanUse(out act)) return true;
 
         return base.EmergencyAbility(nextGCD, out act);
     }
@@ -237,8 +242,8 @@ public sealed class AST_Default : AstrologianRotation
     {
         act = null;
         if (BubbleProtec && Player.HasStatus(true, StatusID.CollectiveUnconscious_848)) return false;
+        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
         if (MicroPrio && Player.HasStatus(true, StatusID.Macrocosmos)) return false;
-        if (HasSwift && SwiftLogic && AscendPvE.CanUse(out _)) return false;
 
         if (AspectedBeneficPvE.CanUse(out act)
             && (IsMoving
@@ -255,8 +260,8 @@ public sealed class AST_Default : AstrologianRotation
     {
         act = null;
         if (BubbleProtec && Player.HasStatus(true, StatusID.CollectiveUnconscious_848)) return false;
+        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
         if (MicroPrio && Player.HasStatus(true, StatusID.Macrocosmos)) return false;
-        if (HasSwift && SwiftLogic && AscendPvE.CanUse(out _)) return false;
 
         if (AspectedHeliosPvE.CanUse(out act)) return true;
         if (HeliosPvE.CanUse(out act)) return true;
@@ -267,7 +272,7 @@ public sealed class AST_Default : AstrologianRotation
     {
         act = null;
         if (BubbleProtec && Player.HasStatus(true, StatusID.CollectiveUnconscious_848)) return false;
-        if (HasSwift && SwiftLogic) return false;
+        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
 
         if (GravityPvE.CanUse(out act)) return true;
 

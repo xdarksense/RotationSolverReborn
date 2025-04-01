@@ -55,8 +55,8 @@ internal class ConditionBoolean
     public static implicit operator bool(ConditionBoolean condition)
     {
         if (!Service.Config.UseAdditionalConditions) return condition.Value;
-        var rotation = DataCenter.RightNowRotation;
-        var set = DataCenter.RightSet;
+        var rotation = DataCenter.CurrentRotation;
+        var set = DataCenter.CurrentConditionValue;
         if (rotation != null)
         {
             if (condition.Enable && set.GetEnableCondition(condition.Key).IsTrue(rotation)) return true;

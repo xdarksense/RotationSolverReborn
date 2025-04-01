@@ -15,10 +15,8 @@
         {
             if (type == null) return Array.Empty<PropertyInfo>();
 
-            var properties = type.GetRuntimeProperties()
+            var properties = type.GetProperties(BindingFlags.Static | BindingFlags.Public)
                                  .Where(prop => typeof(T).IsAssignableFrom(prop.PropertyType)
-                                            && prop.GetMethod is MethodInfo methodInfo
-                                            && methodInfo.IsPublic && methodInfo.IsStatic
                                             && prop.GetCustomAttribute<ObsoleteAttribute>() == null)
                                  .ToArray();
 
@@ -35,7 +33,7 @@
         {
             if (type == null) return Enumerable.Empty<MethodInfo>();
 
-            var methods = type.GetRuntimeMethods()
+            var methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
                               .Where(method => !method.IsConstructor)
                               .ToArray();
 
@@ -51,8 +49,10 @@
         /// <returns>The property information if found, otherwise null.</returns>
         internal static PropertyInfo? GetPropertyInfo(this Type type, string name)
         {
-            var property = type.GetRuntimeProperties()
-                               .FirstOrDefault(prop => prop.Name == name && prop.GetMethod is MethodInfo methodInfo && methodInfo.IsStatic);
+            if (type == null) throw new ArgumentNullException(nameof(type));
+            if (string.IsNullOrEmpty(name)) throw new ArgumentException("Property name cannot be null or empty", nameof(name));
+
+            var property = type.GetProperty(name, BindingFlags.Static | BindingFlags.Public);
 
             return property ?? type.BaseType?.GetPropertyInfo(name);
         }
@@ -66,9 +66,9 @@
         internal static MethodInfo? GetMethodInfo(this Type? type, string name)
         {
             if (type == null) return null;
+            if (string.IsNullOrEmpty(name)) throw new ArgumentException("Method name cannot be null or empty", nameof(name));
 
-            var method = type.GetRuntimeMethods()
-                             .FirstOrDefault(m => m.Name == name && m.IsStatic && !m.IsConstructor && m.ReturnType == typeof(bool));
+            var method = type.GetMethod(name, BindingFlags.Static | BindingFlags.Public);
 
             return method ?? type.BaseType?.GetMethodInfo(name);
         }

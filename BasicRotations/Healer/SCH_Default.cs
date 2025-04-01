@@ -1,6 +1,6 @@
-namespace DefaultRotations.Healer;
+namespace RebornRotations.Healer;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
 [SourceCode(Path = "main/BasicRotations/Healer/SCH_Default.cs")]
 [Api(4)]
 public sealed class SCH_Default : ScholarRotation
@@ -171,8 +171,7 @@ public sealed class SCH_Default : ScholarRotation
     protected override bool HealAreaGCD(out IAction? act)
     {
         act = null;
-
-        if (HasSwift && SwiftLogic && ResurrectionPvE.CanUse(out _)) return false;
+        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
 
         if (SuccorPvE.CanUse(out act)) return true;
         if (ConcitationPvE.CanUse(out act, skipCastingCheck: true)) return true;
@@ -181,13 +180,12 @@ public sealed class SCH_Default : ScholarRotation
         return base.HealAreaGCD(out act);
     }
 
-    [RotationDesc(ActionID.AdloquiumPvE, ActionID.PhysickPvE)]
+    [RotationDesc(ActionID.AdloquiumPvE, ActionID.ManifestationPvE, ActionID.PhysickPvE)]
     protected override bool HealSingleGCD(out IAction? act)
     {
         act = null;
+        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
 
-        if (HasSwift && SwiftLogic && ResurrectionPvE.CanUse(out _)) return false;
-        
         if (AdloquiumPvE.CanUse(out act)) return true;
         if (ManifestationPvE.CanUse(out act, skipCastingCheck: true)) return true;
         if (PhysickPvE.CanUse(out act)) return true;
@@ -195,12 +193,11 @@ public sealed class SCH_Default : ScholarRotation
         return base.HealSingleGCD(out act);
     }
 
-    [RotationDesc(ActionID.SuccorPvE)]
+    [RotationDesc(ActionID.SuccorPvE, ActionID.ConcitationPvE, ActionID.AccessionPvE)]
     protected override bool DefenseAreaGCD(out IAction? act)
     {
         act = null;
-
-        if (HasSwift && SwiftLogic && ResurrectionPvE.CanUse(out _)) return false;
+        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
 
         if (SuccorPvE.CanUse(out act)) return true;
         if (ConcitationPvE.CanUse(out act, skipCastingCheck: true)) return true;
@@ -212,8 +209,7 @@ public sealed class SCH_Default : ScholarRotation
     protected override bool GeneralGCD(out IAction? act)
     {
         act = null;
-
-        if (HasSwift && SwiftLogic && ResurrectionPvE.CanUse(out _)) return false;
+        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
 
         // Summon Eos
         if (SummonEosPvE.CanUse(out act)) return true;
@@ -236,7 +232,7 @@ public sealed class SCH_Default : ScholarRotation
 
         //Single Instant for when moving.
         if (MovingTime > RuinTime && RuinIiPvE.CanUse(out act)) return true;
-        
+
         //Add dot while moving.
         if (MovingTime > DOTTime && BiolysisPvE.CanUse(out act, skipStatusProvideCheck: DOTUpkeep)) return true;
         if (MovingTime > DOTTime && BioIiPvE.CanUse(out act, skipStatusProvideCheck: DOTUpkeep)) return true;

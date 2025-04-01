@@ -81,29 +81,6 @@ partial class BlackMageRotation
     protected static bool EnochianEndAfterGCD(uint gcdCount = 0, float offset = 0)
         => EnochianEndAfter(GCDTime(gcdCount, offset));
 
-    static float ElementTimeRaw => JobGauge.ElementTimeRemaining / 1000f;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    protected static float ElementTime => ElementTimeRaw - DataCenter.DefaultGCDRemain;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="time"></param>
-    /// <returns></returns>
-    protected static bool ElementTimeEndAfter(float time) => ElementTime <= time;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="gctCount"></param>
-    /// <param name="offset"></param>
-    /// <returns></returns>
-    protected static bool ElementTimeEndAfterGCD(uint gctCount = 0, float offset = 0)
-        => ElementTimeEndAfter(GCDTime(gctCount, offset));
-
     /// <summary>
     /// 
     /// </summary>
@@ -214,7 +191,8 @@ partial class BlackMageRotation
 
     static partial void ModifyTransposePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DataCenter.DefaultGCDRemain <= ElementTimeRaw;
+        //setting.ActionCheck = () => DataCenter.DefaultGCDRemain <= ElementTimeRaw;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyThunderPvE(ref ActionSetting setting)
@@ -254,12 +232,14 @@ partial class BlackMageRotation
     {
         setting.StatusProvide = [StatusID.Manaward];
         setting.UnlockedByQuestID = 65889;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyManafontPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Thunderhead];
         setting.UnlockedByQuestID = 66609;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyFireIiiPvE(ref ActionSetting setting)
@@ -276,12 +256,13 @@ partial class BlackMageRotation
 
     static partial void ModifyUmbralSoulPvE(ref ActionSetting setting)
     {
+        setting.ActionCheck = () => InUmbralIce;
         setting.UnlockedByQuestID = 66609;
     }
 
     static partial void ModifyFreezePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InUmbralIce && !ElementTimeEndAfter(ActionID.FreezePvE.GetCastTime() - 0.1f) && UmbralHearts == 0;
+        setting.ActionCheck = () => InUmbralIce && UmbralHearts == 0;
         setting.UnlockedByQuestID = 66611;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -303,7 +284,7 @@ partial class BlackMageRotation
 
     static partial void ModifyFlarePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InAstralFire && AstralSoulStacks <= 3 && !ElementTimeEndAfter(ActionID.FlarePvE.GetCastTime() - 0.1f);
+        setting.ActionCheck = () => InAstralFire && AstralSoulStacks <= 3;
         setting.UnlockedByQuestID = 66614;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -326,19 +307,20 @@ partial class BlackMageRotation
 
     static partial void ModifyBlizzardIvPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InUmbralIce && !ElementTimeEndAfter(ActionID.BlizzardIvPvE.GetCastTime() - 0.1f);
+        setting.ActionCheck = () => InUmbralIce;
         setting.UnlockedByQuestID = 67218;
     }
 
     static partial void ModifyFireIvPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InAstralFire && AstralSoulStacks <= 5 && !ElementTimeEndAfter(ActionID.FireIvPvE.GetCastTime() - 0.1f);
+        setting.ActionCheck = () => InAstralFire && AstralSoulStacks <= 5;
         setting.UnlockedByQuestID = 67219;
     }
 
     static partial void ModifyBetweenTheLinesPvE(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingBackward;
+        setting.IsFriendly = true;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -358,6 +340,7 @@ partial class BlackMageRotation
     static partial void ModifyTriplecastPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = StatusHelper.SwiftcastStatus;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyFoulPvE(ref ActionSetting setting)
@@ -372,7 +355,7 @@ partial class BlackMageRotation
 
     static partial void ModifyDespairPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InAstralFire && !ElementTimeEndAfter(ActionID.DespairPvE.GetCastTime() - 0.1f);
+        setting.ActionCheck = () => InAstralFire;
     }
 
     static partial void ModifyXenoglossyPvE(ref ActionSetting setting)
@@ -399,6 +382,7 @@ partial class BlackMageRotation
     static partial void ModifyAmplifierPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => (InAstralFire || InUmbralIce) && !EnochianEndAfter(10) && !IsPolyglotStacksMaxed;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyParadoxPvE(ref ActionSetting setting)
@@ -478,6 +462,7 @@ partial class BlackMageRotation
     static partial void ModifyParadoxPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.Paradox];
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyXenoglossyPvP(ref ActionSetting setting)
@@ -501,6 +486,7 @@ partial class BlackMageRotation
         {
             AoeCount = 1,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyFireIiiPvP(ref ActionSetting setting)
@@ -519,10 +505,6 @@ partial class BlackMageRotation
     {
         setting.StatusNeed = [StatusID.AstralFireIii_3381];
         setting.StatusProvide = [StatusID.AstralFire_3212];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
     }
 
     static partial void ModifyFlarePvP(ref ActionSetting setting)
@@ -532,6 +514,7 @@ partial class BlackMageRotation
         {
             AoeCount = 1,
         };
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyBlizzardIiiPvP(ref ActionSetting setting)
@@ -553,6 +536,7 @@ partial class BlackMageRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
+            // Removed ShouldCheckStatus = false
         };
     }
 
@@ -563,6 +547,7 @@ partial class BlackMageRotation
         {
             AoeCount = 1,
         };
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyWreathOfFirePvP(ref ActionSetting setting)
@@ -573,6 +558,7 @@ partial class BlackMageRotation
     static partial void ModifyWreathOfIcePvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => WreathOfIceReady;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyFlareStarPvP(ref ActionSetting setting)
@@ -583,8 +569,9 @@ partial class BlackMageRotation
         {
             AoeCount = 1,
         };
+        setting.MPOverride = () => 0;
     }
-    
+
     static partial void ModifyFrostStarPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.ElementalStar];
@@ -593,6 +580,7 @@ partial class BlackMageRotation
         {
             AoeCount = 1,
         };
+        setting.MPOverride = () => 0;
     }
 
     #endregion

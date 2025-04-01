@@ -95,6 +95,7 @@ partial class BardRotation
 
     static partial void ModifyRagingStrikesPvE(ref ActionSetting setting)
     {
+        setting.IsFriendly = true;
         setting.StatusProvide = [StatusID.RagingStrikes];
         setting.CreateConfig = () => new()
         {
@@ -168,6 +169,7 @@ partial class BardRotation
 
     static partial void ModifyBarragePvE(ref ActionSetting setting)
     {
+        setting.IsFriendly = true;
         setting.StatusProvide = [StatusID.Barrage, StatusID.ResonantArrowReady];
     }
 
@@ -211,7 +213,7 @@ partial class BardRotation
 
     static partial void ModifyPitchPerfectPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Song == Song.WANDERER && Repertoire > 0;
+        setting.ActionCheck = () => Song == Song.Wanderer && Repertoire > 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -334,7 +336,7 @@ partial class BardRotation
 
     static partial void ModifyRadiantFinalePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => JobGauge.Coda.Any(s => s != Song.NONE);
+        setting.ActionCheck = () => JobGauge.Coda.Any(s => s != Song.None);
         setting.StatusProvide = [StatusID.RadiantEncoreReady];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -405,12 +407,17 @@ partial class BardRotation
 
     static partial void ModifyRepellingShotPvP(ref ActionSetting setting)
     {
+        setting.SpecialType = SpecialActionType.MovingBackward;
+    }
 
+    static partial void ModifyEncoreOfLightPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.EncoreOfLightReady];
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyTheWardensPaeanPvP(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.Repertoire];
         setting.TargetStatusProvide = [StatusID.WardensGrace];
         setting.TargetType = TargetType.Dispel;
     }

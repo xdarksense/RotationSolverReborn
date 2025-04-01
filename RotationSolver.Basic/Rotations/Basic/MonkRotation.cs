@@ -20,17 +20,17 @@ partial class MonkRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasSolar => JobGauge.Nadi.HasFlag(Nadi.SOLAR);
+    public static bool HasSolar => JobGauge.Nadi.HasFlag(Nadi.Solar);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasLunar => JobGauge.Nadi.HasFlag(Nadi.LUNAR);
+    public static bool HasLunar => JobGauge.Nadi.HasFlag(Nadi.Lunar);
 
     /// <summary>
     /// .
     /// </summary>
-    public static bool NoNadi => JobGauge.Nadi.HasFlag(Nadi.NONE);
+    public static bool NoNadi => JobGauge.Nadi.HasFlag(Nadi.None);
 
     /// <summary>
     /// Gets the amount of available Opo-opo Fury stacks.
@@ -136,6 +136,7 @@ partial class MonkRotation
     static partial void ModifySteeledMeditationPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => (!InBrotherhood && Chakra < 5 || InBrotherhood && Chakra < 10);
+        setting.IsFriendly = true;
     }
 
     static partial void ModifySteelPeakPvE(ref ActionSetting setting)
@@ -182,11 +183,13 @@ partial class MonkRotation
     {
         setting.SpecialType = SpecialActionType.MovingForward;
         setting.UnlockedByQuestID = 66598;
+        setting.IsFriendly = false;
     }
 
     static partial void ModifyInspiritedMeditationPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => (!InBrotherhood && Chakra < 5 || InBrotherhood && Chakra < 10);
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyHowlingFistPvE(ref ActionSetting setting)
@@ -207,6 +210,7 @@ partial class MonkRotation
             TimeToKill = 10,
             AoeCount = 1,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyFourpointFuryPvE(ref ActionSetting setting)
@@ -228,20 +232,23 @@ partial class MonkRotation
 
     static partial void ModifyPerfectBalancePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => BeastChakras.Distinct().Count() == 1 && BeastChakras.Any(chakra => chakra == BeastChakra.NONE);
+        setting.ActionCheck = () => BeastChakras.Distinct().Count() == 1 && BeastChakras.Any(chakra => chakra == BeastChakra.None);
         setting.UnlockedByQuestID = 66602;
         setting.StatusProvide = [StatusID.PerfectBalance];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyFormShiftPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.FormlessFist];
         setting.UnlockedByQuestID = 67563;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyForbiddenMeditationPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => (!InBrotherhood && Chakra < 5 || InBrotherhood && Chakra < 10);
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyTheForbiddenChakraPvE(ref ActionSetting setting)
@@ -257,7 +264,7 @@ partial class MonkRotation
 
     static partial void ModifyTornadoKickPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => HasSolar && HasLunar && BeastChakras.Any(chakra => chakra != BeastChakra.NONE);
+        setting.ActionCheck = () => HasSolar && HasLunar && BeastChakras.Any(chakra => chakra != BeastChakra.None);
         setting.StatusProvide = [StatusID.FormlessFist];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -322,6 +329,7 @@ partial class MonkRotation
         {
             TimeToKill = 10,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyBrotherhoodPvE(ref ActionSetting setting)
@@ -342,11 +350,13 @@ partial class MonkRotation
         {
             TimeToKill = 10,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyEnlightenedMeditationPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => (!InBrotherhood && Chakra < 5 || InBrotherhood && Chakra < 10);
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyEnlightenmentPvE(ref ActionSetting setting)
@@ -439,9 +449,92 @@ partial class MonkRotation
     }
     #endregion
 
-    // PvP
+    #region PvP Actions
+
+    static partial void ModifyDragonKickPvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyTwinSnakesPvP(ref ActionSetting setting) 
+    {
+    }
+
+    static partial void ModifyDemolishPvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyLeapingOpoPvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyRisingRaptorPvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyPouncingCoeurlPvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyPhantomRushPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyFlintsReplyPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyWindsReplyPvP(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.WindsRumination];
+        setting.TargetStatusProvide = [StatusID.PressurePoint];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyRisingPhoenixPvP(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.FiresRumination_4301, StatusID.FireResonance];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyRiddleOfEarthPvP(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.EarthResonance];
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyFiresReplyPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.FiresRumination_4301];
+    }
+
+    static partial void ModifyEarthsReplyPvP(ref ActionSetting setting)
+    {
+        setting.TargetStatusNeed = [StatusID.EarthResonance];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
     static partial void ModifyThunderclapPvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
     }
+
+
+    #endregion
 }

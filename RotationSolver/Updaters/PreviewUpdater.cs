@@ -21,66 +21,12 @@ internal static class PreviewUpdater
         UpdateCancelCast();
     }
 
-    //public static byte Job => Job;
     static IDtrBarEntry? _dtrEntry;
 
     private static void UpdateEntry()
     {
         var showStr = RSCommands.EntryString;
-        var icon = Player.Job switch
-        {
-            Job.WAR => BitmapFontIcon.Warrior,
-            Job.PLD => BitmapFontIcon.Paladin,
-            Job.DRK => BitmapFontIcon.DarkKnight,
-            Job.GNB => BitmapFontIcon.Gunbreaker,
-
-            Job.AST => BitmapFontIcon.Astrologian,
-            Job.WHM => BitmapFontIcon.WhiteMage,
-            Job.SGE => BitmapFontIcon.Sage,
-            Job.SCH => BitmapFontIcon.Scholar,
-
-            Job.BLM => BitmapFontIcon.BlackMage,
-            Job.SMN => BitmapFontIcon.Summoner,
-            Job.RDM => BitmapFontIcon.RedMage,
-            Job.PCT => BitmapFontIcon.Pictomancer,
-            Job.BLU => BitmapFontIcon.BlueMage,
-
-            Job.MNK => BitmapFontIcon.Monk,
-            Job.SAM => BitmapFontIcon.Samurai,
-            Job.DRG => BitmapFontIcon.Dragoon,
-            Job.RPR => BitmapFontIcon.Reaper,
-            Job.NIN => BitmapFontIcon.Ninja,
-            Job.VPR => BitmapFontIcon.Viper,
-
-            Job.BRD => BitmapFontIcon.Bard,
-            Job.MCH => BitmapFontIcon.Machinist,
-            Job.DNC => BitmapFontIcon.Dancer,
-
-            Job.BSM => BitmapFontIcon.Blacksmith,
-            Job.ARM => BitmapFontIcon.Armorer,
-            Job.WVR => BitmapFontIcon.Weaver,
-            Job.ALC => BitmapFontIcon.Alchemist,
-            Job.CRP => BitmapFontIcon.Carpenter,
-            Job.LTW => BitmapFontIcon.Leatherworker,
-            Job.CUL => BitmapFontIcon.Culinarian,
-            Job.GSM => BitmapFontIcon.Goldsmith,
-
-            Job.FSH => BitmapFontIcon.Fisher,
-            Job.MIN => BitmapFontIcon.Miner,
-            Job.BTN => BitmapFontIcon.Botanist,
-
-            Job.GLA => BitmapFontIcon.Gladiator,
-            Job.CNJ => BitmapFontIcon.Conjurer,
-            Job.MRD => BitmapFontIcon.Marauder,
-            Job.PGL => BitmapFontIcon.Pugilist,
-            Job.LNC => BitmapFontIcon.Lancer,
-            Job.ROG => BitmapFontIcon.Rogue,
-            Job.ARC => BitmapFontIcon.Archer,
-            Job.THM => BitmapFontIcon.Thaumaturge,
-            Job.ACN => BitmapFontIcon.Arcanist,
-
-            _ => BitmapFontIcon.ExclamationRectangle,
-        };
+        var icon = GetJobIcon(Player.Job);
 
         if (Service.Config.ShowInfoOnDtr && !string.IsNullOrEmpty(showStr))
         {
@@ -91,7 +37,7 @@ internal static class PreviewUpdater
             catch
             {
 #pragma warning disable 0436
-                WarningHelper.AddSystemWarning($"Unable to add server bar entry");
+                WarningHelper.AddSystemWarning("Unable to add server bar entry");
                 return;
             }
 
@@ -109,6 +55,56 @@ internal static class PreviewUpdater
         }
     }
 
+    private static BitmapFontIcon GetJobIcon(Job job)
+    {
+        return job switch
+        {
+            Job.WAR => BitmapFontIcon.Warrior,
+            Job.PLD => BitmapFontIcon.Paladin,
+            Job.DRK => BitmapFontIcon.DarkKnight,
+            Job.GNB => BitmapFontIcon.Gunbreaker,
+            Job.AST => BitmapFontIcon.Astrologian,
+            Job.WHM => BitmapFontIcon.WhiteMage,
+            Job.SGE => BitmapFontIcon.Sage,
+            Job.SCH => BitmapFontIcon.Scholar,
+            Job.BLM => BitmapFontIcon.BlackMage,
+            Job.SMN => BitmapFontIcon.Summoner,
+            Job.RDM => BitmapFontIcon.RedMage,
+            Job.PCT => BitmapFontIcon.Pictomancer,
+            Job.BLU => BitmapFontIcon.BlueMage,
+            Job.MNK => BitmapFontIcon.Monk,
+            Job.SAM => BitmapFontIcon.Samurai,
+            Job.DRG => BitmapFontIcon.Dragoon,
+            Job.RPR => BitmapFontIcon.Reaper,
+            Job.NIN => BitmapFontIcon.Ninja,
+            Job.VPR => BitmapFontIcon.Viper,
+            Job.BRD => BitmapFontIcon.Bard,
+            Job.MCH => BitmapFontIcon.Machinist,
+            Job.DNC => BitmapFontIcon.Dancer,
+            Job.BSM => BitmapFontIcon.Blacksmith,
+            Job.ARM => BitmapFontIcon.Armorer,
+            Job.WVR => BitmapFontIcon.Weaver,
+            Job.ALC => BitmapFontIcon.Alchemist,
+            Job.CRP => BitmapFontIcon.Carpenter,
+            Job.LTW => BitmapFontIcon.Leatherworker,
+            Job.CUL => BitmapFontIcon.Culinarian,
+            Job.GSM => BitmapFontIcon.Goldsmith,
+            Job.FSH => BitmapFontIcon.Fisher,
+            Job.MIN => BitmapFontIcon.Miner,
+            Job.BTN => BitmapFontIcon.Botanist,
+            Job.GLA => BitmapFontIcon.Gladiator,
+            Job.CNJ => BitmapFontIcon.Conjurer,
+            Job.MRD => BitmapFontIcon.Marauder,
+            Job.PGL => BitmapFontIcon.Pugilist,
+            Job.LNC => BitmapFontIcon.Lancer,
+            Job.ROG => BitmapFontIcon.Rogue,
+            Job.ARC => BitmapFontIcon.Archer,
+            Job.THM => BitmapFontIcon.Thaumaturge,
+            Job.ACN => BitmapFontIcon.Arcanist,
+            _ => BitmapFontIcon.ExclamationRectangle,
+        };
+    }
+
     static RandomDelay _tarStopCastDelay = new(() => Service.Config.StopCastingDelay);
 
     private static unsafe void UpdateCancelCast()
@@ -119,9 +115,9 @@ internal static class PreviewUpdater
             && Svc.Objects.SearchById(Player.Object.CastTargetObjectId) is IBattleChara b
             && b.IsEnemy() && b.CurrentHp == 0;
 
-        var statusTimes = Player.Object.StatusTimes(false, [.. OtherConfiguration.NoCastingStatus.Select(i => (StatusID)i)]);
+        var statusTimes = GetStatusTimes();
 
-        var stopDueStatus = statusTimes.Any() && statusTimes.Min() > Player.Object.TotalCastTime - Player.Object.CurrentCastTime && statusTimes.Min() < 5;
+        var stopDueStatus = statusTimes.Length > 0 && statusTimes.Min() > Player.Object.TotalCastTime - Player.Object.CurrentCastTime && statusTimes.Min() < 5;
 
         if (_tarStopCastDelay.Delay(tarDead) || stopDueStatus)
         {
@@ -129,6 +125,18 @@ internal static class PreviewUpdater
         }
     }
 
+    private static float[] GetStatusTimes()
+    {
+        var statusTimes = new List<float>();
+        foreach (var status in Player.Object.StatusList)
+        {
+            if (OtherConfiguration.NoCastingStatus.Contains((uint)status.StatusId))
+            {
+                statusTimes.Add(status.RemainingTime);
+            }
+        }
+        return statusTimes.ToArray();
+    }
 
     internal static unsafe void PulseActionBar(uint actionID)
     {
@@ -137,7 +145,6 @@ internal static class PreviewUpdater
             return IsActionSlotRight(bar, hot, actionID);
         });
     }
-
 
     private unsafe static bool IsActionSlotRight(ActionBarSlot slot, RaptureHotbarModule.HotbarSlot? hot, uint actionID)
     {
@@ -184,7 +191,6 @@ internal static class PreviewUpdater
             hotBarIndex++;
         }
     }
-
 
     public unsafe static void Dispose()
     {

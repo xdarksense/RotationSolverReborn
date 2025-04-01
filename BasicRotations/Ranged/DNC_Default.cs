@@ -1,4 +1,4 @@
-namespace DefaultRotations.Ranged;
+namespace RebornRotations.Ranged;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.15", Description = "")]
 [SourceCode(Path = "main/BasicRotations/Ranged/DNC_Default.cs")]
@@ -196,11 +196,10 @@ public sealed class DNC_Default : DancerRotation
         act = null;
 
         if (IsDancing) return false;
+        // Use Dance of the Dawn immediately if available
+        if (burst && Esprit > 50 && DanceOfTheDawnPvE.CanUse(out act)) return true;
 
-        if (!DevilmentPvE.CanUse(out _, skipComboCheck: true))
-        {
-            if (TillanaPvE.CanUse(out act, skipAoeCheck: true)) return true;
-        }
+        if (HandleTillana(out act)) return true;
 
         if (TechnicalStepPvE.Cooldown.ElapsedAfter(103))
         {
@@ -238,7 +237,7 @@ public sealed class DNC_Default : DancerRotation
         if (FinishingMovePvE.CanUse(out act, skipAoeCheck: true)) return true;
 
         // Further prioritized GCD abilities
-        if ((burst || (Esprit >= 85 && !TechnicalStepPvE.Cooldown.ElapsedAfter(115))) && SaberDancePvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if ((burst || (Esprit >= 70 && !TechnicalStepPvE.Cooldown.ElapsedAfter(115))) && SaberDancePvE.CanUse(out act, skipAoeCheck: true)) return true;
 
         if (StarfallDancePvE.CanUse(out act, skipAoeCheck: true)) return true;
 
@@ -316,6 +315,21 @@ public sealed class DNC_Default : DancerRotation
             return true;
         }
 
+        act = null;
+        return false;
+    }
+ 
+    // Handles the logic for using the Tillana.
+    private bool HandleTillana(out IAction? act)
+    {
+        // Check if Esprit is less than or equal to 50 and Devilment cannot be used
+        if (Esprit <= 45 && !DevilmentPvE.CanUse(out _, skipComboCheck: true))
+        {
+            // Attempt to use Tillana, skipping the AoE check
+            if (TillanaPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        }
+
+        // No Tillana action was performed
         act = null;
         return false;
     }

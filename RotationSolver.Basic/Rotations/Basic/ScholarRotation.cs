@@ -52,6 +52,7 @@ partial class ScholarRotation
     }
     #endregion
 
+    #region PvE Actions
     private sealed protected override IBaseAction Raise => ResurrectionPvE;
 
     static partial void ModifyRuinPvE(ref ActionSetting setting)
@@ -72,6 +73,7 @@ partial class ScholarRotation
     static partial void ModifySummonEosPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => !DataCenter.HasPet && !Player.HasStatus(true, StatusID.Dissipation);
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyResurrectionPvE(ref ActionSetting setting)
@@ -232,6 +234,7 @@ partial class ScholarRotation
         {
             TimeToKill = 10,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyAetherpactPvE(ref ActionSetting setting)
@@ -363,4 +366,80 @@ partial class ScholarRotation
             AoeCount = 1,
         };
     }
+    #endregion
+
+    #region PvP Actions
+    static partial void ModifyBroilIvPvP(ref ActionSetting setting)
+    {
+        
+    }
+
+    static partial void ModifyBiolysisPvP(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyChainStratagemPvP(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifySummonSeraphPvP(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifySeraphicHaloPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.BroilIvPvP) == ActionID.SeraphicHaloPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifySeraphicVeilPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            IsEnabled = false,
+        };
+    }
+
+    static partial void ModifyAdloquiumPvP(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyDeploymentTacticsPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+
+    }
+
+    static partial void ModifyExpedientPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyAccessionPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Player.HasStatus(true, StatusID.Seraphism_4327);
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    #endregion
 }

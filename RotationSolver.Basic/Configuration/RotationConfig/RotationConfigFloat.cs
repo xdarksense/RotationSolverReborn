@@ -58,18 +58,20 @@ internal class RotationConfigFloat : RotationConfigBase
     /// <returns><c>true</c> if the command was executed; otherwise, <c>false</c>.</returns>
     public override bool DoCommand(IRotationConfigSet set, string str)
     {
-        if (str == null) return false;
-        if (!base.DoCommand(set, str)) return false;
-
-        // Ensure the string has sufficient length before slicing
-        if (str.Length <= Name.Length) return false;
+        if (str == null || !base.DoCommand(set, str) || str.Length <= Name.Length)
+        {
+            return false;
+        }
 
         string numStr = str[Name.Length..].Trim();
 
-        // Parse the float value and set it
         if (float.TryParse(numStr, out float parsedValue))
         {
-            Value = parsedValue.ToString(); // Convert float to string
+            if (UnitType == ConfigUnitType.Percent)
+            {
+                parsedValue /= 100.0f;
+            }
+            Value = parsedValue.ToString();
             return true;
         }
 

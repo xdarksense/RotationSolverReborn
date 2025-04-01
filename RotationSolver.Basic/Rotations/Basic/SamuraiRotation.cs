@@ -170,7 +170,7 @@ partial class SamuraiRotation
     static partial void ModifyJinpuPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Kenki <= 95;
-        setting.ComboIds = new[] { ActionID.HakazePvE, ActionID.GyofuPvE };
+        setting.ComboIds = [ActionID.HakazePvE, ActionID.GyofuPvE];
     }
 
     static partial void ModifyEnpiPvE(ref ActionSetting setting)
@@ -180,13 +180,14 @@ partial class SamuraiRotation
 
     static partial void ModifyThirdEyePvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = new[] { StatusID.ThirdEye };
+        setting.StatusProvide = [StatusID.ThirdEye];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyShifuPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Kenki <= 95;
-        setting.ComboIds = new[] { ActionID.HakazePvE, ActionID.GyofuPvE };
+        setting.ComboIds = [ActionID.HakazePvE, ActionID.GyofuPvE];
     }
 
     static partial void ModifyFugaPvE(ref ActionSetting setting)
@@ -200,7 +201,7 @@ partial class SamuraiRotation
 
     static partial void ModifyGekkoPvE(ref ActionSetting setting)
     {
-        setting.ComboIds = new[] { ActionID.JinpuPvE };
+        setting.ComboIds = [ActionID.JinpuPvE];
         setting.ActionCheck = () => Kenki <= 90;
     }
 
@@ -211,7 +212,7 @@ partial class SamuraiRotation
 
     static partial void ModifyMangetsuPvE(ref ActionSetting setting)
     {
-        setting.ComboIds = new[] { ActionID.FukoPvE };
+        setting.ComboIds = [ActionID.FukoPvE];
         setting.ActionCheck = () => Kenki <= 90;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -222,12 +223,12 @@ partial class SamuraiRotation
     static partial void ModifyKashaPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Kenki <= 90;
-        setting.ComboIds = new[] { ActionID.ShifuPvE };
+        setting.ComboIds = [ActionID.ShifuPvE];
     }
 
     static partial void ModifyOkaPvE(ref ActionSetting setting)
     {
-        setting.ComboIds = new[] { ActionID.FukoPvE };
+        setting.ComboIds = [ActionID.FukoPvE];
         setting.ActionCheck = () => Kenki <= 90;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -237,17 +238,18 @@ partial class SamuraiRotation
 
     static partial void ModifyYukikazePvE(ref ActionSetting setting)
     {
-        setting.ComboIds = new[] { ActionID.HakazePvE, ActionID.GyofuPvE };
+        setting.ComboIds = [ActionID.HakazePvE, ActionID.GyofuPvE];
         setting.ActionCheck = () => Kenki <= 85;
     }
 
     static partial void ModifyMeikyoShisuiPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = new[] { StatusID.MeikyoShisui, StatusID.Tendo };
+        setting.StatusProvide = [StatusID.MeikyoShisui, StatusID.Tendo];
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 0,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyHissatsuShintenPvE(ref ActionSetting setting)
@@ -274,6 +276,7 @@ partial class SamuraiRotation
     {
         setting.UnlockedByQuestID = 68101;
         setting.ActionCheck = () => !IsMoving;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyHissatsuKyutenPvE(ref ActionSetting setting)
@@ -284,12 +287,14 @@ partial class SamuraiRotation
     static partial void ModifyHagakurePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => (SenCount == 1 && Kenki <= 90) || (SenCount == 2 && Kenki <= 80) || (SenCount == 3 && Kenki <= 70);
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyIkishotenPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = new[] { StatusID.OgiNamikiriReady, StatusID.ZanshinReady };
+        setting.StatusProvide = [StatusID.OgiNamikiriReady, StatusID.ZanshinReady];
         setting.ActionCheck = () => InCombat && Kenki <= 50;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyHissatsuGurenPvE(ref ActionSetting setting)
@@ -298,7 +303,7 @@ partial class SamuraiRotation
         setting.UnlockedByQuestID = 68106;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 2,
+            AoeCount = 3,
         };
     }
 
@@ -323,7 +328,8 @@ partial class SamuraiRotation
 
     static partial void ModifyTengentsuPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = new[] { StatusID.Tengentsu };
+        setting.StatusProvide = [StatusID.Tengentsu];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyFukoPvE(ref ActionSetting setting)
@@ -337,7 +343,7 @@ partial class SamuraiRotation
 
     static partial void ModifyOgiNamikiriPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = new[] { StatusID.OgiNamikiriReady };
+        setting.StatusNeed = [StatusID.OgiNamikiriReady];
         setting.ActionCheck = () => MeditationStacks <= 2;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -352,7 +358,7 @@ partial class SamuraiRotation
 
     static partial void ModifyZanshinPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = new[] { StatusID.ZanshinReady_3855 };
+        setting.StatusNeed = [StatusID.ZanshinReady_3855];
         setting.ActionCheck = () => Kenki >= 50;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -365,7 +371,7 @@ partial class SamuraiRotation
     static partial void ModifyHiganbanaPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => HiganbanaReady;
-        setting.TargetStatusProvide = new[] { StatusID.Higanbana };
+        setting.TargetStatusProvide = [StatusID.Higanbana];
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 48,
@@ -400,7 +406,7 @@ partial class SamuraiRotation
     static partial void ModifyKaeshiSetsugekkaPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => KaeshiSetsugekkaReady;
-        setting.StatusNeed = new[] { StatusID.Tsubamegaeshi };
+        setting.StatusNeed = [StatusID.Tsubamegaeshi];
     }
 
     static partial void ModifyKaeshiNamikiriPvE(ref ActionSetting setting)
@@ -425,8 +431,8 @@ partial class SamuraiRotation
     static partial void ModifyTendoSetsugekkaPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => TendoSetsugekkaReady;
-        setting.StatusProvide = new[] { StatusID.Tsubamegaeshi };
-        setting.StatusNeed = new[] { StatusID.Tendo };
+        setting.StatusProvide = [StatusID.Tsubamegaeshi];
+        setting.StatusNeed = [StatusID.Tendo];
     }
 
     static partial void ModifyTendoKaeshiGokenPvE(ref ActionSetting setting)
@@ -442,16 +448,109 @@ partial class SamuraiRotation
     static partial void ModifyTendoKaeshiSetsugekkaPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => TendoKaeshiSetsugekkaReady;
-        setting.StatusNeed = new[] { StatusID.Tsubamegaeshi_4218 };
+        setting.StatusNeed = [StatusID.Tsubamegaeshi_4218];
     }
 
     #endregion
 
     #region PvP Actions
-    // PvP
+
+    static partial void ModifyYukikazePvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyGekkoPvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyKashaPvP(ref ActionSetting setting)
+    {
+    }
+    static partial void ModifyOgiNamikiriPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyHissatsuChitenPvP(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyMineuchiPvP(ref ActionSetting setting)
+    {
+    }
+
+    static partial void ModifyMeikyoShisuiPvP(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyHyosetsuPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.YukikazePvP) == ActionID.HyosetsuPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyMangetsuPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.YukikazePvP) == ActionID.MangetsuPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyOkaPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.YukikazePvP) == ActionID.OkaPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyKaeshiNamikiriPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.OgiNamikiriPvP) == ActionID.KaeshiNamikiriPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyZanshinPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.HissatsuChitenPvP) == ActionID.ZanshinPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyTendoSetsugekkaPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.MeikyoShisuiPvP) == ActionID.TendoSetsugekkaPvP;
+    }
+
+    static partial void ModifyTendoKaeshiSetsugekkaPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.MeikyoShisuiPvP) == ActionID.TendoKaeshiSetsugekkaPvP;
+    }
+
+
     static partial void ModifyHissatsuSotenPvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
     #endregion
 }

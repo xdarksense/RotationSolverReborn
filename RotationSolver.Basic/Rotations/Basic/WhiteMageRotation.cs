@@ -143,6 +143,7 @@ partial class WhiteMageRotation
         };
         setting.UnlockedByQuestID = 66615;
         setting.StatusProvide = [StatusID.SacredSight];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyRegenPvE(ref ActionSetting setting)
@@ -167,6 +168,7 @@ partial class WhiteMageRotation
     static partial void ModifyAetherialShiftPvE(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyHolyPvE(ref ActionSetting setting)
@@ -234,6 +236,7 @@ partial class WhiteMageRotation
     {
         setting.UnlockedByQuestID = 67259;
         setting.StatusProvide = [StatusID.ThinAir];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyTetragrammatonPvE(ref ActionSetting setting)
@@ -296,6 +299,7 @@ partial class WhiteMageRotation
     static partial void ModifyTemperancePvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Temperance, StatusID.DivineGrace];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyGlareIiiPvE(ref ActionSetting setting)
@@ -354,14 +358,55 @@ partial class WhiteMageRotation
     #endregion
 
     #region PvP Actions
-    static partial void ModifyCureIiiPvP(ref ActionSetting setting)
+    static partial void ModifyGlareIiiPvP(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.CureIiiReady];
+
+    }
+
+    static partial void ModifyCureIiPvP(ref ActionSetting setting) 
+    {
+
+    }
+
+    static partial void ModifyAfflatusMiseryPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyAquaveilPvP(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyMiracleOfNaturePvP(ref ActionSetting setting)
+    {
+
     }
 
     static partial void ModifySeraphStrikePvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
+    }
+
+    static partial void ModifyGlareIvPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.GlareIiiPvP) == ActionID.GlareIvPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyCureIiiPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.CureIiPvP) == ActionID.CureIiiPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
     #endregion
 }

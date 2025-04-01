@@ -35,7 +35,7 @@ internal class OverlayWindow : Window
         base.PreDraw();
     }
 
-    public override void Draw()
+    public unsafe override void Draw()
     {
         if (!HotbarHighlightManager.Enable || Svc.ClientState == null || Svc.ClientState.LocalPlayer == null)
             return;
@@ -44,24 +44,18 @@ internal class OverlayWindow : Window
 
         try
         {
-            if (!HotbarHighlightManager.UseTaskToAccelerate)
-            {
-                HotbarHighlightManager._drawingElements2D = HotbarHighlightManager.To2DAsync().Result;
-            }
+            UpdateDrawingElementsAsync().GetAwaiter().GetResult();
 
             if (HotbarHighlightManager._drawingElements2D != null)
             {
-                foreach (var item in HotbarHighlightManager._drawingElements2D.OrderBy(drawing =>
+                var drawList = ImGui.GetWindowDrawList();
+                if (drawList.NativePtr == null)
                 {
-                    if (drawing is PolylineDrawing poly)
-                    {
-                        return poly._thickness == 0 ? 0 : 1;
-                    }
-                    else
-                    {
-                        return 2;
-                    }
-                }))
+                    Svc.Log.Warning($"{nameof(OverlayWindow)}: Window draw list is null.");
+                    return;
+                }
+
+                foreach (var item in HotbarHighlightManager._drawingElements2D.OrderBy(GetDrawingOrder))
                 {
                     item.Draw();
                 }
@@ -70,6 +64,27 @@ internal class OverlayWindow : Window
         catch (Exception ex)
         {
             Svc.Log.Warning(ex, $"{nameof(OverlayWindow)} failed to draw on Screen.");
+        }
+    }
+
+    private async Task UpdateDrawingElementsAsync()
+    {
+        if (!HotbarHighlightManager.UseTaskToAccelerate)
+        {
+            HotbarHighlightManager._drawingElements2D = await HotbarHighlightManager.To2DAsync();
+        }
+    }
+
+    private int GetDrawingOrder(object drawing)
+    {
+        switch (drawing)
+        {
+            case PolylineDrawing poly:
+                return poly._thickness == 0 ? 0 : 1;
+            case ImageDrawing:
+                return 1;
+            default:
+                return 2;
         }
     }
 

@@ -1,13 +1,13 @@
-﻿namespace DefaultRotations.Magical;
+﻿namespace RebornRotations.Magical;
 
-[Rotation("Beta", CombatType.PvE, GameVersion = "7.15")]
+[Rotation("Pending Rework", CombatType.PvE, GameVersion = "7.2")]
 [SourceCode(Path = "main/BasicRotations/Magical/BLM_Beta.cs")]
 [Api(4)]
 
 public sealed class BLM_Beta : BlackMageRotation
 {
     #region Config Options
-    [RotationConfig(CombatType.PvE, Name = "Use Infinite Paradox Rotation (Requires Level 90)")]
+    [RotationConfig(CombatType.PvE, Name = "Use Infinite Paradox Rotation when at level 100)")]
     public bool Infinity { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "(Standard Rotation) Use Leylines in combat when standing still")]
@@ -140,32 +140,32 @@ public sealed class BLM_Beta : BlackMageRotation
             if (AmplifierPvE.CanUse(out act)) return true;
         }
 
-        if (ParadoxPvE.EnoughLevel && Infinity)
+        if (FlareStarPvE.EnoughLevel && Infinity)
         {
             if (UseMedicine && UseBurstMedicine(out act)) return true;
 
-            if (ElementTime > 0 && ElementTimeEndAfter(1))
-            {
-                if (TransposePvE.CanUse(out act)) return true;
-            }
+            //if (ElementTime > 0 && ElementTimeEndAfter(1))
+            //{
+            //    if (TransposePvE.CanUse(out act)) return true;
+            //}
 
             if (InCombat)
             {
-                if (ThisManyInstantCasts > 6 && AstralSoulStacks < 6 && InAstralFire && ElementTime > 6 && Player.HasStatus(true, StatusID.Firestarter))
+                if (ThisManyInstantCasts > 6 && AstralSoulStacks < 6 && InAstralFire && Player.HasStatus(true, StatusID.Firestarter))
                 {
                     if (ManafontPvE.CanUse(out act)) return true;
                 }
-                if (ThisManyInstantCasts > 6 && AstralSoulStacks < 6 && InAstralFire && ElementTime > 6 && Player.HasStatus(true, StatusID.Firestarter) && Player.CurrentMp > 9000)
+                if (ThisManyInstantCasts > 6 && AstralSoulStacks < 6 && InAstralFire && Player.HasStatus(true, StatusID.Firestarter) && Player.CurrentMp > 9000)
                 {
                     if (InCombat && TriplecastPvE.CanUse(out act)) return true;
                 }
 
-                if (ThisManyInstantCasts > 3 && AstralSoulStacks == 3 && InAstralFire && ElementTime > 6)
+                if (ThisManyInstantCasts > 3 && AstralSoulStacks == 3 && InAstralFire)
                 {
                     if (InCombat && TriplecastPvE.CanUse(out act, usedUp: true)) return true;
                 }
 
-                if (ThisManyInstantCasts == 1 && AstralSoulStacks == 6 && InAstralFire && ElementTime > 3)
+                if (ThisManyInstantCasts == 1 && AstralSoulStacks == 6 && InAstralFire)
                 {
                     if (SwiftcastPvE.CanUse(out act)) return true;
                 }
@@ -199,10 +199,10 @@ public sealed class BLM_Beta : BlackMageRotation
             if (MaintainStatus(out act)) return true;
         }
 
-        if (ParadoxPvE.EnoughLevel && Infinity)
+        if (FlareStarPvE.EnoughLevel && Infinity)
         {
 
-            if (InAstralFire && ElementTime < 4 && Player.HasStatus(true, StatusID.Firestarter))
+            if (InAstralFire && Player.HasStatus(true, StatusID.Firestarter))
             {
                 if (FireIiiPvE.CanUse(out act)) return true;
             }
@@ -403,12 +403,12 @@ public sealed class BLM_Beta : BlackMageRotation
                 break;
         }
 
-        if (ElementTimeEndAfterGCD(false ? 3u : 2u))
-        {
-            if (CurrentMp >= FirePvE.Info.MPNeed * 2 + 800 && FirePvE.CanUse(out act)) return true;
-            if (FlarePvE.CanUse(out act)) return true;
-            if (DespairPvE.CanUse(out act)) return true;
-        }
+        //if (ElementTimeEndAfterGCD(false ? 3u : 2u))
+        //{
+        //    if (CurrentMp >= FirePvE.Info.MPNeed * 2 + 800 && FirePvE.CanUse(out act)) return true;
+        //    if (FlarePvE.CanUse(out act)) return true;
+        //    if (DespairPvE.CanUse(out act)) return true;
+        //}
 
         return false;
     }
@@ -498,9 +498,9 @@ public sealed class BLM_Beta : BlackMageRotation
     {
         act = null;
 
-        if (gcdCount == 0 || IsPolyglotStacksMaxed && EnochianEndAfterGCD(gcdCount))
+        if (gcdCount == 0 || IsPolyglotStacksMaxed && (EnochianEndAfterGCD(gcdCount) || AmplifierPvE.Cooldown.WillHaveOneChargeGCD(gcdCount)))
         {
-            if (FoulPvE.CanUse(out act)) return true;
+            if (FoulPvE.CanUse(out act, skipAoeCheck: !XenoglossyPvE.EnoughLevel)) return true;
             if (XenoglossyPvE.CanUse(out act)) return true;
         }
         return false;
@@ -512,7 +512,7 @@ public sealed class BLM_Beta : BlackMageRotation
         if (CombatElapsedLess(6)) return false;
         if (UmbralSoulPvE.CanUse(out act)) return true;
         if (InAstralFire && TransposePvE.CanUse(out act)) return true;
-        
+
         return false;
     }
 

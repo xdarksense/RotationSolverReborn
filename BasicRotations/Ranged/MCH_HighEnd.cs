@@ -1,4 +1,4 @@
-namespace DefaultRotations.Ranged;
+namespace RebornRotations.Ranged;
 
 [Rotation("High End", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Ranged/MCH_HighEnd.cs")]
@@ -14,6 +14,9 @@ public sealed class MCH_HighEnd : MachinistRotation
 
     [RotationConfig(CombatType.PvE, Name = "Use burst medicine midfight when Air Anchor, Barrel Stabilizer, and Wildfire are about to come off cooldown")]
     private bool MidfightBurstMeds { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Bioblaster while moving")]
+    private bool BioMove { get; set; } = true;
     #endregion
 
     private const float HYPERCHARGE_DURATION = 8f;
@@ -85,6 +88,9 @@ public sealed class MCH_HighEnd : MachinistRotation
         // If Wildfire is active, use Hypercharge.....Period
         if (Player.HasStatus(true, StatusID.Wildfire_1946) && HyperchargePvE.CanUse(out act)) return true;
 
+        // If you cant use Wildfire, use Hypercharge freely
+        if (!WildfirePvE.EnoughLevel && HyperchargePvE.CanUse(out act)) return true;
+
         // don't do anything that might fuck with burst timings at 100
         if (nextGCD.IsTheSameTo(true, FullMetalFieldPvE) || IsLastGCD(true, FullMetalFieldPvE))
         {
@@ -147,7 +153,7 @@ public sealed class MCH_HighEnd : MachinistRotation
         if (HeatBlastPvE.CanUse(out act)) return true;
 
         // drill's aoe version
-        if (BioblasterPvE.CanUse(out act, usedUp: true)) return true;
+        if ((BioMove || (!IsMoving && !BioMove)) && BioblasterPvE.CanUse(out act, usedUp: true)) return true;
 
         // single target --- need to update this strange condition writing!!!
         if (!SpreadShotPvE.CanUse(out _))

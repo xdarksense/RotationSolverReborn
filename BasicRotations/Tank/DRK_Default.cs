@@ -1,4 +1,4 @@
-namespace DefaultRotations.Tank;
+namespace RebornRotations.Tank;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Tank/DRK_Default.cs")]
@@ -177,7 +177,7 @@ public sealed class DRK_Default : DarkKnightRotation
             if (!DeliriumPvE.EnoughLevel || !LivingShadowPvE.EnoughLevel) return true;
             if (Player.HasStatus(true, StatusID.Delirium_3836)) return true;
             if ((Player.HasStatus(true, StatusID.Delirium_1972) || Player.HasStatus(true, StatusID.Delirium_3836)) && LivingShadowPvE.Cooldown.IsCoolingDown) return true;
-            if ((DeliriumPvE.Cooldown.WillHaveOneChargeGCD(1) && !LivingShadowPvE.Cooldown.WillHaveOneChargeGCD(3)) || Blood >= 90 && !LivingShadowPvE.Cooldown.WillHaveOneChargeGCD(1)) return true;
+            if (DeliriumPvE.Cooldown.WillHaveOneChargeGCD(1) && !LivingShadowPvE.Cooldown.WillHaveOneChargeGCD(3) || Blood >= 90 && !LivingShadowPvE.Cooldown.WillHaveOneChargeGCD(1)) return true;
 
             return false;
 
@@ -188,7 +188,7 @@ public sealed class DRK_Default : DarkKnightRotation
     {
         get
         {
-            if ((BloodWeaponPvE.Cooldown.IsCoolingDown && DeliriumPvE.Cooldown.IsCoolingDown && ((LivingShadowPvE.Cooldown.IsCoolingDown && !(LivingShadowPvE.Cooldown.ElapsedAfter(15))) || !LivingShadowPvE.EnoughLevel))) return true;
+            if (BloodWeaponPvE.Cooldown.IsCoolingDown && DeliriumPvE.Cooldown.IsCoolingDown && (LivingShadowPvE.Cooldown.IsCoolingDown && !LivingShadowPvE.Cooldown.ElapsedAfter(15) || !LivingShadowPvE.EnoughLevel)) return true;
             else return false;
         }
     }
@@ -202,9 +202,9 @@ public sealed class DRK_Default : DarkKnightRotation
 
             if (CombatElapsedLess(3)) return false;
 
-            if ((InTwoMIsBurst && HasDarkArts) || (HasDarkArts && Player.HasStatus(true, StatusID.BlackestNight)) || (HasDarkArts && DarkSideEndAfterGCD(3))) return true;
+            if (InTwoMIsBurst && HasDarkArts || HasDarkArts && Player.HasStatus(true, StatusID.BlackestNight) || HasDarkArts && DarkSideEndAfterGCD(3)) return true;
 
-            if ((InTwoMIsBurst && BloodWeaponPvE.Cooldown.IsCoolingDown && LivingShadowPvE.Cooldown.IsCoolingDown && SaltedEarthPvE.Cooldown.IsCoolingDown && ShadowbringerPvE.Cooldown.CurrentCharges == 0 && CarveAndSpitPvE.Cooldown.IsCoolingDown)) return true;
+            if (InTwoMIsBurst && BloodWeaponPvE.Cooldown.IsCoolingDown && LivingShadowPvE.Cooldown.IsCoolingDown && SaltedEarthPvE.Cooldown.IsCoolingDown && ShadowbringerPvE.Cooldown.CurrentCharges == 0 && CarveAndSpitPvE.Cooldown.IsCoolingDown) return true;
 
             if (TheBlackestNight && CurrentMp < 6000) return false;
 

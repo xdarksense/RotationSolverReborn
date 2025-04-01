@@ -1,6 +1,5 @@
 ﻿using ECommons.ExcelServices;
 using Lumina.Excel.Sheets;
-using System.Data;
 
 namespace RotationSolver.Basic.Helpers;
 
@@ -19,14 +18,15 @@ public static class TargetFilter
     {
         if (charas == null) return Enumerable.Empty<IBattleChara>();
 
-        return charas.Where(item =>
+        var result = new List<IBattleChara>();
+        foreach (var item in charas)
         {
-            if (item == null || !item.IsDead || item.CurrentHp != 0 || !item.IsTargetable) return false;
-            if (item.HasStatus(false, StatusID.Raise)) return false;
-            if (!Service.Config.RaiseBrinkOfDeath && item.HasStatus(false, StatusID.BrinkOfDeath)) return false;
-            if (DataCenter.AllianceMembers.Any(c => c.CastTargetObjectId == item.GameObjectId)) return false;
-            return true;
-        });
+            if (item == null || !item.IsDead || item.CurrentHp != 0 || !item.IsTargetable) continue;
+            if (item.HasStatus(false, StatusID.Raise)) continue;
+            if (!Service.Config.RaiseBrinkOfDeath && item.HasStatus(false, StatusID.BrinkOfDeath)) continue;
+            result.Add(item);
+        }
+        return result;
     }
 
     /// <summary>
@@ -39,11 +39,30 @@ public static class TargetFilter
     {
         if (objects == null || roles == null || roles.Length == 0) return Enumerable.Empty<IBattleChara>();
 
-        var validJobs = new HashSet<byte>(roles.SelectMany(role => Service.GetSheet<ClassJob>()
-            .Where(job => role == job.GetJobRole())
-            .Select(job => (byte)job.RowId)));
+        var validJobs = new HashSet<byte>();
+        var classJobs = Service.GetSheet<ClassJob>();
 
-        return objects.Where(obj => obj.IsJobs(validJobs));
+        foreach (var role in roles)
+        {
+            foreach (var job in classJobs)
+            {
+                if (role == job.GetJobRole())
+                {
+                    validJobs.Add((byte)job.RowId);
+                }
+            }
+        }
+
+        var result = new List<IBattleChara>();
+        foreach (var obj in objects)
+        {
+            if (obj.IsJobs(validJobs))
+            {
+                result.Add(obj);
+            }
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -56,9 +75,16 @@ public static class TargetFilter
     {
         if (obj == null) return false;
 
-        var validJobs = new HashSet<byte>(Service.GetSheet<ClassJob>()
-            .Where(job => role == job.GetJobRole())
-            .Select(job => (byte)job.RowId));
+        var validJobs = new HashSet<byte>();
+        var classJobs = Service.GetSheet<ClassJob>();
+
+        foreach (var job in classJobs)
+        {
+            if (role == job.GetJobRole())
+            {
+                validJobs.Add((byte)job.RowId);
+            }
+        }
 
         return obj.IsJobs(validJobs);
     }
@@ -73,7 +99,13 @@ public static class TargetFilter
     {
         if (obj == null || validJobs == null || validJobs.Length == 0) return false;
 
-        return obj.IsJobs(new HashSet<byte>(validJobs.Select(j => (byte)(uint)j)));
+        var validJobSet = new HashSet<byte>();
+        foreach (var job in validJobs)
+        {
+            validJobSet.Add((byte)(uint)job);
+        }
+
+        return obj.IsJobs(validJobSet);
     }
 
     private static bool IsJobs(this IGameObject obj, HashSet<byte> validJobs)
@@ -94,6 +126,14 @@ public static class TargetFilter
     {
         if (objects == null) return Enumerable.Empty<T>();
 
-        return objects.Where(o => o.DistanceToPlayer() <= radius);
+        var result = new List<T>();
+        foreach (var obj in objects)
+        {
+            if (obj.DistanceToPlayer() <= radius)
+            {
+                result.Add(obj);
+            }
+        }
+        return result;
     }
 }

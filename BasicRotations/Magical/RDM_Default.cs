@@ -1,6 +1,6 @@
-namespace DefaultRotations.Magical;
+namespace RebornRotations.Magical;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
 [SourceCode(Path = "main/BasicRotations/Magical/RDM_Default.cs")]
 [Api(4)]
 public sealed class RDM_Default : RedMageRotation
@@ -106,13 +106,7 @@ public sealed class RDM_Default : RedMageRotation
         ActionID.EnchantedMoulinetPvE,
         ActionID.MoulinetPvE
         //I dont know at this point if nextGCD.IsTheSameTo even working, but stil gonna left it in here.
-    }) && !nextGCD.IsTheSameTo(new[]
-        {
-        ActionID.RipostePvE,
-        ActionID.EnchantedRipostePvE,
-        ActionID.MoulinetPvE,
-        ActionID.EnchantedMoulinetPvE
-    });
+    }) && !nextGCD.IsTheSameTo(true, ActionID.RipostePvE, ActionID.EnchantedRipostePvE, ActionID.MoulinetPvE, ActionID.EnchantedMoulinetPvE);
 
         //i really hate this.
         bool ambatumelee = Player.HasStatus(true, StatusID.Manafication, StatusID.MagickedSwordplay);

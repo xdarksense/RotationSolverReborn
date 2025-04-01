@@ -1,6 +1,6 @@
-namespace DefaultRotations.Magical;
+namespace RebornRotations.Magical;
 
-[Rotation("DOES NOT WORK", CombatType.PvE, GameVersion = "7.15")]
+[Rotation("DOES NOT WORK", CombatType.PvE, GameVersion = "7.2")]
 [SourceCode(Path = "main/BasicRotations/Limited Jobs/BLU_Default.cs")]
 [Api(4)]
 public sealed class Blue_Default : BlueMageRotation
@@ -21,7 +21,8 @@ public sealed class Blue_Default : BlueMageRotation
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-
+        if (nextGCD.IsTheSameTo(true, AngelWhisperPvE) && SwiftcastPvE.CanUse(out act)) return true;
+        if (nextGCD.IsTheSameTo(true, TheRoseOfDestructionPvE) && OffguardPvE.CanUse(out act)) return true;
         return base.EmergencyAbility(nextGCD, out act);
     }
 
@@ -88,9 +89,11 @@ public sealed class Blue_Default : BlueMageRotation
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
+        if (SurpanakhaPvE.CanUse(out act)) return true;
+        if (PhantomFlurryPvE.CanUse(out act)) return true;
         if (JKickPvE.CanUse(out act)) return true;
         if (BeingMortalPvE.CanUse(out act)) return true;
-        if (NightbloomPvE.CanUse(out act)) return true;
+        if (NightbloomPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
         if (FeatherRainPvE.CanUse(out act)) return true;
         if (ShockStrikePvE.CanUse(out act)) return true;
 
@@ -112,7 +115,7 @@ public sealed class Blue_Default : BlueMageRotation
     protected override bool EmergencyGCD(out IAction? act)
     {
         act = null;
-
+        
         return base.EmergencyGCD(out act);
     }
 
@@ -125,6 +128,7 @@ public sealed class Blue_Default : BlueMageRotation
     protected override bool DefenseAreaGCD(out IAction? act)
     {
         if (ColdFogPvE.CanUse(out act)) return true;
+        if (GobskinPvE.CanUse(out act)) return true;
         return base.DefenseAreaGCD(out act);
     }
 
@@ -137,13 +141,14 @@ public sealed class Blue_Default : BlueMageRotation
 
     protected override bool HealAreaGCD(out IAction? act)
     {
-        if (WhiteWindPvE.CanUse(out act)) return true;
+        if (Player.GetHealthRatio() > 0.5 && WhiteWindPvE.CanUse(out act)) return true;
+        if (StotramPvE.CanUse(out act)) return true;
         return base.HealAreaGCD(out act);
     }
 
     protected override bool HealSingleGCD(out IAction? act)
     {
-        if (WhiteWindPvE.CanUse(out act)) return true;
+        if (PomCurePvE.CanUse(out act)) return true;
         return base.HealSingleGCD(out act);
     }
 
@@ -169,6 +174,8 @@ public sealed class Blue_Default : BlueMageRotation
 
     protected override bool GeneralGCD(out IAction? act)
     {
+        if (MightyGuardPvE.CanUse(out act)) return true;
+        if (BasicInstinctPvE.CanUse(out act)) return true;
         if (WhiteDeathPvE.CanUse(out act)) return true;
 
         if (BreathOfMagicPvE.CanUse(out act) &&
@@ -184,7 +191,7 @@ public sealed class Blue_Default : BlueMageRotation
         if (WhistlePvE.CanUse(out act) && Player.HasStatus(true, StatusID.Tingling)) return true;
         if (TripleTridentPvE.CanUse(out act) && IsLastGCD(ActionID.WhistlePvE) &&
             Player.HasStatus(true, StatusID.Tingling)) return true;
-
+        
         if (SonicBoomPvE.CanUse(out act)) return true;
         if (FlyingSardinePvE.CanUse(out act)) return true;
         return base.GeneralGCD(out act);

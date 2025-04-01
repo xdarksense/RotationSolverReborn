@@ -86,9 +86,9 @@ internal class TargetCondition : DelayCondition
     {
         return Param2 switch
         {
-            0 => tar.GetTimeToKill() > DistanceOrTime,
-            1 => tar.GetTimeToKill() < DistanceOrTime,
-            2 => tar.GetTimeToKill() == DistanceOrTime,
+            0 => tar.GetTTK() > DistanceOrTime,
+            1 => tar.GetTTK() < DistanceOrTime,
+            2 => tar.GetTTK() == DistanceOrTime,
             _ => false,
         };
     }

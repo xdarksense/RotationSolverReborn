@@ -36,7 +36,7 @@ internal static class ActionUpdater
     }
 
     private static IBaseAction? _nextGCDAction;
-    const float gcdHeight = 5;
+    const float GcdHeight = 5;
     internal static IBaseAction? NextGCDAction
     {
         get => _nextGCDAction;
@@ -59,7 +59,7 @@ internal static class ActionUpdater
     internal static void UpdateNextAction()
     {
         IPlayerCharacter localPlayer = Player.Object;
-        var customRotation = DataCenter.RightNowRotation;
+        var customRotation = DataCenter.CurrentRotation;
 
         try
         {
@@ -73,9 +73,7 @@ internal static class ActionUpdater
         }
         catch (Exception ex)
         {
-#pragma warning disable 0436
-            WarningHelper.AddSystemWarning($"Failed to update the next action in the rotation because: {ex.Message}");
-            Svc.Log.Error(ex, "Failed to update next action.");
+            LogError("Failed to update the next action in the rotation", ex);
         }
 
         NextAction = NextGCDAction = null;
@@ -98,10 +96,10 @@ internal static class ActionUpdater
     internal unsafe static void UpdateActionInfo()
     {
         SetAction(NextGCDAction?.AdjustedID ?? 0);
-        //UpdateWeaponTime();
         UpdateCombatTime();
         UpdateSlots();
         UpdateMoving();
+        UpdateLifetime();
         UpdateMPTimer();
     }
 
@@ -114,7 +112,7 @@ internal static class ActionUpdater
         }
         for (ushort i = 0; i < DataCenter.DutyActions.Length; i++)
         {
-            DataCenter.DutyActions[i] = ActionManager.GetDutyActionId(i);
+            DataCenter.DutyActions[i] = DutyActionManager.GetDutyActionId(i);
         }
     }
 
@@ -124,7 +122,7 @@ internal static class ActionUpdater
     private unsafe static void UpdateMoving()
     {
         var last = DataCenter.IsMoving;
-        DataCenter.IsMoving = AgentMap.Instance()->IsPlayerMoving > 0;
+        DataCenter.IsMoving = AgentMap.Instance()->IsPlayerMoving;
         if (last && !DataCenter.IsMoving)
         {
             _stopMovingTime = DateTime.Now;
@@ -141,6 +139,38 @@ internal static class ActionUpdater
         DataCenter.MovingRaw = DataCenter.IsMoving
             ? (float)(DateTime.Now - _startMovingTime).TotalSeconds
             : 0;
+    }
+    private static DateTime _startDeadTime = DateTime.MinValue;
+    private static DateTime _startAliveTime = DateTime.Now;
+    private static bool _isDead = true;
+    public static void UpdateLifetime()
+    {
+        if (Player.Object == null) return;
+
+        var lastDead = _isDead;
+        _isDead = Player.Object.IsDead;
+
+        if (Svc.Condition[ConditionFlag.BetweenAreas])
+        {
+            _startAliveTime = DateTime.Now;
+        }
+        switch (lastDead)
+        {
+            case true when !Player.Object.IsDead:
+                _startAliveTime = DateTime.Now;
+                break;
+            case false when Player.Object.IsDead:
+                _startDeadTime = DateTime.Now;
+                break;
+        }
+
+        DataCenter.DeadTimeRaw = Player.Object.IsDead
+            ? (float)(DateTime.Now - _startDeadTime).TotalSeconds
+            : 0;
+
+        DataCenter.AliveTimeRaw = Player.Object.IsDead
+            ? 0
+            : (float)(DateTime.Now - _startAliveTime).TotalSeconds;
     }
 
     static DateTime _startCombatTime = DateTime.MinValue;
@@ -193,6 +223,20 @@ internal static class ActionUpdater
 
     internal unsafe static bool CanDoAction()
     {
+        if (IsPlayerOccupied() || Player.Object.CurrentHp == 0) return false;
+
+        var nextAction = NextAction;
+        if (nextAction == null) return false;
+
+        // Skip when casting
+        if (Player.Object.TotalCastTime - DataCenter.ActionAhead > 0) return false;
+
+        // GCD
+        return RSCommands.CanDoAnAction(ActionHelper.CanUseGCD);
+    }
+
+    private unsafe static bool IsPlayerOccupied()
+    {
         if (Svc.Condition[ConditionFlag.OccupiedInQuestEvent]
             || Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]
             || Svc.Condition[ConditionFlag.Occupied33]
@@ -201,25 +245,32 @@ internal static class ActionUpdater
             || Svc.Condition[ConditionFlag.BetweenAreas]
             || Svc.Condition[ConditionFlag.BetweenAreas51]
             || Svc.Condition[ConditionFlag.Mounted]
-            //|| Svc.Condition[ConditionFlag.SufferingStatusAffliction] //Because of BLU30!
             || Svc.Condition[ConditionFlag.SufferingStatusAffliction2]
             || Svc.Condition[ConditionFlag.RolePlaying]
             || Svc.Condition[ConditionFlag.InFlight]
             || Svc.Condition[ConditionFlag.Diving]
             || Svc.Condition[ConditionFlag.Swimming]
             || Svc.Condition[ConditionFlag.Unconscious]
-            || Svc.Condition[ConditionFlag.MeldingMateria]
-            || (ActionManager.Instance()->ActionQueued && NextAction != null
-                && ActionManager.Instance()->QueuedActionId != NextAction.AdjustedID)
-            || Player.Object.CurrentHp == 0) return false;
+            || Svc.Condition[ConditionFlag.MeldingMateria])
+        {
+            return true;
+        }
 
-        var nextAction = NextAction;
-        if (nextAction == null) return false;
+        var actionManager = ActionManager.Instance();
+        if (actionManager->ActionQueued && NextAction != null
+            && actionManager->QueuedActionId != NextAction.AdjustedID)
+        {
+            return true;
+        }
 
-        //Skip when casting
-        if (Player.Object.TotalCastTime - DataCenter.ActionAhead > 0) return false;
+        return false;
+    }
 
-        //GCD
-        return RSCommands.CanDoAnAction(ActionHelper.CanUseGCD);
+    private static void LogError(string message, Exception ex)
+    {
+#pragma warning disable 0436
+
+        WarningHelper.AddSystemWarning($"{message} because: {ex.Message}");
+        Svc.Log.Error(ex, message);
     }
 }

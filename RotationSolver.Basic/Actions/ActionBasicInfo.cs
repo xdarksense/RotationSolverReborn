@@ -30,6 +30,16 @@ public readonly struct ActionBasicInfo
     public readonly uint ID => _action.Action.RowId;
 
     /// <summary>
+    /// The Range of the action.
+    /// </summary>
+    public readonly sbyte Range => _action.Action.Range;
+
+    /// <summary>
+    /// The EffectRange of the action.
+    /// </summary>
+    public readonly byte EffectRange => _action.Action.EffectRange;
+
+    /// <summary>
     /// The icon of the action.
     /// </summary>
     public readonly uint IconID => ID == (uint)ActionID.SprintPvE ? 104u : _action.Action.Icon;
@@ -43,6 +53,7 @@ public readonly struct ActionBasicInfo
     /// The attack type of this action.
     /// </summary>
     public readonly AttackType AttackType => (AttackType)(_action.Action.AttackType.RowId != 0 ? _action.Action.AttackType.RowId : byte.MaxValue);
+    
     /// <summary>
     /// The aspect of this action.
     /// </summary>
@@ -81,11 +92,14 @@ public readonly struct ActionBasicInfo
     {
         get
         {
+            if (IsPvP && ID != 29711) return 0;
+            
             var mpOver = _action.Setting.MPOverride?.Invoke();
             if (mpOver.HasValue) return mpOver.Value;
 
             var mp = (uint)ActionManager.GetActionCost(ActionType.Action, AdjustedID, 0, 0, 0, 0);
             if (mp < 100) return 0;
+            
             return mp;
         }
     }
@@ -216,6 +230,8 @@ public readonly struct ActionBasicInfo
 
     private readonly bool CheckForCombo()
     {
+        if (!_action.Config.ShouldCheckCombo) return true;
+
         if (_action.Setting.ComboIdsNot != null)
         {
             if (_action.Setting.ComboIdsNot.Contains(DataCenter.LastComboAction)) return false;

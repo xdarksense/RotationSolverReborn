@@ -79,7 +79,7 @@ public class BaseAction : IBaseAction
     {
         get
         {
-            if (!Service.Config.RotationActionConfig.TryGetValue(ID, out var value))
+            if (!Service.Config.RotationActionConfig.TryGetValue(ID, out var value) || DataCenter.ResetActionConfigs)
             {
                 value = Setting.CreateConfig?.Invoke() ?? new ActionConfig();
                 Service.Config.RotationActionConfig[ID] = value;
@@ -142,9 +142,6 @@ public class BaseAction : IBaseAction
             usedUp = true;
         }
 
-        if (isLastAbility && !IsLastAbilityUsable()) return false;
-        if (isFirstAbility && !IsFirstAbilityUsable()) return false;
-
         if (!Info.BasicCheck(skipStatusProvideCheck, skipComboCheck, skipCastingCheck)) return false;
 
         if (!Cooldown.CooldownCheck(usedUp, gcdCountForAbility)) return false;
@@ -153,7 +150,13 @@ public class BaseAction : IBaseAction
 
         if (!skipTTKCheck)
         {
-            if (!IsTimeToKillValid()) return false;
+            switch (DataCenter.IsPvP)
+            {
+                case true when Service.Config.IgnorePvPttk:
+                    break;
+                case false when !IsTimeToKillValid():
+                    return false;
+            }
         }
 
         PreviewTarget = TargetInfo.FindTarget(skipAoeCheck, skipStatusProvideCheck);
@@ -167,37 +170,9 @@ public class BaseAction : IBaseAction
         return true;
     }
 
-    private bool IsLastAbilityUsable()
-    {
-        if (Service.Config.UseV2AbilityChecks)
-        {
-            return IsLastAbilityv2Usable();
-        }
-        return DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD <= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.isLastAbilityTimer);
-    }
-
-    private bool IsFirstAbilityUsable()
-    {
-        if (Service.Config.UseV2AbilityChecks)
-        {
-            return IsFirstAbilityv2Usable();
-        }
-        return DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD >= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.isFirstAbilityTimer);
-    }
-
-    private bool IsLastAbilityv2Usable()
-    {
-        return DataCenter.InCombat && (DataCenter.DefaultGCDElapsed >= DataCenter.DefaultGCDRemain);
-    }
-
-    private bool IsFirstAbilityv2Usable()
-    {
-        return DataCenter.InCombat && (DataCenter.DefaultGCDRemain >= DataCenter.DefaultGCDElapsed);
-    }
-
     private bool IsTimeToKillValid()
     {
-        return DataCenter.AverageTimeToKill >= Config.TimeToKill && DataCenter.AverageTimeToKill >= Config.TimeToUntargetable;
+        return DataCenter.AverageTTK >= Config.TimeToKill && DataCenter.AverageTTK >= Config.TimeToUntargetable;
     }
 
 

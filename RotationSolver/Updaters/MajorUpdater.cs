@@ -1,5 +1,4 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Plugin.Services;
 using ECommons.DalamudServices;
 using ECommons.GameHelpers;
@@ -10,7 +9,6 @@ using FFXIVClientStructs.FFXIV.Component.GUI;
 using Lumina.Excel.Sheets;
 using RotationSolver.Commands;
 using RotationSolver.Data;
-
 using RotationSolver.UI.HighlightTeachingMode;
 using System.Runtime.InteropServices;
 using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule;
@@ -23,19 +21,36 @@ internal static class MajorUpdater
         && !Svc.Condition[ConditionFlag.BetweenAreas]
         && !Svc.Condition[ConditionFlag.BetweenAreas51]
         && !Svc.Condition[ConditionFlag.LoggingOut]
-        && Player.Available;
+        && Player.AvailableThreadSafe;
 
     private static Exception? _threadException;
     private static DateTime _lastUpdatedWork = DateTime.Now;
     private static DateTime _warningsLastDisplayed = DateTime.MinValue;
 
-    private unsafe static void FrameworkUpdate(IFramework framework)
+    public static void Enable()
+    {
+        ActionSequencerUpdater.Enable(Svc.PluginInterface.ConfigDirectory.FullName + "\\Conditions");
+        Svc.Framework.Update += RSRUpdate;
+    }
+
+    // "Transition locked" means when !MajorUpdater.IsValid
+    // TransitionSafeCommands are any function that are qualified safe for RSRUpdate to run, even when other updates should not happen.
+    // TransitionSafeCommands *should* be duplicated elsewhere for commands that should also run when otherwise safe to update.
+    // TransitionSafeCommands *should not* be used for commands that should *only* run when transition locked.
+    public static void TransitionSafeCommands()
+    {
+        RSCommands.UpdateRotationState();
+        ActionUpdater.UpdateLifetime();
+    }
+
+    private unsafe static void RSRUpdate(IFramework framework)
     {
         HotbarHighlightManager.HotbarIDs.Clear();
         RotationSolverPlugin.UpdateDisplayWindow();
 
         if (!IsValid)
         {
+            TransitionSafeCommands();
             ActionUpdater.ClearNextAction();
             CustomRotation.MoveTarget = null;
             return;
@@ -78,7 +93,7 @@ internal static class MajorUpdater
 
     private static void HandleSystemWarnings()
     {
-        if (DataCenter.SystemWarnings.Any())
+        if (DataCenter.SystemWarnings.Count > 0)
         {
             var warningsToRemove = new List<string>();
 
@@ -107,17 +122,14 @@ internal static class MajorUpdater
 
         try
         {
-            if (Service.Config.FrameworkStyle == FrameworkStyle.WorkTask)
+            switch (Service.Config.FrameworkStyle)
             {
-                await Task.Run(() => UpdateWork());
-            }
-            else if (Service.Config.FrameworkStyle == FrameworkStyle.RunOnTick)
-            {
-                await Svc.Framework.RunOnTick(() => UpdateWork());
-            }
-            else if (Service.Config.FrameworkStyle == FrameworkStyle.MainThread)
-            {
-                UpdateWork();
+                case FrameworkStyle.RunOnTick:
+                    await Svc.Framework.RunOnTick(() => UpdateWork());
+                    break;
+                case FrameworkStyle.MainThread:
+                    UpdateWork();
+                    break;
             }
         }
         catch (Exception tEx)
@@ -157,22 +169,7 @@ internal static class MajorUpdater
             RSCommands.UpdateRotationState();
             HotbarHighlightManager.UpdateSettings();
 
-            // Collect expired VfxNewData items
-            var expiredVfx = new List<VfxNewData>();
-            for (int i = 0; i < DataCenter.VfxDataQueue.Count; i++)
-            {
-                var vfx = DataCenter.VfxDataQueue[i];
-                if (vfx.TimeDuration > TimeSpan.FromSeconds(10))
-                {
-                    expiredVfx.Add(vfx);
-                }
-            }
-
-            // Remove expired VfxNewData items
-            foreach (var vfx in expiredVfx)
-            {
-                DataCenter.VfxDataQueue.Remove(vfx);
-            }
+            RemoveExpiredVfxData();
         }
         catch (Exception ex)
         {
@@ -183,14 +180,35 @@ internal static class MajorUpdater
         }
     }
 
+    private static void RemoveExpiredVfxData()
+    {
+        var expiredVfx = new List<VfxNewData>();
+        lock (DataCenter.VfxDataQueue)
+        {
+            for (int i = 0; i < DataCenter.VfxDataQueue.Count; i++)
+            {
+                var vfx = DataCenter.VfxDataQueue[i];
+                if (vfx.TimeDuration > TimeSpan.FromSeconds(6))
+                {
+                    expiredVfx.Add(vfx);
+                }
+            }
+
+            foreach (var vfx in expiredVfx)
+            {
+                DataCenter.VfxDataQueue.Remove(vfx);
+            }
+        }
+    }
+
     private static void UpdateHighlight()
     {
         if (!Service.Config.TeachingMode || ActionUpdater.NextAction is not IAction nextAction) return;
 
         HotbarID? hotbar = nextAction switch
-            {
+        {
             IBaseItem item => new HotbarID(HotbarSlotType.Item, item.ID),
-            IBaseAction baseAction when baseAction.Action.ActionCategory.RowId is 10 or 11 => Svc.Data.GetExcelSheet<GeneralAction>()?.FirstOrDefault(g => g.Action.RowId == baseAction.ID) is GeneralAction gAct ? new HotbarID(HotbarSlotType.GeneralAction, gAct.RowId) : null,
+            IBaseAction baseAction when baseAction.Action.ActionCategory.RowId is 10 or 11 => GetGeneralActionHotbarID(baseAction),
             IBaseAction baseAction => new HotbarID(HotbarSlotType.Action, baseAction.AdjustedID),
             _ => null
         };
@@ -199,6 +217,22 @@ internal static class MajorUpdater
         {
             HotbarHighlightManager.HotbarIDs.Add(hotbar.Value);
         }
+    }
+
+    private static HotbarID? GetGeneralActionHotbarID(IBaseAction baseAction)
+    {
+        var generalActions = Svc.Data.GetExcelSheet<GeneralAction>();
+        if (generalActions == null) return null;
+
+        foreach (var gAct in generalActions)
+        {
+            if (gAct.Action.RowId == baseAction.ID)
+            {
+                return new HotbarID(HotbarSlotType.GeneralAction, gAct.RowId);
+            }
+        }
+
+        return null;
     }
 
     private static void ShowWarning()
@@ -213,12 +247,6 @@ internal static class MajorUpdater
 #pragma warning disable CS0436
             WarningHelper.AddSystemWarning(UiString.TextToTalkWarning.GetDescription());
         }
-    }
-
-    public static void Enable()
-    {
-        ActionSequencerUpdater.Enable(Svc.PluginInterface.ConfigDirectory.FullName + "\\Conditions");
-        Svc.Framework.Update += FrameworkUpdate;
     }
 
     static DateTime _closeWindowTime = DateTime.Now;
@@ -255,6 +283,7 @@ internal static class MajorUpdater
     private unsafe static void OpenChest()
     {
         if (!Service.Config.AutoOpenChest) return;
+        if (DataCenter.InCombat) return;
         var player = Player.Object;
 
         var treasure = Svc.Objects.FirstOrDefault(o =>
@@ -264,7 +293,7 @@ internal static class MajorUpdater
             if (dis > 0.5f) return false;
 
             var address = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)o.Address;
-            if ((ObjectKind)address->ObjectKind != ObjectKind.Treasure) return false;
+            if (address->ObjectKind != FFXIVClientStructs.FFXIV.Client.Game.Object.ObjectKind.Treasure) return false;
 
             //Opened!
             foreach (var item in Loot.Instance()->Items)
@@ -301,7 +330,7 @@ internal static class MajorUpdater
 
     public static void Dispose()
     {
-        Svc.Framework.Update -= FrameworkUpdate;
+        Svc.Framework.Update -= RSRUpdate;
         PreviewUpdater.Dispose();
         ActionSequencerUpdater.SaveFiles();
         ActionUpdater.ClearNextAction();

@@ -45,7 +45,7 @@ partial class RedMageRotation
     {
         setting.StatusProvide = SwiftcastStatus;
     }
-
+    #region PvE Actions
     static partial void ModifyVerfirePvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.VerfireReady];
@@ -172,14 +172,10 @@ partial class RedMageRotation
             TimeToKill = 10,
         };
         setting.UnlockedByQuestID = 68118;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyCorpsacorpsPvE(ref ActionSetting setting)
-    {
-        setting.SpecialType = SpecialActionType.MovingForward;
-    }
-
-    static partial void ModifyCorpsacorpsPvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
     }
@@ -191,7 +187,7 @@ partial class RedMageRotation
 
     /// <inheritdoc/>
     [RotationDesc(ActionID.VercurePvE)]
-    protected sealed override bool HealSingleGCD(out IAction? act)
+    protected override bool HealSingleGCD(out IAction? act)
     {
         if (VercurePvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
         return base.HealSingleGCD(out act);
@@ -199,7 +195,7 @@ partial class RedMageRotation
 
     /// <inheritdoc/>
     [RotationDesc(ActionID.CorpsacorpsPvE)]
-    protected sealed override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
+    protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
         if (CorpsacorpsPvE.CanUse(out act)) return true;
         return base.MoveForwardAbility(nextGCD, out act);
@@ -207,14 +203,12 @@ partial class RedMageRotation
 
     /// <inheritdoc/>
     [RotationDesc(ActionID.AddlePvE, ActionID.MagickBarrierPvE)]
-    protected sealed override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
+    protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
         if (AddlePvE.CanUse(out act)) return true;
         if (MagickBarrierPvE.CanUse(out act, skipAoeCheck: true)) return true;
         return base.DefenseAreaAbility(nextGCD, out act);
     }
-
-    //DT Changes
 
     static partial void ModifyViceOfThornsPvE(ref ActionSetting setting)
     {
@@ -234,4 +228,98 @@ partial class RedMageRotation
     {
         setting.StatusNeed = [StatusID.PrefulgenceReady];
     }
+    #endregion
+    
+    #region PvP Actions
+    static partial void ModifyJoltIiiPvP(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.Dualcast_1393];        
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+    
+    static partial void ModifyGrandImpactPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.Dualcast_1393];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyEnchantedRipostePvP(ref ActionSetting setting) 
+    {
+        setting.StatusProvide = [StatusID.EnchantedRiposte];
+    }
+
+    static partial void ModifyEnchantedZwerchhauPvP(ref ActionSetting setting)
+    {
+        setting.ComboIds = [ActionID.EnchantedRipostePvP];
+        setting.StatusProvide = [StatusID.EnchantedZwerchhau_3238];
+    }
+
+    static partial void ModifyEnchantedRedoublementPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.EnchantedRipostePvP) == ActionID.EnchantedRedoublementPvP;
+        setting.StatusProvide = [StatusID.EnchantedRedoublement_3239];
+    }
+    
+    static partial void ModifyScorchPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.EnchantedRipostePvP) == ActionID.ScorchPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyResolutionPvP(ref ActionSetting setting)
+    {
+        setting.TargetStatusProvide = [StatusID.Silence_1347];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyEmboldenPvP(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.Embolden_2282, StatusID.PrefulgenceReady_4322];
+    }
+
+    static partial void ModifyCorpsacorpsPvP(ref ActionSetting setting)
+    {
+        setting.TargetStatusProvide = [StatusID.Monomachy_3242];
+    }
+
+    static partial void ModifyDisplacementPvP(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.Displacement_3243];
+    }
+
+    static partial void ModifyFortePvP(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.Forte];
+    }
+
+    static partial void ModifyPrefulgencePvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.EmboldenPvP) == ActionID.PrefulgencePvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyViceOfThornsPvP(ref ActionSetting setting)
+    {   
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.FortePvP) == ActionID.ViceOfThornsPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+    #endregion
 }

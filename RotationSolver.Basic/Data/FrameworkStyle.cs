@@ -11,11 +11,8 @@ public enum FrameworkStyle : byte
     [Description("On the game thread")]
     MainThread,
 
-    /// <summary>
-    /// Running outside of game thread.
-    /// </summary>
-    [Description("Running outside of game thread")]
-    WorkTask,
+    //[Description("Running outside of game thread")]
+    //WorkTask,
 
     /// <summary>
     /// Running on Game Tick.

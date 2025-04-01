@@ -33,10 +33,9 @@ public partial class RotationConfigWindow
         _baseHeader?.Draw();
     }
 
-    private static readonly CollapsingHeaderGroup _baseHeader = new CollapsingHeaderGroup(new()
+    private static readonly CollapsingHeaderGroup _baseHeader = new CollapsingHeaderGroup(new Dictionary<Func<string>, Action>
     {
         { UiString.ConfigWindow_Basic_Timer.GetDescription, DrawBasicTimer },
-        { UiString.ConfigWindow_Basic_AutoSwitch.GetDescription, DrawBasicAutoSwitch },
         { UiString.ConfigWindow_Basic_NamedConditions.GetDescription, DrawBasicNamedConditions },
         { UiString.ConfigWindow_Basic_Others.GetDescription, DrawBasicOthers },
     });
@@ -110,45 +109,39 @@ public partial class RotationConfigWindow
         _allSearchable.DrawItems(Configs.BasicTimer);
     }
 
-    private static readonly CollapsingHeaderGroup _autoSwitch = new CollapsingHeaderGroup(new()
+    private static readonly CollapsingHeaderGroup _autoSwitch = new CollapsingHeaderGroup(new Dictionary<Func<string>, Action>
     {
         {
             UiString.ConfigWindow_Basic_SwitchCancelConditionSet.GetDescription,
-            () => DataCenter.RightSet.SwitchCancelConditionSet?.DrawMain(DataCenter.RightNowRotation)
+            () => DataCenter.CurrentConditionValue.SwitchCancelConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Basic_SwitchManualConditionSet.GetDescription,
-            () => DataCenter.RightSet.SwitchManualConditionSet?.DrawMain(DataCenter.RightNowRotation)
+            () => DataCenter.CurrentConditionValue.SwitchManualConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Basic_SwitchAutoConditionSet.GetDescription,
-            () => DataCenter.RightSet.SwitchAutoConditionSet?.DrawMain(DataCenter.RightNowRotation)
+            () => DataCenter.CurrentConditionValue.SwitchAutoConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
     })
     {
         HeaderSize = 18,
     };
 
-    private static void DrawBasicAutoSwitch()
-    {
-        _allSearchable.DrawItems(Configs.BasicAutoSwitch);
-        _autoSwitch?.Draw();
-    }
-
     private static readonly Dictionary<int, bool> _isOpen = new Dictionary<int, bool>();
 
     private static void DrawBasicNamedConditions()
     {
         // Ensure there is always an empty named condition at the end
-        if (!DataCenter.RightSet.NamedConditions.Any(c => string.IsNullOrEmpty(c.Name)))
+        if (!DataCenter.CurrentConditionValue.NamedConditions.Any(c => string.IsNullOrEmpty(c.Name)))
         {
-            DataCenter.RightSet.NamedConditions = DataCenter.RightSet.NamedConditions.Append((string.Empty, new ConditionSet())).ToArray();
+            DataCenter.CurrentConditionValue.NamedConditions = DataCenter.CurrentConditionValue.NamedConditions.Append((string.Empty, new ConditionSet())).ToArray();
         }
 
         ImGui.Spacing();
 
         int removeIndex = -1;
-        for (int i = 0; i < DataCenter.RightSet.NamedConditions.Length; i++)
+        for (int i = 0; i < DataCenter.CurrentConditionValue.NamedConditions.Length; i++)
         {
             var value = _isOpen.TryGetValue(i, out var open) && open;
 
@@ -159,7 +152,7 @@ public partial class RotationConfigWindow
 
             ImGui.SetNextItemWidth(width);
             ImGui.InputTextWithHint($"##Rotation Solver Named Condition{i}", UiString.ConfigWindow_Condition_ConditionName.GetDescription(),
-                ref DataCenter.RightSet.NamedConditions[i].Name, 1024);
+                ref DataCenter.CurrentConditionValue.NamedConditions[i].Name, 1024);
 
             ImGui.SameLine();
 
@@ -175,24 +168,24 @@ public partial class RotationConfigWindow
                 removeIndex = i;
             }
 
-            if (value && DataCenter.RightNowRotation != null)
+            if (value && DataCenter.CurrentRotation != null)
             {
-                DataCenter.RightSet.NamedConditions[i].Condition?.DrawMain(DataCenter.RightNowRotation);
+                DataCenter.CurrentConditionValue.NamedConditions[i].Condition?.DrawMain(DataCenter.CurrentRotation);
             }
         }
 
         // Remove the named condition if needed
         if (removeIndex > -1)
         {
-            var list = DataCenter.RightSet.NamedConditions.ToList();
+            var list = DataCenter.CurrentConditionValue.NamedConditions.ToList();
             list.RemoveAt(removeIndex);
-            DataCenter.RightSet.NamedConditions = list.ToArray();
+            DataCenter.CurrentConditionValue.NamedConditions = list.ToArray();
         }
     }
 
     private static void DrawBasicOthers()
     {
-        var set = DataCenter.RightSet;
+        var set = DataCenter.CurrentConditionValue;
 
         const string popUpId = "Right Set Popup";
         if (ImGui.Selectable(set.Name, false, ImGuiSelectableFlags.None, new Vector2(0, 20)))
@@ -215,7 +208,7 @@ public partial class RotationConfigWindow
                 if (combos[i].Name == set.Name)
                 {
                     ImGuiHelper.SetNextWidthWithName(set.Name);
-                    ImGui.InputText("##MajorConditionSet", ref set.Name, 100);
+                    ImGui.InputText("##MajorConditionValue", ref set.Name, 100);
                 }
                 else
                 {
@@ -259,7 +252,7 @@ public partial class RotationConfigWindow
         _UIHeader?.Draw();
     }
 
-    private static readonly CollapsingHeaderGroup _UIHeader = new CollapsingHeaderGroup(new()
+    private static readonly CollapsingHeaderGroup _UIHeader = new CollapsingHeaderGroup(new Dictionary<Func<string>, Action>
     {
         {
             UiString.ConfigWindow_UI_Information.GetDescription,
@@ -282,26 +275,44 @@ public partial class RotationConfigWindow
     private void DrawAuto()
     {
         ImGui.TextWrapped(UiString.ConfigWindow_Auto_Description.GetDescription());
-        DrawAutoStatusOrderConfig();
         _autoHeader?.Draw();
     }
 
-    private static readonly CollapsingHeaderGroup _autoHeader = new(new()
+    private static readonly CollapsingHeaderGroup _autoHeader = new(new Dictionary<Func<string>, Action>
     {
-        { UiString.ConfigWindow_Auto_ActionUsage.GetDescription, () =>
-            {
-                ImGui.TextWrapped(UiString.ConfigWindow_Auto_ActionUsage_Description.GetDescription());
-                ImGui.Separator();
-
-                _allSearchable.DrawItems(Configs.AutoActionUsage);
-            }
-        },
+        { UiString.ConfigWindow_Basic_AutoSwitch.GetDescription, DrawBasicAutoSwitch },
+        { UiString.ConfigWindow_Auto_PrioritiesOrganizer.GetDescription, DrawAutoStatusOrderConfig },
+        { UiString.ConfigWindow_Auto_ActionUsage.GetDescription, DrawActionUsageControl },
         { UiString.ConfigWindow_Auto_HealingCondition.GetDescription, DrawHealingActionCondition },
+        { UiString.ConfigWindow_Auto_PvPSpecific.GetDescription, DrawPvPSpecificControls },
         { UiString.ConfigWindow_Auto_StateCondition.GetDescription, () => _autoState?.Draw() },
     })
     {
         HeaderSize = HeaderSize,
     };
+
+    private static void DrawBasicAutoSwitch()
+    {
+        _allSearchable.DrawItems(Configs.BasicAutoSwitch);
+        _autoSwitch?.Draw();
+    }
+
+    private static void DrawPvPSpecificControls()
+    {
+        ImGui.TextWrapped(UiString.ConfigWindow_Auto_PvPSpecific.GetDescription());
+        ImGui.Separator();
+        _allSearchable.DrawItems(Configs.PvPSpecificControls);
+    }
+
+    /// <summary>
+    /// Draws the Action Usage and Control section.
+    /// </summary>
+    private static void DrawActionUsageControl()
+    {
+        ImGui.TextWrapped(UiString.ConfigWindow_Auto_ActionUsage_Description.GetDescription());
+        ImGui.Separator();
+        _allSearchable.DrawItems(Configs.AutoActionUsage);
+    }
 
     /// <summary>
     /// Draws the healing action condition section.
@@ -310,55 +321,54 @@ public partial class RotationConfigWindow
     {
         ImGui.TextWrapped(UiString.ConfigWindow_Auto_HealingCondition_Description.GetDescription());
         ImGui.Separator();
-
         _allSearchable.DrawItems(Configs.HealingActionCondition);
     }
 
-    private static readonly CollapsingHeaderGroup _autoState = new(new()
+    private static readonly CollapsingHeaderGroup _autoState = new(new Dictionary<Func<string>, Action>
     {
         {
             UiString.ConfigWindow_Auto_HealAreaConditionSet.GetDescription,
-            () => DataCenter.RightSet.HealAreaConditionSet?.DrawMain(DataCenter.RightNowRotation)
+            () => DataCenter.CurrentConditionValue.HealAreaConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Auto_HealSingleConditionSet.GetDescription,
-            () => DataCenter.RightSet.HealSingleConditionSet?.DrawMain(DataCenter.RightNowRotation)
+            () => DataCenter.CurrentConditionValue.HealSingleConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Auto_DefenseAreaConditionSet.GetDescription,
-            () => DataCenter.RightSet.DefenseAreaConditionSet?.DrawMain(DataCenter.RightNowRotation)
+            () => DataCenter.CurrentConditionValue.DefenseAreaConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Auto_DefenseSingleConditionSet.GetDescription,
-            () => DataCenter.RightSet.DefenseSingleConditionSet?.DrawMain(DataCenter.RightNowRotation)
+            () => DataCenter.CurrentConditionValue.DefenseSingleConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Auto_DispelStancePositionalConditionSet.GetDescription,
-            () => DataCenter.RightSet.DispelStancePositionalConditionSet?.DrawMain(DataCenter.RightNowRotation)
+            () => DataCenter.CurrentConditionValue.DispelStancePositionalConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Auto_RaiseShirkConditionSet.GetDescription,
-            () => DataCenter.RightSet.RaiseShirkConditionSet?.DrawMain(DataCenter.RightNowRotation)
+            () => DataCenter.CurrentConditionValue.RaiseShirkConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Auto_MoveForwardConditionSet.GetDescription,
-            () => DataCenter.RightSet.MoveForwardConditionSet?.DrawMain(DataCenter.RightNowRotation)
+            () => DataCenter.CurrentConditionValue.MoveForwardConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Auto_MoveBackConditionSet.GetDescription,
-            () => DataCenter.RightSet.MoveBackConditionSet?.DrawMain(DataCenter.RightNowRotation)
+            () => DataCenter.CurrentConditionValue.MoveBackConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Auto_AntiKnockbackConditionSet.GetDescription,
-            () => DataCenter.RightSet.AntiKnockbackConditionSet?.DrawMain(DataCenter.RightNowRotation)
+            () => DataCenter.CurrentConditionValue.AntiKnockbackConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Auto_SpeedConditionSet.GetDescription,
-            () => DataCenter.RightSet.SpeedConditionSet?.DrawMain(DataCenter.RightNowRotation)
+            () => DataCenter.CurrentConditionValue.SpeedConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
         {
             UiString.ConfigWindow_Auto_NoCastingConditionSet.GetDescription,
-            () => DataCenter.RightSet.NoCastingConditionSet?.DrawMain(DataCenter.RightNowRotation)
+            () => DataCenter.CurrentConditionValue.NoCastingConditionSet?.DrawMain(DataCenter.CurrentRotation)
         },
     })
     {
@@ -375,8 +385,8 @@ public partial class RotationConfigWindow
     /// <summary>
     /// Header group for target-related configurations.
     /// </summary>
-    private static readonly CollapsingHeaderGroup _targetHeader = new(new()
-{
+    private static readonly CollapsingHeaderGroup _targetHeader = new(new Dictionary<Func<string>, Action>
+    {
     { UiString.ConfigWindow_Target_Config.GetDescription, DrawTargetConfig },
     { UiString.ConfigWindow_List_Hostile.GetDescription, DrawTargetHostile },
     { UiString.ConfigWindow_List_TargetPriority.GetDescription, DrawTargetPriority },
@@ -488,8 +498,8 @@ public partial class RotationConfigWindow
         _extraHeader?.Draw();
     }
 
-    private static readonly CollapsingHeaderGroup _extraHeader = new(new()
-{
+    private static readonly CollapsingHeaderGroup _extraHeader = new(new Dictionary<Func<string>, Action>
+    {
     { UiString.ConfigWindow_EventItem.GetDescription, DrawEventTab },
     {
         UiString.ConfigWindow_Extra_Others.GetDescription,

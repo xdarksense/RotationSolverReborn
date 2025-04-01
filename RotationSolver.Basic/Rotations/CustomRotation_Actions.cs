@@ -114,18 +114,25 @@ partial class CustomRotation
     #endregion
 
     #region PvP
-
     static partial void ModifyStandardissueElixirPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => !HasHostilesInMaxRange
             && (Player.CurrentMp <= Player.MaxMp / 3 || Player.CurrentHp <= Player.MaxHp / 3)
-            && !IsLastAction(ActionID.StandardissueElixirPvP);
+            && !IsLastAction(ActionID.StandardissueElixirPvP) && Player.TimeAlive() > 5;
         setting.IsFriendly = true;
     }
 
     static partial void ModifyRecuperatePvP(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => Player.MaxHp - Player.CurrentHp > 15000;
+        //Recuperate will knock off Guard, likely killing you.
+        setting.ActionCheck = () => Player.MaxHp - Player.CurrentHp > 15000 && Player.TimeAlive() > 5;
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyGuardPvP(ref ActionSetting setting)
+    {
+        //If you've just respawned; you don't wanna Guard.
+        setting.ActionCheck = () => Player.TimeAlive() > 5;
         setting.IsFriendly = true;
     }
 

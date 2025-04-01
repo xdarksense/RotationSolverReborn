@@ -20,6 +20,8 @@ namespace RotationSolver.Basic;
 internal static class DataCenter
 {
     private static ulong _hostileTargetId = 0;
+    
+    public static bool ResetActionConfigs { get; set; } = false;
 
     public static bool IsActivated() => State || IsManual || Service.Config.TeachingMode;
 
@@ -37,13 +39,13 @@ internal static class DataCenter
     /// <summary>
     /// This one never be null.
     /// </summary>
-    public static MajorConditionSet RightSet
+    public static MajorConditionValue CurrentConditionValue
     {
         get
         {
             if (ConditionSets == null || ConditionSets.Length == 0)
             {
-                ConditionSets = new[] { new MajorConditionSet() };
+                ConditionSets = new[] { new MajorConditionValue() };
             }
 
             var index = Service.Config.ActionSequencerIndex;
@@ -56,7 +58,7 @@ internal static class DataCenter
         }
     }
 
-    internal static MajorConditionSet[] ConditionSets { get; set; } = Array.Empty<MajorConditionSet>();
+    internal static MajorConditionValue[] ConditionSets { get; set; } = Array.Empty<MajorConditionValue>();
 
     /// <summary>
     /// Only recorded 15s hps.
@@ -66,8 +68,8 @@ internal static class DataCenter
     internal static Queue<(DateTime time, SortedList<ulong, float> hpRatios)> RecordedHP { get; } =
         new(HP_RECORD_TIME + 1);
 
-    public static ICustomRotation? RightNowRotation { get; internal set; }
-    public static DutyRotation? RightNowDutyRotation { get; internal set; }
+    public static ICustomRotation? CurrentRotation { get; internal set; }
+    public static DutyRotation? CurrentDutyRotation { get; internal set; }
 
     public static Dictionary<string, DateTime> SystemWarnings { get; set; } = new();
 
@@ -106,6 +108,18 @@ internal static class DataCenter
     public static TerritoryInfo? Territory { get; set; }
 
     public static bool IsPvP => Territory?.IsPvP ?? false;
+    public static bool IsInDuty => Svc.Condition[ConditionFlag.BoundByDuty] || Svc.Condition[ConditionFlag.BoundByDuty56];
+    public static bool IsInAllianceRaid
+    {
+        get
+        {
+            var allianceTerritoryIds = new HashSet<ushort>
+        {
+            151, 174, 372, 508, 556, 627, 734, 776, 826, 882, 917, 966, 1054, 1118, 1178, 1248, 1241
+        };
+            return allianceTerritoryIds.Contains(TerritoryID);
+        }
+    }
 
     public static ushort TerritoryID => Svc.ClientState.TerritoryType;
     public static bool IsInUCoB => TerritoryID == 733;
@@ -114,6 +128,8 @@ internal static class DataCenter
     public static bool IsInDSR => TerritoryID == 968;
     public static bool IsInTOP => TerritoryID == 1122;
     public static bool IsInFRU => TerritoryID == 1238;
+    public static bool IsInCOD => TerritoryID == 1241;
+
 
     public static AutoStatus MergedStatus => AutoStatus | CommandStatus;
 
@@ -178,8 +194,8 @@ internal static class DataCenter
         NextActs.Sort((a, b) => a.DeadTime.CompareTo(b.DeadTime));
     }
 
-    public static TargetHostileType RightNowTargetToHostileType => Service.Config.HostileType;
-    public static TinctureUseType RightNowTinctureUseType => Service.Config.TinctureType;
+    public static TargetHostileType CurrentTargetToHostileType => Service.Config.HostileType;
+    public static TinctureUseType CurrentTinctureUseType => Service.Config.TinctureType;
 
     public static unsafe ActionID LastComboAction => (ActionID)ActionManager.Instance()->Combo.Action;
     public static unsafe float ComboTime => ActionManager.Instance()->Combo.Timer;
@@ -206,6 +222,8 @@ internal static class DataCenter
     internal static float StopMovingRaw { get; set; }
 
     internal static float MovingRaw { get; set; }
+    internal static float DeadTimeRaw { get; set; }
+    internal static float AliveTimeRaw { get; set; }
 
     public static unsafe ushort FateId
     {
@@ -230,36 +248,45 @@ internal static class DataCenter
     }
 
     #region GCD
-    // Returns the time remaining until the next GCD (Global Cooldown) after considering the current animation lock.
-    public static float NextAbilityToNextGCD => DefaultGCDRemain - Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock);
+    /// <summary>
+    /// Returns the time remaining until the next GCD (Global Cooldown) after considering the current animation lock.
+    /// </summary>
+    public static float NextAbilityToNextGCD => DefaultGCDRemain - Math.Min(ActionManagerHelper.GetCurrentAnimationLock(), MinAnimationLock);
 
-    // Returns the total duration of the default GCD.
+    /// <summary>
+    /// Returns the total duration of the default GCD.
+    /// </summary>
     public static float DefaultGCDTotal => ActionManagerHelper.GetDefaultRecastTime();
 
-    // Returns the remaining time for the default GCD by subtracting the elapsed time from the total recast time.
-    public static float DefaultGCDRemain =>
-        ActionManagerHelper.GetDefaultRecastTime() - ActionManagerHelper.GetDefaultRecastTimeElapsed();
+    /// <summary>
+    /// Returns the remaining time for the default GCD by subtracting the elapsed time from the total recast time.
+    /// </summary>
+    public static float DefaultGCDRemain => DefaultGCDTotal - DefaultGCDElapsed;
 
-    // Returns the elapsed time since the start of the default GCD.
+    /// <summary>
+    /// Returns the elapsed time since the start of the default GCD.
+    /// </summary>
     public static float DefaultGCDElapsed => ActionManagerHelper.GetDefaultRecastTimeElapsed();
 
-    // Returns the action ahead time, which can be overridden by a configuration setting.
-    public static float ActionAhead =>
-        Service.Config.OverrideActionAheadTimer ? Service.Config.Action4Head : CalculatedActionAhead;
+    /// <summary>
+    /// Returns the action ahead time, which can be overridden by a configuration setting.
+    /// </summary>
+    public static float ActionAhead => Service.Config.OverrideActionAheadTimer ? Service.Config.Action4Head : CalculatedActionAhead;
 
-    // Returns the calculated action ahead time as 25% of the total GCD time.
-    public static float CalculatedActionAhead => Math.Min(DefaultGCDTotal * 0.25f, DataCenter.MinAnimationLock);
+    /// <summary>
+    /// Calculates the action ahead time based on the default GCD total and minimum animation lock.
+    /// </summary>
+    public static float CalculatedActionAhead => Math.Min(DefaultGCDTotal * 0.20f, MinAnimationLock);
 
-    // Calculates the total GCD time for a given number of GCDs and an optional offset.
-    public static float GCDTime(uint gcdCount = 0, float offset = 0)
-        => ActionManagerHelper.GetDefaultRecastTime() * gcdCount + offset;
-
-    public static bool LastAbilityv2 => DataCenter.InCombat && !ActionHelper.CanUseGCD && (ActionManagerHelper.GetCurrentAnimationLock() == 0) && !Player.Object.IsCasting && (DataCenter.DefaultGCDElapsed >= DataCenter.DefaultGCDRemain);
-    public static bool FirstAbilityv2 => DataCenter.InCombat && !ActionHelper.CanUseGCD && (ActionManagerHelper.GetCurrentAnimationLock() == 0) && !Player.Object.IsCasting && (DataCenter.DefaultGCDRemain >= DataCenter.DefaultGCDElapsed);
-
-    public static bool LastAbilityorNot => DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD <= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.isLastAbilityTimer);
-    public static bool FirstAbilityorNot => DataCenter.InCombat && (DataCenter.NextAbilityToNextGCD >= Math.Max(ActionManagerHelper.GetCurrentAnimationLock(), DataCenter.MinAnimationLock) + Service.Config.isFirstAbilityTimer);
+    /// <summary>
+    /// Calculates the total GCD time for a given number of GCDs and an optional offset.
+    /// </summary>
+    /// <param name="gcdCount">The number of GCDs.</param>
+    /// <param name="offset">The optional offset.</param>
+    /// <returns>The total GCD time.</returns>
+    public static float GCDTime(uint gcdCount = 0, float offset = 0) => DefaultGCDTotal * gcdCount + offset;
     #endregion
+
 
     public static uint[] BluSlots { get; internal set; } = new uint[24];
 
@@ -322,13 +349,13 @@ internal static class DataCenter
         }
     }
 
-    public static List<IBattleChara> PartyMembers { get; set; } = new();
+    public static List<IBattleChara> PartyMembers { get; set; } = [];
 
-    public static List<IBattleChara> AllianceMembers { get; set; } = new();
+    public static List<IBattleChara> AllianceMembers { get; set; } = [];
 
-    public static List<IBattleChara> FriendlyNPCMembers { get; set; } = new();
+    public static List<IBattleChara> FriendlyNPCMembers { get; set; } = [];
 
-    public static List<IBattleChara> AllHostileTargets { get; set; } = new();
+    public static List<IBattleChara> AllHostileTargets { get; set; } = [];
 
     public static IBattleChara? InterruptTarget { get; set; }
 
@@ -338,7 +365,7 @@ internal static class DataCenter
 
     public static IBattleChara? DispelTarget { get; set; }
 
-    public static List<IBattleChara> AllTargets { get; set; } = new();
+    public static List<IBattleChara> AllTargets { get; set; } = [];
 
     public static ulong[] TreasureCharas
     {
@@ -442,7 +469,7 @@ internal static class DataCenter
         }
     }
 
-    public static float AverageTimeToKill
+    public static float AverageTTK
     {
         get
         {
@@ -450,10 +477,10 @@ internal static class DataCenter
             int count = 0;
             foreach (var b in AllHostileTargets)
             {
-                var timeToKill = b.GetTimeToKill();
-                if (!float.IsNaN(timeToKill))
+                var tTK = b.GetTTK();
+                if (!float.IsNaN(tTK))
                 {
-                    total += timeToKill;
+                    total += tTK;
                     count++;
                 }
             }
@@ -792,27 +819,43 @@ internal static class DataCenter
 
     public static bool IsCastingTankVfx()
     {
-        return IsCastingVfx(s =>
+        return IsCastingVfx(VfxDataQueue, s =>
         {
-            if (!s.Path.StartsWith("vfx/lockon/eff/tank_lockon")) return false;
+            if (!s.Path.StartsWith("vfx/lockon/eff/tank_lockon")
+            && !s.Path.StartsWith("vfx/lockon/eff/tank_laser")) return false;
+
             if (!Player.Available) return false;
             if (Player.Object.IsJobCategory(JobRole.Tank) && s.ObjectId != Player.Object.GameObjectId) return false;
-
             return true;
         });
     }
 
     public static bool IsCastingAreaVfx()
     {
-        return IsCastingVfx(s => s.Path.StartsWith("vfx/lockon/eff/coshare"));
+        return IsCastingVfx(VfxDataQueue, s =>
+        {
+            if (!s.Path.StartsWith("vfx/lockon/eff/coshare") 
+            && !s.Path.StartsWith("vfx/lockon/eff/share_laser")
+            && !s.Path.StartsWith("vfx/lockon/eff/com_share")) return false;
+
+            if (!Player.Available) return false;
+            return true;
+        });
     }
 
-    public static bool IsCastingVfx(Func<VfxNewData, bool> isVfx)
+    public static bool IsCastingVfx(List<VfxNewData> vfxDataQueueCopy, Func<VfxNewData, bool> isVfx)
     {
-        // Create a copy of the VfxDataQueue to avoid modifying the collection while enumerating
-        var vfxDataQueueCopy = VfxDataQueue.ToList();
+        // Create a copy of the list to avoid modification during enumeration
+        var vfxDataQueueSnapshot = new List<VfxNewData>(vfxDataQueueCopy);
 
-        foreach (var vfx in vfxDataQueueCopy)
+        // Ensure the list is not empty
+        if (vfxDataQueueSnapshot.Count == 0)
+        {
+            return false;
+        }
+
+        // Iterate over the copied list
+        foreach (var vfx in vfxDataQueueSnapshot)
         {
             if (isVfx(vfx))
             {
@@ -847,8 +890,17 @@ internal static class DataCenter
         // Check if h is null
         if (h == null) return false;
 
-        // Check if the hostile character is casting
-        if (!h.IsCasting) return false;
+        try
+        {
+            // Check if the hostile character is casting
+            if (!h.IsCasting) return false;
+        }
+        catch (AccessViolationException ex)
+        {
+            // Log the exception and return false
+            Svc.Log.Error($"AccessViolationException: {ex.Message}");
+            return false;
+        }
 
         // Check if the cast is interruptible
         if (h.IsCastInterruptible) return false;

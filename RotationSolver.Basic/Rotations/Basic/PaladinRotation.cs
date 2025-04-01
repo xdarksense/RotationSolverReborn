@@ -34,7 +34,6 @@ partial class PaladinRotation
     public static byte OathGauge => JobGauge.OathGauge;
     #endregion
 
-
     #region Status Tracking
 
     /// <summary>
@@ -115,12 +114,23 @@ partial class PaladinRotation
     #endregion
 
     private protected sealed override IBaseAction TankStance => IronWillPvE;
+    #region PvE
+
+    static partial void ModifyIronWillPvE(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyReleaseIronWillPvE(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+    }
 
     static partial void ModifyFastBladePvE(ref ActionSetting setting)
     {
 
     }
-
+    
     static partial void ModifyFightOrFlightPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.GoringBladeReady];
@@ -128,6 +138,7 @@ partial class PaladinRotation
         {
             TimeToKill = 0,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyRiotBladePvE(ref ActionSetting setting)
@@ -139,7 +150,7 @@ partial class PaladinRotation
     {
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 2,
         };
     }
 
@@ -186,6 +197,7 @@ partial class PaladinRotation
     static partial void ModifySentinelPvE(ref ActionSetting setting)
     {
         setting.TargetType = TargetType.Self;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyProminencePvE(ref ActionSetting setting)
@@ -195,7 +207,7 @@ partial class PaladinRotation
         setting.UnlockedByQuestID = 66593;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 2,
         };
     }
 
@@ -206,6 +218,7 @@ partial class PaladinRotation
         setting.ActionCheck = () => OathGauge >= 50;
         setting.UnlockedByQuestID = 66595;
         setting.TargetType = TargetType.BeAttacked;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyCircleOfScornPvE(ref ActionSetting setting)
@@ -213,7 +226,7 @@ partial class PaladinRotation
         setting.TargetStatusProvide = [StatusID.CircleOfScorn];
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 1,
             TimeToKill = 0,
         };
     }
@@ -223,11 +236,13 @@ partial class PaladinRotation
         setting.StatusProvide = [StatusID.HallowedGround];
         setting.UnlockedByQuestID = 66596;
         setting.ActionCheck = () => InCombat;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyBulwarkPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Bulwark];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyGoringBladePvE(ref ActionSetting setting)
@@ -240,6 +255,7 @@ partial class PaladinRotation
     {
         setting.UnlockedByQuestID = 67571;
         setting.StatusProvide = [StatusID.DivineVeil_1362];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyClemencyPvE(ref ActionSetting setting)
@@ -250,6 +266,7 @@ partial class PaladinRotation
             if (t.HasStatus(false, StatusHelper.TankStanceStatus)) return false;
             return true;
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyRoyalAuthorityPvE(ref ActionSetting setting)
@@ -283,13 +300,14 @@ partial class PaladinRotation
     {
         setting.StatusProvide = [StatusID.PassageOfArms];
         setting.UnlockedByQuestID = 68111;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyHolyCirclePvE(ref ActionSetting setting)
     {
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 2,
         };
     }
 
@@ -324,6 +342,7 @@ partial class PaladinRotation
         setting.StatusProvide = [StatusID.HolySheltron];
         setting.UnlockedByQuestID = 66592;
         setting.TargetType = TargetType.Self;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyExpiacionPvE(ref ActionSetting setting)
@@ -365,6 +384,7 @@ partial class PaladinRotation
     {
         setting.StatusProvide = StatusHelper.RampartStatus;
         setting.TargetType = TargetType.Self;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyImperatorPvE(ref ActionSetting setting)
@@ -391,10 +411,117 @@ partial class PaladinRotation
         setting.ActionCheck = () => SupplicationReady;
         setting.StatusProvide = [StatusID.SepulchreReady];
     }
+    #endregion
+    #region PvP
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool BladeOfTruthPvPReady => Service.GetAdjustedActionId(ActionID.BladeOfFaithPvP) == ActionID.BladeOfTruthPvP;
 
-    // PvP
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool BladeOfValorPvPReady => Service.GetAdjustedActionId(ActionID.BladeOfFaithPvP) == ActionID.BladeOfValorPvP;
+    
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ConfiteorPvPReady => Service.GetAdjustedActionId(ActionID.ImperatorPvP) == ActionID.ConfiteorPvP;
+    static partial void ModifyFastBladePvP(ref ActionSetting setting)
+    {
+        
+    }
+
+    static partial void ModifyRiotBladePvP(ref ActionSetting setting)
+    {
+        setting.ComboIds = [ActionID.FastBladePvP];
+    }
+
+    static partial void ModifyRoyalAuthorityPvP(ref ActionSetting setting)
+    {
+        setting.ComboIds = [ActionID.RiotBladePvP];
+    }
+
+    static partial void ModifyAtonementPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.AtonementReady_2015];
+    }
+
+    static partial void ModifySupplicationPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.SupplicationReady_4281];
+    }
+
+    static partial void ModifySepulchrePvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.SepulchreReady_4282];
+    }
+
+    static partial void ModifyHolySpiritPvP(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyShieldSmitePvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1
+        };
+    }
+
+    static partial void ModifyImperatorPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1
+        };
+    }
+
+    static partial void ModifyHolySheltronPvP(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyConfiteorPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => ConfiteorPvPReady;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1
+        };
+    }
+
     static partial void ModifyIntervenePvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
     }
+
+    static partial void ModifyBladeOfFaithPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.BladeOfFaithReady];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1
+        };
+    }
+
+    static partial void ModifyBladeOfTruthPvP(ref ActionSetting setting)
+    {
+        // setting.ActionCheck = () => BladeOfTruthPvPReady;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1
+        };
+    }
+
+    static partial void ModifyBladeOfValorPvP(ref ActionSetting setting)
+    {
+        // setting.ActionCheck = () => BladeOfValorPvPReady;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1
+        };
+    }
+    #endregion
 }

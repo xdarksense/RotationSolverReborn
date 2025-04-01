@@ -14,12 +14,12 @@ partial class SageRotation
     /// <summary>
     /// Gets the amount of Addersgall available.
     /// </summary>
-    public static byte Addersgall => JobGauge.Addersgall;
+    public static byte Addersgall => AddersgallTrait.EnoughLevel ? JobGauge.Addersgall : (byte)0;
 
     /// <summary>
     /// Gets the amount of Addersting available.
     /// </summary>
-    public static byte Addersting => JobGauge.Addersting;
+    public static byte Addersting => AdderstingTrait.EnoughLevel ? JobGauge.Addersting : (byte)0;
 
     static float AddersgallTimerRaw => JobGauge.AddersgallTimer / 1000f;
 
@@ -27,7 +27,7 @@ partial class SageRotation
     /// Gets the amount of milliseconds elapsed until the next Addersgall is available.
     /// This counts from 0 to 20_000.
     /// </summary>
-    public static float AddersgallTime => AddersgallTimerRaw - DataCenter.DefaultGCDRemain;
+    public static float AddersgallTime => AddersgallTrait.EnoughLevel ? AddersgallTimerRaw - DataCenter.DefaultGCDRemain : 0;
 
     /// <summary>
     /// Used to determine if the cooldown for the next Addersgall will end within a specified time frame.
@@ -55,6 +55,7 @@ partial class SageRotation
     }
     #endregion
 
+    #region PvE Actions
     private protected sealed override IBaseAction Raise => EgeiroPvE;
 
     static partial void ModifyDosisPvE(ref ActionSetting setting)
@@ -71,11 +72,13 @@ partial class SageRotation
     static partial void ModifyKardiaPvE(ref ActionSetting setting)
     {
         setting.TargetType = TargetType.Tank;
-        setting.ActionCheck = () => !DataCenter.AllianceMembers.Any(m => m.HasStatus(true, StatusID.Kardion));
+        setting.TargetStatusProvide = [StatusID.Kardion];
+        setting.ActionCheck = () => !DataCenter.PartyMembers.Any(m => m.HasStatus(true, StatusID.Kardion));
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 0,
         };
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyPrognosisPvE(ref ActionSetting setting)
@@ -113,6 +116,7 @@ partial class SageRotation
     {
         setting.ActionCheck = () => !HasEukrasia;
         setting.StatusProvide = [StatusID.Eukrasia];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyEukrasianDiagnosisPvE(ref ActionSetting setting)
@@ -198,16 +202,7 @@ partial class SageRotation
 
     static partial void ModifyPepsisPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () =>
-        {
-            foreach (var chara in DataCenter.PartyMembers)
-            {
-                if (chara.HasStatus(true, StatusID.EukrasianDiagnosis, StatusID.EukrasianPrognosis)
-                && chara.GetHealthRatio() < 0.9) return true;
-            }
-
-            return false;
-        };
+        setting.StatusNeed = [StatusID.EukrasianPrognosis];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -392,18 +387,81 @@ partial class SageRotation
             AoeCount = 1,
         };
     }
+    #endregion
 
-    // PvP
+    #region PvP Actions
+    static partial void ModifyDosisIiiPvP(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyPhlegmaIiiPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyPneumaPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+
+    }
+
+    static partial void ModifyEukrasiaPvP(ref ActionSetting setting)
+    {
+        setting.IsFriendly = true;
+    }
+
     static partial void ModifyIcarusPvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
     }
 
+    static partial void ModifyToxikonPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyKardiaPvP(ref ActionSetting setting)
+    {
+
+    }
+
+
+    static partial void ModifyEukrasianDosisIiiPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.DosisIiiPvP) == ActionID.EukrasianDosisIiiPvP;
+    }
+
+    static partial void ModifyPsychePvP(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyToxikonIiPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Player.HasStatus(true, StatusID.Addersting);
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+
     /// <inheritdoc/>
     [RotationDesc(ActionID.IcarusPvE)]
-    protected sealed override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
+    protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
         if (IcarusPvE.CanUse(out act)) return true;
         return base.MoveForwardAbility(nextGCD, out act);
     }
+    #endregion
 }

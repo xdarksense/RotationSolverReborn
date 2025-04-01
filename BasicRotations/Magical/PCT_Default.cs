@@ -1,12 +1,10 @@
-﻿namespace DefaultRotations.Magical;
+﻿namespace RebornRotations.Magical;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
 [SourceCode(Path = "main/BasicRotations/Magical/PCT_Default.cs")]
 [Api(4)]
 public sealed class PCT_Default : PictomancerRotation
 {
-    private const float CountdownBuffer = 0.2f;
-
     #region Config Options
     [RotationConfig(CombatType.PvE, Name = "Use HolyInWhite or CometInBlack while moving")]
     public bool HolyCometMoving { get; set; } = true;
@@ -41,7 +39,7 @@ public sealed class PCT_Default : PictomancerRotation
             if (!LandscapeMotifDrawn && StarrySkyMotifPvE.CanUse(out act) && !HasHyperphantasia) return act;
         }
 
-        if (remainTime <= RainbowDripPvE.Info.CastTime + CountdownBuffer + CountDownAhead && RainbowDripPvE.CanUse(out act))
+        if (remainTime <= RainbowDripPvE.Info.CastTime + CountDownAhead && RainbowDripPvE.CanUse(out act))
         {
             return act;
         }
@@ -95,17 +93,25 @@ public sealed class PCT_Default : PictomancerRotation
         return base.DefenseAreaAbility(nextGCD, out act);
     }
 
+    [RotationDesc(ActionID.TemperaCoatPvE)]
+    protected sealed override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
+    {
+        // Mitigations
+        if (TemperaCoatPvE.CanUse(out act)) return true;
+        return base.DefenseAreaAbility(nextGCD, out act);
+    }
+
     #endregion
 
     #region oGCD Logic
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        bool burstTimingCheckerStriking = !ScenicMusePvE.Cooldown.WillHaveOneCharge(60) || HasStarryMuse;
+        bool burstTimingCheckerStriking = !ScenicMusePvE.Cooldown.WillHaveOneCharge(60) || HasStarryMuse || !StarryMusePvE.EnoughLevel;
         // Bursts
         int adjustCombatTimeForOpener = Player.Level < 92 ? 2 : 5;
         if (StarryMusePvE.CanUse(out act) && CombatTime > adjustCombatTimeForOpener && IsBurst) return true;
-        if (CombatTime > adjustCombatTimeForOpener && StrikingMusePvE.CanUse(out act) && burstTimingCheckerStriking) return true;
+        if (CombatTime > adjustCombatTimeForOpener && StrikingMusePvE.CanUse(out act, usedUp: true) && burstTimingCheckerStriking) return true;
         if (SubtractivePalettePvE.CanUse(out act)) return true;
 
         if (HasStarryMuse)
@@ -115,7 +121,7 @@ public sealed class PCT_Default : PictomancerRotation
         }
         if (RetributionOfTheMadeenPvE.CanUse(out act)) return true;
         if (MogOfTheAgesPvE.CanUse(out act)) return true;
-        if (StrikingMusePvE.CanUse(out act) && burstTimingCheckerStriking) return true;
+        if (StrikingMusePvE.CanUse(out act, usedUp: true) && burstTimingCheckerStriking) return true;
         if (PomMusePvE.CanUse(out act, usedUp: true)) return true;
         if (WingedMusePvE.CanUse(out act, usedUp: true)) return true;
         if (ClawedMusePvE.CanUse(out act, usedUp: true)) return true;
@@ -124,6 +130,13 @@ public sealed class PCT_Default : PictomancerRotation
         //if (ScenicMusePvE.CanUse(out act)) return true;
         //if (SteelMusePvE.CanUse(out act, usedUp: true)) return true;
         //if (LivingMusePvE.CanUse(out act, usedUp: true)) return true;
+        return base.AttackAbility(nextGCD, out act);
+    }
+
+    protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
+    {
+        if ((MergedStatus.HasFlag(AutoStatus.DefenseArea) || Player.WillStatusEndGCD(2, 0, true, StatusID.TemperaCoat)) && TemperaGrassaPvE.CanUse(out act)) return true;
+
         return base.AttackAbility(nextGCD, out act);
     }
     #endregion
@@ -146,7 +159,7 @@ public sealed class PCT_Default : PictomancerRotation
         if (Paint == HolyCometMax && HolyInWhitePvE.CanUse(out act)) return true;
 
         // Landscape Paining Burst
-        if (RainbowDripPvE.CanUse(out act)) return true;
+        if (HasRainbowBright && RainbowDripPvE.CanUse(out act, skipCastingCheck: HasRainbowBright)) return true;
         if (StarPrismPvE.CanUse(out act)) return true;
 
         // timings for motif casting

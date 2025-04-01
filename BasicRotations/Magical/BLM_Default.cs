@@ -1,6 +1,6 @@
-﻿namespace DefaultRotations.Magical;
+﻿namespace RebornRotations.Magical;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
 [SourceCode(Path = "main/BasicRotations/Magical/BLM_Default.cs")]
 [Api(4)]
 public class BLM_Default : BlackMageRotation
@@ -276,12 +276,12 @@ public class BLM_Default : BlackMageRotation
                 break;
         }
 
-        if (ElementTimeEndAfterGCD(ExtendTimeSafely ? 3u : 2u))
-        {
-            if (CurrentMp >= FirePvE.Info.MPNeed * 2 + 800 && FirePvE.CanUse(out act)) return true;
-            if (FlarePvE.CanUse(out act)) return true;
-            if (DespairPvE.CanUse(out act)) return true;
-        }
+        //if (ElementTimeEndAfterGCD(ExtendTimeSafely ? 3u : 2u))
+        //{
+        //    if (CurrentMp >= FirePvE.Info.MPNeed * 2 + 800 && FirePvE.CanUse(out act)) return true;
+        //    if (FlarePvE.CanUse(out act)) return true;
+        //    if (DespairPvE.CanUse(out act)) return true;
+        //}
 
         return false;
     }
@@ -371,9 +371,9 @@ public class BLM_Default : BlackMageRotation
     {
         act = null;
 
-        if (gcdCount == 0 || IsPolyglotStacksMaxed && EnochianEndAfterGCD(gcdCount))
+        if (gcdCount == 0 || IsPolyglotStacksMaxed && (EnochianEndAfterGCD(gcdCount) || AmplifierPvE.Cooldown.WillHaveOneChargeGCD(gcdCount)))
         {
-            if (FoulPvE.CanUse(out act)) return true;
+            if (FoulPvE.CanUse(out act, skipAoeCheck: !XenoglossyPvE.EnoughLevel)) return true;
             if (XenoglossyPvE.CanUse(out act)) return true;
         }
         return false;

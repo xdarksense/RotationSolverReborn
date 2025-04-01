@@ -1,4 +1,4 @@
-namespace DefaultRotations.Ranged;
+namespace RebornRotations.Ranged;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
 [SourceCode(Path = "main/BasicRotations/Ranged/MCH_Default.cs")]
@@ -8,6 +8,9 @@ public sealed class MCH_Default : MachinistRotation
     #region Config Options
     [RotationConfig(CombatType.PvE, Name = "Prioritize Barrel Stabilizer use")]
     private bool BSPrio { get; set; } = true;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Automation Queen as soon as its available")]
+    private bool DumbQueen { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Delay Drill for combo GCD if have one charge and about to break combo")]
     private bool HoldDrillForCombo { get; set; } = true;
@@ -23,6 +26,9 @@ public sealed class MCH_Default : MachinistRotation
 
     [RotationConfig(CombatType.PvE, Name = "Prevent the use of defense abilties during hypercharge burst")]
     private bool BurstDefense { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Bioblaster while moving")]
+    private bool BioMove { get; set; } = true;
     #endregion
 
     #region Countdown logic
@@ -79,6 +85,9 @@ public sealed class MCH_Default : MachinistRotation
         // If Wildfire is active, use Hypercharge.....Period
         if (Player.HasStatus(true, StatusID.Wildfire_1946) && HyperchargePvE.CanUse(out act)) return true;
 
+        // If you cant use Wildfire, use Hypercharge freely
+        if (!WildfirePvE.EnoughLevel && HyperchargePvE.CanUse(out act)) return true;
+
         // Start Ricochet/Gauss cooldowns rolling
         if (!RicochetPvE.Cooldown.IsCoolingDown && RicochetPvE.CanUse(out act)) return true;
         if (!GaussRoundPvE.Cooldown.IsCoolingDown && GaussRoundPvE.CanUse(out act)) return true;
@@ -106,6 +115,7 @@ public sealed class MCH_Default : MachinistRotation
         }
 
         // Rook Autoturret/Queen Logic
+        if (DumbQueen && InCombat && RookAutoturretPvE.CanUse(out act)) return true;
         if (CanUseQueenMeow(out act, nextGCD)) return true;
 
         // Use Ricochet and Gauss
@@ -127,7 +137,7 @@ public sealed class MCH_Default : MachinistRotation
         if (HeatBlastPvE.CanUse(out act)) return true;
 
         // drill's aoe version
-        if (BioblasterPvE.CanUse(out act, usedUp: true)) return true;
+        if ((BioMove || (!IsMoving && !BioMove)) && BioblasterPvE.CanUse(out act, usedUp: true)) return true;
 
         // single target --- need to update this strange condition writing!!!
         if (!SpreadShotPvE.CanUse(out _))

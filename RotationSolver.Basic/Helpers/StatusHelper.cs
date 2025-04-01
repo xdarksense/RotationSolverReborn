@@ -1,5 +1,6 @@
 ﻿using Dalamud.Game.ClientState.Statuses;
 using ECommons.Automation;
+using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using ECommons.Logging;
 using RotationSolver.Basic.Configuration;
@@ -80,7 +81,10 @@ public static class StatusHelper
         StatusID.TheEwer_3891,
     };
 
-    internal static StatusID[] TankStanceStatus { get; } =
+    /// <summary>
+    /// 
+    /// </summary>
+    public static StatusID[] TankStanceStatus { get; } =
     {
         StatusID.Grit,
         StatusID.RoyalGuard_1833,
@@ -88,7 +92,10 @@ public static class StatusHelper
         StatusID.Defiance,
     };
 
-    internal static StatusID[] NoNeedHealingStatus { get; } =
+    /// <summary>
+    /// 
+    /// </summary>
+    public static StatusID[] NoNeedHealingStatus { get; } =
     {
         StatusID.Holmgang_409,
         StatusID.LivingDead,
@@ -96,14 +103,20 @@ public static class StatusHelper
         StatusID.Superbolide,
     };
 
-    internal static StatusID[] SwiftcastStatus { get; } =
+    /// <summary>
+    /// 
+    /// </summary>
+    public static StatusID[] SwiftcastStatus { get; } =
     {
         StatusID.Swiftcast,
         StatusID.Triplecast,
         StatusID.Dualcast,
     };
 
-    internal static StatusID[] AstCardStatus { get; } =
+    /// <summary>
+    /// 
+    /// </summary>
+    public static StatusID[] AstCardStatus { get; } =
     {
         StatusID.TheBalance_3887,
         StatusID.TheSpear_3889,
@@ -111,7 +124,10 @@ public static class StatusHelper
         StatusID.BrinkOfDeath,
     };
 
-    internal static StatusID[] RampartStatus { get; } =
+    /// <summary>
+    /// 
+    /// </summary>
+    public static StatusID[] RampartStatus { get; } =
     {
         StatusID.Superbolide,
         StatusID.HallowedGround,
@@ -128,7 +144,10 @@ public static class StatusHelper
         StatusID.Superbolide,
     };
 
-    internal static StatusID[] NoPositionalStatus { get; } =
+    /// <summary>
+    /// 
+    /// </summary>
+    public static StatusID[] NoPositionalStatus { get; } =
     {
         StatusID.TrueNorth,
         StatusID.RightEye,
@@ -205,12 +224,19 @@ public static class StatusHelper
     {
         if (obj == null)
         {
-            // Log or handle the case where obj is null
             PluginLog.Error("IGameObject is null. Cannot get status times.");
             return Enumerable.Empty<float>();
         }
 
-        return obj.GetStatus(isFromSelf, statusIDs).Select(status => status.RemainingTime == 0 ? float.MaxValue : status.RemainingTime);
+        var statuses = obj.GetStatus(isFromSelf, statusIDs);
+        var result = new List<float>();
+
+        foreach (var status in statuses)
+        {
+            result.Add(status.RemainingTime == 0 ? float.MaxValue : status.RemainingTime);
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -239,12 +265,19 @@ public static class StatusHelper
     {
         if (obj == null)
         {
-            // Log or handle the case where obj is null
             PluginLog.Error("IGameObject is null. Cannot get status stacks.");
             return Enumerable.Empty<byte>();
         }
 
-        return obj.GetStatus(isFromSelf, statusIDs).Select(status => status.StackCount == 0 ? byte.MaxValue : status.StackCount);
+        var statuses = obj.GetStatus(isFromSelf, statusIDs);
+        var result = new List<byte>();
+
+        foreach (var status in statuses)
+        {
+            result.Add((byte)(status.Param == 0 ? byte.MaxValue : status.Param));
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -322,10 +355,19 @@ public static class StatusHelper
     /// <returns>An enumerable of statuses.</returns>
     private static IEnumerable<Status> GetStatus(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
     {
-        // Convert statusIDs to a HashSet for faster lookups
         var newEffects = new HashSet<uint>(statusIDs.Select(a => (uint)a));
         var allStatuses = obj.GetAllStatus(isFromSelf);
-        return allStatuses.Where(status => newEffects.Contains(status.StatusId));
+        var result = new List<Status>();
+
+        foreach (var status in allStatuses)
+        {
+            if (newEffects.Contains(status.StatusId))
+            {
+                result.Add(status);
+            }
+        }
+
+        return result;
     }
 
     /// <summary>
@@ -339,11 +381,31 @@ public static class StatusHelper
         if (obj is not IBattleChara b) return Enumerable.Empty<Status>();
 
         var playerId = Player.Object?.GameObjectId ?? 0;
-        // Ensure b.StatusList is not null
-        return b.StatusList?.Where(status => !isFromSelf
-                                              || status.SourceId == playerId
-                                              || status.SourceObject?.OwnerId == playerId)
-                             ?? Enumerable.Empty<Status>();
+        var result = new List<Status>();
+
+        try
+        {
+            if (b.StatusList == null)
+            {
+                PluginLog.Error("StatusList is null. Cannot get statuses.");
+                return Enumerable.Empty<Status>();
+            }
+
+            foreach (var status in b.StatusList)
+            {
+                if (!isFromSelf || status.SourceId == playerId || status.SourceObject?.OwnerId == playerId)
+                {
+                    result.Add(status);
+                }
+            }
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Svc.Log.Error($"Failed to get statuses: {ex.Message}");
+            return Enumerable.Empty<Status>();
+        }
     }
 
     /// <summary>
@@ -377,7 +439,7 @@ public static class StatusHelper
     {
         if (status == null) return false;
         if (!status.CanDispel()) return false;
-        if (status.StackCount > 2) return true;
+        if (status.Param > 2) return true;
         if (status.RemainingTime > 20) return true;
         return OtherConfiguration.DangerousStatus.Any(id => id == status.StatusId);
     }

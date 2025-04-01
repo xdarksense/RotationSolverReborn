@@ -101,7 +101,7 @@ internal readonly struct JobFilter
 
             if (JobRoles != null)
             {
-                var role = DataCenter.RightNowRotation?.Role;
+                var role = DataCenter.CurrentRotation?.Role;
                 if (role.HasValue)
                 {
                     canDraw = JobRoles.Contains(role.Value);

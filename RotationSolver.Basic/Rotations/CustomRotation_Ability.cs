@@ -1,3 +1,5 @@
+using RotationSolver.Basic.Helpers;
+
 namespace RotationSolver.Basic.Rotations;
 
 partial class CustomRotation
@@ -38,7 +40,7 @@ partial class CustomRotation
         var role = DataCenter.Role;
 
         IBaseAction.TargetOverride = TargetType.Interrupt;
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.Interrupt) && MyInterruptAbility(role, nextGCD, out act))
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.Interrupt) && !Player.HasStatus(true, StatusID.Mudra) && MyInterruptAbility(role, nextGCD, out act))
         {
             return true;
         }
@@ -69,7 +71,7 @@ partial class CustomRotation
         {
             IBaseAction.ShouldEndSpecial = true;
         }
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.AntiKnockback) && AntiKnockback(role, nextGCD, out act))
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.AntiKnockback) && !Player.HasStatus(true, StatusID.Mudra) && AntiKnockback(role, nextGCD, out act))
         {
             return true;
         }
@@ -79,7 +81,7 @@ partial class CustomRotation
         {
             IBaseAction.ShouldEndSpecial = true;
         }
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.Positional) && TrueNorthPvE.Cooldown.CurrentCharges > 0 && !IsLastAbility(true, TrueNorthPvE) && TrueNorthPvE.CanUse(out act, skipComboCheck: true, usedUp: true))
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.Positional) && !Player.HasStatus(true, StatusID.Mudra) && TrueNorthPvE.Cooldown.CurrentCharges > 0 && !IsLastAbility(true, TrueNorthPvE) && TrueNorthPvE.CanUse(out act, skipComboCheck: true, usedUp: true))
         {
             return true;
         }
@@ -269,7 +271,7 @@ partial class CustomRotation
                 break;
 
             case JobRole.Melee:
-                if (LegSweepPvE.CanUse(out act)) return true;
+                if (LegSweepPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.Mudra)) return true;
                 break;
 
             case JobRole.RangedPhysical:
@@ -291,7 +293,7 @@ partial class CustomRotation
     /// <returns>True if the interrupt ability can be used; otherwise, false.</returns>
     protected virtual bool InterruptAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.RightNowDutyRotation?.InterruptAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.InterruptAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;
     }
@@ -310,7 +312,7 @@ partial class CustomRotation
         {
             case JobRole.Tank:
             case JobRole.Melee:
-                if (ArmsLengthPvE.CanUse(out act)) return true;
+                if (ArmsLengthPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.Mudra)) return true;
                 break;
             case JobRole.Healer:
             case JobRole.RangedMagical:
@@ -335,7 +337,7 @@ partial class CustomRotation
     /// <returns>True if the anti-knockback ability can be used; otherwise, false.</returns>
     protected virtual bool AntiKnockbackAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.RightNowDutyRotation?.AntiKnockbackAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.AntiKnockbackAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;
     }
@@ -348,7 +350,7 @@ partial class CustomRotation
     /// <returns>True if the provoke ability can be used; otherwise, false.</returns>
     protected virtual bool ProvokeAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.RightNowDutyRotation?.ProvokeAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.ProvokeAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;
     }
@@ -370,8 +372,8 @@ partial class CustomRotation
                 break;
 
             case JobRole.Melee:
-                if (SecondWindPvE.CanUse(out act)) return true;
-                if (BloodbathPvE.CanUse(out act)) return true;
+                if (SecondWindPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.Mudra)) return true;
+                if (BloodbathPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.Mudra)) return true;
                 break;
 
             case JobRole.Healer:
@@ -408,7 +410,7 @@ partial class CustomRotation
         if (nextGCD is BaseAction action)
         {
             if (Role is JobRole.RangedMagical &&
-                action.Info.CastTime >= 5 && SwiftcastPvE.CanUse(out act, isFirstAbility: true))
+                action.Info.CastTime >= 5 && IActionHelper.IsLastActionGCD() && SwiftcastPvE.CanUse(out act))
             {
                 return true;
             }
@@ -416,21 +418,19 @@ partial class CustomRotation
 
         if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
         {
-            if (Role is JobRole.Healer && SwiftcastPvE.CanUse(out act, isFirstAbility: true))
+            if (Role is JobRole.Healer && IActionHelper.IsLastActionGCD() && (DataCenter.DefaultGCDRemain > Service.Config.SwiftcastBuffer)  && nextGCD.IsTheSameTo(true, ActionID.RaisePvE, ActionID.EgeiroPvE, ActionID.ResurrectionPvE, ActionID.AscendPvE) && SwiftcastPvE.CanUse(out act))
             {
                 return true;
             }
         }
 
-        if (DataCenter.RightNowDutyRotation?.EmergencyAbility(nextGCD, out act) ?? false)
+        if (DataCenter.CurrentDutyRotation?.EmergencyAbility(nextGCD, out act) ?? false)
         {
             return true;
         }
 
         #region PvP
-        if (GuardPvP.CanUse(out act) &&
-            (Player.GetHealthRatio() <= Service.Config.HealthForGuard ||
-             DataCenter.CommandStatus.HasFlag(AutoStatus.Raise | AutoStatus.Shirk)))
+        if (GuardPvP.CanUse(out act) && Player.GetHealthRatio() <= Service.Config.HealthForGuard)
         {
             return true;
         }
@@ -449,7 +449,7 @@ partial class CustomRotation
     [RotationDesc(DescType.MoveForwardAbility)]
     protected virtual bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.RightNowDutyRotation?.MoveForwardAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.MoveForwardAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;
     }
@@ -463,7 +463,7 @@ partial class CustomRotation
     [RotationDesc(DescType.MoveBackAbility)]
     protected virtual bool MoveBackAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.RightNowDutyRotation?.MoveBackAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.MoveBackAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;
     }
@@ -478,7 +478,7 @@ partial class CustomRotation
     protected virtual bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
         if (RecuperatePvP.CanUse(out act)) return true;
-        if (DataCenter.RightNowDutyRotation?.HealSingleAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.HealSingleAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;
     }
@@ -492,7 +492,7 @@ partial class CustomRotation
     [RotationDesc(DescType.HealAreaAbility)]
     protected virtual bool HealAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.RightNowDutyRotation?.HealAreaAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.HealAreaAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;
     }
@@ -506,7 +506,7 @@ partial class CustomRotation
     [RotationDesc(DescType.DefenseSingleAbility)]
     protected virtual bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.RightNowDutyRotation?.DefenseSingleAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.DefenseSingleAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;
     }
@@ -520,7 +520,7 @@ partial class CustomRotation
     [RotationDesc(DescType.DefenseAreaAbility)]
     protected virtual bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.RightNowDutyRotation?.DefenseAreaAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.DefenseAreaAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;
     }
@@ -535,11 +535,10 @@ partial class CustomRotation
     [RotationDesc(ActionID.SprintPvE)]
     protected virtual bool SpeedAbility(IAction nextGCD, out IAction? act)
     {
-        if (SprintPvP.CanUse(out act)) return true;
         if (PelotonPvE.CanUse(out act, skipAoeCheck: true)) return true;
         if (SprintPvE.CanUse(out act)) return true;
 
-        if (DataCenter.RightNowDutyRotation?.SpeedAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.SpeedAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;
     }
@@ -557,7 +556,7 @@ partial class CustomRotation
             act = null;
         }
 
-        if (DataCenter.RightNowDutyRotation?.GeneralAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.GeneralAbility(nextGCD, out act) ?? false) return true;
 
         act = null;
         return false;
@@ -576,7 +575,7 @@ partial class CustomRotation
             act = null;
         }
 
-        if (DataCenter.RightNowDutyRotation?.AttackAbility(nextGCD, out act) ?? false) return true;
+        if (DataCenter.CurrentDutyRotation?.AttackAbility(nextGCD, out act) ?? false) return true;
         act = null;
         return false;
     }

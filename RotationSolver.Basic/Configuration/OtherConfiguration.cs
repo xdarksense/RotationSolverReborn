@@ -220,17 +220,30 @@ internal class OtherConfiguration
 
     private static void SavePath<T>(T value, string path)
     {
-        try
+        int retryCount = 3;
+        int delay = 1000; // 1 second delay
+
+        for (int i = 0; i < retryCount; i++)
         {
-            File.WriteAllText(path,
-            JsonConvert.SerializeObject(value, Formatting.Indented, new JsonSerializerSettings()
+            try
             {
-                TypeNameHandling = TypeNameHandling.None,
-            }));
-        }
-        catch (Exception ex)
-        {
-            Svc.Log.Warning(ex, $"Failed to save the file to {path}");
+                File.WriteAllText(path,
+                JsonConvert.SerializeObject(value, Formatting.Indented, new JsonSerializerSettings()
+                {
+                    TypeNameHandling = TypeNameHandling.None,
+                }));
+                return; // Exit the method if successful
+            }
+            catch (IOException ex) when (i < retryCount - 1)
+            {
+                Svc.Log.Warning(ex, $"Failed to save the file to {path}. Retrying in {delay}ms...");
+                Thread.Sleep(delay); // Wait before retrying
+            }
+            catch (Exception ex)
+            {
+                Svc.Log.Warning(ex, $"Failed to save the file to {path}");
+                return; // Exit the method if an unexpected exception occurs
+            }
         }
     }
 
