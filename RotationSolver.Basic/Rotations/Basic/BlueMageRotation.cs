@@ -522,7 +522,7 @@ partial class BlueMageRotation
 
     static partial void ModifyMindBlastPvE(ref ActionSetting setting)
     {
-        setting.TargetStatusProvide = [StatusID.Paralysis];
+        //setting.TargetStatusProvide = [StatusID.Paralysis];
         setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
