@@ -34,7 +34,6 @@ partial class BlueMageRotation
         /// 
         /// </summary>
         SharpenedKnife,
-
     }
 
     /// <summary>
