@@ -526,7 +526,7 @@ partial class BlueMageRotation
         setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 1,
+            AoeCount = 2,
         };
     }
 
