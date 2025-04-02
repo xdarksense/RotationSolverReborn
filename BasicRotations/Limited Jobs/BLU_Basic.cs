@@ -289,7 +289,7 @@ public sealed class Blue_Basic : BlueMageRotation
 
     protected override bool RaiseGCD(out IAction? act)
     {
-        //if (AngelWhisperPvE.CanUse(out act)) return true;
+        if (AngelWhisperPvE.CanUse(out act)) return true;
         return base.RaiseGCD(out act);
     }
 
@@ -306,34 +306,28 @@ public sealed class Blue_Basic : BlueMageRotation
 
     #endregion
 
-    protected override IBaseAction[] ActiveActions
-    {
-        get
-        {
-            return
-            [
-                WaterCannonPvE,
-                SonicBoomPvE,
-                GoblinPunchPvE,
-                WhiteWindPvE,
-                AngelsSnackPvE,
-                GlowerPvE,
-                FlyingFrenzyPvE,
-                FlameThrowerPvE,
-                DrillCannonsPvE,
-                PlaincrackerPvE,
-                HighVoltagePvE,
-                MindBlastPvE,
-                _1000NeedlesPvE,
-                BasicInstinctPvE,
-                MightyGuardPvE,
-                AethericMimicryPvE,
-                FlyingSardinePvE,
-                BloodDrainPvE,
-                LoomPvE,
-                SelfdestructPvE,
-                DiamondbackPvE
-            ];
-        }
-    }
+    protected override IBaseAction[] ActiveActions =>
+    [
+        WaterCannonPvE,
+        SonicBoomPvE,
+        GoblinPunchPvE,
+        WhiteWindPvE,
+        AngelsSnackPvE,
+        GlowerPvE,
+        FlyingFrenzyPvE,
+        FlameThrowerPvE,
+        DrillCannonsPvE,
+        PlaincrackerPvE,
+        HighVoltagePvE,
+        MindBlastPvE,
+        _1000NeedlesPvE,
+        BasicInstinctPvE,
+        MightyGuardPvE,
+        AethericMimicryPvE,
+        FlyingSardinePvE,
+        BloodDrainPvE,
+        LoomPvE,
+        SelfdestructPvE,
+        DiamondbackPvE
+    ];
 }
