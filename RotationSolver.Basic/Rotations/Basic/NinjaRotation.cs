@@ -197,6 +197,7 @@ partial class NinjaRotation
     static partial void ModifyRabbitMediumPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => RabbitMediumPvEActive;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifySpinningEdgePvE(ref ActionSetting setting)
@@ -218,6 +219,7 @@ partial class NinjaRotation
     {
         setting.StatusProvide = [StatusID.Hidden];
         setting.ActionCheck = () => !InCombat;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyThrowingDaggerPvE(ref ActionSetting setting)
@@ -249,6 +251,7 @@ partial class NinjaRotation
     static partial void ModifyTenPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 65748;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyNinjutsuPvE(ref ActionSetting setting)
@@ -259,6 +262,7 @@ partial class NinjaRotation
     static partial void ModifyChiPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 65750;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyDeathBlossomPvE(ref ActionSetting setting)
@@ -283,6 +287,7 @@ partial class NinjaRotation
     static partial void ModifyJinPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 65768;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyKassatsuPvE(ref ActionSetting setting)
@@ -290,6 +295,7 @@ partial class NinjaRotation
         setting.StatusProvide = [StatusID.Kassatsu];
         setting.ActionCheck = () => !Player.HasStatus(true, StatusID.TenChiJin);
         setting.UnlockedByQuestID = 65770;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyHakkeMujinsatsuPvE(ref ActionSetting setting)
@@ -349,6 +355,7 @@ partial class NinjaRotation
         setting.ActionCheck = () => !HasKassatsu;
         setting.StatusProvide = [StatusID.TenChiJin, StatusID.TenriJindoReady];
         setting.UnlockedByQuestID = 68488;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyMeisuiPvE(ref ActionSetting setting)
@@ -356,6 +363,7 @@ partial class NinjaRotation
         setting.StatusNeed = [StatusID.ShadowWalker];
         setting.StatusProvide = [StatusID.Meisui];
         setting.ActionCheck = () => !HasKassatsu && InCombat && !HasTenChiJin;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyBunshinPvE(ref ActionSetting setting)

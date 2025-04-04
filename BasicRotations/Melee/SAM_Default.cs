@@ -16,6 +16,10 @@ public sealed class SAM_Default : SamuraiRotation
         [Description("Setsugekka")] Setsugekka,
     }
 
+    [Range(0, 20, ConfigUnitType.None, 1)]
+    [RotationConfig(CombatType.PvE, Name = "When during countdown to use Meikyo Shisui")]
+    public int MeikyoCD { get; set; } = 5;
+
     [Range(0, 100, ConfigUnitType.None, 1)]
     [RotationConfig(CombatType.PvE, Name = "Kenki needed to use Shinten")]
     public int ShintenKenki { get; set; } = 75;
@@ -54,7 +58,7 @@ public sealed class SAM_Default : SamuraiRotation
     protected override IAction? CountDownAction(float remainTime)
     {
         // pre-pull: can be changed to -9 and -5 instead of 5 and 2, but it's hard to be universal !!! check later !!!
-        if (remainTime <= 5 && MeikyoShisuiPvE.CanUse(out var act)) return act;
+        if (remainTime <= MeikyoCD && MeikyoShisuiPvE.CanUse(out var act)) return act;
         if (remainTime <= 2 && TrueNorthPvE.CanUse(out act)) return act;
         return base.CountDownAction(remainTime);
     }
