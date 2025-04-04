@@ -224,7 +224,7 @@ public partial class RotationConfigWindow : Window
         if (errorText != "No internal errors.") 
         {
             ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
-            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudOrange); // Set text color to DalamudOrange
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudRed); // Set text color to DalamudOrange
             ImGui.Text(errorText);
             ImGui.PopStyleColor(); // Reset text color
             ImGui.PopTextWrapPos(); // Reset text wrapping position
@@ -232,7 +232,7 @@ public partial class RotationConfigWindow : Window
 
         if (installedCautionaryPlugin.Name != null)
         {
-            cautionText = $"Caution: {installedCautionaryPlugin.Name}, {installedCautionaryPlugin.Features}";
+            cautionText = $"Notice: {installedCautionaryPlugin.Name} has {installedCautionaryPlugin.Features}";
 
             ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth);
             ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
