@@ -145,8 +145,9 @@ public partial class RotationConfigWindow : Window
     private bool CheckErrors(){
         var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
         var installedIncompatiblePlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type == 5);
+        var installedCautionaryPlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type != 5);
 
-        if (installedIncompatiblePlugin.Name != null)
+        if (installedIncompatiblePlugin.Name != null || installedCautionaryPlugin.Name != null)
         {
             return true;
         }
@@ -169,14 +170,16 @@ public partial class RotationConfigWindow : Window
     private void DrawErrorZone()
     {
         var errorText = "No internal errors.";
+        string cautionText;
         float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
 
         var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
         var installedIncompatiblePlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type == 5);
+        var installedCautionaryPlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type != 5);
 
         if (installedIncompatiblePlugin.Name != null)
         {
-            errorText = $"Disable {installedIncompatiblePlugin.Name}, causes targetting issues.";
+            errorText = $"Disable {installedIncompatiblePlugin.Name}, can cause conflicts.";
         }
 
         if (Player.Object != null && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
@@ -221,10 +224,21 @@ public partial class RotationConfigWindow : Window
         if (errorText != "No internal errors.") 
         {
             ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
-            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudOrange); // Set text color to DalamudOrange
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudRed); // Set text color to DalamudOrange
             ImGui.Text(errorText);
             ImGui.PopStyleColor(); // Reset text color
             ImGui.PopTextWrapPos(); // Reset text wrapping position
+        }
+
+        if (installedCautionaryPlugin.Name != null)
+        {
+            cautionText = $"Notice: {installedCautionaryPlugin.Name} has {installedCautionaryPlugin.Features}";
+
+            ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth);
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
+            ImGui.Text(cautionText);
+            ImGui.PopStyleColor();
+            ImGui.PopTextWrapPos();
         }
     }
 
