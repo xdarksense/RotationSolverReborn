@@ -793,7 +793,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 return dis <= EffectRange && dis >= 8;
 
             default:
-                Svc.Log.Debug($"{action.Action.Name.ExtractText}'s CastType is not valid! The value is {action.Action.CastType}");
+                Svc.Log.Debug($"{action.Action.Name.ExtractText().ToString()}'s CastType is not valid! The value is {action.Action.CastType}");
                 return false;
         }
     }
