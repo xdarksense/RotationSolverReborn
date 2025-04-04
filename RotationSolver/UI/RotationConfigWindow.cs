@@ -177,7 +177,7 @@ public partial class RotationConfigWindow : Window
 
         if (installedIncompatiblePlugin.Name != null)
         {
-            errorText = $"Disable {installedIncompatiblePlugin.Name}, causes targetting issues.";
+            errorText = $"Disable {installedIncompatiblePlugin.Name}, can cause issues.";
         }
 
         if (installedCautionaryPlugin.Name != null)
