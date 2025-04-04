@@ -145,8 +145,9 @@ public partial class RotationConfigWindow : Window
     private bool CheckErrors(){
         var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
         var installedIncompatiblePlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type == 5);
+        var installedCautionaryPlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type != 5);
 
-        if (installedIncompatiblePlugin.Name != null)
+        if (installedIncompatiblePlugin.Name != null || installedCautionaryPlugin.Name != null)
         {
             return true;
         }
@@ -169,6 +170,7 @@ public partial class RotationConfigWindow : Window
     private void DrawErrorZone()
     {
         var errorText = "No internal errors.";
+        string cautionText;
         float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
 
         var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
@@ -177,12 +179,7 @@ public partial class RotationConfigWindow : Window
 
         if (installedIncompatiblePlugin.Name != null)
         {
-            errorText = $"Disable {installedIncompatiblePlugin.Name}, can cause issues.";
-        }
-
-        if (installedCautionaryPlugin.Name != null)
-        {
-            errorText = $"Caution: {installedCautionaryPlugin.Name}, {installedCautionaryPlugin.Features} ; Consider disabling if you experience issues.";
+            errorText = $"Disable {installedIncompatiblePlugin.Name}, can cause conflicts.";
         }
 
         if (Player.Object != null && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
@@ -231,6 +228,17 @@ public partial class RotationConfigWindow : Window
             ImGui.Text(errorText);
             ImGui.PopStyleColor(); // Reset text color
             ImGui.PopTextWrapPos(); // Reset text wrapping position
+        }
+
+        if (installedCautionaryPlugin.Name != null)
+        {
+            cautionText = $"Caution: {installedCautionaryPlugin.Name}, {installedCautionaryPlugin.Features}";
+
+            ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth);
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
+            ImGui.Text(cautionText);
+            ImGui.PopStyleColor();
+            ImGui.PopTextWrapPos();
         }
     }
 
