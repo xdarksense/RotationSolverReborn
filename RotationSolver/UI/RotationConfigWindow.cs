@@ -170,12 +170,12 @@ public partial class RotationConfigWindow : Window
     private void DrawErrorZone()
     {
         var errorText = "No internal errors.";
-        string cautionText;
+        //string cautionText;
         float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
 
         var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
         var installedIncompatiblePlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type == 5);
-        var installedCautionaryPlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type != 5);
+        //var installedCautionaryPlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type != 5);
 
         if (installedIncompatiblePlugin.Name != null)
         {
@@ -230,16 +230,16 @@ public partial class RotationConfigWindow : Window
             ImGui.PopTextWrapPos(); // Reset text wrapping position
         }
 
-        if (installedCautionaryPlugin.Name != null)
-        {
-            cautionText = $"Notice: {installedCautionaryPlugin.Name} settings may cause {installedCautionaryPlugin.Features}";
+        //if (installedCautionaryPlugin.Name != null)
+        //{
+        //    cautionText = $"Notice: {installedCautionaryPlugin.Name} settings may cause {installedCautionaryPlugin.Features}";
 
-            ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth);
-            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
-            ImGui.Text(cautionText);
-            ImGui.PopStyleColor();
-            ImGui.PopTextWrapPos();
-        }
+        //    ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth);
+        //    ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
+        //    ImGui.Text(cautionText);
+        //    ImGui.PopStyleColor();
+        //    ImGui.PopTextWrapPos();
+        //}
     }
 
     private void DrawSideBar()
