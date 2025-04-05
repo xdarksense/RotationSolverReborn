@@ -1668,7 +1668,7 @@ public partial class RotationConfigWindow : Window
 
         static void DrawActionDebug()
         {
-            if (!Service.Config.InDebug) return;
+            if (!Service.Config.InDebug || !Player.AvailableThreadSafe) return;
 
             if (_activeAction is IBaseAction action)
             {
@@ -1681,14 +1681,14 @@ public partial class RotationConfigWindow : Window
                     ImGui.Text("ShouldCheckStatus: " + action.Config.ShouldCheckStatus);
 #if DEBUG
                     ImGui.Text("Is Real GCD: " + action.Info.IsRealGCD);
-                    
-                    // Ensure ActionManager.Instance() is not null
-                    if (ActionManager.Instance() != null)
+
+                    // Ensure ActionManager.Instance() is not null and action.AdjustedID is valid
+                    if (ActionManager.Instance() != null && action.AdjustedID != 0)
                     {
                         ImGui.Text("Resources: " + ActionManager.Instance()->CheckActionResources(ActionType.Action, action.AdjustedID));
                         ImGui.Text("Status: " + ActionManager.Instance()->GetActionStatus(ActionType.Action, action.AdjustedID));
                     }
-            
+
                     ImGui.Text("Cast Time: " + action.Info.CastTime);
                     ImGui.Text("MP: " + action.Info.MPNeed);
 #endif
