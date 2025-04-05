@@ -232,7 +232,7 @@ public partial class RotationConfigWindow : Window
 
         if (installedCautionaryPlugin.Name != null)
         {
-            cautionText = $"Notice: {installedCautionaryPlugin.Name} has {installedCautionaryPlugin.Features}";
+            cautionText = $"Notice: {installedCautionaryPlugin.Name} settings may cause {installedCautionaryPlugin.Features}";
 
             ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth);
             ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
