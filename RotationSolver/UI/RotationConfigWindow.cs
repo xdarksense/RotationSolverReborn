@@ -147,9 +147,8 @@ public partial class RotationConfigWindow : Window
     {
         var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
         var installedIncompatiblePlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type == 5);
-        var installedCautionaryPlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type != 5);
 
-        if (installedIncompatiblePlugin.Name != null || installedCautionaryPlugin.Name != null)
+        if (installedIncompatiblePlugin.Name != null)
         {
             return true;
         }
@@ -167,6 +166,43 @@ public partial class RotationConfigWindow : Window
         }
 
         return false;
+    }
+
+    private void DrawDiagnosticInfoCube()
+    {
+        string diagInfo = "";
+        Vector4 diagColor = new Vector4(1f, 1f, 1f, .3f);
+
+        diagInfo += $"Rotation Solver Reborn v{typeof(RotationConfigWindow).Assembly.GetName().Version?.ToString() ?? "?.?.?"}\n";
+        if (DalamudReflector.TryGetDalamudStartInfo(out var startinfo, Svc.PluginInterface)){
+            diagInfo += $"Dalamud Version: {startinfo.GameVersion}\n";
+            diagInfo += $"Game Language: {startinfo.Language}\n";
+        }
+
+        var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
+        var installedIncompatiblePlugin = incompatiblePlugins.FirstOrDefault(p => p.IsEnabled);
+        if (installedIncompatiblePlugin.Name != null)
+        {
+            diagInfo += $"\nPlugins:\n";
+        }
+
+        foreach (var plugin in incompatiblePlugins)
+        {
+            if (plugin.IsEnabled)
+            {
+                diagInfo += $"{plugin.Name}\n";
+                if ((int)plugin.Type == 5){
+                    diagColor = new Vector4(1f, 0f, 0f, .3f);
+                }
+                if ((int)plugin.Type != 5){
+                    diagColor = new Vector4(1f, 1f, .4f, .3f);
+                }
+            }
+        }
+
+        ImGui.SetCursorPosY(ImGui.GetWindowSize().Y - 20);
+        ImGui.SetCursorPosX(0);
+        ImGuiEx.InfoMarker(diagInfo, diagColor, FontAwesomeIcon.Cube.ToIconString(), false);
     }
 
     private void DrawErrorZone()
@@ -231,17 +267,6 @@ public partial class RotationConfigWindow : Window
             ImGui.PopStyleColor(); // Reset text color
             ImGui.PopTextWrapPos(); // Reset text wrapping position
         }
-
-        //if (installedCautionaryPlugin.Name != null)
-        //{
-        //    cautionText = $"Notice: {installedCautionaryPlugin.Name} settings may cause {installedCautionaryPlugin.Features}";
-
-        //    ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth);
-        //    ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
-        //    ImGui.Text(cautionText);
-        //    ImGui.PopStyleColor();
-        //    ImGui.PopTextWrapPos();
-        //}
     }
 
     private void DrawSideBar()
@@ -322,6 +347,8 @@ public partial class RotationConfigWindow : Window
                     ImGui.Separator();
                 }
             }
+            DrawDiagnosticInfoCube();
+            ImGui.Spacing();
         }
     }
 
