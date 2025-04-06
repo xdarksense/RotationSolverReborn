@@ -24,6 +24,8 @@ using RotationSolver.UI.SearchableConfigs;
 using RotationSolver.UI.SearchableSettings;
 using RotationSolver.Updaters;
 using System.Diagnostics;
+using System.Text;
+using static FFXIVClientStructs.FFXIV.Client.Game.Character.VfxContainer;
 using GAction = Lumina.Excel.Sheets.Action;
 using Status = Lumina.Excel.Sheets.Status;
 using Task = System.Threading.Tasks.Task;
@@ -168,41 +170,90 @@ public partial class RotationConfigWindow : Window
         return false;
     }
 
+    public static string DalamudBranch()
+    {
+        const string stg = "stg";
+        const string release = "release";
+        const string other = "other";
+
+        if (DalamudReflector.TryGetDalamudStartInfo(out var startinfo, Svc.PluginInterface))
+        {
+            if (File.Exists(startinfo.ConfigurationPath))
+            {
+                try
+                {
+                    var file = File.ReadAllText(startinfo.ConfigurationPath);
+                    var ob = JsonConvert.DeserializeObject<dynamic>(file);
+                    string? type = ob?.DalamudBetaKind;
+                    if (type is not null && !string.IsNullOrEmpty(type))
+                    {
+                        return type switch
+                        {
+                            "stg" => stg,
+                            "release" => release,
+                            _ => other,
+                        };
+                    }
+                    else
+                    {
+                        Svc.Log.Information("Dalamud release is not a string or null.");
+                        return other;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Svc.Log.Information($"Failed to read or deserialize configuration file: {ex.Message}");
+                    return other;
+                }
+            }
+            else
+            {
+                Svc.Log.Information("Configuration file does not exist.");
+                return other;
+            }
+        }
+        Svc.Log.Information("Failed to get Dalamud start info.");
+        return other;
+    }
+
     private void DrawDiagnosticInfoCube()
     {
-        string diagInfo = "";
+        var diagInfo = new StringBuilder();
         Vector4 diagColor = new Vector4(1f, 1f, 1f, .3f);
 
-        diagInfo += $"Rotation Solver Reborn v{typeof(RotationConfigWindow).Assembly.GetName().Version?.ToString() ?? "?.?.?"}\n";
-        if (DalamudReflector.TryGetDalamudStartInfo(out var startinfo, Svc.PluginInterface)){
-            diagInfo += $"Dalamud Version: {startinfo.GameVersion}\n";
-            diagInfo += $"Game Language: {startinfo.Language}\n";
+        diagInfo.AppendLine($"Rotation Solver Reborn v{typeof(RotationConfigWindow).Assembly.GetName().Version?.ToString() ?? "?.?.?"}");
+        if (DalamudReflector.TryGetDalamudStartInfo(out var startinfo, Svc.PluginInterface))
+        {
+            diagInfo.AppendLine($"FFXIV Version: {startinfo.GameVersion}");
+            diagInfo.AppendLine($"OS Type: {startinfo.Platform.ToString()}");
+            diagInfo.AppendLine($"Dalamud Branch: {DalamudReflector.GetService().}");
+            diagInfo.AppendLine($"Dalamud Branch: {DalamudBranch()}");
+            diagInfo.AppendLine($"Game Language: {startinfo.Language}");
+        }
+        else
+        {
+            diagInfo.AppendLine("Failed to get Dalamud start info.");
         }
 
         var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
         var installedIncompatiblePlugin = incompatiblePlugins.FirstOrDefault(p => p.IsEnabled);
         if (installedIncompatiblePlugin.Name != null)
         {
-            diagInfo += $"\nPlugins:\n";
+            diagInfo.AppendLine("\nPlugins:");
         }
 
         foreach (var plugin in incompatiblePlugins)
         {
             if (plugin.IsEnabled)
             {
-                diagInfo += $"{plugin.Name}\n";
-                if ((int)plugin.Type == 5){
-                    diagColor = new Vector4(1f, 0f, 0f, .3f);
-                }
-                if ((int)plugin.Type != 5){
-                    diagColor = new Vector4(1f, 1f, .4f, .3f);
-                }
+                diagInfo.AppendLine(plugin.Name);
+                diagColor = (int)plugin.Type == 5 ? new Vector4(1f, 0f, 0f, .3f) : new Vector4(1f, 1f, .4f, .3f);
             }
         }
 
         ImGui.SetCursorPosY(ImGui.GetWindowSize().Y - 20);
         ImGui.SetCursorPosX(0);
-        ImGuiEx.InfoMarker(diagInfo, diagColor, FontAwesomeIcon.Cube.ToIconString(), false);
+        ImGuiEx.InfoMarker(diagInfo.ToString(), diagColor, FontAwesomeIcon.Cube.ToIconString(), false);
     }
 
     private void DrawErrorZone()
