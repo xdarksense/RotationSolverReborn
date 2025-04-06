@@ -226,7 +226,6 @@ public partial class RotationConfigWindow : Window
         {
             diagInfo.AppendLine($"FFXIV Version: {startinfo.GameVersion}");
             diagInfo.AppendLine($"OS Type: {startinfo.Platform.ToString()}");
-            diagInfo.AppendLine($"Dalamud Branch: {DalamudReflector.GetService().}");
             diagInfo.AppendLine($"Dalamud Branch: {DalamudBranch()}");
             diagInfo.AppendLine($"Game Language: {startinfo.Language}");
         }
