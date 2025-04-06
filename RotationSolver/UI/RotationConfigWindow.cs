@@ -10,6 +10,7 @@ using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.ImGuiMethods;
+using ECommons.Reflection;
 using ExCSS;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Fate;
@@ -142,12 +143,12 @@ public partial class RotationConfigWindow : Window
         }
     }
 
-    private bool CheckErrors(){
+    private bool CheckErrors()
+    {
         var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
         var installedIncompatiblePlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type == 5);
-        var installedCautionaryPlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type != 5);
 
-        if (installedIncompatiblePlugin.Name != null || installedCautionaryPlugin.Name != null)
+        if (installedIncompatiblePlugin.Name != null)
         {
             return true;
         }
@@ -167,6 +168,43 @@ public partial class RotationConfigWindow : Window
         return false;
     }
 
+    private void DrawDiagnosticInfoCube()
+    {
+        string diagInfo = "";
+        Vector4 diagColor = new Vector4(1f, 1f, 1f, .3f);
+
+        diagInfo += $"Rotation Solver Reborn v{typeof(RotationConfigWindow).Assembly.GetName().Version?.ToString() ?? "?.?.?"}\n";
+        if (DalamudReflector.TryGetDalamudStartInfo(out var startinfo, Svc.PluginInterface)){
+            diagInfo += $"Dalamud Version: {startinfo.GameVersion}\n";
+            diagInfo += $"Game Language: {startinfo.Language}\n";
+        }
+
+        var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
+        var installedIncompatiblePlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled);
+        if (installedIncompatiblePlugin.Name != null)
+        {
+            diagInfo += $"\nPlugins:\n";
+        }
+
+        foreach (var plugin in incompatiblePlugins)
+        {
+            if (plugin.IsInstalled)
+            {
+                diagInfo += $"{plugin.Name}\n";
+                if ((int)plugin.Type == 5){
+                    diagColor = new Vector4(1f, 0f, 0f, .3f);
+                }
+                if ((int)plugin.Type != 5){
+                    diagColor = new Vector4(1f, 1f, .4f, .3f);
+                }
+            }
+        }
+
+        ImGui.SetCursorPosY(ImGui.GetWindowSize().Y - 20);
+        ImGui.SetCursorPosX(0);
+        ImGuiEx.InfoMarker(diagInfo, diagColor, FontAwesomeIcon.Cube.ToIconString(), false);
+    }
+
     private void DrawErrorZone()
     {
         var errorText = "No internal errors.";
@@ -175,7 +213,6 @@ public partial class RotationConfigWindow : Window
 
         var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
         var installedIncompatiblePlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type == 5);
-        //var installedCautionaryPlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type != 5);
 
         if (installedIncompatiblePlugin.Name != null)
         {
@@ -219,9 +256,9 @@ public partial class RotationConfigWindow : Window
             {
                 DataCenter.SystemWarnings.Remove(warning);
             }
-        } 
-        
-        if (errorText != "No internal errors.") 
+        }
+
+        if (errorText != "No internal errors.")
         {
             ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
             ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudRed); // Set text color to DalamudOrange
@@ -229,17 +266,6 @@ public partial class RotationConfigWindow : Window
             ImGui.PopStyleColor(); // Reset text color
             ImGui.PopTextWrapPos(); // Reset text wrapping position
         }
-
-        //if (installedCautionaryPlugin.Name != null)
-        //{
-        //    cautionText = $"Notice: {installedCautionaryPlugin.Name} settings may cause {installedCautionaryPlugin.Features}";
-
-        //    ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth);
-        //    ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
-        //    ImGui.Text(cautionText);
-        //    ImGui.PopStyleColor();
-        //    ImGui.PopTextWrapPos();
-        //}
     }
 
     private void DrawSideBar()
@@ -260,7 +286,8 @@ public partial class RotationConfigWindow : Window
             if (wholeWidth > JOB_ICON_WIDTH * Scale)
             {
                 DrawDutyRotation();
-                if (CheckErrors()) {
+                if (CheckErrors())
+                {
                     DrawErrorZone();
 
                     ImGui.Separator();
@@ -333,6 +360,8 @@ public partial class RotationConfigWindow : Window
                     ImGui.Separator();
                 }
             }
+            DrawDiagnosticInfoCube();
+            ImGui.Spacing();
         }
     }
 
@@ -1681,14 +1710,14 @@ public partial class RotationConfigWindow : Window
                     ImGui.Text("ShouldCheckStatus: " + action.Config.ShouldCheckStatus);
 #if DEBUG
                     ImGui.Text("Is Real GCD: " + action.Info.IsRealGCD);
-                    
+
                     // Ensure ActionManager.Instance() is not null
                     if (ActionManager.Instance() != null)
                     {
                         ImGui.Text("Resources: " + ActionManager.Instance()->CheckActionResources(ActionType.Action, action.AdjustedID));
                         ImGui.Text("Status: " + ActionManager.Instance()->GetActionStatus(ActionType.Action, action.AdjustedID));
                     }
-            
+
                     ImGui.Text("Cast Time: " + action.Info.CastTime);
                     ImGui.Text("MP: " + action.Info.MPNeed);
 #endif
