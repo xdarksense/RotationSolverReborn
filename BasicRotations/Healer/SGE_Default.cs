@@ -262,7 +262,7 @@ public sealed class SGE_Default : SageRotation
         return base.GeneralAbility(nextGCD, out act);
     }
     #endregion
-
+    
     #region Eukrasia Logic
     private IBaseAction? _EukrasiaActionAim = null;
 
@@ -315,11 +315,11 @@ public sealed class SGE_Default : SageRotation
         {
             SetEukrasia(EukrasianDosisIiiPvE);
         }
-        else if ((!EukrasianDyskrasiaPvE.CanUse(out _) || !DyskrasiaPvE.CanUse(out _)) && EukrasianDosisIiPvE.CanUse(out _) && EukrasianDosisIiPvE.EnoughLevel && (!MergedStatus.HasFlag(AutoStatus.DefenseSingle) || !MergedStatus.HasFlag(AutoStatus.DefenseArea)))
+        else if ((!EukrasianDyskrasiaPvE.CanUse(out _) || !DyskrasiaPvE.CanUse(out _)) && EukrasianDosisIiPvE.CanUse(out _) && !EukrasianDosisIiiPvE.EnoughLevel && EukrasianDosisIiPvE.EnoughLevel && (!MergedStatus.HasFlag(AutoStatus.DefenseSingle) || !MergedStatus.HasFlag(AutoStatus.DefenseArea)))
         {
             SetEukrasia(EukrasianDosisIiPvE);
         }
-        else if ((!EukrasianDyskrasiaPvE.CanUse(out _) || !DyskrasiaPvE.CanUse(out _)) && EukrasianDosisPvE.CanUse(out _) && EukrasianDosisPvE.EnoughLevel && (!MergedStatus.HasFlag(AutoStatus.DefenseSingle) || !MergedStatus.HasFlag(AutoStatus.DefenseArea)))
+        else if ((!EukrasianDyskrasiaPvE.CanUse(out _) || !DyskrasiaPvE.CanUse(out _)) && EukrasianDosisPvE.CanUse(out _) && !EukrasianDosisIiPvE.EnoughLevel && EukrasianDosisPvE.EnoughLevel && (!MergedStatus.HasFlag(AutoStatus.DefenseSingle) || !MergedStatus.HasFlag(AutoStatus.DefenseArea)))
         {
             SetEukrasia(EukrasianDosisPvE);
         }
