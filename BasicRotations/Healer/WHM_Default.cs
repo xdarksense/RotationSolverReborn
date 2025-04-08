@@ -231,7 +231,7 @@ public sealed class WHM_Default : WhiteMageRotation
             if (UseLily(out act)) return true;
         }
 
-        if (AeroPvE.CanUse(out act, skipStatusProvideCheck: DOTUpkeep)) return true;
+        if (AeroPvE.CanUse(out act, skipTargetStatusProvideCheck: DOTUpkeep)) return true;
 
         return base.GeneralGCD(out act);
     }

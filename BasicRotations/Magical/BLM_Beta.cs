@@ -23,14 +23,6 @@ public sealed class BLM_Beta : BlackMageRotation
     public bool UseMedicine { get; set; } = false;
     #endregion
 
-    public bool NextGCDisInstant => Player.HasStatus(true, StatusID.Triplecast, StatusID.Swiftcast);
-
-    public bool CanMakeInstant => TriplecastPvE.Cooldown.CurrentCharges > 0 || !SwiftcastPvE.Cooldown.IsCoolingDown;
-
-    public int ThisManyInstantCasts => (TriplecastPvE.Cooldown.CurrentCharges * 3) + Player.StatusStack(true, StatusID.Triplecast) + SwiftcastPvE.Cooldown.CurrentCharges;
-
-    public int AstralDefecit => ThisManyInstantCasts - AstralSoulStacks;
-
     protected override IAction? CountDownAction(float remainTime)
     {
         IAction act;
@@ -462,16 +454,14 @@ public sealed class BLM_Beta : BlackMageRotation
     private bool AddThunder(out IAction? act, uint gcdCount = 3)
     {
         act = null;
-        //Return if just used.
-        if (IsLastGCD(ActionID.ThunderPvE, ActionID.ThunderIiPvE, ActionID.ThunderIiiPvE, ActionID.ThunderIvPvE)) return false;
 
-        //So long for thunder.
-        if (ThunderPvE.CanUse(out _) && (!ThunderPvE.Target.Target?.WillStatusEndGCD(gcdCount, 0, true,
-            StatusID.Thunder, StatusID.ThunderIi, StatusID.ThunderIii, StatusID.ThunderIv, StatusID.HighThunder_3872) ?? false))
-            return false;
+        if (HighThunderIiPvE.CanUse(out act)) return true;
+        if (!HighThunderIiPvE.EnoughLevel && ThunderIvPvE.CanUse(out act)) return true;
+        if (!ThunderIvPvE.EnoughLevel && ThunderIiPvE.CanUse(out act)) return true;
 
-        if (ThunderIiPvE.CanUse(out act)) return true;
-        if (ThunderPvE.CanUse(out act)) return true;
+        if (HighThunderPvE.CanUse(out act)) return true;
+        if (!HighThunderPvE.EnoughLevel && ThunderIiiPvE.CanUse(out act)) return true;
+        if (!ThunderIiiPvE.EnoughLevel && ThunderPvE.CanUse(out act)) return true;
 
         return false;
     }

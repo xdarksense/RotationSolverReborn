@@ -123,7 +123,7 @@ public class BaseAction : IBaseAction
     }
 
     /// <inheritdoc/>
-    public bool CanUse(out IAction act, bool isLastAbility = false, bool isFirstAbility = false, bool skipStatusProvideCheck = false, bool skipComboCheck = false, bool skipCastingCheck = false,
+    public bool CanUse(out IAction act, bool isLastAbility = false, bool isFirstAbility = false, bool skipSelfStatusProvideCheck = false, bool skipTargetStatusProvideCheck = false, bool skipComboCheck = false, bool skipCastingCheck = false,
     bool usedUp = false, bool skipAoeCheck = false, bool skipTTKCheck = false, byte gcdCountForAbility = 0)
     {
         act = this;
@@ -142,7 +142,7 @@ public class BaseAction : IBaseAction
             usedUp = true;
         }
 
-        if (!Info.BasicCheck(skipStatusProvideCheck, skipComboCheck, skipCastingCheck)) return false;
+        if (!Info.BasicCheck(skipSelfStatusProvideCheck, skipTargetStatusProvideCheck, skipComboCheck, skipCastingCheck)) return false;
 
         if (!Cooldown.CooldownCheck(usedUp, gcdCountForAbility)) return false;
 
@@ -159,7 +159,7 @@ public class BaseAction : IBaseAction
             }
         }
 
-        PreviewTarget = TargetInfo.FindTarget(skipAoeCheck, skipStatusProvideCheck);
+        PreviewTarget = TargetInfo.FindTarget(skipAoeCheck, skipSelfStatusProvideCheck, skipTargetStatusProvideCheck);
         if (PreviewTarget == null) return false;
 
         if (!IBaseAction.ActionPreview)

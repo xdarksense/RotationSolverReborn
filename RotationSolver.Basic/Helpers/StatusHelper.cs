@@ -161,14 +161,24 @@ public static class StatusHelper
     public static bool NeedHealing(this IGameObject p) => p.WillStatusEndGCD(2, 0, false, NoNeedHealingStatus);
 
     /// <summary>
-    /// Will any of <paramref name="statusIDs"/> end after <paramref name="gcdCount"/> GCDs plus <paramref name="offset"/> seconds?
+    /// Determines whether any of the specified statuses will end after a given number of Global Cooldowns (GCDs) 
+    /// plus an additional time offset in seconds.
     /// </summary>
-    /// <param name="obj"></param>
-    /// <param name="gcdCount"></param>
-    /// <param name="offset"></param>
-    /// <param name="isFromSelf"></param>
-    /// <param name="statusIDs"></param>
-    /// <returns></returns>
+    /// <param name="obj">The game object to check for the statuses. This is typically a player or NPC.</param>
+    /// <param name="gcdCount">The number of GCDs to consider. Defaults to 0 if not specified.</param>
+    /// <param name="offset">An additional time offset in seconds to add to the GCD duration. Defaults to 0 if not specified.</param>
+    /// <param name="isFromSelf">A boolean indicating whether to check for statuses applied by the current player (true) 
+    /// or by any source (false). Defaults to true.</param>
+    /// <param name="statusIDs">An array of <see cref="StatusID"/> values representing the statuses to check.</param>
+    /// <returns>
+    /// Returns <c>true</c> if any of the specified statuses will end within the calculated time frame 
+    /// (based on the GCD count and offset); otherwise, <c>false</c>.
+    /// </returns>
+    /// <remarks>
+    /// This method calculates the total time frame by combining the duration of the specified number of GCDs 
+    /// (retrieved using <see cref="DataCenter.GCDTime(uint, float)"/>) and the additional offset. 
+    /// It then checks if any of the provided statuses will expire within this time frame.
+    /// </remarks>
     public static bool WillStatusEndGCD(this IGameObject obj, uint gcdCount = 0, float offset = 0, bool isFromSelf = true, params StatusID[] statusIDs)
         => WillStatusEnd(obj, DataCenter.GCDTime(gcdCount, offset), isFromSelf, statusIDs);
 
@@ -378,20 +388,24 @@ public static class StatusHelper
     /// <returns>An enumerable of all statuses.</returns>
     private static IEnumerable<Status> GetAllStatus(this IGameObject obj, bool isFromSelf)
     {
-        if (obj is not IBattleChara b) return Enumerable.Empty<Status>();
+        if (obj is not IBattleChara b)
+        {
+            Svc.Log.Verbose("Object is not a battle character. Cannot get statuses.");
+            return Enumerable.Empty<Status>();
+        }
 
         var playerId = Player.Object?.GameObjectId ?? 0;
         var result = new List<Status>();
 
         try
         {
-            if (b.StatusList == null)
+            if (b.StatusList is null || b.StatusList.Length == 0)
             {
-                Svc.Log.Information("StatusList is null. Cannot get statuses.");
+                Svc.Log.Information("StatusList is null or empty. Cannot get statuses.");
                 return Enumerable.Empty<Status>();
             }
 
-            foreach (var status in b.StatusList)
+            foreach (var status in b.StatusList.Where(x => x is not null && x.StatusId > 0))
             {
                 if (!isFromSelf || status.SourceId == playerId || status.SourceObject?.OwnerId == playerId)
                 {

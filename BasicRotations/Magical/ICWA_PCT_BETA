@@ -57,15 +57,15 @@ public sealed class IcWaPctBeta : PictomancerRotation
         }
         if (remainTime < RainbowDripPvE.Info.CastTime + CountDownAhead)
         {
-            if (StrikingMusePvE.CanUse(out act, skipCastingCheck: true, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, usedUp: true) && WeaponMotifDrawn) return act;
+            if (StrikingMusePvE.CanUse(out act, skipCastingCheck: true, skipSelfStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, usedUp: true) && WeaponMotifDrawn) return act;
         }
         if (remainTime < RainbowDripPvE.Info.CastTime + 0.4f + CountDownAhead)
         {
-            if (RainbowPrePull.CanUse(out act, skipAoeCheck: true, skipCastingCheck: true, skipStatusProvideCheck: true)) return act;
+            if (RainbowPrePull.CanUse(out act, skipAoeCheck: true, skipCastingCheck: true, skipSelfStatusProvideCheck: true)) return act;
         }
         if (remainTime < FireInRedPvE.Info.CastTime + CountDownAhead && Player.Level < 92)
         {
-            if (FireInRedPvE.CanUse(out act, skipAoeCheck: true, skipCastingCheck: true, skipStatusProvideCheck: true)) return act;
+            if (FireInRedPvE.CanUse(out act, skipAoeCheck: true, skipCastingCheck: true, skipSelfStatusProvideCheck: true)) return act;
         }
         return base.CountDownAction(remainTime);
     }
@@ -139,20 +139,20 @@ public sealed class IcWaPctBeta : PictomancerRotation
     {
         bool burstTimingCheckerStriking = !ScenicMusePvE.Cooldown.WillHaveOneCharge(60) || Player.HasStatus(true, StatusID.StarryMuse);
         int adjustCombatTimeForOpener = Player.Level < 92 ? 2 : 5;
-        if (StarryMusePvE.CanUse(out act, skipCastingCheck: true, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, usedUp: true) && CombatTime > adjustCombatTimeForOpener && IsBurst) return true;
-        if (CombatTime > adjustCombatTimeForOpener && StrikingMusePvE.CanUse(out act, skipCastingCheck: true, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, usedUp: true) && burstTimingCheckerStriking) return true;
+        if (StarryMusePvE.CanUse(out act, skipCastingCheck: true, skipSelfStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, usedUp: true) && CombatTime > adjustCombatTimeForOpener && IsBurst) return true;
+        if (CombatTime > adjustCombatTimeForOpener && StrikingMusePvE.CanUse(out act, skipCastingCheck: true, skipSelfStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, usedUp: true) && burstTimingCheckerStriking) return true;
         if (SubtractivePalettePvE.CanUse(out act) && !Player.HasStatus(true, StatusID.SubtractivePalette)) return true;
         if (Player.HasStatus(true, StatusID.StarryMuse))
         {
-            if (FangedMusePvE.CanUse(out act, skipCastingCheck: true, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, usedUp: true)) return true;
-            if (RetributionOfTheMadeenPvE.CanUse(out act, skipCastingCheck: true, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, usedUp: true)) return true;
+            if (FangedMusePvE.CanUse(out act, skipCastingCheck: true, skipSelfStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, usedUp: true)) return true;
+            if (RetributionOfTheMadeenPvE.CanUse(out act, skipCastingCheck: true, skipSelfStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, usedUp: true)) return true;
         }
-        if (RetributionOfTheMadeenPvE.CanUse(out act, skipCastingCheck: true, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, usedUp: true)) return true;
-        if (MogOfTheAgesPvE.CanUse(out act, skipCastingCheck: true, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, usedUp: true)) return true;
-        if (StrikingMusePvE.CanUse(out act, skipCastingCheck: true, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, usedUp: true) && burstTimingCheckerStriking) return true;
-        if (PomMusePvE.CanUse(out act, skipCastingCheck: true, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, usedUp: true) && LivingMusePvE.AdjustedID == PomMusePvE.ID) return true;
-        if (WingedMusePvE.CanUse(out act, skipCastingCheck: true, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, usedUp: true) && LivingMusePvE.AdjustedID == WingedMusePvE.ID) return true;
-        if (ClawedMusePvE.CanUse(out act, skipCastingCheck: true, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, usedUp: true) && LivingMusePvE.AdjustedID == ClawedMusePvE.ID) return true;
+        if (RetributionOfTheMadeenPvE.CanUse(out act, skipCastingCheck: true, skipSelfStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, usedUp: true)) return true;
+        if (MogOfTheAgesPvE.CanUse(out act, skipCastingCheck: true, skipSelfStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, usedUp: true)) return true;
+        if (StrikingMusePvE.CanUse(out act, skipCastingCheck: true, skipSelfStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, usedUp: true) && burstTimingCheckerStriking) return true;
+        if (PomMusePvE.CanUse(out act, skipCastingCheck: true, skipSelfStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, usedUp: true) && LivingMusePvE.AdjustedID == PomMusePvE.ID) return true;
+        if (WingedMusePvE.CanUse(out act, skipCastingCheck: true, skipSelfStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, usedUp: true) && LivingMusePvE.AdjustedID == WingedMusePvE.ID) return true;
+        if (ClawedMusePvE.CanUse(out act, skipCastingCheck: true, skipSelfStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true, usedUp: true) && LivingMusePvE.AdjustedID == ClawedMusePvE.ID) return true;
         return base.AttackAbility(nextGCD, out act);
     }
     #endregion
