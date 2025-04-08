@@ -223,6 +223,7 @@ partial class BlackMageRotation
     {
         setting.StatusNeed = [StatusID.Thunderhead];
         setting.TargetStatusProvide = [StatusID.Thunder];
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyBlizzardIiPvE(ref ActionSetting setting)
@@ -250,6 +251,7 @@ partial class BlackMageRotation
     {
         setting.StatusNeed = [StatusID.Thunderhead];
         setting.TargetStatusProvide = [StatusID.ThunderIi];
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyManawardPvE(ref ActionSetting setting)
@@ -299,6 +301,7 @@ partial class BlackMageRotation
         setting.TargetStatusProvide = [StatusID.ThunderIii];
         setting.StatusNeed = [StatusID.Thunderhead];
         setting.UnlockedByQuestID = 66612;
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyAetherialManipulationPvE(ref ActionSetting setting)
@@ -359,6 +362,7 @@ partial class BlackMageRotation
         {
             AoeCount = 3,
         };
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyTriplecastPvE(ref ActionSetting setting)
@@ -419,6 +423,7 @@ partial class BlackMageRotation
     {
         setting.StatusNeed = [StatusID.Thunderhead];
         setting.TargetStatusProvide = [StatusID.HighThunder];
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyHighThunderIiPvE(ref ActionSetting setting)
@@ -429,6 +434,7 @@ partial class BlackMageRotation
         {
             AoeCount = 3,
         };
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyRetracePvE(ref ActionSetting setting)
