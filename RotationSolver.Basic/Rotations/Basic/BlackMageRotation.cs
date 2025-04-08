@@ -417,6 +417,7 @@ partial class BlackMageRotation
 
     static partial void ModifyHighThunderPvE(ref ActionSetting setting)
     {
+        setting.StatusNeed = [StatusID.Thunderhead];
         setting.TargetStatusProvide = [StatusID.HighThunder];
     }
 
