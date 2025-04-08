@@ -1,9 +1,9 @@
 ﻿namespace RebornRotations.Magical;
 
 [Rotation("RebornPowerdox(TESTING)", CombatType.PvE, GameVersion = "7.2")]
-[SourceCode(Path = "main/BasicRotations/Magical/BLM_IP.cs")]
+[SourceCode(Path = "main/BasicRotations/Magical/BLM_RP.cs")]
 [Api(4)]
-public class BLM_IP : BlackMageRotation
+public class BLM_RP : BlackMageRotation
 {
     #region Config Options
     [RotationConfig(CombatType.PvE, Name = "Use Leylines in combat when standing still")]

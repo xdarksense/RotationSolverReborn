@@ -82,7 +82,6 @@ public static class ObjectHelper
 
     internal static bool IsAttackable(this IBattleChara battleChara)
     {
-        if (battleChara == null) return false;
         if (battleChara.IsAllianceMember()) return false;
 
         // Dead.
@@ -242,21 +241,12 @@ public static class ObjectHelper
     }
 
     internal static unsafe bool IsEnemy(this IGameObject obj)
-    {
-        if (obj == null) return false;
-        var objStruct = obj.Struct();
-        if (objStruct == null) return false;
-        return ActionManager.CanUseActionOnTarget((uint)ActionID.BlizzardPvE, objStruct);
-    }
+    => obj != null
+    && ActionManager.CanUseActionOnTarget((uint)ActionID.BlizzardPvE, obj.Struct());
 
     internal static unsafe bool IsAllianceMember(this IGameObject obj)
-    {
-        if (obj == null || obj.GameObjectId == 0) return false;
-        if (DataCenter.IsPvP || !DataCenter.IsInAllianceRaid || obj is not IPlayerCharacter) return false;
-        var objStruct = obj.Struct();
-        if (objStruct == null) return false;
-        return ActionManager.CanUseActionOnTarget((uint)ActionID.RaisePvE, objStruct) || ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, objStruct);
-    }
+        => obj.GameObjectId is not 0
+        && (!DataCenter.IsPvP && DataCenter.IsInAllianceRaid && obj is IPlayerCharacter && (ActionManager.CanUseActionOnTarget((uint)ActionID.RaisePvE, obj.Struct()) || ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, obj.Struct())));
 
     private static readonly object _lock = new();
 

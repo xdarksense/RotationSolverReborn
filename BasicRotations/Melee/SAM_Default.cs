@@ -168,7 +168,7 @@ public sealed class SAM_Default : SamuraiRotation
             return false;
         }
 
-        if ((!HiganbanaTargets || (HiganbanaTargets && NumberOfAllHostilesInRange < 2)) && (HostileTarget?.WillStatusEnd(18, true, StatusID.Higanbana) ?? false) && HiganbanaPvE.CanUse(out act, skipTargetStatusProvideCheck: true)) return true;
+        if ((!HiganbanaTargets || (HiganbanaTargets && NumberOfAllHostilesInRange < 2)) && (HostileTarget?.WillStatusEnd(18, true, StatusID.Higanbana) ?? false) && HiganbanaPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
 
         if (NumberOfHostilesInRange >= 3)
         {

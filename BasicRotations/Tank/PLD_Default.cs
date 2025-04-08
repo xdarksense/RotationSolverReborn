@@ -82,14 +82,12 @@ public sealed class PLD_Default : PaladinRotation
         if (CoverPvE.CanUse(out act) && CoverPvE.Target.Target?.DistanceToPlayer() < 10 &&
             CoverPvE.Target.Target?.GetHealthRatio() < CoverRatio) return true;
 
-        if (NumberOfHostilesInRange > 0)
-        {
-            if (!RiotBladePvE.EnoughLevel && nextGCD.IsTheSameTo(true, FastBladePvE) && FightOrFlightPvE.CanUse(out act)) return true;
-            if (!RageOfHalonePvE.EnoughLevel && nextGCD.IsTheSameTo(true, RiotBladePvE, TotalEclipsePvE) && FightOrFlightPvE.CanUse(out act)) return true;
-            if (!ProminencePvE.EnoughLevel && nextGCD.IsTheSameTo(true, RageOfHalonePvE, TotalEclipsePvE) && FightOrFlightPvE.CanUse(out act)) return true;
-            if (!AtonementPvE.EnoughLevel && nextGCD.IsTheSameTo(true, RoyalAuthorityPvE, ProminencePvE) && FightOrFlightPvE.CanUse(out act)) return true;
-            if (AtonementPvE.EnoughLevel && (Player.HasStatus(true, StatusID.AtonementReady, StatusID.SepulchreReady, StatusID.SupplicationReady, StatusID.DivineMight) || IsLastAction(true, RoyalAuthorityPvE)) && FightOrFlightPvE.CanUse(out act)) return true;
-        }
+        if (!RiotBladePvE.EnoughLevel && nextGCD.IsTheSameTo(true, FastBladePvE) && FightOrFlightPvE.CanUse(out act)) return true;
+        if (!RageOfHalonePvE.EnoughLevel && nextGCD.IsTheSameTo(true, RiotBladePvE, TotalEclipsePvE) && FightOrFlightPvE.CanUse(out act)) return true;
+        if (!ProminencePvE.EnoughLevel && nextGCD.IsTheSameTo(true, RageOfHalonePvE, TotalEclipsePvE) && FightOrFlightPvE.CanUse(out act)) return true;
+        if (!AtonementPvE.EnoughLevel && nextGCD.IsTheSameTo(true, RoyalAuthorityPvE, ProminencePvE) && FightOrFlightPvE.CanUse(out act)) return true;
+        if (AtonementPvE.EnoughLevel && (Player.HasStatus(true, StatusID.AtonementReady, StatusID.SepulchreReady, StatusID.SupplicationReady, StatusID.DivineMight) || IsLastAction(true, RoyalAuthorityPvE)) && FightOrFlightPvE.CanUse(out act)) return true;
+
 
         // if requiscat is able to proc confiteor, use it immediately after Fight or Flight
         if (RequiescatMasteryTrait.EnoughLevel)

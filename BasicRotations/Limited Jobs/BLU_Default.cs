@@ -85,7 +85,7 @@ public sealed class Blue_Default : BlueMageRotation
         if (PhantomFlurryPvE.CanUse(out act)) return true;
         if (JKickPvE.CanUse(out act)) return true;
         if (BeingMortalPvE.CanUse(out act)) return true;
-        if (NightbloomPvE.CanUse(out act, skipTargetStatusProvideCheck: true)) return true;
+        if (NightbloomPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
         if (FeatherRainPvE.CanUse(out act)) return true;
         if (ShockStrikePvE.CanUse(out act)) return true;
 

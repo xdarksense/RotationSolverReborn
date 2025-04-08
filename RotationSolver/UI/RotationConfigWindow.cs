@@ -1714,32 +1714,12 @@ public partial class RotationConfigWindow : Window
                 }
                 ImguiTooltips.HoveredTooltip(ConfigUnitType.Seconds.GetDescription());
 
-                if (a.Setting.StatusProvide != null)
+                if (a.Setting.StatusProvide != null || a.Setting.TargetStatusProvide != null)
                 {
-                    var shouldStatus = config.ShouldCheckSelfStatus;
+                    var shouldStatus = config.ShouldCheckStatus;
                     if (ImGui.Checkbox($"{UiString.ConfigWindow_Actions_CheckStatus.GetDescription()}##{a}", ref shouldStatus))
                     {
-                        config.ShouldCheckSelfStatus = shouldStatus;
-                    }
-
-                    if (shouldStatus)
-                    {
-                        var statusGcdCount = (int)config.StatusGcdCount;
-                        ImGui.SetNextItemWidth(Scale * 150);
-                        if (ImGui.DragInt($"{UiString.ConfigWindow_Actions_GcdCount.GetDescription()}##{a}",
-                            ref statusGcdCount, 0.05f, 1, 10))
-                        {
-                            config.StatusGcdCount = (byte)statusGcdCount;
-                        }
-                    }
-                }
-
-                if (a.Setting.TargetStatusProvide != null)
-                {
-                    var shouldStatus = config.ShouldCheckTargetStatus;
-                    if (ImGui.Checkbox($"{UiString.ConfigWindow_Actions_CheckTargetStatus.GetDescription()}##{a}", ref shouldStatus))
-                    {
-                        config.ShouldCheckTargetStatus = shouldStatus;
+                        config.ShouldCheckStatus = shouldStatus;
                     }
 
                     if (shouldStatus)
@@ -1789,8 +1769,7 @@ public partial class RotationConfigWindow : Window
                     ImGui.Text("AdjustedID: " + Service.GetAdjustedActionId(action.Info.ID));
                     ImGui.Text($"Can Use: {action.CanUse(out _)} ");
                     ImGui.Text("AoeCount: " + action.Config.AoeCount);
-                    ImGui.Text("ShouldCheckSelfStatus: " + action.Config.ShouldCheckSelfStatus);
-                    ImGui.Text("ShouldCheckTargetStatus: " + action.Config.ShouldCheckTargetStatus);
+                    ImGui.Text("ShouldCheckStatus: " + action.Config.ShouldCheckStatus);
 #if DEBUG
                     ImGui.Text("Is Real GCD: " + action.Info.IsRealGCD);
 

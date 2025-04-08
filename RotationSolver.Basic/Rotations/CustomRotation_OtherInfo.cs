@@ -45,6 +45,18 @@ partial class CustomRotation
     public static bool InCombat => DataCenter.InCombat;
 
     /// <summary>
+    /// Is out of combat.
+    /// </summary>
+    [Description("Not In Combat Delay")]
+    public static bool NotInCombatDelay => DataCenter.NotInCombatDelay;
+
+    /// <summary>
+    /// Player's MP.
+    /// </summary>
+    [Description("Player's MP")]
+    public static uint CurrentMp => DataCenter.CurrentMp;
+
+    /// <summary>
     /// Does someone in party have a damage buff active.
     /// </summary>
     [Description("Party Burst Status Active")]
@@ -79,18 +91,6 @@ partial class CustomRotation
 
         return minutes % 2 == 0 && secondsInCurrentMinute < 15;
     }
-
-    /// <summary>
-    /// Is out of combat.
-    /// </summary>
-    [Description("Not In Combat Delay")]
-    public static bool NotInCombatDelay => DataCenter.NotInCombatDelay;
-
-    /// <summary>
-    /// Player's MP.
-    /// </summary>
-    [Description("Player's MP")]
-    public static uint CurrentMp => DataCenter.CurrentMp;
 
     /// <summary>
     /// Condition.

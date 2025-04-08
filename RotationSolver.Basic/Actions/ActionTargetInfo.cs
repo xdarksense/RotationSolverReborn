@@ -45,13 +45,12 @@ public struct ActionTargetInfo(IBaseAction action)
     /// <summary>
     /// Retrieves a collection of valid battle characters that can be targeted based on the specified criteria.
     /// </summary>
-    /// <param name="skipSelfStatusProvideCheck">If set to <c>true</c>, skips the status provide check.</param>
-    /// <param name="skipTargetStatusProvideCheck">If set to <c>true</c>, skips the target status provide check.</param>
+    /// <param name="skipStatusProvideCheck">If set to <c>true</c>, skips the status provide check.</param>
     /// <param name="type">The type of target to filter (e.g., Heal).</param>
     /// <returns>
     /// An <see cref="IEnumerable{IBattleChara}"/> containing the valid targets.
     /// </returns>
-    private IEnumerable<IBattleChara> GetCanTargets(bool skipSelfStatusProvideCheck, bool skipTargetStatusProvideCheck, TargetType type)
+    private IEnumerable<IBattleChara> GetCanTargets(bool skipStatusProvideCheck, TargetType type)
     {
         var allTargets = DataCenter.AllTargets;
         if (allTargets == null) return Enumerable.Empty<IBattleChara>();
@@ -62,7 +61,7 @@ public struct ActionTargetInfo(IBaseAction action)
         foreach (var target in filteredTargets)
         {
             if (type == TargetType.Heal && target.GetHealthRatio() == 1) continue;
-            if (!GeneralCheck(target, skipSelfStatusProvideCheck, skipTargetStatusProvideCheck)) continue;
+            if (!GeneralCheck(target, skipStatusProvideCheck)) continue;
             validTargets.Add(target);
         }
 
@@ -88,13 +87,12 @@ public struct ActionTargetInfo(IBaseAction action)
     /// <summary>
     /// Retrieves a list of battle characters that can be affected based on the specified criteria.
     /// </summary>
-    /// <param name="skipSelfStatusProvideCheck">If set to <c>true</c>, skips the status provide check.</param>
-    /// <param name="skipTargetStatusProvideCheck">If set to <c>true</c>, skips the target status provide check.</param>
+    /// <param name="skipStatusProvideCheck">If set to <c>true</c>, skips the status provide check.</param>
     /// <param name="type">The type of target to filter (e.g., Heal).</param>
     /// <returns>
     /// A <see cref="List{IBattleChara}"/> containing the valid targets.
     /// </returns>
-    private List<IBattleChara> GetCanAffects(bool skipSelfStatusProvideCheck, bool skipTargetStatusProvideCheck, TargetType type)
+    private List<IBattleChara> GetCanAffects(bool skipStatusProvideCheck, TargetType type)
     {
         if (EffectRange == 0) return new List<IBattleChara>();
 
@@ -123,7 +121,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
         foreach (var obj in items)
         {
-            if (!GeneralCheck(obj, skipSelfStatusProvideCheck, skipTargetStatusProvideCheck)) continue;
+            if (!GeneralCheck(obj, skipStatusProvideCheck)) continue;
             validTargets.Add(obj);
         }
 
@@ -200,12 +198,11 @@ public struct ActionTargetInfo(IBaseAction action)
     /// Performs a general check on the specified battle character to determine if it meets the criteria for targeting.
     /// </summary>
     /// <param name="gameObject">The battle character to check.</param>
-    /// <param name="skipSelfStatusProvideCheck">If set to <c>true</c>, skips the status provide check.</param>
-    /// <param name="skipTargetStatusProvideCheck">If set to <c>true</c>, skips the target status provide check.</param>
+    /// <param name="skipStatusProvideCheck">If set to <c>true</c>, skips the status provide check.</param>
     /// <returns>
     /// <c>true</c> if the battle character meets the criteria for targeting; otherwise, <c>false</c>.
     /// </returns>
-    public bool GeneralCheck(IBattleChara gameObject, bool skipSelfStatusProvideCheck, bool skipTargetStatusProvideCheck)
+    public bool GeneralCheck(IBattleChara gameObject, bool skipStatusProvideCheck)
     {
         if (!gameObject.IsTargetable) return false;
 
@@ -229,8 +226,7 @@ public struct ActionTargetInfo(IBaseAction action)
             return false;
         }
 
-        return CheckSelfStatus(gameObject, skipSelfStatusProvideCheck)
-            && CheckTargetStatus(gameObject, skipTargetStatusProvideCheck)
+        return CheckStatus(gameObject, skipStatusProvideCheck)
             && CheckTimeToKill(gameObject)
             && CheckResistance(gameObject);
     }
@@ -239,38 +235,23 @@ public struct ActionTargetInfo(IBaseAction action)
     /// Checks the status of the specified game object to determine if it meets the criteria for the action.
     /// </summary>
     /// <param name="gameObject">The game object to check.</param>
-    /// <param name="skipSelfStatusProvideCheck">If set to <c>true</c>, skips the status provide check.</param>
+    /// <param name="skipStatusProvideCheck">If set to <c>true</c>, skips the status provide check.</param>
     /// <returns>
     /// <c>true</c> if the game object meets the status criteria for the action; otherwise, <c>false</c>.
     /// </returns>
-    private bool CheckSelfStatus(IGameObject gameObject, bool skipSelfStatusProvideCheck)
+    private bool CheckStatus(IGameObject gameObject, bool skipStatusProvideCheck)
     {
-        if (!action.Config.ShouldCheckSelfStatus) return true;
+        if (!action.Config.ShouldCheckStatus) return true;
 
-        if (action.Setting.TargetStatusNeed != null && !skipSelfStatusProvideCheck)
+        if (action.Setting.TargetStatusNeed != null)
         {
-            if (gameObject.WillStatusEndGCD(action.Config.StatusGcdCount, 0, action.Setting.StatusFromSelf, action.Setting.TargetStatusNeed))
+            if (gameObject.WillStatusEndGCD(0, 0, action.Setting.StatusFromSelf, action.Setting.TargetStatusNeed))
             {
                 return false;
             }
         }
 
-        return true;
-    }
-
-    /// <summary>
-    /// Checks the status of the specified game object to determine if it meets the criteria for the action.
-    /// </summary>
-    /// <param name="gameObject">The game object to check.</param>
-    /// <param name="skipTargetStatusProvideCheck">If set to <c>true</c>, skips the target status provide check.</param>
-    /// <returns>
-    /// <c>true</c> if the game object meets the status criteria for the action; otherwise, <c>false</c>.
-    /// </returns>
-    private bool CheckTargetStatus(IGameObject gameObject, bool skipTargetStatusProvideCheck)
-    {
-        if (!action.Config.ShouldCheckTargetStatus) return true;
-
-        if (action.Setting.TargetStatusProvide != null && !skipTargetStatusProvideCheck)
+        if (action.Setting.TargetStatusProvide != null && !skipStatusProvideCheck)
         {
             if (!gameObject.WillStatusEndGCD(action.Config.StatusGcdCount, 0, action.Setting.StatusFromSelf, action.Setting.TargetStatusProvide))
             {
@@ -348,12 +329,11 @@ public struct ActionTargetInfo(IBaseAction action)
     /// Finds the target based on the specified criteria.
     /// </summary>
     /// <param name="skipAoeCheck">If set to <c>true</c>, skips the AoE check.</param>
-    /// <param name="skipSelfStatusProvideCheck">If set to <c>true</c>, skips the status provide check.</param>
-    /// <param name="skipTargetStatusProvideCheck">If set to <c>true</c>, skips the target status provide check.</param>
+    /// <param name="skipStatusProvideCheck">If set to <c>true</c>, skips the status provide check.</param>
     /// <returns>
     /// A <see cref="TargetResult"/> containing the target and affected characters, or <c>null</c> if no target is found.
     /// </returns>
-    internal TargetResult? FindTarget(bool skipAoeCheck, bool skipSelfStatusProvideCheck, bool skipTargetStatusProvideCheck)
+    internal TargetResult? FindTarget(bool skipAoeCheck, bool skipStatusProvideCheck)
     {
         var range = Range;
         var player = Player.Object;
@@ -370,8 +350,8 @@ public struct ActionTargetInfo(IBaseAction action)
 
         var type = action.Setting.TargetType;
 
-        var canTargets = GetCanTargets(skipSelfStatusProvideCheck, skipTargetStatusProvideCheck, type);
-        var canAffects = GetCanAffects(skipSelfStatusProvideCheck, skipTargetStatusProvideCheck, type);
+        var canTargets = GetCanTargets(skipStatusProvideCheck, type);
+        var canAffects = GetCanAffects(skipStatusProvideCheck, type);
 
         if (IsTargetArea)
         {
