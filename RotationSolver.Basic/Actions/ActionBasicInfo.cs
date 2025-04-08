@@ -1,6 +1,8 @@
-﻿using ECommons.ExcelServices;
+﻿using ECommons.DalamudServices;
+using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 
 namespace RotationSolver.Basic.Actions;
@@ -161,16 +163,19 @@ public readonly struct ActionBasicInfo
         Aspect = (Aspect)_action.Action.Aspect;
     }
 
-    internal readonly bool BasicCheck(bool skipStatusProvideCheck, bool skipComboCheck, bool skipCastingCheck)
+    internal readonly bool BasicCheck(bool skipSelfStatusProvideCheck, bool skipTargetStatusProvideCheck, bool skipComboCheck, bool skipCastingCheck)
     {
         if (!IsActionEnabled() || !IsOnSlot) return false;
         if (IsLimitBreak) return true;
         if (IsActionDisabled() || !EnoughLevel || !HasEnoughMP() || !SpellUnlocked) return false;
 
-        if (IsStatusNeeded() || IsStatusProvided(skipStatusProvideCheck)) return false;
+        if (IsSelfStatusNeeded()) return false;
+        if (IsStatusProvided(skipSelfStatusProvideCheck)) return false;
+        //if (IsTargetStatusNeeded()) return false;
+        if (IsTargetStatusProvided(skipTargetStatusProvideCheck)) return false;
         if (IsLimitBreakLevelLow() || !IsComboValid(skipComboCheck) || !IsRoleActionValid()) return false;
         if (NeedsCasting(skipCastingCheck)) return false;
-        if (IsGeneralGCD && IsStatusProvidedDuringGCD()) return false;
+        if (IsGeneralGCD && (IsSelfStatusProvidedDuringGCD() || IsTargetStatusProvidedDuringGCD())) return false;
         if (!IsActionCheckValid() || !IsRotationCheckValid()) return false;
 
         return true;
@@ -187,16 +192,53 @@ public readonly struct ActionBasicInfo
 
     private bool HasEnoughMP() => DataCenter.CurrentMp >= MPNeed;
 
-    private bool IsStatusNeeded()
+    private bool IsSelfStatusNeeded()
     {
         var player = Player.Object;
-        return _action.Setting.StatusNeed != null && player.WillStatusEndGCD(0, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusNeed);
+        return _action.Setting.StatusNeed != null && player.WillStatusEndGCD(_action.Config.StatusGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusNeed);
     }
 
-    private bool IsStatusProvided(bool skipStatusProvideCheck)
+    private bool IsTargetStatusNeeded()
+    {
+        if (_action?.Setting?.TargetStatusProvide == null)
+            return false;
+
+        var player = Player.Object;
+        var act = _action;
+        var tar = act?.Target.Target == player
+            ? act?.Target.AffectedTargets?.FirstOrDefault()
+            : act?.Target.Target;
+
+        if (tar == null)
+            return false;
+
+        return _action?.Setting.TargetStatusProvide != null && tar != null &&
+               tar.WillStatusEndGCD(_action.Config.StatusGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.TargetStatusProvide);
+    }
+
+    private bool IsStatusProvided(bool skipSelfStatusProvideCheck)
     {
         var player = Player.Object;
-        return !skipStatusProvideCheck && _action.Setting.StatusProvide != null && !player.WillStatusEndGCD(_action.Config.StatusGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusProvide);
+        return !skipSelfStatusProvideCheck && _action.Setting.StatusProvide != null && !player.WillStatusEndGCD(_action.Config.StatusGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusProvide);
+    }
+
+    private bool IsTargetStatusProvided(bool skipTargetStatusProvideCheck)
+    {
+        if (skipTargetStatusProvideCheck || _action?.Setting?.TargetStatusProvide == null)
+            return false;
+
+        var player = Player.Object;
+        var act = _action;
+        var tar = act?.Target.Target == player
+            ? act?.Target.AffectedTargets?.FirstOrDefault()
+            : act?.Target.Target;
+
+        if (tar == null)
+            return false;
+
+        return !skipTargetStatusProvideCheck &&
+               _action.Setting.TargetStatusProvide != null &&
+               !tar.WillStatusEndGCD(_action.Config.StatusGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.TargetStatusProvide);
     }
 
     private bool IsLimitBreakLevelLow() => _action.Action.ActionCategory.RowId == 15 && CustomRotation.LimitBreakLevel <= 1;
@@ -221,9 +263,14 @@ public readonly struct ActionBasicInfo
                 (DataCenter.NoPoslock && DataCenter.IsMoving && !skipCastingCheck));
     }
 
-    private bool IsStatusProvidedDuringGCD()
+    private bool IsSelfStatusProvidedDuringGCD()
     {
         return _action.Setting.StatusProvide?.Length > 0 && _action.Setting.IsFriendly && IActionHelper.IsLastGCD(true, _action) && DataCenter.TimeSinceLastAction.TotalSeconds < 3;
+    }
+
+    private bool IsTargetStatusProvidedDuringGCD()
+    {
+        return _action.Setting.TargetStatusProvide?.Length > 0 && IActionHelper.IsLastGCD(true, _action) && DataCenter.TimeSinceLastAction.TotalSeconds < 3;
     }
 
     private bool IsActionCheckValid() => _action.Setting.ActionCheck?.Invoke() ?? true;

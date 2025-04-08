@@ -176,12 +176,12 @@ public sealed class RDM_Default : RedMageRotation
         // Hardcode Resolution & Scorch to avoid double melee without finishers
         if (IsLastGCD(ActionID.ScorchPvE))
         {
-            if (ResolutionPvE.CanUse(out act, skipStatusProvideCheck: true, skipAoeCheck: true)) return true;
+            if (ResolutionPvE.CanUse(out act, skipAoeCheck: true)) return true;
         }
 
         if (IsLastGCD(ActionID.VerholyPvE, ActionID.VerflarePvE))
         {
-            if (ScorchPvE.CanUse(out act, skipStatusProvideCheck: true, skipAoeCheck: true)) return true;
+            if (ScorchPvE.CanUse(out act, skipAoeCheck: true)) return true;
         }
 
         //Melee AOE combo
@@ -205,7 +205,7 @@ public sealed class RDM_Default : RedMageRotation
             }
         }
         //Grand impact usage if not interrupting melee combo
-        if (GrandImpactPvE.CanUse(out act, skipStatusProvideCheck: Player.HasStatus(true, StatusID.GrandImpactReady), skipCastingCheck: true, skipAoeCheck: true)) return true;
+        if (GrandImpactPvE.CanUse(out act, skipCastingCheck: true, skipAoeCheck: true)) return true;
 
         if (ManaStacks == 3) return false;
 

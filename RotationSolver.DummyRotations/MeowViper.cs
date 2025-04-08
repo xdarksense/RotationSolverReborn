@@ -70,8 +70,8 @@
 //        //    if (UncoiledFuryPvE.CanUse(out act)) return true;
 //        //}
 
-//        if (HuntersDenPvE.CanUse(out act, skipComboCheck: true, skipCastingCheck: true, skipAoeCheck: true, skipStatusProvideCheck: true)) return true;
-//        if (SwiftskinsDenPvE.CanUse(out act, skipComboCheck: true, skipCastingCheck: true, skipAoeCheck: true, skipStatusProvideCheck: true)) return true;
+//        if (HuntersDenPvE.CanUse(out act, skipComboCheck: true, skipCastingCheck: true, skipAoeCheck: true, skipSelfStatusProvideCheck: true)) return true;
+//        if (SwiftskinsDenPvE.CanUse(out act, skipComboCheck: true, skipCastingCheck: true, skipAoeCheck: true, skipSelfStatusProvideCheck: true)) return true;
 //        if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true)) return true;
 //        if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true)) return true;
 
@@ -85,7 +85,7 @@
 //        //    !HasHunterVenom && !HasSwiftVenom &&
 //        //    !HasPoisedBlood && !HasPoisedFang)
 //        //{
-//        //    if (ReawakenPvE.CanUse(out act, skipComboCheck: true, skipCastingCheck: true, skipAoeCheck: true, skipStatusProvideCheck: true)) return true;
+//        //    if (ReawakenPvE.CanUse(out act, skipComboCheck: true, skipCastingCheck: true, skipAoeCheck: true, skipSelfStatusProvideCheck: true)) return true;
 //        //}
 
 //        //if (Vicepit.CanUse(out act, usedUp: true)) return true;

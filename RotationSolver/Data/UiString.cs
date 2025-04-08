@@ -133,8 +133,11 @@ namespace RotationSolver.Data
         [Description("Number of targets needed to use this action")]
         ConfigWindow_Actions_AoeCount,
 
-        [Description("Should this action check status effects")]
+        [Description("Should this action check self status effects")]
         ConfigWindow_Actions_CheckStatus,
+
+        [Description("Should this action check target status effects")]
+        ConfigWindow_Actions_CheckTargetStatus,
 
         [Description("Number of GCDs before the DoT is reapplied")]
         ConfigWindow_Actions_GcdCount,

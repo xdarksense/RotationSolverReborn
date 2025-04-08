@@ -234,9 +234,9 @@ public sealed class SCH_Default : ScholarRotation
         if (MovingTime > RuinTime && RuinIiPvE.CanUse(out act)) return true;
 
         //Add dot while moving.
-        if (MovingTime > DOTTime && BiolysisPvE.CanUse(out act, skipStatusProvideCheck: DOTUpkeep)) return true;
-        if (MovingTime > DOTTime && BioIiPvE.CanUse(out act, skipStatusProvideCheck: DOTUpkeep)) return true;
-        if (MovingTime > DOTTime && BioPvE.CanUse(out act, skipStatusProvideCheck: DOTUpkeep)) return true;
+        if (MovingTime > DOTTime && BiolysisPvE.CanUse(out act, skipTargetStatusProvideCheck: DOTUpkeep)) return true;
+        if (MovingTime > DOTTime && BioIiPvE.CanUse(out act, skipTargetStatusProvideCheck: DOTUpkeep)) return true;
+        if (MovingTime > DOTTime && BioPvE.CanUse(out act, skipTargetStatusProvideCheck: DOTUpkeep)) return true;
 
         return base.GeneralGCD(out act);
     }

@@ -253,7 +253,7 @@ public partial class ViperRotation
         setting.StatusProvide = [StatusID.HuntersInstinct];
         setting.CreateConfig = () => new ActionConfig()
         {
-            ShouldCheckStatus = false,
+            ShouldCheckSelfStatus = false,
         };
     }
 
