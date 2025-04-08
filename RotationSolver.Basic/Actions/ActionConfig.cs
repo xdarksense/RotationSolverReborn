@@ -17,14 +17,9 @@ public class ActionConfig()
     }
 
     /// <summary>
-    /// Should check the self status for this action.
+    /// Should check the status for this action.
     /// </summary>
-    public bool ShouldCheckSelfStatus { get; set; } = true;
-
-    /// <summary>
-    /// Should check the target status for this action.
-    /// </summary>
-    public bool ShouldCheckTargetStatus { get; set; } = true;
+    public bool ShouldCheckStatus { get; set; } = true;
 
     /// <summary>
     /// Should check the combo for this action.

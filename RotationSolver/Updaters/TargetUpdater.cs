@@ -47,16 +47,21 @@ internal static partial class TargetUpdater
         var partyMembers = new List<IBattleChara>();
         try
         {
-            foreach (var member in DataCenter.AllTargets)
+            if (DataCenter.PartyMembers != null)
             {
-                if (member == null) continue;
-
-                var character = member.Character();
-                if (ObjectHelper.IsParty(member) && member.IsParty() && character != null &&
-                    character->CharacterData.OnlineStatus != 15 &&
-                    character->CharacterData.OnlineStatus != 5 && member.IsTargetable)
+                foreach (var member in DataCenter.AllTargets)
                 {
-                    partyMembers.Add(member);
+                    if (member == null) continue;
+
+                    if (ObjectHelper.IsParty(member) && member.IsParty() && member.Character() != null)
+                    {
+                        var character = member.Character();
+                        if (character != null && character->CharacterData.OnlineStatus != 15 &&
+                            character->CharacterData.OnlineStatus != 5 && member.IsTargetable)
+                        {
+                            partyMembers.Add(member);
+                        }
+                    }
                 }
             }
         }
@@ -66,7 +71,6 @@ internal static partial class TargetUpdater
         }
         return partyMembers;
     }
-
 
     private static unsafe List<IBattleChara> GetAllianceMembers()
     {

@@ -189,7 +189,7 @@ partial class RedMageRotation
     [RotationDesc(ActionID.VercurePvE)]
     protected override bool HealSingleGCD(out IAction? act)
     {
-        if (VercurePvE.CanUse(out act, skipSelfStatusProvideCheck: true)) return true;
+        if (VercurePvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
         return base.HealSingleGCD(out act);
     }
 

@@ -110,8 +110,8 @@ public sealed class NIN_Default : NinjaRotation
         if (!CombatElapsedLess(6))
         {
             // Attempts to use Trick Attack if it's available.
-            if (KunaisBanePvE.CanUse(out act, skipAoeCheck: true, skipTargetStatusProvideCheck: IsShadowWalking)) return true;
-            if (!KunaisBanePvE.EnoughLevel && TrickAttackPvE.CanUse(out act, skipTargetStatusProvideCheck: IsShadowWalking)) return true;
+            if (KunaisBanePvE.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: IsShadowWalking)) return true;
+            if (!KunaisBanePvE.EnoughLevel && TrickAttackPvE.CanUse(out act, skipStatusProvideCheck: IsShadowWalking)) return true;
 
             // If Trick Attack is on cooldown but will not be ready soon, considers using Meisui to recover Ninki.
             if (TrickAttackPvE.Cooldown.IsCoolingDown && !TrickAttackPvE.Cooldown.WillHaveOneCharge(19) && TenChiJinPvE.Cooldown.IsCoolingDown && MeisuiPvE.CanUse(out act)) return true;
@@ -328,7 +328,7 @@ public sealed class NIN_Default : NinjaRotation
             //Others
             else if (jinId == SuitonPvE_18881.ID && !IsLastAction(false, SuitonPvE_18881))
             {
-                if (SuitonPvE_18881.CanUse(out act, skipAoeCheck: true, skipSelfStatusProvideCheck: true)) return true;
+                if (SuitonPvE_18881.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: true)) return true;
             }
             else if (chiId == DotonPvE_18880.ID && !IsLastAction(false, DotonPvE_18880) && !HasDoton)
             {
