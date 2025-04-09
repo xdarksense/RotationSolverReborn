@@ -598,7 +598,20 @@ internal static class DataCenter
             var refinedHP = new Dictionary<ulong, float>();
             foreach (var member in PartyMembers)
             {
-                refinedHP[member.GameObjectId] = GetPartyMemberHPRatio(member);
+                try
+                {
+                    if (member == null || member.GameObjectId == 0)
+                    {
+                        continue; // Skip invalid or null members
+                    }
+
+                    refinedHP[member.GameObjectId] = GetPartyMemberHPRatio(member);
+                }
+                catch (AccessViolationException ex)
+                {
+                    Svc.Log.Error($"AccessViolationException in RefinedHP: {ex.Message}");
+                    continue; // Skip problematic members
+                }
             }
             return refinedHP;
         }
