@@ -796,7 +796,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 return dis <= EffectRange && dis >= 8;
 
             default:
-                Svc.Log.Debug($"{action.Action.Name.ExtractText}'s CastType is not valid! The value is {action.Action.CastType}");
+                Svc.Log.Debug($"{action.Action.Name.ExtractText().ToString()}'s CastType is not valid! The value is {action.Action.CastType}");
                 return false;
         }
     }
@@ -914,7 +914,7 @@ public struct ActionTargetInfo(IBaseAction action)
         IBattleChara? FindTheSpear()
         {
             // The Spear priority based on the info from The Balance Discord for Level 100 Dance Partner
-            Job[] TheSpearpriority = { Job.PCT, Job.SAM, Job.BLM, Job.RDM, Job.SMN, Job.MCH, Job.BRD, Job.DNC, Job.RPR, Job.VPR, Job.MNK, Job.NIN, Job.DRG };
+            Job[] TheSpearpriority = { Job.PCT, Job.MCH, Job.SMN, Job.RDM, Job.BRD, Job.DNC, Job.BLM, Job.SAM, Job.NIN, Job.VPR, Job.DRG, Job.MNK, Job.DRK, Job.RPR };
 
             if (IGameObjects == null) return null;
 
@@ -948,7 +948,7 @@ public struct ActionTargetInfo(IBaseAction action)
         IBattleChara? FindTheBalance()
         {
             // The Balance priority based on the info from The Balance Discord for Level 100 Dance Partner
-            Job[] TheBalancepriority = { Job.RPR, Job.VPR, Job.MNK, Job.NIN, Job.DRG, Job.PCT, Job.SAM, Job.BLM, Job.RDM, Job.SMN, Job.MCH, Job.BRD, Job.DNC };
+            Job[] TheBalancepriority = { Job.SAM, Job.NIN, Job.VPR, Job.DRG, Job.MNK, Job.RPR, Job.DRK, Job.PCT, Job.MCH, Job.SMN, Job.RDM, Job.BRD, Job.DNC, Job.BLM };
 
             if (IGameObjects == null) return null;
 
@@ -1172,13 +1172,13 @@ public struct ActionTargetInfo(IBaseAction action)
                     TargetingType.LowMaxHP => IGameObjects.OrderBy<IGameObject, uint>(p => p is IBattleChara b ? b.MaxHp : 0),
                     TargetingType.Nearest => IGameObjects.OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
                     TargetingType.Farthest => IGameObjects.OrderByDescending<IGameObject, float>(p => p.DistanceToPlayer()),
-                    TargetingType.HunterKillerHealers => IGameObjects.Where(p => p.IsJobs(JobRole.Healer.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer()).Any() 
+                    TargetingType.PvPHealers => IGameObjects.Where(p => p.IsJobs(JobRole.Healer.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer()).Any() 
                         ? IGameObjects.Where(p => p.IsJobs(JobRole.Healer.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer())
                         : IGameObjects.OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
-                    TargetingType.HunterKillerTanks => IGameObjects.Where(p => p.IsJobs(JobRole.Tank.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer()).Any()
+                    TargetingType.PvPTanks => IGameObjects.Where(p => p.IsJobs(JobRole.Tank.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer()).Any()
                         ? IGameObjects.Where(p => p.IsJobs(JobRole.Tank.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer())
                         : IGameObjects.OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
-                    TargetingType.HunterKillerDPS => IGameObjects.Where(p => p.IsJobs(JobRole.AllDPS.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer()).Any()
+                    TargetingType.PvPDPS => IGameObjects.Where(p => p.IsJobs(JobRole.AllDPS.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer()).Any()
                         ? IGameObjects.Where(p => p.IsJobs(JobRole.AllDPS.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer())
                         : IGameObjects.OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
                     _ => IGameObjects.OrderByDescending<IGameObject, float>(p => p.HitboxRadius),
