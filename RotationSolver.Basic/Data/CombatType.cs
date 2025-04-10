@@ -32,7 +32,25 @@ public enum CombatType : byte
 /// </summary>
 public enum CombatRole
 {
-    None, Tank, Healer, DPS
+    /// <summary>
+    /// 
+    /// </summary>
+    None,
+
+    /// <summary>
+    /// 
+    /// </summary>
+    Tank,
+
+    /// <summary>
+    /// 
+    /// </summary>
+    Healer,
+
+    /// <summary>
+    /// 
+    /// </summary>
+    DPS
 }
 
 /// <summary>

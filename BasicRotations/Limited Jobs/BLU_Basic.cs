@@ -124,73 +124,6 @@ public sealed class Blue_Basic : BlueMageRotation
 
     #endregion
 
-    /// <summary>
-    ///
-    /// </summary>
-    public enum BluDPSSpell : byte
-    {
-        /// <summary>
-        ///
-        /// </summary>
-        WaterCannon,
-
-        /// <summary>
-        ///
-        /// </summary>
-        SonicBoom,
-
-        /// <summary>
-        ///
-        /// </summary>
-        GoblinPunch,
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    public enum BluAOESpell : byte
-    {
-        /// <summary>
-        ///
-        /// </summary>
-        Glower,
-
-        /// <summary>
-        ///
-        /// </summary>
-        FlyingFrenzy,
-
-        /// <summary>
-        ///
-        /// </summary>
-        FlameThrower,
-
-        /// <summary>
-        ///
-        /// </summary>
-        DrillCannons,
-
-        /// <summary>
-        ///
-        /// </summary>
-        Plaincracker,
-
-        /// <summary>
-        ///
-        /// </summary>
-        HighVoltage,
-
-        /// <summary>
-        ///
-        /// </summary>
-        MindBlast,
-
-        /// <summary>
-        ///
-        /// </summary>
-        ThousandNeedles,
-    }
-
     public Blue_Basic()
     {
         BluDPSSpellActions.Add(BluDPSSpell.WaterCannon, WaterCannonPvE);
@@ -208,37 +141,6 @@ public sealed class Blue_Basic : BlueMageRotation
         BluAOESpellActions.Add(BluAOESpell.HighVoltage, HighVoltagePvE);
         BluAOESpellActions.Add(BluAOESpell.MindBlast, MindBlastPvE);
         BluAOESpellActions.Add(BluAOESpell.ThousandNeedles, _1000NeedlesPvE);
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    public Dictionary<BluDPSSpell, IBaseAction> BluDPSSpellActions = [];
-
-    /// <summary>
-    ///
-    /// </summary>
-    public Dictionary<BluAOESpell, IBaseAction> BluAOESpellActions = [];
-
-    /// <summary>
-    ///
-    /// </summary>
-    public Dictionary<BluHealSpell, IBaseAction> BluHealSpellActions = [];
-
-    /// <summary>
-    ///
-    /// </summary>
-    public enum BluHealSpell : byte
-    {
-        /// <summary>
-        ///
-        /// </summary>
-        WhiteWind,
-
-        /// <summary>
-        ///
-        /// </summary>
-        AngelsSnack,
     }
 
     #region GCD Logic
