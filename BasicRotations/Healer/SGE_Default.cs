@@ -431,6 +431,9 @@ public sealed class SGE_Default : SageRotation
         act = null;
         if (IsLastAction(ActionID.SwiftcastPvE) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
 
+        if (DoEukrasianPrognosis(out act)) return true;
+        if (DoEukrasianDiagnosis(out act)) return true;
+
         if (PhlegmaPvE.CanUse(out act, usedUp: IsMoving)) return true;
 
         foreach (var member in PartyMembers)
@@ -452,12 +455,7 @@ public sealed class SGE_Default : SageRotation
         if (IsMoving && ToxikonPvE.CanUse(out act)) return true;
 
         if (DoEukrasianDyskrasia(out act)) return true;
-
-        if ((_EukrasiaActionAim == null)
-            && DyskrasiaPvE.CanUse(out act)) return true;
-
-        if (DoEukrasianPrognosis(out act)) return true;
-        if (DoEukrasianDiagnosis(out act)) return true;
+        if (DyskrasiaPvE.CanUse(out act)) return true;
 
         if (DoEukrasianDosis(out act)) return true;
         if (DosisPvE.CanUse(out act)) return true;

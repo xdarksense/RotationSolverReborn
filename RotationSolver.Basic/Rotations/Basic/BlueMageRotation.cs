@@ -1,6 +1,4 @@
-using ECommons;
 using ECommons.DalamudServices;
-using ECommons.GameFunctions;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using CombatRole = RotationSolver.Basic.Data.CombatRole;
 
@@ -151,6 +149,9 @@ partial class BlueMageRotation
     /// </summary>
     protected abstract IBaseAction[] ActiveActions { get; }
 
+    /// <summary>
+    /// 
+    /// </summary>
     public BlueMageRotation()
     {
         SetBlueMageActions();
@@ -159,7 +160,6 @@ partial class BlueMageRotation
     /// <summary>
     /// Attempts to set the actions for the Blue Mage character.
     /// </summary>
-    /// <param name="actions">An array of actions implementing the <see cref="IBaseAction"/> interface to be set for the Blue Mage. The maximum number of actions is 24.</param>
     /// <returns>Returns <c>true</c> if the actions are successfully set; otherwise, returns <c>false</c>.</returns>
     protected unsafe bool SetBlueMageActions()
     {
