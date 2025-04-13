@@ -257,7 +257,7 @@ public sealed class SGE_Testing : SageRotation
         if (!InCombat && !Player.HasStatus(true, StatusID.Kardia) && KardiaPvE.CanUse(out act)) return true;
 
         if (KardiaPvE.CanUse(out act)) return true;
-
+        
         if (OOCRhizomata && !InCombat && Addersgall <= 1 && RhizomataPvE.CanUse(out act)) return true;
         if (InCombat && Addersgall <= 1 && RhizomataPvE.CanUse(out act)) return true;
 
@@ -266,7 +266,7 @@ public sealed class SGE_Testing : SageRotation
         return base.GeneralAbility(nextGCD, out act);
     }
     #endregion
-
+    
     #region Eukrasia Logic
     private IBaseAction? _EukrasiaActionAim = null;
 
@@ -470,7 +470,7 @@ public sealed class SGE_Testing : SageRotation
         if (InCombat && !HasHostilesInRange && EukrasiaPvE.CanUse(out act)) return true;
         return base.GeneralGCD(out act);
     }
-    #endregion
+#endregion
 
     #region Extra Methods
     public override bool CanHealSingleSpell => base.CanHealSingleSpell && (GCDHeal || PartyMembers.GetJobCategory(JobRole.Healer).Count() < 2);
