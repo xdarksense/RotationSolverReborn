@@ -1,9 +1,9 @@
 namespace RebornRotations.Healer;
 
-[Rotation("Testing", CombatType.PvE, GameVersion = "7.2")]
-[SourceCode(Path = "main/BasicRotations/Healer/SGE_Testing.cs")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
+[SourceCode(Path = "main/BasicRotations/Healer/SGE_Default.cs")]
 [Api(4)]
-public sealed class SGE_Testing : SageRotation
+public sealed class SGE_Default : SageRotation
 {
     #region Config Options
     [RotationConfig(CombatType.PvE, Name = "Use Eukrasia Action to heal")]
