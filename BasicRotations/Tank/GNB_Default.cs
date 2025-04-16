@@ -1,3 +1,5 @@
+using Dalamud.Utility;
+
 namespace RebornRotations.Tank;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
@@ -6,8 +8,6 @@ namespace RebornRotations.Tank;
 public sealed class GNB_Default_Old : GunbreakerRotation
 {
     #region Config Options
-    [RotationConfig(CombatType.PvE, Name = "Use experimental No Mercy logic for burst")]
-    public bool NoMercyLogic { get; set; } = false;
     #endregion
 
     private static bool InBurstStatus => !Player.WillStatusEnd(0, true, StatusID.NoMercy);
@@ -28,8 +28,8 @@ public sealed class GNB_Default_Old : GunbreakerRotation
 
         if (InCombat && CombatElapsedLess(30))
         {
-            if (!CombatElapsedLessGCD(2) && NoMercyPvE.CanUse(out act, skipAoeCheck: true)) return true;
-            if (InBurstStatus && BloodfestPvE.CanUse(out act, skipAoeCheck: true)) return true;
+            if (CanUseNoMercy() && NoMercyPvE.CanUse(out act)) return true;
+            if (InBurstStatus && BloodfestPvE.CanUse(out act)) return true;
         }
 
         if (AbdomenTearPvE.CanUse(out act)) return true;
@@ -72,12 +72,9 @@ public sealed class GNB_Default_Old : GunbreakerRotation
         if (AuroraPvE.CanUse(out act, usedUp: true)) return true;
         return base.HealSingleAbility(nextGCD, out act);
     }
+
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        if (NoMercyLogic && IsBurst && CanUseNoMercy(out act)) return true;
-
-        if (!NoMercyLogic && !CombatElapsedLessGCD(5) && NoMercyPvE.CanUse(out act, skipAoeCheck: true)) return true;
-
         if (JugularRipPvE.CanUse(out act)) return true;
 
         if (DangerZonePvE.CanUse(out act) && !DoubleDownPvE.EnoughLevel)
@@ -131,13 +128,13 @@ public sealed class GNB_Default_Old : GunbreakerRotation
         if (SavageClawPvE.CanUse(out act, skipComboCheck: true)) return true;
         if (WickedTalonPvE.CanUse(out act, skipComboCheck: true)) return true;
 
-        if (CanUseBurstStrike(out act)) return true;
+        if (CanUseBurstStrike() && BurstStrikePvE.CanUse(out act)) return true;
 
         if (FatedCirclePvE.CanUse(out act)) return true;
         if (DemonSlaughterPvE.CanUse(out act)) return true;
         if (DemonSlicePvE.CanUse(out act)) return true;
 
-        if (Ammo == MaxAmmo && IsLastGCD(ActionID.BrutalShellPvE) && BurstStrikePvE.CanUse(out act)) return true;
+        if (Ammo == MaxAmmo() && IsLastGCD(ActionID.BrutalShellPvE) && BurstStrikePvE.CanUse(out act)) return true;
 
         if (!InGnashingFang)
         {
@@ -157,7 +154,7 @@ public sealed class GNB_Default_Old : GunbreakerRotation
 
     public override bool CanHealAreaSpell => false;
 
-    private bool CanUseNoMercy(out IAction act)
+    private bool CanUseNoMercyOld(out IAction act)
     {
         var IsTargetBoss = HostileTarget?.IsBossFromIcon() ?? false;
 
@@ -170,8 +167,56 @@ public sealed class GNB_Default_Old : GunbreakerRotation
         if (BurstStrikePvE.EnoughLevel)
         {
             if (IsLastGCD(ActionID.KeenEdgePvE) && Ammo == 1 && !GnashingFangPvE.Cooldown.IsCoolingDown && !BloodfestPvE.Cooldown.IsCoolingDown) return true;
-            else if (Ammo == MaxAmmo) return true;
+            else if (Ammo == MaxAmmo()) return true;
             else if (Ammo == 2 && GnashingFangPvE.Cooldown.IsCoolingDown) return true;
+        }
+
+        return false;
+    }
+
+    private bool IsOddMinuteBurst => BloodfestPvE.Cooldown.RecastTimeElapsed is < 90 and > 20;
+
+    private bool CanUseNoMercy()
+    {
+        var IsTargetBoss = HostileTarget?.IsBossFromIcon() ?? false;
+
+        // Check if No Mercy can be used
+        if (!NoMercyPvE.CanUse(out _))
+        {
+            return false;
+        }
+
+        if (!IsFullParty && !IsTargetBoss && !IsMoving && DemonSlicePvE.CanUse(out _)) return true;
+
+        // Check if the player is in combat and has hostiles in range
+        if (InCombat && HasHostilesInRange)
+        {
+            if (DoubleDownPvE.EnoughLevel)
+            {
+                // Logic for when Double Down is available
+                if (IsOddMinuteBurst)
+                {
+                    if (Ammo >= 2 || (IsLastComboAction(false, BrutalShellPvE) && Ammo == 1))
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (Ammo != 3)
+                    {
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                // Logic for when Double Down is not available
+                if (Ammo > 0)
+                {
+                    return true;
+                }
+            }
         }
 
         return false;
@@ -222,25 +267,53 @@ public sealed class GNB_Default_Old : GunbreakerRotation
         return false;
     }
 
-    private bool CanUseBurstStrike(out IAction act)
+    private bool CanUseBurstStrikeOld(out IAction act)
     {
-        if (BurstStrikePvE.CanUse(out act))
+        if (BurstStrikePvE.CanUse(out act, usedUp: true, skipStatusProvideCheck: true))
         {
             if (DemonSlicePvE.CanUse(out _)) return false;
 
             if (SonicBreakPvE.Cooldown.IsCoolingDown && SonicBreakPvE.Cooldown.WillHaveOneCharge(0.5f) && GnashingFangPvE.EnoughLevel) return false;
 
             if (Player.HasStatus(true, StatusID.NoMercy) &&
-            AmmoComboStep == 0 &&
                 !GnashingFangPvE.Cooldown.WillHaveOneCharge(1)) return true;
 
             if (!CartridgeChargeIiTrait.EnoughLevel && Ammo == 2) return true;
 
             if (IsLastGCD((ActionID)BrutalShellPvE.ID) &&
-                (Ammo == MaxAmmo ||
+                (Ammo == MaxAmmo() ||
                 BloodfestPvE.Cooldown.WillHaveOneCharge(6) && Ammo <= 2 && !NoMercyPvE.Cooldown.WillHaveOneCharge(10) && BloodfestPvE.EnoughLevel)) return true;
 
         }
+        return false;
+    }
+
+    private bool CanUseBurstStrike()
+    {
+        // Check if BurstStrike can be used
+        if (!BurstStrikePvE.CanUse(out _))
+        {
+            return false;
+        }
+
+        // Check if all conditions for using BurstStrike are met
+        if (BurstStrikePvE.CanUse(out _) && NoMercyWindow)
+        {
+            if (GnashingFangPvE.IsInCooldown)
+            {
+                if (DoubleDownPvE.IsInCooldown || (!DoubleDownPvE.EnoughLevel && Ammo > 0))
+                {
+                    if (!HasReadyToReign)
+                    {
+                        if (AmmoComboStep == 0)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
         return false;
     }
 
