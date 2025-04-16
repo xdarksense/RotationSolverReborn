@@ -152,15 +152,22 @@ public sealed class BRD_Default : BardRotation
         {
             if ((!RadiantFinalePvE.EnoughLevel && !RagingStrikesPvE.Cooldown.IsCoolingDown
                     || RadiantFinalePvE.EnoughLevel && !RadiantFinalePvE.Cooldown.IsCoolingDown && RagingStrikesPvE.EnoughLevel && (!RagingStrikesPvE.Cooldown.IsCoolingDown || RagingStrikesPvE.Cooldown.WillHaveOneCharge(BuffAlignment)))
-                    && HostileTarget?.HasStatus(true, StatusID.Windbite, StatusID.Stormbite) == true && HostileTarget?.HasStatus(true, StatusID.VenomousBite, StatusID.CausticBite) == true && BattleVoicePvE.CanUse(out act, isLastAbility: OGCDTimers)) return true;
+                    && BattleVoicePvE.Target.Target?.HasStatus(true, StatusID.Windbite, StatusID.Stormbite) == true && BattleVoicePvE.Target.Target?.HasStatus(true, StatusID.VenomousBite, StatusID.CausticBite) == true && BattleVoicePvE.CanUse(out act, isLastAbility: OGCDTimers)) return true;
 
             if (!Player.WillStatusEnd(0, true, StatusID.BattleVoice) && RadiantFinalePvE.CanUse(out act, isFirstAbility: OGCDTimers)) return true;
 
             if ((RadiantFinalePvE.EnoughLevel && !Player.WillStatusEnd(0, true, StatusID.RadiantFinale) && !Player.WillStatusEnd(0, true, StatusID.BattleVoice)
                 || !RadiantFinalePvE.EnoughLevel && BattleVoicePvE.EnoughLevel && !Player.WillStatusEnd(0, true, StatusID.BattleVoice)
-                || !RadiantFinalePvE.EnoughLevel && !BattleVoicePvE.EnoughLevel)
+                || !RadiantFinalePvE.EnoughLevel && !BattleVoicePvE.EnoughLevel && nextGCD.IsTheSameTo(true, StraightShotPvE))
                 && RagingStrikesPvE.CanUse(out act, isLastAbility: OGCDTimers)) return true;
         }
+        else if (!MagesBalladPvE.EnoughLevel)
+        {
+            if (!StraightShotPvE.EnoughLevel && RagingStrikesPvE.CanUse(out act, isLastAbility: OGCDTimers)) return true;
+
+            if (nextGCD.IsTheSameTo(true, StraightShotPvE) && RagingStrikesPvE.CanUse(out act, isLastAbility: OGCDTimers)) return true;
+        }
+
 
         if (RadiantFinalePvE.EnoughLevel && RadiantFinalePvE.Cooldown.IsCoolingDown && BattleVoicePvE.EnoughLevel && !BattleVoicePvE.Cooldown.IsCoolingDown) return false;
 
@@ -213,6 +220,9 @@ public sealed class BRD_Default : BardRotation
     #region GCD Logic
     protected override bool GeneralGCD(out IAction? act)
     {
+        var isTargetBoss = CurrentTarget?.IsBossFromTTK() ?? false;
+        var isTargetDying = CurrentTarget?.IsDying() ?? false;
+
         if (IronJawsPvE.CanUse(out act)) return true;
         if (IronJawsPvE.CanUse(out act, skipStatusProvideCheck: true) && (IronJawsPvE.Target.Target?.WillStatusEnd(30, true, IronJawsPvE.Setting.TargetStatusProvide ?? []) ?? false))
         {
@@ -231,7 +241,7 @@ public sealed class BRD_Default : BardRotation
         {
             if (!Player.HasStatus(true, StatusID.RagingStrikes)) return true;
             if (Player.HasStatus(true, StatusID.RagingStrikes) && BarragePvE.Cooldown.IsCoolingDown) return true;
-            if (HostileTarget?.WillStatusEndGCD(1, 0.5f, true, StatusID.Windbite, StatusID.Stormbite, StatusID.VenomousBite, StatusID.CausticBite) ?? false) return false;
+            if (BlastArrowPvE.Target.Target?.WillStatusEndGCD(1, 0.5f, true, StatusID.Windbite, StatusID.Stormbite, StatusID.VenomousBite, StatusID.CausticBite) ?? false) return false;
         }
 
         //aoe
@@ -240,7 +250,7 @@ public sealed class BRD_Default : BardRotation
         if (LadonsbitePvE.CanUse(out act) && !Player.HasStatus(true, StatusID.HawksEye_3861) && !Player.HasStatus(true, StatusID.Barrage)) return true;
         if (QuickNockPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.HawksEye_3861) && !Player.HasStatus(true, StatusID.Barrage)) return true;
 
-        if (IronJawsPvE.EnoughLevel && HostileTarget?.HasStatus(true, StatusID.Windbite, StatusID.Stormbite) == true && HostileTarget?.HasStatus(true, StatusID.VenomousBite, StatusID.CausticBite) == true)
+        if (IronJawsPvE.EnoughLevel && WindbitePvE.Target.Target?.HasStatus(true, StatusID.Windbite, StatusID.Stormbite) == true && VenomousBitePvE.Target.Target?.HasStatus(true, StatusID.VenomousBite, StatusID.CausticBite) == true)
         {
             // Do not use WindbitePvE or VenomousBitePvE if both statuses are present and IronJawsPvE has enough level
         }
@@ -268,7 +278,7 @@ public sealed class BRD_Default : BardRotation
         if (QuickNockPvE.CanUse(out _) && SoulVoice == 100) return true;
         if (LadonsbitePvE.CanUse(out _) && SoulVoice == 100) return true;
 
-        if (HostileTarget?.WillStatusEndGCD(1, 1, true, StatusID.Windbite, StatusID.Stormbite, StatusID.VenomousBite, StatusID.CausticBite) ?? false) return false;
+        if (ApexArrowPvE.Target.Target?.WillStatusEndGCD(1, 1, true, StatusID.Windbite, StatusID.Stormbite, StatusID.VenomousBite, StatusID.CausticBite) ?? false) return false;
 
         if (Song == Song.Wanderer && SoulVoice >= 80 && !Player.HasStatus(true, StatusID.RagingStrikes)) return false;
 
