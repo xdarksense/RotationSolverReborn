@@ -24,10 +24,24 @@ internal static class DataCenter
 
     public static bool IsActivated() => State || IsManual || Service.Config.TeachingMode;
 
+    private static IBattleChara? _cachedHostileTarget;
+
     internal static IBattleChara? HostileTarget
     {
-        get => Svc.Objects.SearchById(_hostileTargetId) as IBattleChara;
-        set => _hostileTargetId = value?.GameObjectId ?? 0;
+        get
+        {
+            if (_cachedHostileTarget?.GameObjectId == _hostileTargetId)
+                return _cachedHostileTarget;
+
+            var target = Svc.Objects.SearchById(_hostileTargetId);
+            _cachedHostileTarget = target as IBattleChara;
+            return _cachedHostileTarget;
+        }
+        set
+        {
+            _hostileTargetId = value?.GameObjectId ?? 0;
+            _cachedHostileTarget = value;
+        }
     }
 
     internal static List<uint> PrioritizedNameIds { get; set; } = new();
