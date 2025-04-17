@@ -410,36 +410,52 @@ public static class StatusHelper
     /// <returns>An enumerable of all statuses.</returns>
     private static IEnumerable<Status> GetAllStatus(this IGameObject obj, bool isFromSelf)
     {
+        // Early return if the object is null
+        if (obj == null)
+        {
+            Svc.Log.Warning("Object is null. Cannot retrieve statuses.");
+            return Enumerable.Empty<Status>();
+        }
+
+        // Early return if the object is not a BattleChara
         if (obj is not IBattleChara b)
         {
-            Svc.Log.Warning($"Object is not a valid IBattleChara (GameObjectId: {obj?.GameObjectId}). Returning empty status list.");
+            Svc.Log.Warning($"Object is not a valid IBattleChara (GameObjectId: {obj.GameObjectId}). Returning empty status list.");
             return Enumerable.Empty<Status>();
         }
 
         var playerId = Player.Object?.GameObjectId ?? 0;
         var result = new List<Status>();
 
+        // Wrap the entire status retrieval process in a try-catch block
         try
         {
-            // Ensure the BattleChara object and its StatusList are valid
-            if (b == null)
-            {
-                Svc.Log.Warning($"BattleChara object is null (GameObjectId: {obj.GameObjectId}). Cannot retrieve statuses.");
-                return Enumerable.Empty<Status>();
-            }
-
+            // Check if the StatusList is accessible before attempting to use it
             var statusList = b.StatusList;
-            if (statusList == null || statusList.Length == 0)
+            if (statusList == null)
             {
-                Svc.Log.Warning($"StatusList is null or empty for BattleChara (GameObjectId: {obj.GameObjectId}). Cannot get statuses.");
+                Svc.Log.Warning($"StatusList is null for BattleChara (GameObjectId: {obj.GameObjectId}). Cannot get statuses.");
                 return Enumerable.Empty<Status>();
             }
 
+            // Iterate through the status list with additional safety checks
             foreach (var status in statusList)
             {
-                if (!isFromSelf || status.SourceId == playerId || status.SourceObject?.OwnerId == playerId)
+                if (status == null) continue; // Skip null statuses
+
+                try
                 {
-                    result.Add(status);
+                    // Check if the status is from self if required
+                    if (!isFromSelf || status.SourceId == playerId ||
+                        (status.SourceObject != null && status.SourceObject.OwnerId == playerId))
+                    {
+                        result.Add(status);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Log the exception but continue processing other statuses
+                    Svc.Log.Error($"Error processing individual status: {ex.Message}");
                 }
             }
         }
@@ -454,6 +470,7 @@ public static class StatusHelper
 
         return result;
     }
+
 
     /// <summary>
     /// Check if the status is invincible.
