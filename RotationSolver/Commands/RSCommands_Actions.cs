@@ -82,12 +82,7 @@ namespace RotationSolver.Commands
 
             if (nextAction is BaseAction baseAct)
             {
-                // Cache target to avoid redundant property access
-                var target = baseAct.Target.Target == playerObject
-                    ? baseAct.Target.AffectedTargets.FirstOrDefault()
-                    : baseAct.Target.Target;
-
-                if (target != null && target != playerObject && target.IsEnemy())
+                if (baseAct.Target.Target is IBattleChara target && target != playerObject && target.IsEnemy())
                 {
                     DataCenter.HostileTarget = target;
                     if (!DataCenter.IsManual &&
@@ -225,12 +220,25 @@ namespace RotationSolver.Commands
                     return;
                 }
 
-                // Cache target lookup
-                var target = DataCenter.AllHostileTargets
-                            .FirstOrDefault(t => t is IBattleChara battleChara &&
-                            battleChara != null &&
-                            playerObject != null &&
-                            battleChara.TargetObjectId == playerObject.GameObjectId);
+                if (DataCenter.AllHostileTargets == null || !DataCenter.AllHostileTargets.Any())
+                {
+                    return;
+                }
+
+                IBattleChara? target = null;
+                try
+                {
+                    target = DataCenter.AllHostileTargets
+                        .FirstOrDefault(t => t is IBattleChara battleChara &&
+                                             battleChara != null &&
+                                             playerObject != null &&
+                                             battleChara.TargetObjectId == playerObject.GameObjectId);
+                }
+
+                catch (Exception ex)
+                {
+                    Svc.Log.Error(ex, "Error while accessing AllHostileTargets.");
+                }
 
                 if (Service.Config.StartOnAttackedBySomeone && target != null && !target.IsDummy())
                 {
