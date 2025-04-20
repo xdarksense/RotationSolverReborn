@@ -164,6 +164,7 @@ namespace RotationSolver.Commands
 
         internal static void CancelState()
         {
+            DataCenter.ResetAllRecords();
             if (DataCenter.State) DoStateCommandType(StateCommandType.Off);
         }
 
@@ -179,12 +180,7 @@ namespace RotationSolver.Commands
                 }
 
                 var playerObject = Player.Object;
-                if (playerObject == null)
-                {
-                    if (Service.Config.InDebug)
-                        Svc.Log.Information("Player object is null.");
-                    return;
-                }
+                if (playerObject == null) return;
 
                 // Cache frequently accessed properties
                 var isPvP = DataCenter.Territory?.IsPvP ?? false;

@@ -183,9 +183,8 @@ public static class StatusHelper
     public static bool WillStatusEnd(this IGameObject? obj, float time, bool isFromSelf = true, params StatusID[] statusIDs)
     {
         if (HasApplyStatus(obj, statusIDs)) return false;
-        var remain = obj.StatusTime(isFromSelf, statusIDs);
-        if (remain < 0 && obj.HasStatus(isFromSelf, statusIDs)) return false;
-        return remain <= time;
+        if (obj.StatusTime(isFromSelf, statusIDs) < 0 && obj.HasStatus(isFromSelf, statusIDs)) return false;
+        return obj.StatusTime(isFromSelf, statusIDs) <= time;
     }
 
     /// <summary>
@@ -224,10 +223,9 @@ public static class StatusHelper
             return Enumerable.Empty<float>();
         }
 
-        var statuses = obj.GetStatus(isFromSelf, statusIDs);
         var result = new List<float>();
 
-        foreach (var status in statuses)
+        foreach (var status in obj.GetStatus(isFromSelf, statusIDs))
         {
             result.Add(status.RemainingTime == 0 ? float.MaxValue : status.RemainingTime);
         }
@@ -250,9 +248,8 @@ public static class StatusHelper
         }
 
         if (HasApplyStatus(obj, statusIDs)) return byte.MaxValue;
-        var stacks = obj.StatusStacks(isFromSelf, statusIDs);
-        if (stacks == null || !stacks.Any()) return 0;
-        return stacks.Min();
+        if (obj.StatusStacks(isFromSelf, statusIDs) == null || !obj.StatusStacks(isFromSelf, statusIDs).Any()) return 0;
+        return obj.StatusStacks(isFromSelf, statusIDs).Min();
     }
 
     private static IEnumerable<byte> StatusStacks(this IGameObject? obj, bool isFromSelf, params StatusID[] statusIDs)
@@ -365,17 +362,16 @@ public static class StatusHelper
     private static IEnumerable<Status> GetStatus(this IGameObject? obj, bool isFromSelf, params StatusID[] statusIDs)
     {
         var newEffects = new HashSet<uint>(statusIDs.Select(a => (uint)a));
-        var allStatuses = obj.GetAllStatus(isFromSelf);
         var result = new List<Status>();
 
-        if (obj == null || statusIDs == null || statusIDs.Length == 0 || allStatuses == null || !allStatuses.Any())
+        if (obj == null || statusIDs == null || statusIDs.Length == 0 || obj.GetAllStatus(isFromSelf) == null || !obj.GetAllStatus(isFromSelf).Any())
         {
             return Enumerable.Empty<Status>();
         }
 
         try
         {
-            foreach (var status in allStatuses)
+            foreach (var status in obj.GetAllStatus(isFromSelf))
             {
                 if (newEffects.Contains(status.StatusId))
                 {
