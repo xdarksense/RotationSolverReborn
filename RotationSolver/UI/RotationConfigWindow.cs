@@ -2783,10 +2783,10 @@ public partial class RotationConfigWindow : Window
         //}
 
         // Check and display VFX casting status
-        ImGui.Text($"Is Casting Tank VFX: {DataCenter.IsCastingTankVfx()}");
-        ImGui.Text($"Is Casting Area VFX: {DataCenter.IsCastingAreaVfx()}");
-        ImGui.Text($"Is Hostile Casting Stop: {DataCenter.IsHostileCastingStop}");
-        ImGui.Text($"VfxDataQueue: {DataCenter.VfxDataQueue.Count}");
+        //ImGui.Text($"Is Casting Tank VFX: {DataCenter.IsCastingTankVfx()}");
+        //ImGui.Text($"Is Casting Area VFX: {DataCenter.IsCastingAreaVfx()}");
+        //ImGui.Text($"Is Hostile Casting Stop: {DataCenter.IsHostileCastingStop}");
+        //ImGui.Text($"VfxDataQueue: {DataCenter.VfxDataQueue.Count}");
 
         // Check and display VFX casting status
         ImGui.Text("Casting Vfx:");

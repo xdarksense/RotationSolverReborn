@@ -189,8 +189,8 @@ namespace RotationSolver.Commands
 
                 // Combine conditions to reduce redundant checks
                 if (Svc.Condition[ConditionFlag.LoggingOut] ||
-                    (Service.Config.AutoOffWhenDead && !isPvP && Player.Available && currentHp == 0) ||
-                    (Service.Config.AutoOffWhenDeadPvP && isPvP && Player.Available && currentHp == 0) ||
+                    (Service.Config.AutoOffWhenDead && !isPvP && Player.AvailableThreadSafe && currentHp == 0) ||
+                    (Service.Config.AutoOffWhenDeadPvP && isPvP && Player.AvailableThreadSafe && currentHp == 0) ||
                     (Service.Config.AutoOffPvPMatchEnd && Svc.Condition[ConditionFlag.PvPDisplayActive]) ||
                     (Service.Config.AutoOffCutScene && Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]) ||
                     (Service.Config.AutoOffSwitchClass && playerJob != _previousJob) ||
@@ -220,10 +220,10 @@ namespace RotationSolver.Commands
                 try
                 {
                     target = DataCenter.AllHostileTargets
-                        .FirstOrDefault(t => t is IBattleChara battleChara &&
-                                             battleChara != null &&
-                                             playerObject != null &&
-                                             battleChara.TargetObjectId == playerObject.GameObjectId);
+                    .FirstOrDefault(t => t is IBattleChara battleChara &&
+                                         battleChara != null &&
+                                         playerObject != null &&
+                                         battleChara.TargetObjectId == playerObject.GameObjectId);
                 }
 
                 catch (Exception ex)
