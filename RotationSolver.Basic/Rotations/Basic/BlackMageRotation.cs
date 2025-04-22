@@ -104,7 +104,7 @@ partial class BlackMageRotation
     public static byte SoulStackCount => Math.Max(AstralFireStacks, UmbralIceStacks);
 
     /// <summary>
-    /// A check with variable max stacks of Polyglot based on the trait level.
+    /// A check with variable max stacks of Astral Fire stacks and Umbral Ice based on the trait level.
     /// </summary>
     public static bool IsSoulStacksMaxed
     {
@@ -126,7 +126,7 @@ partial class BlackMageRotation
     }
 
     /// <summary>
-    /// A check with variable max stacks of Polyglot based on the trait level.
+    /// A check with variable max stacks of Astral Fire stacks and Umbral Ice based on the trait level.
     /// </summary>
     public static byte MaxSoulCount
     {

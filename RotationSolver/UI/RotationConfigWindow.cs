@@ -1750,7 +1750,7 @@ public partial class RotationConfigWindow : Window
 
         static void DrawActionDebug()
         {
-            if (!Service.Config.InDebug || !Player.AvailableThreadSafe) return;
+            if (!Service.Config.InDebug || !Player.Available) return;
 
             if (_activeAction is IBaseAction action)
             {
