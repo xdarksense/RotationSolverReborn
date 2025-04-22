@@ -89,6 +89,7 @@ public static class ObjectHelper
 
         // Check if the target is invincible.
         if (Service.Config.CodTarget && battleChara.IsCODBossImmune()) return false;
+        if (Service.Config.CinderTarget && battleChara.IsCinderDriftImmune()) return false;
         if (Service.Config.JeunoTarget && battleChara.IsJeunoBossImmune()) return false;
         if (Service.Config.StrongOfSheildTarget && battleChara.IsHanselorGretelSheilded()) return false;
 
@@ -407,6 +408,8 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsJeunoBossImmune(this IBattleChara obj)
     {
+        if (!Service.Config.JeunoTarget) return false;
+
         if (obj == null) return false;
         if (Player.Object == null) return false;
 
@@ -453,6 +456,8 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsCODBossImmune(this IBattleChara obj)
     {
+        if (!Service.Config.CodTarget) return false;
+
         if (obj == null) return false;
         if (Player.Object == null) return false;
 
@@ -479,6 +484,49 @@ public static class ObjectHelper
                 if (Service.Config.InDebug)
                 {
                     Svc.Log.Information("IsCODBossImmune: InnerDarkness status found, Stygian immune");
+                }
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Is target COD Boss immune.
+    /// </summary>
+    /// <param name="obj">the object.</param>
+    /// <returns></returns>
+    public static bool IsCinderDriftImmune(this IBattleChara obj)
+    {
+        if (!Service.Config.CinderTarget) return false;
+
+        if (obj == null) return false;
+        if (Player.Object == null) return false;
+
+        var GriefAdd = StatusID.BlindToGrief;
+        var RageAdd = StatusID.BlindToRage;
+        var AntiGriefAdd = StatusID.PallOfGrief;
+        var AntiRageAdd = StatusID.PallOfRage;
+
+        if (obj.IsEnemy())
+        {
+            if (obj.HasStatus(false, GriefAdd) &&
+                Player.Object.HasStatus(false, AntiGriefAdd))
+            {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("IsCinderDriftImmune: AntiGriefAdd status found, GriefAdd immune");
+                }
+                return true;
+            }
+
+            if (obj.HasStatus(false, RageAdd) &&
+                Player.Object.HasStatus(false, AntiRageAdd))
+            {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("IsCinderDriftImmune: AntiRageAdd status found, RageAdd immune");
                 }
                 return true;
             }

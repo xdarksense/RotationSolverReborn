@@ -140,6 +140,10 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig)]
     private static readonly bool _cODTarget = true;
 
+    [ConditionBool, UI("Ignore immune targets in Cinder Drift (Extreme).",
+        Filter = TargetConfig)]
+    private static readonly bool _cinderTarget = true;
+
     [ConditionBool, UI("Ignore Strong of Shield target (Hansel and Gretel) in The Tower at Paradigm's Breach if you will hit shield.",
         Filter = TargetConfig)]
     private static readonly bool _strongOfSheildTarget = true;

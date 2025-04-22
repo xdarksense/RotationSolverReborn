@@ -277,10 +277,8 @@ public static class StatusHelper
     /// <returns></returns>
     public static bool HasStatus(this IGameObject? obj, bool isFromSelf, params StatusID[] statusIDs)
     {
-        if (obj == null)
-        {
-            return false;
-        }
+        if (obj == null) return false;
+        if (Player.Object == null) return false;
 
         if (HasApplyStatus(obj, statusIDs)) return true;
         return obj.GetStatus(isFromSelf, statusIDs).Any();
@@ -296,10 +294,9 @@ public static class StatusHelper
     /// </returns>
     public static bool HasApplyStatus(this IGameObject? obj, StatusID[] statusIDs)
     {
-        if (statusIDs == null || statusIDs.Length == 0 || obj == null)
-        {
-            return false;
-        }
+        if (obj == null) return false;
+        if (statusIDs == null) return false;
+        if (statusIDs.Length == 0) return false;
 
         if (DataCenter.InEffectTime && DataCenter.ApplyStatus.TryGetValue(obj.GameObjectId, out var statusId))
         {
@@ -318,7 +315,12 @@ public static class StatusHelper
     /// <param name="status"></param>
     public static void StatusOff(StatusID status)
     {
-        if (Player.Object == null || !Player.Object.HasStatus(false, status))
+        if (Player.Object == null)
+        {
+            return;
+        }
+
+        if (!Player.Object.HasStatus(false, status))
         {
             return;
         }
@@ -362,10 +364,11 @@ public static class StatusHelper
         var newEffects = new HashSet<uint>(statusIDs.Select(a => (uint)a));
         var result = new List<Status>();
 
-        if (obj == null || statusIDs == null || statusIDs.Length == 0 || obj.GetAllStatus(isFromSelf) == null || !obj.GetAllStatus(isFromSelf).Any())
-        {
-            return Enumerable.Empty<Status>();
-        }
+        if (obj == null) return Enumerable.Empty<Status>();
+        if (statusIDs == null) return Enumerable.Empty<Status>();
+        if (statusIDs.Length == 0) return Enumerable.Empty<Status>();
+        if (obj.GetAllStatus(isFromSelf) == null) return Enumerable.Empty<Status>();
+        if (!obj.GetAllStatus(isFromSelf).Any()) return Enumerable.Empty<Status>();
 
         try
         {
