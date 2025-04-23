@@ -523,7 +523,7 @@ partial class MonkRotation
 
     static partial void ModifyEarthsReplyPvP(ref ActionSetting setting)
     {
-        setting.TargetStatusNeed = [StatusID.EarthResonance];
+        setting.StatusNeed = [StatusID.EarthResonance];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

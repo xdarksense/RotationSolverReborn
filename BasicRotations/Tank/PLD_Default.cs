@@ -28,8 +28,12 @@ public sealed class PLD_Default : PaladinRotation
     [RotationConfig(CombatType.PvE, Name = "Health threshold for Intervention (Set to 0 to disable)")]
     private float InterventionRatio { get; set; } = 0.6f;
 
-    [RotationConfig(CombatType.PvE, Name = "Attempt to use intevention on CoTank during tankbusters")]
+    [RotationConfig(CombatType.PvE, Name = "Use Intervention on CoTank during tankbusters")]
     private bool InterventionTank { get; set; } = false;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Health threshold for using Intervention to attempt to save someone")]
+    private float InterventionClutch { get; set; } = 0.6f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Health threshold for Cover (Set to 0 to disable)")]
@@ -79,8 +83,8 @@ public sealed class PLD_Default : PaladinRotation
         && Player.GetHealthRatio() <= HealthForDyingTanks) return true;
 
         if ((Player.HasStatus(true, StatusID.Rampart) || Player.HasStatus(true, StatusID.Sentinel)) &&
-            InterventionPvE.CanUse(out act) &&
-            InterventionPvE.Target.Target?.GetHealthRatio() < 0.6) return true;
+            InterventionPvE.CanUse(out act, skipTargetStatusNeedCheck: true) &&
+            InterventionPvE.Target.Target?.GetHealthRatio() < InterventionClutch) return true;
 
         if (CoverPvE.CanUse(out act) && CoverPvE.Target.Target?.DistanceToPlayer() < 10 &&
             CoverPvE.Target.Target?.GetHealthRatio() < CoverRatio) return true;
@@ -141,7 +145,7 @@ public sealed class PLD_Default : PaladinRotation
         act = null;
         if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
 
-        if (InterventionTank && InterventionPvE.Target.Target?.HasStatus(false, StatusID.Grit, StatusID.RoyalGuard_1833, StatusID.IronWill, StatusID.Defiance) == true && InterventionPvE.CanUse(out act)) return true;
+        if (InterventionTank && InterventionPvE.CanUse(out act)) return true;
 
         // If the player has the Hallowed Ground status, don't use any abilities.
         if (!Player.HasStatus(true, StatusID.HallowedGround))

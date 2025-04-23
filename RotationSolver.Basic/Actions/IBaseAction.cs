@@ -62,6 +62,7 @@ public interface IBaseAction : IAction
     /// <param name="isLastAbility">Use this ability as last during a GCD window?</param>
     /// <param name="isFirstAbility">Use this ability as first during a GCD window?</param>
     /// <param name="skipStatusProvideCheck">Skip Status Provide Check</param>
+    /// <param name="skipTargetStatusNeedCheck">Skip Status Provide Check</param>
     /// <param name="skipComboCheck">Skip Combo Check</param>
     /// <param name="skipCastingCheck">Skip Casting and Moving Check</param>
     /// <param name="usedUp">Is it used up all stacks</param>
@@ -69,6 +70,6 @@ public interface IBaseAction : IAction
     /// <param name="skipTTKCheck">skip IsTimeToKillValid check in BaseAction</param>
     /// <param name="gcdCountForAbility">the gcd count for the ability.</param>
     /// <returns>can I use it</returns>
-    bool CanUse(out IAction act, bool isLastAbility = false, bool isFirstAbility = false, bool skipStatusProvideCheck = false, bool skipComboCheck = false, bool skipCastingCheck = false,
+    bool CanUse(out IAction act, bool isLastAbility = false, bool isFirstAbility = false, bool skipStatusProvideCheck = false, bool skipTargetStatusNeedCheck = false, bool skipComboCheck = false, bool skipCastingCheck = false,
         bool usedUp = false, bool skipAoeCheck = false, bool skipTTKCheck = false, byte gcdCountForAbility = 0);
 }
