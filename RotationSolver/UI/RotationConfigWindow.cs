@@ -1761,6 +1761,7 @@ public partial class RotationConfigWindow : Window
                     ImGui.Text($"Can Use: {action.CanUse(out _)} ");
                     ImGui.Text("AoeCount: " + action.Config.AoeCount);
                     ImGui.Text("ShouldCheckStatus: " + action.Config.ShouldCheckStatus);
+                    ImGui.Text("ShouldCheckTargetStatus: " + action.Config.ShouldCheckTargetStatus);
 #if DEBUG
                     ImGui.Text("Is Real GCD: " + action.Info.IsRealGCD);
                     ImGui.Text("Is PvP Action: " + action.Info.IsPvP);

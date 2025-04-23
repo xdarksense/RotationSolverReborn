@@ -168,6 +168,9 @@ public readonly struct ActionBasicInfo
 
     internal readonly bool BasicCheck(bool skipStatusProvideCheck, bool skipComboCheck, bool skipCastingCheck)
     {
+        if (Player.Object == null) return false;
+        if (Player.Object.StatusList == null) return false;
+
         if (!IsActionEnabled() || !IsOnSlot) return false;
         if (IsLimitBreak) return true;
         if (IsActionDisabled() || !EnoughLevel || !HasEnoughMP() || !SpellUnlocked) return false;
@@ -194,14 +197,16 @@ public readonly struct ActionBasicInfo
 
     private bool IsStatusNeeded()
     {
-        var player = Player.Object;
-        return _action.Setting.StatusNeed != null && player.WillStatusEndGCD(_action.Config.StatusGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusNeed);
+        if (Player.Object == null) return false;
+        if (Player.Object.StatusList == null) return false;
+        return _action.Setting.StatusNeed != null && Player.Object.WillStatusEndGCD(_action.Config.StatusGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusNeed);
     }
 
     private bool IsStatusProvided(bool skipStatusProvideCheck)
     {
-        var player = Player.Object;
-        return !skipStatusProvideCheck && _action.Setting.StatusProvide != null && !player.WillStatusEndGCD(_action.Config.StatusGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusProvide);
+        if (Player.Object == null) return false;
+        if (Player.Object.StatusList == null) return false;
+        return !skipStatusProvideCheck && _action.Setting.StatusProvide != null && !Player.Object.WillStatusEndGCD(_action.Config.StatusGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusProvide);
     }
 
     private bool IsLimitBreakLevelLow() => _action.Action.ActionCategory.RowId == 15 && CustomRotation.LimitBreakLevel <= 1;
@@ -220,8 +225,7 @@ public readonly struct ActionBasicInfo
 
     private bool NeedsCasting(bool skipCastingCheck)
     {
-        var player = Player.Object;
-        return CastTime > 0 && !player.HasStatus(true, new[] { StatusID.Swiftcast, StatusID.Triplecast, StatusID.Dualcast }) && !ActionsNoNeedCasting.Contains(ID) &&
+        return CastTime > 0 && !Player.Object.HasStatus(true, new[] { StatusID.Swiftcast, StatusID.Triplecast, StatusID.Dualcast }) && !ActionsNoNeedCasting.Contains(ID) &&
                (DataCenter.SpecialType == SpecialCommandType.NoCasting || (DateTime.Now > DataCenter.KnockbackStart && DateTime.Now < DataCenter.KnockbackFinished) ||
                 (DataCenter.NoPoslock && DataCenter.IsMoving && !skipCastingCheck));
     }
