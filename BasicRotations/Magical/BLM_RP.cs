@@ -86,7 +86,7 @@ public class BLM_RP : BlackMageRotation
         if (ThunderPvE.CanUse(out act)
             && (ThunderPvE.Target.Target?.WillStatusEndGCD(ThunderPvE.Config.StatusGcdCount, 0, true, ThunderPvE.Setting.TargetStatusNeed ?? []) ?? false)) return true;
 
-        if ((IsPolyglotStacksMaxed && (EnochianEndAfterGCD(0) || AmplifierPvE.Cooldown.WillHaveOneChargeGCD(0))) || PartyBurst || Player.HasStatus(true, StatusID.LeyLines))
+        if ((IsPolyglotStacksMaxed && (EnochianEndAfterGCD(0) || AmplifierPvE.Cooldown.WillHaveOneChargeGCD(0))) || Player.HasStatus(true, StatusID.LeyLines))
         {
             if (FoulPvE.CanUse(out act, skipAoeCheck: !XenoglossyPvE.EnoughLevel)) return true;
             if (XenoglossyPvE.CanUse(out act)) return true;

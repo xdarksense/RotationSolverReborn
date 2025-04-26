@@ -347,7 +347,7 @@ partial class BlackMageRotation
 
     static partial void ModifyFreezePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InUmbralIce && UmbralHearts == 0;
+        setting.ActionCheck = () => InUmbralIce && UmbralHearts < 3;
         setting.UnlockedByQuestID = 66611;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -393,7 +393,7 @@ partial class BlackMageRotation
 
     static partial void ModifyBlizzardIvPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InUmbralIce;
+        setting.ActionCheck = () => InUmbralIce && UmbralHearts < 3;
         setting.UnlockedByQuestID = 67218;
     }
 

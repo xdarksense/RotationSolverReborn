@@ -210,11 +210,10 @@ public class BLM_Default : BlackMageRotation
         if (UmbralIceStacks == MaxSoulCount && UsePolyglot(out act)) return true;
 
         //Add Hearts
-        if (UmbralIceStacks == MaxSoulCount &&
-            BlizzardIvPvE.EnoughLevel && UmbralHearts < 3 && !IsLastGCD
+        if (UmbralIceStacks == MaxSoulCount && !IsLastGCD
             (ActionID.BlizzardIvPvE, ActionID.FreezePvE))
         {
-            if (FreezePvE.CanUse(out act)) return true;
+            if (FreezePvE.CanUse(out act, skipAoeCheck: !BlizzardIvPvE.EnoughLevel)) return true;
             if (BlizzardIvPvE.CanUse(out act)) return true;
         }
 
