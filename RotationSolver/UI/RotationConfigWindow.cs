@@ -2930,7 +2930,6 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"Is Alliance: {battleChara.IsAllianceMember()}");
             ImGui.Text($"Is Enemy: {battleChara.IsEnemy()}");
             ImGui.Text($"Distance To Player: {battleChara.DistanceToPlayer()}");
-            ImGui.Text($"Is In EnemiesList: {battleChara.IsInEnemiesList()}");
             ImGui.Text($"Is Attackable: {battleChara.IsAttackable()}");
             ImGui.Text($"Is Jeuno Boss Immune: {battleChara.IsJeunoBossImmune()}");
             ImGui.Text($"CanProvoke: {battleChara.CanProvoke()}");

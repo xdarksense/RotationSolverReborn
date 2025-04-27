@@ -17,7 +17,7 @@ namespace RotationSolver.Updaters;
 
 internal static class MajorUpdater
 {
-    public static bool IsValid => Player.Available
+    public static bool IsValid => Player.AvailableThreadSafe
         && Svc.Condition.Any()
         && !Svc.Condition[ConditionFlag.BetweenAreas]
         && !Svc.Condition[ConditionFlag.BetweenAreas51]
