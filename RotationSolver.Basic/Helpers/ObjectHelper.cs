@@ -141,10 +141,6 @@ public static class ObjectHelper
             TargetHostileType.AllTargetsWhenSolo => DataCenter.PartyMembers.Count == 1 || battleChara.TargetObject is IBattleChara,
             TargetHostileType.AllTargetsWhenSoloInDuty => (DataCenter.PartyMembers.Count == 1 && (Svc.Condition[ConditionFlag.BoundByDuty] || Svc.Condition[ConditionFlag.BoundByDuty56]))
                                 || battleChara.TargetObject is IBattleChara,
-            //Below options do not work while in party, isAttackable will always return false
-            TargetHostileType.TargetIsInEnemiesList => battleChara.TargetObject is IBattleChara target && target.IsInEnemiesList(),
-            TargetHostileType.AllTargetsWhenSoloTargetIsInEnemiesList => (DataCenter.PartyMembers.Count == 1 && (Svc.Condition[ConditionFlag.BoundByDuty] || Svc.Condition[ConditionFlag.BoundByDuty56])) || battleChara.TargetObject is IBattleChara target && target.IsInEnemiesList(),
-            TargetHostileType.AllTargetsWhenSoloInDutyTargetIsInEnemiesList => DataCenter.PartyMembers.Count == 1 || battleChara.TargetObject is IBattleChara target && target.IsInEnemiesList(),
             _ => true,
         };
     }
@@ -166,35 +162,6 @@ public static class ObjectHelper
         }
         return output.ToString();
     }
-
-    internal static unsafe bool IsInEnemiesList(this IBattleChara battleChara)
-    {
-        if (Service.GetAddons<AddonEnemyList>() == null) return false;
-        if (!Service.GetAddons<AddonEnemyList>().Any()) return false;
-        if (Service.GetAddons<AddonEnemyList>().First() == IntPtr.Zero) return false;
-        if ((AddonEnemyList*)Service.GetAddons<AddonEnemyList>().First() == null) return false;
-        if (((AddonEnemyList*)Service.GetAddons<AddonEnemyList>().First())->EnemyOneComponent == null) return false;
-
-        for (int i = 0; i < ((AddonEnemyList*)Service.GetAddons<AddonEnemyList>().First())->EnemyCount; i++)
-        {
-            if (*(((AddonEnemyList*)Service.GetAddons<AddonEnemyList>().First())->EnemyOneComponent + i) == null) continue;
-
-            for (int j = 0; j < (*(((AddonEnemyList*)Service.GetAddons<AddonEnemyList>().First())->EnemyOneComponent + i))->AtkComponentBase.UldManager.NodeListCount; j++)
-            {
-                if ((*(((AddonEnemyList*)Service.GetAddons<AddonEnemyList>().First())->EnemyOneComponent + i))->AtkComponentBase.UldManager.NodeList[j] == null) continue;
-                if ((*(((AddonEnemyList*)Service.GetAddons<AddonEnemyList>().First())->EnemyOneComponent + i))->AtkComponentBase.UldManager.NodeList[j]->Type != NodeType.Text) continue;
-
-                if (!string.IsNullOrEmpty(RemoveControlCharacters(((AtkTextNode*)(*(((AddonEnemyList*)Service.GetAddons<AddonEnemyList>().First())->EnemyOneComponent + i))->AtkComponentBase.UldManager.NodeList[j])->NodeText.StringPtr.ToString())) &&
-                    string.Equals(RemoveControlCharacters(((AtkTextNode*)(*(((AddonEnemyList*)Service.GetAddons<AddonEnemyList>().First())->EnemyOneComponent + i))->AtkComponentBase.UldManager.NodeList[j])->NodeText.StringPtr.ToString()), battleChara.Name.TextValue, StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
 
     internal static unsafe bool IsEnemy(this IGameObject obj)
     => obj != null
