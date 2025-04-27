@@ -17,11 +17,11 @@ namespace RotationSolver.Updaters;
 
 internal static class MajorUpdater
 {
-    public static bool IsValid => Svc.Condition.Any()
+    public static bool IsValid => Player.Available
+        && Svc.Condition.Any()
         && !Svc.Condition[ConditionFlag.BetweenAreas]
         && !Svc.Condition[ConditionFlag.BetweenAreas51]
-        && !Svc.Condition[ConditionFlag.LoggingOut]
-        && Player.Available;
+        && !Svc.Condition[ConditionFlag.LoggingOut];
 
     private static Exception? _threadException;
     private static DateTime _lastUpdatedWork = DateTime.Now;
@@ -88,7 +88,7 @@ internal static class MajorUpdater
             }
         }
 
-        HandleWorkUpdateAsync().ConfigureAwait(false);
+        HandleWorkUpdate();
     }
 
     private static void HandleSystemWarnings()
@@ -112,17 +112,11 @@ internal static class MajorUpdater
         }
     }
 
-    private static async Task HandleWorkUpdateAsync()
+    private static void HandleWorkUpdate()
     {
-        var now = DateTime.Now;
-        if (now - _lastUpdatedWork < TimeSpan.FromSeconds(Service.Config.MinUpdatingTime))
-            return;
-
-        _lastUpdatedWork = now;
-
         try
         {
-            await Svc.Framework.RunOnTick(UpdateWork);
+            Svc.Framework.RunOnTick(UpdateWork);
         }
         catch (Exception tEx)
         {
