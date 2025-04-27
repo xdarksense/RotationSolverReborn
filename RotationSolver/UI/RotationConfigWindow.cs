@@ -1448,7 +1448,10 @@ public partial class RotationConfigWindow : Window
             {
                 var names = c.DisplayValues;
                 var selectedValue = c.Value;
-                var index = names.IndexOf(n => n == selectedValue);
+
+                // Ensure the selected value matches the description, not the enum name
+                var index = names.IndexOf(n => n.Equals(selectedValue, StringComparison.OrdinalIgnoreCase));
+                if (index == -1) index = 0; // Fallback to the first item if no match is found
 
                 ImGui.SetNextItemWidth(ImGui.CalcTextSize(c.DisplayValues.OrderByDescending(v => v.Length).First()).X + 50 * Scale);
                 if (ImGui.Combo(name, ref index, names, names.Length))

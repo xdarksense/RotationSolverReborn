@@ -16,7 +16,7 @@ internal class RotationConfigCombo : RotationConfigBase
     /// <param name="rotation">The custom rotation instance.</param>
     /// <param name="property">The property information.</param>
     public RotationConfigCombo(ICustomRotation rotation, PropertyInfo property)
-        : base(rotation, property)
+    : base(rotation, property)
     {
         if (!property.PropertyType.IsEnum)
         {
@@ -26,10 +26,26 @@ internal class RotationConfigCombo : RotationConfigBase
         var names = new List<string>();
         foreach (Enum v in Enum.GetValues(property.PropertyType))
         {
-            names.Add(v.ToString());
+            // Retrieve the Description attribute if it exists
+            var fieldInfo = property.PropertyType.GetField(v.ToString());
+            var descriptionAttribute = fieldInfo?.GetCustomAttribute<DescriptionAttribute>();
+            names.Add(descriptionAttribute?.Description ?? v.ToString());
         }
 
         DisplayValues = names.ToArray();
+
+        // Set the Value to the description of the default enum value
+        var defaultEnumValue = property.GetValue(rotation);
+        if (defaultEnumValue is Enum defaultEnum)
+        {
+            var defaultFieldInfo = property.PropertyType.GetField(defaultEnum.ToString());
+            var defaultDescriptionAttribute = defaultFieldInfo?.GetCustomAttribute<DescriptionAttribute>();
+            Value = defaultDescriptionAttribute?.Description ?? defaultEnum.ToString();
+        }
+        else
+        {
+            Value = DisplayValues[0]; // Fallback to the first item if no default is found
+        }
     }
 
     /// <summary>

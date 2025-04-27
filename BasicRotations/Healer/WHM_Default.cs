@@ -20,8 +20,15 @@ public sealed class WHM_Default : WhiteMageRotation
     [RotationConfig(CombatType.PvE, Name = "Use DOT while moving even if it does not need refresh (disabling is a damage down)")]
     public bool DOTUpkeep { get; set; } = true;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Lily at max stacks.")]
+    [RotationConfig(CombatType.PvE, Name = "Use Lily at max stacks/about to overcap.")]
     public bool UseLilyWhenFull { get; set; } = true;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Lily if about to overcap and no valid target nearby.")]
+    public bool UseLilyDowntime { get; set; } = true;
+
+    [Range(1, 13, ConfigUnitType.None, 1)]
+    [RotationConfig(CombatType.PvE, Name = "Number of GCDs before you cap on blue lillies that overcap protection will consider 'near full'.")]
+    public int LilyOvercapTime { get; set; } = 3;
 
     [RotationConfig(CombatType.PvE, Name = "Regen on Tank at 5 seconds remaining on Prepull Countdown.")]
     public bool UsePreRegen { get; set; } = true;
@@ -211,7 +218,7 @@ public sealed class WHM_Default : WhiteMageRotation
 
         if (AfflatusMiseryPvE.CanUse(out act, skipAoeCheck: true)) return true;
 
-        bool liliesNearlyFull = Lily == 2 && LilyTime > 13;
+        bool liliesNearlyFull = Lily == 2 && LilyTime < LilyOvercapTime;
         bool liliesFullNoBlood = Lily == 3;
         if (UseLilyWhenFull && (liliesNearlyFull || liliesFullNoBlood) && AfflatusMiseryPvE.EnoughLevel && BloodLily < 3)
         {
@@ -226,7 +233,7 @@ public sealed class WHM_Default : WhiteMageRotation
 
         if (StonePvE.CanUse(out act)) return true;
 
-        if (Lily >= 2)
+        if (UseLilyDowntime && (liliesNearlyFull || liliesFullNoBlood))
         {
             if (UseLily(out act)) return true;
         }
