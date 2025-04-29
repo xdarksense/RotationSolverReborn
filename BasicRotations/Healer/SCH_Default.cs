@@ -186,8 +186,8 @@ public sealed class SCH_Default : ScholarRotation
         act = null;
         if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
 
-        if (AdloquiumPvE.CanUse(out act)) return true;
         if (ManifestationPvE.CanUse(out act, skipCastingCheck: true)) return true;
+        if (AdloquiumPvE.CanUse(out act)) return true;
         if (PhysickPvE.CanUse(out act)) return true;
 
         return base.HealSingleGCD(out act);
