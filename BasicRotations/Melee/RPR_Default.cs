@@ -105,7 +105,7 @@ public sealed class RPR_Default : ReaperRotation
             if (LemureShroud > 1)
             {
                 if (PlentifulHarvestPvE.EnoughLevel && ArcaneCirclePvE.Cooldown.WillHaveOneCharge(9) &&
-                   (LemureShroud == 4 && (ShadowOfDeathPvE.Target.Target?.WillStatusEnd(30, true, StatusID.DeathsDesign) ?? false) || LemureShroud == 3 && (ShadowOfDeathPvE.Target.Target?.WillStatusEnd(50, true, StatusID.DeathsDesign) ?? false)))
+                   (LemureShroud == 4 && (CurrentTarget?.WillStatusEnd(30, true, StatusID.DeathsDesign) ?? false) || LemureShroud == 3 && (CurrentTarget?.WillStatusEnd(50, true, StatusID.DeathsDesign) ?? false)))
                 {
                     if (ShadowOfDeathPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
                 }
