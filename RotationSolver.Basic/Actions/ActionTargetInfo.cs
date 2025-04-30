@@ -368,7 +368,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
         var targets = GetMostCanTargetObjects(canTargets, canAffects, skipAoeCheck ? 0 : action.Config.AoeCount);
         var target = FindTargetByType(targets, type, action.Config.AutoHealRatio, action.Setting.SpecialType);
-        return target == null ? null : new TargetResult(target, GetAffects(target, canAffects).ToArray(), target.Position);
+        return target == null ? null : new TargetResult(target, GetAffectsTarget(target, canAffects).ToArray(), target.Position);
     }
 
     /// <summary>
@@ -521,7 +521,7 @@ public struct ActionTargetInfo(IBaseAction action)
         // Check if the action's range is zero and handle it as targeting self
         if (range == 0)
         {
-            return new TargetResult(player, GetAffects(player.Position, canAffects).ToArray(), player.Position);
+            return new TargetResult(player, GetAffectsVector(player.Position, canAffects).ToArray(), player.Position);
         }
 
         var strategy = Service.Config.BeneficialAreaStrategy2;
@@ -581,7 +581,7 @@ public struct ActionTargetInfo(IBaseAction action)
                     // Check if the closest point is within the effect range
                     if (Vector3.Distance(player.Position, closest) < player.HitboxRadius + EffectRange)
                     {
-                        return new TargetResult(player, GetAffects(closest, canAffects).ToArray(), closest);
+                        return new TargetResult(player, GetAffectsVector(closest, canAffects).ToArray(), closest);
                     }
                 }
 
@@ -608,14 +608,14 @@ public struct ActionTargetInfo(IBaseAction action)
                     // Ensure the player's position is within the range of the ability
                     if (Vector3.Distance(player.Position, b.Position) <= range)
                     {
-                        return new TargetResult(b, GetAffects(b.Position, canAffects).ToArray(), b.Position);
+                        return new TargetResult(b, GetAffectsVector(b.Position, canAffects).ToArray(), b.Position);
                     }
                     else
                     {
                         // Adjust the position to be within the range
                         Vector3 directionToTarget = b.Position - player.Position;
                         Vector3 adjustedPosition = player.Position + directionToTarget / directionToTarget.Length() * range;
-                        return new TargetResult(b, GetAffects(adjustedPosition, canAffects).ToArray(), adjustedPosition);
+                        return new TargetResult(b, GetAffectsVector(adjustedPosition, canAffects).ToArray(), adjustedPosition);
                     }
                 }
                 else
@@ -626,7 +626,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
                     if (attackT == null)
                     {
-                        return new TargetResult(player, GetAffects(player.Position, canAffects).ToArray(), player.Position);
+                        return new TargetResult(player, GetAffectsVector(player.Position, canAffects).ToArray(), player.Position);
                     }
                     else
                     {
@@ -635,13 +635,13 @@ public struct ActionTargetInfo(IBaseAction action)
                         if (disToTankRound < effectRange
                             || disToTankRound > 2 * effectRange - player.HitboxRadius)
                         {
-                            return new TargetResult(player, GetAffects(player.Position, canAffects).ToArray(), player.Position);
+                            return new TargetResult(player, GetAffectsVector(player.Position, canAffects).ToArray(), player.Position);
                         }
                         else
                         {
                             Vector3 directionToTank = attackT.Position - player.Position;
                             var moveDirection = directionToTank / directionToTank.Length() * Math.Max(0, disToTankRound - effectRange);
-                            return new TargetResult(player, GetAffects(player.Position, canAffects).ToArray(), player.Position + moveDirection);
+                            return new TargetResult(player, GetAffectsVector(player.Position, canAffects).ToArray(), player.Position + moveDirection);
                         }
                     }
                 }
@@ -659,7 +659,7 @@ public struct ActionTargetInfo(IBaseAction action)
     /// <returns>
     /// An <see cref="IEnumerable{IBattleChara}"/> containing the characters that are within the effect range.
     /// </returns>
-    private IEnumerable<IBattleChara> GetAffects(Vector3? point, IEnumerable<IBattleChara> canAffects)
+    private IEnumerable<IBattleChara> GetAffectsVector(Vector3? point, IEnumerable<IBattleChara> canAffects)
     {
         if (Player.Object == null) yield break;
         if (canAffects == null) yield break;
@@ -682,7 +682,7 @@ public struct ActionTargetInfo(IBaseAction action)
     /// <returns>
     /// An <see cref="IEnumerable{IBattleChara}"/> containing the characters that are affected by the target.
     /// </returns>
-    private IEnumerable<IBattleChara> GetAffects(IBattleChara tar, IEnumerable<IBattleChara> canAffects)
+    private IEnumerable<IBattleChara> GetAffectsTarget(IBattleChara tar, IEnumerable<IBattleChara> canAffects)
     {
         if (Player.Object == null) yield break;
         if (tar == null) yield break;
@@ -899,7 +899,7 @@ public struct ActionTargetInfo(IBaseAction action)
             var partyMembers = new List<IBattleChara>();
             foreach (var obj in IGameObjects)
             {
-                if (ObjectHelper.IsParty(obj))
+                if (ObjectHelper.IsParty(obj) && obj.StatusList != null)
                 {
                     partyMembers.Add(obj);
                 }
@@ -909,7 +909,7 @@ public struct ActionTargetInfo(IBaseAction action)
             {
                 foreach (var member in partyMembers)
                 {
-                    if (member.IsJobs(job) && !member.IsDead)
+                    if (member.IsJobs(job) && !member.IsDead && !member.HasStatus(false, StatusID.DamageDown, StatusID.Weakness, StatusID.BrinkOfDeath))
                     {
                         return member;
                     }
@@ -1226,7 +1226,10 @@ public struct ActionTargetInfo(IBaseAction action)
                 }
             }
 
-            return attachedT.OrderBy(ObjectHelper.GetHealthRatio).FirstOrDefault();
+            // Fix: Ensure consistent handling of attachedT
+            return Service.Config.Priolowtank
+                ? attachedT.OrderByDescending(ObjectHelper.GetHealthRatio).LastOrDefault()
+                : attachedT.OrderBy(ObjectHelper.GetHealthRatio).FirstOrDefault();
         }
 
         IBattleChara? FindDispelTarget()
@@ -1370,4 +1373,4 @@ public enum TargetType : byte
 /// <param name="Target">the target.</param>
 /// <param name="AffectedTargets">the targets that be affected by this action.</param>
 /// <param name="Position">the position to use this action.</param>
-public readonly record struct TargetResult(IBattleChara? Target, IBattleChara[] AffectedTargets, Vector3? Position);
+public readonly record struct TargetResult(IBattleChara Target, IBattleChara[] AffectedTargets, Vector3? Position);

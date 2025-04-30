@@ -8,7 +8,7 @@ using ECommons.GameHelpers;
 using ECommons.ImGuiMethods;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
-using RotationSolver.Basic.IPC;
+using RotationSolver.IPC;
 using RotationSolver.Commands;
 using RotationSolver.Data;
 using RotationSolver.Helpers;

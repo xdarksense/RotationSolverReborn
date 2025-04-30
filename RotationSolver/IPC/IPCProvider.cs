@@ -1,7 +1,8 @@
 ﻿using ECommons.DalamudServices;
 using ECommons.EzIpcManager;
+using RotationSolver.Commands;
 
-namespace RotationSolver.Basic.IPC
+namespace RotationSolver.IPC
 {
     internal class IPCProvider
     {
@@ -113,21 +114,7 @@ namespace RotationSolver.Basic.IPC
         [EzIPC]
         public void ChangeOperatingMode(StateCommandType stateCommand)
         {
-            switch (stateCommand)
-            {
-                case StateCommandType.Auto:
-                    DataCenter.IsManual = false;
-                    DataCenter.State = true;
-                    break;
-                case StateCommandType.Manual:
-                    DataCenter.IsManual = true;
-                    DataCenter.State = true;
-                    break;
-                case StateCommandType.Off:
-                    DataCenter.State = false;
-                    DataCenter.IsManual = false;
-                    break;
-            }
+            RSCommands.UpdateState(stateCommand, (JobRole)DataCenter.Job);
             Svc.Log.Debug($"IPC ChangeOperatingMode was called. StateCommand:{stateCommand}");
         }
 
