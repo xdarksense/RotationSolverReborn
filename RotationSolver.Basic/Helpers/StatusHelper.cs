@@ -170,7 +170,12 @@ public static class StatusHelper
     /// <param name="statusIDs"></param>
     /// <returns></returns>
     public static bool WillStatusEndGCD(this IGameObject? obj, uint gcdCount = 0, float offset = 0, bool isFromSelf = true, params StatusID[] statusIDs)
-        => WillStatusEnd(obj, DataCenter.GCDTime(gcdCount, offset), isFromSelf, statusIDs);
+    {
+        if (obj == null) return false;
+        if (statusIDs == null) return false;
+
+        return WillStatusEnd(obj, DataCenter.GCDTime(gcdCount, offset), isFromSelf, statusIDs);
+    }
 
     /// <summary>
     /// Will any of <paramref name="statusIDs"/> end after <paramref name="time"/> seconds?
@@ -182,6 +187,10 @@ public static class StatusHelper
     /// <returns></returns>
     public static bool WillStatusEnd(this IGameObject? obj, float time, bool isFromSelf = true, params StatusID[] statusIDs)
     {
+        if (obj == null) return false;
+        if (statusIDs == null) return false;
+        if (Player.Object == null) return false;
+
         if (HasApplyStatus(obj, statusIDs)) return false;
         if (obj.StatusTime(isFromSelf, statusIDs) < 0 && obj.HasStatus(isFromSelf, statusIDs)) return false;
         return obj.StatusTime(isFromSelf, statusIDs) <= time;
@@ -196,10 +205,9 @@ public static class StatusHelper
     /// <returns></returns>
     public static float StatusTime(this IGameObject? obj, bool isFromSelf, params StatusID[] statusIDs)
     {
-        if (obj == null)
-        {
-            return 0;
-        }
+        if (obj == null) return 0;
+        if (statusIDs == null) return 0;
+        if (Player.Object == null) return 0;
 
         try
         {
@@ -217,10 +225,9 @@ public static class StatusHelper
 
     internal static IEnumerable<float> StatusTimes(this IGameObject? obj, bool isFromSelf, params StatusID[] statusIDs)
     {
-        if (obj == null)
-        {
-            return Enumerable.Empty<float>();
-        }
+        if (obj == null) return Enumerable.Empty<float>();
+        if (statusIDs == null) return Enumerable.Empty<float>();
+        if (Player.Object == null) return Enumerable.Empty<float>();
 
         var result = new List<float>();
 
@@ -241,10 +248,8 @@ public static class StatusHelper
     /// <returns></returns>
     public static byte StatusStack(this IGameObject? obj, bool isFromSelf, params StatusID[] statusIDs)
     {
-        if (obj == null)
-        {
-            return 0;
-        }
+        if (obj == null) return 0;
+        if (Player.Object == null) return 0;
 
         if (HasApplyStatus(obj, statusIDs)) return byte.MaxValue;
         if (obj.StatusStacks(isFromSelf, statusIDs) == null || !obj.StatusStacks(isFromSelf, statusIDs).Any()) return 0;
@@ -253,10 +258,9 @@ public static class StatusHelper
 
     private static IEnumerable<byte> StatusStacks(this IGameObject? obj, bool isFromSelf, params StatusID[] statusIDs)
     {
-        if (obj == null)
-        {
-            return Enumerable.Empty<byte>();
-        }
+        if (obj == null) return Enumerable.Empty<byte>();
+        if (statusIDs == null) return Enumerable.Empty<byte>();
+        if (Player.Object == null) return Enumerable.Empty<byte>();
 
         var result = new List<byte>();
 
@@ -278,6 +282,7 @@ public static class StatusHelper
     public static bool HasStatus(this IGameObject? obj, bool isFromSelf, params StatusID[] statusIDs)
     {
         if (obj == null) return false;
+        if (statusIDs == null) return false;
         if (Player.Object == null) return false;
 
         if (HasApplyStatus(obj, statusIDs)) return true;
@@ -296,7 +301,7 @@ public static class StatusHelper
     {
         if (obj == null) return false;
         if (statusIDs == null) return false;
-        if (statusIDs.Length == 0) return false;
+        if (Player.Object == null) return false;
 
         if (DataCenter.InEffectTime && DataCenter.ApplyStatus.TryGetValue(obj.GameObjectId, out var statusId))
         {
@@ -315,15 +320,8 @@ public static class StatusHelper
     /// <param name="status"></param>
     public static void StatusOff(StatusID status)
     {
-        if (Player.Object == null)
-        {
-            return;
-        }
-
-        if (!Player.Object.HasStatus(false, status))
-        {
-            return;
-        }
+        if (Player.Object == null) return;
+        if (!Player.Object.HasStatus(false, status)) return;
 
         try
         {
@@ -364,6 +362,7 @@ public static class StatusHelper
         var newEffects = new HashSet<uint>(statusIDs.Select(a => (uint)a));
         var result = new List<Status>();
 
+        if (Player.Object == null) return Enumerable.Empty<Status>();
         if (obj == null) return Enumerable.Empty<Status>();
         if (statusIDs == null) return Enumerable.Empty<Status>();
         if (statusIDs.Length == 0) return Enumerable.Empty<Status>();

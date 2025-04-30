@@ -69,7 +69,7 @@ namespace RotationSolver.Commands
             Service.Config.TargetingIndex = index;
         }
 
-        private static void UpdateState(StateCommandType stateType, JobRole role)
+        public static void UpdateState(StateCommandType stateType, JobRole role)
         {
             switch (stateType)
             {

@@ -1,6 +1,7 @@
 ﻿using Dalamud.Configuration;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
+using Lumina.Excel.Sheets;
 using System.Collections.Concurrent;
 using static RotationSolver.Basic.Configuration.ConfigTypes;
 
@@ -502,6 +503,10 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Heal party members with GCD if there is nothing to do in combat.",
         Filter = HealingActionCondition, Section = 3)]
     private static readonly bool _healWhenNothingTodo = true;
+
+    [ConditionBool, UI("Prioritize Low HP tank for tankbusters.",
+        Filter = HealingActionCondition, Section = 3)]
+    private static readonly bool _priolowtank = false;
 
     [UI("The duration of special windows opened by /macro commands by default.",
         Filter = BasicTimer, Section = 1)]
