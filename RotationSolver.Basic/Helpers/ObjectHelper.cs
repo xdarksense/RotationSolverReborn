@@ -7,16 +7,11 @@ using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
-using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
-using FFXIVClientStructs.FFXIV.Component.GUI;
-using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using System.Collections.Concurrent;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -29,7 +24,7 @@ public static class ObjectHelper
 {
     static readonly EventHandlerContent[] _eventType =
     {
-        FFXIVClientStructs.FFXIV.Client.Game.Event.EventHandlerContent.TreasureHuntDirector,
+        EventHandlerContent.TreasureHuntDirector,
         EventHandlerContent.Quest,
     };
 
@@ -127,13 +122,13 @@ public static class ObjectHelper
             if (battleChara.FateId() != 0 && battleChara.FateId() != DataCenter.PlayerFateId) return false;
         }
 
-        // Bozja CE
+        // Prevent targeting mobs in Bozja CE if you are not in CE
         if (DataCenter.Territory?.ContentType == TerritoryContentType.SaveTheQueen)
         {
             var npcRank = battleChara.GetObjectNPC()?.Rank;
             var hasDutiesStatus = Player.Object.HasStatus(false, StatusID.DutiesAsAssigned);
 
-            if ((npcRank == 2 && !hasDutiesStatus) || (npcRank == 0 && hasDutiesStatus))
+            if ((npcRank == 2 && !hasDutiesStatus))
             {
                 return false;
             }
