@@ -7,6 +7,7 @@ using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Client.UI;
@@ -41,7 +42,7 @@ public static class ObjectHelper
     {
         if (target == null) return false;
 
-        if (DataCenter.FateId != 0 && target.FateId() == DataCenter.FateId) return false;
+        if (DataCenter.PlayerFateId != 0 && target.FateId() == DataCenter.PlayerFateId) return false;
 
         // Removed the listed names.
         if (OtherConfiguration.NoProvokeNames.TryGetValue(Svc.ClientState.TerritoryType, out var ns1))
@@ -92,6 +93,9 @@ public static class ObjectHelper
         if (Service.Config.CinderTarget && battleChara.IsCinderDriftImmune()) return false;
         if (Service.Config.JeunoTarget && battleChara.IsJeunoBossImmune()) return false;
         if (Service.Config.StrongOfSheildTarget && battleChara.IsHanselorGretelSheilded()) return false;
+        if (Service.Config.ResistanceImmune && battleChara.IsResistanceImmune()) return false;
+        if (Service.Config.OmegaImmune && battleChara.IsOmegaImmune()) return false;
+        if (Service.Config.LimitlessImmune && battleChara.IsLimitlessBlue()) return false;
 
         // Ensure StatusList is not null before accessing it
         if (battleChara.StatusList == null) return false;
@@ -117,9 +121,21 @@ public static class ObjectHelper
         }
 
         // Fate
-        if (DataCenter.Territory?.ContentType != TerritoryContentType.Eureka)
+        if (Service.Config.IgnoreNonFateInFate && DataCenter.Territory?.ContentType != TerritoryContentType.Eureka)
         {
-            if (battleChara.FateId() != 0 && battleChara.FateId() != DataCenter.FateId) return false;
+            if (battleChara.FateId() != 0 && battleChara.FateId() != DataCenter.PlayerFateId) return false;
+        }
+
+        // Bozja CE
+        if (DataCenter.Territory?.ContentType == TerritoryContentType.SaveTheQueen)
+        {
+            var npcRank = battleChara.GetObjectNPC()?.Rank;
+            var hasDutiesStatus = Player.Object.HasStatus(false, StatusID.DutiesAsAssigned);
+
+            if ((npcRank == 2 && !hasDutiesStatus) || (npcRank == 0 && hasDutiesStatus))
+            {
+                return false;
+            }
         }
 
         if (Service.Config.TargetQuestThings && battleChara.IsOthersPlayers()) return false;
@@ -302,7 +318,7 @@ public static class ObjectHelper
 
         if (Service.Config.ChooseAttackMark && MarkingHelper.GetAttackSignTargets().Any(id => id != 0 && id == (long)obj.GameObjectId && obj.IsEnemy())) return true;
 
-        if (Service.Config.TargetFatePriority && DataCenter.FateId != 0 && obj.FateId() == DataCenter.FateId) return true;
+        if (Service.Config.TargetFatePriority && DataCenter.PlayerFateId != 0 && obj.FateId() == DataCenter.PlayerFateId) return true;
 
         var icon = obj.GetNamePlateIcon();
 
@@ -494,6 +510,154 @@ public static class ObjectHelper
                 if (Service.Config.InDebug)
                 {
                     Svc.Log.Information("IsCinderDriftImmune: AntiRageAdd status found, RageAdd immune");
+                }
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Is target COD Boss immune.
+    /// </summary>
+    /// <param name="obj">the object.</param>
+    /// <returns></returns>
+    public static bool IsResistanceImmune(this IBattleChara obj)
+    {
+        if (!Service.Config.ResistanceImmune) return false;
+
+        if (obj == null) return false;
+        if (Player.Object == null) return false;
+
+        var VoidArkMagicResistance = StatusID.MagicResistance;
+        var VoidArkRangedResistance = StatusID.RangedResistance;
+        var LeviMagicResistance = StatusID.MantleOfTheWhorl;
+        var LeviRangedResistance = StatusID.VeilOfTheWhorl;
+        var role = Player.Object?.ClassJob.Value.GetJobRole() ?? JobRole.None;
+
+        if (obj.IsEnemy())
+        {
+            if (obj.HasStatus(false, VoidArkMagicResistance, LeviMagicResistance) &&
+                (role == JobRole.RangedMagical || role == JobRole.Healer))
+            {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("IsResistanceImmune: MagicResistance status found");
+                }
+                return true;
+            }
+
+            if (obj.HasStatus(false, VoidArkRangedResistance, LeviRangedResistance) &&
+                role == JobRole.RangedPhysical)
+            {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("IsResistanceImmune: RangedResistance status found");
+                }
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Is target COD Boss immune.
+    /// </summary>
+    /// <param name="obj">the object.</param>
+    /// <returns></returns>
+    public static bool IsOmegaImmune(this IBattleChara obj)
+    {
+        if (!Service.Config.OmegaImmune) return false;
+
+        if (obj == null) return false;
+        if (Player.Object == null) return false;
+
+        var AntiOmegaF = StatusID.PacketFilterF;
+        var AntiOmegaF_Extreme = StatusID.PacketFilterF_3500;
+        var AntiOmegaM = StatusID.PacketFilterM;
+        var AntiOmegaM_Extreme = StatusID.PacketFilterM_3499;
+
+        var OmegaF = StatusID.OmegaF;
+        var OmegaM = StatusID.OmegaM;
+        var OmegaM2 = StatusID.OmegaM_3454;
+
+        if (obj.IsEnemy())
+        {
+            if (obj.HasStatus(false, OmegaF) &&
+                Player.Object.HasStatus(false, AntiOmegaF, AntiOmegaF_Extreme))
+            {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("IsOmegaImmune: PacketFilterF status found");
+                }
+                return true;
+            }
+
+            if (obj.HasStatus(false, OmegaM, OmegaM2) &&
+                Player.Object.HasStatus(false, AntiOmegaM, AntiOmegaM_Extreme))
+            {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("IsOmegaImmune: PacketFilterM status found");
+                }
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Is target COD Boss immune.
+    /// </summary>
+    /// <param name="obj">the object.</param>
+    /// <returns></returns>
+    public static bool IsLimitlessBlue(this IBattleChara obj)
+    {
+        if (!Service.Config.LimitlessImmune) return false;
+
+        if (obj == null) return false;
+        if (Player.Object == null) return false;
+
+        var WillOfTheWater = StatusID.WillOfTheWater;
+        var WillOfTheWind = StatusID.WillOfTheWind;
+        var WhaleBack = StatusID.Whaleback;
+
+        var Green = obj.NameId == 3654;
+        var Blue = obj.NameId == 3655;
+        var BismarkShell = obj.NameId == 3656;
+        var BismarkCorona = obj.NameId == 3657;
+
+        if (obj.IsEnemy())
+        {
+            if ((BismarkShell || BismarkCorona) &&
+                !Player.Object.HasStatus(false, WhaleBack))
+            {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("IsLimitlessBlue: Bismark found, WhaleBack status not found");
+                }
+                return true;
+            }
+
+            if (Blue &&
+                Player.Object.HasStatus(false, WillOfTheWater))
+            {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("IsLimitlessBlue: WillOfTheWater status found");
+                }
+                return true;
+            }
+
+            if (Green &&
+                Player.Object.HasStatus(false, WillOfTheWind))
+            {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("IsLimitlessBlue: WillOfTheWind status found");
                 }
                 return true;
             }
