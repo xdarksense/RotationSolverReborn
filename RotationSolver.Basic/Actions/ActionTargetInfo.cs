@@ -892,7 +892,7 @@ public struct ActionTargetInfo(IBaseAction action)
         IBattleChara? FindDancePartner()
         {
             // DancePartnerPriority based on the info from The Balance Discord for Level 100
-            Job[] DancePartnerPriority = { Job.PCT, Job.SAM, Job.RPR, Job.VPR, Job.MNK, Job.NIN, Job.DRG, Job.BLM, Job.RDM, Job.SMN, Job.MCH, Job.BRD, Job.DNC };
+            Job[] DancePartnerPriority = { Job.SAM, Job.PCT, Job.RPR, Job.VPR, Job.MNK, Job.NIN, Job.DRG, Job.BLM, Job.RDM, Job.SMN, Job.MCH, Job.BRD, Job.DNC };
 
             if (IGameObjects == null) return null;
 
@@ -909,7 +909,7 @@ public struct ActionTargetInfo(IBaseAction action)
             {
                 foreach (var member in partyMembers)
                 {
-                    if (member.IsJobs(job) && !member.IsDead && !member.HasStatus(false, StatusID.DamageDown, StatusID.Weakness, StatusID.BrinkOfDeath))
+                    if (member.IsJobs(job) && !member.IsDead && !member.HasStatus(false, StatusID.DamageDown_2911, StatusID.DamageDown, StatusID.Weakness, StatusID.BrinkOfDeath))
                     {
                         return member;
                     }
