@@ -2750,7 +2750,7 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Merged Status: {DataCenter.MergedStatus}");
         if ((IntPtr)FateManager.Instance() != IntPtr.Zero)
         {
-            ImGui.Text($"Fate: {DataCenter.FateId}");
+            ImGui.Text($"Fate: {DataCenter.PlayerFateId}");
         }
         ImGui.Text($"Height: {Player.Character->ModelContainer.CalculateHeight()}");
         var conditions = Svc.Condition.AsReadOnlySet().ToArray();
@@ -2917,6 +2917,7 @@ public partial class RotationConfigWindow : Window
         if (target is IBattleChara battleChara)
         {
             ImGui.Text($"HP: {battleChara.CurrentHp} / {battleChara.MaxHp}");
+            ImGui.Text($"FateID: {battleChara.FateId().ToString() ?? string.Empty}");
             ImGui.Text($"Is Current Focus Target: {battleChara.IsFocusTarget()}");
             ImGui.Text($"TTK: {battleChara.GetTTK()}");
             ImGui.Text($"Is Boss TTK: {battleChara.IsBossFromTTK()}");

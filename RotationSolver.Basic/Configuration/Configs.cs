@@ -133,6 +133,10 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig)]
     private static readonly bool _filterOneHPInvincible = true;
 
+    [ConditionBool, UI("Ignore Non-Fate targets while in a Fate and Fate targets if not in Fate.",
+        Filter = TargetConfig)]
+    private static readonly bool _ignoreNonFateInFate = true;
+
     [ConditionBool, UI("Ignore immune Ark Angels in Jenuo: The First Walk.",
         Filter = TargetConfig)]
     private static readonly bool _jeunoTarget = true;
@@ -140,6 +144,18 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Ignore immune targets in Cloud of Darkness Chaotic.",
         Filter = TargetConfig)]
     private static readonly bool _cODTarget = true;
+
+    [ConditionBool, UI("Ignore immune targets based on Resistance status (Void Ark Alliance and Leviathan).",
+        Filter = TargetConfig)]
+    private static readonly bool _resistanceImmune = true;
+
+    [ConditionBool, UI("Ignore immune Omega Variants (O12N/O12S).",
+        Filter = TargetConfig)]
+    private static readonly bool _omegaImmune = true;
+
+    [ConditionBool, UI("Ignore immune targets in Limitless Blue (Normal/Extreme).",
+        Filter = TargetConfig)]
+    private static readonly bool _limitlessImmune = true;
 
     [ConditionBool, UI("Ignore immune targets in Cinder Drift (Extreme).",
         Filter = TargetConfig)]
