@@ -96,6 +96,7 @@ public static class ObjectHelper
         if (Service.Config.ResistanceImmune && battleChara.IsResistanceImmune()) return false;
         if (Service.Config.OmegaImmune && battleChara.IsOmegaImmune()) return false;
         if (Service.Config.LimitlessImmune && battleChara.IsLimitlessBlue()) return false;
+        if (Service.Config.WolfImmune && battleChara.IsWolfImmune()) return false;
 
         // Ensure StatusList is not null before accessing it
         if (battleChara.StatusList == null) return false;
@@ -383,6 +384,51 @@ public static class ObjectHelper
     }
 
     internal static bool IsDummy(this IBattleChara obj) => obj?.NameId == 541;
+
+    /// <summary>
+    /// Is target Wolf add immune.
+    /// </summary>
+    /// <param name="obj">the object.</param>
+    /// <returns></returns>
+    public static bool IsWolfImmune(this IBattleChara obj)
+    {
+        if (!Service.Config.WolfImmune) return false;
+
+        if (obj == null) return false;
+        if (Player.Object == null) return false;
+
+        // Numeric values used instead of name as Lumina does not provide name yet, and may update to change name
+        var WindPack = (StatusID)4389; // Numeric value for "Rsv43891100S74Cfc3B0E74Cfc3B0", unable to hit Wolf of Wind
+        var StonePack = (StatusID)4390; // Numeric value for "Rsv43901100S74Cfc3B0E74Cfc3B0", unable to hit Wolf of Wind
+
+        var WolfOfWind = obj.NameId == 13846;
+        var WolfOfStone = obj.NameId == 13847;
+
+        if (obj.IsEnemy())
+        {
+            if (WolfOfWind &&
+                Player.Object.HasStatus(false, WindPack))
+            {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("IsWolfImmune: WindPack status found");
+                }
+                return true;
+            }
+
+            if (WolfOfStone &&
+                Player.Object.HasStatus(false, StonePack))
+            {
+                if (Service.Config.InDebug)
+                {
+                    Svc.Log.Information("IsWolfImmune: StonePack status found");
+                }
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /// <summary>
     /// Is target Jeuno Boss immune.

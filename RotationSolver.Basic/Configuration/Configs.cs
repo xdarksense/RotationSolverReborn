@@ -137,6 +137,10 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig)]
     private static readonly bool _ignoreNonFateInFate = true;
 
+    [ConditionBool, UI("Ignore immune Wolves in M8S.",
+        Filter = TargetConfig)]
+    private static readonly bool _wolfImmune = true;
+
     [ConditionBool, UI("Ignore immune Ark Angels in Jenuo: The First Walk.",
         Filter = TargetConfig)]
     private static readonly bool _jeunoTarget = true;
