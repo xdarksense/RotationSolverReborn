@@ -106,6 +106,7 @@ internal static class DataCenter
             return allianceTerritoryIds.Contains(TerritoryID);
         }
     }
+    #region Bozja
 
     /// <summary>
     /// Determines if the current content is Bozjan Southern Front or Zadnor.
@@ -137,6 +138,8 @@ internal static class DataCenter
     /// Determines if the current territory is Bozja and is either a field operation or field raid.
     /// </summary>
     public static bool IsInBozja => DataCenter.Territory?.ContentType == TerritoryContentType.SaveTheQueen && (IsInBozjanFieldOp || IsInBozjanFieldRaids || IsInDelubrumSavage);
+
+    #endregion
 
     public static ushort TerritoryID => Svc.ClientState.TerritoryType;
     public static bool IsInUCoB => TerritoryID == 733;
