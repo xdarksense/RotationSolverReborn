@@ -107,6 +107,28 @@ internal static class DataCenter
         }
     }
 
+    /// <summary>
+    /// Determines if the current content is Bozjan Southern Front or Zadnor.
+    /// </summary>
+    public static bool IsInFieldOp => Content.ContentType == ECommons.GameHelpers.ContentType.FieldOperations && DataCenter.Territory?.ContentType == TerritoryContentType.SaveTheQueen;
+
+    /// <summary>
+    /// Determines if the current content is Delubrum Reginae, Dalriada, or Castrum Lacus Litore.
+    /// </summary>
+    public static bool IsInFieldRaids => Content.ContentType == ECommons.GameHelpers.ContentType.FieldRaid && DataCenter.Territory?.ContentType == TerritoryContentType.SaveTheQueen;
+
+    /// <summary>
+    /// Determines if the current content is Delubrum Reginae (Savage).
+    /// </summary>
+    public static bool IsInFieldRaidsSavage => Content.ContentType == ECommons.GameHelpers.ContentType.FieldRaid
+        && Content.ContentDifficulty == ContentDifficulty.FieldRaidsSavage
+        && DataCenter.Territory?.ContentType == TerritoryContentType.SaveTheQueen;
+
+    /// <summary>
+    /// Determines if the current territory is Bozja and is either a field operation or field raid.
+    /// </summary>
+    public static bool IsInBozja => DataCenter.Territory?.ContentType == TerritoryContentType.SaveTheQueen && (IsInFieldOp || IsInFieldRaids || IsInFieldRaidsSavage);
+
     public static ushort TerritoryID => Svc.ClientState.TerritoryType;
     public static bool IsInUCoB => TerritoryID == 733;
     public static bool IsInUwU => TerritoryID == 777;
