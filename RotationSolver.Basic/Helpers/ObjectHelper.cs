@@ -8,8 +8,10 @@ using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using FFXIVClientStructs.FFXIV.Client.Game.InstanceContent;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
+using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using System.Collections.Concurrent;
 using System.Text;
@@ -123,16 +125,16 @@ public static class ObjectHelper
         }
 
         // Prevent targeting mobs in Bozja CE if you are not in CE
-        if (DataCenter.Territory?.ContentType == TerritoryContentType.SaveTheQueen)
-        {
-            var npcRank = battleChara.GetObjectNPC()?.Rank;
-            var hasDutiesStatus = Player.Object.HasStatus(false, StatusID.DutiesAsAssigned);
+        //if (DataCenter.Territory?.ContentType == TerritoryContentType.SaveTheQueen)
+        //{
+        //    var npcRank = battleChara.GetObjectNPC()?.Rank;
+        //    var hasDutiesStatus = Player.Object.HasStatus(false, StatusID.DutiesAsAssigned);
 
-            if ((npcRank == 2 && !hasDutiesStatus))
-            {
-                return false;
-            }
-        }
+        //    if ((npcRank == 2 && !hasDutiesStatus))
+        //    {
+        //        return false;
+        //    }
+        //}
 
         if (Service.Config.TargetQuestThings && battleChara.IsOthersPlayers()) return false;
 

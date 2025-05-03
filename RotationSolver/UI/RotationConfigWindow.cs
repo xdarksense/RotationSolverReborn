@@ -2770,6 +2770,10 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Combo Time: {DataCenter.ComboTime}");
         ImGui.Text($"TargetingType: {DataCenter.TargetingType}");
         ImGui.Text($"DeathTarget: {DataCenter.DeathTarget}");
+        ImGui.Text($"IsInFieldOp: {DataCenter.IsInFieldOp}");
+        ImGui.Text($"IsInFieldRaids: {DataCenter.IsInFieldRaids}");
+        ImGui.Text($"IsInFieldRaidsSavage: {DataCenter.IsInFieldRaidsSavage}");
+        ImGui.Text($"IsInBozja: {DataCenter.IsInBozja}");
         ImGui.Text($"AttackedTargets: {DataCenter.AttackedTargets?.Count() ?? 0}");
         if (DataCenter.AttackedTargets != null)
         {
@@ -2918,6 +2922,7 @@ public partial class RotationConfigWindow : Window
         {
             ImGui.Text($"HP: {battleChara.CurrentHp} / {battleChara.MaxHp}");
             ImGui.Text($"FateID: {battleChara.FateId().ToString() ?? string.Empty}");
+            ImGui.Text($"EventType: {battleChara.GetEventType().ToString() ?? string.Empty}");
             ImGui.Text($"Is Current Focus Target: {battleChara.IsFocusTarget()}");
             ImGui.Text($"TTK: {battleChara.GetTTK()}");
             ImGui.Text($"Is Boss TTK: {battleChara.IsBossFromTTK()}");
