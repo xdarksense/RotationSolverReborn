@@ -307,7 +307,6 @@ internal static class DataCenter
     public static float GCDTime(uint gcdCount = 0, float offset = 0) => DefaultGCDTotal * gcdCount + offset;
     #endregion
 
-
     public static uint[] BluSlots { get; internal set; } = new uint[24];
 
     public static uint[] DutyActions { get; internal set; } = new uint[2];

@@ -169,6 +169,10 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig)]
     private static readonly bool _strongOfSheildTarget = true;
 
+    [ConditionBool, UI("Attempt to handle Bozja CE mob targeting. (Experimental)",
+        Filter = TargetConfig)]
+    private static readonly bool _bozjaCEmobtargeting = false;
+
     [ConditionBool, UI("Teaching mode", Filter = UiInformation)]
     private static readonly bool _teachingMode = false;
 

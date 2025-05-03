@@ -30,7 +30,7 @@ public static class ObjectHelper
         EventHandlerContent.Quest,
     };
 
-    internal static Lumina.Excel.Sheets.BNpcBase? GetObjectNPC(this IGameObject obj)
+    internal static BNpcBase? GetObjectNPC(this IGameObject obj)
     {
         return obj == null ? null : Service.GetSheet<Lumina.Excel.Sheets.BNpcBase>().GetRow(obj.DataId);
     }
@@ -124,16 +124,22 @@ public static class ObjectHelper
             if (battleChara.FateId() != 0 && battleChara.FateId() != DataCenter.PlayerFateId) return false;
         }
 
-        // Prevent targeting mobs in Bozja CE if you are not in CE
-        //if (DataCenter.IsInBozjanFieldOpCE)
-        //{
-        //    var npcRank = battleChara.GetObjectNPC()?.Rank;
+        if (Service.Config.BozjaCEmobtargeting && DataCenter.IsInBozjanFieldOp)
+        {
+            bool isInCE = DataCenter.IsInBozjanFieldOpCE;
 
-        //    if (npcRank == 2)
-        //    {
-        //        return false;
-        //    }
-        //}
+            // Prevent targeting mobs in Bozja CE if you are not in CE
+            if (battleChara.IsBozjanCEFateMob() && !isInCE)
+            {
+                return false;
+            }
+
+            // Prevent targeting mobs out of Bozja CE if you are in CE
+            if (!battleChara.IsBozjanCEFateMob() && isInCE)
+            {
+                return false;
+            }
+        }
 
         if (Service.Config.TargetQuestThings && battleChara.IsOthersPlayers()) return false;
 
@@ -156,6 +162,20 @@ public static class ObjectHelper
                                 || battleChara.TargetObject is IBattleChara,
             _ => true,
         };
+    }
+
+    internal static bool IsBozjanCEFateMob(this IGameObject obj)
+    {
+        if (obj == null) return false;
+
+        var mobEventId = obj.GetEventType();
+        var mobFateId = obj.FateId();
+
+        // Get the EventId of the mob
+        if (mobEventId == EventHandlerContent.PublicContentDirector && mobFateId == 2)
+            return true;
+
+        return false;
     }
 
     private static string RemoveControlCharacters(string input)
