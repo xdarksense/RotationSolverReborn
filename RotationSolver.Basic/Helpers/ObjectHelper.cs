@@ -125,15 +125,15 @@ public static class ObjectHelper
         }
 
         // Prevent targeting mobs in Bozja CE if you are not in CE
-        if (DataCenter.IsInBozjanFieldOpCE)
-        {
-            var npcRank = battleChara.GetObjectNPC()?.Rank;
+        //if (DataCenter.IsInBozjanFieldOpCE)
+        //{
+        //    var npcRank = battleChara.GetObjectNPC()?.Rank;
 
-            if (npcRank == 2)
-            {
-                return false;
-            }
-        }
+        //    if (npcRank == 2)
+        //    {
+        //        return false;
+        //    }
+        //}
 
         if (Service.Config.TargetQuestThings && battleChara.IsOthersPlayers()) return false;
 
