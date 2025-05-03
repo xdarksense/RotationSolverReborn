@@ -2926,6 +2926,7 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"HP: {battleChara.CurrentHp} / {battleChara.MaxHp}");
             ImGui.Text($"FateID: {battleChara.FateId().ToString() ?? string.Empty}");
             ImGui.Text($"EventType: {battleChara.GetEventType().ToString() ?? string.Empty}");
+            ImGui.Text($"IsBozjanCEFateMob: {battleChara.IsBozjanCEFateMob()}");
             ImGui.Text($"Is Current Focus Target: {battleChara.IsFocusTarget()}");
             ImGui.Text($"TTK: {battleChara.GetTTK()}");
             ImGui.Text($"Is Boss TTK: {battleChara.IsBossFromTTK()}");
