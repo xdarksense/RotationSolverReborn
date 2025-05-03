@@ -2770,10 +2770,13 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Combo Time: {DataCenter.ComboTime}");
         ImGui.Text($"TargetingType: {DataCenter.TargetingType}");
         ImGui.Text($"DeathTarget: {DataCenter.DeathTarget}");
-        ImGui.Text($"IsInFieldOp: {DataCenter.IsInFieldOp}");
-        ImGui.Text($"IsInFieldRaids: {DataCenter.IsInFieldRaids}");
-        ImGui.Text($"IsInFieldRaidsSavage: {DataCenter.IsInFieldRaidsSavage}");
+        ImGui.Spacing();
+        ImGui.Text($"IsInFieldOp: {DataCenter.IsInBozjanFieldOp}");
+        ImGui.Text($"IsInFieldOpCE: {DataCenter.IsInBozjanFieldOpCE}");
+        ImGui.Text($"IsInFieldRaids: {DataCenter.IsInBozjanFieldRaids}");
+        ImGui.Text($"IsInFieldRaidsSavage: {DataCenter.IsInDelubrumSavage}");
         ImGui.Text($"IsInBozja: {DataCenter.IsInBozja}");
+        ImGui.Spacing();
         ImGui.Text($"AttackedTargets: {DataCenter.AttackedTargets?.Count() ?? 0}");
         if (DataCenter.AttackedTargets != null)
         {
@@ -2864,7 +2867,7 @@ public partial class RotationConfigWindow : Window
 
         ImGui.Text($"TerritoryType: {DataCenter.Territory?.ContentType}");
         ImGui.Text($"DPSTaken: {DataCenter.DPSTaken}");
-        ImGui.Text($"IsHostileCastingToTank: {DataCenter.IsHostileCastingToTank}");
+        //ImGui.Text($"IsHostileCastingToTank: {DataCenter.IsHostileCastingToTank}");
         ImGui.Text($"CurrentRotation: {DataCenter.CurrentRotation}");
         ImGui.Text($"Job: {DataCenter.Job}");
         ImGui.Text($"JobRange: {DataCenter.JobRange}");
