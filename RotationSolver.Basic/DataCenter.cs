@@ -111,33 +111,29 @@ internal static class DataCenter
     /// <summary>
     /// Determines if the current content is Bozjan Southern Front or Zadnor.
     /// </summary>
-    public static bool IsInBozjanFieldOp => Content.ContentType == ECommons.GameHelpers.ContentType.FieldOperations 
-        && DataCenter.Territory?.ContentType == TerritoryContentType.SaveTheQueen;
+    public static bool IsInBozjanFieldOp => Content.ContentType == ECommons.GameHelpers.ContentType.FieldOperations;
 
     /// <summary>
     /// Determines if the current content is Bozjan Southern Front CE or Zadnor CE.
     /// </summary>
     public static bool IsInBozjanFieldOpCE => Content.ContentType == ECommons.GameHelpers.ContentType.FieldOperations 
-        && Player.Object.HasStatus(false, StatusID.DutiesAsAssigned)
-        && DataCenter.Territory?.ContentType == TerritoryContentType.SaveTheQueen;
+        && Player.Object.HasStatus(false, StatusID.DutiesAsAssigned);
 
     /// <summary>
-    /// Determines if the current content is Delubrum Reginae, Dalriada, or Castrum Lacus Litore.
+    /// Determines if the current content is Delubrum Reginae.
     /// </summary>
-    public static bool IsInBozjanFieldRaids => Content.ContentType == ECommons.GameHelpers.ContentType.FieldRaid 
-        && DataCenter.Territory?.ContentType == TerritoryContentType.SaveTheQueen;
+    public static bool IsInDelubrumNormal => Content.ContentType == ECommons.GameHelpers.ContentType.FieldRaid;
 
     /// <summary>
     /// Determines if the current content is Delubrum Reginae (Savage).
     /// </summary>
     public static bool IsInDelubrumSavage => Content.ContentType == ECommons.GameHelpers.ContentType.FieldRaid
-        && Content.ContentDifficulty == ContentDifficulty.FieldRaidsSavage
-        && DataCenter.Territory?.ContentType == TerritoryContentType.SaveTheQueen;
+        && Content.ContentDifficulty == ContentDifficulty.FieldRaidsSavage;
 
     /// <summary>
     /// Determines if the current territory is Bozja and is either a field operation or field raid.
     /// </summary>
-    public static bool IsInBozja => DataCenter.Territory?.ContentType == TerritoryContentType.SaveTheQueen && (IsInBozjanFieldOp || IsInBozjanFieldRaids || IsInDelubrumSavage);
+    public static bool IsInBozja => (IsInBozjanFieldOp || IsInDelubrumNormal || IsInDelubrumSavage);
 
     #endregion
 
