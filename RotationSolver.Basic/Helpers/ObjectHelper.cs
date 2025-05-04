@@ -8,10 +8,8 @@ using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
-using FFXIVClientStructs.FFXIV.Client.Game.InstanceContent;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
-using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using System.Collections.Concurrent;
 using System.Text;
@@ -30,7 +28,7 @@ public static class ObjectHelper
         EventHandlerContent.Quest,
     };
 
-    internal static BNpcBase? GetObjectNPC(this IGameObject obj)
+    internal static Lumina.Excel.Sheets.BNpcBase? GetObjectNPC(this IGameObject obj)
     {
         return obj == null ? null : Service.GetSheet<Lumina.Excel.Sheets.BNpcBase>().GetRow(obj.DataId);
     }
@@ -72,7 +70,7 @@ public static class ObjectHelper
         return obj != null && (!(obj.GetObjectNPC()?.IsOmnidirectional ?? false)); // Unknown10 used to be the flag for no positional, believe this was changed to IsOmnidirectional
     }
 
-    internal static unsafe bool IsOthersPlayers(this IGameObject obj)
+    internal static unsafe bool IsOthersPlayersMob(this IGameObject obj)
     {
         //SpecialType but no NamePlateIcon
         return _eventType.Contains(obj.GetEventType()) && obj.GetNamePlateIcon() == 0;
@@ -81,6 +79,8 @@ public static class ObjectHelper
     internal static bool IsAttackable(this IBattleChara battleChara)
     {
         if (battleChara.IsAllianceMember()) return false;
+        if (battleChara.IsEnemy() == false) return false;
+        if (battleChara.IsSpecialExecptionImmune()) return false; // For specific named mobs that are immune to everything.
 
         // Dead.
         if (Service.Config.FilterOneHpInvincible && battleChara.CurrentHp <= 1) return false;
@@ -124,7 +124,10 @@ public static class ObjectHelper
             if (battleChara.FateId() != 0 && battleChara.FateId() != DataCenter.PlayerFateId) return false;
         }
 
-        if (Service.Config.BozjaCEmobtargeting && DataCenter.IsInBozjanFieldOp)
+        if (Service.Config.BozjaCEmobtargeting 
+            && DataCenter.IsInBozjanFieldOp 
+            && !DataCenter.IsInDelubrumNormal
+            && !DataCenter.IsInDelubrumSavage)
         {
             bool isInCE = DataCenter.IsInBozjanFieldOpCE;
 
@@ -141,7 +144,7 @@ public static class ObjectHelper
             }
         }
 
-        if (Service.Config.TargetQuestThings && battleChara.IsOthersPlayers()) return false;
+        if (Service.Config.TargetQuestThings && battleChara.IsOthersPlayersMob()) return false;
 
         if (battleChara.IsTopPriorityNamedHostile()) return true;
 
@@ -167,14 +170,22 @@ public static class ObjectHelper
     internal static bool IsBozjanCEFateMob(this IGameObject obj)
     {
         if (obj == null) return false;
-
-        var mobEventId = obj.GetEventType();
-        var mobFateId = obj.FateId();
+        if (obj.IsEnemy() == false) return false;
+        if (!DataCenter.IsInBozjanFieldOp) return false;
 
         // Get the EventId of the mob
-        if (mobEventId == EventHandlerContent.PublicContentDirector && mobFateId == 2)
+        if (obj.GetEventType() == EventHandlerContent.PublicContentDirector)
             return true;
 
+        return false;
+    }
+
+    internal static bool IsSpecialExecptionImmune(this IBattleChara obj)
+    {
+        if (obj == null) return false;
+        if (Player.Object == null) return false;
+
+        if (obj.NameId == 9441) return true; // Special case for Bottom gate in CLL
         return false;
     }
 

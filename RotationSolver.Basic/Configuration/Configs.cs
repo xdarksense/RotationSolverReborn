@@ -169,7 +169,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig)]
     private static readonly bool _strongOfSheildTarget = true;
 
-    [ConditionBool, UI("Attempt to handle Bozja CE mob targeting. (Experimental)",
+    [ConditionBool, UI("Prevent targeting invalid targets in Bozjan Southern Front and Zadnor",
         Filter = TargetConfig)]
     private static readonly bool _bozjaCEmobtargeting = false;
 
