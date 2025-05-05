@@ -64,6 +64,11 @@ partial class AstrologianRotation
     protected static DrawType ActiveDraw => JobGauge.ActiveDraw;
 
     /// <summary>
+    /// Has NeutralSect
+    /// </summary>
+    public static bool HasNeutralSect => !Player.WillStatusEnd(0, true, StatusID.NeutralSect);
+
+    /// <summary>
     /// Has Lightspeed.
     /// </summary>
     public static bool HasLightspeed => !Player.WillStatusEnd(0, true, StatusID.Lightspeed);
@@ -394,7 +399,7 @@ partial class AstrologianRotation
 
     static partial void ModifyHoroscopePvE_16558(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Horoscope];
+        setting.StatusNeed = [StatusID.Horoscope, StatusID.HoroscopeHelios];
         setting.IsFriendly = true;
         setting.CreateConfig = () => new ActionConfig()
         {

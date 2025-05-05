@@ -1,6 +1,6 @@
 namespace RebornRotations.Healer;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.21")]
 [SourceCode(Path = "main/BasicRotations/Healer/AST_Default.cs")]
 [Api(4)]
 public sealed class AST_Default : AstrologianRotation
@@ -78,10 +78,14 @@ public sealed class AST_Default : AstrologianRotation
         if (!InCombat) return false;
 
         if (OraclePvE.CanUse(out act)) return true;
-        if (nextGCD.IsTheSameTo(true, AspectedHeliosPvE, HeliosPvE))
+        if (nextGCD.IsTheSameTo(false, HeliosConjunctionPvE, AspectedHeliosPvE))
+        {
+            if (NeutralSectPvE.CanUse(out act)) return true;
+        }
+
+        if (nextGCD.IsTheSameTo(false, HeliosConjunctionPvE, HeliosPvE))
         {
             if (HoroscopePvE.CanUse(out act)) return true;
-            if (NeutralSectPvE.CanUse(out act)) return true;
         }
 
         if (nextGCD.IsTheSameTo(true, BeneficPvE, BeneficIiPvE, AspectedBeneficPvE))
@@ -115,7 +119,7 @@ public sealed class AST_Default : AstrologianRotation
 
         act = null;
         if (BubbleProtec && HasCollectiveUnconscious) return false;
-        if (MacrocosmosPvE.Cooldown.IsCoolingDown && !MacrocosmosPvE.Cooldown.WillHaveOneCharge(150) 
+        if (MacrocosmosPvE.Cooldown.IsCoolingDown && !MacrocosmosPvE.Cooldown.WillHaveOneCharge(150)
             || CollectiveUnconsciousPvE.Cooldown.IsCoolingDown && !CollectiveUnconsciousPvE.Cooldown.WillHaveOneCharge(40)) return false;
 
         if (((!StarMove && !IsMoving) || StarMove) && !HasGiantDominance && !HasEarthlyDominance && EarthlyStarPvE.CanUse(out act)) return true;
@@ -149,8 +153,8 @@ public sealed class AST_Default : AstrologianRotation
         if (MicroPrio && HasMacrocosmos) return false;
         if (CelestialOppositionPvE.CanUse(out act)) return true;
         if (StellarDetonationPvE.CanUse(out act)) return true;
-        if (HoroscopePvE.CanUse(out act)) return true;
         if (HoroscopePvE_16558.CanUse(out act)) return true;
+        if (HoroscopePvE.CanUse(out act)) return true;
         if (LadyOfCrownsPvE.CanUse(out act)) return true;
 
         return base.HealAreaAbility(nextGCD, out act);
@@ -173,7 +177,6 @@ public sealed class AST_Default : AstrologianRotation
         if (UmbralDrawPvE.CanUse(out act)) return true;
         if ((HasDivination || !DivinationPvE.Cooldown.WillHaveOneCharge(66) || !DivinationPvE.EnoughLevel) && InCombat && TheBalancePvE.CanUse(out act)) return true;
         if ((HasDivination || !DivinationPvE.Cooldown.WillHaveOneCharge(66) || !DivinationPvE.EnoughLevel) && InCombat && TheSpearPvE.CanUse(out act)) return true;
-
         return base.GeneralAbility(nextGCD, out act);
     }
 
@@ -186,10 +189,10 @@ public sealed class AST_Default : AstrologianRotation
         if (IsBurst && !IsMoving && InCombat && DivinationPvE.CanUse(out act)) return true;
         if (AstralDrawPvE.CanUse(out act, usedUp: IsBurst)) return true;
 
-        if (!HasLightspeed && InCombat && 
-            (InBurstStatus 
-            || DivinationPvE.Cooldown.ElapsedAfter(115) 
-            || DivinationPvE.Cooldown.WillHaveOneCharge(5) 
+        if (!HasLightspeed && InCombat &&
+            (InBurstStatus
+            || DivinationPvE.Cooldown.ElapsedAfter(115)
+            || DivinationPvE.Cooldown.WillHaveOneCharge(5)
             || HasDivination) && LightspeedPvE.CanUse(out act, usedUp: true)) return true;
 
         if (InCombat)
@@ -198,10 +201,10 @@ public sealed class AST_Default : AstrologianRotation
 
             if (!IsMoving && !HasGiantDominance && !HasEarthlyDominance && StellarDetonationPvE.CanUse(out act)) return true;
 
-            if (!SimpleLord && 
-                (HasDivination 
-                || !DivinationPvE.Cooldown.WillHaveOneCharge(45) 
-                || !DivinationPvE.EnoughLevel 
+            if (!SimpleLord &&
+                (HasDivination
+                || !DivinationPvE.Cooldown.WillHaveOneCharge(45)
+                || !DivinationPvE.EnoughLevel
                 || UmbralDrawPvE.Cooldown.WillHaveOneCharge(3)) && LordOfCrownsPvE.CanUse(out act)) return true;
         }
 
@@ -211,6 +214,18 @@ public sealed class AST_Default : AstrologianRotation
 
     #region GCD Logic
     [RotationDesc(ActionID.MacrocosmosPvE)]
+    protected override bool DefenseSingleGCD(out IAction? act)
+    {
+        act = null;
+        if (BubbleProtec && HasCollectiveUnconscious) return false;
+        if (MacrocosmosPvE.Cooldown.IsCoolingDown && !MacrocosmosPvE.Cooldown.WillHaveOneCharge(150)
+            || CollectiveUnconsciousPvE.Cooldown.IsCoolingDown && !CollectiveUnconsciousPvE.Cooldown.WillHaveOneCharge(40)) return false;
+
+        if ((NeutralSectPvE.CanUse(out act) || HasNeutralSect || IsLastAbility(false, NeutralSectPvE)) && AspectedBeneficPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
+        return base.DefenseAreaGCD(out act);
+    }
+
+    [RotationDesc(ActionID.MacrocosmosPvE)]
     protected override bool DefenseAreaGCD(out IAction? act)
     {
         act = null;
@@ -218,6 +233,7 @@ public sealed class AST_Default : AstrologianRotation
         if (MacrocosmosPvE.Cooldown.IsCoolingDown && !MacrocosmosPvE.Cooldown.WillHaveOneCharge(150)
             || CollectiveUnconsciousPvE.Cooldown.IsCoolingDown && !CollectiveUnconsciousPvE.Cooldown.WillHaveOneCharge(40)) return false;
 
+        if ((NeutralSectPvE.CanUse(out act) || HasNeutralSect || IsLastAbility(false, NeutralSectPvE)) && HeliosConjunctionPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
         if (MacrocosmosPvE.CanUse(out act)) return true;
         return base.DefenseAreaGCD(out act);
     }
