@@ -27,6 +27,9 @@ public sealed class AST_Default : AstrologianRotation
     [RotationConfig(CombatType.PvE, Name = "Detonate Earlthy Star when you have Giant Dominance")]
     public bool StellarNow { get; set; } = false;
 
+    [RotationConfig(CombatType.PvE, Name = "Use Earthly Star while moving")]
+    public bool StarMove { get; set; } = true;
+
     [Range(4, 20, ConfigUnitType.Seconds)]
     [RotationConfig(CombatType.PvE, Name = "Use Earthly Star during countdown timer.")]
     public float UseEarthlyStarTime { get; set; } = 15;
@@ -43,11 +46,15 @@ public sealed class AST_Default : AstrologianRotation
     [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold among party member needed to use Horoscope")]
     public float HoroscopeHeal { get; set; } = 0.3f;
 
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Minimum average HP threshold among party members needed to use Lady Of Crowns")]
+    public float LadyOfHeals { get; set; } = 0.8f;
+
     [RotationConfig(CombatType.PvE, Name = "Use DOT while moving even if it does not need refresh (disabling is a damage down)")]
     public bool DOTUpkeep { get; set; } = true;
     #endregion
 
-    private static bool InBurstStatus => !Player.WillStatusEnd(0, true, StatusID.Divination);
+    private static bool InBurstStatus => HasDivination;
 
     #region Countdown Logic
     protected override IAction? CountDownAction(float remainTime)
@@ -66,8 +73,8 @@ public sealed class AST_Default : AstrologianRotation
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (BubbleProtec && Player.HasStatus(true, StatusID.CollectiveUnconscious_848)) return false;
-        if (MicroPrio && Player.HasStatus(true, StatusID.Macrocosmos)) return false;
+        if (BubbleProtec && HasCollectiveUnconscious) return false;
+        if (MicroPrio && HasMacrocosmos) return false;
         if (!InCombat) return false;
 
         if (OraclePvE.CanUse(out act)) return true;
@@ -83,7 +90,7 @@ public sealed class AST_Default : AstrologianRotation
         }
 
         if (DivinationPvE.CanUse(out _) && UseBurstMedicine(out act)) return true;
-        if (StellarNow && Player.HasStatus(true, StatusID.GiantDominance) && StellarDetonationPvE.CanUse(out act)) return true;
+        if (StellarNow && HasGiantDominance && StellarDetonationPvE.CanUse(out act)) return true;
 
         return base.EmergencyAbility(nextGCD, out act);
     }
@@ -92,7 +99,7 @@ public sealed class AST_Default : AstrologianRotation
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (BubbleProtec && Player.HasStatus(true, StatusID.CollectiveUnconscious_848)) return false;
+        if (BubbleProtec && HasCollectiveUnconscious) return false;
 
         if (InCombat && TheSpirePvE.CanUse(out act)) return true;
         if (InCombat && TheBolePvE.CanUse(out act)) return true;
@@ -101,26 +108,17 @@ public sealed class AST_Default : AstrologianRotation
         return base.DefenseSingleAbility(nextGCD, out act);
     }
 
-    [RotationDesc(ActionID.MacrocosmosPvE)]
-    protected override bool DefenseAreaGCD(out IAction? act)
-    {
-        act = null;
-        if (BubbleProtec && Player.HasStatus(true, StatusID.CollectiveUnconscious_848)) return false;
-        if (MacrocosmosPvE.Cooldown.IsCoolingDown && !MacrocosmosPvE.Cooldown.WillHaveOneCharge(150) || CollectiveUnconsciousPvE.Cooldown.IsCoolingDown && !CollectiveUnconsciousPvE.Cooldown.WillHaveOneCharge(40)) return false;
-
-        if (MacrocosmosPvE.CanUse(out act)) return true;
-        return base.DefenseAreaGCD(out act);
-    }
-
     [RotationDesc(ActionID.CollectiveUnconsciousPvE, ActionID.SunSignPvE)]
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
         if (SunSignPvE.CanUse(out act)) return true;
 
         act = null;
-        if (BubbleProtec && Player.HasStatus(true, StatusID.CollectiveUnconscious_848)) return false;
-        if (MacrocosmosPvE.Cooldown.IsCoolingDown && !MacrocosmosPvE.Cooldown.WillHaveOneCharge(150) || CollectiveUnconsciousPvE.Cooldown.IsCoolingDown && !CollectiveUnconsciousPvE.Cooldown.WillHaveOneCharge(40)) return false;
+        if (BubbleProtec && HasCollectiveUnconscious) return false;
+        if (MacrocosmosPvE.Cooldown.IsCoolingDown && !MacrocosmosPvE.Cooldown.WillHaveOneCharge(150) 
+            || CollectiveUnconsciousPvE.Cooldown.IsCoolingDown && !CollectiveUnconsciousPvE.Cooldown.WillHaveOneCharge(40)) return false;
 
+        if (((!StarMove && !IsMoving) || StarMove) && !HasGiantDominance && !HasEarthlyDominance && EarthlyStarPvE.CanUse(out act)) return true;
         if (CollectiveUnconsciousPvE.CanUse(out act)) return true;
         return base.DefenseAreaAbility(nextGCD, out act);
     }
@@ -129,8 +127,8 @@ public sealed class AST_Default : AstrologianRotation
     protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (BubbleProtec && Player.HasStatus(true, StatusID.CollectiveUnconscious_848)) return false;
-        if (MicroPrio && Player.HasStatus(true, StatusID.Macrocosmos)) return false;
+        if (BubbleProtec && HasCollectiveUnconscious) return false;
+        if (MicroPrio && HasMacrocosmos) return false;
 
         if (InCombat && TheArrowPvE.CanUse(out act)) return true;
         if (InCombat && TheEwerPvE.CanUse(out act)) return true;
@@ -144,10 +142,11 @@ public sealed class AST_Default : AstrologianRotation
     protected override bool HealAreaAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (BubbleProtec && Player.HasStatus(true, StatusID.CollectiveUnconscious_848)) return false;
+        if (BubbleProtec && HasCollectiveUnconscious) return false;
 
+        if (HasGiantDominance && StellarDetonationPvE.CanUse(out act)) return true;
         if (MicrocosmosPvE.CanUse(out act)) return true;
-        if (MicroPrio && Player.HasStatus(true, StatusID.Macrocosmos)) return false;
+        if (MicroPrio && HasMacrocosmos) return false;
         if (CelestialOppositionPvE.CanUse(out act)) return true;
         if (StellarDetonationPvE.CanUse(out act)) return true;
         if (HoroscopePvE.CanUse(out act)) return true;
@@ -160,9 +159,9 @@ public sealed class AST_Default : AstrologianRotation
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (BubbleProtec && Player.HasStatus(true, StatusID.CollectiveUnconscious_848)) return false;
+        if (BubbleProtec && HasCollectiveUnconscious) return false;
 
-        if (PartyMembersAverHP < .8 && LadyOfCrownsPvE.CanUse(out act)) return true;
+        if (PartyMembersAverHP < LadyOfHeals && LadyOfCrownsPvE.CanUse(out act)) return true;
         if (AstralDrawPvE.Cooldown.WillHaveOneCharge(3) && LadyOfCrownsPvE.CanUse(out act)) return true;
 
         if (AstralDrawPvE.Cooldown.WillHaveOneCharge(3) && InCombat && TheEwerPvE.CanUse(out act)) return true;
@@ -172,8 +171,8 @@ public sealed class AST_Default : AstrologianRotation
 
         if (AstralDrawPvE.CanUse(out act)) return true;
         if (UmbralDrawPvE.CanUse(out act)) return true;
-        if ((Player.HasStatus(true, StatusID.Divination) || !DivinationPvE.Cooldown.WillHaveOneCharge(66) || !DivinationPvE.EnoughLevel) && InCombat && TheBalancePvE.CanUse(out act)) return true;
-        if ((Player.HasStatus(true, StatusID.Divination) || !DivinationPvE.Cooldown.WillHaveOneCharge(66) || !DivinationPvE.EnoughLevel) && InCombat && TheSpearPvE.CanUse(out act)) return true;
+        if ((HasDivination || !DivinationPvE.Cooldown.WillHaveOneCharge(66) || !DivinationPvE.EnoughLevel) && InCombat && TheBalancePvE.CanUse(out act)) return true;
+        if ((HasDivination || !DivinationPvE.Cooldown.WillHaveOneCharge(66) || !DivinationPvE.EnoughLevel) && InCombat && TheSpearPvE.CanUse(out act)) return true;
 
         return base.GeneralAbility(nextGCD, out act);
     }
@@ -181,21 +180,29 @@ public sealed class AST_Default : AstrologianRotation
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (BubbleProtec && Player.HasStatus(true, StatusID.CollectiveUnconscious_848)) return false;
+        if (BubbleProtec && HasCollectiveUnconscious) return false;
 
-        if (SimpleLord && InCombat && Player.HasStatus(true, StatusID.Divination) && LordOfCrownsPvE.CanUse(out act)) return true;
+        if (SimpleLord && InCombat && HasDivination && LordOfCrownsPvE.CanUse(out act)) return true;
         if (IsBurst && !IsMoving && InCombat && DivinationPvE.CanUse(out act)) return true;
         if (AstralDrawPvE.CanUse(out act, usedUp: IsBurst)) return true;
 
-        if (!Player.HasStatus(true, StatusID.Lightspeed) && InCombat && (InBurstStatus || DivinationPvE.Cooldown.ElapsedAfter(115) || DivinationPvE.Cooldown.WillHaveOneCharge(5) || Player.HasStatus(true, StatusID.Divination)) && LightspeedPvE.CanUse(out act, usedUp: true)) return true;
+        if (!HasLightspeed && InCombat && 
+            (InBurstStatus 
+            || DivinationPvE.Cooldown.ElapsedAfter(115) 
+            || DivinationPvE.Cooldown.WillHaveOneCharge(5) 
+            || HasDivination) && LightspeedPvE.CanUse(out act, usedUp: true)) return true;
 
         if (InCombat)
         {
-            if (!Player.HasStatus(true, StatusID.Lightspeed) && IsMoving && LightspeedPvE.CanUse(out act, usedUp: LightspeedMove)) return true;
+            if (!HasLightspeed && IsMoving && LightspeedPvE.CanUse(out act, usedUp: LightspeedMove)) return true;
 
-            if (!IsMoving && !Player.HasStatus(true, StatusID.EarthlyDominance, StatusID.GiantDominance) && EarthlyStarPvE.CanUse(out act)) return true;
+            if (!IsMoving && !HasGiantDominance && !HasEarthlyDominance && StellarDetonationPvE.CanUse(out act)) return true;
 
-            if (!SimpleLord && (Player.HasStatus(true, StatusID.Divination) || !DivinationPvE.Cooldown.WillHaveOneCharge(45) || !DivinationPvE.EnoughLevel || UmbralDrawPvE.Cooldown.WillHaveOneCharge(3)) && LordOfCrownsPvE.CanUse(out act)) return true;
+            if (!SimpleLord && 
+                (HasDivination 
+                || !DivinationPvE.Cooldown.WillHaveOneCharge(45) 
+                || !DivinationPvE.EnoughLevel 
+                || UmbralDrawPvE.Cooldown.WillHaveOneCharge(3)) && LordOfCrownsPvE.CanUse(out act)) return true;
         }
 
         return base.AttackAbility(nextGCD, out act);
@@ -203,13 +210,25 @@ public sealed class AST_Default : AstrologianRotation
     #endregion
 
     #region GCD Logic
+    [RotationDesc(ActionID.MacrocosmosPvE)]
+    protected override bool DefenseAreaGCD(out IAction? act)
+    {
+        act = null;
+        if (BubbleProtec && HasCollectiveUnconscious) return false;
+        if (MacrocosmosPvE.Cooldown.IsCoolingDown && !MacrocosmosPvE.Cooldown.WillHaveOneCharge(150)
+            || CollectiveUnconsciousPvE.Cooldown.IsCoolingDown && !CollectiveUnconsciousPvE.Cooldown.WillHaveOneCharge(40)) return false;
+
+        if (MacrocosmosPvE.CanUse(out act)) return true;
+        return base.DefenseAreaGCD(out act);
+    }
+
     [RotationDesc(ActionID.AspectedBeneficPvE, ActionID.BeneficIiPvE, ActionID.BeneficPvE)]
     protected override bool HealSingleGCD(out IAction? act)
     {
         act = null;
-        if (BubbleProtec && Player.HasStatus(true, StatusID.CollectiveUnconscious_848)) return false;
+        if (BubbleProtec && HasCollectiveUnconscious) return false;
         if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
-        if (MicroPrio && Player.HasStatus(true, StatusID.Macrocosmos)) return false;
+        if (MicroPrio && HasMacrocosmos) return false;
 
         if (AspectedBeneficPvE.CanUse(out act) && (IsMoving || AspectedBeneficPvE.Target.Target?.GetHealthRatio() < AspectedBeneficHeal)) return true;
         if (BeneficIiPvE.CanUse(out act)) return true;
@@ -222,9 +241,9 @@ public sealed class AST_Default : AstrologianRotation
     protected override bool HealAreaGCD(out IAction? act)
     {
         act = null;
-        if (BubbleProtec && Player.HasStatus(true, StatusID.CollectiveUnconscious_848)) return false;
+        if (BubbleProtec && HasCollectiveUnconscious) return false;
         if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
-        if (MicroPrio && Player.HasStatus(true, StatusID.Macrocosmos)) return false;
+        if (MicroPrio && HasMacrocosmos) return false;
 
         if (HeliosConjunctionPvE.CanUse(out act)) return true;
         if (AspectedHeliosPvE.CanUse(out act)) return true;
@@ -237,7 +256,7 @@ public sealed class AST_Default : AstrologianRotation
     protected override bool GeneralGCD(out IAction? act)
     {
         act = null;
-        if (BubbleProtec && Player.HasStatus(true, StatusID.CollectiveUnconscious_848)) return false;
+        if (BubbleProtec && HasCollectiveUnconscious) return false;
         if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
 
         if (GravityPvE.CanUse(out act)) return true;

@@ -62,6 +62,36 @@ partial class AstrologianRotation
     ///  Can use Umbral or Astral draw, active draw matching what the next draw will be, ASTRAL, UMBRAL
     /// </summary>
     protected static DrawType ActiveDraw => JobGauge.ActiveDraw;
+
+    /// <summary>
+    /// Has Lightspeed.
+    /// </summary>
+    public static bool HasLightspeed => !Player.WillStatusEnd(0, true, StatusID.Lightspeed);
+
+    /// <summary>
+    /// Has Divination.
+    /// </summary>
+    public static bool HasDivination => !Player.WillStatusEnd(0, true, StatusID.Divination);
+
+    /// <summary>
+    /// Has Macrocosmos.
+    /// </summary>
+    public static bool HasMacrocosmos => !Player.WillStatusEnd(0, true, StatusID.Macrocosmos);
+
+    /// <summary>
+    /// Is holding bubble.
+    /// </summary>
+    public static bool HasCollectiveUnconscious => !Player.WillStatusEnd(0, true, StatusID.CollectiveUnconscious_848);
+
+    /// <summary>
+    /// Able to execute Giant Dominance Stellar Detonation.
+    /// </summary>
+    public static bool HasGiantDominance => !Player.WillStatusEnd(0, true, StatusID.GiantDominance);
+
+    /// <summary>
+    /// Able to execute Earthly Dominance Stellar Detonation.
+    /// </summary>
+    public static bool HasEarthlyDominance => !Player.WillStatusEnd(0, true, StatusID.EarthlyDominance);
     #endregion
 
     #region Debug
