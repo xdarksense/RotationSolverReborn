@@ -1197,7 +1197,8 @@ public struct ActionTargetInfo(IBaseAction action)
             };
 
             return orderedGameObjects.FirstOrDefault() as IBattleChara;
-        };
+        }
+        ;
 
         IBattleChara? FindBeAttackedTarget()
         {

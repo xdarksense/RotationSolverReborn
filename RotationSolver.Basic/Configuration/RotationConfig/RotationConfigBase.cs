@@ -108,14 +108,32 @@ internal abstract class RotationConfigBase : IRotationConfig
     {
         if (type.IsEnum)
         {
-            return Enum.Parse(type, value);
+            // Attempt to match the value with the enum name
+            if (Enum.IsDefined(type, value))
+            {
+                return Enum.Parse(type, value);
+            }
+
+            // Attempt to match the value with the Description attribute
+            foreach (var field in type.GetFields())
+            {
+                var descriptionAttribute = field.GetCustomAttribute<DescriptionAttribute>();
+                if (descriptionAttribute != null && descriptionAttribute.Description == value)
+                {
+                    return Enum.Parse(type, field.Name);
+                }
+            }
+
+            // Log a warning and return the default value if no match is found
+            Svc.Log.Warning($"Invalid enum value '{value}' for type '{type.Name}'. Using default value.");
+            return Enum.GetValues(type).GetValue(0) ?? throw new InvalidOperationException($"No default value available for enum type '{type.Name}'.");
         }
         else if (type == typeof(bool))
         {
             return bool.Parse(value);
         }
 
-        return Convert.ChangeType(value, type);
+        return Convert.ChangeType(value, type) ?? throw new InvalidOperationException($"Failed to convert value '{value}' to type '{type.Name}'.");
     }
 
     /// <summary>

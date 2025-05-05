@@ -60,9 +60,14 @@ partial class GunbreakerRotation
     public static short MaxTimerDuration => JobGauge.MaxTimerDuration;
 
     /// <summary>
-    /// 
+    /// Gets whether the player is in the Gnashing Fang combo.
     /// </summary>
-    public static bool InGnashingFang => AmmoComboStep > 0;
+    public static bool InGnashingFang => AmmoComboStep == 1 || AmmoComboStep == 2;
+
+    /// <summary>
+    /// Gets whether the player is in the Reign combo.
+    /// </summary>
+    public static bool InReignCombo => AmmoComboStep == 3 || AmmoComboStep == 4;
 
     /// <summary>
     /// Able to execute Sonic Break.
@@ -201,7 +206,6 @@ partial class GunbreakerRotation
 
     static partial void ModifyNoMercyPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.ReadyToBreak];
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 5,
@@ -257,7 +261,6 @@ partial class GunbreakerRotation
 
     static partial void ModifyBurstStrikePvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.ReadyToBlast, StatusID.ReadyToBlast_3041];
         setting.ActionCheck = () => Ammo >= 1;
     }
 
@@ -304,19 +307,16 @@ partial class GunbreakerRotation
     static partial void ModifyGnashingFangPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => AmmoComboStep == 0 && Ammo >= 1;
-        setting.StatusProvide = [StatusID.ReadyToRip];
     }
 
     static partial void ModifySavageClawPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => SavageClawPvEReady;
-        setting.StatusProvide = [StatusID.ReadyToTear];
     }
 
     static partial void ModifyWickedTalonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => WickedTalonPvEReady;
-        setting.StatusProvide = [StatusID.ReadyToGouge];
     }
 
     static partial void ModifyBowShockPvE(ref ActionSetting setting)
@@ -433,7 +433,7 @@ partial class GunbreakerRotation
 
     static partial void ModifyNobleBloodPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NobleBloodPvEReady;
+        setting.ActionCheck = () => NobleBloodPvEReady && InReignCombo;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1
@@ -442,7 +442,7 @@ partial class GunbreakerRotation
 
     static partial void ModifyLionHeartPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => LionHeartPvEReady;
+        setting.ActionCheck = () => LionHeartPvEReady && InReignCombo;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1

@@ -1,6 +1,6 @@
 namespace RebornRotations.Tank;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.21")]
 [SourceCode(Path = "main/BasicRotations/Tank/DRK_Default.cs")]
 [Api(4)]
 public sealed class DRK_Default : DarkKnightRotation
@@ -34,7 +34,7 @@ public sealed class DRK_Default : DarkKnightRotation
     // Decision-making for emergency abilities, focusing on Blood Weapon usage.
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        
+
         return base.EmergencyAbility(nextGCD, out act);
     }
 

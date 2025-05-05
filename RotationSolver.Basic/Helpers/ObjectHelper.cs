@@ -124,8 +124,8 @@ public static class ObjectHelper
             if (battleChara.FateId() != 0 && battleChara.FateId() != DataCenter.PlayerFateId) return false;
         }
 
-        if (Service.Config.BozjaCEmobtargeting 
-            && DataCenter.IsInBozjanFieldOp 
+        if (Service.Config.BozjaCEmobtargeting
+            && DataCenter.IsInBozjanFieldOp
             && !DataCenter.IsInDelubrumNormal
             && !DataCenter.IsInDelubrumSavage)
         {

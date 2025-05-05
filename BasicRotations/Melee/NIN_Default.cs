@@ -2,7 +2,7 @@ using Dalamud.Interface.Colors;
 
 namespace RebornRotations.Melee;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.21")]
 [SourceCode(Path = "main/BasicRotations/Melee/NIN_Default.cs")]
 [Api(4)]
 
@@ -85,14 +85,13 @@ public sealed class NIN_Default : NinjaRotation
 
         // If the last action performed matches any of a list of specific actions, it clears the Ninjutsu aim.
         // This serves as a reset/cleanup mechanism to ensure the decision logic starts fresh for the next cycle.
-        if (IsLastAction(false, RabbitMediumPvE, FumaShurikenPvE, KatonPvE, RaitonPvE,
-            HyotonPvE, HutonPvE, DotonPvE, SuitonPvE, GokaMekkyakuPvE, HyoshoRanryuPvE) 
+        if (IsLastAction(true, NinjutsuPvE, RaitonPvE)
             || Player.HasStatus(true, StatusID.ShadowWalker) && (_ninActionAim == SuitonPvE || _ninActionAim == HutonPvE)
             || _ninActionAim == GokaMekkyakuPvE && IsLastGCD(false, GokaMekkyakuPvE)
             || _ninActionAim == HyoshoRanryuPvE && IsLastGCD(false, HyoshoRanryuPvE)
             || _ninActionAim == GokaMekkyakuPvE && !HasKassatsu
             || _ninActionAim == HyoshoRanryuPvE && !HasKassatsu
-            || IsLastAbility(false, KassatsuPvE))
+            || IsLastAction(false, KassatsuPvE))
         {
             ClearNinjutsu();
         }

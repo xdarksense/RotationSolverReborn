@@ -116,7 +116,7 @@ internal static class DataCenter
     /// <summary>
     /// Determines if the current content is Bozjan Southern Front CE or Zadnor CE.
     /// </summary>
-    public static bool IsInBozjanFieldOpCE => Content.ContentType == ECommons.GameHelpers.ContentType.FieldOperations 
+    public static bool IsInBozjanFieldOpCE => Content.ContentType == ECommons.GameHelpers.ContentType.FieldOperations
         && Player.Object.HasStatus(false, StatusID.DutiesAsAssigned);
 
     /// <summary>

@@ -1,6 +1,6 @@
 namespace RebornRotations.Healer;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.21")]
 [SourceCode(Path = "main/BasicRotations/Healer/SCH_Default.cs")]
 [Api(4)]
 public sealed class SCH_Default : ScholarRotation
@@ -24,6 +24,10 @@ public sealed class SCH_Default : ScholarRotation
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Remove Aetherpact to conserve resources if party member is above this percentage")]
     public float AetherpactRemove { get; set; } = 0.9f;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "HP percent needed for Excogitation to be used as a ogcd heal")]
+    public float ExcogHeal { get; set; } = 0.5f;
 
     [Range(0, 5, ConfigUnitType.Seconds)]
     [RotationConfig(CombatType.PvE, Name = "How long you need to be moving before Ruin is used")]
@@ -68,6 +72,7 @@ public sealed class SCH_Default : ScholarRotation
                 return true;
             }
         }
+        if (nextGCD.IsTheSameTo(true, AdloquiumPvE, ConcitationPvE, SuccorPvE, IndomitabilityPvE, ExcogitationPvE) && RecitationPvE.CanUse(out act)) return true;
 
         return base.EmergencyAbility(nextGCD, out act);
     }
@@ -100,14 +105,10 @@ public sealed class SCH_Default : ScholarRotation
     {
         var haveLink = PartyMembers.Any(p => p.HasStatus(true, StatusID.FeyUnion_1223));
         if (ProtractionPvE.CanUse(out act)) return true;
-        if (IsLastAbility(ActionID.RecitationPvE) && ExcogitationPvE.CanUse(out act)) return true;
-
+        if (ExcogitationPvE.Target.Target.GetHealthRatio() > 0.5 && ExcogitationPvE.CanUse(out act)) return true;
         if (AetherpactPvE.CanUse(out act) && FairyGauge >= 70 && !haveLink) return true;
-        if (ExcogitationPvE.CanUse(out act)) return true;
         if (LustratePvE.CanUse(out act)) return true;
         if (AetherpactPvE.CanUse(out act) && !haveLink) return true;
-
-        if (ExcogitationPvE.CanUse(out act)) return true;
 
         return base.HealSingleAbility(nextGCD, out act);
     }
