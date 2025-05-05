@@ -158,6 +158,10 @@ internal class Service : IDisposable
     {
         if (disposing)
         {
+            // Dispose the EzHook instance
+            actorVfxCreateHook?.Disable();
+
+            // Clean up ForceDisableMovement if necessary
             if (!_canMove && ForceDisableMovement > 0)
             {
                 ForceDisableMovement--;

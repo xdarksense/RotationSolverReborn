@@ -6,8 +6,8 @@ namespace RebornRotations.Tank;
 public sealed class GNB_Default : GunbreakerRotation
 {
     #region Config Options
-    [RotationConfig(CombatType.PvE, Name = "Use experimental No Mercy logic for burst")]
-    public bool NoMercyLogic { get; set; } = false;
+    [RotationConfig(CombatType.PvE, Name = "Use tinctures in opener (experimental)")]
+    public bool UsePots { get; set; } = false;
     #endregion
 
     private static bool InBurstStatus => !Player.WillStatusEnd(0, true, StatusID.NoMercy);
@@ -25,6 +25,8 @@ public sealed class GNB_Default : GunbreakerRotation
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
         if (base.EmergencyAbility(nextGCD, out act)) return true;
+
+        if (UsePots && CombatElapsedLessGCD(3) && IsLastGCD(true, KeenEdgePvE) && BloodfestPvE.Cooldown.IsCoolingDown && UseBurstMedicine(out act)) return true;
 
         if (InCombat && CombatElapsedLess(30))
         {
@@ -74,9 +76,7 @@ public sealed class GNB_Default : GunbreakerRotation
     }
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        if (NoMercyLogic && IsBurst && CanUseNoMercy(out act)) return true;
-
-        if (!NoMercyLogic && !CombatElapsedLessGCD(5) && NoMercyPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (Ammo == 0 && BloodfestPvE.CanUse(out act)) return true;
 
         if (JugularRipPvE.CanUse(out act)) return true;
 
@@ -95,7 +95,6 @@ public sealed class GNB_Default : GunbreakerRotation
         if (InBurstStatus && CanUseBowShock(out act)) return true;
 
         //if (TrajectoryPvE.CanUse(out act) && !IsMoving) return true;
-        if (GnashingFangPvE.Cooldown.IsCoolingDown && DoubleDownPvE.Cooldown.IsCoolingDown && Ammo == 0 && BloodfestPvE.CanUse(out act)) return true;
 
         bool areDDTargetsInRange = AllHostileTargets.Any(hostile => hostile.DistanceToPlayer() < 4.5f);
 
@@ -114,19 +113,18 @@ public sealed class GNB_Default : GunbreakerRotation
         bool areDDTargetsInRange = AllHostileTargets.Any(hostile => hostile.DistanceToPlayer() < 4.5f);
 
         if (InBurstStatus && BloodfestPvE.CanUse(out act)) return true;
-
+       
         if (IsLastGCD(false, NobleBloodPvE) && LionHeartPvE.CanUse(out act, skipComboCheck: true)) return true;
         if (IsLastGCD(false, ReignOfBeastsPvE) && NobleBloodPvE.CanUse(out act, skipComboCheck: true)) return true;
-        if (!InGnashingFang && ReignOfBeastsPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (InBurstStatus && !InGnashingFang && !GnashingFangPvE.Cooldown.HasOneCharge && ReignOfBeastsPvE.CanUse(out act, skipAoeCheck: true)) return true;
+
+        if (InBurstStatus && DoubleDownPvE.CanUse(out act)) return true;
 
         if (InBurstStatus && SonicBreakPvE.CanUse(out act)) return true;
 
-        if (areDDTargetsInRange)
-        {
-            if (InBurstStatus && CanUseDoubleDown(out act)) return true;
-        }
-
-        if (CanUseGnashingFang(out act)) return true;
+        if (WickedTalonPvE.CanUse(out act, skipComboCheck: true)) return true;
+        if (SavageClawPvE.CanUse(out act, skipComboCheck: true)) return true;
+        if (NoMercyPvE.Cooldown.IsCoolingDown && GnashingFangPvE.Cooldown.HasOneCharge && GnashingFangPvE.CanUse(out act)) return true;
 
         if (SavageClawPvE.CanUse(out act, skipComboCheck: true)) return true;
         if (WickedTalonPvE.CanUse(out act, skipComboCheck: true)) return true;
@@ -137,7 +135,9 @@ public sealed class GNB_Default : GunbreakerRotation
         if (DemonSlaughterPvE.CanUse(out act)) return true;
         if (DemonSlicePvE.CanUse(out act)) return true;
 
-        if (IsAmmoCapped && IsLastGCD(ActionID.BrutalShellPvE) && BurstStrikePvE.CanUse(out act)) return true;
+        if ((IsAmmoCapped && IsLastGCD(ActionID.BrutalShellPvE) 
+            || (IsAmmoCapped && HasReadyToReign && IsLastComboAction(false, KeenEdgePvE))) 
+            && BurstStrikePvE.CanUse(out act, skipComboCheck: true)) return true;
 
         if (!InGnashingFang)
         {
@@ -224,22 +224,23 @@ public sealed class GNB_Default : GunbreakerRotation
 
     private bool CanUseBurstStrike(out IAction act)
     {
-        if (BurstStrikePvE.CanUse(out act))
+        if (BurstStrikePvE.CanUse(out act, skipComboCheck: true))
         {
             if (DemonSlicePvE.CanUse(out _)) return false;
+
+            if (DoubleDownPvE.EnoughLevel && DoubleDownPvE.CanUse(out _)) return false;
 
             if (SonicBreakPvE.Cooldown.IsCoolingDown && SonicBreakPvE.Cooldown.WillHaveOneCharge(0.5f) && GnashingFangPvE.EnoughLevel) return false;
 
             if (Player.HasStatus(true, StatusID.NoMercy) &&
-            AmmoComboStep == 0 &&
+                AmmoComboStep == 0 &&
                 !GnashingFangPvE.Cooldown.WillHaveOneCharge(1)) return true;
 
-            if (!CartridgeChargeIiTrait.EnoughLevel && Ammo == 2) return true;
+            if (IsAmmoCapped) return true;
 
             if (IsLastGCD((ActionID)BrutalShellPvE.ID) &&
                 (IsAmmoCapped ||
                 BloodfestPvE.Cooldown.WillHaveOneCharge(6) && Ammo <= 2 && !NoMercyPvE.Cooldown.WillHaveOneCharge(10) && BloodfestPvE.EnoughLevel)) return true;
-
         }
         return false;
     }
