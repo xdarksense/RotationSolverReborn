@@ -1,7 +1,6 @@
 ﻿using Dalamud.Configuration;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
-using Lumina.Excel.Sheets;
 using System.Collections.Concurrent;
 using static RotationSolver.Basic.Configuration.ConfigTypes;
 

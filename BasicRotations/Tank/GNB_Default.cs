@@ -1,9 +1,9 @@
 namespace RebornRotations.Tank;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.21")]
 [SourceCode(Path = "main/BasicRotations/Tank/GNB_Default.cs")]
 [Api(4)]
-public sealed class GNB_Default_Old : GunbreakerRotation
+public sealed class GNB_Default : GunbreakerRotation
 {
     #region Config Options
     [RotationConfig(CombatType.PvE, Name = "Use experimental No Mercy logic for burst")]
