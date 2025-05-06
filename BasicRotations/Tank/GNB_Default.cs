@@ -34,6 +34,20 @@ public sealed class GNB_Default : GunbreakerRotation
             if (InBurstStatus && BloodfestPvE.CanUse(out act, skipAoeCheck: true)) return true;
         }
 
+        // AOE No Mercy Logic
+        if (!DemonSlaughterPvE.EnoughLevel && nextGCD.IsTheSameTo(true, ActionID.DemonSlicePvE) && NoMercyPvE.CanUse(out act)) return true;
+        if (!FatedCirclePvE.EnoughLevel && nextGCD.IsTheSameTo(true, ActionID.DemonSlaughterPvE) && NoMercyPvE.CanUse(out act)) return true;
+        if (!DoubleDownPvE.EnoughLevel && nextGCD.IsTheSameTo(true, ActionID.FatedCirclePvE) && NoMercyPvE.CanUse(out act)) return true;
+        if (nextGCD.IsTheSameTo(true, ActionID.DoubleDownPvE) && NoMercyPvE.CanUse(out act)) return true;
+
+        // ST No Mercy Logic
+        if (!BrutalShellPvE.EnoughLevel && nextGCD.IsTheSameTo(true, ActionID.KeenEdgePvE) && NoMercyPvE.CanUse(out act)) return true;
+        if (!SolidBarrelPvE.EnoughLevel && nextGCD.IsTheSameTo(true, ActionID.BrutalShellPvE) && NoMercyPvE.CanUse(out act)) return true;
+        if (!BurstStrikePvE.EnoughLevel && nextGCD.IsTheSameTo(true, ActionID.SolidBarrelPvE) && NoMercyPvE.CanUse(out act)) return true;
+        if (!GnashingFangPvE.EnoughLevel && nextGCD.IsTheSameTo(true, ActionID.BurstStrikePvE) && NoMercyPvE.CanUse(out act)) return true;
+        if (!GnashingFangPvE.EnoughLevel && nextGCD.IsTheSameTo(true, ActionID.BurstStrikePvE) && NoMercyPvE.CanUse(out act)) return true;
+        if (nextGCD.IsTheSameTo(false, ActionID.GnashingFangPvE) && NoMercyPvE.CanUse(out act)) return true;
+
         if (AbdomenTearPvE.CanUse(out act)) return true;
         if (EyeGougePvE.CanUse(out act)) return true;
         if (FatedBrandPvE.CanUse(out act)) return true;
@@ -124,7 +138,7 @@ public sealed class GNB_Default : GunbreakerRotation
 
         if (WickedTalonPvE.CanUse(out act, skipComboCheck: true)) return true;
         if (SavageClawPvE.CanUse(out act, skipComboCheck: true)) return true;
-        if (NoMercyPvE.Cooldown.IsCoolingDown && GnashingFangPvE.Cooldown.HasOneCharge && GnashingFangPvE.CanUse(out act)) return true;
+        if (GnashingFangPvE.Cooldown.HasOneCharge && GnashingFangPvE.CanUse(out act)) return true;
 
         if (SavageClawPvE.CanUse(out act, skipComboCheck: true)) return true;
         if (WickedTalonPvE.CanUse(out act, skipComboCheck: true)) return true;
