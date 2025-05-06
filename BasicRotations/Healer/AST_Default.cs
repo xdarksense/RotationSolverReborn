@@ -27,7 +27,7 @@ public sealed class AST_Default : AstrologianRotation
     [RotationConfig(CombatType.PvE, Name = "Detonate Earlthy Star when you have Giant Dominance")]
     public bool StellarNow { get; set; } = false;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Earthly Star while moving")]
+    [RotationConfig(CombatType.PvE, Name = "Use Earthly Star as an attack while moving")]
     public bool StarMove { get; set; } = true;
 
     [Range(4, 20, ConfigUnitType.Seconds)]
@@ -115,15 +115,16 @@ public sealed class AST_Default : AstrologianRotation
     [RotationDesc(ActionID.CollectiveUnconsciousPvE, ActionID.SunSignPvE)]
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (SunSignPvE.CanUse(out act)) return true;
-
         act = null;
         if (BubbleProtec && HasCollectiveUnconscious) return false;
+
+        if (SunSignPvE.CanUse(out act)) return true;
+        if (EarthlyStarPvE.CanUse(out act)) return true;
+
         if (MacrocosmosPvE.Cooldown.IsCoolingDown && !MacrocosmosPvE.Cooldown.WillHaveOneCharge(150)
             || CollectiveUnconsciousPvE.Cooldown.IsCoolingDown && !CollectiveUnconsciousPvE.Cooldown.WillHaveOneCharge(40)) return false;
-
-        if (((!StarMove && !IsMoving) || StarMove) && !HasGiantDominance && !HasEarthlyDominance && EarthlyStarPvE.CanUse(out act)) return true;
         if (CollectiveUnconsciousPvE.CanUse(out act)) return true;
+
         return base.DefenseAreaAbility(nextGCD, out act);
     }
 
@@ -199,7 +200,7 @@ public sealed class AST_Default : AstrologianRotation
         {
             if (!HasLightspeed && IsMoving && LightspeedPvE.CanUse(out act, usedUp: LightspeedMove)) return true;
 
-            if (!IsMoving && !HasGiantDominance && !HasEarthlyDominance && StellarDetonationPvE.CanUse(out act)) return true;
+            if (((!StarMove && !IsMoving) || StarMove) && !HasGiantDominance && !HasEarthlyDominance && EarthlyStarPvE.CanUse(out act)) return true;
 
             if (!SimpleLord &&
                 (HasDivination
