@@ -104,10 +104,7 @@ partial class GunbreakerRotation
     /// </summary>
     public static bool HasReadyToBlast => !Player.WillStatusEndGCD(0, 0, true, StatusID.ReadyToBlast);
 
-    /// <summary>
-    /// Able to execute Hypervelocity.
-    /// </summary>
-    public bool NoMercyWindow => NoMercyPvE.Cooldown.RecastTimeElapsed >= 39.5f && NoMercyPvE.Cooldown.RecastTimeElapsed <= 60;
+    //public bool NoMercyWindow => NoMercyPvE.Cooldown.RecastTimeElapsed >= 39.5f && NoMercyPvE.Cooldown.RecastTimeElapsed <= 60;
 
     #endregion
 
@@ -164,7 +161,7 @@ partial class GunbreakerRotation
     /// <inheritdoc/>
     public override void DisplayStatus()
     {
-        ImGui.Text("NoMercyWindow: " + NoMercyWindow.ToString());
+        //ImGui.Text("NoMercyWindow: " + NoMercyWindow.ToString());
         ImGui.Text("Ammo: " + Ammo.ToString());
         ImGui.Text("AmmoComboStep: " + AmmoComboStep.ToString());
         ImGui.Text("MaxAmmo: " + MaxAmmo().ToString());
