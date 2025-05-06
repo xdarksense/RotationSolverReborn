@@ -24,8 +24,6 @@ public sealed class GNB_Default : GunbreakerRotation
     #region oGCD Logic
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        if (base.EmergencyAbility(nextGCD, out act)) return true;
-
         if (UsePots && CombatElapsedLessGCD(3) && IsLastGCD(true, KeenEdgePvE) && BloodfestPvE.Cooldown.IsCoolingDown && UseBurstMedicine(out act)) return true;
 
         if (InCombat && CombatElapsedLess(30))
@@ -45,8 +43,7 @@ public sealed class GNB_Default : GunbreakerRotation
         if (!SolidBarrelPvE.EnoughLevel && nextGCD.IsTheSameTo(true, ActionID.BrutalShellPvE) && NoMercyPvE.CanUse(out act)) return true;
         if (!BurstStrikePvE.EnoughLevel && nextGCD.IsTheSameTo(true, ActionID.SolidBarrelPvE) && NoMercyPvE.CanUse(out act)) return true;
         if (!GnashingFangPvE.EnoughLevel && nextGCD.IsTheSameTo(true, ActionID.BurstStrikePvE) && NoMercyPvE.CanUse(out act)) return true;
-        if (!GnashingFangPvE.EnoughLevel && nextGCD.IsTheSameTo(true, ActionID.BurstStrikePvE) && NoMercyPvE.CanUse(out act)) return true;
-        if (nextGCD.IsTheSameTo(false, ActionID.GnashingFangPvE) && NoMercyPvE.CanUse(out act)) return true;
+        if (nextGCD.IsTheSameTo(true, ActionID.GnashingFangPvE) && NoMercyPvE.CanUse(out act)) return true;
 
         if (AbdomenTearPvE.CanUse(out act)) return true;
         if (EyeGougePvE.CanUse(out act)) return true;
