@@ -106,6 +106,36 @@ internal static class DataCenter
             return allianceTerritoryIds.Contains(TerritoryID);
         }
     }
+    #region Bozja
+
+    /// <summary>
+    /// Determines if the current content is Bozjan Southern Front or Zadnor.
+    /// </summary>
+    public static bool IsInBozjanFieldOp => Content.ContentType == ECommons.GameHelpers.ContentType.FieldOperations;
+
+    /// <summary>
+    /// Determines if the current content is Bozjan Southern Front CE or Zadnor CE.
+    /// </summary>
+    public static bool IsInBozjanFieldOpCE => Content.ContentType == ECommons.GameHelpers.ContentType.FieldOperations
+        && Player.Object.HasStatus(false, StatusID.DutiesAsAssigned);
+
+    /// <summary>
+    /// Determines if the current content is Delubrum Reginae.
+    /// </summary>
+    public static bool IsInDelubrumNormal => Content.ContentType == ECommons.GameHelpers.ContentType.FieldRaid;
+
+    /// <summary>
+    /// Determines if the current content is Delubrum Reginae (Savage).
+    /// </summary>
+    public static bool IsInDelubrumSavage => Content.ContentType == ECommons.GameHelpers.ContentType.FieldRaid
+        && Content.ContentDifficulty == ContentDifficulty.FieldRaidsSavage;
+
+    /// <summary>
+    /// Determines if the current territory is Bozja and is either a field operation or field raid.
+    /// </summary>
+    public static bool IsInBozja => (IsInBozjanFieldOp || IsInDelubrumNormal || IsInDelubrumSavage);
+
+    #endregion
 
     public static ushort TerritoryID => Svc.ClientState.TerritoryType;
     public static bool IsInUCoB => TerritoryID == 733;
@@ -272,7 +302,6 @@ internal static class DataCenter
     /// <returns>The total GCD time.</returns>
     public static float GCDTime(uint gcdCount = 0, float offset = 0) => DefaultGCDTotal * gcdCount + offset;
     #endregion
-
 
     public static uint[] BluSlots { get; internal set; } = new uint[24];
 
@@ -823,11 +852,11 @@ internal static class DataCenter
     {
         return IsCastingVfx(VfxDataQueue, s =>
         {
-            if (!s.Path.StartsWith("vfx/lockon/eff/tank_lockon")
-            && !s.Path.StartsWith("vfx/lockon/eff/tank_laser")) return false;
-
             if (!Player.Available) return false;
             if (Player.Object.IsJobCategory(JobRole.Tank) && s.ObjectId != Player.Object.GameObjectId) return false;
+
+            if (!s.Path.StartsWith("vfx/lockon/eff/tank_lockon")
+            && !s.Path.StartsWith("vfx/lockon/eff/tank_laser")) return false;
             return true;
         });
     }
@@ -836,11 +865,11 @@ internal static class DataCenter
     {
         return IsCastingVfx(VfxDataQueue, s =>
         {
+            if (!Player.Available) return false;
+
             if (!s.Path.StartsWith("vfx/lockon/eff/coshare")
             && !s.Path.StartsWith("vfx/lockon/eff/share_laser")
             && !s.Path.StartsWith("vfx/lockon/eff/com_share")) return false;
-
-            if (!Player.Available) return false;
             return true;
         });
     }
@@ -869,6 +898,11 @@ internal static class DataCenter
 
     public static bool IsHostileCastingTank(IBattleChara h)
     {
+        if (h == null)
+        {
+            return false;
+        }
+
         return IsHostileCastingBase(h, (act) =>
         {
             return OtherConfiguration.HostileCastingTank.Contains(act.RowId)
@@ -890,17 +924,24 @@ internal static class DataCenter
     public static bool IsHostileCastingBase(IBattleChara? h, Func<Action, bool> check)
     {
         // Check if h is null
-        if (h == null) return false;
+        if (h == null)
+        {
+            Svc.Log.Error("IsHostileCastingBase: Hostile character is null.");
+            return false;
+        }
 
         try
         {
             // Check if the hostile character is casting
-            if (!h.IsCasting) return false;
+            if (!h.IsCasting)
+            {
+                return false;
+            }
         }
-        catch (AccessViolationException ex)
+        catch (Exception ex)
         {
             // Log the exception and return false
-            Svc.Log.Error($"AccessViolationException: {ex.Message}");
+            Svc.Log.Error($"IsHostileCastingBase: Exception while checking IsCasting - {ex.Message}");
             return false;
         }
 
@@ -916,13 +957,21 @@ internal static class DataCenter
 
         // Get the action sheet
         var actionSheet = Service.GetSheet<Action>();
-        if (actionSheet == null) return false; // Check if actionSheet is null
+        if (actionSheet == null)
+        {
+            Svc.Log.Error("IsHostileCastingBase: Action sheet is null.");
+            return false;
+        }
 
         // Get the action being cast
         var action = actionSheet.GetRow(h.CastActionId);
-        if (action.RowId == 0) return false; // Check if action is not initialized
+        if (action.RowId == 0)
+        {
+            Svc.Log.Error("IsHostileCastingBase: Action is not initialized.");
+            return false;
+        }
 
         // Invoke the check function on the action and return the result
-        return check?.Invoke(action) ?? false; // Check if check is null
+        return check?.Invoke(action) ?? false;
     }
 }

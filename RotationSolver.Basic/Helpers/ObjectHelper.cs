@@ -70,7 +70,7 @@ public static class ObjectHelper
         return obj != null && (!(obj.GetObjectNPC()?.IsOmnidirectional ?? false)); // Unknown10 used to be the flag for no positional, believe this was changed to IsOmnidirectional
     }
 
-    internal static unsafe bool IsOthersPlayers(this IGameObject obj)
+    internal static unsafe bool IsOthersPlayersMob(this IGameObject obj)
     {
         //SpecialType but no NamePlateIcon
         return _eventType.Contains(obj.GetEventType()) && obj.GetNamePlateIcon() == 0;
@@ -79,6 +79,8 @@ public static class ObjectHelper
     internal static bool IsAttackable(this IBattleChara battleChara)
     {
         if (battleChara.IsAllianceMember()) return false;
+        if (battleChara.IsEnemy() == false) return false;
+        if (battleChara.IsSpecialExecptionImmune()) return false; // For specific named mobs that are immune to everything.
 
         // Dead.
         if (Service.Config.FilterOneHpInvincible && battleChara.CurrentHp <= 1) return false;
@@ -122,19 +124,27 @@ public static class ObjectHelper
             if (battleChara.FateId() != 0 && battleChara.FateId() != DataCenter.PlayerFateId) return false;
         }
 
-        // Prevent targeting mobs in Bozja CE if you are not in CE
-        if (DataCenter.Territory?.ContentType == TerritoryContentType.SaveTheQueen)
+        if (Service.Config.BozjaCEmobtargeting
+            && DataCenter.IsInBozjanFieldOp
+            && !DataCenter.IsInDelubrumNormal
+            && !DataCenter.IsInDelubrumSavage)
         {
-            var npcRank = battleChara.GetObjectNPC()?.Rank;
-            var hasDutiesStatus = Player.Object.HasStatus(false, StatusID.DutiesAsAssigned);
+            bool isInCE = DataCenter.IsInBozjanFieldOpCE;
 
-            if ((npcRank == 2 && !hasDutiesStatus))
+            // Prevent targeting mobs in Bozja CE if you are not in CE
+            if (battleChara.IsBozjanCEFateMob() && !isInCE)
+            {
+                return false;
+            }
+
+            // Prevent targeting mobs out of Bozja CE if you are in CE
+            if (!battleChara.IsBozjanCEFateMob() && isInCE)
             {
                 return false;
             }
         }
 
-        if (Service.Config.TargetQuestThings && battleChara.IsOthersPlayers()) return false;
+        if (Service.Config.TargetQuestThings && battleChara.IsOthersPlayersMob()) return false;
 
         if (battleChara.IsTopPriorityNamedHostile()) return true;
 
@@ -155,6 +165,28 @@ public static class ObjectHelper
                                 || battleChara.TargetObject is IBattleChara,
             _ => true,
         };
+    }
+
+    internal static bool IsBozjanCEFateMob(this IGameObject obj)
+    {
+        if (obj == null) return false;
+        if (obj.IsEnemy() == false) return false;
+        if (!DataCenter.IsInBozjanFieldOp) return false;
+
+        // Get the EventId of the mob
+        if (obj.GetEventType() == EventHandlerContent.PublicContentDirector)
+            return true;
+
+        return false;
+    }
+
+    internal static bool IsSpecialExecptionImmune(this IBattleChara obj)
+    {
+        if (obj == null) return false;
+        if (Player.Object == null) return false;
+
+        if (obj.NameId == 9441) return true; // Special case for Bottom gate in CLL
+        return false;
     }
 
     private static string RemoveControlCharacters(string input)

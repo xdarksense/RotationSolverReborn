@@ -2770,6 +2770,13 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Combo Time: {DataCenter.ComboTime}");
         ImGui.Text($"TargetingType: {DataCenter.TargetingType}");
         ImGui.Text($"DeathTarget: {DataCenter.DeathTarget}");
+        ImGui.Spacing();
+        ImGui.Text($"IsInBozjanFieldOp: {DataCenter.IsInBozjanFieldOp}");
+        ImGui.Text($"IsInBozjanFieldOpCE: {DataCenter.IsInBozjanFieldOpCE}");
+        ImGui.Text($"IsInDelubrumNormal: {DataCenter.IsInDelubrumNormal}");
+        ImGui.Text($"IsInDelubrumSavage: {DataCenter.IsInDelubrumSavage}");
+        ImGui.Text($"IsInBozja: {DataCenter.IsInBozja}");
+        ImGui.Spacing();
         ImGui.Text($"AttackedTargets: {DataCenter.AttackedTargets?.Count() ?? 0}");
         if (DataCenter.AttackedTargets != null)
         {
@@ -2860,7 +2867,7 @@ public partial class RotationConfigWindow : Window
 
         ImGui.Text($"TerritoryType: {DataCenter.Territory?.ContentType}");
         ImGui.Text($"DPSTaken: {DataCenter.DPSTaken}");
-        ImGui.Text($"IsHostileCastingToTank: {DataCenter.IsHostileCastingToTank}");
+        //ImGui.Text($"IsHostileCastingToTank: {DataCenter.IsHostileCastingToTank}");
         ImGui.Text($"CurrentRotation: {DataCenter.CurrentRotation}");
         ImGui.Text($"Job: {DataCenter.Job}");
         ImGui.Text($"JobRange: {DataCenter.JobRange}");
@@ -2872,12 +2879,23 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"MP: {DataCenter.CurrentMp}");
         ImGui.Text($"Count Down: {Service.CountDownTime}");
 
+        ImGui.Spacing();
+        ImGui.Text($"Statuses:");
         foreach (var status in Player.Object.StatusList)
         {
             var source = status.SourceId == Player.Object.GameObjectId ? "You" : Svc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
             byte stacks = Player.Object.StatusStack(true, (StatusID)status.StatusId);
             string stackDisplay = stacks == byte.MaxValue ? "N/A" : stacks.ToString(); // Convert 255 to "N/A"
             ImGui.Text($"{status.GameData.Value.Name}: {status.StatusId} From: {source} Stacks: {stackDisplay}");
+        }
+
+        ImGui.Spacing();
+        ImGui.Text($"Enemies:");
+        ImGui.Text($"All: {DataCenter.AllTargets.Count()}");
+        ImGui.Text($"Hostile: {DataCenter.AllHostileTargets.Count()}");
+        foreach (var item in DataCenter.AllHostileTargets)
+        {
+            ImGui.Text(item.Name.ToString());
         }
     }
 
@@ -2916,8 +2934,15 @@ public partial class RotationConfigWindow : Window
 
         if (target is IBattleChara battleChara)
         {
+            ImGui.Text($"NamePlate: {battleChara.GetNamePlateIcon()}");
+            ImGui.Text($"Name Id: {battleChara.NameId}");
+            ImGui.Text($"Data Id: {battleChara.DataId}");
             ImGui.Text($"HP: {battleChara.CurrentHp} / {battleChara.MaxHp}");
+            ImGui.Text($"Is Enemy Action Check: {battleChara.IsEnemy()}");
+            ImGui.Text($"Is Attackable: {battleChara.IsAttackable()}");
             ImGui.Text($"FateID: {battleChara.FateId().ToString() ?? string.Empty}");
+            ImGui.Text($"EventType: {battleChara.GetEventType().ToString() ?? string.Empty}");
+            ImGui.Text($"IsBozjanCEFateMob: {battleChara.IsBozjanCEFateMob()}");
             ImGui.Text($"Is Current Focus Target: {battleChara.IsFocusTarget()}");
             ImGui.Text($"TTK: {battleChara.GetTTK()}");
             ImGui.Text($"Is Boss TTK: {battleChara.IsBossFromTTK()}");
@@ -2932,36 +2957,24 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"Is Party: {battleChara.IsParty()}");
             ImGui.Text($"Is Healer: {battleChara.IsJobCategory(JobRole.Healer)}");
             ImGui.Text($"Is Alliance: {battleChara.IsAllianceMember()}");
-            ImGui.Text($"Is Enemy: {battleChara.IsEnemy()}");
             ImGui.Text($"Distance To Player: {battleChara.DistanceToPlayer()}");
-            ImGui.Text($"Is Attackable: {battleChara.IsAttackable()}");
-            ImGui.Text($"Is Jeuno Boss Immune: {battleChara.IsJeunoBossImmune()}");
             ImGui.Text($"CanProvoke: {battleChara.CanProvoke()}");
-            //ImGui.Text($"EventType: {battleChara.GetEventType()}");
             ImGui.Text($"NamePlate: {battleChara.GetNamePlateIcon()}");
             ImGui.Text($"StatusFlags: {battleChara.StatusFlags}");
             ImGui.Text($"InView: {Svc.GameGui.WorldToScreen(battleChara.Position, out _)}");
-            ImGui.Text($"Name Id: {battleChara.NameId}");
-            ImGui.Text($"Data Id: {battleChara.DataId}");
             ImGui.Text($"Enemy Positional: {battleChara.FindEnemyPositional()}");
             ImGui.Text($"NameplateKind: {battleChara.GetNameplateKind()}");
             ImGui.Text($"BattleNPCSubKind: {battleChara.GetBattleNPCSubKind()}");
             ImGui.Text($"Is Top Priority Hostile: {battleChara.IsTopPriorityHostile()}");
-            ImGui.Text($"Is Others Players: {battleChara.IsOthersPlayers()}");
+            ImGui.Text($"Is Others Players Mob: {battleChara.IsOthersPlayersMob()}");
             ImGui.Text($"Targetable: {battleChara.Struct()->Character.GameObject.TargetableStatus}");
-
+            ImGui.Spacing();
+            ImGui.Text($"Statuses:");
             foreach (var status in battleChara.StatusList)
             {
                 var source = status.SourceId == Player.Object.GameObjectId ? "You" : Svc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
                 ImGui.Text($"{status.GameData.Value.Name}: {status.StatusId} From: {source}");
             }
-        }
-
-        ImGui.Text($"All: {DataCenter.AllTargets.Count()}");
-        ImGui.Text($"Hostile: {DataCenter.AllHostileTargets.Count()}");
-        foreach (var item in DataCenter.AllHostileTargets)
-        {
-            ImGui.Text(item.Name.ToString());
         }
     }
 

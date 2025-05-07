@@ -1,7 +1,6 @@
 ﻿using Dalamud.Configuration;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
-using Lumina.Excel.Sheets;
 using System.Collections.Concurrent;
 using static RotationSolver.Basic.Configuration.ConfigTypes;
 
@@ -168,6 +167,10 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Ignore Strong of Shield target (Hansel and Gretel) in The Tower at Paradigm's Breach if you will hit shield.",
         Filter = TargetConfig)]
     private static readonly bool _strongOfSheildTarget = true;
+
+    [ConditionBool, UI("Prevent targeting invalid targets in Bozjan Southern Front and Zadnor",
+        Filter = TargetConfig)]
+    private static readonly bool _bozjaCEmobtargeting = false;
 
     [ConditionBool, UI("Teaching mode", Filter = UiInformation)]
     private static readonly bool _teachingMode = false;

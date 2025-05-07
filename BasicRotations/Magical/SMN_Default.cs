@@ -160,7 +160,7 @@ public sealed class SMN_Default : SummonerRotation
         }
 
         if ((RadiantOnCooldown && RadiantAegisPvE.Cooldown.CurrentCharges == 2 || RadiantAegisPvE.Cooldown.CurrentCharges == 1 && RadiantAegisPvE.Cooldown.WillHaveOneCharge(5)) && (anyBigInvocationIsCoolingDown && Player.Level <= 100) && RadiantAegisPvE.CanUse(out act)) return true;
-        if (RadiantOnCooldown && Player.Level < 88 && anyBigInvocationIsCoolingDown && RadiantAegisPvE.CanUse(out act)) return true;
+        if (RadiantOnCooldown && !EnhancedRadiantAegisTrait.EnoughLevel && anyBigInvocationIsCoolingDown && RadiantAegisPvE.CanUse(out act)) return true;
 
         return base.EmergencyAbility(nextGCD, out act);
     }
