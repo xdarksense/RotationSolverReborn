@@ -54,7 +54,9 @@ partial class BardRotation
     /// <returns></returns>
     protected static bool SongEndAfterGCD(uint gctCount = 0, float offset = 0)
         => SongEndAfter(GCDTime(gctCount, offset));
+    #endregion
 
+    #region Status Tracking
     /// <summary>
     /// Able to execute Raging Strikes.
     /// </summary>

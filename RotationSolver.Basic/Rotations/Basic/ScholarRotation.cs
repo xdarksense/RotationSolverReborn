@@ -23,6 +23,23 @@ partial class ScholarRotation
     /// 
     /// </summary>
     public static float SeraphTime => SeraphTimeRaw - DataCenter.DefaultGCDRemain;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool FairyDismissed => JobGauge.DismissedFairy > 0;
+    #endregion
+
+    #region Status Tracking
+    /// <summary>
+    /// Has Impact Imminent.
+    /// </summary>
+    public static bool HasImpactImminent => !Player.WillStatusEnd(0, true, StatusID.ImpactImminent);
+
+    /// <summary>
+    /// Has Dissipation.
+    /// </summary>
+    public static bool HasDissipation => !Player.WillStatusEnd(0, true, StatusID.Dissipation);
     #endregion
 
     #region Actions Unassignable
@@ -46,7 +63,8 @@ partial class ScholarRotation
         ImGui.Text("FairyGauge: " + FairyGauge.ToString());
         ImGui.Text("HasAetherflow: " + HasAetherflow.ToString());
         ImGui.Text("SeraphTime: " + SeraphTime.ToString());
-        ImGui.Text("Has Fairy Out: " + DataCenter.HasPet.ToString());
+        ImGui.Text("Has Fairy Out: " + DataCenter.HasPet().ToString());
+        ImGui.Text("FairyDismissed: " + FairyDismissed.ToString());
         ImGui.Text("ManifestationReady: " + ManifestationReady.ToString());
         ImGui.Text("AccessionReady: " + AccessionReady.ToString());
     }
@@ -72,7 +90,7 @@ partial class ScholarRotation
 
     static partial void ModifySummonEosPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => !DataCenter.HasPet && !Player.HasStatus(true, StatusID.Dissipation);
+        setting.ActionCheck = () => !DataCenter.HasPet() && !FairyDismissed;
         setting.IsFriendly = true;
     }
 
@@ -83,7 +101,7 @@ partial class ScholarRotation
 
     static partial void ModifyWhisperingDawnPvE_16537(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DataCenter.HasPet && !Player.HasStatus(true, StatusID.Dissipation);
+        setting.ActionCheck = () => DataCenter.HasPet() && !FairyDismissed;
         setting.IsFriendly = true;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -133,7 +151,7 @@ partial class ScholarRotation
 
     static partial void ModifyFeyIlluminationPvE_16538(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DataCenter.HasPet && !Player.HasStatus(true, StatusID.Dissipation);
+        setting.ActionCheck = () => DataCenter.HasPet() && !FairyDismissed;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -210,7 +228,7 @@ partial class ScholarRotation
     static partial void ModifyDissipationPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Dissipation];
-        setting.ActionCheck = () => !HasAetherflow && SeraphTime <= 0 && InCombat && DataCenter.HasPet;
+        setting.ActionCheck = () => !HasAetherflow && SeraphTime <= 0 && InCombat && DataCenter.HasPet();
         setting.UnlockedByQuestID = 67212;
         setting.IsFriendly = true;
     }
@@ -239,7 +257,7 @@ partial class ScholarRotation
 
     static partial void ModifyAetherpactPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => FairyGauge >= 10 && DataCenter.HasPet && SeraphTime <= 0;
+        setting.ActionCheck = () => FairyGauge >= 10 && DataCenter.HasPet() && SeraphTime <= 0;
         setting.UnlockedByQuestID = 68463;
     }
 
@@ -266,13 +284,13 @@ partial class ScholarRotation
 
     static partial void ModifyFeyBlessingPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SeraphTime <= 0 && DataCenter.HasPet && !Player.HasStatus(true, StatusID.Dissipation);
+        setting.ActionCheck = () => SeraphTime <= 0 && DataCenter.HasPet() && !FairyDismissed;
         setting.IsFriendly = true;
     }
 
     static partial void ModifySummonSeraphPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DataCenter.HasPet;
+        setting.ActionCheck = () => DataCenter.HasPet();
         setting.IsFriendly = true;
     }
 
@@ -335,7 +353,7 @@ partial class ScholarRotation
 
     static partial void ModifySeraphismPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DataCenter.HasPet && InCombat && !Player.HasStatus(true, StatusID.Dissipation);
+        setting.ActionCheck = () => DataCenter.HasPet() && InCombat && !FairyDismissed;
         setting.IsFriendly = true;
     }
 

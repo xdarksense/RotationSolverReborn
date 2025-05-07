@@ -434,7 +434,9 @@ public static class StatusHelper
     /// <returns>True if the status is invincible, otherwise false.</returns>
     public static bool IsInvincible(this Status status)
     {
+        if (status == null) return false;
         if (status.GameData.Value.Icon == 15024) return true;
+        if (OtherConfiguration.InvincibleStatus == null) return false; // Null check added
         return OtherConfiguration.InvincibleStatus.Any(id => (uint)id == status.StatusId);
     }
 
