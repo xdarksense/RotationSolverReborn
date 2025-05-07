@@ -229,18 +229,29 @@ public static partial class RSCommands
 
     private static void ToggleActionCommand(string str)
     {
-        foreach (var act in RotationUpdater.CurrentRotationActions)
+        var trimStr = str.Trim();
+        foreach (var act in RotationUpdater.CurrentRotationActions.OrderByDescending(a => a.Name.Length))
         {
-            if (str.StartsWith(act.Name))
+            // First, check for an exact match.
+            if (trimStr.Equals(act.Name, StringComparison.OrdinalIgnoreCase))
             {
-                var flag = str[act.Name.Length..].Trim();
-                act.IsEnabled = bool.TryParse(flag, out var parse) ? parse : !act.IsEnabled;
-
+                act.IsEnabled = !act.IsEnabled;
                 if (Service.Config.ShowToggledSettingInChat)
                 {
                     Svc.Chat.Print($"Toggled {act.Name} : {act.IsEnabled}");
                 }
-
+                return;
+            }
+            // Otherwise, if the command starts with the action name followed by a space,
+            // extract extra text (flag) and use it.
+            if (trimStr.StartsWith(act.Name + " ", StringComparison.OrdinalIgnoreCase))
+            {
+                var flag = trimStr[act.Name.Length..].Trim();
+                act.IsEnabled = bool.TryParse(flag, out var parse) ? parse : !act.IsEnabled;
+                if (Service.Config.ShowToggledSettingInChat)
+                {
+                    Svc.Chat.Print($"Toggled {act.Name} : {act.IsEnabled}");
+                }
                 return;
             }
         }
