@@ -108,6 +108,7 @@ partial class MachinistRotation
         ImGui.Spacing();
     }
     #endregion
+
     #region PvE
     static partial void ModifySplitShotPvE(ref ActionSetting setting)
     {
@@ -420,6 +421,7 @@ partial class MachinistRotation
         };
     }
     #endregion
+
     #region PvP
 
     static partial void ModifyAnalysisPvP(ref ActionSetting setting)

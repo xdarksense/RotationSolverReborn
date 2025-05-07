@@ -541,42 +541,10 @@ internal static class DataCenter
         return check?.Invoke(action) ?? false; // Check if check is null
     }
 
-    public static bool HasPet
-    {
-        get
-        {
-            foreach (var npc in AllTargets)
-            {
-                if (npc is IBattleNpc battleNpc && battleNpc.OwnerId == Player.Object.GameObjectId && battleNpc.BattleNpcKind == BattleNpcSubKind.Pet)
-                {
-                    _petLastSeen = DateTime.Now;
-                    return true;
-                }
-            }
-
-            if (Svc.Condition[ConditionFlag.Mounted] ||
-                Svc.Condition[ConditionFlag.Mounted2] ||
-                Svc.Condition[ConditionFlag.BetweenAreas] ||
-                Svc.Condition[ConditionFlag.BetweenAreas51] ||
-                Svc.Condition[ConditionFlag.BeingMoved] ||
-                Svc.Condition[ConditionFlag.WatchingCutscene] ||
-                Svc.Condition[ConditionFlag.OccupiedInEvent] ||
-                Svc.Condition[ConditionFlag.Occupied33] ||
-                Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent] ||
-                Svc.Condition[ConditionFlag.Jumping61])
-            {
-                _petLastSeen = DateTime.Now;
-                return true;
-            }
-
-            if (_petLastSeen.AddSeconds(3) < DateTime.Now)
-            {
-                return false;
-            }
-
-            return true;
-        }
-    }
+    /// <summary>
+    /// Player has a pet summoned.
+    /// </summary>
+    public static bool HasPet() => Svc.Buddies.PetBuddy != null;
 
     public static unsafe bool HasCompanion
     {
