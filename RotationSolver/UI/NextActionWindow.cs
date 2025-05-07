@@ -100,7 +100,7 @@ internal class NextActionWindow : Window
         var actionRemain = DataCenter.DefaultGCDRemain;
         if (actionRemain > 0)
         {
-            var value = total - DataCenter.ActionAhead;
+            var value = total - DataCenter.CalculatedActionAhead;
 
             if (value > Player.Object.TotalCastTime)
             {

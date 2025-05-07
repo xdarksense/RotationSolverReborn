@@ -227,7 +227,7 @@ internal static class ActionUpdater
         if (NextAction == null) return false;
 
         // Skip when casting
-        if (Player.Object.TotalCastTime - DataCenter.ActionAhead > 0) return false;
+        if (Player.Object.TotalCastTime - DataCenter.CalculatedActionAhead > 0) return false;
 
         // GCD
         return RSCommands.CanDoAnAction(ActionHelper.CanUseGCD);

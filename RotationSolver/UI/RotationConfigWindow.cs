@@ -2988,7 +2988,6 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"GCD Remain: {DataCenter.DefaultGCDRemain}");
         ImGui.Text($"GCD Elapsed: {DataCenter.DefaultGCDElapsed}");
         ImGui.Text($"Calculated Action Ahead: {DataCenter.CalculatedActionAhead}");
-        ImGui.Text($"Actual Action Ahead: {DataCenter.ActionAhead}");
         ImGui.Text($"Animation Lock Delay: {ActionManagerHelper.GetCurrentAnimationLock()}");
     }
 
