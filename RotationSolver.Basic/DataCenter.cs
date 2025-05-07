@@ -285,11 +285,6 @@ internal static class DataCenter
     public static float DefaultGCDElapsed => ActionManagerHelper.GetDefaultRecastTimeElapsed();
 
     /// <summary>
-    /// Returns the action ahead time, which can be overridden by a configuration setting.
-    /// </summary>
-    public static float ActionAhead => Service.Config.OverrideActionAheadTimer ? Service.Config.Action4Head : CalculatedActionAhead;
-
-    /// <summary>
     /// Calculates the action ahead time based on the default GCD total and minimum animation lock.
     /// </summary>
     public static float CalculatedActionAhead => DefaultGCDTotal * 0.25f;

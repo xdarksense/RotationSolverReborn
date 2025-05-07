@@ -84,6 +84,6 @@ internal static class ActionHelper
     /// </summary>
     internal static bool CanUseGCD
     {
-        get { return DataCenter.DefaultGCDRemain <= DataCenter.ActionAhead; }
+        get { return DataCenter.DefaultGCDRemain <= DataCenter.CalculatedActionAhead; }
     }
 }

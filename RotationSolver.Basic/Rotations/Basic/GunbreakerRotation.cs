@@ -70,6 +70,11 @@ partial class GunbreakerRotation
     public static bool InReignCombo => AmmoComboStep == 3 || AmmoComboStep == 4;
 
     /// <summary>
+    /// Has No Mercy buff.
+    /// </summary>
+    public static bool HasNoMercy => !Player.WillStatusEndGCD(0, 0, true, StatusID.NoMercy);
+
+    /// <summary>
     /// Able to execute Sonic Break.
     /// </summary>
     public static bool HasReadyToBreak => !Player.WillStatusEndGCD(0, 0, true, StatusID.ReadyToBreak);
@@ -161,6 +166,17 @@ partial class GunbreakerRotation
     /// <inheritdoc/>
     public override void DisplayStatus()
     {
+        ImGui.Text("InGnashingFang: " + InGnashingFang.ToString());
+        ImGui.Text("InReignCombo: " + InReignCombo.ToString());
+        ImGui.Text("HasNoMercy: " + HasNoMercy.ToString());
+        ImGui.Text("HasReadyToBreak: " + HasReadyToBreak.ToString());
+        ImGui.Text("HasReadyToReign: " + HasReadyToReign.ToString());
+        ImGui.Text("HasReadyToRip: " + HasReadyToRip.ToString());
+        ImGui.Text("HasReadyToTear: " + HasReadyToTear.ToString());
+        ImGui.Text("HasReadyToRaze: " + HasReadyToRaze.ToString());
+        ImGui.Text("HasReadyToGouge: " + HasReadyToGouge.ToString());
+        ImGui.Text("HasReadyToBlast: " + HasReadyToBlast.ToString());
+        ImGui.Spacing();
         //ImGui.Text("NoMercyWindow: " + NoMercyWindow.ToString());
         ImGui.Text("Ammo: " + Ammo.ToString());
         ImGui.Text("AmmoComboStep: " + AmmoComboStep.ToString());
@@ -308,12 +324,12 @@ partial class GunbreakerRotation
 
     static partial void ModifySavageClawPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SavageClawPvEReady;
+        setting.ActionCheck = () => AmmoComboStep == 1;
     }
 
     static partial void ModifyWickedTalonPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => WickedTalonPvEReady;
+        setting.ActionCheck = () => AmmoComboStep == 2;
     }
 
     static partial void ModifyBowShockPvE(ref ActionSetting setting)
@@ -430,7 +446,7 @@ partial class GunbreakerRotation
 
     static partial void ModifyNobleBloodPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NobleBloodPvEReady && InReignCombo;
+        setting.ActionCheck = () => AmmoComboStep == 3;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1
@@ -439,7 +455,7 @@ partial class GunbreakerRotation
 
     static partial void ModifyLionHeartPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => LionHeartPvEReady && InReignCombo;
+        setting.ActionCheck = () => AmmoComboStep == 4;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1
