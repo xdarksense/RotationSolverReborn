@@ -634,6 +634,11 @@ internal partial class Configs : IPluginConfiguration
     [JobConfig, Range(0, 0.3f, ConfigUnitType.Seconds, 0.002f)]
     public float MinUpdatingTime { get; set; } = 0.01f;
 
+    [JobConfig, Range(0.05f, 0.25f, ConfigUnitType.Percent)]
+    [UI("Action Ahead (Percent of your GCD time remaining on a GCD cycle before RSR will try to queue the next GCD)", Filter = BasicTimer,
+    Description = "This setting controls how many oGCDs RSR will try to fit in a single GCD window\nLower numbers mean more oGCDs, but potentially more GCD clipping")]
+    private readonly float _action5head = 0.20f;
+
     [UI("The HP for using Guard.",
         Filter = HealingActionCondition, Section = 3,
         PvEFilter = JobFilterType.NoJob)]

@@ -97,9 +97,9 @@ public sealed class GNB_Default : GunbreakerRotation
             //AOE CHECK
             if (DemonSlicePvE.CanUse(out _) && !IsFullParty) return true;
 
-            if (!SonicBreakPvE.EnoughLevel && Player.HasStatus(true, StatusID.NoMercy)) return true;
+            if (!SonicBreakPvE.EnoughLevel && HasNoMercy) return true;
 
-            if (Player.HasStatus(true, StatusID.NoMercy) && SonicBreakPvE.Cooldown.IsCoolingDown) return true;
+            if (HasNoMercy && SonicBreakPvE.Cooldown.IsCoolingDown) return true;
         }
 
         if (HasNoMercy && IsLastGCD(ActionID.DoubleDownPvE) && BlastingZonePvE.CanUse(out act)) return true;
@@ -142,7 +142,7 @@ public sealed class GNB_Default : GunbreakerRotation
 
             if (SonicBreakPvE.Cooldown.IsCoolingDown && SonicBreakPvE.Cooldown.WillHaveOneCharge(0.5f) && GnashingFangPvE.EnoughLevel) return false;
 
-            if (Player.HasStatus(true, StatusID.NoMercy) &&
+            if (HasNoMercy &&
                 AmmoComboStep == 0 &&
                 !GnashingFangPvE.Cooldown.WillHaveOneCharge(1)) return true;
 

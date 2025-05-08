@@ -683,7 +683,9 @@ internal static class ConditionDrawer
 
     private static Status[]? _allStatus = null;
     private static Status[] AllStatus => _allStatus ??= Enum.GetValues<StatusID>()
-        .Select(id => Service.GetSheet<Status>().GetRow((uint)id)).ToArray()!;
+    .Select(id => Service.GetSheet<Status>().GetRow((uint)id))
+    .Where(status => status.RowId != 0)
+    .ToArray()!;
 
     private static void DrawAfter(this TargetCondition targetCondition, ICustomRotation rotation)
     {
