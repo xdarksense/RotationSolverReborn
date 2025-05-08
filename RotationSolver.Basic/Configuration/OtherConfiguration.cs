@@ -247,7 +247,7 @@ internal class OtherConfiguration
         }
     }
 
-    private static void InitOne<T>(ref T value, string name, bool download = true, bool forceDownload = false)
+    private static void InitOne<T>(ref T value, string name, bool download = true, bool forceDownload = false) where T : new()
     {
         var path = GetFilePath(name);
         Svc.Log.Info($"Initializing {name} from {path}");
@@ -257,11 +257,13 @@ internal class OtherConfiguration
             try
             {
                 value = JsonConvert.DeserializeObject<T>(File.ReadAllText(path))!;
+                if (value == null) throw new Exception("Deserialized value is null.");
                 Svc.Log.Info($"Loaded {name} from local file.");
             }
             catch (Exception ex)
             {
-                Svc.Log.Warning(ex, $"Failed to load {name} from local file.");
+                Svc.Log.Warning(ex, $"Failed to load {name} from local file. Reinitializing to default.");
+                value = new T(); // Reinitialize to default
             }
         }
         else if (download || forceDownload)
@@ -280,19 +282,20 @@ internal class OtherConfiguration
                         args.ErrorContext.Handled = true;
                     }
                 })!;
+                if (value == null) throw new Exception("Deserialized value is null.");
                 Svc.Log.Info($"Downloaded and loaded {name} from GitHub.");
             }
             catch (Exception ex)
             {
-                Svc.Log.Warning(ex, $"Failed to download {name} from GitHub.");
-                SavePath(value, path);
+                Svc.Log.Warning(ex, $"Failed to download {name} from GitHub. Reinitializing to default.");
+                value = new T(); // Reinitialize to default
+                SavePath(value, path); // Save the default value
             }
         }
         else
         {
-            SavePath(value, path);
+            value = new T(); // Reinitialize to default
+            SavePath(value, path); // Save the default value
         }
     }
 }
-#pragma warning restore CA2211
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member

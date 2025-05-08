@@ -2107,10 +2107,10 @@ public partial class RotationConfigWindow : Window
     internal static Status[] AllDispelStatus => _allDispelStatus.Value;
 
     private static readonly Lazy<Status[]> _allStatus = new(() =>
-        Service.GetSheet<Status>()
-            .Where(s => !s.CanDispel && !s.LockMovement && !s.IsGaze && !s.IsFcBuff
-                && !string.IsNullOrEmpty(s.Name.ToString()) && s.Icon != 0)
-            .ToArray());
+    Service.GetSheet<Status>()?
+        .Where(s => !s.CanDispel && !s.LockMovement && !s.IsGaze && !s.IsFcBuff
+            && !string.IsNullOrEmpty(s.Name.ToString()) && s.Icon != 0)
+    .ToArray() ?? Array.Empty<Status>());
 
     internal static Status[] AllStatus => _allStatus.Value;
 
@@ -2251,7 +2251,7 @@ public partial class RotationConfigWindow : Window
     {
         const float IconWidth = 24f;
         const float IconHeight = 32f;
-        const uint DefaultNotLoadId = 10100;
+        const uint DefaultNotLoadId = 0;
 
         ImGui.PushID(name);
         FromClipBoardButton(statuses);
@@ -2270,18 +2270,18 @@ public partial class RotationConfigWindow : Window
         var count = Math.Max(1, (int)MathF.Floor(ImGui.GetColumnWidth() / (IconWidth * Scale + ImGui.GetStyle().ItemSpacing.X)));
         var index = 0;
 
-        if (IconSet.GetTexture(16220, out var text))
+        if (index++ % count != 0)
         {
-            if (index++ % count != 0)
-            {
-                ImGui.SameLine();
-            }
-            if (ImGuiHelper.NoPaddingNoColorImageButton(text.ImGuiHandle, new Vector2(IconWidth, IconHeight) * Scale, name))
-            {
-                if (!ImGui.IsPopupOpen(popupId)) ImGui.OpenPopup(popupId);
-            }
-            ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_List_AddStatus.GetDescription());
+            ImGui.SameLine();
         }
+        if (ImGui.Button("+", new Vector2(IconWidth, IconHeight) * Scale))
+        {
+            if (!ImGui.IsPopupOpen(popupId))
+            {
+                ImGui.OpenPopup(popupId);
+            }
+        }
+        ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_List_AddStatus.GetDescription());
 
         foreach (var statusId in statuses)
         {
@@ -2315,7 +2315,7 @@ public partial class RotationConfigWindow : Window
         ImGui.PopID();
     }
 
-    internal static void StatusPopUp(string popupId, Status[] allStatus, ref string searching, Action<Status> clicked, uint notLoadId = 10100, float size = 32)
+    internal static void StatusPopUp(string popupId, Status[] allStatus, ref string searching, Action<Status> clicked, uint notLoadId = 0, float size = 32)
     {
         const float InputWidth = 200f;
         const float ChildHeight = 400f;
@@ -2325,7 +2325,7 @@ public partial class RotationConfigWindow : Window
         if (popup)
         {
             ImGui.SetNextItemWidth(InputWidth * Scale);
-            ImGui.InputTextWithHint("##Searching the status", UiString.ConfigWindow_List_StatusNameOrId.GetDescription(), ref searching, InputTextLength);
+            ImGui.InputTextWithHint("##Searching the status", "Enter status name/number", ref searching, InputTextLength);
 
             ImGui.Spacing();
 
@@ -2335,10 +2335,26 @@ public partial class RotationConfigWindow : Window
                 var count = Math.Max(1, (int)MathF.Floor(ImGui.GetWindowWidth() / (size * 3 / 4 * Scale + ImGui.GetStyle().ItemSpacing.X)));
                 var index = 0;
 
-                var searchingKey = searching;
-                foreach (var status in allStatus.OrderByDescending(s => SearchableCollection.Similarity($"{s.Name} {s.RowId}", searchingKey)))
+                if (string.IsNullOrWhiteSpace(searching))
                 {
-                    if (IconSet.GetTexture(status.Icon, out var texture, notLoadId))
+                    return;
+                }
+
+                var searchingKey = searching;
+                var matchingStatuses = allStatus
+                    .Where(s => SearchableCollection.Similarity($"{s.Name} {s.RowId}", searchingKey) > 0)
+                    .OrderByDescending(s => SearchableCollection.Similarity($"{s.Name} {s.RowId}", searchingKey))
+                    .ToArray();
+
+                if (matchingStatuses.Length == 0)
+                {
+                    ImGui.TextColored(ImGuiColors.DalamudRed, "No matching statuses found.");
+                    return;
+                }
+
+                foreach (var status in matchingStatuses)
+                {
+                    if (status.Icon != 215049 && IconSet.GetTexture(status.Icon, out var texture, notLoadId))
                     {
                         if (index++ % count != 0)
                         {
