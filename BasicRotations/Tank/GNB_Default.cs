@@ -126,7 +126,7 @@ public sealed class GNB_Default : GunbreakerRotation
             if (WickedTalonPvE.CanUse(out act, skipComboCheck: true)) return true;
         }
 
-        if (!InGnashingFang && !GnashingFangPvE.Cooldown.HasOneCharge)
+        if ((!InGnashingFang && !GnashingFangPvE.Cooldown.HasOneCharge) || InReignCombo)
         {
             if (LionHeartPvE.CanUse(out act, skipComboCheck: true)) return true;
             if (NobleBloodPvE.CanUse(out act, skipComboCheck: true)) return true;
