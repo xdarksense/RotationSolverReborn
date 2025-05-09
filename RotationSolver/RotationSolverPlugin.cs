@@ -252,7 +252,12 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         return false;
     }
 
-    public async void Dispose()
+    void IDisposable.Dispose()
+    {
+        Dispose().GetAwaiter().GetResult();
+    }
+
+    public async Task Dispose()
     {
         RSCommands.Disable();
         Watcher.Disable();
@@ -264,10 +269,9 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         {
             item.Dispose();
         }
-        _dis?.Clear();
+        _dis.Clear();
 
         MajorUpdater.Dispose();
-        //HotbarHighlightDrawerManager.Dispose();
         HotbarHighlightManager.Dispose();
         await OtherConfiguration.Save();
 

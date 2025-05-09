@@ -1,6 +1,5 @@
 ﻿using Dalamud.Game.ClientState.Statuses;
 using ECommons.Automation;
-using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using ECommons.Logging;
 using RotationSolver.Basic.Configuration;
@@ -158,7 +157,7 @@ public static class StatusHelper
     /// </summary>
     /// <param name="p"></param>
     /// <returns></returns>
-    public static bool NeedHealing(this IGameObject? p) => p.WillStatusEndGCD(2, 0, false, NoNeedHealingStatus);
+    public static bool NeedHealing(this IGameObject p) => p.WillStatusEndGCD(2, 0, false, NoNeedHealingStatus);
 
     /// <summary>
     /// Will any of <paramref name="statusIDs"/> end after <paramref name="gcdCount"/> GCDs plus <paramref name="offset"/> seconds?
@@ -169,10 +168,11 @@ public static class StatusHelper
     /// <param name="isFromSelf"></param>
     /// <param name="statusIDs"></param>
     /// <returns></returns>
-    public static bool WillStatusEndGCD(this IGameObject? obj, uint gcdCount = 0, float offset = 0, bool isFromSelf = true, params StatusID[] statusIDs)
+    public static bool WillStatusEndGCD(this IGameObject obj, uint gcdCount = 0, float offset = 0, bool isFromSelf = true, params StatusID[] statusIDs)
     {
         if (obj == null) return false;
         if (statusIDs == null) return false;
+        if (Player.Object == null) return false;
 
         return WillStatusEnd(obj, DataCenter.GCDTime(gcdCount, offset), isFromSelf, statusIDs);
     }
@@ -185,7 +185,7 @@ public static class StatusHelper
     /// <param name="isFromSelf"></param>
     /// <param name="statusIDs"></param>
     /// <returns></returns>
-    public static bool WillStatusEnd(this IGameObject? obj, float time, bool isFromSelf = true, params StatusID[] statusIDs)
+    public static bool WillStatusEnd(this IGameObject obj, float time, bool isFromSelf = true, params StatusID[] statusIDs)
     {
         if (obj == null) return false;
         if (statusIDs == null) return false;
@@ -203,7 +203,7 @@ public static class StatusHelper
     /// <param name="isFromSelf"></param>
     /// <param name="statusIDs"></param>
     /// <returns></returns>
-    public static float StatusTime(this IGameObject? obj, bool isFromSelf, params StatusID[] statusIDs)
+    public static float StatusTime(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
     {
         if (obj == null) return 0;
         if (statusIDs == null) return 0;
@@ -223,7 +223,7 @@ public static class StatusHelper
         }
     }
 
-    internal static IEnumerable<float> StatusTimes(this IGameObject? obj, bool isFromSelf, params StatusID[] statusIDs)
+    internal static IEnumerable<float> StatusTimes(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
     {
         if (obj == null) return Enumerable.Empty<float>();
         if (statusIDs == null) return Enumerable.Empty<float>();
@@ -246,9 +246,10 @@ public static class StatusHelper
     /// <param name="isFromSelf"></param>
     /// <param name="statusIDs"></param>
     /// <returns></returns>
-    public static byte StatusStack(this IGameObject? obj, bool isFromSelf, params StatusID[] statusIDs)
+    public static byte StatusStack(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
     {
         if (obj == null) return 0;
+        if (statusIDs == null) return 0;
         if (Player.Object == null) return 0;
 
         if (HasApplyStatus(obj, statusIDs)) return byte.MaxValue;
@@ -256,7 +257,7 @@ public static class StatusHelper
         return obj.StatusStacks(isFromSelf, statusIDs).Min();
     }
 
-    private static IEnumerable<byte> StatusStacks(this IGameObject? obj, bool isFromSelf, params StatusID[] statusIDs)
+    private static IEnumerable<byte> StatusStacks(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
     {
         if (obj == null) return Enumerable.Empty<byte>();
         if (statusIDs == null) return Enumerable.Empty<byte>();
@@ -279,7 +280,7 @@ public static class StatusHelper
     /// <param name="isFromSelf"></param>
     /// <param name="statusIDs"></param>
     /// <returns></returns>
-    public static bool HasStatus(this IGameObject? obj, bool isFromSelf, params StatusID[] statusIDs)
+    public static bool HasStatus(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
     {
         if (obj == null) return false;
         if (statusIDs == null) return false;
@@ -297,7 +298,7 @@ public static class StatusHelper
     /// <returns>
     /// <c>true</c> if any of the specified statuses have to be applied to the object; otherwise, <c>false</c>.
     /// </returns>
-    public static bool HasApplyStatus(this IGameObject? obj, StatusID[] statusIDs)
+    public static bool HasApplyStatus(this IGameObject obj, StatusID[] statusIDs)
     {
         if (obj == null) return false;
         if (statusIDs == null) return false;
@@ -342,6 +343,8 @@ public static class StatusHelper
     /// <returns>The name of the status.</returns>
     internal static string GetStatusName(StatusID id)
     {
+        if (Player.Object == null) return string.Empty;
+
         var statusRow = Service.GetSheet<Lumina.Excel.Sheets.Status>().GetRow((uint)id);
         if (statusRow.RowId == 0)
         {
@@ -357,7 +360,7 @@ public static class StatusHelper
     /// <param name="isFromSelf">Whether the statuses are from self.</param>
     /// <param name="statusIDs">The status IDs to look for.</param>
     /// <returns>An enumerable of statuses.</returns>
-    private static IEnumerable<Status> GetStatus(this IGameObject? obj, bool isFromSelf, params StatusID[] statusIDs)
+    private static IEnumerable<Status> GetStatus(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
     {
         var newEffects = new HashSet<uint>(statusIDs.Select(a => (uint)a));
         var result = new List<Status>();
@@ -383,7 +386,7 @@ public static class StatusHelper
         }
         catch (Exception ex)
         {
-            Svc.Log.Error($"Failed to retrieve statuses for GameObjectId: {obj.GameObjectId}. Exception: {ex.Message}");
+            PluginLog.Error($"Failed to retrieve statuses for GameObjectId: {obj.GameObjectId}. Exception: {ex.Message}");
             return Enumerable.Empty<Status>();
         }
     }
@@ -394,8 +397,10 @@ public static class StatusHelper
     /// <param name="obj">The object to get the statuses from.</param>
     /// <param name="isFromSelf">Whether the statuses are from self.</param>
     /// <returns>An enumerable of all statuses.</returns>
-    private static IEnumerable<Status> GetAllStatus(this IGameObject? obj, bool isFromSelf)
+    private static IEnumerable<Status> GetAllStatus(this IGameObject obj, bool isFromSelf)
     {
+        if (Player.Object == null) return Enumerable.Empty<Status>();
+        if (obj == null) return Enumerable.Empty<Status>();
         if (obj is not IBattleChara b) return Enumerable.Empty<Status>();
 
         var playerId = Player.Object?.GameObjectId ?? 0;
@@ -421,7 +426,7 @@ public static class StatusHelper
         }
         catch (Exception ex)
         {
-            Svc.Log.Error($"Failed to get statuses: {ex.Message}");
+            PluginLog.Error($"Failed to get statuses: {ex.Message}");
             return Enumerable.Empty<Status>();
         }
     }
@@ -436,7 +441,7 @@ public static class StatusHelper
     {
         if (status == null) return false;
         if (status.GameData.Value.Icon == 15024) return true;
-        if (OtherConfiguration.InvincibleStatus == null) return false; // Null check added
+        if (OtherConfiguration.InvincibleStatus == null) return false;
         return OtherConfiguration.InvincibleStatus.Any(id => (uint)id == status.StatusId);
     }
 
@@ -448,6 +453,7 @@ public static class StatusHelper
     public static bool IsPriority(this Status status)
     {
         if (status == null) return false;
+        if (OtherConfiguration.PriorityStatus == null) return false;
         return OtherConfiguration.PriorityStatus.Any(id => (uint)id == status.StatusId);
     }
 
@@ -462,6 +468,7 @@ public static class StatusHelper
         if (!status.CanDispel()) return false;
         if (status.Param > 2) return true;
         if (status.RemainingTime > 20) return true;
+        if (OtherConfiguration.DangerousStatus == null) return false;
         return OtherConfiguration.DangerousStatus.Any(id => id == status.StatusId);
     }
 

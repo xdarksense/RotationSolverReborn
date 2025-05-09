@@ -2888,7 +2888,7 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Job: {DataCenter.Job}");
         ImGui.Text($"JobRange: {DataCenter.JobRange}");
         ImGui.Text($"Job Role: {DataCenter.Role}");
-        ImGui.Text($"Have pet: {DataCenter.HasPet}");
+        ImGui.Text($"Have pet: {DataCenter.HasPet()}");
         ImGui.Text($"Hostile Near Count: {DataCenter.NumberOfHostilesInRange}");
         ImGui.Text($"Hostile Near Count Max Range: {DataCenter.NumberOfHostilesInMaxRange}");
         ImGui.Text($"Have Companion: {DataCenter.HasCompanion}");

@@ -59,6 +59,7 @@ namespace RotationSolver.Commands
             // Cache frequently accessed properties to avoid redundant calls
             var playerObject = Player.Object;
             if (playerObject == null) return;
+            if (playerObject.StatusList == null) return;
 
             var statusTimes = playerObject.StatusTimes(false, [.. OtherConfiguration.NoCastingStatus.Select(i => (StatusID)i)]);
 

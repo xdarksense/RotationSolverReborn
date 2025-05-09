@@ -309,6 +309,8 @@ partial class CustomRotation
         switch (role)
         {
             case JobRole.Tank:
+                if (ArmsLengthPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.InnerStrength)) return true;
+                break;
             case JobRole.Melee:
                 if (ArmsLengthPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.Mudra)) return true;
                 break;

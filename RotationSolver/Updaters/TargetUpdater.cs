@@ -17,6 +17,8 @@ internal static partial class TargetUpdater
 
     internal static void UpdateTargets()
     {
+        if (Player.Object == null) return;
+        if (DataCenter.State == false && !Service.Config.TeachingMode) return;
         DataCenter.AllTargets = GetAllTargets();
         DataCenter.FriendlyNPCMembers = GetFriendlyNPCs();
         DataCenter.AllianceMembers = GetAllianceMembers();
@@ -36,6 +38,8 @@ internal static partial class TargetUpdater
         {
             if (obj is IBattleChara battleChara)
             {
+                if (obj == null) continue;
+
                 if (!battleChara.IsDummy() || !Service.Config.DisableTargetDummys)
                 {
                     allTargets.Add(battleChara);
@@ -55,7 +59,7 @@ internal static partial class TargetUpdater
                 foreach (var member in DataCenter.AllTargets)
                 {
                     if (member == null) continue;
-
+                    if (member.StatusList == null) continue;
                     if (ObjectHelper.IsParty(member) && member.IsParty() && member.Character() != null)
                     {
                         var character = member.Character();
@@ -110,26 +114,18 @@ internal static partial class TargetUpdater
 
         try
         {
-            if (Svc.Objects != null)
+            if (DataCenter.AllTargets != null)
             {
-                foreach (var obj in Svc.Objects)
+                foreach (var member in DataCenter.AllTargets)
                 {
-                    if (obj != null && obj.ObjectKind == ObjectKind.BattleNpc)
+                    if (member == null) continue;
+                    if (member.StatusList == null) continue;
+                    if (member.ObjectKind == ObjectKind.BattleNpc)
                     {
-                        try
+                        if (member.GetNameplateKind() == NameplateKind.FriendlyBattleNPC ||
+                                member.GetBattleNPCSubKind() == BattleNpcSubKind.NpcPartyMember)
                         {
-                            if (obj.GetNameplateKind() == NameplateKind.FriendlyBattleNPC ||
-                                obj.GetBattleNPCSubKind() == BattleNpcSubKind.NpcPartyMember)
-                            {
-                                if (obj is IBattleChara battleChara)
-                                {
-                                    friendlyNpcs.Add(battleChara);
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Svc.Log.Error($"Error filtering object in GetFriendlyNPCs: {ex.Message}");
+                            friendlyNpcs.Add(member);
                         }
                     }
                 }
@@ -150,6 +146,7 @@ internal static partial class TargetUpdater
             foreach (var target in DataCenter.AllTargets)
             {
                 if (target == null) continue;
+                if (target.StatusList == null) continue;
                 if (!target.IsEnemy() || !target.IsTargetable) continue;
                 if (target.StatusList != null && target.StatusList.Any(StatusHelper.IsInvincible) &&
                     (DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility || !DataCenter.IsPvP)) continue;

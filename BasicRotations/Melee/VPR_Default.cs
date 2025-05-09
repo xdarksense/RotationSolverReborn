@@ -32,6 +32,9 @@ public sealed class VPR_Default : ViperRotation
     [RotationConfig(CombatType.PvE, Name = "Experimental Pot Usage(used up to 5 seconds before SerpentsIre comes off cooldown)")]
     public bool BurstMed { get; set; } = false;
 
+    [RotationConfig(CombatType.PvE, Name = "Restrict GCD use if oGCDs can be used (Experimental)")]
+    public bool AbilityPrio { get; set; } = false;
+
     #endregion
 
     private static bool IsInBurst => Player.Level > 50 && !Player.WillStatusEnd(0, true, StatusID.RagingStrikes);
@@ -118,6 +121,12 @@ public sealed class VPR_Default : ViperRotation
     #region GCD Logic
     protected override bool GeneralGCD(out IAction? act)
     {
+        act = null;
+        if (AbilityPrio && 
+            (SerpentsTailPvE.AdjustedID != SerpentsTailPvE.ID
+            || TwinfangBitePvE.AdjustedID != TwinfangBitePvE.ID
+            || TwinbloodBitePvE.AdjustedID != TwinbloodBitePvE.ID)) return false;
+
 
         ////Reawaken Combo
         if (OuroborosPvE.CanUse(out act)) return true;
