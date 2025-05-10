@@ -60,9 +60,9 @@ public sealed class BRD_DefaultPvP : BardRotation
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
         if (RepellingShotPvP.CanUse(out action) && !Player.HasStatus(true, StatusID.Repertoire)) return true;
-        if (EncoreOfLightPvP.CanUse(out action)) return true;
         if (SilentNocturnePvP.CanUse(out action) && !Player.HasStatus(true, StatusID.Repertoire)) return true;
         if (EagleEyeShotPvP.CanUse(out action)) return true;
+        if (EncoreOfLightPvP.CanUse(out action, skipAoeCheck: true)) return true;
 
         return base.AttackAbility(nextGCD, out action);
     }

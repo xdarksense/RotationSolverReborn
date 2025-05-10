@@ -51,8 +51,6 @@ public partial class RotationConfigWindow : Window
             MaximumSize = new Vector2(5000, 5000),
         };
         RespectCloseHotkey = true;
-
-        _showText = !Service.Config.HasShownMainMenuMessage; // Show the message if it hasn't been shown before
     }
 
     public override void OnClose()
@@ -417,7 +415,6 @@ public partial class RotationConfigWindow : Window
         }
     }
 
-    private bool _showText;
 
     private void DrawHeader(float wholeWidth)
     {
@@ -425,11 +422,6 @@ public partial class RotationConfigWindow : Window
 
         if (IconSet.GetTexture((uint)0, out var overlay))
         {
-            if (_showText) // Conditionally render the text
-            {
-                ImGui.TextWrapped("Click RSR icon for main menu.");
-                ImGui.Spacing();
-            }
 
             ImGuiHelper.DrawItemMiddle(() =>
             {
@@ -440,11 +432,6 @@ public partial class RotationConfigWindow : Window
                 {
                     _activeTab = RotationConfigWindowTab.About;
                     _searchResults = [];
-                    _showText = false; // Update the flag when the icon is clicked
-
-                    // Save the configuration to indicate that the message has been shown
-                    Service.Config.HasShownMainMenuMessage = true;
-                    Service.Config.Save();
                 }
                 ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Punchline.GetDescription());
 
@@ -1441,10 +1428,13 @@ public partial class RotationConfigWindow : Window
         if (!string.IsNullOrEmpty(extra)) result += " " + extra;
         return result;
     }
+
     private static void DrawRotationConfiguration()
     {
         var rotation = DataCenter.CurrentRotation;
         if (rotation == null) return;
+        if (Player.Object == null) return;
+        if (!Player.AvailableThreadSafe) return;
 
         var enable = rotation.IsEnabled;
         if (ImGui.Checkbox(rotation.Name, ref enable))
@@ -1557,6 +1547,266 @@ public partial class RotationConfigWindow : Window
             ImGui.TextWrapped($"{config.DisplayName}");
             ImGuiHelper.ReactPopup(key, command, Reset, false);
         }
+
+        if (Player.Object != null && DataCenter.PartyMembers != null && Player.Object.IsJobs(Job.DNC))
+        {
+            ImGui.Spacing();
+            ImGui.Text("Dance Partner Priority");
+            ImGui.Spacing();
+            //var currentDancePartnerPriority = ActionTargetInfo.FindTargetByType(DataCenter.PartyMembers, TargetType.DancePartner, 0, SpecialActionType.None);
+            //ImGui.Text($"Current Target: {currentDancePartnerPriority?.Name ?? "None"}");
+            //ImGui.Spacing();
+
+            if (ImGui.Button("Reset to Default"))
+            {
+                OtherConfiguration.ResetDancePartnerPriority();
+            }
+            ImGui.Spacing();
+
+            var workingCopy = OtherConfiguration.DancePartnerPriority.ToList();
+            bool orderChanged = false;
+
+            ImGui.BeginChild("DancePartnerPriorityList", new Vector2(0, 200 * Scale), true);
+
+            for (int i = 0; i < workingCopy.Count; i++)
+            {
+                var job = workingCopy[i];
+                var jobName = job.ToString();
+
+                if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowUp, $"##Up{i}") && i > 0)
+                {
+                    (workingCopy[i - 1], workingCopy[i]) = (workingCopy[i], workingCopy[i - 1]);
+                    orderChanged = true;
+                }
+
+                ImGui.SameLine();
+
+                if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowDown, $"##Down{i}") && i < workingCopy.Count - 1)
+                {
+                    (workingCopy[i + 1], workingCopy[i]) = (workingCopy[i], workingCopy[i + 1]);
+                    orderChanged = true;
+                }
+
+                ImGui.SameLine();
+                ImGui.Text(jobName);
+            }
+
+            ImGui.EndChild();
+
+            if (orderChanged)
+            {
+                OtherConfiguration.DancePartnerPriority = workingCopy;
+                OtherConfiguration.SaveDancePartnerPriority();
+            }
+            if (Service.Config.InDebug)
+            {
+                ImGui.Text("Current Dance Partner Priority:");
+                foreach (var job in OtherConfiguration.DancePartnerPriority)
+                {
+                    ImGui.BulletText(job.ToString());
+                }
+            }
+        }
+
+        if (Player.Object != null && DataCenter.PartyMembers != null && Player.Object.IsJobs(Job.SGE))
+        {
+            ImGui.Spacing();
+            ImGui.Text("Kardia Tank Priority");
+            ImGui.Spacing();
+            //var currentKardiaTankPriority = ActionTargetInfo.FindTargetByType(DataCenter.PartyMembers, TargetType.Kardia, 0, SpecialActionType.None);
+            //ImGui.Text($"Current Target: {currentKardiaTankPriority?.Name ?? "None"}");
+            //ImGui.Spacing();
+
+            if (ImGui.Button("Reset to Default"))
+            {
+                OtherConfiguration.ResetKardiaTankPriority();
+            }
+            ImGui.Spacing();
+
+            var kardiaTankPriority = OtherConfiguration.KardiaTankPriority.ToList();
+            bool orderChanged = false;
+
+            ImGui.BeginChild("KardiaTankPriorityList", new Vector2(0, 200 * Scale), true);
+
+            for (int i = 0; i < kardiaTankPriority.Count; i++)
+            {
+                var job = kardiaTankPriority[i];
+                var jobName = job.ToString();
+
+                if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowUp, $"##Up{i}") && i > 0)
+                {
+                    var temp = kardiaTankPriority[i - 1];
+                    kardiaTankPriority[i - 1] = kardiaTankPriority[i];
+                    kardiaTankPriority[i] = temp;
+                    orderChanged = true;
+                }
+
+                ImGui.SameLine();
+
+                if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowDown, $"##Down{i}") && i < kardiaTankPriority.Count - 1)
+                {
+                    var temp = kardiaTankPriority[i + 1];
+                    kardiaTankPriority[i + 1] = kardiaTankPriority[i];
+                    kardiaTankPriority[i] = temp;
+                    orderChanged = true;
+                }
+
+                ImGui.SameLine();
+                ImGui.Text(jobName);
+            }
+
+            ImGui.EndChild();
+
+            if (orderChanged)
+            {
+                OtherConfiguration.KardiaTankPriority = kardiaTankPriority;
+                OtherConfiguration.SaveKardiaTankPriority();
+            }
+            if (Service.Config.InDebug)
+            {
+                ImGui.Text("Current Kardia Tank Priority:");
+                foreach (var job in OtherConfiguration.KardiaTankPriority)
+                {
+                    ImGui.BulletText(job.ToString());
+                }
+            }
+        }
+
+        if (Player.Object != null && DataCenter.PartyMembers != null && Player.Object.IsJobs(Job.AST))
+        {
+            ImGui.Spacing();
+
+            if (ImGui.BeginTable("PriorityTable", 2, ImGuiTableFlags.SizingStretchProp))
+            {
+                // The Spear Priority Column
+                ImGui.TableNextColumn();
+                ImGui.Spacing();
+                ImGui.Text("Spear Card Priority");
+                ImGui.Spacing();
+                //var currentTheSpearPriority = ActionTargetInfo.FindTargetByType(DataCenter.PartyMembers, TargetType.TheSpear, 0, SpecialActionType.None);
+                //ImGui.Text($"Current Target: {currentTheSpearPriority?.Name ?? "None"}");
+                //ImGui.Spacing();
+
+                if (ImGui.Button("Reset to Default##Spear"))
+                {
+                    OtherConfiguration.ResetTheSpearPriority();
+                }
+                ImGui.Spacing();
+
+                var spearPriority = OtherConfiguration.TheSpearPriority.ToList();
+                bool spearOrderChanged = false;
+
+                ImGui.BeginChild("TheSpearPriorityList", new Vector2(0, 200 * Scale), true);
+
+                for (int i = 0; i < spearPriority.Count; i++)
+                {
+                    var job = spearPriority[i];
+                    var jobName = job.ToString();
+
+                    if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowUp, $"##UpSpear{i}") && i > 0)
+                    {
+                        var temp = spearPriority[i - 1];
+                        spearPriority[i - 1] = spearPriority[i];
+                        spearPriority[i] = temp;
+                        spearOrderChanged = true;
+                    }
+
+                    ImGui.SameLine();
+
+                    if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowDown, $"##DownSpear{i}") && i < spearPriority.Count - 1)
+                    {
+                        var temp = spearPriority[i + 1];
+                        spearPriority[i + 1] = spearPriority[i];
+                        spearPriority[i] = temp;
+                        spearOrderChanged = true;
+                    }
+
+                    ImGui.SameLine();
+                    ImGui.Text(jobName);
+                }
+
+                ImGui.EndChild();
+
+                if (spearOrderChanged)
+                {
+                    OtherConfiguration.TheSpearPriority = spearPriority;
+                    OtherConfiguration.SaveTheSpearPriority();
+                }
+                if (Service.Config.InDebug)
+                {
+                    ImGui.Text("Current Spear Priority:");
+                    foreach (var job in OtherConfiguration.TheSpearPriority)
+                    {
+                        ImGui.BulletText(job.ToString());
+                    }
+                }
+
+                // The Balance Priority Column
+                ImGui.TableNextColumn();
+                ImGui.Spacing();
+                ImGui.Text("Balance Card Priority");
+                ImGui.Spacing();
+                //var currentTheBalancePriority = ActionTargetInfo.FindTargetByType(DataCenter.PartyMembers, TargetType.TheBalance, 0, SpecialActionType.None);
+                //ImGui.Text($"Current Target: {currentTheBalancePriority?.Name ?? "None"}");
+                //ImGui.Spacing();
+
+                if (ImGui.Button("Reset to Default##Balance"))
+                {
+                    OtherConfiguration.ResetTheBalancePriority();
+                }
+                ImGui.Spacing();
+
+                var balancePriority = OtherConfiguration.TheBalancePriority.ToList();
+                bool balanceOrderChanged = false;
+
+                ImGui.BeginChild("TheBalancePriorityList", new Vector2(0, 200 * Scale), true);
+
+                for (int i = 0; i < balancePriority.Count; i++)
+                {
+                    var job = balancePriority[i];
+                    var jobName = job.ToString();
+
+                    if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowUp, $"##UpBalance{i}") && i > 0)
+                    {
+                        var temp = balancePriority[i - 1];
+                        balancePriority[i - 1] = balancePriority[i];
+                        balancePriority[i] = temp;
+                        balanceOrderChanged = true;
+                    }
+
+                    ImGui.SameLine();
+
+                    if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowDown, $"##DownBalance{i}") && i < balancePriority.Count - 1)
+                    {
+                        var temp = balancePriority[i + 1];
+                        balancePriority[i + 1] = balancePriority[i];
+                        balancePriority[i] = temp;
+                        balanceOrderChanged = true;
+                    }
+
+                    ImGui.SameLine();
+                    ImGui.Text(jobName);
+                }
+
+                ImGui.EndChild();
+
+                if (balanceOrderChanged)
+                {
+                    OtherConfiguration.TheBalancePriority = balancePriority;
+                    OtherConfiguration.SaveTheBalancePriority();
+                }
+                if (Service.Config.InDebug)
+                {
+                    ImGui.Text("Current Balance Priority:");
+                    foreach (var job in OtherConfiguration.TheBalancePriority)
+                    {
+                        ImGui.BulletText(job.ToString());
+                    }
+                }
+
+                ImGui.EndTable();
+            }
+        }
     }
 
     private static void DrawRotationInformation()
@@ -1619,7 +1869,7 @@ public partial class RotationConfigWindow : Window
             _groupWidth = ImGui.GetItemRectSize().X;
         }
     }
-
+    
     private static float _groupWidth = 100;
     #endregion
 

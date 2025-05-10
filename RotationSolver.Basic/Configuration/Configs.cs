@@ -28,7 +28,6 @@ internal partial class Configs : IPluginConfiguration
 
     public const int CurrentVersion = 12;
     public int Version { get; set; } = CurrentVersion;
-    public bool HasShownMainMenuMessage { get; set; } = false;
 
     public string LastSeenChangelog { get; set; } = "0.0.0.0";
     public bool FirstTimeSetupDone { get; set; } = false;

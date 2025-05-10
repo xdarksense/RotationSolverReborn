@@ -827,8 +827,17 @@ public struct ActionTargetInfo(IBaseAction action)
 
     #region TargetFind
 
-    private static IBattleChara? FindTargetByType(IEnumerable<IBattleChara> IGameObjects, TargetType type, float healRatio, SpecialActionType actionType)
+    /// <summary>
+    /// Finds the target based on the specified type and criteria.
+    /// </summary>
+    /// <param name="IGameObjects"></param>
+    /// <param name="type"></param>
+    /// <param name="healRatio"></param>
+    /// <param name="actionType"></param>
+    /// <returns></returns>
+    public static IBattleChara? FindTargetByType(IEnumerable<IBattleChara> IGameObjects, TargetType type, float healRatio, SpecialActionType actionType)
     {
+        if (!Player.AvailableThreadSafe) return null;
         if (Player.Object == null) return null;
         if (IGameObjects == null) return null;
 
@@ -901,20 +910,24 @@ public struct ActionTargetInfo(IBaseAction action)
         IBattleChara? FindDancePartner()
         {
             // DancePartnerPriority based on the info from The Balance Discord for Level 100
-            Job[] DancePartnerPriority = { Job.SAM, Job.PCT, Job.RPR, Job.VPR, Job.MNK, Job.NIN, Job.DRG, Job.BLM, Job.RDM, Job.SMN, Job.MCH, Job.BRD, Job.DNC };
+            var dancePartnerPriority = OtherConfiguration.DancePartnerPriority;
 
+            if (!Player.AvailableThreadSafe) return null;
+            if (Player.Object == null) return null;
+            if (DataCenter.PartyMembers == null) return null;
             if (IGameObjects == null) return null;
 
             var partyMembers = new List<IBattleChara>();
-            foreach (var obj in IGameObjects)
+
+            foreach (var obj in DataCenter.PartyMembers)
             {
-                if (ObjectHelper.IsParty(obj) && obj.StatusList != null)
+                if (ObjectHelper.IsParty(obj) && obj.StatusList != null && obj != Player.Object)
                 {
                     partyMembers.Add(obj);
                 }
             }
 
-            foreach (var job in DancePartnerPriority)
+            foreach (var job in dancePartnerPriority)
             {
                 foreach (var member in partyMembers)
                 {
@@ -935,12 +948,15 @@ public struct ActionTargetInfo(IBaseAction action)
         IBattleChara? FindTheSpear()
         {
             // The Spear priority based on the info from The Balance Discord for Level 100 Dance Partner
-            Job[] TheSpearpriority = { Job.PCT, Job.MCH, Job.SMN, Job.RDM, Job.BRD, Job.DNC, Job.BLM, Job.SAM, Job.NIN, Job.VPR, Job.DRG, Job.MNK, Job.DRK, Job.RPR };
+            var TheSpearPriority = OtherConfiguration.TheSpearPriority;
 
+            if (!Player.AvailableThreadSafe) return null;
+            if (Player.Object == null) return null;
+            if (DataCenter.PartyMembers == null) return null;
             if (IGameObjects == null) return null;
 
             var partyMembers = new List<IBattleChara>();
-            foreach (var obj in IGameObjects)
+            foreach (var obj in DataCenter.PartyMembers)
             {
                 if (ObjectHelper.IsParty(obj))
                 {
@@ -948,7 +964,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 }
             }
 
-            foreach (var job in TheSpearpriority)
+            foreach (var job in TheSpearPriority)
             {
                 foreach (var member in partyMembers)
                 {
@@ -969,12 +985,15 @@ public struct ActionTargetInfo(IBaseAction action)
         IBattleChara? FindTheBalance()
         {
             // The Balance priority based on the info from The Balance Discord for Level 100 Dance Partner
-            Job[] TheBalancepriority = { Job.SAM, Job.NIN, Job.VPR, Job.DRG, Job.MNK, Job.RPR, Job.DRK, Job.PCT, Job.MCH, Job.SMN, Job.RDM, Job.BRD, Job.DNC, Job.BLM };
+            var TheBalancePriority = OtherConfiguration.TheBalancePriority;
 
+            if (!Player.AvailableThreadSafe) return null;
+            if (Player.Object == null) return null;
+            if (DataCenter.PartyMembers == null) return null;
             if (IGameObjects == null) return null;
 
             var partyMembers = new List<IBattleChara>();
-            foreach (var obj in IGameObjects)
+            foreach (var obj in DataCenter.PartyMembers)
             {
                 if (ObjectHelper.IsParty(obj))
                 {
@@ -982,7 +1001,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 }
             }
 
-            foreach (var job in TheBalancepriority)
+            foreach (var job in TheBalancePriority)
             {
                 foreach (var member in partyMembers)
                 {
@@ -1002,14 +1021,17 @@ public struct ActionTargetInfo(IBaseAction action)
 
         IBattleChara? FindKardia()
         {
-            Job[] KardiaTankpriority = { Job.PLD, Job.WAR, Job.GNB, Job.DRK, Job.GLA, Job.MRD };
+            var KardiaTankPriority = OtherConfiguration.KardiaTankPriority;
 
+            if (!Player.AvailableThreadSafe) return null;
+            if (Player.Object == null) return null;
             if (DataCenter.PartyMembers == null) return null;
+            if (IGameObjects == null) return null;
 
             // First, prioritize tanks with TankStanceStatus and without Kardion from anyone, accounting for Double Sage parties
             foreach (var member in DataCenter.PartyMembers.Where(member => member.IsJobCategory(JobRole.Tank)))
             {
-                foreach (var job in KardiaTankpriority)
+                foreach (var job in KardiaTankPriority)
                 {
                     if (member.IsJobs(job) && !member.IsDead && member.HasStatus(false, StatusHelper.TankStanceStatus) && !member.HasStatus(false, StatusID.Kardion))
                     {
@@ -1021,7 +1043,7 @@ public struct ActionTargetInfo(IBaseAction action)
             // If no tanks with TankStanceStatus are found, pick any tank
             foreach (var member in DataCenter.PartyMembers.Where(member => member.IsJobCategory(JobRole.Tank)))
             {
-                foreach (var job in KardiaTankpriority)
+                foreach (var job in KardiaTankPriority)
                 {
                     if (member.IsJobs(job) && !member.IsDead)
                     {
