@@ -1,17 +1,15 @@
-{
-  "DancePartnerPriority": [
-    "SAM",
-    "PCT",
-    "RPR",
-    "VPR",
-    "MNK",
-    "NIN",
-    "DRG",
-    "BLM",
-    "RDM",
-    "SMN",
-    "MCH",
-    "BRD",
-    "DNC"
-  ]
-}
+[
+  "SAM",
+  "PCT",
+  "RPR",
+  "VPR",
+  "MNK",
+  "NIN",
+  "DRG",
+  "BLM",
+  "RDM",
+  "SMN",
+  "MCH",
+  "BRD",
+  "DNC"
+]
