@@ -89,6 +89,7 @@ public static class StatusHelper
         StatusID.RoyalGuard_1833,
         StatusID.IronWill,
         StatusID.Defiance,
+        StatusID.Defiance_3124,
     };
 
     /// <summary>
