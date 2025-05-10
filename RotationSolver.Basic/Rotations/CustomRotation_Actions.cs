@@ -150,6 +150,8 @@ partial class CustomRotation
 
     static partial void ModifyDervishPvP(ref ActionSetting setting)
     {
+        setting.StatusNeed = [StatusID.PvPRoleActionDervish];
+        setting.StatusProvide = [StatusID.Dervish];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -158,16 +160,19 @@ partial class CustomRotation
 
     static partial void ModifyBraveryPvP(ref ActionSetting setting)
     {
+        setting.StatusNeed = [StatusID.PvPRoleActionBravery];
+        setting.StatusProvide = [StatusID.Bravery];
         setting.TargetType = TargetType.Self;
     }
 
     static partial void ModifyEagleEyeShotPvP(ref ActionSetting setting)
     {
-
+        setting.StatusNeed = [StatusID.PvPRoleActionEagleEyeShot];
     }
 
     static partial void ModifyCometPvP(ref ActionSetting setting)
     {
+        setting.StatusNeed = [StatusID.PvPRoleActionComet];
         setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -177,6 +182,7 @@ partial class CustomRotation
 
     static partial void ModifyRustPvP(ref ActionSetting setting)
     {
+        setting.StatusNeed = [StatusID.PvPRoleActionRust];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -185,11 +191,12 @@ partial class CustomRotation
 
     static partial void ModifyPhantomDartPvP(ref ActionSetting setting)
     {
-
+        setting.StatusNeed = [StatusID.PvPRoleActionPhantomDart];
     }
 
     static partial void ModifyRampagePvP(ref ActionSetting setting)
     {
+        setting.StatusNeed = [StatusID.PvPRoleActionRampage];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -198,21 +205,22 @@ partial class CustomRotation
 
     static partial void ModifyRampartPvP(ref ActionSetting setting)
     {
-
+        setting.StatusNeed = [StatusID.PvPRoleActionRampart];
     }
 
     static partial void ModifyFullSwingPvP(ref ActionSetting setting)
     {
-
+        setting.StatusNeed = [StatusID.PvPRoleActionFullSwing];
     }
 
     static partial void ModifyHaelanPvP(ref ActionSetting setting)
     {
-
+        setting.StatusNeed = [StatusID.PvPRoleActionHaelan];
     }
 
     static partial void ModifyStoneskinIiPvP(ref ActionSetting setting)
     {
+        setting.StatusNeed = [StatusID.PvPRoleActionStoneskinIi];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -221,6 +229,7 @@ partial class CustomRotation
 
     static partial void ModifyDiabrosisPvP(ref ActionSetting setting)
     {
+        setting.StatusNeed = [StatusID.Diabrosis];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -229,17 +238,17 @@ partial class CustomRotation
 
     static partial void ModifyBloodbathPvP(ref ActionSetting setting)
     {
-
+        setting.StatusNeed = [StatusID.PvPRoleActionBloodbath];
     }
 
     static partial void ModifySwiftPvP(ref ActionSetting setting)
     {
-
+        setting.StatusNeed = [StatusID.PvPRoleActionSwift];
     }
 
     static partial void ModifySmitePvP(ref ActionSetting setting)
     {
-
+        setting.StatusNeed = [StatusID.PvPRoleActionSmite];
     }
 
     #endregion

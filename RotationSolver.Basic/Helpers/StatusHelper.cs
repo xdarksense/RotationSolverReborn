@@ -153,11 +153,26 @@ public static class StatusHelper
     };
 
     /// <summary>
+    /// 
+    /// </summary>
+    public static StatusID[] DoomHealStatus { get; } =
+    {
+        StatusID.Doom_1769,
+    };
+
+    /// <summary>
     /// Check whether the target needs to be healing.
     /// </summary>
-    /// <param name="p"></param>
+    /// <param name="Invulnp"></param>
     /// <returns></returns>
-    public static bool NeedHealing(this IGameObject p) => p.WillStatusEndGCD(2, 0, false, NoNeedHealingStatus);
+    public static bool NoNeedHealingInvuln(this IGameObject Invulnp) => Invulnp.WillStatusEndGCD(2, 0, false, NoNeedHealingStatus);
+
+    /// <summary>
+    /// Check if the target needs to be healed because of Doomed To Heal status.
+    /// </summary>
+    /// <param name="Doomp"></param>
+    /// <returns></returns>
+    public static bool DoomNeedHealing(this IGameObject Doomp) => Doomp.HasStatus(false, DoomHealStatus);
 
     /// <summary>
     /// Will any of <paramref name="statusIDs"/> end after <paramref name="gcdCount"/> GCDs plus <paramref name="offset"/> seconds?

@@ -207,6 +207,7 @@ public struct ActionTargetInfo(IBaseAction action)
     public bool GeneralCheck(IBattleChara gameObject, bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck)
     {
         if (gameObject == null) return false;
+        if (gameObject.StatusList == null) return false;
 
         if (!gameObject.IsTargetable) return false;
 
@@ -351,6 +352,11 @@ public struct ActionTargetInfo(IBaseAction action)
             return null;
         }
 
+        if (action == null || action.Setting == null || action.Config == null)
+        {
+            return null;
+        }
+
         if (range == 0 && EffectRange == 0)
         {
             return new TargetResult(Player.Object, Array.Empty<IBattleChara>(), Player.Object.Position);
@@ -361,6 +367,11 @@ public struct ActionTargetInfo(IBaseAction action)
         var canTargets = GetCanTargets(skipStatusProvideCheck, skipTargetStatusNeedCheck, type);
         var canAffects = GetCanAffects(skipStatusProvideCheck, skipTargetStatusNeedCheck, type);
 
+        if (canTargets == null || canAffects == null)
+        {
+            return null;
+        }
+
         if (IsTargetArea)
         {
             return FindTargetArea(canTargets, canAffects, range, Player.Object);
@@ -368,7 +379,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
         var targets = GetMostCanTargetObjects(canTargets, canAffects, skipAoeCheck ? 0 : action.Config.AoeCount);
         var target = FindTargetByType(targets, type, action.Config.AutoHealRatio, action.Setting.SpecialType);
-        return target == null ? null : new TargetResult(target, GetAffectsTarget(target, canAffects).ToArray(), target.Position);
+        return target == null ? null : new TargetResult(target, GetAffectsTarget(target, canAffects)?.ToArray() ?? Array.Empty<IBattleChara>(), target.Position);
     }
 
     /// <summary>
@@ -826,10 +837,7 @@ public struct ActionTargetInfo(IBaseAction action)
         switch (actionType)
         {
             case SpecialActionType.MeleeRange:
-                if (IGameObjects != null && Service.Config != null)
-                {
-                    IGameObjects = IGameObjects.Where(t => t.DistanceToPlayer() >= 3 + Service.Config.MeleeRangeOffset);
-                }
+                IGameObjects = IGameObjects.Where(t => t.DistanceToPlayer() >= 3 + (Service.Config?.MeleeRangeOffset ?? 0));
                 break;
 
             case SpecialActionType.MovingForward:
@@ -839,7 +847,7 @@ public struct ActionTargetInfo(IBaseAction action)
                     {
                         type = TargetType.Move;
                     }
-                    else if (IGameObjects != null)
+                    else
                     {
                         IGameObjects = IGameObjects.Where(t => t.DistanceToPlayer() < Service.Config.DistanceForMoving);
                     }
@@ -1094,7 +1102,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
             static IBattleChara? GeneralHealTarget(IEnumerable<IBattleChara> objs)
             {
-                var healingNeededObjs = objs.Where(StatusHelper.NeedHealing).OrderBy(ObjectHelper.GetHealthRatio);
+                var healingNeededObjs = objs.Where(StatusHelper.NoNeedHealingInvuln).OrderBy(ObjectHelper.GetHealthRatio);
 
                 var healerTars = healingNeededObjs.GetJobCategory(JobRole.Healer);
                 var tankTars = healingNeededObjs.GetJobCategory(JobRole.Tank);
@@ -1261,7 +1269,12 @@ public struct ActionTargetInfo(IBaseAction action)
 
     private static IBattleChara? FindMimicryTarget()
     {
-        var targetCandidates = DataCenter.AllTargets.Where(IsNeededRole).OrderBy(o => Player.DistanceTo(o.Position));
+        if (DataCenter.AllTargets == null) return null;
+
+        var targetCandidates = DataCenter.AllTargets
+            .Where(target => target != null && IsNeededRole(target))
+            .OrderBy(target => Player.Object != null ? Player.DistanceTo(target.Position) : float.MaxValue);
+
         return targetCandidates.FirstOrDefault();
     }
 
