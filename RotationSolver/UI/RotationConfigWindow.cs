@@ -1759,6 +1759,13 @@ public partial class RotationConfigWindow : Window
             {
                 try
                 {
+                    var target = action.Target.Target;
+                    if (target is not IBattleChara battleChara)
+                    {
+                        ImGui.TextColored(ImGuiColors.DalamudRed, "Target is not a valid BattleChara.");
+                        return;
+                    }
+
                     ImGui.Text("ID: " + action.Info.ID);
                     ImGui.Text("AdjustedID: " + Service.GetAdjustedActionId(action.Info.ID));
                     ImGui.Text($"Can Use: {action.CanUse(out _)} ");
@@ -2777,6 +2784,7 @@ public partial class RotationConfigWindow : Window
         }
         ImGui.Text($"OnlineStatus: {Player.OnlineStatus}");
         ImGui.Text($"IsDead: {Player.Object.IsDead}");
+        ImGui.Text($"DoomNeedHealing: {Player.Object.DoomNeedHealing()}");
         ImGui.Text($"Dead Time: {DataCenter.DeadTimeRaw}");
         ImGui.Text($"Alive Time: {DataCenter.AliveTimeRaw}");
         ImGui.Text($"Moving: {DataCenter.IsMoving}");
@@ -2922,6 +2930,7 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Is in Alliance Raid: {DataCenter.IsInAllianceRaid}");
         ImGui.Text($"Number of Alliance Members: {DataCenter.AllianceMembers.Count}");
         ImGui.Text($"Average Party HP Percent: {DataCenter.PartyMembersAverHP * 100}");
+        ImGui.Text($"Number of Party Members with Doomed To Heal status: {DataCenter.PartyMembers.Count(member => member.DoomNeedHealing())}");
         foreach (var p in Svc.Party)
         {
             if (p.GameObject is not IBattleChara b) continue;

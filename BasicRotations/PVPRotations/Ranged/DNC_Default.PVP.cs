@@ -1,6 +1,6 @@
 ﻿namespace RebornRotations.PVPRotations.Ranged;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.2")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.21")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Ranged/DNC_Default.PvP.cs")]
 [Api(4)]
 public sealed class DNC_DefaultPvP : DancerRotation
@@ -44,6 +44,9 @@ public sealed class DNC_DefaultPvP : DancerRotation
 
         if (ClosedPositionPvP.CanUse(out action) && !Player.HasStatus(true, StatusID.ClosedPosition_2026)) return true;
 
+        if (InCombat && BraveryPvP.CanUse(out action)) return true;
+        if (InCombat && DervishPvP.CanUse(out action)) return true;
+
         return base.EmergencyAbility(nextGCD, out action);
     }
 
@@ -81,6 +84,7 @@ public sealed class DNC_DefaultPvP : DancerRotation
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
         if (FanDancePvP.CanUse(out action)) return true;
+        if (EagleEyeShotPvP.CanUse(out action)) return true;
 
         return base.AttackAbility(nextGCD, out action);
     }

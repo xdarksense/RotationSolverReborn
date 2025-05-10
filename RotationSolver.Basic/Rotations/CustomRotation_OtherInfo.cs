@@ -148,7 +148,7 @@ partial class CustomRotation
     /// <summary>
     /// The last attacked hostile target.
     /// </summary>
-    protected static IBattleChara? HostileTarget => DataCenter.HostileTarget;
+    protected static IBattleChara? HostileTarget => DataCenter.HostileTarget ?? null;
 
     /// <summary>
     /// Is player in position to hit the positional?
