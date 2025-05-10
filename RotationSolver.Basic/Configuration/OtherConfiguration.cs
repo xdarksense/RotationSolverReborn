@@ -1,4 +1,6 @@
 ﻿using ECommons.DalamudServices;
+using ECommons.ExcelServices;
+using Newtonsoft.Json.Converters;
 
 namespace RotationSolver.Basic.Configuration;
 
@@ -21,6 +23,10 @@ internal class OtherConfiguration
     public static HashSet<uint> NoCastingStatus = [];
     public static HashSet<uint> PrioTargetId = [];
     public static HashSet<uint> AutoStatusOrder = [];
+    public static List<Job> DancePartnerPriority = [];
+    public static List<Job> TheSpearPriority = [];
+    public static List<Job> TheBalancePriority = [];
+    public static List<Job> KardiaTankPriority = [];
 
     public static RotationSolverRecord RotationSolverRecord = new();
 
@@ -36,6 +42,10 @@ internal class OtherConfiguration
         Task.Run(() => InitOne(ref InvincibleStatus, nameof(InvincibleStatus)));
         Task.Run(() => InitOne(ref PrioTargetId, nameof(PrioTargetId)));
         Task.Run(() => InitOne(ref AutoStatusOrder, nameof(AutoStatusOrder)));
+        Task.Run(() => InitOne(ref DancePartnerPriority, nameof(DancePartnerPriority)));
+        Task.Run(() => InitOne(ref TheSpearPriority, nameof(TheSpearPriority)));
+        Task.Run(() => InitOne(ref TheBalancePriority, nameof(TheBalancePriority)));
+        Task.Run(() => InitOne(ref KardiaTankPriority, nameof(KardiaTankPriority)));
         Task.Run(() => InitOne(ref NoHostileNames, nameof(NoHostileNames)));
         Task.Run(() => InitOne(ref NoProvokeNames, nameof(NoProvokeNames)));
         Task.Run(() => InitOne(ref AnimationLockTime, nameof(AnimationLockTime)));
@@ -57,6 +67,10 @@ internal class OtherConfiguration
             await SaveInvincibleStatus();
             await SavePrioTargetId();
             await SaveAutoStatusOrder();
+            await SaveDancePartnerPriority();
+            await SaveTheSpearPriority();
+            await SaveTheBalancePriority();
+            await SaveKardiaTankPriority();
             await SaveNoHostileNames();
             await SaveAnimationLockTime();
             await SaveHostileCastingArea();
@@ -166,6 +180,7 @@ internal class OtherConfiguration
     {
         return Task.Run(() => Save(RotationSolverRecord, nameof(RotationSolverRecord)));
     }
+
     public static Task SaveNoProvokeNames()
     {
         return Task.Run(() => Save(NoProvokeNames, nameof(NoProvokeNames)));
@@ -193,9 +208,53 @@ internal class OtherConfiguration
         SaveAutoStatusOrder().Wait();
     }
 
+    public static void ResetDancePartnerPriority()
+    {
+        InitOne(ref DancePartnerPriority, nameof(DancePartnerPriority), true, true);
+        SaveDancePartnerPriority().Wait();
+    }
+
+    public static void ResetTheSpearPriority()
+    {
+        InitOne(ref TheSpearPriority, nameof(TheSpearPriority), true, true);
+        SaveTheSpearPriority().Wait();
+    }
+
+    public static void ResetTheBalancePriority()
+    {
+        InitOne(ref TheBalancePriority, nameof(TheBalancePriority), true, true);
+        SaveTheBalancePriority().Wait();
+    }
+
+    public static void ResetKardiaTankPriority()
+    {
+        InitOne(ref KardiaTankPriority, nameof(KardiaTankPriority), true, true);
+        SaveKardiaTankPriority().Wait();
+    }
+
     public static Task SaveAutoStatusOrder()
     {
         return Task.Run(() => Save(AutoStatusOrder, nameof(AutoStatusOrder)));
+    }
+
+    public static Task SaveDancePartnerPriority()
+    {
+        return Task.Run(() => Save(DancePartnerPriority, nameof(DancePartnerPriority)));
+    }
+
+    public static Task SaveTheSpearPriority()
+    {
+        return Task.Run(() => Save(TheSpearPriority, nameof(TheSpearPriority)));
+    }
+
+    public static Task SaveTheBalancePriority()
+    {
+        return Task.Run(() => Save(TheBalancePriority, nameof(TheBalancePriority)));
+    }
+
+    public static Task SaveKardiaTankPriority()
+    {
+        return Task.Run(() => Save(KardiaTankPriority, nameof(KardiaTankPriority)));
     }
 
     public static Task SaveNoHostileNames()
@@ -256,7 +315,11 @@ internal class OtherConfiguration
         {
             try
             {
-                value = JsonConvert.DeserializeObject<T>(File.ReadAllText(path))!;
+                value = JsonConvert.DeserializeObject<T>(File.ReadAllText(path), new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.None,
+                    Converters = new List<JsonConverter> { new StringEnumConverter() } // Add this line
+                })!;
                 if (value == null) throw new Exception("Deserialized value is null.");
                 Svc.Log.Info($"Loaded {name} from local file.");
             }
@@ -274,13 +337,10 @@ internal class OtherConfiguration
                 var str = client.GetStringAsync($"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Resources/{name}.json").Result;
 
                 File.WriteAllText(path, str);
-                value = JsonConvert.DeserializeObject<T>(str, new JsonSerializerSettings()
+                value = JsonConvert.DeserializeObject<T>(str, new JsonSerializerSettings
                 {
-                    MissingMemberHandling = MissingMemberHandling.Error,
-                    Error = delegate (object? sender, Newtonsoft.Json.Serialization.ErrorEventArgs args) // Allow sender to be null
-                    {
-                        args.ErrorContext.Handled = true;
-                    }
+                    TypeNameHandling = TypeNameHandling.None,
+                    Converters = new List<JsonConverter> { new StringEnumConverter() } // Add this line
                 })!;
                 if (value == null) throw new Exception("Deserialized value is null.");
                 Svc.Log.Info($"Downloaded and loaded {name} from GitHub.");

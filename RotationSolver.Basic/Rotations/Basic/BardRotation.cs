@@ -441,6 +441,10 @@ partial class BardRotation
     {
         setting.StatusNeed = [StatusID.EncoreOfLightReady];
         setting.MPOverride = () => 0;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyTheWardensPaeanPvP(ref ActionSetting setting)
