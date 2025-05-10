@@ -28,6 +28,12 @@ internal enum RotationConfigWindowTab : byte
     [TabSkip] About,
     [TabSkip] Rotation,
 
+    [Description("Useful information and macro list.")]
+    [TabIcon(Icon = 4)] Main,
+
+    [Description("Rotation specific configs.")]
+    [TabIcon(Icon = 4)] Job,
+
     [Description("Configure abilities and custom conditions for your current job.")]
     [TabIcon(Icon = 4)] Actions,
 

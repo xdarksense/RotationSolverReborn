@@ -894,6 +894,7 @@ public struct ActionTargetInfo(IBaseAction action)
             TargetType.MimicryTarget => FindMimicryTarget(),
             TargetType.TheSpear => FindTheSpear(),
             TargetType.TheBalance => FindTheBalance(),
+            TargetType.Kardia => FindKardia(),
             _ => FindHostile(),
         };
 
@@ -996,6 +997,44 @@ public struct ActionTargetInfo(IBaseAction action)
                 ?? RandomRangeTarget(IGameObjects)
                 ?? RandomMagicalTarget(IGameObjects)
                 ?? RandomPhysicalTarget(IGameObjects)
+                ?? null;
+        }
+
+        IBattleChara? FindKardia()
+        {
+            Job[] KardiaTankpriority = { Job.PLD, Job.WAR, Job.GNB, Job.DRK, Job.GLA, Job.MRD };
+
+            if (DataCenter.PartyMembers == null) return null;
+
+            // First, prioritize tanks with TankStanceStatus and without Kardion from anyone, accounting for Double Sage parties
+            foreach (var member in DataCenter.PartyMembers.Where(member => member.IsJobCategory(JobRole.Tank)))
+            {
+                foreach (var job in KardiaTankpriority)
+                {
+                    if (member.IsJobs(job) && !member.IsDead && member.HasStatus(false, StatusHelper.TankStanceStatus) && !member.HasStatus(false, StatusID.Kardion))
+                    {
+                        return member;
+                    }
+                }
+            }
+
+            // If no tanks with TankStanceStatus are found, pick any tank
+            foreach (var member in DataCenter.PartyMembers.Where(member => member.IsJobCategory(JobRole.Tank)))
+            {
+                foreach (var job in KardiaTankpriority)
+                {
+                    if (member.IsJobs(job) && !member.IsDead)
+                    {
+                        return member;
+                    }
+                }
+            }
+
+            return FindTankTarget()
+                ?? RandomMeleeTarget(DataCenter.PartyMembers)
+                ?? RandomPhysicalTarget(DataCenter.PartyMembers)
+                ?? RandomRangeTarget(DataCenter.PartyMembers)
+                ?? RandomMagicalTarget(DataCenter.PartyMembers)
                 ?? null;
         }
 
@@ -1378,6 +1417,7 @@ public enum TargetType : byte
     MimicryTarget,
     TheBalance,
     TheSpear,
+    Kardia,
 }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 

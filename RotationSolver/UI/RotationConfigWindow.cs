@@ -357,12 +357,16 @@ public partial class RotationConfigWindow : Window
                 // Skip the tab if it has the TabSkipAttribute
                 if (item.GetAttribute<TabSkipAttribute>() != null) continue;
 
+                string displayName = item == RotationConfigWindowTab.Job && Player.Object != null
+                    ? Player.Job.ToString() // Use the current player's job name
+                    : item.ToString();
+
                 if (IconSet.GetTexture(item.GetAttribute<TabIconAttribute>()?.Icon ?? 0, out var icon) && wholeWidth <= JOB_ICON_WIDTH * Scale)
                 {
                     ImGuiHelper.DrawItemMiddle(() =>
                     {
                         var cursor = ImGui.GetCursorPos();
-                        if (ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, Vector2.One * iconSize, item.ToString()))
+                        if (ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, Vector2.One * iconSize, displayName))
                         {
                             _activeTab = item;
                             _searchResults = [];
@@ -370,14 +374,14 @@ public partial class RotationConfigWindow : Window
                         ImGuiHelper.DrawActionOverlay(cursor, iconSize, _activeTab == item ? 1 : 0);
                     }, Math.Max(Scale * MIN_COLUMN_WIDTH, wholeWidth), iconSize);
 
-                    var desc = item.ToString();
+                    var desc = displayName;
                     var addition = item.GetDescription();
                     if (!string.IsNullOrEmpty(addition)) desc += "\n \n" + addition;
                     ImguiTooltips.HoveredTooltip(desc);
                 }
                 else
                 {
-                    if (ImGui.Selectable(item.ToString(), _activeTab == item, ImGuiSelectableFlags.None, new Vector2(0, 20)))
+                    if (ImGui.Selectable(displayName, _activeTab == item, ImGuiSelectableFlags.None, new Vector2(0, 20)))
                     {
                         _activeTab = item;
                         _searchResults = [];
@@ -392,6 +396,18 @@ public partial class RotationConfigWindow : Window
 
                 // Add a separator after the "Debug" tab
                 if (item == RotationConfigWindowTab.Debug)
+                {
+                    ImGui.Separator();
+                }
+
+                // Add a separator after the "Debug" tab
+                if (item == RotationConfigWindowTab.Job)
+                {
+                    ImGui.Separator();
+                }
+
+                // Add a separator after the "Debug" tab
+                if (item == RotationConfigWindowTab.Main)
                 {
                     ImGui.Separator();
                 }
@@ -667,6 +683,14 @@ public partial class RotationConfigWindow : Window
                 switch (_activeTab)
                 {
 
+                    case RotationConfigWindowTab.Main:
+                        DrawAbout();
+                        break;
+
+                    case RotationConfigWindowTab.Job:
+                        DrawRotation();
+                        break;
+
                     case RotationConfigWindowTab.AutoDuty:
                         DrawAutoduty();
                         break;
@@ -753,10 +777,17 @@ public partial class RotationConfigWindow : Window
             ImGui.TextWrapped(UiString.ConfigWindow_About_Warning.GetDescription());
         }
 
+        ImGui.Spacing();
+        var width2 = ImGui.GetWindowWidth();
+        if (IconSet.GetTexture("https://storage.ko-fi.com/cdn/brandasset/kofi_button_red.png", out var icon2) && ImGuiHelper.TextureButton(icon2, width2, 250 * Scale, "Ko-fi link"))
+        {
+            Util.OpenLink("https://ko-fi.com/ltscombatreborn");
+        }
+
         var width = ImGui.GetWindowWidth();
 
         // Draw the Discord link button
-        if (IconSet.GetTexture("https://discordapp.com/api/guilds/1064448004498653245/embed.png?style=banner2", out var icon) && ImGuiHelper.TextureButton(icon, width, width))
+        if (IconSet.GetTexture("https://discordapp.com/api/guilds/1064448004498653245/embed.png?style=banner2", out var icon) && ImGuiHelper.TextureButton(icon, width, 250 * Scale, "Discord link"))
         {
             Util.OpenLink("https://discord.gg/p54TZMPnC9");
         }
@@ -2862,6 +2893,20 @@ public partial class RotationConfigWindow : Window
             ImGui.Text("Party Members: None");
         }
 
+        var tankPartyMembers = DataCenter.PartyMembers.Where(member => member.IsJobCategory(JobRole.Tank)).ToList();
+        if (tankPartyMembers.Count != 0)
+        {
+            ImGui.Text("Tank Party Members:");
+            foreach (var member in tankPartyMembers)
+            {
+                ImGui.Text($"- {member.Name}");
+            }
+        }
+        else
+        {
+            ImGui.Text("Tank Party Members: None");
+        }
+
         // Display all party members
         var friendlyNPCMembers = DataCenter.FriendlyNPCMembers;
         if (friendlyNPCMembers.Count != 0)
@@ -2981,6 +3026,8 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"Is Alive: {battleChara.IsAlive()}");
             ImGui.Text($"Is Party: {battleChara.IsParty()}");
             ImGui.Text($"Is Healer: {battleChara.IsJobCategory(JobRole.Healer)}");
+            ImGui.Text($"Is DPS: {battleChara.IsJobCategory(JobRole.AllDPS)}");
+            ImGui.Text($"Is Tank: {battleChara.IsJobCategory(JobRole.Tank)}");
             ImGui.Text($"Is Alliance: {battleChara.IsAllianceMember()}");
             ImGui.Text($"Distance To Player: {battleChara.DistanceToPlayer()}");
             ImGui.Text($"CanProvoke: {battleChara.CanProvoke()}");
