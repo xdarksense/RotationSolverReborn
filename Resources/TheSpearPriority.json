@@ -1,15 +1,16 @@
 [
-  "SAM",
   "PCT",
-  "RPR",
-  "VPR",
-  "MNK",
-  "NIN",
-  "DRG",
-  "BLM",
-  "RDM",
-  "SMN",
   "MCH",
+  "SMN",
+  "RDM",
   "BRD",
-  "DNC"
+  "DNC",
+  "BLM",
+  "SAM",
+  "NIN",
+  "VPR",
+  "DRG",
+  "MNK",
+  "DRK",
+  "RPR"
 ]
