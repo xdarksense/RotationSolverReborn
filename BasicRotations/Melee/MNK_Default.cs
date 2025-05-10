@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RebornRotations.Melee;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.2", Description = "Uses Lunar Solar Opener from The Balance")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.21", Description = "Uses Lunar Solar Opener from The Balance")]
 [SourceCode(Path = "main/BasicRotations/Melee/MNK_Default.cs")]
 [Api(4)]
 
@@ -34,7 +34,7 @@ public sealed class MNK_Default : MonkRotation
     public bool AutoPB_AOE { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Use Howling Fist/Enlightenment as a ranged attack verses single target enemies")]
-    public bool HowlingSingle { get; set; } = false;
+    public bool HowlingSingle2 { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Enable TEA Checker.")]
     public bool EnableTEAChecker { get; set; } = false;
@@ -118,6 +118,9 @@ public sealed class MNK_Default : MonkRotation
             // 'If you are not high enough level for TheForbiddenChakra, use immediately at 5 chakra.'
             if (SteelPeakPvE.CanUse(out act)) return true;
         }
+
+        if (!HasHostilesInRange && EnlightenmentPvE.CanUse(out act, skipAoeCheck: HowlingSingle2)) return true; // Enlightment
+        if (!HasHostilesInRange && HowlingFistPvE.CanUse(out act, skipAoeCheck: HowlingSingle2)) return true; // Howling Fist
 
         return base.EmergencyAbility(nextGCD, out act);
     }
@@ -208,8 +211,8 @@ public sealed class MNK_Default : MonkRotation
         // 'Use on cooldown, unless you know your killtime. You should aim to get as many casts of RoW as you can, and then shift those usages to align with burst as much as possible without losing a use.'
         if (!CombatElapsedLessGCD(3) && RiddleOfWindPvE.CanUse(out act)) return true; // Riddle Of Wind
 
-        if (EnlightenmentPvE.CanUse(out act, skipAoeCheck: HowlingSingle)) return true; // Enlightment
-        if (HowlingFistPvE.CanUse(out act, skipAoeCheck: HowlingSingle)) return true; // Howling Fist
+        if (EnlightenmentPvE.CanUse(out act, skipAoeCheck: HowlingSingle2)) return true;
+        if (HowlingFistPvE.CanUse(out act, skipAoeCheck: HowlingSingle2)) return true;
 
         return base.AttackAbility(nextGCD, out act);
     }
