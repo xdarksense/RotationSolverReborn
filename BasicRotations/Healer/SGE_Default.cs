@@ -1,6 +1,6 @@
 namespace RebornRotations.Healer;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.21")]
 [SourceCode(Path = "main/BasicRotations/Healer/SGE_Default.cs")]
 [Api(4)]
 public sealed class SGE_Default : SageRotation
@@ -198,8 +198,6 @@ public sealed class SGE_Default : SageRotation
 
         if ((!TaurocholePvE.EnoughLevel || TaurocholePvE.Cooldown.IsCoolingDown) && DruocholePvE.CanUse(out act)) return true;
 
-
-
         foreach (var member in PartyMembers)
         {
             if (SoteriaPvE.CanUse(out act) && member.HasStatus(true, StatusID.Kardion) && member.GetHealthRatio() < SoteriaHeal)
@@ -251,13 +249,11 @@ public sealed class SGE_Default : SageRotation
         return base.HealSingleAbility(nextGCD, out act);
     }
 
-    [RotationDesc(ActionID.EukrasianPrognosisPvE, ActionID.EukrasianPrognosisIiPvE)]
+    [RotationDesc(ActionID.KardiaPvE, ActionID.RhizomataPvE, ActionID.SoteriaPvE)]
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
-        // If not in combat and lacking the Kardia status, attempt to use KardiaPvE
-        if (!InCombat && !Player.HasStatus(true, StatusID.Kardia) && KardiaPvE.CanUse(out act)) return true;
-
-        if (KardiaPvE.CanUse(out act)) return true;
+        // If lacking the Kardia status, attempt to use KardiaPvE
+        if (!HasKardia && KardiaPvE.CanUse(out act)) return true;
 
         if (OOCRhizomata && !InCombat && Addersgall <= 1 && RhizomataPvE.CanUse(out act)) return true;
         if (InCombat && Addersgall <= 1 && RhizomataPvE.CanUse(out act)) return true;
@@ -411,8 +407,8 @@ public sealed class SGE_Default : SageRotation
             if (PneumaPvE.CanUse(out act)) return true;
         }
 
-        if (Player.HasStatus(true, StatusID.Eukrasia) && EukrasiaActionHeal && EukrasianPrognosisPvE.CanUse(out act)) return true;
-        if (EukrasiaPvE.EnoughLevel && !Player.HasStatus(true, StatusID.Eukrasia) && EukrasiaActionHeal && EukrasiaPvE.CanUse(out act)) return true;
+        if (HasEukrasia && EukrasiaActionHeal && EukrasianPrognosisPvE.CanUse(out act)) return true;
+        if (EukrasiaPvE.EnoughLevel && !HasEukrasia && EukrasiaActionHeal && EukrasiaPvE.CanUse(out act)) return true;
 
         if (_EukrasiaActionAim == null && PrognosisPvE.CanUse(out act))
         {
@@ -427,8 +423,8 @@ public sealed class SGE_Default : SageRotation
     {
         act = null;
         if (IsLastAction(ActionID.SwiftcastPvE) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
-        if (Player.HasStatus(true, StatusID.Eukrasia) && EukrasiaActionHeal && EukrasianDiagnosisPvE.CanUse(out act)) return true;
-        if (EukrasiaPvE.EnoughLevel && !Player.HasStatus(true, StatusID.Eukrasia) && EukrasiaActionHeal && EukrasiaPvE.CanUse(out act)) return true;
+        if (HasEukrasia && EukrasiaActionHeal && EukrasianDiagnosisPvE.CanUse(out act)) return true;
+        if (EukrasiaPvE.EnoughLevel && !HasEukrasia && EukrasiaActionHeal && EukrasiaPvE.CanUse(out act)) return true;
         if (_EukrasiaActionAim == null && DiagnosisPvE.CanUse(out act)) return true;
         return base.HealSingleGCD(out act);
     }
@@ -467,7 +463,7 @@ public sealed class SGE_Default : SageRotation
         if (DoEukrasianDosis(out act)) return true;
         if (DosisPvE.CanUse(out act)) return true;
 
-        if (OOCEukrasia && !InCombat && !Player.HasStatus(true, StatusID.Eukrasia) && EukrasiaPvE.CanUse(out act)) return true;
+        if (OOCEukrasia && !InCombat && !HasEukrasia && EukrasiaPvE.CanUse(out act)) return true;
         if (InCombat && !HasHostilesInRange && EukrasiaPvE.CanUse(out act)) return true;
         return base.GeneralGCD(out act);
     }
