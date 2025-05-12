@@ -99,7 +99,7 @@ internal static class RotationUpdater
             Svc.Log.Error("Failed to find main assembly directory");
             return null;
         }
-        var assemblyPath = Path.Combine(directory.ToString(), "RebornRotations.dll");
+        var assemblyPath = Path.Combine(directory.ToString(), "net9.0-windows\\RebornRotations.dll");
         return LoadOne(assemblyPath);
     }
 
