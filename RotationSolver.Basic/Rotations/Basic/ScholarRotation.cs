@@ -17,6 +17,11 @@ partial class ScholarRotation
     /// </summary>
     public static bool HasAetherflow => JobGauge.Aetherflow > 0;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public static byte SCHAetherFlowStacks => JobGauge.Aetherflow;
+
     static float SeraphTimeRaw => JobGauge.SeraphTimer / 1000f;
 
     /// <summary>
@@ -40,6 +45,16 @@ partial class ScholarRotation
     /// Has Dissipation.
     /// </summary>
     public static bool HasDissipation => !Player.WillStatusEnd(0, true, StatusID.Dissipation);
+
+    /// <summary>
+    /// Has EmergencyTactics.
+    /// </summary>
+    public static bool HasEmergencyTactics => !Player.WillStatusEnd(0, true, StatusID.EmergencyTactics);
+
+    /// <summary>
+    /// Has Recitation.
+    /// </summary>
+    public static bool HasRecitation => Player.HasStatus(true, StatusID.Recitation);
     #endregion
 
     #region Actions Unassignable
@@ -62,11 +77,17 @@ partial class ScholarRotation
     {
         ImGui.Text("FairyGauge: " + FairyGauge.ToString());
         ImGui.Text("HasAetherflow: " + HasAetherflow.ToString());
+        ImGui.Text("SCHAetherFlowStacks: " + SCHAetherFlowStacks.ToString());
         ImGui.Text("SeraphTime: " + SeraphTime.ToString());
         ImGui.Text("Has Fairy Out: " + DataCenter.HasPet().ToString());
         ImGui.Text("FairyDismissed: " + FairyDismissed.ToString());
         ImGui.Text("ManifestationReady: " + ManifestationReady.ToString());
         ImGui.Text("AccessionReady: " + AccessionReady.ToString());
+        ImGui.Text($"Excog Target: {ExcogitationPvE.Target.Target.Name}");
+        ImGui.Text($"Recitation on Cooldown: {RecitationPvE.Cooldown.IsCoolingDown}");
+        ImGui.Text($"Excog on cooldown: {ExcogitationPvE.Cooldown.IsCoolingDown}");
+        ImGui.Text($"Whispering Dawn On Cooldown: {WhisperingDawnPvE_16537.Cooldown.IsCoolingDown}");
+        ImGui.Text($"Fey Blessing On Cooldown: {FeyBlessingPvE.Cooldown.IsCoolingDown}");
     }
     #endregion
 

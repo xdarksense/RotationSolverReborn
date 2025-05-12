@@ -74,7 +74,7 @@ partial class SummonerRotation
     /// <summary>
     /// 
     /// </summary>
-    public static byte AetherflowStacks => JobGauge.AetherflowStacks;
+    public static byte SMNAetherflowStacks => JobGauge.AetherflowStacks;
 
     private static float SummonTimeRaw => JobGauge.SummonTimerRemaining / 1000f;
 
@@ -240,7 +240,7 @@ partial class SummonerRotation
         ImGui.Text("InIfrit: " + InIfrit.ToString());
         ImGui.Text("InTitan: " + InTitan.ToString());
         ImGui.Text("InGaruda: " + InGaruda.ToString());
-        ImGui.Text("AetherflowStacks: " + AetherflowStacks.ToString());
+        ImGui.Text("SMNAetherflowStacks: " + SMNAetherflowStacks.ToString());
         ImGui.Text("SummonTime: " + SummonTime.ToString());
         ImGui.Text("AttunmentTime: " + AttunmentTime.ToString());
         ImGui.Text("HasSummon: " + HasSummon.ToString());

@@ -50,9 +50,6 @@ public class BLM_DefaultPVP : BlackMageRotation
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
         if (DoPurify(out action)) return true;
 
-        if (XenoglossyPvP.CanUse(out action, usedUp: true) 
-            && (Player.GetHealthRatio() < XenoglossyLowHP || Player.GetHealthRatio() > XenoglossyHighHP)) return true;
-
         return base.EmergencyAbility(nextGCD, out action);
     }
 
@@ -109,6 +106,9 @@ public class BLM_DefaultPVP : BlackMageRotation
     {
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+
+        if (XenoglossyPvP.CanUse(out action, usedUp: true)
+            && (Player.GetHealthRatio() < XenoglossyLowHP || Player.GetHealthRatio() > XenoglossyHighHP)) return true;
 
         if (FlareStarPvP.CanUse(out action)) return true;
         if (FrostStarPvP.CanUse(out action)) return true;
