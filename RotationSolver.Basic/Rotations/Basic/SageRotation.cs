@@ -55,6 +55,13 @@ partial class SageRotation
     }
     #endregion
 
+    #region Status Tracking
+    /// <summary>
+    /// Player has Kardia.
+    /// </summary>
+    public static bool HasKardia => Player.HasStatus(true, StatusID.Kardia);
+    #endregion
+
     #region PvE Actions
     private protected sealed override IBaseAction Raise => EgeiroPvE;
 
@@ -156,6 +163,7 @@ partial class SageRotation
     {
         setting.StatusProvide = [StatusID.Soteria];
         setting.TargetType = TargetType.Self;
+        setting.ActionCheck = () => DataCenter.PartyMembers.Any(m => m.HasStatus(true, StatusID.Kardion));
     }
 
     static partial void ModifyIcarusPvE(ref ActionSetting setting)

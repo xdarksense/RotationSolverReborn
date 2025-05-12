@@ -10,6 +10,9 @@ namespace RotationSolver.Basic.Actions;
 /// </summary>
 public readonly struct ActionBasicInfo
 {
+    /// <summary>
+    /// Actions that do not require casting.
+    /// </summary>
     internal static readonly uint[] ActionsNoNeedCasting =
     [
         5,
@@ -20,78 +23,78 @@ public readonly struct ActionBasicInfo
     private readonly IBaseAction _action;
 
     /// <summary>
-    /// The name of the action.
+    /// Gets the name of the action.
     /// </summary>
     public readonly string Name => _action.Action.Name.ExtractText();
 
     /// <summary>
-    /// The ID of the action.
+    /// Gets the unique identifier of the action.
     /// </summary>
     public readonly uint ID => _action.Action.RowId;
 
     /// <summary>
-    /// The Range of the action.
+    /// Gets the range of the action.
     /// </summary>
     public readonly sbyte Range => _action.Action.Range;
 
     /// <summary>
-    /// The EffectRange of the action.
+    /// Gets the effect range of the action.
     /// </summary>
     public readonly byte EffectRange => _action.Action.EffectRange;
 
     /// <summary>
-    /// The icon of the action.
+    /// Gets the icon ID of the action.
     /// </summary>
     public readonly uint IconID => ID == (uint)ActionID.SprintPvE ? 104u : _action.Action.Icon;
 
     /// <summary>
-    /// The adjust id of this action.
+    /// Gets the adjusted ID of the action, considering any modifications.
     /// </summary>
     public readonly uint AdjustedID => (uint)Service.GetAdjustedActionId((ActionID)ID);
 
     /// <summary>
-    /// The attack type of this action.
+    /// Gets the attack type of the action.
     /// </summary>
     public readonly AttackType AttackType => (AttackType)(_action.Action.AttackType.RowId != 0 ? _action.Action.AttackType.RowId : byte.MaxValue);
 
     /// <summary>
-    /// The aspect of this action.
+    /// Gets the aspect of the action.
     /// </summary>
     public Aspect Aspect { get; }
 
     /// <summary>
-    /// The animation lock time of this action.
+    /// Gets the animation lock time of the action.
     /// </summary>
     [Obsolete("Use ActionManagerHelper.GetCurrentAnimationLock()")]
     public readonly float AnimationLockTime => ActionManagerHelper.GetCurrentAnimationLock();
 
     /// <summary>
-    /// The level of this action.
+    /// Gets the level required to use the action.
     /// </summary>
     public readonly byte Level => _action.Action.ClassJobLevel;
 
     /// <summary>
-    /// If this action is enough level to use.
+    /// Determines whether the player's level is sufficient to use the action.
     /// </summary>
     public readonly bool EnoughLevel => Player.Level >= Level;
 
     /// <summary>
-    /// If this action a pvp action.
+    /// Determines whether the action is a PvP action.
     /// </summary>
     public readonly bool IsPvP => _action.Action.IsPvP;
 
     /// <summary>
-    /// If this action a pvp action.
+    /// Gets the cast type of the action.
     /// </summary>
     public readonly byte CastType => _action.Action.CastType;
 
     /// <summary>
-    /// Casting time.
+    /// Gets the casting time of the action.
     /// </summary>
     public readonly unsafe float CastTime => ((ActionID)AdjustedID).GetCastTime();
 
     /// <summary>
-    /// How many mp does this action needs.
+    /// Gets the MP required to use the action.
     /// </summary>
     public readonly unsafe uint MPNeed
     {
@@ -110,7 +113,7 @@ public readonly struct ActionBasicInfo
     }
 
     /// <summary>
-    /// Is this action on the slot.
+    /// Determines whether the action is on the player's hotbar or slot.
     /// </summary>
     public readonly bool IsOnSlot
     {
@@ -131,30 +134,30 @@ public readonly struct ActionBasicInfo
     }
 
     /// <summary>
-    /// Is this action is a lb action.
+    /// Determines whether the action is a limit break action.
     /// </summary>
     public bool IsLimitBreak { get; }
 
     /// <summary>
-    /// Is this action a general gcd.
+    /// Determines whether the action is a general global cooldown (GCD) action.
     /// </summary>
     public bool IsGeneralGCD { get; }
 
     /// <summary>
-    /// Is this action a real gcd.
+    /// Determines whether the action is a real global cooldown (GCD) action.
     /// </summary>
     public bool IsRealGCD { get; }
 
     /// <summary>
-    /// Is this action a duty action.
+    /// Determines whether the action is a duty action.
     /// </summary>
     public bool IsDutyAction { get; }
 
     /// <summary>
-    /// The basic way to create a basic info
+    /// Initializes a new instance of the <see cref="ActionBasicInfo"/> struct.
     /// </summary>
-    /// <param name="action">the action</param>
-    /// <param name="isDutyAction">if it is a duty action.</param>
+    /// <param name="action">The base action.</param>
+    /// <param name="isDutyAction">Indicates whether the action is a duty action.</param>
     public ActionBasicInfo(IBaseAction action, bool isDutyAction)
     {
         _action = action;
@@ -166,6 +169,13 @@ public readonly struct ActionBasicInfo
         Aspect = (Aspect)_action.Action.Aspect;
     }
 
+    /// <summary>
+    /// Performs a basic check to determine whether the action can be used.
+    /// </summary>
+    /// <param name="skipStatusProvideCheck">Whether to skip the status provide check.</param>
+    /// <param name="skipComboCheck">Whether to skip the combo check.</param>
+    /// <param name="skipCastingCheck">Whether to skip the casting check.</param>
+    /// <returns>True if the action passes the basic check; otherwise, false.</returns>
     internal readonly bool BasicCheck(bool skipStatusProvideCheck, bool skipComboCheck, bool skipCastingCheck)
     {
         if (Player.Object == null) return false;
@@ -185,7 +195,7 @@ public readonly struct ActionBasicInfo
     }
 
     /// <summary>
-    /// Whether the spell is unlocked by the player
+    /// Determines whether the spell is unlocked for the player.
     /// </summary>
     public unsafe bool SpellUnlocked => _action.Action.UnlockLink.RowId <= 0 || UIState.Instance()->IsUnlockLinkUnlockedOrQuestCompleted(_action.Action.UnlockLink.RowId);
 
