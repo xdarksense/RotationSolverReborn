@@ -749,6 +749,14 @@ internal partial class Configs : IPluginConfiguration
     [JobConfig, UI("Engage settings", Filter = TargetConfig, PvPFilter = JobFilterType.NoJob)]
     private readonly TargetHostileType _hostileType = TargetHostileType.AllTargetsWhenSoloInDuty;
 
+    [ConditionBool, UI("Prioritize Low HP targets instead of High HP targets when using Small Target and multiple Small targets present.",
+        Filter = TargetConfig)]
+    private static readonly bool _smallHP = false;
+
+    [ConditionBool, UI("Prioritize Low HP targets instead of High HP targets when using Big Target and multiple Big targets present.",
+        Filter = TargetConfig)]
+    private static readonly bool _bigHP = false;
+
     [JobConfig]
     private readonly string _PvPRotationChoice = string.Empty;
 
