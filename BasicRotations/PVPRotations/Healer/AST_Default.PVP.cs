@@ -1,6 +1,6 @@
 ﻿namespace RebornRotations.PVPRotations.Healer;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.2")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.21")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Healer/AST_Default.PVP.cs")]
 [Api(4)]
 public class AST_DefaultPVP : AstrologianRotation
@@ -45,7 +45,9 @@ public class AST_DefaultPVP : AstrologianRotation
         if (AspectedBeneficPvP_29247.CanUse(out action, usedUp: true)) return true;
 
         if (Player.WillStatusEnd(1, true, StatusID.Macrocosmos_3104) && MicrocosmosPvP.CanUse(out action)) return true;
+        if (Player.WillStatusEnd(1, true, StatusID.LadyOfCrowns_4328) && LadyOfCrownsPvE.CanUse(out action)) return true;
         if (Player.GetHealthRatio() < 0.5 && MicrocosmosPvP.CanUse(out action)) return true;
+        if (OraclePvP.CanUse(out action)) return true;
 
         return base.EmergencyAbility(nextGCD, out action);
     }
@@ -55,6 +57,8 @@ public class AST_DefaultPVP : AstrologianRotation
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
+        if (DiabrosisPvP.CanUse(out action)) return true;
+
         if (MinorArcanaPvP.CanUse(out action)) return true;
         if (LordOfCrownsPvP.CanUse(out action)) return true;
 
@@ -62,19 +66,27 @@ public class AST_DefaultPVP : AstrologianRotation
         if (GravityIiPvP_29248.CanUse(out action, usedUp: true)) return true;
         if (FallMaleficPvP_29246.CanUse(out action, usedUp: true)) return true;
 
-        if (OraclePvP.CanUse(out action)) return true;
-
         return base.AttackAbility(nextGCD, out action);
     }
     #endregion
 
     #region GCDs
+    protected override bool DefenseSingleGCD(out IAction? action)
+    {
+        action = null;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+
+        if (StoneskinIiPvP.CanUse(out action)) return true;
+
+        return base.DefenseSingleGCD(out action);
+    }
 
     protected override bool HealSingleGCD(out IAction? action)
     {
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
+        if (HaelanPvP.CanUse(out action)) return true;
         if (AspectedBeneficPvP.CanUse(out action, usedUp: true)) return true;
 
         return base.HealSingleGCD(out action);

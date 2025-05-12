@@ -1,6 +1,6 @@
 ﻿namespace RebornRotations.PVPRotations.Tank;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.2")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.21")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Tank/WAR_Default.PvP.cs")]
 [Api(4)]
 public sealed class WAR_DefaultPvP : WarriorRotation
@@ -50,7 +50,7 @@ public sealed class WAR_DefaultPvP : WarriorRotation
     {
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
-
+        if (RampartPvP.CanUse(out action)) return true;
         if (BloodwhettingPvP.CanUse(out action)) return true;
 
         return base.DefenseSingleAbility(nextGCD, out action);
@@ -59,6 +59,11 @@ public sealed class WAR_DefaultPvP : WarriorRotation
     {
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+
+        if (PrimalWrathPvP.CanUse(out action)) return true;
+
+        if (RampagePvP.CanUse(out action)) return true;
+        if (FullSwingPvP.CanUse(out action)) return true;
 
         if (BlotaPvP.CanUse(out action)) return true;
         if (OnslaughtPvP.CanUse(out action)) return true;

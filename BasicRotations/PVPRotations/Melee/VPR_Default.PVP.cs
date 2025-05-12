@@ -1,6 +1,6 @@
 ﻿namespace RebornRotations.PVPRotations.Melee;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.2")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.21")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Melee/VPR_Default.PvP.cs")]
 [Api(4)]
 public sealed class VPR_DefaultPvP : ViperRotation
@@ -12,6 +12,14 @@ public sealed class VPR_DefaultPvP : ViperRotation
 
     [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
     public bool RespectGuard { get; set; } = true;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Player health threshold needed for Bloodbath use")]
+    public float BloodBathPvPPercent { get; set; } = 0.75f;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Enemy health threshold needed for Smite use")]
+    public float SmitePvPPercent { get; set; } = 0.25f;
     #endregion
 
     #region Standard PVP Utilities
@@ -46,6 +54,9 @@ public sealed class VPR_DefaultPvP : ViperRotation
         {
             if (RattlingCoilPvP.CanUse(out action)) return true;
         }
+        if (Player.GetHealthRatio() < BloodBathPvPPercent && BloodbathPvP.CanUse(out action)) return true;
+        if (SwiftPvP.CanUse(out action)) return true;
+        if (CurrentTarget?.GetHealthRatio() <= SmitePvPPercent && SmitePvP.CanUse(out action)) return true;
 
         return base.EmergencyAbility(nextGCD, out action);
     }

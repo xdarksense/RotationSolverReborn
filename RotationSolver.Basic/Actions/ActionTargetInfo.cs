@@ -188,6 +188,7 @@ public struct ActionTargetInfo(IBaseAction action)
         ActionID.DotonPvE,
         ActionID.DotonPvE_18880,
         ActionID.FeatherRainPvE,
+        ActionID.SaltAndDarknessPvP,
     };
 
     private bool IsSpecialAbility(uint iD)
@@ -207,7 +208,16 @@ public struct ActionTargetInfo(IBaseAction action)
     public bool GeneralCheck(IBattleChara gameObject, bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck)
     {
         if (gameObject == null) return false;
-        if (gameObject.StatusList == null) return false;
+
+        try
+        {
+            if (gameObject.StatusList == null) return false;
+        }
+        catch (Exception ex)
+        {
+            Svc.Log.Error($"Exception accessing StatusList for {gameObject?.NameId}: {ex.Message}");
+            return false;
+        }
 
         if (!gameObject.IsTargetable) return false;
 
@@ -216,7 +226,17 @@ public struct ActionTargetInfo(IBaseAction action)
             return false;
         }
 
-        if (DataCenter.BlacklistedNameIds.Contains(gameObject.NameId))
+        // Replace LINQ Contains with manual loop
+        bool isBlacklisted = false;
+        foreach (var id in DataCenter.BlacklistedNameIds)
+        {
+            if (id == gameObject.NameId)
+            {
+                isBlacklisted = true;
+                break;
+            }
+        }
+        if (isBlacklisted)
         {
             return false;
         }
@@ -226,7 +246,18 @@ public struct ActionTargetInfo(IBaseAction action)
             return false;
         }
 
-        if (MarkingHelper.GetStopTargets().Contains((long)gameObject.GameObjectId) && Service.Config.FilterStopMark)
+        // Replace LINQ Contains with manual loop
+        bool isStopTarget = false;
+        var stopTargets = MarkingHelper.GetStopTargets();
+        foreach (var stopId in stopTargets)
+        {
+            if (stopId == (long)gameObject.GameObjectId)
+            {
+                isStopTarget = true;
+                break;
+            }
+        }
+        if (isStopTarget && Service.Config.FilterStopMark)
         {
             return false;
         }

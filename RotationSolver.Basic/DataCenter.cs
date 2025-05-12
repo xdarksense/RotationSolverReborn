@@ -426,6 +426,18 @@ internal static class DataCenter
             return count;
         }
     }
+    public static int NumberOfHostilesInRangeOf(float range)
+    {
+        int count = 0;
+        foreach (var o in AllHostileTargets)
+        {
+            if (o.DistanceToPlayer() < range)
+            {
+                count++;
+            }
+        }
+        return count;
+    }
     public static int NumberOfAllHostilesInRange => NumberOfHostilesInRange;
     public static int NumberOfAllHostilesInMaxRange => NumberOfHostilesInMaxRange;
 
