@@ -448,7 +448,10 @@ partial class SageRotation
 
     static partial void ModifyPsychePvP(ref ActionSetting setting)
     {
-
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyToxikonIiPvP(ref ActionSetting setting)

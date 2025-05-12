@@ -259,7 +259,7 @@ partial class CustomRotation
     protected virtual bool EmergencyGCD(out IAction? act)
     {
         #region PvP
-        if (GuardPvP.CanUse(out act) && (Player.GetHealthRatio() <= Service.Config.HealthForGuard || DataCenter.CommandStatus.HasFlag(AutoStatus.Raise | AutoStatus.Shirk))) return true;
+        if (GuardPvP.CanUse(out act) && !Player.HasStatus(true, StatusID.UndeadRedemption) && !Player.HasStatus(true, StatusID.InnerRelease_1303) && (Player.GetHealthRatio() <= Service.Config.HealthForGuard || DataCenter.CommandStatus.HasFlag(AutoStatus.Raise | AutoStatus.Shirk))) return true;
 
         if (StandardissueElixirPvP.CanUse(out act)) return true;
         #endregion

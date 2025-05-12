@@ -1,6 +1,6 @@
 ﻿namespace RebornRotations.PVPRotations.Melee;
 
-[Rotation("Default", CombatType.PvP, GameVersion = "7.2")]
+[Rotation("Default", CombatType.PvP, GameVersion = "7.21")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Melee/MNK_Default.PVP.cs")]
 [Api(4)]
 public sealed class MNK_DefaultPvP : MonkRotation
@@ -12,6 +12,14 @@ public sealed class MNK_DefaultPvP : MonkRotation
 
     [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
     public bool RespectGuard { get; set; } = true;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Player health threshold needed for Bloodbath use")]
+    public float BloodBathPvPPercent { get; set; } = 0.75f;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Enemy health threshold needed for Smite use")]
+    public float SmitePvPPercent { get; set; } = 0.25f;
     #endregion
 
     #region Standard PVP Utilities
@@ -49,6 +57,10 @@ public sealed class MNK_DefaultPvP : MonkRotation
             if (Player.GetHealthRatio() < 0.5 && EarthsReplyPvP.CanUse(out action)) return true;
             if (Player.WillStatusEnd(1, true, StatusID.EarthResonance) && EarthsReplyPvP.CanUse(out action)) return true;
         }
+
+        if (Player.GetHealthRatio() < BloodBathPvPPercent && BloodbathPvP.CanUse(out action)) return true;
+        if (SwiftPvP.CanUse(out action)) return true;
+        if (CurrentTarget?.GetHealthRatio() <= SmitePvPPercent && SmitePvP.CanUse(out action)) return true;
 
         return base.EmergencyAbility(nextGCD, out action);
     }

@@ -460,6 +460,10 @@ partial class DarkKnightRotation
     static partial void ModifyShadowbringerPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Player.CurrentHp > 12000 || Player.HasStatus(true, StatusID.DarkArts_3034);
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
     static partial void ModifyPlungePvP(ref ActionSetting setting)
     {
@@ -483,11 +487,34 @@ partial class DarkKnightRotation
 
     static partial void ModifyDisesteemPvP(ref ActionSetting setting)
     {
+        setting.StatusNeed = [StatusID.Scorn_4290];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifySaltAndDarknessPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => SaltAndDarknessPvPReady;
+    }
+
+    static partial void ModifySaltedEarthPvP(ref ActionSetting setting)
+    {
+        setting.TargetType = TargetType.Self;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyImpalementPvP(ref ActionSetting setting)
+    {
+        setting.IsFriendly = false;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     #endregion

@@ -1,6 +1,6 @@
 ﻿namespace RebornRotations.PVPRotations.Melee;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.2")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.21")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Tank/NIN_Default.PvP.cs")]
 [Api(4)]
 public sealed class NIN_DefaultPvP : NinjaRotation
@@ -12,6 +12,14 @@ public sealed class NIN_DefaultPvP : NinjaRotation
 
     [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
     public bool RespectGuard { get; set; } = true;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Player health threshold needed for Bloodbath use")]
+    public float BloodBathPvPPercent { get; set; } = 0.75f;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Enemy health threshold needed for Smite use")]
+    public float SmitePvPPercent { get; set; } = 0.25f;
     #endregion
 
     #region Standard PVP Utilities
@@ -41,8 +49,11 @@ public sealed class NIN_DefaultPvP : NinjaRotation
         action = null;
         if (Player.HasStatus(true, StatusID.Hidden_1316)) return false;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
-
         if (DoPurify(out action)) return true;
+
+        if (Player.GetHealthRatio() < BloodBathPvPPercent && BloodbathPvP.CanUse(out action)) return true;
+        if (SwiftPvP.CanUse(out action)) return true;
+        if (CurrentTarget?.GetHealthRatio() <= SmitePvPPercent && SmitePvP.CanUse(out action)) return true;
 
         return base.EmergencyAbility(nextGCD, out action);
     }

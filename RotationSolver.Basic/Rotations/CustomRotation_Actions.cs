@@ -229,7 +229,7 @@ partial class CustomRotation
 
     static partial void ModifyDiabrosisPvP(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Diabrosis];
+        setting.StatusNeed = [StatusID.PvPRoleActionDiabrosis];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

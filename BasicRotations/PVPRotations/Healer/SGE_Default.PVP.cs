@@ -1,6 +1,6 @@
 ﻿namespace RebornRotations.PVPRotations.Healer;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.2")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.21")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Healer/SGE_Default.PVP.cs")]
 [Api(4)]
 public class SGE_DefaultPVP : SageRotation
@@ -52,6 +52,7 @@ public class SGE_DefaultPVP : SageRotation
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
+        if (DiabrosisPvP.CanUse(out action)) return true;
         if (!Target.HasStatus(true, StatusID.Toxikon) && ToxikonPvP.CanUse(out action, usedUp: true)) return true;
 
         return base.AttackAbility(nextGCD, out action);
@@ -59,6 +60,26 @@ public class SGE_DefaultPVP : SageRotation
     #endregion
 
     #region GCDs
+    protected override bool DefenseSingleGCD(out IAction? action)
+    {
+        action = null;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+
+        if (StoneskinIiPvP.CanUse(out action)) return true;
+
+        return base.DefenseSingleGCD(out action);
+    }
+
+    protected override bool HealSingleGCD(out IAction? action)
+    {
+        action = null;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+
+        if (HaelanPvP.CanUse(out action)) return true;
+
+        return base.HealSingleGCD(out action);
+    }
+
     protected override bool GeneralGCD(out IAction? action)
     {
         action = null;

@@ -1,6 +1,6 @@
 ﻿namespace RebornRotations.PVPRotations.Tank;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.2")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.21")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Tank/PLD_Default.PvP.cs")]
 [Api(4)]
 public sealed class PLD_DefaultPvP : PaladinRotation
@@ -50,7 +50,7 @@ public sealed class PLD_DefaultPvP : PaladinRotation
     {
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
-
+        if (RampartPvP.CanUse(out action)) return true;
         if (HolySheltronPvP.CanUse(out action)) return true;
 
         return base.DefenseSingleAbility(nextGCD, out action);
@@ -60,6 +60,8 @@ public sealed class PLD_DefaultPvP : PaladinRotation
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
+        if (RampagePvP.CanUse(out action)) return true;
+        if (FullSwingPvP.CanUse(out action)) return true;
         if (ImperatorPvP.CanUse(out action)) return true;
 
         return base.AttackAbility(nextGCD, out action);

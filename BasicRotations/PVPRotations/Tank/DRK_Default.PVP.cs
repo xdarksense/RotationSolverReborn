@@ -1,6 +1,6 @@
 namespace RebornRotations.PVPRotations.Tank;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.2")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.21")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Tank/DRK_Default.PvP.cs")]
 [Api(4)]
 public sealed class DRK_DefaultPvP : DarkKnightRotation
@@ -56,6 +56,7 @@ public sealed class DRK_DefaultPvP : DarkKnightRotation
         act = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
+        if (RampartPvP.CanUse(out act)) return true;
         if (TheBlackestNightPvP.CanUse(out act)) return true;
 
         return base.DefenseSingleAbility(nextGCD, out act);
@@ -65,7 +66,10 @@ public sealed class DRK_DefaultPvP : DarkKnightRotation
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
-        if (!IsMoving && SaltedEarthPvP.CanUse(out action)) return true;
+        if (RampagePvP.CanUse(out action)) return true;
+        if (FullSwingPvP.CanUse(out action)) return true;
+
+        if (HasHostilesInRange && SaltedEarthPvP.CanUse(out action)) return true;
 
         if (PlungePvP.CanUse(out action)) return true;
 
@@ -82,6 +86,8 @@ public sealed class DRK_DefaultPvP : DarkKnightRotation
     {
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+
+        if (DisesteemPvP.CanUse(out action)) return true;
 
         if ((Player.GetHealthRatio() * 100) < 60 && ImpalementPvP.CanUse(out action)) return true;
 

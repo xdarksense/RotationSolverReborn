@@ -516,6 +516,7 @@ partial class GunbreakerRotation
 
     static partial void ModifyFatedCirclePvP(ref ActionSetting setting)
     {
+        setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -565,6 +566,7 @@ partial class GunbreakerRotation
     {
         setting.ActionCheck = () => FatedBrandPvPReady;
         setting.MPOverride = () => 0;
+        setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

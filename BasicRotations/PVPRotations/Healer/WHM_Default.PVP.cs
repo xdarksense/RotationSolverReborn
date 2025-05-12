@@ -1,6 +1,6 @@
 namespace RebornRotations.PVPRotations.Healer;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.2")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.21")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Healer/WHM_Default.PVP.cs")]
 [Api(4)]
 public class WHM_DefaultPVP : WhiteMageRotation
@@ -58,17 +58,29 @@ public class WHM_DefaultPVP : WhiteMageRotation
     {
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (DiabrosisPvP.CanUse(out action)) return true;
 
         return base.AttackAbility(nextGCD, out action);
     }
     #endregion
 
     #region GCDs
+    protected override bool DefenseSingleGCD(out IAction? action)
+    {
+        action = null;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+
+        if (StoneskinIiPvP.CanUse(out action)) return true;
+
+        return base.DefenseSingleGCD(out action);
+    }
+
     protected override bool HealSingleGCD(out IAction? action)
     {
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
+        if (HaelanPvP.CanUse(out action)) return true;
         if (CureIiiPvP.CanUse(out action)) return true;
         if (CureIiPvP.CanUse(out action)) return true;
 

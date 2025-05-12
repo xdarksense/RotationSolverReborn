@@ -495,6 +495,7 @@ partial class AstrologianRotation
     static partial void ModifyFallMaleficPvP_29246(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.DoubleCastPvP) == ActionID.FallMaleficPvP_29246;
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyAspectedBeneficPvP(ref ActionSetting setting)
@@ -505,6 +506,7 @@ partial class AstrologianRotation
     static partial void ModifyAspectedBeneficPvP_29247(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.DoubleCastPvP) == ActionID.AspectedBeneficPvP_29247;
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyGravityIiPvP(ref ActionSetting setting)
@@ -518,6 +520,7 @@ partial class AstrologianRotation
     static partial void ModifyGravityIiPvP_29248(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.DoubleCastPvP) == ActionID.GravityIiPvP_29248;
+        setting.MPOverride = () => 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -529,6 +532,10 @@ partial class AstrologianRotation
         // You should never send the server this Action.
         setting.ActionCheck = () => false;
         setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyMacrocosmosPvP(ref ActionSetting setting)
@@ -577,6 +584,7 @@ partial class AstrologianRotation
     static partial void ModifyOraclePvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Player.HasStatus(true, StatusID.Divining_4332);
+        setting.MPOverride = () => 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
