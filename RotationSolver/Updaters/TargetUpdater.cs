@@ -335,9 +335,24 @@ internal static partial class TargetUpdater
 
         foreach (var member in members)
         {
-            if (member.StatusList != null && member.StatusList.Any(status => status != null && status.CanDispel()))
+            try
             {
-                targetList.Add(member);
+                if (member.StatusList != null)
+                {
+                    for (int i = 0; i < member.StatusList.Length; i++)
+                    {
+                        var status = member.StatusList[i];
+                        if (status != null && status.CanDispel())
+                        {
+                            targetList.Add(member);
+                            break; // Add only once per member if any status can be dispelled
+                        }
+                    }
+                }
+            }
+            catch (NullReferenceException ex)
+            {
+                Svc.Log.Error($"NullReferenceException in AddDispelTargets for member {member?.ToString()}: {ex.Message}");
             }
         }
     }
