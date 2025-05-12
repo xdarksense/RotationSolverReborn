@@ -1244,7 +1244,13 @@ public struct ActionTargetInfo(IBaseAction action)
 
             var orderedGameObjects = DataCenter.TargetingType switch
             {
-                TargetingType.Small => IGameObjects.OrderBy<IGameObject, float>(p => p.HitboxRadius),
+                TargetingType.Small => Service.Config.SmallHp
+                            ? IGameObjects
+                                .OrderBy<IGameObject, float>(p => p.HitboxRadius)
+                                .ThenBy(p => p is IBattleChara b ? b.CurrentHp : float.MaxValue) // Low HP
+                            : IGameObjects
+                                .OrderBy<IGameObject, float>(p => p.HitboxRadius)
+                                .ThenByDescending(p => p is IBattleChara b ? b.CurrentHp : 0), // High HP
                 TargetingType.HighHP => IGameObjects.OrderByDescending<IGameObject, uint>(p => p is IBattleChara b ? b.CurrentHp : 0),
                 TargetingType.LowHP => IGameObjects.OrderBy<IGameObject, uint>(p => p is IBattleChara b ? b.CurrentHp : 0),
                 TargetingType.HighHPPercent => IGameObjects.OrderByDescending<IGameObject, float>(p => p is IBattleChara b ? b.CurrentHp / b.MaxHp : 0),
@@ -1262,7 +1268,13 @@ public struct ActionTargetInfo(IBaseAction action)
                 TargetingType.PvPDPS => IGameObjects.Where(p => p.IsJobs(JobRole.AllDPS.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer()).Any()
                     ? IGameObjects.Where(p => p.IsJobs(JobRole.AllDPS.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer())
                     : IGameObjects.OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
-                _ => IGameObjects.OrderByDescending<IGameObject, float>(p => p.HitboxRadius),
+                _ => Service.Config.SmallHp
+                    ? IGameObjects
+                                .OrderByDescending<IGameObject, float>(p => p.HitboxRadius)
+                                .ThenBy(p => p is IBattleChara b ? b.CurrentHp : float.MaxValue) // Low HP
+                            : IGameObjects
+                                .OrderByDescending<IGameObject, float>(p => p.HitboxRadius)
+                                .ThenByDescending(p => p is IBattleChara b ? b.CurrentHp : 0), // High HP
             };
 
             return orderedGameObjects.FirstOrDefault() as IBattleChara;
