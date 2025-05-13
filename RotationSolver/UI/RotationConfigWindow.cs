@@ -145,16 +145,33 @@ public partial class RotationConfigWindow : Window
     private bool CheckErrors()
     {
         var incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
-        var installedIncompatiblePlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type == 5);
+        IncompatiblePlugin? installedIncompatiblePlugin = null;
+        foreach (var p in incompatiblePlugins)
+        {
+            if (p.IsInstalled && (int)p.Type == 5)
+            {
+                installedIncompatiblePlugin = p;
+                break;
+            }
+        }
 
-        if (installedIncompatiblePlugin.Name != null)
+        if (installedIncompatiblePlugin.HasValue && installedIncompatiblePlugin.Value.Name != null)
         {
             return true;
         }
 
-        if (DataCenter.SystemWarnings != null && DataCenter.SystemWarnings.Any())
+        if (DataCenter.SystemWarnings != null)
         {
-            return true;
+            bool hasAny = false;
+            foreach (var _ in DataCenter.SystemWarnings)
+            {
+                hasAny = true;
+                break;
+            }
+            if (hasAny)
+            {
+                return true;
+            }
         }
 
         if (Player.Object != null && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||

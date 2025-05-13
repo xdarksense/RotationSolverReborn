@@ -85,8 +85,14 @@ public struct IncompatiblePlugin
         {
             var name = this.Name;
             var installedPlugins = Svc.PluginInterface.InstalledPlugins;
-            return installedPlugins.Any(x =>
-                (x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase)) && x.IsLoaded);
+            foreach (var x in installedPlugins)
+            {
+                if ((x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase)) && x.IsLoaded)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
@@ -100,8 +106,14 @@ public struct IncompatiblePlugin
         {
             var name = this.Name;
             var installedPlugins = Svc.PluginInterface.InstalledPlugins;
-            return installedPlugins.Any(x =>
-                x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase));
+            foreach (var x in installedPlugins)
+            {
+                if (x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
@@ -128,8 +140,14 @@ public struct AutoDutyPlugin
         {
             var name = this.Name;
             var installedPlugins = Svc.PluginInterface.InstalledPlugins;
-            return installedPlugins.Any(x =>
-                (x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase)) && x.IsLoaded);
+            foreach (var x in installedPlugins)
+            {
+                if ((x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase)) && x.IsLoaded)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
@@ -143,8 +161,14 @@ public struct AutoDutyPlugin
         {
             var name = this.Name;
             var installedPlugins = Svc.PluginInterface.InstalledPlugins;
-            return installedPlugins.Any(x =>
-                x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase));
+            foreach (var x in installedPlugins)
+            {
+                if (x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

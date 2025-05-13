@@ -5,17 +5,7 @@ using RotationSolver.UI.SearchableSettings;
 namespace RotationSolver.UI.SearchableConfigs;
 
 internal class AutoHealCheckBox(PropertyInfo property, params ISearchable[] otherChildren)
-    : CheckBoxSearchCondition(property, otherChildren.Union(new ISearchable[]
-        {
-            _healthAreaAbility,
-            _healthAreaAbilityHot,
-            _healthAreaSpell,
-            _healthAreaSpellHot,
-            _healthSingleAbility,
-            _healthSingleAbilityHot,
-            _healthSingleSpell,
-            _healthSingleSpellHot,
-        }).ToArray())
+    : CheckBoxSearchCondition(property, ConcatChildren(otherChildren))
 {
     private readonly ISearchable[] _otherChildren = otherChildren;
 
@@ -29,6 +19,27 @@ internal class AutoHealCheckBox(PropertyInfo property, params ISearchable[] othe
         _healthSingleAbilityHot = CreateDragFloatSearch(nameof(Configs.HealthSingleAbilityHot)),
         _healthSingleSpell = CreateDragFloatSearch(nameof(Configs.HealthSingleSpell)),
         _healthSingleSpellHot = CreateDragFloatSearch(nameof(Configs.HealthSingleSpellHot));
+
+    // Helper to concatenate arrays without LINQ
+    private static ISearchable[] ConcatChildren(ISearchable[] otherChildren)
+    {
+        var healthChildren = new ISearchable[]
+        {
+            _healthAreaAbility,
+            _healthAreaAbilityHot,
+            _healthAreaSpell,
+            _healthAreaSpellHot,
+            _healthSingleAbility,
+            _healthSingleAbilityHot,
+            _healthSingleSpell,
+            _healthSingleSpellHot,
+        };
+
+        var result = new ISearchable[otherChildren.Length + healthChildren.Length];
+        otherChildren.CopyTo(result, 0);
+        healthChildren.CopyTo(result, otherChildren.Length);
+        return result;
+    }
 
     // Method to create DragFloatSearch instances with null checks
     private static DragFloatSearch CreateDragFloatSearch(string propertyName)

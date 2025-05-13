@@ -1,5 +1,4 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.ClientState.Objects.Enums;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
@@ -161,16 +160,23 @@ internal static class DataCenter
     {
         get
         {
-            var next = NextActs.FirstOrDefault();
+            NextAct? next = null;
+            if (NextActs.Count > 0)
+            {
+                next = NextActs[0];
+            }
 
             while (next != null && NextActs.Count > 0 &&
                    (next.DeadTime < DateTime.Now || IActionHelper.IsLastAction(true, next.Act)))
             {
                 NextActs.RemoveAt(0);
-                next = NextActs.FirstOrDefault();
+                if (NextActs.Count > 0)
+                    next = NextActs[0];
+                else
+                    next = null;
             }
 
-            return next?.Act ?? ActionSequencerAction;
+            return next != null ? next.Act : ActionSequencerAction;
         }
     }
 
@@ -385,7 +391,16 @@ internal static class DataCenter
             //60687 - 60691 For treasure hunt.
             for (int i = 60687; i <= 60691; i++)
             {
-                var b = AllTargets.FirstOrDefault(obj => obj.GetNamePlateIcon() == i);
+                IBattleChara? b = null;
+                for (int j = 0; j < AllTargets.Count; j++)
+                {
+                    var obj = AllTargets[j];
+                    if (obj.GetNamePlateIcon() == i)
+                    {
+                        b = obj;
+                        break;
+                    }
+                }
                 if (b == null || b.CurrentHp == 0) continue;
                 charas.Add(b.GameObjectId);
             }
@@ -511,15 +526,43 @@ internal static class DataCenter
     }
 
     public static bool IsHostileCastingAOE =>
-    InCombat && (IsCastingAreaVfx() || (AllHostileTargets?.Any(IsHostileCastingArea) ?? false));
+    InCombat && (IsCastingAreaVfx() || (AllHostileTargets != null && IsAnyHostileCastingArea()));
+
+    private static bool IsAnyHostileCastingArea()
+    {
+        if (AllHostileTargets == null) return false;
+        for (int i = 0; i < AllHostileTargets.Count; i++)
+        {
+            if (IsHostileCastingArea(AllHostileTargets[i])) return true;
+        }
+        return false;
+    }
 
     public static bool IsHostileCastingToTank =>
-    InCombat && (IsCastingTankVfx() || (AllHostileTargets?.Any(IsHostileCastingTank) ?? false));
+        InCombat && (IsCastingTankVfx() || (AllHostileTargets != null && IsAnyHostileCastingTank()));
+
+    private static bool IsAnyHostileCastingTank()
+    {
+        if (AllHostileTargets == null) return false;
+        for (int i = 0; i < AllHostileTargets.Count; i++)
+        {
+            if (IsHostileCastingTank(AllHostileTargets[i])) return true;
+        }
+        return false;
+    }
 
     public static bool IsHostileCastingStop =>
-    InCombat && (Service.Config.CastingStop && (AllHostileTargets?.Any(IsHostileStop) ?? false));
+        InCombat && (Service.Config.CastingStop && (AllHostileTargets != null && IsAnyHostileStop()));
 
-    private static DateTime _petLastSeen = DateTime.MinValue;
+    private static bool IsAnyHostileStop()
+    {
+        if (AllHostileTargets == null) return false;
+        for (int i = 0; i < AllHostileTargets.Count; i++)
+        {
+            if (IsHostileStop(AllHostileTargets[i])) return true;
+        }
+        return false;
+    }
 
     public static bool IsHostileStop(IBattleChara h)
     {
@@ -695,15 +738,25 @@ internal static class DataCenter
     {
         get
         {
-            var partyMembersHP = new List<float>(PartyMembersHP);
+            var partyMembersHP = new List<float>();
+            foreach (var hp in PartyMembersHP)
+            {
+                partyMembersHP.Add(hp);
+            }
             if (partyMembersHP.Count == 0) return 0;
 
-            var averageHP = partyMembersHP.Average();
+            float sum = 0;
+            for (int i = 0; i < partyMembersHP.Count; i++)
+            {
+                sum += partyMembersHP[i];
+            }
+            float averageHP = sum / partyMembersHP.Count;
             var variance = 0f;
 
-            foreach (var hp in partyMembersHP)
+            for (int i = 0; i < partyMembersHP.Count; i++)
             {
-                variance += (hp - averageHP) * (hp - averageHP);
+                float diff = partyMembersHP[i] - averageHP;
+                variance += diff * diff;
             }
 
             return (float)Math.Sqrt(variance / partyMembersHP.Count);
@@ -743,8 +796,14 @@ internal static class DataCenter
 
                 if (recs.Count == 0) return 0;
 
-                var damages = recs.Sum(r => r.Ratio);
-                var time = recs.Last().ReceiveTime - recs.First().ReceiveTime + TimeSpan.FromMilliseconds(2.5f);
+                float damages = 0;
+                for (int i = 0; i < recs.Count; i++)
+                {
+                    damages += recs[i].Ratio;
+                }
+                DateTime first = recs[0].ReceiveTime;
+                DateTime last = recs[recs.Count - 1].ReceiveTime;
+                var time = last - first + TimeSpan.FromMilliseconds(2.5f);
 
                 return damages / (float)time.TotalSeconds;
             }
@@ -755,7 +814,19 @@ internal static class DataCenter
         }
     }
 
-    public static ActionRec[] RecordActions => _actions.Reverse().ToArray();
+    public static ActionRec[] RecordActions
+    {
+        get
+        {
+            var arr = new ActionRec[_actions.Count];
+            int i = _actions.Count - 1;
+            foreach (var rec in _actions)
+            {
+                arr[i--] = rec;
+            }
+            return arr;
+        }
+    }
     private static DateTime _timeLastActionUsed = DateTime.Now;
     public static TimeSpan TimeSinceLastAction => DateTime.Now - _timeLastActionUsed;
 

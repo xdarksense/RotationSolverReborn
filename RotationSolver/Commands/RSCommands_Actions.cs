@@ -291,6 +291,5 @@ namespace RotationSolver.Commands
             }
         }
 
-
     }
 }

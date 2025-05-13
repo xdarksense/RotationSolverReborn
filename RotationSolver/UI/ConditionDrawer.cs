@@ -80,17 +80,34 @@ internal static class ConditionDrawer
 
     private static IEnumerable<MemberInfo> GetAllMethods(this Type? type, Func<Type, IEnumerable<MemberInfo>> getFunc)
     {
-        if (type == null || getFunc == null) return [];
+        if (type == null || getFunc == null) return Array.Empty<MemberInfo>();
 
         var methods = getFunc(type);
-        return methods.Union(type.BaseType.GetAllMethods(getFunc));
+        var baseMethods = type.BaseType.GetAllMethods(getFunc);
+
+        // Union without LINQ
+        var set = new HashSet<MemberInfo>(methods);
+        foreach (var m in baseMethods)
+            set.Add(m);
+        return set;
     }
 
     public static bool DrawByteEnum<T>(string name, ref T value) where T : struct, Enum
     {
-        var values = Enum.GetValues<T>().Where(i => i.GetAttribute<ObsoleteAttribute>() == null).ToHashSet().ToArray();
+        var allValues = Enum.GetValues<T>();
+        var tempList = new List<T>();
+        foreach (var i in allValues)
+        {
+            if (i.GetAttribute<ObsoleteAttribute>() == null)
+                tempList.Add(i);
+        }
+        var values = tempList.ToArray();
+
         var index = Array.IndexOf(values, value);
-        var names = values.Select(v => v.GetDescription()).ToArray();
+
+        var names = new string[values.Length];
+        for (int i = 0; i < values.Length; i++)
+            names[i] = values[i].GetDescription();
 
         if (ImGuiHelper.SelectableCombo(name, names, ref index))
         {
@@ -99,6 +116,7 @@ internal static class ConditionDrawer
         }
         return false;
     }
+
     public static bool DrawDragFloat2(ConfigUnitType type, string name, ref Vector2 value, string id, string name1, string name2)
     {
         ImGui.Text(name);
@@ -199,12 +217,23 @@ internal static class ConditionDrawer
 
         group.ClearCollapsingHeader();
 
-        foreach (var pair in RotationUpdater.GroupActions(rotation.AllBaseActions.Where(i => i.Action.IsInJob()))!)
+        var filtered = new List<IBaseAction>();
+        foreach (var i in rotation.AllBaseActions)
+        {
+            if (i.Action.IsInJob())
+                filtered.Add(i);
+        }
+        var grouped = RotationUpdater.GroupActions(filtered.ToArray());
+
+        foreach (var pair in grouped!)
         {
             group.AddCollapsingHeader(() => pair.Key, () =>
             {
                 var index = 0;
-                foreach (var item in pair.OrderBy(t => t.ID))
+                // OrderBy(t => t.ID) removed
+                var items = pair.ToList();
+                items.Sort((a, b) => a.ID.CompareTo(b.ID));
+                foreach (var item in items)
                 {
                     if (!item.GetTexture(out var icon)) continue;
 
@@ -323,8 +352,13 @@ internal static class ConditionDrawer
 
     private static void DrawAfter(this NamedCondition namedCondition, ICustomRotation _)
     {
+        var namedConditions = DataCenter.CurrentConditionValue.NamedConditions;
+        var namesList = new List<string>();
+        foreach (var p in namedConditions)
+            namesList.Add(p.Name);
+
         ImGuiHelper.SearchCombo($"##Comparation{namedCondition.GetHashCode()}", namedCondition.ConditionName, ref searchTxt,
-            DataCenter.CurrentConditionValue.NamedConditions.Select(p => p.Name).ToArray(), i => i.ToString(), i =>
+            namesList.ToArray(), i => i.ToString(), i =>
             {
                 namedCondition.ConditionName = i;
             }, UiString.ConfigWindow_Condition_ConditionName.GetDescription());
@@ -682,10 +716,25 @@ internal static class ConditionDrawer
     }
 
     private static Status[]? _allStatus = null;
-    private static Status[] AllStatus => _allStatus ??= Enum.GetValues<StatusID>()
-    .Select(id => Service.GetSheet<Status>().GetRow((uint)id))
-    .Where(status => status.RowId != 0)
-    .ToArray()!;
+    private static Status[] AllStatus
+    {
+        get
+        {
+            if (_allStatus == null)
+            {
+                var ids = Enum.GetValues<StatusID>();
+                var tempList = new List<Status>();
+                foreach (var id in ids)
+                {
+                    var status = Service.GetSheet<Status>().GetRow((uint)id);
+                    if (status.RowId != 0)
+                        tempList.Add(status);
+                }
+                _allStatus = tempList.ToArray();
+            }
+            return _allStatus!;
+        }
+    }
 
     private static void DrawAfter(this TargetCondition targetCondition, ICustomRotation rotation)
     {
@@ -694,7 +743,17 @@ internal static class ConditionDrawer
         if (targetCondition.StatusId != StatusID.None &&
             (targetCondition.Status == null || targetCondition.Status.Value.RowId != (uint)targetCondition.StatusId))
         {
-            targetCondition.Status = AllStatus.FirstOrDefault(a => a.RowId == (uint)targetCondition.StatusId);
+            // Remove LINQ FirstOrDefault
+            Status? found = null;
+            foreach (var a in AllStatus)
+            {
+                if (a.RowId == (uint)targetCondition.StatusId)
+                {
+                    found = a;
+                    break;
+                }
+            }
+            targetCondition.Status = found;
         }
 
         var popUpKey = "Target Condition Pop Up" + targetCondition.GetHashCode().ToString();
@@ -888,13 +947,56 @@ internal static class ConditionDrawer
     }
 
     private static string[]? _territoryNames = null;
-    public static string[] TerritoryNames => _territoryNames ??= Service.GetSheet<TerritoryType>()?
-        .Select(t => t.PlaceName.Value.Name.ExtractText() ?? string.Empty).Where(s => !string.IsNullOrEmpty(s)).ToArray()!;
+    public static string[] TerritoryNames
+    {
+        get
+        {
+            if (_territoryNames == null)
+            {
+                var sheet = Service.GetSheet<TerritoryType>();
+                var tempList = new List<string>();
+                if (sheet != null)
+                {
+                    foreach (var t in sheet)
+                    {
+                        var name = t.PlaceName.Value.Name.ExtractText();
+                        if (string.IsNullOrEmpty(name)) continue;
+                        tempList.Add(name);
+                    }
+                }
+                _territoryNames = tempList.ToArray();
+            }
+            return _territoryNames!;
+        }
+    }
 
     private static string[]? _dutyNames = null;
-
-    public static string[] DutyNames => _dutyNames ??= new HashSet<string>(Service.GetSheet<ContentFinderCondition>()?
-        .Select(t => t.Name.ExtractText() ?? string.Empty).Where(s => !string.IsNullOrEmpty(s)).Reverse()!).ToArray();
+    public static string[] DutyNames
+    {
+        get
+        {
+            if (_dutyNames == null)
+            {
+                var sheet = Service.GetSheet<ContentFinderCondition>();
+                var tempSet = new HashSet<string>();
+                if (sheet != null)
+                {
+                    foreach (var t in sheet)
+                    {
+                        var name = t.Name.ExtractText();
+                        if (!string.IsNullOrEmpty(name))
+                            tempSet.Add(name);
+                    }
+                }
+                // Reverse
+                var arr = new string[tempSet.Count];
+                tempSet.CopyTo(arr);
+                Array.Reverse(arr);
+                _dutyNames = arr;
+            }
+            return _dutyNames!;
+        }
+    }
 
     private static void DrawAfter(this TerritoryCondition territoryCondition, ICustomRotation _)
     {

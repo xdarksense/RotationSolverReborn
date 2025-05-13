@@ -170,10 +170,28 @@ namespace RotationSolver.UI
                 return;
             }
 
-            var commits = changeLog.Commits
-                .Where(c => !c.CommitData.Message.Contains("Merge pull request"))
-                .OrderByDescending(c => c.CommitData.CommitAuthor.Date)
-                .ToList();
+            var commits = new List<Commit>();
+            foreach (var c in changeLog.Commits)
+            {
+                if (!c.CommitData.Message.Contains("Merge pull request"))
+                {
+                    commits.Add(c);
+                }
+            }
+            // Sort commits by CommitAuthor.Date descending
+            for (int i = 0; i < commits.Count - 1; i++)
+            {
+                for (int j = i + 1; j < commits.Count; j++)
+                {
+                    if (commits[i].CommitData.CommitAuthor.Date < commits[j].CommitData.CommitAuthor.Date)
+                    {
+                        var temp = commits[i];
+                        commits[i] = commits[j];
+                        commits[j] = temp;
+                    }
+                }
+            }
+
             var authors = GetAuthorsFromChangeLogs(commits);
             var commitCount = commits.Count;
             var authorCount = authors.Count;
@@ -202,10 +220,20 @@ namespace RotationSolver.UI
                     System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = $"https://github.com/{author}", UseShellExecute = true });
                 }
             }
+
             // Build file stats
-            var additions = changeLog.Files.Sum(f => f.Additions);
-            var deletions = changeLog.Files.Sum(f => f.Deletions);
-            var files = changeLog.Files.Count;
+            int additions = 0;
+            int deletions = 0;
+            int files = 0;
+            if (changeLog.Files != null)
+            {
+                files = changeLog.Files.Count;
+                foreach (var f in changeLog.Files)
+                {
+                    additions += f.Additions;
+                    deletions += f.Deletions;
+                }
+            }
             if (ImGui.CollapsingHeader("Fun stats for nerds"))
             {
                 ImGui.Text($"Total commits: {changeLog.TotalCommits}");
@@ -222,7 +250,12 @@ namespace RotationSolver.UI
             {
                 authors.Add(commit.CommitData.CommitAuthor.Name);
             }
-            return authors.ToList();
+            var authorList = new List<string>();
+            foreach (var author in authors)
+            {
+                authorList.Add(author);
+            }
+            return authorList;
         }
 
         public override void OnClose()

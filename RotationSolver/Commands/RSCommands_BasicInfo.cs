@@ -65,15 +65,15 @@ namespace RotationSolver.Commands
         private static bool TryGetOneEnum<T>(string command, out T type) where T : struct, Enum
         {
             type = default;
-            try
+            foreach (var c in Enum.GetValues<T>())
             {
-                type = Enum.GetValues<T>().First(c => command.StartsWith(c.ToString(), StringComparison.OrdinalIgnoreCase));
-                return true;
+                if (command.StartsWith(c.ToString(), StringComparison.OrdinalIgnoreCase))
+                {
+                    type = c;
+                    return true;
+                }
             }
-            catch (InvalidOperationException)
-            {
-                return false;
-            }
+            return false;
         }
 
         internal static string GetCommandStr(this Enum command, string extraCommand = "")
