@@ -309,6 +309,8 @@ partial class CustomRotation
         switch (role)
         {
             case JobRole.Tank:
+                if (ArmsLengthPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.InnerStrength)) return true;
+                break;
             case JobRole.Melee:
                 if (ArmsLengthPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.Mudra)) return true;
                 break;
@@ -428,7 +430,7 @@ partial class CustomRotation
         }
 
         #region PvP
-        if (GuardPvP.CanUse(out act) && Player.GetHealthRatio() <= Service.Config.HealthForGuard)
+        if (GuardPvP.CanUse(out act) && Player.GetHealthRatio() <= Service.Config.HealthForGuard && !Player.HasStatus(true, StatusID.UndeadRedemption) && !Player.HasStatus(true, StatusID.InnerRelease_1303))
         {
             return true;
         }

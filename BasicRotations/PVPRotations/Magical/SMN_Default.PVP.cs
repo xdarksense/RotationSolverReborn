@@ -1,6 +1,6 @@
 ﻿namespace RebornRotations.PVPRotations.Magical;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.2")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.21")]
 [SourceCode(Path = "main/BasicRotations/PVPRotations/Magical/SMN_Default.PVP.cs")]
 [Api(4)]
 public class SMN_DefaultPvP : SummonerRotation
@@ -73,6 +73,10 @@ public class SMN_DefaultPvP : SummonerRotation
     {
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+
+        //if (CometPvP.CanUse(out action)) return true;
+        if (RustPvP.CanUse(out action)) return true;
+        if (PhantomDartPvP.CanUse(out action)) return true;
 
         if (CrimsonCyclonePvP.CanUse(out action) && Target.DistanceToPlayer() < 5) return true;
 

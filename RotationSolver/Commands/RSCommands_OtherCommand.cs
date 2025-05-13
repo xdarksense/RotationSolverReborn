@@ -51,7 +51,14 @@ public static partial class RSCommands
         }
 
         var settingName = strs[0];
-        var command = strs.Length > 1 ? string.Join(' ', strs.Skip(1)) : null;
+        string? command = null;
+        if (strs.Length > 1)
+        {
+            // Equivalent to string.Join(' ', strs.Skip(1))
+            var arr = new string[strs.Length - 1];
+            Array.Copy(strs, 1, arr, 0, strs.Length - 1);
+            command = string.Join(' ', arr);
+        }
 
         if (string.IsNullOrEmpty(settingName))
         {
@@ -70,8 +77,14 @@ public static partial class RSCommands
 
     private static void UpdateSetting(string settingName, string? command)
     {
-        foreach (var property in typeof(Configs).GetRuntimeProperties().Where(p => p.GetMethod?.IsPublic ?? false))
+        var properties = typeof(Configs).GetRuntimeProperties().ToArray(); // Convert to array to use Length
+        for (int i = 0; i < properties.Length; i++)
         {
+            var property = properties[i];
+            var getMethod = property.GetMethod;
+            if (getMethod == null || !getMethod.IsPublic)
+                continue;
+
             if (!settingName.Equals(property.Name, StringComparison.OrdinalIgnoreCase))
                 continue;
 
@@ -221,8 +234,14 @@ public static partial class RSCommands
 
     private static Enum GetNextEnumValue(Enum currentEnumValue)
     {
-        var enumValues = Enum.GetValues(currentEnumValue.GetType()).Cast<Enum>().ToArray();
-        var nextIndex = Array.IndexOf(enumValues, currentEnumValue) + 1;
+        // Remove LINQ: .Cast<Enum>().ToArray()
+        var values = Enum.GetValues(currentEnumValue.GetType());
+        Enum[] enumValues = new Enum[values.Length];
+        for (int i = 0; i < values.Length; i++)
+        {
+            enumValues[i] = (Enum)values.GetValue(i)!;
+        }
+        int nextIndex = Array.IndexOf(enumValues, currentEnumValue) + 1;
 
         return enumValues.Length == nextIndex ? enumValues[0] : enumValues[nextIndex];
     }
@@ -230,8 +249,27 @@ public static partial class RSCommands
     private static void ToggleActionCommand(string str)
     {
         var trimStr = str.Trim();
-        foreach (var act in RotationUpdater.CurrentRotationActions.OrderByDescending(a => a.Name.Length))
+
+        // Remove LINQ: .OrderByDescending(a => a.Name.Length)
+        var actions = RotationUpdater.CurrentRotationActions;
+        // Create a sorted copy by Name.Length descending
+        var sortedActions = new List<ITexture>(actions);
+        for (int i = 0; i < sortedActions.Count - 1; i++)
         {
+            for (int j = i + 1; j < sortedActions.Count; j++)
+            {
+                if (sortedActions[j].Name.Length > sortedActions[i].Name.Length)
+                {
+                    var temp = sortedActions[i];
+                    sortedActions[i] = sortedActions[j];
+                    sortedActions[j] = temp;
+                }
+            }
+        }
+
+        foreach (var actObj in sortedActions)
+        {
+            var act = actObj;
             // First, check for an exact match.
             if (trimStr.Equals(act.Name, StringComparison.OrdinalIgnoreCase))
             {
@@ -246,7 +284,7 @@ public static partial class RSCommands
             // extract extra text (flag) and use it.
             if (trimStr.StartsWith(act.Name + " ", StringComparison.OrdinalIgnoreCase))
             {
-                var flag = trimStr[act.Name.Length..].Trim();
+                var flag = trimStr.Substring(act.Name.Length).Trim();
                 act.IsEnabled = bool.TryParse(flag, out var parse) ? parse : !act.IsEnabled;
                 if (Service.Config.ShowToggledSettingInChat)
                 {
@@ -271,8 +309,10 @@ public static partial class RSCommands
 
         if (double.TryParse(timeStr, out var time))
         {
-            foreach (var iAct in RotationUpdater.CurrentRotationActions)
+            var actions = RotationUpdater.CurrentRotationActions;
+            for (int i = 0; i < actions.Length; i++)
             {
+                var iAct = actions[i];
                 if (actName.Equals(iAct.Name, StringComparison.OrdinalIgnoreCase))
                 {
                     DataCenter.AddCommandAction(iAct, time);

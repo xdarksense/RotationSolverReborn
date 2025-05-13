@@ -397,6 +397,18 @@ partial class WarriorRotation
     {
         setting.IsFriendly = false;
         setting.StatusNeed = [StatusID.Wrathful_4286];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyOrogenyPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyBloodwhettingPvP(ref ActionSetting setting)
@@ -407,6 +419,11 @@ partial class WarriorRotation
     static partial void ModifyChaoticCyclonePvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.ChaoticCycloneReady];
+        setting.IsFriendly = false;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
     #endregion
 

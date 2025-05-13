@@ -1,6 +1,6 @@
 ﻿namespace RebornRotations.PVPRotations.Magical;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.2")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.21")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Magical/BLM_Default.PVP.cs")]
 [Api(4)]
 public class BLM_DefaultPVP : BlackMageRotation
@@ -12,6 +12,14 @@ public class BLM_DefaultPVP : BlackMageRotation
 
     [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
     public bool RespectGuard { get; set; } = true;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Upper HP threshold you need to be to use Xenoglossy as a damage oGCD")]
+    public float XenoglossyHighHP { get; set; } = 0.8f;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Lower HP threshold you need to be to use Xenoglossy as a heal oGCD")]
+    public float XenoglossyLowHP { get; set; } = 0.5f;
     #endregion
 
     #region Standard PVP Utilities
@@ -41,9 +49,6 @@ public class BLM_DefaultPVP : BlackMageRotation
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
         if (DoPurify(out action)) return true;
-
-        if (XenoglossyPvP.CanUse(out action, usedUp: true) && Player.GetHealthRatio() < .5) return true;
-        // if (XenoglossyPvP.CanUse(out action)) return true;
 
         return base.EmergencyAbility(nextGCD, out action);
     }
@@ -76,7 +81,10 @@ public class BLM_DefaultPVP : BlackMageRotation
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
-        if (WreathOfFirePvP.CanUse(out action)) return true;
+        //if (CometPvP.CanUse(out action)) return true;
+        if (RustPvP.CanUse(out action)) return true;
+        if (PhantomDartPvP.CanUse(out action)) return true;
+
         if (LethargyPvP.CanUse(out action)) return true;
 
         return base.AttackAbility(nextGCD, out action);
@@ -86,6 +94,7 @@ public class BLM_DefaultPVP : BlackMageRotation
     {
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (InCombat && WreathOfFirePvP.CanUse(out action)) return true;
 
         return base.GeneralAbility(nextGCD, out action);
     }
@@ -97,6 +106,9 @@ public class BLM_DefaultPVP : BlackMageRotation
     {
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+
+        if (XenoglossyPvP.CanUse(out action, usedUp: true)
+            && (Player.GetHealthRatio() < XenoglossyLowHP || Player.GetHealthRatio() > XenoglossyHighHP)) return true;
 
         if (FlareStarPvP.CanUse(out action)) return true;
         if (FrostStarPvP.CanUse(out action)) return true;

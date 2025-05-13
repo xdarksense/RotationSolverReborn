@@ -59,12 +59,41 @@ namespace RotationSolver.Commands
             // Cache frequently accessed properties to avoid redundant calls
             var playerObject = Player.Object;
             if (playerObject == null) return;
+            if (playerObject.StatusList == null) return;
 
-            var statusTimes = playerObject.StatusTimes(false, [.. OtherConfiguration.NoCastingStatus.Select(i => (StatusID)i)]);
-
-            if (statusTimes.Any())
+            // Convert NoCastingStatus to StatusID[] without LINQ
+            StatusID[] noCastingStatusArray;
+            var noCastingStatus = OtherConfiguration.NoCastingStatus;
+            if (noCastingStatus != null)
             {
-                var minStatusTime = statusTimes.Min();
+                noCastingStatusArray = new StatusID[noCastingStatus.Count];
+                int index = 0;
+                foreach (var status in noCastingStatus)
+                {
+                    noCastingStatusArray[index++] = (StatusID)status;
+                }
+            }
+            else
+            {
+                noCastingStatusArray = Array.Empty<StatusID>();
+            }
+
+            var statusTimes = playerObject.StatusTimes(false, noCastingStatusArray);
+
+            // Replace Any() and Min() with manual logic
+            float minStatusTime = float.MaxValue;
+            int statusTimesCount = 0;
+            foreach (var t in statusTimes)
+            {
+                statusTimesCount++;
+                if (t < minStatusTime)
+                {
+                    minStatusTime = t;
+                }
+            }
+
+            if (statusTimesCount > 0)
+            {
                 var remainingCastTime = playerObject.TotalCastTime - playerObject.CurrentCastTime;
                 if (minStatusTime > remainingCastTime && minStatusTime < 5)
                 {
@@ -261,7 +290,6 @@ namespace RotationSolver.Commands
                 Svc.Log.Error(ex, "Exception in UpdateRotationState");
             }
         }
-
 
     }
 }

@@ -114,7 +114,7 @@ public sealed class GNB_Default : GunbreakerRotation
     {
         if (BurstStrikePvE.CanUse(out act))
         {
-            if (IsAmmoCapped && NoMercyPvE.Cooldown.WillHaveOneChargeGCD(1)) return true;
+            if (IsAmmoCapped && BloodfestPvE.EnoughLevel && NoMercyPvE.Cooldown.WillHaveOneChargeGCD(1)) return true;
         }
 
         if (!InReignCombo)
@@ -126,37 +126,40 @@ public sealed class GNB_Default : GunbreakerRotation
             if (WickedTalonPvE.CanUse(out act, skipComboCheck: true)) return true;
         }
 
-        if (!InGnashingFang && !GnashingFangPvE.Cooldown.HasOneCharge)
+        if ((!InGnashingFang && !GnashingFangPvE.Cooldown.HasOneCharge) || InReignCombo)
         {
             if (LionHeartPvE.CanUse(out act, skipComboCheck: true)) return true;
             if (NobleBloodPvE.CanUse(out act, skipComboCheck: true)) return true;
             if (ReignOfBeastsPvE.CanUse(out act, skipComboCheck: true)) return true;
         }
 
-        if (SavageClawPvE.CanUse(out act)) return true;
-        if (WickedTalonPvE.CanUse(out act)) return true;
-
         if (BurstStrikePvE.CanUse(out act))
         {
-            if (HasNoMercy &&
-                AmmoComboStep == 0 &&
-                !GnashingFangPvE.Cooldown.WillHaveOneCharge(1)) return true;
+            if (
+                // Condition 1: No Mercy is active, AmmoComboStep is 0, and Gnashing Fang cooldown won't have a charge
+                (HasNoMercy && AmmoComboStep == 0 && !GnashingFangPvE.Cooldown.WillHaveOneCharge(1)) ||
 
-            if (IsLastComboAction((ActionID)BrutalShellPvE.ID) &&
-                (IsAmmoCapped ||
-                BloodfestPvE.Cooldown.WillHaveOneCharge(6) && Ammo <= 2 && !NoMercyPvE.Cooldown.WillHaveOneCharge(10) && BloodfestPvE.EnoughLevel)) return true;
+                // Condition 2: Last combo action was Brutal Shell, and either Ammo is capped or Bloodfest conditions are met
+                (IsLastComboAction((ActionID)BrutalShellPvE.ID) && 
+                (IsAmmoCapped || (BloodfestPvE.Cooldown.WillHaveOneCharge(6) && Ammo <= 2 && !NoMercyPvE.Cooldown.WillHaveOneCharge(10) && BloodfestPvE.EnoughLevel))) ||
+
+                // Condition 3: Ammo is capped and one of the following is true:
+                // - Last GCD was Brutal Shell
+                // - Ready to Reign and last combo action was Keen Edge
+                // - Gnashing Fang is available and No Mercy is active
+                (IsAmmoCapped && (IsLastGCD(ActionID.BrutalShellPvE) || (HasReadyToReign && IsLastComboAction(false, KeenEdgePvE)) || (GnashingFangPvE.EnoughLevel && HasNoMercy)))
+                )
+            {
+                return true;
+            }
         }
-
-        if (FatedCirclePvE.CanUse(out act)) return true;
-        if (DemonSlaughterPvE.CanUse(out act)) return true;
-        if (DemonSlicePvE.CanUse(out act)) return true;
-
-        if ((IsAmmoCapped && IsLastGCD(ActionID.BrutalShellPvE) 
-            || (IsAmmoCapped && HasReadyToReign && IsLastComboAction(false, KeenEdgePvE))) 
-            && BurstStrikePvE.CanUse(out act)) return true;
 
         if (!InGnashingFang && !InReignCombo)
         {
+            if (FatedCirclePvE.CanUse(out act)) return true;
+            if (DemonSlaughterPvE.CanUse(out act)) return true;
+            if (DemonSlicePvE.CanUse(out act)) return true;
+
             if (SolidBarrelPvE.CanUse(out act)) return true;
             if (BrutalShellPvE.CanUse(out act)) return true;
             if (KeenEdgePvE.CanUse(out act)) return true;

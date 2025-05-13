@@ -17,6 +17,8 @@ internal static partial class TargetUpdater
 
     internal static void UpdateTargets()
     {
+        if (Player.Object == null) return;
+        if (DataCenter.State == false && !Service.Config.TeachingMode) return;
         DataCenter.AllTargets = GetAllTargets();
         DataCenter.FriendlyNPCMembers = GetFriendlyNPCs();
         DataCenter.AllianceMembers = GetAllianceMembers();
@@ -36,6 +38,8 @@ internal static partial class TargetUpdater
         {
             if (obj is IBattleChara battleChara)
             {
+                if (obj == null) continue;
+
                 if (!battleChara.IsDummy() || !Service.Config.DisableTargetDummys)
                 {
                     allTargets.Add(battleChara);
@@ -55,7 +59,7 @@ internal static partial class TargetUpdater
                 foreach (var member in DataCenter.AllTargets)
                 {
                     if (member == null) continue;
-
+                    if (member.StatusList == null) continue;
                     if (ObjectHelper.IsParty(member) && member.IsParty() && member.Character() != null)
                     {
                         var character = member.Character();
@@ -110,26 +114,18 @@ internal static partial class TargetUpdater
 
         try
         {
-            if (Svc.Objects != null)
+            if (DataCenter.AllTargets != null)
             {
-                foreach (var obj in Svc.Objects)
+                foreach (var member in DataCenter.AllTargets)
                 {
-                    if (obj != null && obj.ObjectKind == ObjectKind.BattleNpc)
+                    if (member == null) continue;
+                    if (member.StatusList == null) continue;
+                    if (member.ObjectKind == ObjectKind.BattleNpc)
                     {
-                        try
+                        if (member.GetNameplateKind() == NameplateKind.FriendlyBattleNPC ||
+                                member.GetBattleNPCSubKind() == BattleNpcSubKind.NpcPartyMember)
                         {
-                            if (obj.GetNameplateKind() == NameplateKind.FriendlyBattleNPC ||
-                                obj.GetBattleNPCSubKind() == BattleNpcSubKind.NpcPartyMember)
-                            {
-                                if (obj is IBattleChara battleChara)
-                                {
-                                    friendlyNpcs.Add(battleChara);
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Svc.Log.Error($"Error filtering object in GetFriendlyNPCs: {ex.Message}");
+                            friendlyNpcs.Add(member);
                         }
                     }
                 }
@@ -145,13 +141,27 @@ internal static partial class TargetUpdater
     private static List<IBattleChara> GetAllHostileTargets()
     {
         var hostileTargets = new List<IBattleChara>();
+        bool hasInvincible = false;
         try
         {
             foreach (var target in DataCenter.AllTargets)
             {
                 if (target == null) continue;
+                if (target.StatusList == null) continue;
                 if (!target.IsEnemy() || !target.IsTargetable) continue;
-                if (target.StatusList != null && target.StatusList.Any(StatusHelper.IsInvincible) &&
+                if (target.StatusList != null)
+                {
+                    for (int i = 0; i < target.StatusList.Length; i++)
+                    {
+                        var status = target.StatusList[i];
+                        if (status != null && StatusHelper.IsInvincible(status))
+                        {
+                            hasInvincible = true;
+                            break;
+                        }
+                    }
+                }
+                if (hasInvincible &&
                     (DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility || !DataCenter.IsPvP)) continue;
 
                 hostileTargets.Add(target);
@@ -190,10 +200,50 @@ internal static partial class TargetUpdater
         {
             try
             {
-                var deathParty = DataCenter.PartyMembers?.GetDeath().Where(target => !target.IsEnemy()).ToList() ?? [];
-                var deathAll = DataCenter.AllTargets?.GetDeath().Where(target => !target.IsEnemy()).ToList() ?? [];
-                var deathNPC = DataCenter.FriendlyNPCMembers?.GetDeath().Where(target => !target.IsEnemy()).ToList() ?? [];
-                var deathAllianceMembers = DataCenter.AllianceMembers?.GetDeath().Where(target => !target.IsEnemy()).ToList() ?? [];
+                var deathParty = new List<IBattleChara>();
+                if (DataCenter.PartyMembers != null)
+                {
+                    foreach (var target in DataCenter.PartyMembers.GetDeath())
+                    {
+                        if (!target.IsEnemy())
+                        {
+                            deathParty.Add(target);
+                        }
+                    }
+                }
+                var deathAll = new List<IBattleChara>();
+                if (DataCenter.AllTargets != null)
+                {
+                    foreach (var target in DataCenter.AllTargets.GetDeath())
+                    {
+                        if (!target.IsEnemy())
+                        {
+                            deathAll.Add(target);
+                        }
+                    }
+                }
+                var deathNPC = new List<IBattleChara>();
+                if (DataCenter.FriendlyNPCMembers != null)
+                {
+                    foreach (var target in DataCenter.FriendlyNPCMembers.GetDeath())
+                    {
+                        if (!target.IsEnemy())
+                        {
+                            deathNPC.Add(target);
+                        }
+                    }
+                }
+                var deathAllianceMembers = new List<IBattleChara>();
+                if (DataCenter.AllianceMembers != null)
+                {
+                    foreach (var target in DataCenter.AllianceMembers.GetDeath())
+                    {
+                        if (!target.IsEnemy())
+                        {
+                            deathAllianceMembers.Add(target);
+                        }
+                    }
+                }
                 var deathAllianceHealers = new List<IBattleChara>(deathParty);
                 var deathAllianceSupports = new List<IBattleChara>(deathParty);
 
@@ -258,7 +308,6 @@ internal static partial class TargetUpdater
         return null;
     }
 
-
     private static IBattleChara? GetPriorityDeathTarget(List<IBattleChara> validRaiseTargets, RaiseType raiseType = RaiseType.PartyOnly)
     {
         if (validRaiseTargets.Count == 0) return null;
@@ -321,7 +370,20 @@ internal static partial class TargetUpdater
 
             foreach (var person in weakenPeople)
             {
-                if (person.StatusList != null && person.StatusList.Any(status => status != null && status.IsDangerous()))
+                bool hasDangerous = false;
+                if (person.StatusList != null)
+                {
+                    for (int i = 0; i < person.StatusList.Length; i++)
+                    {
+                        var status = person.StatusList[i];
+                        if (status != null && status.IsDangerous())
+                        {
+                            hasDangerous = true;
+                            break;
+                        }
+                    }
+                }
+                if (hasDangerous)
                 {
                     dyingPeople.Add(person);
                 }
@@ -338,9 +400,24 @@ internal static partial class TargetUpdater
 
         foreach (var member in members)
         {
-            if (member.StatusList != null && member.StatusList.Any(status => status != null && status.CanDispel()))
+            try
             {
-                targetList.Add(member);
+                if (member.StatusList != null)
+                {
+                    for (int i = 0; i < member.StatusList.Length; i++)
+                    {
+                        var status = member.StatusList[i];
+                        if (status != null && status.CanDispel())
+                        {
+                            targetList.Add(member);
+                            break; // Add only once per member if any status can be dispelled
+                        }
+                    }
+                }
+            }
+            catch (NullReferenceException ex)
+            {
+                Svc.Log.Error($"NullReferenceException in AddDispelTargets for member {member?.ToString()}: {ex.Message}");
             }
         }
     }

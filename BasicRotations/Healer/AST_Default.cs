@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace RebornRotations.Healer;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.21")]
@@ -39,10 +41,6 @@ public sealed class AST_Default : AstrologianRotation
     public float AspectedBeneficHeal { get; set; } = 0.4f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Essential Dignity")]
-    public float EssentialDignityHeal { get; set; } = 0.4f;
-
-    [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold among party member needed to use Horoscope")]
     public float HoroscopeHeal { get; set; } = 0.3f;
 
@@ -52,6 +50,33 @@ public sealed class AST_Default : AstrologianRotation
 
     [RotationConfig(CombatType.PvE, Name = "Use DOT while moving even if it does not need refresh (disabling is a damage down)")]
     public bool DOTUpkeep { get; set; } = true;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Essential Dignity 3rd charge")]
+    public float EssentialDignityThird { get; set; } = 0.8f;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Essential Dignity 2nd charge")]
+    public float EssentialDignitySecond { get; set; } = 0.7f;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Essential Dignity last charge")]
+    public float EssentialDignityLast { get; set; } = 0.6f;
+
+    [RotationConfig(CombatType.PvE, Name = "Prioritize Essential Dignity over single target GCD heals when available")]
+    public EssentialPrioStrategy EssentialPrio { get; set; } = EssentialPrioStrategy.CappedCharges;
+
+    public enum EssentialPrioStrategy : byte
+    {
+        [Description("Ignore setting")]
+        UseGCDs,
+
+        [Description("When capped")]
+        CappedCharges,
+
+        [Description("Any charges")]
+        AnyCharges,
+    }
     #endregion
 
     private static bool InBurstStatus => HasDivination;
@@ -137,7 +162,10 @@ public sealed class AST_Default : AstrologianRotation
 
         if (InCombat && TheArrowPvE.CanUse(out act)) return true;
         if (InCombat && TheEwerPvE.CanUse(out act)) return true;
-        if (EssentialDignityPvE.CanUse(out act, usedUp: true) && EssentialDignityPvE.Target.Target?.GetHealthRatio() < EssentialDignityHeal) return true;
+        if (EssentialDignityPvE.Cooldown.CurrentCharges == 3 && EssentialDignityPvE.CanUse(out act, usedUp: true) && EssentialDignityPvE.Target.Target?.GetHealthRatio() < EssentialDignityThird) return true;
+        if (EssentialDignityPvE.Cooldown.CurrentCharges == 2 && EssentialDignityPvE.CanUse(out act, usedUp: true) && EssentialDignityPvE.Target.Target?.GetHealthRatio() < EssentialDignitySecond) return true;
+        if (EssentialDignityPvE.Cooldown.CurrentCharges == 1 && EssentialDignityPvE.CanUse(out act, usedUp: true) && EssentialDignityPvE.Target.Target?.GetHealthRatio() < EssentialDignityLast) return true;
+
         if (CelestialIntersectionPvE.CanUse(out act, usedUp: true)) return true;
 
         return base.HealSingleAbility(nextGCD, out act);
@@ -246,6 +274,8 @@ public sealed class AST_Default : AstrologianRotation
         if (BubbleProtec && HasCollectiveUnconscious) return false;
         if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
         if (MicroPrio && HasMacrocosmos) return false;
+        if (EssentialPrio == EssentialPrioStrategy.AnyCharges && EssentialDignityPvE.EnoughLevel && EssentialDignityPvE.Cooldown.CurrentCharges > 0) return false;
+        if (EssentialPrio == EssentialPrioStrategy.CappedCharges && EssentialDignityPvE.EnoughLevel && EssentialDignityPvE.Cooldown.CurrentCharges < EssentialDignityPvE.Cooldown.MaxCharges) return false;
 
         if (AspectedBeneficPvE.CanUse(out act) && (IsMoving || AspectedBeneficPvE.Target.Target?.GetHealthRatio() < AspectedBeneficHeal)) return true;
         if (BeneficIiPvE.CanUse(out act)) return true;

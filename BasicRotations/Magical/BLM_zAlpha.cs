@@ -3,7 +3,7 @@
 [Rotation("zAlpha DO NOT USE", CombatType.PvE, GameVersion = "7.2")]
 [SourceCode(Path = "main/BasicRotations/Magical/BLM_Alpha.cs")]
 [Api(4)]
-public class BLM_Alpha : BlackMageRotation
+public class BLM_zAlpha : BlackMageRotation
 {
     #region Config Options
     [RotationConfig(CombatType.PvE, Name = "Use Transpose to Astral Fire before Paradox")]

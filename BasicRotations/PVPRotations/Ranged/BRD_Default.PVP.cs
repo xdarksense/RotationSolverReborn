@@ -1,6 +1,6 @@
 ﻿namespace RebornRotations.PVPRotations.Ranged;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.2")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.21")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Ranged/BRD_Default.PvP.cs")]
 [Api(4)]
 public sealed class BRD_DefaultPvP : BardRotation
@@ -41,6 +41,8 @@ public sealed class BRD_DefaultPvP : BardRotation
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
         if (DoPurify(out action)) return true;
+        if (InCombat && BraveryPvP.CanUse(out action)) return true;
+        if (InCombat && DervishPvP.CanUse(out action)) return true;
 
         return base.EmergencyAbility(nextGCD, out action);
     }
@@ -58,12 +60,14 @@ public sealed class BRD_DefaultPvP : BardRotation
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
         if (RepellingShotPvP.CanUse(out action) && !Player.HasStatus(true, StatusID.Repertoire)) return true;
-        if (EncoreOfLightPvP.CanUse(out action)) return true;
         if (SilentNocturnePvP.CanUse(out action) && !Player.HasStatus(true, StatusID.Repertoire)) return true;
+        if (EagleEyeShotPvP.CanUse(out action)) return true;
+        if (EncoreOfLightPvP.CanUse(out action, skipAoeCheck: true)) return true;
 
         return base.AttackAbility(nextGCD, out action);
     }
     #endregion
+
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {

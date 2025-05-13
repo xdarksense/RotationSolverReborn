@@ -1,10 +1,28 @@
 ﻿namespace RotationSolver.Basic.Actions;
 
-internal enum SpecialActionType : byte
+/// <summary>
+/// Specific action type for the action.
+/// </summary>
+public enum SpecialActionType : byte
 {
+    /// <summary>
+    /// 
+    /// </summary>
     None,
+
+    /// <summary>
+    /// 
+    /// </summary>
     MeleeRange,
+
+    /// <summary>
+    /// 
+    /// </summary>
     MovingBackward,
+
+    /// <summary>
+    /// 
+    /// </summary>
     MovingForward,
 }
 

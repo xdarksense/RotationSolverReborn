@@ -41,6 +41,7 @@ public static class TargetFilter
 
         var validJobs = new HashSet<byte>();
         var classJobs = Service.GetSheet<ClassJob>();
+        if (classJobs == null) return Enumerable.Empty<IBattleChara>();
 
         foreach (var role in roles)
         {
@@ -56,7 +57,7 @@ public static class TargetFilter
         var result = new List<IBattleChara>();
         foreach (var obj in objects)
         {
-            if (obj.IsJobs(validJobs))
+            if (obj != null && obj.IsJobs(validJobs))
             {
                 result.Add(obj);
             }
@@ -77,6 +78,7 @@ public static class TargetFilter
 
         var validJobs = new HashSet<byte>();
         var classJobs = Service.GetSheet<ClassJob>();
+        if (classJobs == null) return false;
 
         foreach (var job in classJobs)
         {
@@ -111,7 +113,8 @@ public static class TargetFilter
     private static bool IsJobs(this IGameObject obj, HashSet<byte> validJobs)
     {
         if (obj is not IBattleChara b) return false;
-        return validJobs.Contains((byte?)b.ClassJob.Value.RowId ?? 0);
+        if (validJobs == null) return false;
+        return validJobs.Contains((byte)b.ClassJob.Value.RowId);
     }
     #endregion
 

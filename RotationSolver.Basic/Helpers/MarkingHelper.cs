@@ -1,4 +1,5 @@
 ﻿using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using System.Collections.Generic;
 
 namespace RotationSolver.Basic.Helpers
 {
@@ -48,7 +49,19 @@ namespace RotationSolver.Basic.Helpers
         /// <summary>
         /// Gets a value indicating whether there are any attack characters.
         /// </summary>
-        internal static bool HaveAttackChara => GetAttackSignTargets().Any(id => id != 0);
+        internal static bool HaveAttackChara
+        {
+            get
+            {
+                var targets = GetAttackSignTargets();
+                for (int i = 0; i < targets.Length; i++)
+                {
+                    if (targets[i] != 0)
+                        return true;
+                }
+                return false;
+            }
+        }
 
         /// <summary>
         /// Gets the attack sign targets.
@@ -87,8 +100,21 @@ namespace RotationSolver.Basic.Helpers
         /// <returns>The filtered characters.</returns>
         internal unsafe static IEnumerable<IBattleChara> FilterStopCharacters(IEnumerable<IBattleChara> charas)
         {
-            var ids = new HashSet<long>(GetStopTargets().Where(id => id != 0));
-            return charas.Where(b => !ids.Contains((long)b.GameObjectId));
+            var stopTargets = GetStopTargets();
+            var ids = new HashSet<long>();
+            for (int i = 0; i < stopTargets.Length; i++)
+            {
+                if (stopTargets[i] != 0)
+                    ids.Add(stopTargets[i]);
+            }
+
+            var result = new List<IBattleChara>();
+            foreach (var b in charas)
+            {
+                if (!ids.Contains((long)b.GameObjectId))
+                    result.Add(b);
+            }
+            return result;
         }
     }
 }

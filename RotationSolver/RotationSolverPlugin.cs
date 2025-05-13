@@ -16,6 +16,7 @@ using RotationSolver.UI;
 using RotationSolver.UI.HighlightTeachingMode;
 using RotationSolver.UI.HighlightTeachingMode.ElementSpecial;
 using RotationSolver.Updaters;
+using System;
 using WelcomeWindow = RotationSolver.UI.WelcomeWindow;
 
 namespace RotationSolver;
@@ -37,6 +38,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
     public static DalamudLinkPayload OpenLinkPayload { get; private set; } = null!;
     public static DalamudLinkPayload? HideWarningLinkPayload { get; private set; }
+    static readonly Random _random = new();
 
     internal IPCProvider IPCProvider;
     public RotationSolverPlugin(IDalamudPluginInterface pluginInterface)
@@ -112,10 +114,9 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         Svc.ClientState.TerritoryChanged += ClientState_TerritoryChanged;
         ClientState_TerritoryChanged(Svc.ClientState.TerritoryType);
 
-
         static void DutyState_DutyCompleted(object? sender, ushort e)
         {
-            var delay = TimeSpan.FromSeconds(new Random().Next(4, 6));
+            var delay = TimeSpan.FromSeconds(_random.Next(4, 6));
             Svc.Framework.RunOnTick(() =>
             {
                 Service.Config.DutyEnd.AddMacro();
@@ -252,7 +253,12 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         return false;
     }
 
-    public async void Dispose()
+    void IDisposable.Dispose()
+    {
+        Dispose().GetAwaiter().GetResult();
+    }
+
+    public async Task Dispose()
     {
         RSCommands.Disable();
         Watcher.Disable();
@@ -264,10 +270,9 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         {
             item.Dispose();
         }
-        _dis?.Clear();
+        _dis.Clear();
 
         MajorUpdater.Dispose();
-        //HotbarHighlightDrawerManager.Dispose();
         HotbarHighlightManager.Dispose();
         await OtherConfiguration.Save();
 

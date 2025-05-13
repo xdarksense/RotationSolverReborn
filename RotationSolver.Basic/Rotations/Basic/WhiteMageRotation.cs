@@ -389,6 +389,10 @@ partial class WhiteMageRotation
     static partial void ModifySeraphStrikePvP(ref ActionSetting setting)
     {
         setting.SpecialType = SpecialActionType.MovingForward;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyGlareIvPvP(ref ActionSetting setting)

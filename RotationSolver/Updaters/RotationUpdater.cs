@@ -69,13 +69,22 @@ internal static class RotationUpdater
 
             if (option.HasFlag(DownloadOption.ShowList))
             {
-                var assemblies = CustomRotationsDict
-                    .SelectMany(d => d.Value)
-                    .SelectMany(g => g.Rotations)
-                    .Select(r => r.Assembly.FullName ?? string.Empty)
-                    .Distinct()
-                    .ToList();
-
+                var assemblies = new List<string>();
+                var seen = new HashSet<string>();
+                foreach (var d in CustomRotationsDict)
+                {
+                    foreach (var g in d.Value)
+                    {
+                        foreach (var r in g.Rotations)
+                        {
+                            var name = r.Assembly.FullName ?? string.Empty;
+                            if (seen.Add(name))
+                            {
+                                assemblies.Add(name);
+                            }
+                        }
+                    }
+                }
                 PrintLoadedAssemblies(assemblies);
             }
         }
@@ -99,7 +108,13 @@ internal static class RotationUpdater
             Svc.Log.Error("Failed to find main assembly directory");
             return null;
         }
-        var assemblyPath = Path.Combine(directory.ToString(), "RebornRotations.dll");
+        var assemblyPath = Path.Combine(directory.ToString(),
+        #if DEBUG
+            "net9.0-windows\\RebornRotations.dll"
+        #else
+            "RebornRotations.dll"
+        #endif
+        );
         return LoadOne(assemblyPath);
     }
 
@@ -110,9 +125,14 @@ internal static class RotationUpdater
     /// <param name="relayFolder"></param>
     private static void LoadRotationsFromLocal(string relayFolder)
     {
-        var directories = Service.Config.RotationLibs
-            .Append(relayFolder)
-            .Where(Directory.Exists);
+        var directories = new List<string>();
+        foreach (var lib in Service.Config.RotationLibs)
+        {
+            if (Directory.Exists(lib))
+                directories.Add(lib);
+        }
+        if (Directory.Exists(relayFolder))
+            directories.Add(relayFolder);
 
         var assemblies = new List<Assembly>();
 
@@ -137,9 +157,21 @@ internal static class RotationUpdater
                         continue;
                     var assembly = LoadOne(dll);
 
-                    if (assembly != null && !assemblies.Any(a => a.FullName == assembly.FullName))
+                    bool found = false;
+                    if (assembly != null)
                     {
-                        assemblies.Add(assembly);
+                        foreach (var a in assemblies)
+                        {
+                            if (a.FullName == assembly.FullName)
+                            {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found)
+                        {
+                            assemblies.Add(assembly);
+                        }
                     }
                 }
             }
@@ -147,27 +179,38 @@ internal static class RotationUpdater
 
         DutyRotations = LoadDutyRotationGroup(assemblies);
         CustomRotations = LoadCustomRotationGroup(assemblies);
+
         var customRotationsGroupedByJobRole = new Dictionary<JobRole, List<CustomRotationGroup>>();
         foreach (var customRotationGroup in CustomRotations)
         {
             var job = customRotationGroup.Rotations[0].GetType().GetCustomAttribute<JobsAttribute>()?.Jobs[0] ?? Job.ADV;
-
             var jobRole = Svc.Data.GetExcelSheet<ClassJob>()!.GetRow((uint)job)!.GetJobRole();
             if (!customRotationsGroupedByJobRole.TryGetValue(jobRole, out var value))
             {
-                value = [];
+                value = new List<CustomRotationGroup>();
                 customRotationsGroupedByJobRole[jobRole] = value;
             }
-
             value.Add(customRotationGroup);
         }
 
-        CustomRotationsDict = [];
-        foreach (var jobRole in customRotationsGroupedByJobRole.Keys)
+        CustomRotationsDict = new SortedList<JobRole, CustomRotationGroup[]>();
+        foreach (var kvp in customRotationsGroupedByJobRole)
         {
-            var customRotationGroups = customRotationsGroupedByJobRole[jobRole];
-            var sortedCustomRotationGroups = customRotationGroups.OrderBy(crg => crg.JobId).ToArray();
-            CustomRotationsDict[jobRole] = sortedCustomRotationGroups;
+            var customRotationGroups = kvp.Value;
+            // Sort by JobId
+            for (int i = 0; i < customRotationGroups.Count - 1; i++)
+            {
+                for (int j = i + 1; j < customRotationGroups.Count; j++)
+                {
+                    if (customRotationGroups[i].JobId > customRotationGroups[j].JobId)
+                    {
+                        var temp = customRotationGroups[i];
+                        customRotationGroups[i] = customRotationGroups[j];
+                        customRotationGroups[j] = temp;
+                    }
+                }
+            }
+            CustomRotationsDict[kvp.Key] = customRotationGroups.ToArray();
         }
     }
 
@@ -442,57 +485,97 @@ internal static class RotationUpdater
             .. DataCenter.CurrentDutyRotation?.AllActions ?? []]);
 
     public static IEnumerable<IGrouping<string, IAction>>? GroupActions(IEnumerable<IAction> actions)
-       => actions?.GroupBy(a =>
-       {
-           if (a is IBaseAction act)
-           {
-               if (!act.Info.IsOnSlot) return string.Empty;
+    {
+        // LINQ removed: .GroupBy, .Where, .OrderBy
+        if (actions == null) return null;
 
-               string result;
+        var groups = new Dictionary<string, List<IAction>>();
+        foreach (var a in actions)
+        {
+            string key = string.Empty;
+            if (a is IBaseAction act)
+            {
+                if (!act.Info.IsOnSlot)
+                {
+                    key = string.Empty;
+                }
+                else if (act.Action.ActionCategory.RowId is 10 or 11)
+                {
+                    key = "System Action";
+                }
+                else if (act.Action.IsRoleAction)
+                {
+                    key = "Role Action";
+                }
+                else if (act.Info.IsLimitBreak)
+                {
+                    key = "Limit Break";
+                }
+                else if (act.Info.IsDutyAction)
+                {
+                    key = "Duty Action";
+                }
+                else
+                {
+                    if (act.Info.IsRealGCD)
+                    {
+                        key = "GCD";
+                    }
+                    else
+                    {
+                        key = "oGCD";
+                    }
+                    if (act.Setting.IsFriendly)
+                    {
+                        key += "-Friendly";
+                    }
+                    else
+                    {
+                        key += "-Attack";
+                    }
+                }
+            }
+            else if (a is IBaseItem)
+            {
+                key = "Item";
+            }
 
-               if (act.Action.ActionCategory.RowId is 10 or 11)
-               {
-                   return "System Action";
-               }
-               else if (act.Action.IsRoleAction)
-               {
-                   return "Role Action";
-               }
-               else if (act.Info.IsLimitBreak)
-               {
-                   return "Limit Break";
-               }
-               else if (act.Info.IsDutyAction)
-               {
-                   return "Duty Action";
-               }
+            if (!string.IsNullOrEmpty(key))
+            {
+                if (!groups.TryGetValue(key, out var list))
+                {
+                    list = new List<IAction>();
+                    groups[key] = list;
+                }
+                list.Add(a);
+            }
+        }
 
-               if (act.Info.IsRealGCD)
-               {
-                   result = "GCD";
-               }
-               else
-               {
-                   result = "oGCD";
-               }
+        // Sort groups by key
+        var sortedKeys = new List<string>(groups.Keys);
+        sortedKeys.Sort(StringComparer.Ordinal);
 
-               if (act.Setting.IsFriendly)
-               {
-                   result += "-Friendly";
-               }
-               else
-               {
-                   result += "-Attack";
-               }
-               return result;
-           }
-           else if (a is IBaseItem)
-           {
-               return "Item";
-           }
-           return string.Empty;
+        var result = new List<IGrouping<string, IAction>>();
+        foreach (var key in sortedKeys)
+        {
+            result.Add(new SimpleGrouping<string, IAction>(key, groups[key]));
+        }
+        return result;
+    }
 
-       }).Where(g => !string.IsNullOrEmpty(g.Key)).OrderBy(g => g.Key);
+    // Helper class for grouping (since LINQ's Grouping is not available)
+    private class SimpleGrouping<TKey, TElement> : IGrouping<TKey, TElement>
+    {
+        private readonly IEnumerable<TElement> _elements;
+        public SimpleGrouping(TKey key, IEnumerable<TElement> elements)
+        {
+            Key = key;
+            _elements = elements;
+        }
+        public TKey Key { get; }
+        public IEnumerator<TElement> GetEnumerator() => _elements.GetEnumerator();
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => _elements.GetEnumerator();
+    }
 
     public static void UpdateRotation()
     {

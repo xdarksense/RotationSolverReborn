@@ -178,7 +178,18 @@ internal abstract class CheckBoxSearch : Searchable
 
     protected override void DrawMain()
     {
-        var hasChild = Children != null && Children.Any(c => c.ShowInChild);
+        var hasChild = false;
+        if (Children != null)
+        {
+            foreach (var c in Children)
+            {
+                if (c.ShowInChild)
+                {
+                    hasChild = true;
+                    break;
+                }
+            }
+        }
         var hasAdditional = AdditionalDraw != null;
         var hasSub = hasChild || hasAdditional;
         IDalamudTextureWrap? texture = null;

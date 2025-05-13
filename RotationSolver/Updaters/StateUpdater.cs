@@ -18,7 +18,15 @@ internal static class StateUpdater
     {
         DataCenter.CommandStatus = StatusFromCmdOrCondition();
         DataCenter.AutoStatus = StatusFromAutomatic();
-        if (!DataCenter.InCombat && DataCenter.AttackedTargets?.Count() > 0)
+        int attackedTargetsCount = 0;
+        if (DataCenter.AttackedTargets != null)
+        {
+            foreach (var _ in DataCenter.AttackedTargets)
+            {
+                attackedTargetsCount++;
+            }
+        }
+        if (!DataCenter.InCombat && attackedTargetsCount > 0)
         {
             DataCenter.ResetAllRecords();
         }
@@ -157,6 +165,7 @@ internal static class StateUpdater
         {
             var id = ActionUpdater.NextGCDAction.ID;
             var target = ActionUpdater.NextGCDAction.Target.Target;
+            if (target == null) return false;
 
             if (ConfigurationHelper.ActionPositional.TryGetValue((ActionID)id, out var positional)
                 && positional != target?.FindEnemyPositional()
@@ -240,6 +249,16 @@ internal static class StateUpdater
         if (!DataCenter.HPNotFull || !CanUseHealAction)
             return false;
 
+        // Prioritize area healing if multiple members have DoomNeedHealing
+        int doomNeedHealingCount = 0;
+        foreach (var member in DataCenter.PartyMembers)
+        {
+            if (member.DoomNeedHealing())
+                doomNeedHealingCount++;
+        }
+        if (doomNeedHealingCount > 1)
+            return true;
+
         int singleAbility = ShouldHealSingle(StatusHelper.SingleHots,
             Service.Config.HealthSingleAbility,
             Service.Config.HealthSingleAbilityHot);
@@ -262,6 +281,16 @@ internal static class StateUpdater
     {
         if (!DataCenter.HPNotFull || !CanUseHealAction)
             return false;
+
+        // Prioritize area healing if multiple members have DoomNeedHealing
+        int doomNeedHealingCount = 0;
+        foreach (var member in DataCenter.PartyMembers)
+        {
+            if (member.DoomNeedHealing())
+                doomNeedHealingCount++;
+        }
+        if (doomNeedHealingCount > 1)
+            return true;
 
         int singleSpell = ShouldHealSingle(StatusHelper.SingleHots,
             Service.Config.HealthSingleSpell,
@@ -291,11 +320,22 @@ internal static class StateUpdater
 
         if (onlyHealSelf)
         {
+            // Prioritize healing self if DoomNeedHealing is true
+            if (Player.Object.DoomNeedHealing())
+                return true;
+
             return ShouldHealSingle(Player.Object, StatusHelper.SingleHots,
                 Service.Config.HealthSingleAbility, Service.Config.HealthSingleAbilityHot);
         }
         else
         {
+            // Prioritize healing any party member with DoomNeedHealing
+            foreach (var member in DataCenter.PartyMembers)
+            {
+                if (member.DoomNeedHealing())
+                    return true;
+            }
+
             int singleAbility = ShouldHealSingle(StatusHelper.SingleHots,
                 Service.Config.HealthSingleAbility,
                 Service.Config.HealthSingleAbilityHot);
@@ -314,11 +354,22 @@ internal static class StateUpdater
 
         if (onlyHealSelf)
         {
+            // Explicitly prioritize "Doom" targets
+            if (Player.Object.DoomNeedHealing())
+                return true;
+
             return ShouldHealSingle(Player.Object, StatusHelper.SingleHots,
                 Service.Config.HealthSingleSpell, Service.Config.HealthSingleSpellHot);
         }
         else
         {
+            // Check if any party member with "Doom" needs healing
+            foreach (var member in DataCenter.PartyMembers)
+            {
+                if (member.DoomNeedHealing())
+                    return true;
+            }
+
             int singleSpell = ShouldHealSingle(StatusHelper.SingleHots,
                 Service.Config.HealthSingleSpell,
                 Service.Config.HealthSingleSpellHot);
@@ -398,12 +449,18 @@ internal static class StateUpdater
     static bool ShouldHealSingle(IBattleChara target, StatusID[] hotStatus, float healSingle, float healSingleHot)
     {
         if (target == null) return false;
+        if (target.StatusList == null) return false;
 
-        float ratio = GetHealingOfTimeRatio(target, hotStatus);
+        // Calculate the ratio of remaining healing-over-time effects on the target. If they have a "Doom" status, treat dot healing as non-existent.
+        float ratio = target.DoomNeedHealing() ? 0f : GetHealingOfTimeRatio(target, hotStatus);
 
-        float h = target.GetHealthRatio();
-        if (h == 0 || !target.NeedHealing()) return false;
+        // Determine the target's health ratio. If they have a "Doom" status, treat their health as critically low (0.2).
+        float h = target.DoomNeedHealing() ? 0.2f : target.GetHealthRatio();
 
+        // If the target's health is zero or they are invulnerable to healing, return false.
+        if (h == 0 || !target.NoNeedHealingInvuln()) return false;
+
+        // Compare the target's health ratio to a threshold determined by linear interpolation (Lerp) between `healSingle` and `healSingleHot`.
         return h < Lerp(healSingle, healSingleHot, ratio);
     }
 

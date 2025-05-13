@@ -188,6 +188,7 @@ public struct ActionTargetInfo(IBaseAction action)
         ActionID.DotonPvE,
         ActionID.DotonPvE_18880,
         ActionID.FeatherRainPvE,
+        ActionID.SaltAndDarknessPvP,
     };
 
     private bool IsSpecialAbility(uint iD)
@@ -208,6 +209,16 @@ public struct ActionTargetInfo(IBaseAction action)
     {
         if (gameObject == null) return false;
 
+        try
+        {
+            if (gameObject.StatusList == null) return false;
+        }
+        catch (Exception ex)
+        {
+            Svc.Log.Error($"Exception accessing StatusList for {gameObject?.NameId}: {ex.Message}");
+            return false;
+        }
+
         if (!gameObject.IsTargetable) return false;
 
         if (Service.Config.RaiseType == RaiseType.PartyOnly && gameObject.IsAllianceMember() && !gameObject.IsParty())
@@ -215,7 +226,17 @@ public struct ActionTargetInfo(IBaseAction action)
             return false;
         }
 
-        if (DataCenter.BlacklistedNameIds.Contains(gameObject.NameId))
+        // Replace LINQ Contains with manual loop
+        bool isBlacklisted = false;
+        foreach (var id in DataCenter.BlacklistedNameIds)
+        {
+            if (id == gameObject.NameId)
+            {
+                isBlacklisted = true;
+                break;
+            }
+        }
+        if (isBlacklisted)
         {
             return false;
         }
@@ -225,7 +246,18 @@ public struct ActionTargetInfo(IBaseAction action)
             return false;
         }
 
-        if (MarkingHelper.GetStopTargets().Contains((long)gameObject.GameObjectId) && Service.Config.FilterStopMark)
+        // Replace LINQ Contains with manual loop
+        bool isStopTarget = false;
+        var stopTargets = MarkingHelper.GetStopTargets();
+        foreach (var stopId in stopTargets)
+        {
+            if (stopId == (long)gameObject.GameObjectId)
+            {
+                isStopTarget = true;
+                break;
+            }
+        }
+        if (isStopTarget && Service.Config.FilterStopMark)
         {
             return false;
         }
@@ -351,6 +383,11 @@ public struct ActionTargetInfo(IBaseAction action)
             return null;
         }
 
+        if (action == null || action.Setting == null || action.Config == null)
+        {
+            return null;
+        }
+
         if (range == 0 && EffectRange == 0)
         {
             return new TargetResult(Player.Object, Array.Empty<IBattleChara>(), Player.Object.Position);
@@ -361,6 +398,11 @@ public struct ActionTargetInfo(IBaseAction action)
         var canTargets = GetCanTargets(skipStatusProvideCheck, skipTargetStatusNeedCheck, type);
         var canAffects = GetCanAffects(skipStatusProvideCheck, skipTargetStatusNeedCheck, type);
 
+        if (canTargets == null || canAffects == null)
+        {
+            return null;
+        }
+
         if (IsTargetArea)
         {
             return FindTargetArea(canTargets, canAffects, range, Player.Object);
@@ -368,7 +410,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
         var targets = GetMostCanTargetObjects(canTargets, canAffects, skipAoeCheck ? 0 : action.Config.AoeCount);
         var target = FindTargetByType(targets, type, action.Config.AutoHealRatio, action.Setting.SpecialType);
-        return target == null ? null : new TargetResult(target, GetAffectsTarget(target, canAffects).ToArray(), target.Position);
+        return target == null ? null : new TargetResult(target, GetAffectsTarget(target, canAffects)?.ToArray() ?? Array.Empty<IBattleChara>(), target.Position);
     }
 
     /// <summary>
@@ -816,8 +858,17 @@ public struct ActionTargetInfo(IBaseAction action)
 
     #region TargetFind
 
-    private static IBattleChara? FindTargetByType(IEnumerable<IBattleChara> IGameObjects, TargetType type, float healRatio, SpecialActionType actionType)
+    /// <summary>
+    /// Finds the target based on the specified type and criteria.
+    /// </summary>
+    /// <param name="IGameObjects"></param>
+    /// <param name="type"></param>
+    /// <param name="healRatio"></param>
+    /// <param name="actionType"></param>
+    /// <returns></returns>
+    public static IBattleChara? FindTargetByType(IEnumerable<IBattleChara> IGameObjects, TargetType type, float healRatio, SpecialActionType actionType)
     {
+        if (!Player.AvailableThreadSafe) return null;
         if (Player.Object == null) return null;
         if (IGameObjects == null) return null;
 
@@ -826,10 +877,7 @@ public struct ActionTargetInfo(IBaseAction action)
         switch (actionType)
         {
             case SpecialActionType.MeleeRange:
-                if (IGameObjects != null && Service.Config != null)
-                {
-                    IGameObjects = IGameObjects.Where(t => t.DistanceToPlayer() >= 3 + Service.Config.MeleeRangeOffset);
-                }
+                IGameObjects = IGameObjects.Where(t => t.DistanceToPlayer() >= 3 + (Service.Config?.MeleeRangeOffset ?? 0));
                 break;
 
             case SpecialActionType.MovingForward:
@@ -839,7 +887,7 @@ public struct ActionTargetInfo(IBaseAction action)
                     {
                         type = TargetType.Move;
                     }
-                    else if (IGameObjects != null)
+                    else
                     {
                         IGameObjects = IGameObjects.Where(t => t.DistanceToPlayer() < Service.Config.DistanceForMoving);
                     }
@@ -886,26 +934,31 @@ public struct ActionTargetInfo(IBaseAction action)
             TargetType.MimicryTarget => FindMimicryTarget(),
             TargetType.TheSpear => FindTheSpear(),
             TargetType.TheBalance => FindTheBalance(),
+            TargetType.Kardia => FindKardia(),
             _ => FindHostile(),
         };
 
         IBattleChara? FindDancePartner()
         {
             // DancePartnerPriority based on the info from The Balance Discord for Level 100
-            Job[] DancePartnerPriority = { Job.SAM, Job.PCT, Job.RPR, Job.VPR, Job.MNK, Job.NIN, Job.DRG, Job.BLM, Job.RDM, Job.SMN, Job.MCH, Job.BRD, Job.DNC };
+            var dancePartnerPriority = OtherConfiguration.DancePartnerPriority;
 
+            if (!Player.AvailableThreadSafe) return null;
+            if (Player.Object == null) return null;
+            if (DataCenter.PartyMembers == null) return null;
             if (IGameObjects == null) return null;
 
             var partyMembers = new List<IBattleChara>();
-            foreach (var obj in IGameObjects)
+
+            foreach (var obj in DataCenter.PartyMembers)
             {
-                if (ObjectHelper.IsParty(obj) && obj.StatusList != null)
+                if (ObjectHelper.IsParty(obj) && obj.StatusList != null && obj != Player.Object)
                 {
                     partyMembers.Add(obj);
                 }
             }
 
-            foreach (var job in DancePartnerPriority)
+            foreach (var job in dancePartnerPriority)
             {
                 foreach (var member in partyMembers)
                 {
@@ -926,12 +979,15 @@ public struct ActionTargetInfo(IBaseAction action)
         IBattleChara? FindTheSpear()
         {
             // The Spear priority based on the info from The Balance Discord for Level 100 Dance Partner
-            Job[] TheSpearpriority = { Job.PCT, Job.MCH, Job.SMN, Job.RDM, Job.BRD, Job.DNC, Job.BLM, Job.SAM, Job.NIN, Job.VPR, Job.DRG, Job.MNK, Job.DRK, Job.RPR };
+            var TheSpearPriority = OtherConfiguration.TheSpearPriority;
 
+            if (!Player.AvailableThreadSafe) return null;
+            if (Player.Object == null) return null;
+            if (DataCenter.PartyMembers == null) return null;
             if (IGameObjects == null) return null;
 
             var partyMembers = new List<IBattleChara>();
-            foreach (var obj in IGameObjects)
+            foreach (var obj in DataCenter.PartyMembers)
             {
                 if (ObjectHelper.IsParty(obj))
                 {
@@ -939,7 +995,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 }
             }
 
-            foreach (var job in TheSpearpriority)
+            foreach (var job in TheSpearPriority)
             {
                 foreach (var member in partyMembers)
                 {
@@ -960,12 +1016,15 @@ public struct ActionTargetInfo(IBaseAction action)
         IBattleChara? FindTheBalance()
         {
             // The Balance priority based on the info from The Balance Discord for Level 100 Dance Partner
-            Job[] TheBalancepriority = { Job.SAM, Job.NIN, Job.VPR, Job.DRG, Job.MNK, Job.RPR, Job.DRK, Job.PCT, Job.MCH, Job.SMN, Job.RDM, Job.BRD, Job.DNC, Job.BLM };
+            var TheBalancePriority = OtherConfiguration.TheBalancePriority;
 
+            if (!Player.AvailableThreadSafe) return null;
+            if (Player.Object == null) return null;
+            if (DataCenter.PartyMembers == null) return null;
             if (IGameObjects == null) return null;
 
             var partyMembers = new List<IBattleChara>();
-            foreach (var obj in IGameObjects)
+            foreach (var obj in DataCenter.PartyMembers)
             {
                 if (ObjectHelper.IsParty(obj))
                 {
@@ -973,7 +1032,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 }
             }
 
-            foreach (var job in TheBalancepriority)
+            foreach (var job in TheBalancePriority)
             {
                 foreach (var member in partyMembers)
                 {
@@ -988,6 +1047,47 @@ public struct ActionTargetInfo(IBaseAction action)
                 ?? RandomRangeTarget(IGameObjects)
                 ?? RandomMagicalTarget(IGameObjects)
                 ?? RandomPhysicalTarget(IGameObjects)
+                ?? null;
+        }
+
+        IBattleChara? FindKardia()
+        {
+            var KardiaTankPriority = OtherConfiguration.KardiaTankPriority;
+
+            if (!Player.AvailableThreadSafe) return null;
+            if (Player.Object == null) return null;
+            if (DataCenter.PartyMembers == null) return null;
+            if (IGameObjects == null) return null;
+
+            // First, prioritize tanks with TankStanceStatus and without Kardion from anyone, accounting for Double Sage parties
+            foreach (var member in DataCenter.PartyMembers.Where(member => member.IsJobCategory(JobRole.Tank)))
+            {
+                foreach (var job in KardiaTankPriority)
+                {
+                    if (member.IsJobs(job) && !member.IsDead && member.HasStatus(false, StatusHelper.TankStanceStatus) && !member.HasStatus(false, StatusID.Kardion))
+                    {
+                        return member;
+                    }
+                }
+            }
+
+            // If no tanks with TankStanceStatus are found, pick any tank
+            foreach (var member in DataCenter.PartyMembers.Where(member => member.IsJobCategory(JobRole.Tank)))
+            {
+                foreach (var job in KardiaTankPriority)
+                {
+                    if (member.IsJobs(job) && !member.IsDead)
+                    {
+                        return member;
+                    }
+                }
+            }
+
+            return FindTankTarget()
+                ?? RandomMeleeTarget(DataCenter.PartyMembers)
+                ?? RandomPhysicalTarget(DataCenter.PartyMembers)
+                ?? RandomRangeTarget(DataCenter.PartyMembers)
+                ?? RandomMagicalTarget(DataCenter.PartyMembers)
                 ?? null;
         }
 
@@ -1094,7 +1194,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
             static IBattleChara? GeneralHealTarget(IEnumerable<IBattleChara> objs)
             {
-                var healingNeededObjs = objs.Where(StatusHelper.NeedHealing).OrderBy(ObjectHelper.GetHealthRatio);
+                var healingNeededObjs = objs.Where(StatusHelper.NoNeedHealingInvuln).OrderBy(ObjectHelper.GetHealthRatio);
 
                 var healerTars = healingNeededObjs.GetJobCategory(JobRole.Healer);
                 var tankTars = healingNeededObjs.GetJobCategory(JobRole.Tank);
@@ -1175,7 +1275,13 @@ public struct ActionTargetInfo(IBaseAction action)
 
             var orderedGameObjects = DataCenter.TargetingType switch
             {
-                TargetingType.Small => IGameObjects.OrderBy<IGameObject, float>(p => p.HitboxRadius),
+                TargetingType.Small => Service.Config.SmallHp
+                            ? IGameObjects
+                                .OrderBy<IGameObject, float>(p => p.HitboxRadius)
+                                .ThenBy(p => p is IBattleChara b ? b.CurrentHp : float.MaxValue) // Low HP
+                            : IGameObjects
+                                .OrderBy<IGameObject, float>(p => p.HitboxRadius)
+                                .ThenByDescending(p => p is IBattleChara b ? b.CurrentHp : 0), // High HP
                 TargetingType.HighHP => IGameObjects.OrderByDescending<IGameObject, uint>(p => p is IBattleChara b ? b.CurrentHp : 0),
                 TargetingType.LowHP => IGameObjects.OrderBy<IGameObject, uint>(p => p is IBattleChara b ? b.CurrentHp : 0),
                 TargetingType.HighHPPercent => IGameObjects.OrderByDescending<IGameObject, float>(p => p is IBattleChara b ? b.CurrentHp / b.MaxHp : 0),
@@ -1193,7 +1299,13 @@ public struct ActionTargetInfo(IBaseAction action)
                 TargetingType.PvPDPS => IGameObjects.Where(p => p.IsJobs(JobRole.AllDPS.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer()).Any()
                     ? IGameObjects.Where(p => p.IsJobs(JobRole.AllDPS.ToJobs())).OrderBy<IGameObject, float>(p => p.DistanceToPlayer())
                     : IGameObjects.OrderBy<IGameObject, float>(p => p.DistanceToPlayer()),
-                _ => IGameObjects.OrderByDescending<IGameObject, float>(p => p.HitboxRadius),
+                _ => Service.Config.SmallHp
+                    ? IGameObjects
+                                .OrderByDescending<IGameObject, float>(p => p.HitboxRadius)
+                                .ThenBy(p => p is IBattleChara b ? b.CurrentHp : float.MaxValue) // Low HP
+                            : IGameObjects
+                                .OrderByDescending<IGameObject, float>(p => p.HitboxRadius)
+                                .ThenByDescending(p => p is IBattleChara b ? b.CurrentHp : 0), // High HP
             };
 
             return orderedGameObjects.FirstOrDefault() as IBattleChara;
@@ -1261,7 +1373,12 @@ public struct ActionTargetInfo(IBaseAction action)
 
     private static IBattleChara? FindMimicryTarget()
     {
-        var targetCandidates = DataCenter.AllTargets.Where(IsNeededRole).OrderBy(o => Player.DistanceTo(o.Position));
+        if (DataCenter.AllTargets == null) return null;
+
+        var targetCandidates = DataCenter.AllTargets
+            .Where(target => target != null && IsNeededRole(target))
+            .OrderBy(target => Player.Object != null ? Player.DistanceTo(target.Position) : float.MaxValue);
+
         return targetCandidates.FirstOrDefault();
     }
 
@@ -1365,6 +1482,7 @@ public enum TargetType : byte
     MimicryTarget,
     TheBalance,
     TheSpear,
+    Kardia,
 }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 

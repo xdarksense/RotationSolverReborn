@@ -55,7 +55,10 @@ internal class OverlayWindow : Window
                     return;
                 }
 
-                foreach (var item in HotbarHighlightManager._drawingElements2D.OrderBy(GetDrawingOrder))
+                var elements = HotbarHighlightManager._drawingElements2D;
+                var sortedElements = new List<IDrawing2D>(elements);
+                sortedElements.Sort((a, b) => GetDrawingOrder(a).CompareTo(GetDrawingOrder(b)));
+                foreach (var item in sortedElements)
                 {
                     item.Draw();
                 }

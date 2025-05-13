@@ -148,7 +148,7 @@ partial class CustomRotation
     /// <summary>
     /// The last attacked hostile target.
     /// </summary>
-    protected static IBattleChara? HostileTarget => DataCenter.HostileTarget;
+    protected static IBattleChara? HostileTarget => DataCenter.HostileTarget ?? null;
 
     /// <summary>
     /// Is player in position to hit the positional?
@@ -168,6 +168,15 @@ partial class CustomRotation
             return true;
         return false;
     }
+
+    /// <summary>
+    /// Returns the number of hostile targets within the specified range from the player.
+    /// </summary>
+    /// <param name="range">The range to check (in yalms).</param>
+    /// <returns>The number of hostile targets within the given range.</returns>
+    [Description("The number of hostiles in specified range")]
+    public static int NumberOfHostilesInRangeOf(float range)
+        => DataCenter.NumberOfHostilesInRangeOf(range);
 
     /// <summary>
     /// Is there any hostile target in range? 25 for ranged jobs and healer, 3 for melee and tank.

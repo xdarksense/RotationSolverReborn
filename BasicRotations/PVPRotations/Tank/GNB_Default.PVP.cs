@@ -1,6 +1,6 @@
 ﻿namespace RebornRotations.PVPRotations.Tank;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.2")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.21")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Tank/GNB_Default.PvP.cs")]
 [Api(4)]
 public sealed class GNB_DefaultPvP : GunbreakerRotation
@@ -50,6 +50,7 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
         if (HeartOfCorundumPvP.CanUse(out action)) return true;
+        if (RampartPvP.CanUse(out action)) return true;
 
         return base.DefenseSingleAbility(nextGCD, out action);
     }
@@ -92,6 +93,9 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
 
         if (!Player.HasStatus(true, StatusID.NoMercy_3042) && RoughDividePvP.CanUse(out action, usedUp: true)) return true;
         if (Target.GetHealthRatio() * 100 <= 50 && BlastingZonePvP.CanUse(out action)) return true;
+
+        if (RampagePvP.CanUse(out action)) return true;
+        if (FullSwingPvP.CanUse(out action)) return true;
 
         if (EyeGougePvP.CanUse(out action)) return true;
         if (AbdomenTearPvP.CanUse(out action)) return true;

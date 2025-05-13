@@ -20,14 +20,21 @@ internal class CooldownWindow() : CtrlWindow(nameof(CooldownWindow))
 
         foreach (var pair in allGroupedActions)
         {
-            var showItems = pair
-                .Where(a => a.IsInCooldown && (a is not IBaseAction b || !b.Info.IsLimitBreak))
-                .Where(a => config.ShowGcdCooldown || !(a is IBaseAction b && b.Info.IsGeneralGCD))
-                .Where(a => config.ShowItemsCooldown || !(a is IBaseItem))
-                .OrderBy(a => a.SortKey)
-                .ToList();
+            // Manual filtering
+            var showItems = new List<IAction>();
+            foreach (var a in pair)
+            {
+                if (!a.IsInCooldown) continue;
+                if (a is IBaseAction b1 && b1.Info.IsLimitBreak) continue;
+                if (!config.ShowGcdCooldown && a is IBaseAction b2 && b2.Info.IsGeneralGCD) continue;
+                if (!config.ShowItemsCooldown && a is IBaseItem) continue;
+                showItems.Add(a);
+            }
 
-            if (!showItems.Any()) continue;
+            // Manual sorting by SortKey
+            showItems.Sort((x, y) => x.SortKey.CompareTo(y.SortKey));
+
+            if (showItems.Count == 0) continue;
 
             ImGui.Text(pair.Key);
 

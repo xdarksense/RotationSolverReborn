@@ -1,6 +1,6 @@
 namespace RebornRotations.PVPRotations.Ranged;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.2")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.21")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Ranged/MCH_Default.PvP.cs")]
 [Api(4)]
 public sealed class MCH_DefaultPvP : MachinistRotation
@@ -42,6 +42,9 @@ public sealed class MCH_DefaultPvP : MachinistRotation
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
         if (DoPurify(out action)) return true;
 
+        if (InCombat && BraveryPvP.CanUse(out action)) return true;
+        if (InCombat && DervishPvP.CanUse(out action)) return true;
+
         return base.EmergencyAbility(nextGCD, out action);
     }
 
@@ -62,6 +65,7 @@ public sealed class MCH_DefaultPvP : MachinistRotation
         if (nextGCD.IsTheSameTo(false, ActionID.DrillPvP, ActionID.BioblasterPvP, ActionID.AirAnchorPvP, ActionID.ChainSawPvP) && AnalysisPvP.CanUse(out action, usedUp: true)) return true;
         if (Player.HasStatus(true, StatusID.Overheated_3149) && WildfirePvP.CanUse(out action)) return true;
         if (BishopAutoturretPvP.CanUse(out action)) return true;
+        if (EagleEyeShotPvP.CanUse(out action)) return true;
 
         return base.AttackAbility(nextGCD, out action);
     }

@@ -1,6 +1,6 @@
 namespace RebornRotations.PVPRotations.Magical;
 
-[Rotation("Default PvP", CombatType.PvP, GameVersion = "7.2")]
+[Rotation("Default PvP", CombatType.PvP, GameVersion = "7.21")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Magical/PCT_Default.PVP.cs")]
 [Api(4)]
 public class PCT_DefaultPvP : PictomancerRotation
@@ -12,6 +12,17 @@ public class PCT_DefaultPvP : PictomancerRotation
 
     [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
     public bool RespectGuard { get; set; } = true;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Health threshold needed to use Tempura Coat")]
+    public float TempuraThreshold { get; set; } = 0.8f;
+
+    [RotationConfig(CombatType.PvP, Name = "Freely use burst damage oGCDs")]
+    public bool FreeBurst { get; set; } = true;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Enemy HP threshold needed to use burst oGCDs on if previous config disabled")]
+    public float BurstThreshold { get; set; } = 0.55f;
     #endregion
 
     #region Standard PVP Utilities
@@ -50,6 +61,8 @@ public class PCT_DefaultPvP : PictomancerRotation
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
+        if (Player.GetHealthRatio() <= TempuraThreshold && TemperaCoatPvP.CanUse(out action)) return true;
+
         return base.DefenseSingleAbility(nextGCD, out action);
     }
 
@@ -58,10 +71,18 @@ public class PCT_DefaultPvP : PictomancerRotation
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
-        if (PomMusePvP.CanUse(out action, usedUp: true)) return true;
-        if (WingedMusePvP.CanUse(out action, usedUp: true)) return true;
-        if (ClawedMusePvP.CanUse(out action, usedUp: true)) return true;
-        if (FangedMusePvP.CanUse(out action, usedUp: true)) return true;
+        //if (CometPvP.CanUse(out action)) return true;
+        if (RustPvP.CanUse(out action)) return true;
+        if (PhantomDartPvP.CanUse(out action)) return true;
+
+        if (FreeBurst || CurrentTarget?.GetHealthRatio() <= BurstThreshold)
+        {
+            // Use all Muses in sequence for maximum burst
+            if (PomMusePvP.CanUse(out action, usedUp: true)) return true;
+            if (WingedMusePvP.CanUse(out action, usedUp: true)) return true;
+            if (ClawedMusePvP.CanUse(out action, usedUp: true)) return true;
+            if (FangedMusePvP.CanUse(out action, usedUp: true)) return true;
+        }
 
         switch (IsMoving)
         {

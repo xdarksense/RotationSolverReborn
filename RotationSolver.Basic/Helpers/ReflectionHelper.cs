@@ -15,13 +15,26 @@
         {
             if (type == null) return Array.Empty<PropertyInfo>();
 
-            var properties = type.GetProperties(BindingFlags.Static | BindingFlags.Public)
-                                 .Where(prop => typeof(T).IsAssignableFrom(prop.PropertyType)
-                                            && prop.GetCustomAttribute<ObsoleteAttribute>() == null)
-                                 .ToArray();
+            var allProperties = type.GetProperties(BindingFlags.Static | BindingFlags.Public);
+            var filteredProperties = new List<PropertyInfo>();
+            foreach (var prop in allProperties)
+            {
+                if (typeof(T).IsAssignableFrom(prop.PropertyType) &&
+                    prop.GetCustomAttribute<ObsoleteAttribute>() == null)
+                {
+                    filteredProperties.Add(prop);
+                }
+            }
 
             var baseProperties = type.BaseType?.GetStaticProperties<T>() ?? Array.Empty<PropertyInfo>();
-            return properties.Concat(baseProperties).ToArray();
+
+            // Combine filteredProperties and baseProperties
+            var result = new PropertyInfo[filteredProperties.Count + baseProperties.Length];
+            filteredProperties.CopyTo(result, 0);
+            if (baseProperties.Length > 0)
+                Array.Copy(baseProperties, 0, result, filteredProperties.Count, baseProperties.Length);
+
+            return result;
         }
 
         /// <summary>
@@ -31,14 +44,27 @@
         /// <returns>An enumerable of method information.</returns>
         internal static IEnumerable<MethodInfo> GetAllMethodInfo(this Type? type)
         {
-            if (type == null) return Enumerable.Empty<MethodInfo>();
+            if (type == null) return Array.Empty<MethodInfo>();
 
-            var methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-                              .Where(method => !method.IsConstructor)
-                              .ToArray();
+            var allMethods = type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            var filteredMethods = new List<MethodInfo>();
+            foreach (var method in allMethods)
+            {
+                if (!method.IsConstructor)
+                {
+                    filteredMethods.Add(method);
+                }
+            }
 
-            var baseMethods = type.BaseType?.GetAllMethodInfo() ?? Enumerable.Empty<MethodInfo>();
-            return methods.Concat(baseMethods);
+            var baseMethods = type.BaseType?.GetAllMethodInfo() ?? Array.Empty<MethodInfo>();
+
+            // Combine filteredMethods and baseMethods
+            var result = new MethodInfo[filteredMethods.Count + baseMethods.Count()];
+            filteredMethods.CopyTo(result, 0);
+            if (baseMethods.Any())
+                baseMethods.ToArray().CopyTo(result, filteredMethods.Count);
+
+            return result;
         }
 
         /// <summary>
