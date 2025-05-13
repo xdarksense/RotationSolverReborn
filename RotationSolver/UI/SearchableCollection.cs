@@ -15,9 +15,11 @@ internal class SearchableCollection
 
     public SearchableCollection()
     {
-        var properties = typeof(Configs).GetRuntimeProperties().ToArray();
-        var pairs = new List<SearchPair>(properties.Length);
-        var parents = new Dictionary<string, CheckBoxSearch>(properties.Length);
+        var properties = typeof(Configs).GetRuntimeProperties();
+        int propertiesLength = 0;
+        foreach (var _ in properties) propertiesLength++;
+        var pairs = new List<SearchPair>(propertiesLength);
+        var parents = new Dictionary<string, CheckBoxSearch>(propertiesLength);
         var attributes = new ConcurrentDictionary<PropertyInfo, UIAttribute>();
 
         foreach (var property in properties)
@@ -79,7 +81,21 @@ internal class SearchableCollection
                 ImGui.Separator();
             }
 
-            foreach (var item in grp.Value.OrderBy(i => i.Attribute.Order))
+            var items = grp.Value;
+            // Simple insertion sort by Attribute.Order
+            for (int i = 1; i < items.Count; i++)
+            {
+                var temp = items[i];
+                int j = i - 1;
+                while (j >= 0 && items[j].Attribute.Order > temp.Attribute.Order)
+                {
+                    items[j + 1] = items[j];
+                    j--;
+                }
+                items[j + 1] = temp;
+            }
+
+            foreach (var item in items)
             {
                 item.Searchable.Draw();
             }
@@ -114,19 +130,29 @@ internal class SearchableCollection
         return finalResults.ToArray();
     }
 
-    private static ISearchable? CreateSearchable(PropertyInfo property) => property.Name switch
+    private static ISearchable? CreateSearchable(PropertyInfo property)
     {
-        nameof(Configs.AutoHeal) => new AutoHealCheckBox(property),
-        _ when property.PropertyType.IsEnum => new EnumSearch(property),
-        _ when property.PropertyType == typeof(bool) => new CheckBoxSearchNoCondition(property),
-        _ when property.PropertyType == typeof(ConditionBoolean) => new CheckBoxSearchCondition(property),
-        _ when property.PropertyType == typeof(float) => new DragFloatSearch(property),
-        _ when property.PropertyType == typeof(int) => new DragIntSearch(property),
-        _ when property.PropertyType == typeof(Vector2) => new DragFloatRangeSearch(property),
-        _ when property.PropertyType == typeof(Vector2Int) => new DragIntRangeSearch(property),
-        _ when property.PropertyType == typeof(Vector4) => new ColorEditSearch(property),
-        _ => null
-    };
+        if (property.Name == nameof(Configs.AutoHeal))
+            return new AutoHealCheckBox(property);
+        else if (property.PropertyType.IsEnum)
+            return new EnumSearch(property);
+        else if (property.PropertyType == typeof(bool))
+            return new CheckBoxSearchNoCondition(property);
+        else if (property.PropertyType == typeof(ConditionBoolean))
+            return new CheckBoxSearchCondition(property);
+        else if (property.PropertyType == typeof(float))
+            return new DragFloatSearch(property);
+        else if (property.PropertyType == typeof(int))
+            return new DragIntSearch(property);
+        else if (property.PropertyType == typeof(Vector2))
+            return new DragFloatRangeSearch(property);
+        else if (property.PropertyType == typeof(Vector2Int))
+            return new DragIntRangeSearch(property);
+        else if (property.PropertyType == typeof(Vector4))
+            return new ColorEditSearch(property);
+        else
+            return null;
+    }
 
     private static IEnumerable<ISearchable> GetChildren(ISearchable searchable)
     {

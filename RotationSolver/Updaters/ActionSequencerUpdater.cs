@@ -32,10 +32,18 @@ internal class ActionSequencerUpdater
         {
             foreach (var conditionPair in conditions)
             {
-                var nextAct = allActions.FirstOrDefault(a => a.ID == conditionPair.Key);
+                object? nextAct = null;
+                foreach (var a in allActions)
+                {
+                    if (a.ID == conditionPair.Key)
+                    {
+                        nextAct = a;
+                        break;
+                    }
+                }
                 if (nextAct == null || !conditionPair.Value.IsTrue(customRotation)) continue;
 
-                DataCenter.ActionSequencerAction = nextAct;
+                DataCenter.ActionSequencerAction = nextAct as IAction;
                 return;
             }
         }

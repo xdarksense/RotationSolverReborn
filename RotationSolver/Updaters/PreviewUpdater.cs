@@ -120,7 +120,17 @@ internal static class PreviewUpdater
 
         var statusTimes = GetStatusTimes();
 
-        var stopDueStatus = statusTimes.Length > 0 && statusTimes.Min() > Player.Object.TotalCastTime - Player.Object.CurrentCastTime && statusTimes.Min() < 5;
+        // Replace statusTimes.Min() with manual minimum calculation
+        float minStatusTime = float.MaxValue;
+        for (int i = 0; i < statusTimes.Length; i++)
+        {
+            if (statusTimes[i] < minStatusTime)
+            {
+                minStatusTime = statusTimes[i];
+            }
+        }
+
+        var stopDueStatus = statusTimes.Length > 0 && minStatusTime > Player.Object.TotalCastTime - Player.Object.CurrentCastTime && minStatusTime < 5;
 
         if (_tarStopCastDelay.Delay(tarDead) || stopDueStatus)
         {
@@ -139,6 +149,7 @@ internal static class PreviewUpdater
         {
             foreach (var status in Player.Object.StatusList)
             {
+                // No LINQ used here, Contains is a method on the collection
                 if (OtherConfiguration.NoCastingStatus.Contains((uint)status.StatusId))
                 {
                     statusTimes.Add(status.RemainingTime);
@@ -173,10 +184,15 @@ internal static class PreviewUpdater
     {
         var index = 0;
         var hotBarIndex = 0;
-        foreach (var intPtr in Service.GetAddons<AddonActionBar>()
-            .Union(Service.GetAddons<AddonActionBarX>())
-            .Union(Service.GetAddons<AddonActionCross>())
-            .Union(Service.GetAddons<AddonActionDoubleCrossBase>()))
+
+        // Replace .Union() LINQ with manual enumeration
+        var addonPtrs = new List<IntPtr>();
+        foreach (var ptr in Service.GetAddons<AddonActionBar>()) addonPtrs.Add(ptr);
+        foreach (var ptr in Service.GetAddons<AddonActionBarX>()) addonPtrs.Add(ptr);
+        foreach (var ptr in Service.GetAddons<AddonActionCross>()) addonPtrs.Add(ptr);
+        foreach (var ptr in Service.GetAddons<AddonActionDoubleCrossBase>()) addonPtrs.Add(ptr);
+
+        foreach (var intPtr in addonPtrs)
         {
             if (intPtr == IntPtr.Zero) continue;
             var actionBar = (AddonActionBarBase*)intPtr;

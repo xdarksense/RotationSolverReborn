@@ -141,6 +141,7 @@ internal static partial class TargetUpdater
     private static List<IBattleChara> GetAllHostileTargets()
     {
         var hostileTargets = new List<IBattleChara>();
+        bool hasInvincible = false;
         try
         {
             foreach (var target in DataCenter.AllTargets)
@@ -148,7 +149,19 @@ internal static partial class TargetUpdater
                 if (target == null) continue;
                 if (target.StatusList == null) continue;
                 if (!target.IsEnemy() || !target.IsTargetable) continue;
-                if (target.StatusList != null && target.StatusList.Any(StatusHelper.IsInvincible) &&
+                if (target.StatusList != null)
+                {
+                    for (int i = 0; i < target.StatusList.Length; i++)
+                    {
+                        var status = target.StatusList[i];
+                        if (status != null && StatusHelper.IsInvincible(status))
+                        {
+                            hasInvincible = true;
+                            break;
+                        }
+                    }
+                }
+                if (hasInvincible &&
                     (DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility || !DataCenter.IsPvP)) continue;
 
                 hostileTargets.Add(target);
@@ -187,10 +200,50 @@ internal static partial class TargetUpdater
         {
             try
             {
-                var deathParty = DataCenter.PartyMembers?.GetDeath().Where(target => !target.IsEnemy()).ToList() ?? [];
-                var deathAll = DataCenter.AllTargets?.GetDeath().Where(target => !target.IsEnemy()).ToList() ?? [];
-                var deathNPC = DataCenter.FriendlyNPCMembers?.GetDeath().Where(target => !target.IsEnemy()).ToList() ?? [];
-                var deathAllianceMembers = DataCenter.AllianceMembers?.GetDeath().Where(target => !target.IsEnemy()).ToList() ?? [];
+                var deathParty = new List<IBattleChara>();
+                if (DataCenter.PartyMembers != null)
+                {
+                    foreach (var target in DataCenter.PartyMembers.GetDeath())
+                    {
+                        if (!target.IsEnemy())
+                        {
+                            deathParty.Add(target);
+                        }
+                    }
+                }
+                var deathAll = new List<IBattleChara>();
+                if (DataCenter.AllTargets != null)
+                {
+                    foreach (var target in DataCenter.AllTargets.GetDeath())
+                    {
+                        if (!target.IsEnemy())
+                        {
+                            deathAll.Add(target);
+                        }
+                    }
+                }
+                var deathNPC = new List<IBattleChara>();
+                if (DataCenter.FriendlyNPCMembers != null)
+                {
+                    foreach (var target in DataCenter.FriendlyNPCMembers.GetDeath())
+                    {
+                        if (!target.IsEnemy())
+                        {
+                            deathNPC.Add(target);
+                        }
+                    }
+                }
+                var deathAllianceMembers = new List<IBattleChara>();
+                if (DataCenter.AllianceMembers != null)
+                {
+                    foreach (var target in DataCenter.AllianceMembers.GetDeath())
+                    {
+                        if (!target.IsEnemy())
+                        {
+                            deathAllianceMembers.Add(target);
+                        }
+                    }
+                }
                 var deathAllianceHealers = new List<IBattleChara>(deathParty);
                 var deathAllianceSupports = new List<IBattleChara>(deathParty);
 
@@ -255,7 +308,6 @@ internal static partial class TargetUpdater
         return null;
     }
 
-
     private static IBattleChara? GetPriorityDeathTarget(List<IBattleChara> validRaiseTargets, RaiseType raiseType = RaiseType.PartyOnly)
     {
         if (validRaiseTargets.Count == 0) return null;
@@ -318,7 +370,20 @@ internal static partial class TargetUpdater
 
             foreach (var person in weakenPeople)
             {
-                if (person.StatusList != null && person.StatusList.Any(status => status != null && status.IsDangerous()))
+                bool hasDangerous = false;
+                if (person.StatusList != null)
+                {
+                    for (int i = 0; i < person.StatusList.Length; i++)
+                    {
+                        var status = person.StatusList[i];
+                        if (status != null && status.IsDangerous())
+                        {
+                            hasDangerous = true;
+                            break;
+                        }
+                    }
+                }
+                if (hasDangerous)
                 {
                     dyingPeople.Add(person);
                 }

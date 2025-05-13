@@ -67,7 +67,7 @@ public static class ObjectHelper
 
     internal static bool HasPositional(this IGameObject obj)
     {
-        return obj != null && (!(obj.GetObjectNPC()?.IsOmnidirectional ?? false)); // Unknown10 used to be the flag for no positional, believe this was changed to IsOmnidirectional
+        return obj != null && (!(obj.GetObjectNPC()?.IsOmnidirectional ?? false));
     }
 
     internal static unsafe bool IsOthersPlayersMob(this IGameObject obj)
@@ -293,7 +293,10 @@ public static class ObjectHelper
     /// <param name="obj"></param>
     /// <returns></returns>
     public static unsafe ObjectKind GetObjectKind(this IGameObject obj)
-    => (ObjectKind)obj.Struct()->ObjectKind;
+    {
+        var s = obj.Struct();
+        return s == null ? default : (ObjectKind)s->ObjectKind;
+    }
 
     /// <summary>
     /// Determines whether the specified game object is a top priority hostile target based on its name being listed.
@@ -337,14 +340,30 @@ public static class ObjectHelper
 
             if (Player.Job == Job.MCH && obj.HasStatus(true, StatusID.Wildfire)) return true;
 
-            // Ensure StatusList is not null before calling Any
-            foreach (var status in b.StatusList)
+            // Ensure StatusList is not null before iterating
+            if (b.StatusList != null)
             {
-                if (StatusHelper.IsPriority(status)) return true;
+                foreach (var status in b.StatusList)
+                {
+                    if (StatusHelper.IsPriority(status)) return true;
+                }
             }
         }
 
-        if (Service.Config.ChooseAttackMark && MarkingHelper.GetAttackSignTargets().Any(id => id != 0 && id == (long)obj.GameObjectId && obj.IsEnemy())) return true;
+        if (Service.Config.ChooseAttackMark)
+        {
+            var targets = MarkingHelper.GetAttackSignTargets();
+            if (targets != null)
+            {
+                foreach (var id in targets)
+                {
+                    if (id != 0 && id == (long)obj.GameObjectId && obj.IsEnemy())
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
 
         if (Service.Config.TargetFatePriority && DataCenter.PlayerFateId != 0 && obj.FateId() == DataCenter.PlayerFateId) return true;
 
@@ -858,7 +877,7 @@ public static class ObjectHelper
 
         foreach (var (time, hpRatiosDict) in recordedHPCopy)
         {
-            if (hpRatiosDict.TryGetValue(obj.GameObjectId, out var ratio) && ratio != 1)
+            if (hpRatiosDict != null && hpRatiosDict.TryGetValue(obj.GameObjectId, out var ratio) && ratio != 1)
             {
                 if (startTime == DateTime.MinValue)
                 {
@@ -876,14 +895,24 @@ public static class ObjectHelper
 
         if (startTime == DateTime.MinValue || (DateTime.Now - startTime) < CheckSpan) return float.NaN;
 
-        if (float.IsNaN(obj.GetHealthRatio())) return float.NaN;
+        float currentHealthRatio = obj.GetHealthRatio();
+        if (float.IsNaN(currentHealthRatio)) return float.NaN;
 
-        // Calculate the moving average of the HP ratios
-        var hpRatioDifference = initialHpRatio - hpRatios.Average();
+        // Manual average calculation to avoid LINQ
+        float sum = 0;
+        int count = 0;
+        foreach (var r in hpRatios)
+        {
+            sum += r;
+            count++;
+        }
+        float avg = count > 0 ? sum / count : 0;
+
+        var hpRatioDifference = initialHpRatio - avg;
         if (hpRatioDifference <= 0) return float.NaN;
 
         var elapsedTime = (float)(DateTime.Now - startTime).TotalSeconds;
-        return elapsedTime / hpRatioDifference * (wholeTime ? 1 : obj.GetHealthRatio());
+        return elapsedTime / hpRatioDifference * (wholeTime ? 1 : currentHealthRatio);
     }
 
     private static readonly ConcurrentDictionary<ulong, DateTime> _aliveStartTimes = new();

@@ -135,7 +135,14 @@ public static class IActionHelper
     /// <returns>True if the action ID matches any of the provided action IDs, otherwise false.</returns>
     private static bool IsActionID(ActionID id, params ActionID[] ids)
     {
-        return ids != null && ids.Contains(id);
+        if (ids == null)
+            return false;
+        for (int i = 0; i < ids.Length; i++)
+        {
+            if (ids[i].Equals(id))
+                return true;
+        }
+        return false;
     }
 
     /// <summary>

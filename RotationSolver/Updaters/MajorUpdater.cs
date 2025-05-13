@@ -4,6 +4,7 @@ using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using ECommons.ImGuiMethods;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
+using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using Lumina.Excel.Sheets;
@@ -17,11 +18,36 @@ namespace RotationSolver.Updaters;
 
 internal static class MajorUpdater
 {
-    public static bool IsValid => Player.AvailableThreadSafe
-        && Svc.Condition.Any()
-        && !Svc.Condition[ConditionFlag.BetweenAreas]
-        && !Svc.Condition[ConditionFlag.BetweenAreas51]
-        && !Svc.Condition[ConditionFlag.LoggingOut];
+    public static bool IsValid
+    {
+        get
+        {
+            if (!Player.AvailableThreadSafe)
+                return false;
+
+            // Replace Svc.Condition.Any() with manual check
+            bool anyCondition = false;
+            foreach (var conditionFlag in Svc.Condition.AsReadOnlySet())
+            {
+                if (Svc.Condition.AsReadOnlySet().Contains(conditionFlag))
+                {
+                    anyCondition = true;
+                    break;
+                }
+            }
+            if (!anyCondition)
+                return false;
+
+            if (Svc.Condition[ConditionFlag.BetweenAreas])
+                return false;
+            if (Svc.Condition[ConditionFlag.BetweenAreas51])
+                return false;
+            if (Svc.Condition[ConditionFlag.LoggingOut])
+                return false;
+
+            return true;
+        }
+    }
 
     private static Exception? _threadException;
     private static DateTime _lastUpdatedWork = DateTime.Now;
@@ -33,10 +59,6 @@ internal static class MajorUpdater
         Svc.Framework.Update += RSRUpdate;
     }
 
-    // "Transition locked" means when !MajorUpdater.IsValid
-    // TransitionSafeCommands are any function that are qualified safe for RSRUpdate to run, even when other updates should not happen.
-    // TransitionSafeCommands *should* be duplicated elsewhere for commands that should also run when otherwise safe to update.
-    // TransitionSafeCommands *should not* be used for commands that should *only* run when transition locked.
     public static void TransitionSafeCommands()
     {
         RSCommands.UpdateRotationState();
@@ -191,13 +213,22 @@ internal static class MajorUpdater
     {
         if (!Service.Config.TeachingMode || ActionUpdater.NextAction is not IAction nextAction) return;
 
-        HotbarID? hotbar = nextAction switch
+        HotbarID? hotbar = null;
+        if (nextAction is IBaseItem item)
         {
-            IBaseItem item => new HotbarID(HotbarSlotType.Item, item.ID),
-            IBaseAction baseAction when baseAction.Action.ActionCategory.RowId is 10 or 11 => GetGeneralActionHotbarID(baseAction),
-            IBaseAction baseAction => new HotbarID(HotbarSlotType.Action, baseAction.AdjustedID),
-            _ => null
-        };
+            hotbar = new HotbarID(HotbarSlotType.Item, item.ID);
+        }
+        else if (nextAction is IBaseAction baseAction)
+        {
+            if (baseAction.Action.ActionCategory.RowId == 10 || baseAction.Action.ActionCategory.RowId == 11)
+            {
+                hotbar = GetGeneralActionHotbarID(baseAction);
+            }
+            else
+            {
+                hotbar = new HotbarID(HotbarSlotType.Action, baseAction.AdjustedID);
+            }
+        }
 
         if (hotbar.HasValue)
         {
@@ -223,12 +254,33 @@ internal static class MajorUpdater
 
     private static void ShowWarning()
     {
-        if (!Svc.PluginInterface.InstalledPlugins.Any(p => p.InternalName == "Avarice"))
+        // Replace LINQ Any with manual loop for "Avarice"
+        bool foundAvarice = false;
+        foreach (var p in Svc.PluginInterface.InstalledPlugins)
+        {
+            if (p.InternalName == "Avarice")
+            {
+                foundAvarice = true;
+                break;
+            }
+        }
+        if (!foundAvarice)
         {
 #pragma warning disable CS0436
             WarningHelper.AddSystemWarning(UiString.AvariceWarning.GetDescription());
         }
-        if (!Svc.PluginInterface.InstalledPlugins.Any(p => p.InternalName == "TextToTalk"))
+
+        // Replace LINQ Any with manual loop for "TextToTalk"
+        bool foundTextToTalk = false;
+        foreach (var p in Svc.PluginInterface.InstalledPlugins)
+        {
+            if (p.InternalName == "TextToTalk")
+            {
+                foundTextToTalk = true;
+                break;
+            }
+        }
+        if (!foundTextToTalk)
         {
 #pragma warning disable CS0436
             WarningHelper.AddSystemWarning(UiString.TextToTalkWarning.GetDescription());
@@ -269,41 +321,53 @@ internal static class MajorUpdater
     private unsafe static void OpenChest()
     {
         if (!Service.Config.AutoOpenChest) return;
+        if (Player.Object == null) return;
         if (DataCenter.InCombat) return;
         var player = Player.Object;
 
-        var treasure = Svc.Objects.FirstOrDefault(o =>
+        object? treasure = null;
+        foreach (var o in Svc.Objects)
         {
-            if (o == null) return false;
+            if (o == null) continue;
             var dis = Vector3.Distance(player.Position, o.Position) - player.HitboxRadius - o.HitboxRadius;
-            if (dis > 0.5f) return false;
+            if (dis > 0.5f) continue;
 
-            var address = (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)o.Address;
-            if (address->ObjectKind != FFXIVClientStructs.FFXIV.Client.Game.Object.ObjectKind.Treasure) return false;
+            var address = (GameObject*)(void*)o.Address;
+            if (address->ObjectKind != ObjectKind.Treasure) continue;
 
-            //Opened!
+            bool opened = false;
             foreach (var item in Loot.Instance()->Items)
             {
-                if (item.ChestObjectId == o.GameObjectId) return false;
+                if (item.ChestObjectId == o.GameObjectId)
+                {
+                    opened = true;
+                    break;
+                }
             }
+            if (opened) continue;
 
-            return true;
-        });
+            treasure = o;
+            break;
+        }
 
         if (treasure == null) return;
         if (DateTime.Now < _nextOpenTime) return;
-        if (treasure.GameObjectId == _lastChest && DateTime.Now - _nextOpenTime < TimeSpan.FromSeconds(10)) return;
+        if (((dynamic)treasure).GameObjectId == _lastChest && DateTime.Now - _nextOpenTime < TimeSpan.FromSeconds(10)) return;
 
         _nextOpenTime = DateTime.Now.AddSeconds(new Random().NextDouble() + 0.2);
-        _lastChest = treasure.GameObjectId;
+        _lastChest = ((dynamic)treasure).GameObjectId;
 
         try
         {
-            Svc.Targets.Target = treasure;
+            var treasureGameObject = treasure as IGameObject;
+            if (treasureGameObject != null)
+            {
+                Svc.Targets.Target = treasureGameObject;
 
-            TargetSystem.Instance()->InteractWithObject((FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)(void*)treasure.Address);
+                TargetSystem.Instance()->InteractWithObject((GameObject*)(void*)treasureGameObject.Address);
 
-            Notify.Plain($"Try to open the chest {treasure.Name}");
+                Notify.Plain($"Try to open the chest {treasureGameObject.Name}");
+            }
         }
         catch (Exception ex)
         {

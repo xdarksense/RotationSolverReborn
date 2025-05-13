@@ -206,7 +206,11 @@ public sealed class SGE_Default : SageRotation
             }
         }
 
-        var tank = PartyMembers.GetJobCategory(JobRole.Tank).ToList();
+        var tankEnum = PartyMembers.GetJobCategory(JobRole.Tank);
+        var tank = new List<IBattleChara>();
+        foreach (var t in tankEnum)
+            tank.Add(t);
+
         for (int i = 0; i < tank.Count; i++)
         {
             var t = tank[i];
@@ -258,7 +262,16 @@ public sealed class SGE_Default : SageRotation
         if (OOCRhizomata && !InCombat && Addersgall <= 1 && RhizomataPvE.CanUse(out act)) return true;
         if (InCombat && Addersgall <= 1 && RhizomataPvE.CanUse(out act)) return true;
 
-        if (SoteriaPvE.CanUse(out act) && PartyMembers.Any(b => b.HasStatus(true, StatusID.Kardion) && b.GetHealthRatio() < HealthSingleAbility)) return true;
+        bool found = false;
+        foreach (var b in PartyMembers)
+        {
+            if (b.HasStatus(true, StatusID.Kardion) && b.GetHealthRatio() < HealthSingleAbility)
+            {
+                found = true;
+                break;
+            }
+        }
+        if (SoteriaPvE.CanUse(out act) && found) return true;
 
         return base.GeneralAbility(nextGCD, out act);
     }
@@ -402,7 +415,18 @@ public sealed class SGE_Default : SageRotation
         act = null;
         if (IsLastAction(ActionID.SwiftcastPvE) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
 
-        if (PartyMembersAverHP < PneumaAOEPartyHeal || DyskrasiaPvE.CanUse(out _) && PartyMembers.GetJobCategory(JobRole.Tank).Any(t => t.GetHealthRatio() < PneumaAOETankHeal))
+        bool tankBelowThreshold = false;
+        var tanks = PartyMembers.GetJobCategory(JobRole.Tank);
+        foreach (var t in tanks)
+        {
+            if (t.GetHealthRatio() < PneumaAOETankHeal)
+            {
+                tankBelowThreshold = true;
+                break;
+            }
+        }
+
+        if (PartyMembersAverHP < PneumaAOEPartyHeal || (DyskrasiaPvE.CanUse(out _) && tankBelowThreshold))
         {
             if (PneumaPvE.CanUse(out act)) return true;
         }
@@ -447,7 +471,8 @@ public sealed class SGE_Default : SageRotation
             }
         }
 
-        foreach (var tank in PartyMembers.GetJobCategory(JobRole.Tank))
+        var tanks = PartyMembers.GetJobCategory(JobRole.Tank);
+        foreach (var tank in tanks)
         {
             if (tank.GetHealthRatio() < PneumaSTTankHeal && !tank.IsDead)
             {
@@ -470,19 +495,28 @@ public sealed class SGE_Default : SageRotation
     #endregion
 
     #region Extra Methods
-    public override bool CanHealSingleSpell => base.CanHealSingleSpell && (GCDHeal || PartyMembers.GetJobCategory(JobRole.Healer).Count() < 2);
-    public override bool CanHealAreaSpell => base.CanHealAreaSpell && (GCDHeal || PartyMembers.GetJobCategory(JobRole.Healer).Count() < 2);
-
-    public override void DisplayStatus()
+    public override bool CanHealSingleSpell
     {
-        ImGui.Text($"Eukrasian Action: {_EukrasiaActionAim}");
-        ImGui.Text($"Last Eukrasian Action: {_lastEukrasiaActionAim}");
-        ImGui.Text("HasEukrasia: " + HasEukrasia.ToString());
-        ImGui.Text("Addersgall: " + Addersgall.ToString());
-        ImGui.Text("Addersting: " + Addersting.ToString());
-        ImGui.Text("AddersgallTime: " + AddersgallTime.ToString());
-        ImGui.Text("CanHealAreaSpell: " + CanHealAreaSpell.ToString());
-        ImGui.Text("CanHealSingleSpell: " + CanHealSingleSpell.ToString());
+        get
+        {
+            // Replace LINQ Count with manual count
+            int healerCount = 0;
+            var healers = PartyMembers.GetJobCategory(JobRole.Healer);
+            foreach (var h in healers)
+                healerCount++;
+            return base.CanHealSingleSpell && (GCDHeal || healerCount < 2);
+        }
+    }
+    public override bool CanHealAreaSpell
+    {
+        get
+        {
+            int healerCount = 0;
+            var healers = PartyMembers.GetJobCategory(JobRole.Healer);
+            foreach (var h in healers)
+                healerCount++;
+            return base.CanHealAreaSpell && (GCDHeal || healerCount < 2);
+        }
     }
     #endregion
 }

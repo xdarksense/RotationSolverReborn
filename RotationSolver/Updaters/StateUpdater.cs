@@ -1,5 +1,4 @@
-﻿using ECommons.DalamudServices;
-using ECommons.GameHelpers;
+﻿using ECommons.GameHelpers;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Configuration.Conditions;
 
@@ -19,7 +18,15 @@ internal static class StateUpdater
     {
         DataCenter.CommandStatus = StatusFromCmdOrCondition();
         DataCenter.AutoStatus = StatusFromAutomatic();
-        if (!DataCenter.InCombat && DataCenter.AttackedTargets?.Count() > 0)
+        int attackedTargetsCount = 0;
+        if (DataCenter.AttackedTargets != null)
+        {
+            foreach (var _ in DataCenter.AttackedTargets)
+            {
+                attackedTargetsCount++;
+            }
+        }
+        if (!DataCenter.InCombat && attackedTargetsCount > 0)
         {
             DataCenter.ResetAllRecords();
         }
@@ -243,7 +250,13 @@ internal static class StateUpdater
             return false;
 
         // Prioritize area healing if multiple members have DoomNeedHealing
-        if (DataCenter.PartyMembers.Count(member => member.DoomNeedHealing()) > 1)
+        int doomNeedHealingCount = 0;
+        foreach (var member in DataCenter.PartyMembers)
+        {
+            if (member.DoomNeedHealing())
+                doomNeedHealingCount++;
+        }
+        if (doomNeedHealingCount > 1)
             return true;
 
         int singleAbility = ShouldHealSingle(StatusHelper.SingleHots,
@@ -270,7 +283,13 @@ internal static class StateUpdater
             return false;
 
         // Prioritize area healing if multiple members have DoomNeedHealing
-        if (DataCenter.PartyMembers.Count(member => member.DoomNeedHealing()) > 1)
+        int doomNeedHealingCount = 0;
+        foreach (var member in DataCenter.PartyMembers)
+        {
+            if (member.DoomNeedHealing())
+                doomNeedHealingCount++;
+        }
+        if (doomNeedHealingCount > 1)
             return true;
 
         int singleSpell = ShouldHealSingle(StatusHelper.SingleHots,

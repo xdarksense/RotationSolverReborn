@@ -417,13 +417,13 @@ public sealed class SCH_Default : ScholarRotation
             if (BioIiPvE.CanUse(out act) && BioIiPvE.Target.Target.CurrentHp >= expectedHPToLive12Seconds) return true; // No better options still and configured TTK should cover whether we want to use it
             if (RuinPvE.CanUse(out act)) return true;
         }
-        else if (!BroilMasteryIiTrait.EnoughLevel)
+        else if (!BroilMasteryTrait.EnoughLevel)
         {
             if (BioIiPvE.CanUse(out act) && nearbyHostiles < GetAoWBreakevenTargets() && BioIiPvE.Target.Target.CurrentHp >= expectedHPToLive12Seconds) return true; // This is better against 2 targets IFF it will last >= 24 seconds
             if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 0) return true;
             if (RuinPvE.CanUse(out act)) return true; // 25m range may still allow us to do better than AoW does even at same potency and with a cast time
         }
-        else if (!CorruptionMasteryIiTrait.EnoughLevel)
+        else if (!BroilMasteryIiTrait.EnoughLevel)
         {
             if (BioIiPvE.CanUse(out act) && nearbyHostiles < GetAoWBreakevenTargets() && BioIiPvE.Target.Target.CurrentHp >= expectedHPToLive12Seconds) return true; // This is better against 3 targets IFF it will last >= 24 seconds
             if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 1) return true;

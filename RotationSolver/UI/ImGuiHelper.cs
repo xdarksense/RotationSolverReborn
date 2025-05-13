@@ -479,7 +479,15 @@ internal static class ImGuiHelper
         var name = string.Join(' ', keys);
 
         if (!_lastChecked.TryGetValue(name, out var last)) last = false;
-        var now = keys.All(k => Svc.KeyState[k]);
+        var now = true;
+        foreach (var k in keys)
+        {
+            if (!Svc.KeyState[k])
+            {
+                now = false;
+                break;
+            }
+        }
         _lastChecked[name] = now;
 
         if (!last && now) action();

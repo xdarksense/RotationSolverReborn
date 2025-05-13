@@ -133,9 +133,27 @@ public partial class RotationConfigWindow
     private static void DrawBasicNamedConditions()
     {
         // Ensure there is always an empty named condition at the end
-        if (!DataCenter.CurrentConditionValue.NamedConditions.Any(c => string.IsNullOrEmpty(c.Name)))
+        bool hasEmpty = false;
+        var namedConditions = DataCenter.CurrentConditionValue.NamedConditions;
+        for (int i = 0; i < namedConditions.Length; i++)
         {
-            DataCenter.CurrentConditionValue.NamedConditions = DataCenter.CurrentConditionValue.NamedConditions.Append((string.Empty, new ConditionSet())).ToArray();
+            if (string.IsNullOrEmpty(namedConditions[i].Name))
+            {
+                hasEmpty = true;
+                break;
+            }
+        }
+        if (!hasEmpty)
+        {
+            // Append (string.Empty, new ConditionSet()) to the array
+            var oldArray = DataCenter.CurrentConditionValue.NamedConditions;
+            var newArray = new (string Name, ConditionSet Condition)[oldArray.Length + 1];
+            for (int i = 0; i < oldArray.Length; i++)
+            {
+                newArray[i] = oldArray[i];
+            }
+            newArray[oldArray.Length] = (string.Empty, new ConditionSet());
+            DataCenter.CurrentConditionValue.NamedConditions = newArray;
         }
 
         ImGui.Spacing();
@@ -177,9 +195,17 @@ public partial class RotationConfigWindow
         // Remove the named condition if needed
         if (removeIndex > -1)
         {
-            var list = DataCenter.CurrentConditionValue.NamedConditions.ToList();
-            list.RemoveAt(removeIndex);
-            DataCenter.CurrentConditionValue.NamedConditions = list.ToArray();
+            // Convert array to list, remove, then back to array
+            var oldArray = DataCenter.CurrentConditionValue.NamedConditions;
+            var newList = new List<(string Name, ConditionSet Condition)>(oldArray.Length - 1);
+            for (int i = 0; i < oldArray.Length; i++)
+            {
+                if (i != removeIndex)
+                {
+                    newList.Add(oldArray[i]);
+                }
+            }
+            DataCenter.CurrentConditionValue.NamedConditions = newList.ToArray();
         }
     }
 
@@ -390,7 +416,7 @@ public partial class RotationConfigWindow
     { UiString.ConfigWindow_Target_Config.GetDescription, DrawTargetConfig },
     { UiString.ConfigWindow_List_Hostile.GetDescription, DrawTargetHostile },
     { UiString.ConfigWindow_List_TargetPriority.GetDescription, DrawTargetPriority },
-});
+    });
 
     /// <summary>
     /// Draws the target configuration items.
@@ -456,7 +482,12 @@ public partial class RotationConfigWindow
     {
         // Convert HashSet<uint> to string[] for ImGui input
         var prioIdSet = OtherConfiguration.PrioTargetId;
-        string[] prioId = prioIdSet.Select(id => id.ToString()).ToArray();
+        string[] prioId = new string[prioIdSet.Count];
+        int idx = 0;
+        foreach (var id in prioIdSet)
+        {
+            prioId[idx++] = id.ToString();
+        }
 
         // Begin new column for Prioritized Target Names
         ImGui.TableNextColumn();
@@ -505,7 +536,7 @@ public partial class RotationConfigWindow
         UiString.ConfigWindow_Extra_Others.GetDescription,
         () => _allSearchable.DrawItems(Configs.Extra)
     },
-});
+    });
 
     private static void DrawEventTab()
     {
