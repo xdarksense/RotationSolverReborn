@@ -352,22 +352,20 @@ internal static class MajorUpdater
 
         if (treasure == null) return;
         if (DateTime.Now < _nextOpenTime) return;
-        if (((dynamic)treasure).GameObjectId == _lastChest && DateTime.Now - _nextOpenTime < TimeSpan.FromSeconds(10)) return;
+
+        var treasureGameObject = treasure as IGameObject;
+        if (treasureGameObject == null) return;
+
+        if (treasureGameObject.GameObjectId == _lastChest && DateTime.Now - _nextOpenTime < TimeSpan.FromSeconds(10)) return;
 
         _nextOpenTime = DateTime.Now.AddSeconds(new Random().NextDouble() + 0.2);
-        _lastChest = ((dynamic)treasure).GameObjectId;
+        _lastChest = treasureGameObject.GameObjectId;
 
         try
         {
-            var treasureGameObject = treasure as IGameObject;
-            if (treasureGameObject != null)
-            {
-                Svc.Targets.Target = treasureGameObject;
-
-                TargetSystem.Instance()->InteractWithObject((GameObject*)(void*)treasureGameObject.Address);
-
-                Notify.Plain($"Try to open the chest {treasureGameObject.Name}");
-            }
+            Svc.Targets.Target = treasureGameObject;
+            TargetSystem.Instance()->InteractWithObject((GameObject*)(void*)treasureGameObject.Address);
+            Notify.Plain($"Try to open the chest {treasureGameObject.Name}");
         }
         catch (Exception ex)
         {

@@ -64,7 +64,7 @@ public sealed class AST_Default : AstrologianRotation
     public float EssentialDignityLast { get; set; } = 0.6f;
 
     [RotationConfig(CombatType.PvE, Name = "Prioritize Essential Dignity over single target GCD heals when available")]
-    public EssentialPrioStrategy EssentialPrio { get; set; } = EssentialPrioStrategy.CappedCharges;
+    public EssentialPrioStrategy EssentialPrio2 { get; set; } = EssentialPrioStrategy.UseGCDs;
 
     public enum EssentialPrioStrategy : byte
     {
@@ -274,8 +274,8 @@ public sealed class AST_Default : AstrologianRotation
         if (BubbleProtec && HasCollectiveUnconscious) return false;
         if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
         if (MicroPrio && HasMacrocosmos) return false;
-        if (EssentialPrio == EssentialPrioStrategy.AnyCharges && EssentialDignityPvE.EnoughLevel && EssentialDignityPvE.Cooldown.CurrentCharges > 0) return false;
-        if (EssentialPrio == EssentialPrioStrategy.CappedCharges && EssentialDignityPvE.EnoughLevel && EssentialDignityPvE.Cooldown.CurrentCharges < EssentialDignityPvE.Cooldown.MaxCharges) return false;
+        if (EssentialPrio2 == EssentialPrioStrategy.AnyCharges && EssentialDignityPvE.EnoughLevel && EssentialDignityPvE.Cooldown.CurrentCharges > 0) return false;
+        if (EssentialPrio2 == EssentialPrioStrategy.CappedCharges && EssentialDignityPvE.EnoughLevel && EssentialDignityPvE.Cooldown.CurrentCharges == EssentialDignityPvE.Cooldown.MaxCharges) return false;
 
         if (AspectedBeneficPvE.CanUse(out act) && (IsMoving || AspectedBeneficPvE.Target.Target?.GetHealthRatio() < AspectedBeneficHeal)) return true;
         if (BeneficIiPvE.CanUse(out act)) return true;
