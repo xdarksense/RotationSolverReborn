@@ -14,11 +14,11 @@ public sealed class RPR_DefaultPvP : ReaperRotation
     public bool RespectGuard { get; set; } = true;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Player health threshold needed for Bloodbath use")]
+    [RotationConfig(CombatType.PvP, Name = "Player health threshold needed for Bloodbath use")]
     public float BloodBathPvPPercent { get; set; } = 0.75f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Enemy health threshold needed for Smite use")]
+    [RotationConfig(CombatType.PvP, Name = "Enemy health threshold needed for Smite use")]
     public float SmitePvPPercent { get; set; } = 0.25f;
     #endregion
 
@@ -72,9 +72,9 @@ public sealed class RPR_DefaultPvP : ReaperRotation
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
+        if (HasEnshroudedPvP && LemuresSlicePvP.CanUse(out action)) return true;
         if (DeathWarrantPvP.CanUse(out action)) return true;
-        if (LemuresSlicePvP.CanUse(out action)) return true;
-        if (GrimSwathePvP.CanUse(out action)) return true;
+        if (!HasEnshroudedPvP && GrimSwathePvP.CanUse(out action)) return true;
 
         return base.AttackAbility(nextGCD, out action);
     }
@@ -86,15 +86,15 @@ public sealed class RPR_DefaultPvP : ReaperRotation
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
-        if (LemuresSlicePvP.CanUse(out action)) return true;
-        if (CommunioPvP.CanUse(out action)) return true;
+        if ((Player.StatusStack(true, StatusID.Enshrouded_2863) == 1 || Player.WillStatusEndGCD(1, 0, true, StatusID.Enshrouded_2863)) 
+            && CommunioPvP.CanUse(out action)) return true;
 
         if (CrossReapingPvP.CanUse(out action)) return true;
         if (VoidReapingPvP.CanUse(out action)) return true;
 
         if (PerfectioPvP.CanUse(out action)) return true;
 
-        if (Player.StatusList.Any(Status => (Status.GameData.Value.Name == "Immortal Sacrifice") && Status.Param > 3))
+        if (Player.StatusStack(true, StatusID.ImmortalSacrifice_3204) > 3)
         {
             if (PlentifulHarvestPvP.CanUse(out action)) return true;
         }

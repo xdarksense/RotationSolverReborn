@@ -14,12 +14,18 @@ public sealed class SAM_DefaultPvP : SamuraiRotation
     public bool RespectGuard { get; set; } = true;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Player health threshold needed for Bloodbath use")]
+    [RotationConfig(CombatType.PvP, Name = "Player health threshold needed for Bloodbath use")]
     public float BloodBathPvPPercent { get; set; } = 0.75f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Enemy health threshold needed for Smite use")]
+    [RotationConfig(CombatType.PvP, Name = "Enemy health threshold needed for Smite use")]
     public float SmitePvPPercent { get; set; } = 0.25f;
+
+    [RotationConfig(CombatType.PvP, Name = "Allow Mineuchi to be used on any target rather than just targets that already have Kuzushi status.")]
+    public bool MineuchiAny { get; set; } = false;
+
+    [RotationConfig(CombatType.PvP, Name = "Allow Hissatsu Soten to be used on any target regardless of distance (good luck)")]
+    public bool SotenYeet { get; set; } = false;
     #endregion
 
     #region Standard PVP Utilities
@@ -53,6 +59,7 @@ public sealed class SAM_DefaultPvP : SamuraiRotation
         if (Player.GetHealthRatio() < BloodBathPvPPercent && BloodbathPvP.CanUse(out action)) return true;
         if (SwiftPvP.CanUse(out action)) return true;
         if (CurrentTarget?.GetHealthRatio() <= SmitePvPPercent && SmitePvP.CanUse(out action)) return true;
+        if (!HasHostilesInRange && SotenYeet && HissatsuSotenPvP.CanUse(out action, usedUp: true)) return true;
 
         return base.EmergencyAbility(nextGCD, out action);
     }
@@ -72,8 +79,12 @@ public sealed class SAM_DefaultPvP : SamuraiRotation
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
+        if (nextGCD.IsTheSameTo(false, ActionID.YukikazePvP, ActionID.GekkoPvP, ActionID.KashaPvP) && HissatsuSotenPvP.CanUse(out action, usedUp: true)) return true;
+
         if (ZanshinPvP.CanUse(out action, usedUp: true)) return true;
-        if (Target.HasStatus(true, StatusID.Kuzushi) && MineuchiPvP.CanUse(out action)) return true;
+        if (MineuchiPvP.CanUse(out action, skipTargetStatusNeedCheck: MineuchiAny)) return true;
+        if (HasHostilesInRange && HissatsuChitenPvP.CanUse(out action)) return true;
+        if (HasHostilesInRange && MeikyoShisuiPvP.CanUse(out action)) return true;
 
         return base.AttackAbility(nextGCD, out action);
     }

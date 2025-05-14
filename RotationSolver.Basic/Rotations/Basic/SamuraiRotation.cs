@@ -481,6 +481,7 @@ partial class SamuraiRotation
 
     static partial void ModifyMineuchiPvP(ref ActionSetting setting)
     {
+        setting.TargetStatusNeed = [StatusID.Kuzushi];
     }
 
     static partial void ModifyMeikyoShisuiPvP(ref ActionSetting setting)
@@ -546,7 +547,7 @@ partial class SamuraiRotation
 
     static partial void ModifyHissatsuSotenPvP(ref ActionSetting setting)
     {
-        setting.SpecialType = SpecialActionType.MovingForward;
+        setting.StatusProvide = [StatusID.Kaiten_3201];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

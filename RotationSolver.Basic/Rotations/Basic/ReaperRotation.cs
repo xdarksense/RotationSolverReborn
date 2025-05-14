@@ -69,6 +69,11 @@ partial class ReaperRotation
     /// 
     /// </summary>
     public static bool HasPerfectioParata => Player.HasStatus(true, StatusID.PerfectioParata);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasEnshroudedPvP => Player.HasStatus(true, StatusID.Enshrouded_2863);
     #endregion
 
     #region Actions Unassignable
@@ -442,32 +447,53 @@ partial class ReaperRotation
     {
     }
 
+    static partial void ModifyHellsIngressPvP(ref ActionSetting setting)
+    {
+        setting.SpecialType = SpecialActionType.MovingForward;
+        setting.IsFriendly = true;
+    }
+
+    static partial void ModifyRegressPvP(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.HellsIngressPvP) == ActionID.RegressPvP;
+        setting.SpecialType = SpecialActionType.MovingBackward;
+        setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
     static partial void ModifyArcaneCrestPvP(ref ActionSetting setting)
     {
         setting.IsFriendly = true;
     }
 
-    static partial void ModifyVoidReapingPvP(ref ActionSetting setting)
-    {
-        setting.StatusNeed = [StatusID.Enshrouded];
-        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SlicePvP) == ActionID.VoidReapingPvP;
-    }
-
     static partial void ModifyExecutionersGuillotinePvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SlicePvP) == ActionID.ExecutionersGuillotinePvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyVoidReapingPvP(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.Enshrouded_2863];
+        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SlicePvP) == ActionID.VoidReapingPvP;
     }
 
     static partial void ModifyCrossReapingPvP(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Enshrouded];
+        setting.StatusNeed = [StatusID.Enshrouded_2863];
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.SlicePvP) == ActionID.CrossReapingPvP;
     }
 
     static partial void ModifyLemuresSlicePvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.GrimSwathePvP) == ActionID.LemuresSlicePvP;
-        setting.StatusNeed = [StatusID.Enshrouded];
+        setting.StatusNeed = [StatusID.Enshrouded_2863];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -482,34 +508,20 @@ partial class ReaperRotation
     {
         setting.StatusNeed = [StatusID.PerfectioParata_4309];
         setting.IsFriendly = false;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyCommunioPvP(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.Enshrouded];
+        setting.StatusNeed = [StatusID.Enshrouded_2863];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
     }
-
-    static partial void ModifyRegressPvP(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.HellsIngressPvP) == ActionID.RegressPvP;
-        setting.SpecialType = SpecialActionType.MovingBackward;
-        setting.IsFriendly = true;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
-    }
-
-    static partial void ModifyHellsIngressPvP(ref ActionSetting setting)
-    {
-        setting.SpecialType = SpecialActionType.MovingForward;
-        setting.IsFriendly = true;
-    }
-
     #endregion
 
     /// <inheritdoc/>

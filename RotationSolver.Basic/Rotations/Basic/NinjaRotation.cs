@@ -594,6 +594,10 @@ partial class NinjaRotation
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.DokumoriPvP) == ActionID.GokaMekkyakuPvP &&
                                     !Player.HasStatus(true, StatusID.SealedGokaMekkyaku);
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyMeisuiPvP(ref ActionSetting setting)
@@ -617,6 +621,10 @@ partial class NinjaRotation
     static partial void ModifyDotonPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.ShukuchiPvP) == ActionID.DotonPvP;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyShukuchiPvP(ref ActionSetting setting)
