@@ -14,11 +14,11 @@ public sealed class MNK_DefaultPvP : MonkRotation
     public bool RespectGuard { get; set; } = true;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Player health threshold needed for Bloodbath use")]
+    [RotationConfig(CombatType.PvP, Name = "Player health threshold needed for Bloodbath use")]
     public float BloodBathPvPPercent { get; set; } = 0.75f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Enemy health threshold needed for Smite use")]
+    [RotationConfig(CombatType.PvP, Name = "Enemy health threshold needed for Smite use")]
     public float SmitePvPPercent { get; set; } = 0.25f;
     #endregion
 
@@ -70,7 +70,8 @@ public sealed class MNK_DefaultPvP : MonkRotation
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
-        if (PhantomRushPvP.CanUse(out _) && RisingPhoenixPvP.CanUse(out action, usedUp: true)) return true;
+        if (HasHostilesInRange && RisingPhoenixPvP.CanUse(out action, usedUp: true)) return true;
+        if (HasHostilesInRange && EarthsReplyPvP.CanUse(out action, usedUp: true)) return true;
 
         return base.AttackAbility(nextGCD, out action);
     }
@@ -93,9 +94,8 @@ public sealed class MNK_DefaultPvP : MonkRotation
         if (PhantomRushPvP.CanUse(out action)) return true;
 
         if (FiresReplyPvP.CanUse(out action)) return true;
-
-        if (FlintsReplyPvP.CanUse(out action)) return true;
         if (WindsReplyPvP.CanUse(out action)) return true;
+        if (FlintsReplyPvP.CanUse(out action, usedUp: true)) return true;
 
         if (PouncingCoeurlPvP.CanUse(out action)) return true;
         if (RisingRaptorPvP.CanUse(out action)) return true;
@@ -103,8 +103,6 @@ public sealed class MNK_DefaultPvP : MonkRotation
         if (DemolishPvP.CanUse(out action)) return true;
         if (TwinSnakesPvP.CanUse(out action)) return true;
         if (DragonKickPvP.CanUse(out action)) return true;
-
-        if (FlintsReplyPvP.CanUse(out action, usedUp: true)) return true;
 
         return base.GeneralGCD(out action);
     }

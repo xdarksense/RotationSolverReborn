@@ -504,6 +504,7 @@ partial class MonkRotation
     static partial void ModifyRisingPhoenixPvP(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.FiresRumination_4301, StatusID.FireResonance];
+        setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
