@@ -78,32 +78,20 @@ public static class ObjectHelper
 
     internal static bool IsAttackable(this IBattleChara battleChara)
     {
+        if (Svc.ClientState == null) return false;
+        if (battleChara.StatusList == null) return false;
         if (battleChara.IsAllianceMember()) return false;
-        if (battleChara.IsEnemy() == false) return false;
+        if (!battleChara.IsEnemy()) return false;
         if (battleChara.IsSpecialExecptionImmune()) return false; // For specific named mobs that are immune to everything.
+        if (battleChara.IsSpecialImmune()) return false;
 
         // Dead.
         if (Service.Config.FilterOneHpInvincible && battleChara.CurrentHp <= 1) return false;
-
-        // Check if the target is invincible.
-        if (Service.Config.CodTarget && battleChara.IsCODBossImmune()) return false;
-        if (Service.Config.CinderTarget && battleChara.IsCinderDriftImmune()) return false;
-        if (Service.Config.JeunoTarget && battleChara.IsJeunoBossImmune()) return false;
-        if (Service.Config.StrongOfSheildTarget && battleChara.IsHanselorGretelSheilded()) return false;
-        if (Service.Config.ResistanceImmune && battleChara.IsResistanceImmune()) return false;
-        if (Service.Config.OmegaImmune && battleChara.IsOmegaImmune()) return false;
-        if (Service.Config.LimitlessImmune && battleChara.IsLimitlessBlue()) return false;
-        if (Service.Config.WolfImmune && battleChara.IsWolfImmune()) return false;
-
-        // Ensure StatusList is not null before accessing it
-        if (battleChara.StatusList == null) return false;
 
         foreach (var status in battleChara.StatusList)
         {
             if (StatusHelper.IsInvincible(status) && (DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility || !DataCenter.IsPvP)) return false;
         }
-
-        if (Svc.ClientState == null) return false;
 
         // In No Hostiles Names
         if (OtherConfiguration.NoHostileNames != null &&
@@ -215,7 +203,7 @@ public static class ObjectHelper
         => obj.GameObjectId is not 0
         && (!DataCenter.IsPvP && DataCenter.IsInAllianceRaid && obj is IPlayerCharacter && (ActionManager.CanUseActionOnTarget((uint)ActionID.RaisePvE, obj.Struct()) || ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, obj.Struct())));
 
-    internal static bool IsParty(this IGameObject? gameObject)
+    internal static bool IsParty(this IGameObject gameObject)
     {
         if (gameObject == null) return false;
 
@@ -225,7 +213,7 @@ public static class ObjectHelper
 
         foreach (var p in Svc.Party)
         {
-            if (p?.GameObject?.GameObjectId == gameObject.GameObjectId) return true;
+            if (p.GameObject?.GameObjectId == gameObject.GameObjectId) return true;
         }
 
         if (Service.Config.FriendlyPartyNpcHealRaise3 && gameObject.IsNpcPartyMember()) return true;
@@ -238,23 +226,17 @@ public static class ObjectHelper
 
     internal static bool IsNpcPartyMember(this IGameObject gameObj)
     {
-        return gameObj?.GetBattleNPCSubKind() == BattleNpcSubKind.NpcPartyMember;
+        return gameObj.GetBattleNPCSubKind() == BattleNpcSubKind.NpcPartyMember;
+    }
+
+    internal static bool IsFriendlyBattleNPC(this IGameObject gameObj)
+    {
+        return gameObj.GetNameplateKind() == NameplateKind.FriendlyBattleNPC;
     }
 
     internal static bool IsPlayerCharacterChocobo(this IGameObject gameObj)
     {
-        return gameObj?.GetBattleNPCSubKind() == BattleNpcSubKind.Chocobo;
-    }
-
-    internal static bool IsFriendlyBattleNPC(this IGameObject? gameObj)
-    {
-        if (gameObj == null)
-        {
-            return false;
-        }
-
-        var nameplateKind = gameObj?.GetNameplateKind();
-        return nameplateKind == NameplateKind.FriendlyBattleNPC;
+        return gameObj.GetBattleNPCSubKind() == BattleNpcSubKind.Chocobo;
     }
 
     internal static bool IsFocusTarget(this IGameObject gameObj)
@@ -432,17 +414,32 @@ public static class ObjectHelper
     internal static bool IsDummy(this IBattleChara obj) => obj?.NameId == 541;
 
     /// <summary>
+    /// Checks if the target is immune due to any special boss mechanic (Wolf, Jeuno, COD, CinderDrift, Resistance, Omega, LimitlessBlue, HanselOrGretel).
+    /// </summary>
+    /// <param name="obj">The object to check.</param>
+    /// <returns>True if the target is immune due to any special mechanic; otherwise, false.</returns>
+    public static bool IsSpecialImmune(this IBattleChara obj)
+    {
+        if (obj == null) return false;
+        if (Player.Object == null) return false;
+
+        return obj.IsWolfImmune()
+            || obj.IsJeunoBossImmune()
+            || obj.IsCODBossImmune()
+            || obj.IsCinderDriftImmune()
+            || obj.IsResistanceImmune()
+            || obj.IsOmegaImmune()
+            || obj.IsLimitlessBlue()
+            || obj.IsHanselorGretelSheilded();
+    }
+
+    /// <summary>
     /// Is target Wolf add immune.
     /// </summary>
     /// <param name="obj">the object.</param>
     /// <returns></returns>
     public static bool IsWolfImmune(this IBattleChara obj)
     {
-        if (!Service.Config.WolfImmune) return false;
-
-        if (obj == null) return false;
-        if (Player.Object == null) return false;
-
         // Numeric values used instead of name as Lumina does not provide name yet, and may update to change name
         var WindPack = (StatusID)4389; // Numeric value for "Rsv43891100S74Cfc3B0E74Cfc3B0", unable to hit Wolf of Wind
         var StonePack = (StatusID)4390; // Numeric value for "Rsv43901100S74Cfc3B0E74Cfc3B0", unable to hit Wolf of Wind
@@ -450,27 +447,24 @@ public static class ObjectHelper
         var WolfOfWind = obj.NameId == 13846;
         var WolfOfStone = obj.NameId == 13847;
 
-        if (obj.IsEnemy())
-        {
-            if (WolfOfWind &&
+        if (WolfOfWind &&
                 Player.Object.HasStatus(false, WindPack))
+        {
+            if (Service.Config.InDebug)
             {
-                if (Service.Config.InDebug)
-                {
-                    Svc.Log.Information("IsWolfImmune: WindPack status found");
-                }
-                return true;
+                Svc.Log.Information("IsWolfImmune: WindPack status found");
             }
+            return true;
+        }
 
-            if (WolfOfStone &&
-                Player.Object.HasStatus(false, StonePack))
+        if (WolfOfStone &&
+            Player.Object.HasStatus(false, StonePack))
+        {
+            if (Service.Config.InDebug)
             {
-                if (Service.Config.InDebug)
-                {
-                    Svc.Log.Information("IsWolfImmune: StonePack status found");
-                }
-                return true;
+                Svc.Log.Information("IsWolfImmune: StonePack status found");
             }
+            return true;
         }
 
         return false;
@@ -483,42 +477,34 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsJeunoBossImmune(this IBattleChara obj)
     {
-        if (!Service.Config.JeunoTarget) return false;
-
-        if (obj == null) return false;
-        if (Player.Object == null) return false;
-
-        if (obj.IsEnemy())
-        {
-            if (obj.HasStatus(false, StatusID.EpicVillain) &&
+        if (obj.HasStatus(false, StatusID.EpicVillain) &&
                 (Player.Object.HasStatus(false, StatusID.VauntedHero) || Player.Object.HasStatus(false, StatusID.FatedHero)))
+        {
+            if (Service.Config.InDebug)
             {
-                if (Service.Config.InDebug)
-                {
-                    Svc.Log.Information("IsJeunoBossImmune: EpicVillain status found");
-                }
-                return true;
+                Svc.Log.Information("IsJeunoBossImmune: EpicVillain status found");
             }
+            return true;
+        }
 
-            if (obj.HasStatus(false, StatusID.VauntedVillain) &&
-                (Player.Object.HasStatus(false, StatusID.EpicHero) || Player.Object.HasStatus(false, StatusID.FatedHero)))
+        if (obj.HasStatus(false, StatusID.VauntedVillain) &&
+            (Player.Object.HasStatus(false, StatusID.EpicHero) || Player.Object.HasStatus(false, StatusID.FatedHero)))
+        {
+            if (Service.Config.InDebug)
             {
-                if (Service.Config.InDebug)
-                {
-                    Svc.Log.Information("IsJeunoBossImmune: VauntedVillain status found");
-                }
-                return true;
+                Svc.Log.Information("IsJeunoBossImmune: VauntedVillain status found");
             }
+            return true;
+        }
 
-            if (obj.HasStatus(false, StatusID.FatedVillain) &&
-                (Player.Object.HasStatus(false, StatusID.EpicHero) || Player.Object.HasStatus(false, StatusID.VauntedHero)))
+        if (obj.HasStatus(false, StatusID.FatedVillain) &&
+            (Player.Object.HasStatus(false, StatusID.EpicHero) || Player.Object.HasStatus(false, StatusID.VauntedHero)))
+        {
+            if (Service.Config.InDebug)
             {
-                if (Service.Config.InDebug)
-                {
-                    Svc.Log.Information("IsJeunoBossImmune: FatedVillain status found");
-                }
-                return true;
+                Svc.Log.Information("IsJeunoBossImmune: FatedVillain status found");
             }
+            return true;
         }
 
         return false;
@@ -531,37 +517,29 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsCODBossImmune(this IBattleChara obj)
     {
-        if (!Service.Config.CodTarget) return false;
-
-        if (obj == null) return false;
-        if (Player.Object == null) return false;
-
         var StygianStatus = StatusID.UnnamedStatus_4388;
         var CloudOfDarknessStatus = StatusID.VeilOfDarkness;
         var AntiCloudOfDarknessStatus = StatusID.OuterDarkness;
         var AntiStygianStatus = StatusID.InnerDarkness;
 
-        if (obj.IsEnemy())
-        {
-            if (obj.HasStatus(false, CloudOfDarknessStatus) &&
+        if (obj.HasStatus(false, CloudOfDarknessStatus) &&
                 Player.Object.HasStatus(false, AntiCloudOfDarknessStatus))
+        {
+            if (Service.Config.InDebug)
             {
-                if (Service.Config.InDebug)
-                {
-                    Svc.Log.Information("IsCODBossImmune: OuterDarkness status found, CloudOfDarkness immune");
-                }
-                return true;
+                Svc.Log.Information("IsCODBossImmune: OuterDarkness status found, CloudOfDarkness immune");
             }
+            return true;
+        }
 
-            if (obj.HasStatus(false, StygianStatus) &&
-                Player.Object.HasStatus(false, AntiStygianStatus))
+        if (obj.HasStatus(false, StygianStatus) &&
+            Player.Object.HasStatus(false, AntiStygianStatus))
+        {
+            if (Service.Config.InDebug)
             {
-                if (Service.Config.InDebug)
-                {
-                    Svc.Log.Information("IsCODBossImmune: InnerDarkness status found, Stygian immune");
-                }
-                return true;
+                Svc.Log.Information("IsCODBossImmune: InnerDarkness status found, Stygian immune");
             }
+            return true;
         }
 
         return false;
@@ -574,37 +552,29 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsCinderDriftImmune(this IBattleChara obj)
     {
-        if (!Service.Config.CinderTarget) return false;
-
-        if (obj == null) return false;
-        if (Player.Object == null) return false;
-
         var GriefAdd = StatusID.BlindToGrief;
         var RageAdd = StatusID.BlindToRage;
         var AntiGriefAdd = StatusID.PallOfGrief;
         var AntiRageAdd = StatusID.PallOfRage;
 
-        if (obj.IsEnemy())
-        {
-            if (obj.HasStatus(false, GriefAdd) &&
+        if (obj.HasStatus(false, GriefAdd) &&
                 Player.Object.HasStatus(false, AntiGriefAdd))
+        {
+            if (Service.Config.InDebug)
             {
-                if (Service.Config.InDebug)
-                {
-                    Svc.Log.Information("IsCinderDriftImmune: AntiGriefAdd status found, GriefAdd immune");
-                }
-                return true;
+                Svc.Log.Information("IsCinderDriftImmune: AntiGriefAdd status found, GriefAdd immune");
             }
+            return true;
+        }
 
-            if (obj.HasStatus(false, RageAdd) &&
-                Player.Object.HasStatus(false, AntiRageAdd))
+        if (obj.HasStatus(false, RageAdd) &&
+            Player.Object.HasStatus(false, AntiRageAdd))
+        {
+            if (Service.Config.InDebug)
             {
-                if (Service.Config.InDebug)
-                {
-                    Svc.Log.Information("IsCinderDriftImmune: AntiRageAdd status found, RageAdd immune");
-                }
-                return true;
+                Svc.Log.Information("IsCinderDriftImmune: AntiRageAdd status found, RageAdd immune");
             }
+            return true;
         }
 
         return false;
@@ -617,38 +587,30 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsResistanceImmune(this IBattleChara obj)
     {
-        if (!Service.Config.ResistanceImmune) return false;
-
-        if (obj == null) return false;
-        if (Player.Object == null) return false;
-
         var VoidArkMagicResistance = StatusID.MagicResistance;
         var VoidArkRangedResistance = StatusID.RangedResistance;
         var LeviMagicResistance = StatusID.MantleOfTheWhorl;
         var LeviRangedResistance = StatusID.VeilOfTheWhorl;
         var role = Player.Object?.ClassJob.Value.GetJobRole() ?? JobRole.None;
 
-        if (obj.IsEnemy())
-        {
-            if (obj.HasStatus(false, VoidArkMagicResistance, LeviMagicResistance) &&
+        if (obj.HasStatus(false, VoidArkMagicResistance, LeviMagicResistance) &&
                 (role == JobRole.RangedMagical || role == JobRole.Healer))
+        {
+            if (Service.Config.InDebug)
             {
-                if (Service.Config.InDebug)
-                {
-                    Svc.Log.Information("IsResistanceImmune: MagicResistance status found");
-                }
-                return true;
+                Svc.Log.Information("IsResistanceImmune: MagicResistance status found");
             }
+            return true;
+        }
 
-            if (obj.HasStatus(false, VoidArkRangedResistance, LeviRangedResistance) &&
-                role == JobRole.RangedPhysical)
+        if (obj.HasStatus(false, VoidArkRangedResistance, LeviRangedResistance) &&
+            role == JobRole.RangedPhysical)
+        {
+            if (Service.Config.InDebug)
             {
-                if (Service.Config.InDebug)
-                {
-                    Svc.Log.Information("IsResistanceImmune: RangedResistance status found");
-                }
-                return true;
+                Svc.Log.Information("IsResistanceImmune: RangedResistance status found");
             }
+            return true;
         }
 
         return false;
@@ -661,11 +623,6 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsOmegaImmune(this IBattleChara obj)
     {
-        if (!Service.Config.OmegaImmune) return false;
-
-        if (obj == null) return false;
-        if (Player.Object == null) return false;
-
         var AntiOmegaF = StatusID.PacketFilterF;
         var AntiOmegaF_Extreme = StatusID.PacketFilterF_3500;
         var AntiOmegaM = StatusID.PacketFilterM;
@@ -675,27 +632,24 @@ public static class ObjectHelper
         var OmegaM = StatusID.OmegaM;
         var OmegaM2 = StatusID.OmegaM_3454;
 
-        if (obj.IsEnemy())
-        {
-            if (obj.HasStatus(false, OmegaF) &&
+        if (obj.HasStatus(false, OmegaF) &&
                 Player.Object.HasStatus(false, AntiOmegaF, AntiOmegaF_Extreme))
+        {
+            if (Service.Config.InDebug)
             {
-                if (Service.Config.InDebug)
-                {
-                    Svc.Log.Information("IsOmegaImmune: PacketFilterF status found");
-                }
-                return true;
+                Svc.Log.Information("IsOmegaImmune: PacketFilterF status found");
             }
+            return true;
+        }
 
-            if (obj.HasStatus(false, OmegaM, OmegaM2) &&
-                Player.Object.HasStatus(false, AntiOmegaM, AntiOmegaM_Extreme))
+        if (obj.HasStatus(false, OmegaM, OmegaM2) &&
+            Player.Object.HasStatus(false, AntiOmegaM, AntiOmegaM_Extreme))
+        {
+            if (Service.Config.InDebug)
             {
-                if (Service.Config.InDebug)
-                {
-                    Svc.Log.Information("IsOmegaImmune: PacketFilterM status found");
-                }
-                return true;
+                Svc.Log.Information("IsOmegaImmune: PacketFilterM status found");
             }
+            return true;
         }
 
         return false;
@@ -708,11 +662,6 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsLimitlessBlue(this IBattleChara obj)
     {
-        if (!Service.Config.LimitlessImmune) return false;
-
-        if (obj == null) return false;
-        if (Player.Object == null) return false;
-
         var WillOfTheWater = StatusID.WillOfTheWater;
         var WillOfTheWind = StatusID.WillOfTheWind;
         var WhaleBack = StatusID.Whaleback;
@@ -722,37 +671,34 @@ public static class ObjectHelper
         var BismarkShell = obj.NameId == 3656;
         var BismarkCorona = obj.NameId == 3657;
 
-        if (obj.IsEnemy())
-        {
-            if ((BismarkShell || BismarkCorona) &&
+        if ((BismarkShell || BismarkCorona) &&
                 !Player.Object.HasStatus(false, WhaleBack))
+        {
+            if (Service.Config.InDebug)
             {
-                if (Service.Config.InDebug)
-                {
-                    Svc.Log.Information("IsLimitlessBlue: Bismark found, WhaleBack status not found");
-                }
-                return true;
+                Svc.Log.Information("IsLimitlessBlue: Bismark found, WhaleBack status not found");
             }
+            return true;
+        }
 
-            if (Blue &&
-                Player.Object.HasStatus(false, WillOfTheWater))
+        if (Blue &&
+            Player.Object.HasStatus(false, WillOfTheWater))
+        {
+            if (Service.Config.InDebug)
             {
-                if (Service.Config.InDebug)
-                {
-                    Svc.Log.Information("IsLimitlessBlue: WillOfTheWater status found");
-                }
-                return true;
+                Svc.Log.Information("IsLimitlessBlue: WillOfTheWater status found");
             }
+            return true;
+        }
 
-            if (Green &&
-                Player.Object.HasStatus(false, WillOfTheWind))
+        if (Green &&
+            Player.Object.HasStatus(false, WillOfTheWind))
+        {
+            if (Service.Config.InDebug)
             {
-                if (Service.Config.InDebug)
-                {
-                    Svc.Log.Information("IsLimitlessBlue: WillOfTheWind status found");
-                }
-                return true;
+                Svc.Log.Information("IsLimitlessBlue: WillOfTheWind status found");
             }
+            return true;
         }
 
         return false;
@@ -765,23 +711,17 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsHanselorGretelSheilded(this IBattleChara obj)
     {
-        if (obj == null) return false;
-        if (Player.Object == null) return false;
-
         var strongOfShieldPositional = EnemyPositional.Front;
         var strongOfShieldStatus = StatusID.StrongOfShield;
 
-        if (obj.IsEnemy())
-        {
-            if (obj.HasStatus(false, strongOfShieldStatus) &&
+        if (obj.HasStatus(false, strongOfShieldStatus) &&
                 strongOfShieldPositional != obj.FindEnemyPositional())
+        {
+            if (Service.Config.InDebug)
             {
-                if (Service.Config.InDebug)
-                {
-                    Svc.Log.Information("IsHanselorGretelSheilded: StrongOfShield status found, ignoring status haver if player is out of position");
-                }
-                return true;
+                Svc.Log.Information("IsHanselorGretelSheilded: StrongOfShield status found, ignoring status haver if player is out of position");
             }
+            return true;
         }
 
         return false;

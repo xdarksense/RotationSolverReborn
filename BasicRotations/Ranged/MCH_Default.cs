@@ -1,6 +1,6 @@
 namespace RebornRotations.Ranged;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.20")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.21")]
 [SourceCode(Path = "main/BasicRotations/Ranged/MCH_Default.cs")]
 [Api(4)]
 public sealed class MCH_Default : MachinistRotation
@@ -115,7 +115,7 @@ public sealed class MCH_Default : MachinistRotation
         }
 
         // Rook Autoturret/Queen Logic
-        if (DumbQueen && InCombat && RookAutoturretPvE.CanUse(out act)) return true;
+        if (DumbQueen && InCombat && RookAutoturretPvE.CanUse(out act, skipTTKCheck: true)) return true;
         if (CanUseQueenMeow(out act, nextGCD)) return true;
 
         // Use Ricochet and Gauss
@@ -224,7 +224,7 @@ public sealed class MCH_Default : MachinistRotation
             || (nextGCD.IsTheSameTo(true, CleanShotPvE) && Battery == 100)
             || (nextGCD.IsTheSameTo(true, HotShotPvE, AirAnchorPvE, ChainSawPvE, ExcavatorPvE) && (Battery == 90 || Battery == 100)))
         {
-            if (RookAutoturretPvE.CanUse(out act)) return true;
+            if (InCombat && RookAutoturretPvE.CanUse(out act)) return true;
         }
         act = null;
         return false;

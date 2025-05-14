@@ -3174,21 +3174,6 @@ public partial class RotationConfigWindow : Window
             ImGui.Text("Tank Party Members: None");
         }
 
-        // Display all party members
-        var friendlyNPCMembers = DataCenter.FriendlyNPCMembers;
-        if (friendlyNPCMembers.Count != 0)
-        {
-            ImGui.Text("Friendly NPC Members:");
-            foreach (var member in friendlyNPCMembers)
-            {
-                ImGui.Text($"- {member.Name}");
-            }
-        }
-        else
-        {
-            ImGui.Text("Friendly NPC Members: None");
-        }
-
         // Display dispel target
         var dispelTarget = DataCenter.DispelTarget;
         if (dispelTarget != null)
@@ -3224,15 +3209,6 @@ public partial class RotationConfigWindow : Window
             string stackDisplay = stacks == byte.MaxValue ? "N/A" : stacks.ToString(); // Convert 255 to "N/A"
             ImGui.Text($"{status.GameData.Value.Name}: {status.StatusId} From: {source} Stacks: {stackDisplay}");
         }
-
-        ImGui.Spacing();
-        ImGui.Text($"Enemies:");
-        ImGui.Text($"All: {DataCenter.AllTargets.Count()}");
-        ImGui.Text($"Hostile: {DataCenter.AllHostileTargets.Count()}");
-        foreach (var item in DataCenter.AllHostileTargets)
-        {
-            ImGui.Text(item.Name.ToString());
-        }
     }
 
     private static unsafe void DrawParty()
@@ -3251,6 +3227,14 @@ public partial class RotationConfigWindow : Window
             if (b.TimeAlive() > 0) text += $", Time Alive: {b.TimeAlive()}";
             if (b.TimeDead() > 0) text += $", Time Dead: {b.TimeDead()}";
             ImGui.Text(text);
+        }
+        ImGui.Spacing();
+        ImGui.Text($"Object Data");
+        ImGui.Text($"AllTargets Count: {DataCenter.AllTargets.Count()}");
+        ImGui.Text($"AllHostileTargets Count: {DataCenter.AllHostileTargets.Count()}");
+        foreach (var item in DataCenter.AllHostileTargets)
+        {
+            ImGui.Text(item.Name.ToString());
         }
     }
 
