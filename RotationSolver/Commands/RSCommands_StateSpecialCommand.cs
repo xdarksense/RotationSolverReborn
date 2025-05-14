@@ -76,6 +76,7 @@ namespace RotationSolver.Commands
                 case StateCommandType.Off:
                     DataCenter.State = false;
                     DataCenter.IsManual = false;
+                    DataCenter.ResetAllRecords();
                     ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
                     if (Service.Config.ShowToggledSettingInChat) { Svc.Chat.Print($"Targeting : Off"); }
                     break;

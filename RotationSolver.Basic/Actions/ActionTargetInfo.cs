@@ -1064,7 +1064,7 @@ public struct ActionTargetInfo(IBaseAction action)
             {
                 foreach (var job in KardiaTankPriority)
                 {
-                    if (member.IsJobs(job) && !member.IsDead && member.HasStatus(false, StatusHelper.TankStanceStatus) && !member.HasStatus(false, StatusID.Kardion))
+                    if (member.IsJobs(job) && !member.IsDead && member.IsParty() && member.HasStatus(false, StatusHelper.TankStanceStatus) && !member.HasStatus(false, StatusID.Kardion))
                     {
                         return member;
                     }
@@ -1076,7 +1076,7 @@ public struct ActionTargetInfo(IBaseAction action)
             {
                 foreach (var job in KardiaTankPriority)
                 {
-                    if (member.IsJobs(job) && !member.IsDead)
+                    if (member.IsJobs(job) && !member.IsDead && member.IsParty())
                     {
                         return member;
                     }

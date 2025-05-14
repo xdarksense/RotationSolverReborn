@@ -252,7 +252,7 @@ partial class CustomRotation
     /// <returns>Is Longer.</returns>
     public static bool IsLongerThan(float time)
     {
-        if (IsInHighEndDuty) return true;
+        //if (IsInHighEndDuty) return true;
         return AverageTTK > time;
     }
 

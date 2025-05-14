@@ -1,6 +1,6 @@
 namespace RebornRotations.Ranged;
 
-[Rotation("High End", CombatType.PvE, GameVersion = "7.20")]
+[Rotation("High End", CombatType.PvE, GameVersion = "7.21")]
 [SourceCode(Path = "main/BasicRotations/Ranged/MCH_HighEnd.cs")]
 [Api(4)]
 public sealed class MCH_HighEnd : MachinistRotation
@@ -244,7 +244,7 @@ public sealed class MCH_HighEnd : MachinistRotation
 
         if (UseBalanceQueenTimings && (QueenOne || QueenTwo || QueenThree || QueenFour || QueenFive || QueenSix || QueenSeven || QueenEight || QueenNine || QueenTen || QueenEleven || QueenTwelve || QueenThirteen || QueenFourteen || QueenFifteen))
         {
-            if (RookAutoturretPvE.CanUse(out act)) return true;
+            if (RookAutoturretPvE.CanUse(out act, skipTTKCheck: true)) return true;
         }
         // take over with normal logic after queen timings run out in long fights
         else if ((!UseBalanceQueenTimings || !CombatElapsedLess(610f)) &&
@@ -257,7 +257,7 @@ public sealed class MCH_HighEnd : MachinistRotation
             || (nextGCD.IsTheSameTo(true, AirAnchorPvE, ChainSawPvE, ExcavatorPvE) && (Battery == 90 || Battery == 100))
             )))
         {
-            if (RookAutoturretPvE.CanUse(out act)) return true;
+            if (RookAutoturretPvE.CanUse(out act, skipTTKCheck: true)) return true;
         }
         act = null;
         return false;
