@@ -44,7 +44,9 @@ public static class Watcher
             if (battle is IPlayerCharacter) return;
             const int FriendSubKind = 9;
             if (battle.SubKind == FriendSubKind) return; // Friend!
-            if (Svc.Objects.SearchById(battle.GameObjectId) is IPlayerCharacter) return;
+            var obj = Svc.Objects.SearchById(battle.GameObjectId);
+            if (obj == null) return;
+            if (obj is IPlayerCharacter) return;
 
             var playerObject = Player.Object;
             if (playerObject == null) return;

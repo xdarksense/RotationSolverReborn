@@ -1,6 +1,6 @@
 namespace RebornRotations.Ranged;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.20")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.21")]
 [SourceCode(Path = "main/BasicRotations/Ranged/DNC_Default.cs")]
 [Api(4)]
 public sealed class DNC_Default : DancerRotation
@@ -302,10 +302,19 @@ public sealed class DNC_Default : DancerRotation
         }
         return false;
     }
+
     // Rewrite of method to hold dance finish until target is in range 14 yalms
     private bool FinishTheDance(out IAction? act)
     {
-        bool areDanceTargetsInRange = AllHostileTargets.Any(hostile => hostile.DistanceToPlayer() < 14);
+        bool areDanceTargetsInRange = false;
+        foreach (var hostile in AllHostileTargets)
+        {
+            if (hostile.DistanceToPlayer() < 14)
+            {
+                areDanceTargetsInRange = true;
+                break;
+            }
+        }
 
         // Check for Standard Step if targets are in range or status is about to end.
         if (Player.HasStatus(true, StatusID.StandardStep) && CompletedSteps == 2 &&

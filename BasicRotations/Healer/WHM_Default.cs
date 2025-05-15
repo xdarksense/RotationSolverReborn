@@ -181,9 +181,20 @@ public sealed class WHM_Default : WhiteMageRotation
 
         if (AfflatusRapturePvE.CanUse(out act)) return true;
 
-        int hasMedica2 = PartyMembers.Count((n) => n.HasStatus(true, StatusID.MedicaIi));
+        int hasMedica2 = 0;
+        foreach (var n in PartyMembers)
+        {
+            if (n.HasStatus(true, StatusID.MedicaIi))
+                hasMedica2++;
+        }
 
-        if (MedicaIiPvE.CanUse(out act) && hasMedica2 < PartyMembers.Count() / 2 && !IsLastAction(true, MedicaIiPvE)) return true;
+        int partyCount = 0;
+        foreach (var _ in PartyMembers)
+        {
+            partyCount++;
+        }
+
+        if (MedicaIiPvE.CanUse(out act) && hasMedica2 < partyCount / 2 && !IsLastAction(true, MedicaIiPvE)) return true;
 
         if (CureIiiPvE.CanUse(out act)) return true;
 
@@ -245,8 +256,29 @@ public sealed class WHM_Default : WhiteMageRotation
     #endregion
 
     #region Extra Methods
-    public override bool CanHealSingleSpell => base.CanHealSingleSpell && (GCDHeal || PartyMembers.GetJobCategory(JobRole.Healer).Count() < 2);
-    public override bool CanHealAreaSpell => base.CanHealAreaSpell && (GCDHeal || PartyMembers.GetJobCategory(JobRole.Healer).Count() < 2);
+
+    public override bool CanHealSingleSpell
+    {
+        get
+        {
+            int healerCount = 0;
+            var healers = PartyMembers.GetJobCategory(JobRole.Healer);
+            foreach (var h in healers)
+                healerCount++;
+            return base.CanHealSingleSpell && (GCDHeal || healerCount < 2);
+        }
+    }
+    public override bool CanHealAreaSpell
+    {
+        get
+        {
+            int healerCount = 0;
+            var healers = PartyMembers.GetJobCategory(JobRole.Healer);
+            foreach (var h in healers)
+                healerCount++;
+            return base.CanHealAreaSpell && (GCDHeal || healerCount < 2);
+        }
+    }
 
     private bool UseLily(out IAction? act)
     {

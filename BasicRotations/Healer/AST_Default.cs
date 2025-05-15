@@ -320,7 +320,27 @@ public sealed class AST_Default : AstrologianRotation
     #endregion
 
     #region Extra Methods
-    public override bool CanHealSingleSpell => base.CanHealSingleSpell && (GCDHeal || PartyMembers.GetJobCategory(JobRole.Healer).Count() < 2);
-    public override bool CanHealAreaSpell => base.CanHealAreaSpell && (GCDHeal || PartyMembers.GetJobCategory(JobRole.Healer).Count() < 2);
+    public override bool CanHealSingleSpell
+    {
+        get
+        {
+            int healerCount = 0;
+            var healers = PartyMembers.GetJobCategory(JobRole.Healer);
+            foreach (var h in healers)
+                healerCount++;
+            return base.CanHealSingleSpell && (GCDHeal || healerCount < 2);
+        }
+    }
+    public override bool CanHealAreaSpell
+    {
+        get
+        {
+            int healerCount = 0;
+            var healers = PartyMembers.GetJobCategory(JobRole.Healer);
+            foreach (var h in healers)
+                healerCount++;
+            return base.CanHealAreaSpell && (GCDHeal || healerCount < 2);
+        }
+    }
     #endregion
 }
