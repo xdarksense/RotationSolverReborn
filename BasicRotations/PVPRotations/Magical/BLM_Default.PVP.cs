@@ -14,11 +14,11 @@ public class BLM_DefaultPVP : BlackMageRotation
     public bool RespectGuard { get; set; } = true;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Upper HP threshold you need to be to use Xenoglossy as a damage oGCD")]
+    [RotationConfig(CombatType.PvP, Name = "Upper HP threshold you need to be to use Xenoglossy as a damage oGCD")]
     public float XenoglossyHighHP { get; set; } = 0.8f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Lower HP threshold you need to be to use Xenoglossy as a heal oGCD")]
+    [RotationConfig(CombatType.PvP, Name = "Lower HP threshold you need to be to use Xenoglossy as a heal oGCD")]
     public float XenoglossyLowHP { get; set; } = 0.5f;
     #endregion
 

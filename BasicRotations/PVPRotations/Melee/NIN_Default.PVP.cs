@@ -14,11 +14,11 @@ public sealed class NIN_DefaultPvP : NinjaRotation
     public bool RespectGuard { get; set; } = true;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Player health threshold needed for Bloodbath use")]
+    [RotationConfig(CombatType.PvP, Name = "Player health threshold needed for Bloodbath use")]
     public float BloodBathPvPPercent { get; set; } = 0.75f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Enemy health threshold needed for Smite use")]
+    [RotationConfig(CombatType.PvP, Name = "Enemy health threshold needed for Smite use")]
     public float SmitePvPPercent { get; set; } = 0.25f;
     #endregion
 
@@ -108,11 +108,11 @@ public sealed class NIN_DefaultPvP : NinjaRotation
 
         if (Player.WillStatusEnd(1, true, StatusID.ThreeMudra) && HutonPvP.CanUse(out action)) return true;
 
+        if (FumaShurikenPvP.CanUse(out action, usedUp: true)) return true;
+
         if (AeolianEdgePvP.CanUse(out action)) return true;
         if (GustSlashPvP.CanUse(out action)) return true;
         if (SpinningEdgePvP.CanUse(out action)) return true;
-
-        if (FumaShurikenPvP.CanUse(out action)) return true;
 
         return base.GeneralGCD(out action);
     }

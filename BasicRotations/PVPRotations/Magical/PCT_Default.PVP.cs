@@ -14,14 +14,14 @@ public class PCT_DefaultPvP : PictomancerRotation
     public bool RespectGuard { get; set; } = true;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Health threshold needed to use Tempura Coat")]
+    [RotationConfig(CombatType.PvP, Name = "Health threshold needed to use Tempura Coat")]
     public float TempuraThreshold { get; set; } = 0.8f;
 
     [RotationConfig(CombatType.PvP, Name = "Freely use burst damage oGCDs")]
     public bool FreeBurst { get; set; } = true;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Enemy HP threshold needed to use burst oGCDs on if previous config disabled")]
+    [RotationConfig(CombatType.PvP, Name = "Enemy HP threshold needed to use burst oGCDs on if previous config disabled")]
     public float BurstThreshold { get; set; } = 0.55f;
     #endregion
 

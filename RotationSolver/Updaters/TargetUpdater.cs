@@ -1,5 +1,4 @@
-﻿using Dalamud.Game.ClientState.Objects.Enums;
-using ECommons.DalamudServices;
+﻿using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
@@ -18,32 +17,30 @@ internal static partial class TargetUpdater
     internal static void UpdateTargets()
     {
         if (Player.Object == null) return;
-        if (DataCenter.State == false && !Service.Config.TeachingMode) return;
+        if (DataCenter.State == false && (!Service.Config.TeachingMode || !Player.IsInDuty)) return;
         DataCenter.AllTargets = GetAllTargets();
-        DataCenter.FriendlyNPCMembers = GetFriendlyNPCs();
-        DataCenter.AllianceMembers = GetAllianceMembers();
-        DataCenter.PartyMembers = GetPartyMembers();
-        DataCenter.DeathTarget = GetDeathTarget();
-        DataCenter.DispelTarget = GetDispelTarget();
-        DataCenter.AllHostileTargets = GetAllHostileTargets();
-        DataCenter.ProvokeTarget = GetFirstHostileTarget(ObjectHelper.CanProvoke);
-        DataCenter.InterruptTarget = GetFirstHostileTarget(ObjectHelper.CanInterrupt);
+        if (DataCenter.AllTargets != null)
+        {
+            DataCenter.PartyMembers = GetPartyMembers();
+            DataCenter.AllianceMembers = GetAllianceMembers();
+            DataCenter.AllHostileTargets = GetAllHostileTargets();
+            DataCenter.DeathTarget = GetDeathTarget();
+            DataCenter.DispelTarget = GetDispelTarget();
+            DataCenter.ProvokeTarget = GetFirstHostileTarget(ObjectHelper.CanProvoke);
+            DataCenter.InterruptTarget = GetFirstHostileTarget(ObjectHelper.CanInterrupt);
+        }
         UpdateTimeToKill();
     }
 
     private static List<IBattleChara> GetAllTargets()
     {
         var allTargets = new List<IBattleChara>();
-        foreach (var obj in Svc.Objects)
+        bool skipDummyCheck = !Service.Config.DisableTargetDummys;
+        foreach (IBattleChara battleChara in Svc.Objects.OfType<IBattleChara>())
         {
-            if (obj is IBattleChara battleChara)
+            if (skipDummyCheck || !battleChara.IsDummy())
             {
-                if (obj == null) continue;
-
-                if (!battleChara.IsDummy() || !Service.Config.DisableTargetDummys)
-                {
-                    allTargets.Add(battleChara);
-                }
+                allTargets.Add(battleChara);
             }
         }
         return allTargets;
@@ -54,21 +51,15 @@ internal static partial class TargetUpdater
         var partyMembers = new List<IBattleChara>();
         try
         {
-            if (DataCenter.PartyMembers != null)
+            foreach (var member in DataCenter.AllTargets)
             {
-                foreach (var member in DataCenter.AllTargets)
+                if (member.StatusList == null || !member.IsParty()) continue;
+                var character = member.Character();
+                if (character == null) continue;
+                var status = character->CharacterData.OnlineStatus;
+                if (status != 15 && status != 5 && member.IsTargetable)
                 {
-                    if (member == null) continue;
-                    if (member.StatusList == null) continue;
-                    if (ObjectHelper.IsParty(member) && member.IsParty() && member.Character() != null)
-                    {
-                        var character = member.Character();
-                        if (character != null && character->CharacterData.OnlineStatus != 15 &&
-                            character->CharacterData.OnlineStatus != 5 && member.IsTargetable)
-                        {
-                            partyMembers.Add(member);
-                        }
-                    }
+                    partyMembers.Add(member);
                 }
             }
         }
@@ -84,16 +75,13 @@ internal static partial class TargetUpdater
         var allianceMembers = new List<IBattleChara>();
         try
         {
-            if (DataCenter.AllianceMembers != null)
+            foreach (var target in DataCenter.AllTargets)
             {
-                foreach (var target in DataCenter.AllTargets)
+                if (ObjectHelper.IsAllianceMember(target) && !target.IsParty() && target.Character() != null &&
+                    target.Character()->CharacterData.OnlineStatus != 15 &&
+                    target.Character()->CharacterData.OnlineStatus != 5 && target.IsTargetable)
                 {
-                    if (ObjectHelper.IsAllianceMember(target) && !target.IsParty() && target.Character() != null &&
-                        target.Character()->CharacterData.OnlineStatus != 15 &&
-                        target.Character()->CharacterData.OnlineStatus != 5 && target.IsTargetable)
-                    {
-                        allianceMembers.Add(target);
-                    }
+                    allianceMembers.Add(target);
                 }
             }
         }
@@ -104,61 +92,24 @@ internal static partial class TargetUpdater
         return allianceMembers;
     }
 
-    private static List<IBattleChara> GetFriendlyNPCs()
-    {
-        var friendlyNpcs = new List<IBattleChara>();
-        if (!Service.Config.FriendlyBattleNpcHeal && !Service.Config.FriendlyPartyNpcHealRaise3)
-        {
-            return friendlyNpcs;
-        }
-
-        try
-        {
-            if (DataCenter.AllTargets != null)
-            {
-                foreach (var member in DataCenter.AllTargets)
-                {
-                    if (member == null) continue;
-                    if (member.StatusList == null) continue;
-                    if (member.ObjectKind == ObjectKind.BattleNpc)
-                    {
-                        if (member.GetNameplateKind() == NameplateKind.FriendlyBattleNPC ||
-                                member.GetBattleNPCSubKind() == BattleNpcSubKind.NpcPartyMember)
-                        {
-                            friendlyNpcs.Add(member);
-                        }
-                    }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Svc.Log.Error($"Error in GetFriendlyNPCs: {ex.Message}");
-        }
-        return friendlyNpcs;
-    }
-
     private static List<IBattleChara> GetAllHostileTargets()
     {
         var hostileTargets = new List<IBattleChara>();
-        bool hasInvincible = false;
         try
         {
             foreach (var target in DataCenter.AllTargets)
             {
-                if (target == null) continue;
-                if (target.StatusList == null) continue;
-                if (!target.IsEnemy() || !target.IsTargetable) continue;
-                if (target.StatusList != null)
+                if (target.StatusList == null || !target.IsEnemy() || !target.IsTargetable) continue;
+
+                bool hasInvincible = false;
+                var statusList = target.StatusList;
+                for (int i = 0; i < statusList.Length; i++)
                 {
-                    for (int i = 0; i < target.StatusList.Length; i++)
+                    var status = statusList[i];
+                    if (status != null && StatusHelper.IsInvincible(status))
                     {
-                        var status = target.StatusList[i];
-                        if (status != null && StatusHelper.IsInvincible(status))
-                        {
-                            hasInvincible = true;
-                            break;
-                        }
+                        hasInvincible = true;
+                        break;
                     }
                 }
                 if (hasInvincible &&
@@ -212,25 +163,11 @@ internal static partial class TargetUpdater
                     }
                 }
                 var deathAll = new List<IBattleChara>();
-                if (DataCenter.AllTargets != null)
+                foreach (var target in DataCenter.AllTargets.GetDeath())
                 {
-                    foreach (var target in DataCenter.AllTargets.GetDeath())
+                    if (!target.IsEnemy())
                     {
-                        if (!target.IsEnemy())
-                        {
-                            deathAll.Add(target);
-                        }
-                    }
-                }
-                var deathNPC = new List<IBattleChara>();
-                if (DataCenter.FriendlyNPCMembers != null)
-                {
-                    foreach (var target in DataCenter.FriendlyNPCMembers.GetDeath())
-                    {
-                        if (!target.IsEnemy())
-                        {
-                            deathNPC.Add(target);
-                        }
+                        deathAll.Add(target);
                     }
                 }
                 var deathAllianceMembers = new List<IBattleChara>();
@@ -287,11 +224,6 @@ internal static partial class TargetUpdater
                 else if (raisetype == RaiseType.All)
                 {
                     validRaiseTargets.AddRange(deathAll);
-                }
-
-                if (Service.Config.FriendlyPartyNpcHealRaise3 || Service.Config.FocusTargetIsParty)
-                {
-                    validRaiseTargets.AddRange(deathNPC);
                 }
 
                 foreach (RaiseType type in Enum.GetValues(typeof(RaiseType)))
@@ -362,11 +294,9 @@ internal static partial class TargetUpdater
             Player.Job == Job.BRD)
         {
             var weakenPeople = new List<IBattleChara>();
-            var weakenNPC = new List<IBattleChara>();
             var dyingPeople = new List<IBattleChara>();
 
             AddDispelTargets(DataCenter.PartyMembers, weakenPeople);
-            AddDispelTargets(DataCenter.FriendlyNPCMembers, weakenNPC);
 
             foreach (var person in weakenPeople)
             {
@@ -389,7 +319,7 @@ internal static partial class TargetUpdater
                 }
             }
 
-            return GetClosestTarget(dyingPeople) ?? GetClosestTarget(weakenPeople) ?? GetClosestTarget(weakenNPC);
+            return GetClosestTarget(dyingPeople) ?? GetClosestTarget(weakenPeople);
         }
         return null;
     }

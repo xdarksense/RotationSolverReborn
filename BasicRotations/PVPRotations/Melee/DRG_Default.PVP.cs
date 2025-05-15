@@ -14,12 +14,15 @@ public sealed class DRG_DefaultPvP : DragoonRotation
     public bool RespectGuard { get; set; } = true;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Player health threshold needed for Bloodbath use")]
+    [RotationConfig(CombatType.PvP, Name = "Player health threshold needed for Bloodbath use")]
     public float BloodBathPvPPercent { get; set; } = 0.75f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Enemy health threshold needed for Smite use")]
+    [RotationConfig(CombatType.PvP, Name = "Enemy health threshold needed for Smite use")]
     public float SmitePvPPercent { get; set; } = 0.25f;
+
+    [RotationConfig(CombatType.PvP, Name = "Allow the use of high jump if there are enemies in melee range.")]
+    public bool JumpYeet { get; set; } = true;
     #endregion
 
     #region Standard PVP Utilities
@@ -73,6 +76,8 @@ public sealed class DRG_DefaultPvP : DragoonRotation
         if (HorridRoarPvP.CanUse(out action)) return true;
         if (GeirskogulPvP.CanUse(out action)) return true;
         if (NastrondPvP.CanUse(out action)) return true;
+
+        if (HasHostilesInRange && JumpYeet && HighJumpPvP.CanUse(out action)) return true;
 
         return base.AttackAbility(nextGCD, out action);
     }

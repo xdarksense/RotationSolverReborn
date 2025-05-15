@@ -328,7 +328,7 @@ internal static class DataCenter
 
     public static bool IsManual { get; set; } = false;
 
-    public static bool InCombat { get; set; }
+    public static bool InCombat { get; set; } = false;
 
     static RandomDelay _notInCombatDelay = new(() => Service.Config.NotInCombatDelay);
 
@@ -368,8 +368,6 @@ internal static class DataCenter
     public static List<IBattleChara> PartyMembers { get; set; } = [];
 
     public static List<IBattleChara> AllianceMembers { get; set; } = [];
-
-    public static List<IBattleChara> FriendlyNPCMembers { get; set; } = [];
 
     public static List<IBattleChara> AllHostileTargets { get; set; } = [];
 
@@ -875,6 +873,10 @@ internal static class DataCenter
 
         AttackedTargets.Clear();
         VfxDataQueue.Clear();
+        AllHostileTargets.Clear();
+        AllianceMembers.Clear();
+        PartyMembers.Clear();
+        AllTargets.Clear();
     }
 
     internal static void AddDamageRec(float damageRatio)

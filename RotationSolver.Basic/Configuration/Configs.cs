@@ -135,38 +135,6 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig)]
     private static readonly bool _ignoreNonFateInFate = true;
 
-    [ConditionBool, UI("Ignore immune Wolves in M8S.",
-        Filter = TargetConfig)]
-    private static readonly bool _wolfImmune = true;
-
-    [ConditionBool, UI("Ignore immune Ark Angels in Jenuo: The First Walk.",
-        Filter = TargetConfig)]
-    private static readonly bool _jeunoTarget = true;
-
-    [ConditionBool, UI("Ignore immune targets in Cloud of Darkness Chaotic.",
-        Filter = TargetConfig)]
-    private static readonly bool _cODTarget = true;
-
-    [ConditionBool, UI("Ignore immune targets based on Resistance status (Void Ark Alliance and Leviathan).",
-        Filter = TargetConfig)]
-    private static readonly bool _resistanceImmune = true;
-
-    [ConditionBool, UI("Ignore immune Omega Variants (O12N/O12S).",
-        Filter = TargetConfig)]
-    private static readonly bool _omegaImmune = true;
-
-    [ConditionBool, UI("Ignore immune targets in Limitless Blue (Normal/Extreme).",
-        Filter = TargetConfig)]
-    private static readonly bool _limitlessImmune = true;
-
-    [ConditionBool, UI("Ignore immune targets in Cinder Drift (Extreme).",
-        Filter = TargetConfig)]
-    private static readonly bool _cinderTarget = true;
-
-    [ConditionBool, UI("Ignore Strong of Shield target (Hansel and Gretel) in The Tower at Paradigm's Breach if you will hit shield.",
-        Filter = TargetConfig)]
-    private static readonly bool _strongOfSheildTarget = true;
-
     [ConditionBool, UI("Prevent targeting invalid targets in Bozjan Southern Front and Zadnor",
         Filter = TargetConfig)]
     private static readonly bool _bozjaCEmobtargeting = false;

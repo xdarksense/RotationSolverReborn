@@ -376,9 +376,32 @@ partial class DragoonRotation
     {
     }
 
+    static partial void ModifyGeirskogulPvP(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyHighJumpPvP(ref ActionSetting setting)
+    {
+        setting.SpecialType = SpecialActionType.MovingForward;
+    }
+
+    static partial void ModifyElusiveJumpPvP(ref ActionSetting setting)
+    {
+        setting.SpecialType = SpecialActionType.MovingBackward;
+        setting.IsFriendly = true;
+    }
+
     static partial void ModifyHorridRoarPvP(ref ActionSetting setting)
     {
         setting.IsFriendly = false;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyHeavensThrustPvP(ref ActionSetting setting)
@@ -395,27 +418,13 @@ partial class DragoonRotation
         };
     }
 
-    static partial void ModifyGeirskogulPvP(ref ActionSetting setting)
-    {
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 2,
-        };
-    }
-
     static partial void ModifyNastrondPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.GeirskogulPvP) == ActionID.NastrondPvP;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 2,
+            AoeCount = 1,
         };
-    }
-
-    static partial void ModifyElusiveJumpPvP(ref ActionSetting setting)
-    {
-        setting.SpecialType = SpecialActionType.MovingBackward;
-        setting.IsFriendly = true;
     }
 
     static partial void ModifyWyrmwindThrustPvP(ref ActionSetting setting)
@@ -425,11 +434,6 @@ partial class DragoonRotation
         {
             AoeCount = 1,
         };
-    }
-
-    static partial void ModifyHighJumpPvP(ref ActionSetting setting)
-    {
-        setting.SpecialType = SpecialActionType.MovingForward;
     }
     #endregion
 
