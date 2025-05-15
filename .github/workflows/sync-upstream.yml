@@ -1,32 +1,30 @@
-name: Sync with Upstream
-
-on:
-  schedule:
-    - cron: '0 0 * * *' # Runs daily at midnight (UTC)
-  workflow_dispatch: # Allows manual triggering of the workflow
-
-jobs:
-  sync-fork:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up git
-        run: |
-          git config --global user.name "aventurescence"
-          git config --global user.email "70804225+aventurescence@users.noreply.github.com"
-
-      - name: Add upstream repository
-        run: |
-          git remote add upstream https://github.com/FFXIV-CombatReborn/ArgentiRotations.git
-          git fetch upstream
-
-      - name: Merge upstream changes
-        run: |
-          git checkout main
-          git merge upstream/main --allow-unrelated-histories
-          git push origin main
+            - name: Sync-Fork-action
+  # You may pin to the exact commit or the version.
+  # uses: XueMoMo/Sync-Fork-action@b1545dfaf057a7ba0e9c8987a5829ce176942995
+  uses: XueMoMo/Sync-Fork-action@v1.0.6
+  with:
+    # Token for accessing the remote repo with authentication
+    github_token: # optional
+    # Upstream repository, e.g. => aormsby/Fork-Sync-With-Upstream-action
+    upstream_repository: FFXIV-CombatReborn/RotationSolverReborn
+    # Branch to sync from, e.g. => main, master, dev
+    upstream_branch: main
+    # Branch to push to, e.g. => main, master, prod
+    target_branch: main
+    # Any extra args to pass to `git checkout` like --recurse-submodules (only used when current branch is not target_branch), default = ""
+    git_checkout_args: # optional, default is 
+    # Any extra args to pass to `git fetch` like --recurse-submodules, default = ""
+    git_fetch_args: --pretty=oneline # optional, default is 
+    # How to print the list of new commits, default = --pretty=oneline
+    git_log_format_args: # optional, default is --pretty=oneline
+    # Any extra args to pass to `git push` like --ff-only or --tags, default = ""
+    git_pull_args: # optional, default is 
+    # Any extra args to pass to `git push` like --force, default = ""
+    git_push_args: # optional, default is 
+    # Git user credentials for sigining commit (set to "null" for no credential changes)
+    git_user: # optional, default is Action - Fork Sync
+    # Git email credentials for sigining commit (set to "null" for no credential changes)
+    git_email: # optional, default is action@github.com
+    # Git config for "pull.rebase" (standard default to false, set to "null" for no config)
+    git_pull_rebase_config: # optional, default is false
+          
