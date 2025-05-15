@@ -249,27 +249,8 @@ public static partial class RSCommands
     private static void ToggleActionCommand(string str)
     {
         var trimStr = str.Trim();
-
-        // Remove LINQ: .OrderByDescending(a => a.Name.Length)
-        var actions = RotationUpdater.CurrentRotationActions;
-        // Create a sorted copy by Name.Length descending
-        var sortedActions = new List<ITexture>(actions);
-        for (int i = 0; i < sortedActions.Count - 1; i++)
+        foreach (var act in RotationUpdater.CurrentRotationActions.OrderByDescending(a => a.Name.Length))
         {
-            for (int j = i + 1; j < sortedActions.Count; j++)
-            {
-                if (sortedActions[j].Name.Length > sortedActions[i].Name.Length)
-                {
-                    var temp = sortedActions[i];
-                    sortedActions[i] = sortedActions[j];
-                    sortedActions[j] = temp;
-                }
-            }
-        }
-
-        foreach (var actObj in sortedActions)
-        {
-            var act = actObj;
             // First, check for an exact match.
             if (trimStr.Equals(act.Name, StringComparison.OrdinalIgnoreCase))
             {
@@ -284,7 +265,7 @@ public static partial class RSCommands
             // extract extra text (flag) and use it.
             if (trimStr.StartsWith(act.Name + " ", StringComparison.OrdinalIgnoreCase))
             {
-                var flag = trimStr.Substring(act.Name.Length).Trim();
+                var flag = trimStr[act.Name.Length..].Trim();
                 act.IsEnabled = bool.TryParse(flag, out var parse) ? parse : !act.IsEnabled;
                 if (Service.Config.ShowToggledSettingInChat)
                 {

@@ -384,11 +384,17 @@ public sealed class SCH_Default : ScholarRotation
 
         var expectedHPToLive12Seconds = 1f;
 
+        int partyMemberCount = 0;
+        foreach (var _ in PartyMembers)
+        {
+            partyMemberCount++;
+        }
+
         // Expect that players do ~ 10% of healer hp as DPS and ballpark to ensure we're not wasting dots on something that's going to die immediately based on nobody hitting it
         // This is still wildly overestimating mob survival in some contexts but initial TTK estimates from RSR can be poor based on how far mobs were being kited
         if (UseBallparkTTK)
         {
-            expectedHPToLive12Seconds = BallparkPercent * Player.MaxHp * PartyMembers.Count() * 12;
+            expectedHPToLive12Seconds = BallparkPercent * Player.MaxHp * partyMemberCount * 12;
         }
 
         /*
@@ -536,7 +542,27 @@ public sealed class SCH_Default : ScholarRotation
         return targets;
     }
 
-    public override bool CanHealSingleSpell => base.CanHealSingleSpell && (GCDHeal || PartyMembers.GetJobCategory(JobRole.Healer).Count() < 2);
-    public override bool CanHealAreaSpell => base.CanHealAreaSpell && (GCDHeal || PartyMembers.GetJobCategory(JobRole.Healer).Count() < 2);
+    public override bool CanHealSingleSpell
+    {
+        get
+        {
+            int healerCount = 0;
+            var healers = PartyMembers.GetJobCategory(JobRole.Healer);
+            foreach (var h in healers)
+                healerCount++;
+            return base.CanHealSingleSpell && (GCDHeal || healerCount < 2);
+        }
+    }
+    public override bool CanHealAreaSpell
+    {
+        get
+        {
+            int healerCount = 0;
+            var healers = PartyMembers.GetJobCategory(JobRole.Healer);
+            foreach (var h in healers)
+                healerCount++;
+            return base.CanHealAreaSpell && (GCDHeal || healerCount < 2);
+        }
+    }
     #endregion
 }

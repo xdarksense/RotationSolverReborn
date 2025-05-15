@@ -17,7 +17,7 @@ internal static partial class TargetUpdater
     internal static void UpdateTargets()
     {
         if (Player.Object == null) return;
-        if (DataCenter.State == false && (!Service.Config.TeachingMode || !Player.IsInDuty)) return;
+        if (DataCenter.State == false && !Service.Config.TeachingMode && (!DataCenter.InCombat || !Player.IsInDuty)) return;
         DataCenter.AllTargets = GetAllTargets();
         if (DataCenter.AllTargets != null)
         {

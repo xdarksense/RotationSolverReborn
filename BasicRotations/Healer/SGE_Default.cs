@@ -499,7 +499,6 @@ public sealed class SGE_Default : SageRotation
     {
         get
         {
-            // Replace LINQ Count with manual count
             int healerCount = 0;
             var healers = PartyMembers.GetJobCategory(JobRole.Healer);
             foreach (var h in healers)
