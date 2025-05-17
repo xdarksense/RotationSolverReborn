@@ -1,14 +1,17 @@
 ﻿namespace RebornRotations.Melee;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.21")]
 [SourceCode(Path = "main/BasicRotations/Melee/VPR_Default.cs")]
 [Api(4)]
 public sealed class VPR_Default : ViperRotation
 {
     #region Config Options
 
+    [RotationConfig(CombatType.PvE, Name = "Hold one charge of Uncoiled Fury after burst for movement")]
+    public bool BurstUncoiledFuryHold { get; set; } = true;
+
     [RotationConfig(CombatType.PvE, Name = "Use up all charges of Uncoiled Fury if you have used Tincture/Gemdraught (Overrides next option)")]
-    public bool BurstUncoiledFury { get; set; } = true;
+    public bool MedicineUncoiledFury { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Allow Uncoiled Fury and Writhing Snap to overwrite oGCDs when at range")]
     public bool UFGhosting { get; set; } = true;
@@ -36,8 +39,6 @@ public sealed class VPR_Default : ViperRotation
     public bool AbilityPrio { get; set; } = false;
 
     #endregion
-
-    private static bool IsInBurst => Player.Level > 50 && !Player.WillStatusEnd(0, true, StatusID.RagingStrikes);
 
     #region Additional oGCD Logic
     [RotationDesc]
@@ -155,13 +156,16 @@ public sealed class VPR_Default : ViperRotation
             if (UncoiledFuryPvE.CanUse(out act, usedUp: true)) return true;
         }
 
-        if (BurstUncoiledFury && Player.HasStatus(true, StatusID.Medicated) && !Player.HasStatus(true, StatusID.ReadyToReawaken) && SerpentCombo == SerpentCombo.None)
+        if (MedicineUncoiledFury && Player.HasStatus(true, StatusID.Medicated) && !Player.HasStatus(true, StatusID.ReadyToReawaken) && SerpentCombo == SerpentCombo.None)
         {
             if (UncoiledFuryPvE.CanUse(out act, usedUp: true)) return true;
         }
 
-        //Uncoiled fury use
-        if (SerpentsIrePvE.Cooldown.JustUsedAfter(30) && !Player.HasStatus(true, StatusID.ReadyToReawaken) && SerpentCombo == SerpentCombo.None)
+        if ((RattlingCoilStacks > 1
+            || !BurstUncoiledFuryHold)
+            && SerpentsIrePvE.Cooldown.JustUsedAfter(30)
+            && !Player.HasStatus(true, StatusID.ReadyToReawaken)
+            && SerpentCombo == SerpentCombo.None)
         {
             if (UncoiledFuryPvE.CanUse(out act, usedUp: true)) return true;
         }
