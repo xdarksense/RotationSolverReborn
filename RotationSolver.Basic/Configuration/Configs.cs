@@ -530,12 +530,12 @@ internal partial class Configs : IPluginConfiguration
     [UI("Not In Combat random delay range.",
         Filter = BasicParams)]
     [Range(0, 10, ConfigUnitType.Seconds, 0.002f)]
-    public Vector2 NotInCombatDelay { get; set; } = new(3, 4);
+    public Vector2 NotInCombatDelay { get; set; } = new(2, 3);
 
     [UI("Clicking actions random delay range.",
         Filter = BasicTimer)]
-    [Range(0.05f, 0.25f, ConfigUnitType.Seconds, 0.002f)]
-    public Vector2 ClickingDelay { get; set; } = new(0.1f, 0.15f);
+    [Range(0.00f, 0.25f, ConfigUnitType.Seconds, 0.002f)]
+    public Vector2 ClickingDelay { get; set; } = new(0.01f, 0.1f);
 
     [UI("Downtime healing delay range.", Parent = nameof(HealWhenNothingTodo))]
     [Range(0, 5, ConfigUnitType.Seconds, 0.05f)]
@@ -596,11 +596,6 @@ internal partial class Configs : IPluginConfiguration
     [Range(0, 30, ConfigUnitType.Seconds, 0.02f)]
     public float AutoHealTimeToKill { get; set; } = 8f;
 
-    [UI("The minimum time between updating RSR information. (Setting too low will negatively affect framerate, setting too high will lead to poor performance)",
-        Filter = BasicTimer)]
-    [JobConfig, Range(0, 0.3f, ConfigUnitType.Seconds, 0.002f)]
-    public float MinUpdatingTime { get; set; } = 0.01f;
-
     [JobConfig, Range(0.05f, 0.25f, ConfigUnitType.Percent)]
     [UI("Action Ahead (Percent of your GCD time remaining on a GCD cycle before RSR will try to queue the next GCD)", Filter = BasicTimer,
     Description = "This setting controls how many oGCDs RSR will try to fit in a single GCD window\nLower numbers mean more oGCDs, but potentially more GCD clipping")]
@@ -636,8 +631,8 @@ internal partial class Configs : IPluginConfiguration
     public ConsoleModifiers PoslockModifier { get; set; }
 
     [Range(0, 5, ConfigUnitType.None, 1)]
-    [UI("Effect times", Parent = nameof(KeyBoardNoise))]
-    public Vector2Int KeyboardNoise { get; set; } = new(2, 3);
+    [UI("Random range of simulated presses per action", Parent = nameof(KeyBoardNoise))]
+    public Vector2Int KeyboardNoise { get; set; } = new(1, 2);
 
     [Range(0, 10, ConfigUnitType.None)]
     public int TargetingIndex { get; set; }

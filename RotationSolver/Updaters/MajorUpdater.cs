@@ -86,10 +86,9 @@ internal static class MajorUpdater
             UpdateHighlight();
             ActionUpdater.UpdateActionInfo();
 
-            var canDoAction = ActionUpdater.CanDoAction();
-            MovingUpdater.UpdateCanMove(canDoAction);
+            MovingUpdater.UpdateCanMove(ActionUpdater.CanDoAction());
 
-            if (canDoAction)
+            if (ActionUpdater.CanDoAction())
             {
                 RSCommands.DoAction();
             }
