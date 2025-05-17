@@ -223,7 +223,7 @@ public sealed class MNK_Default : MonkRotation
     private bool OpoOpoForm(out IAction? act)
     {
         if (ArmOfTheDestroyerPvE.CanUse(out act)) return true; // Arm Of The Destoryer - aoe
-        if (LeapingOpoPvE.CanUse(out act)) return true; // Leaping Opo
+        if (LeapingOpoPvE.EnoughLevel && LeapingOpoPvE.CanUse(out act)) return true; // Leaping Opo
         if (DragonKickPvE.CanUse(out act)) return true; // Dragon Kick
         if (BootshinePvE.CanUse(out act)) return true; //Bootshine - low level
         return false;
@@ -232,7 +232,7 @@ public sealed class MNK_Default : MonkRotation
     private bool RaptorForm(out IAction? act)
     {
         if (FourpointFuryPvE.CanUse(out act)) return true; //Fourpoint Fury - aoe
-        if (RisingRaptorPvE.CanUse(out act)) return true; //Rising Raptor
+        if (RisingRaptorPvE.EnoughLevel && RisingRaptorPvE.CanUse(out act)) return true; //Rising Raptor
         if (TwinSnakesPvE.CanUse(out act)) return true; //Twin Snakes
         if (TrueStrikePvE.CanUse(out act)) return true; //True Strike - low level
         return false;
@@ -241,7 +241,7 @@ public sealed class MNK_Default : MonkRotation
     private bool CoerlForm(out IAction? act)
     {
         if (RockbreakerPvE.CanUse(out act)) return true; // Rockbreaker - aoe
-        if (PouncingCoeurlPvE.CanUse(out act)) return true; // Pouncing Coeurl
+        if (PouncingCoeurlPvE.EnoughLevel && PouncingCoeurlPvE.CanUse(out act)) return true; // Pouncing Coeurl
         if (DemolishPvE.CanUse(out act)) return true; // Demolish
         if (SnapPunchPvE.CanUse(out act)) return true; // Snap Punch - low level
         return false;
