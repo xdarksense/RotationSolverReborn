@@ -231,7 +231,7 @@ partial class ScholarRotation
 
     static partial void ModifyDeploymentTacticsPvE(ref ActionSetting setting)
     {
-        setting.TargetStatusNeed = [StatusID.Galvanize];
+        setting.TargetType = TargetType.Deployment;
         setting.UnlockedByQuestID = 67210;
         setting.CreateConfig = () => new ActionConfig()
         {

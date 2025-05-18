@@ -935,6 +935,7 @@ public struct ActionTargetInfo(IBaseAction action)
             TargetType.TheSpear => FindTheSpear(),
             TargetType.TheBalance => FindTheBalance(),
             TargetType.Kardia => FindKardia(),
+            TargetType.Deployment => FindDeploymentTacticsTarget(),
             _ => FindHostile(),
         };
 
@@ -943,8 +944,7 @@ public struct ActionTargetInfo(IBaseAction action)
             // DancePartnerPriority based on the info from The Balance Discord for Level 100
             var dancePartnerPriority = OtherConfiguration.DancePartnerPriority;
 
-            if (!Player.AvailableThreadSafe) return null;
-            if (Player.Object == null) return null;
+            if (!Player.Object.IsJobs(Job.DNC)) return null;
             if (DataCenter.PartyMembers == null) return null;
             if (IGameObjects == null) return null;
 
@@ -981,8 +981,7 @@ public struct ActionTargetInfo(IBaseAction action)
             // The Spear priority based on the info from The Balance Discord for Level 100 Dance Partner
             var TheSpearPriority = OtherConfiguration.TheSpearPriority;
 
-            if (!Player.AvailableThreadSafe) return null;
-            if (Player.Object == null) return null;
+            if (!Player.Object.IsJobs(Job.AST)) return null;
             if (DataCenter.PartyMembers == null) return null;
             if (IGameObjects == null) return null;
 
@@ -1018,8 +1017,7 @@ public struct ActionTargetInfo(IBaseAction action)
             // The Balance priority based on the info from The Balance Discord for Level 100 Dance Partner
             var TheBalancePriority = OtherConfiguration.TheBalancePriority;
 
-            if (!Player.AvailableThreadSafe) return null;
-            if (Player.Object == null) return null;
+            if (!Player.Object.IsJobs(Job.AST)) return null;
             if (DataCenter.PartyMembers == null) return null;
             if (IGameObjects == null) return null;
 
@@ -1054,8 +1052,7 @@ public struct ActionTargetInfo(IBaseAction action)
         {
             var KardiaTankPriority = OtherConfiguration.KardiaTankPriority;
 
-            if (!Player.AvailableThreadSafe) return null;
-            if (Player.Object == null) return null;
+            if (!Player.Object.IsJobs(Job.SGE)) return null;
             if (DataCenter.PartyMembers == null) return null;
             if (IGameObjects == null) return null;
 
@@ -1068,15 +1065,7 @@ public struct ActionTargetInfo(IBaseAction action)
                     {
                         return member;
                     }
-                }
-            }
-
-            // If no tanks with TankStanceStatus are found, pick any tank
-            foreach (var member in DataCenter.PartyMembers.Where(member => member.IsJobCategory(JobRole.Tank)))
-            {
-                foreach (var job in KardiaTankPriority)
-                {
-                    if (member.IsJobs(job) && !member.IsDead && member.IsParty())
+                    else if (member.IsJobs(job) && !member.IsDead && member.IsParty())
                     {
                         return member;
                     }
@@ -1089,6 +1078,27 @@ public struct ActionTargetInfo(IBaseAction action)
                 ?? RandomRangeTarget(DataCenter.PartyMembers)
                 ?? RandomMagicalTarget(DataCenter.PartyMembers)
                 ?? null;
+        }
+
+        IBattleChara? FindDeploymentTacticsTarget()
+        {
+            if (!Player.Object.IsJobs(Job.SCH)) return null;
+            if (DataCenter.PartyMembers == null) return null;
+            if (IGameObjects == null) return null;
+
+            foreach (var obj in DataCenter.PartyMembers)
+            {
+                if (!obj.IsDead && obj.IsParty() && !obj.WillStatusEnd(20, true, StatusID.Catalyze))
+                {
+                    return obj;
+                }
+                else if (!obj.IsDead && obj.IsParty() && !obj.WillStatusEnd(20, true, StatusID.Galvanize))
+                {
+                    return obj;
+                }
+            }
+
+            return null;
         }
 
         IBattleChara? FindProvokeTarget()
@@ -1310,7 +1320,6 @@ public struct ActionTargetInfo(IBaseAction action)
 
             return orderedGameObjects.FirstOrDefault() as IBattleChara;
         }
-        ;
 
         IBattleChara? FindBeAttackedTarget()
         {
@@ -1397,7 +1406,6 @@ public struct ActionTargetInfo(IBaseAction action)
         return (int)neededRole == (int)player.GetRole();
     }
 
-
     internal static IBattleChara? RandomPhysicalTarget(IEnumerable<IBattleChara> tars)
     {
         return RandomPickByJobs(tars, Job.VPR, Job.WAR, Job.GNB, Job.MNK, Job.SAM, Job.DRG, Job.MCH, Job.DNC)
@@ -1483,6 +1491,7 @@ public enum TargetType : byte
     TheBalance,
     TheSpear,
     Kardia,
+    Deployment,
 }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 

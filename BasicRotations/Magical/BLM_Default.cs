@@ -301,7 +301,7 @@ public class BLM_Default : BlackMageRotation
         if (AddThunder(out act, 0) && Player.WillStatusEndGCD(1, 0, true,
             StatusID.Thundercloud)) return true;
 
-        if (UmbralHearts < 2 && FlarePvE.CanUse(out act)) return true;
+        if (UmbralHearts < 2 && AstralSoulStacks <= 3 && FlarePvE.CanUse(out act)) return true;
         if (FireIiPvE.CanUse(out act)) return true;
 
         if (CurrentMp >= FirePvE.Info.MPNeed + 800)

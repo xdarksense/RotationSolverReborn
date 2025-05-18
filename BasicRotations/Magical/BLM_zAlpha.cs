@@ -301,7 +301,7 @@ public class BLM_zAlpha : BlackMageRotation
 
         if (AddThunder(out act)) return true;
 
-        if (UmbralHearts < 2 && FlarePvE.CanUse(out act)) return true;
+        if (UmbralHearts < 2 && AstralSoulStacks <= 3 && FlarePvE.CanUse(out act)) return true;
         if (FireIiPvE.CanUse(out act)) return true;
 
         if (CurrentMp >= FirePvE.Info.MPNeed + 800)
