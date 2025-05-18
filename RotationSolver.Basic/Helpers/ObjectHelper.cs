@@ -430,7 +430,7 @@ public static class ObjectHelper
             || obj.IsResistanceImmune()
             || obj.IsOmegaImmune()
             || obj.IsLimitlessBlue()
-            || obj.IsHanselorGretelSheilded();
+            || obj.IsHanselorGretelShielded();
     }
 
     /// <summary>
@@ -709,7 +709,7 @@ public static class ObjectHelper
     /// </summary>
     /// <param name="obj">the object.</param>
     /// <returns></returns>
-    public static bool IsHanselorGretelSheilded(this IBattleChara obj)
+    public static bool IsHanselorGretelShielded(this IBattleChara obj)
     {
         var strongOfShieldPositional = EnemyPositional.Front;
         var strongOfShieldStatus = StatusID.StrongOfShield;

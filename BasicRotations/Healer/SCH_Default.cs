@@ -241,7 +241,8 @@ public sealed class SCH_Default : ScholarRotation
         // Deployment Tactics is modified in the base rotation to only use if they have galvanize so can trust that targets are at least valid?
         // The number of times that we adlo to heal a DPS and then would like to use this is actually reasonably high in dungeons
         // TODO: This is typically skipping because the target it's trying to cast the area defense on isn't the galvanized target
-        if (DeploymentTacticsPvE.CanUse(out act)) return true;
+        if ((!RecitationPvE.EnoughLevel || RecitationPvE.Cooldown.IsCoolingDown || PartyMembers.Any(member => member.HasStatus(true, StatusID.Catalyze))) 
+            && DeploymentTacticsPvE.CanUse(out act)) return true;
 
         // Consolation is great if Seraph is up
         if (ConsolationPvE.CanUse(out act, usedUp: true)) return true;
