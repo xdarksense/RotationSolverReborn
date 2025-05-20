@@ -1,4 +1,4 @@
-﻿using ECommons.DalamudServices;
+﻿using ECommons.Logging;
 using RotationSolver.UI;
 
 namespace RotationSolver.Helpers;
@@ -24,7 +24,7 @@ public static class DownloadHelper
         {
             WarningHelper.AddSystemWarning($"Failed to load downloading List because: {ex.Message}");
 #if DEBUG
-            Svc.Log.Information(ex, "Failed to load downloading List.");
+            PluginLog.Warning($"Failed to load downloading List: {ex.Message}");
 #endif
             return default;
         }

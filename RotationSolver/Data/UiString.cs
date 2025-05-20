@@ -538,12 +538,6 @@ namespace RotationSolver.Data
         [Description("Please separately bind damage reduction/shield cooldowns in case RSR fails at a crucial moment in {0}!")]
         HighEndWarning,
 
-        [Description("Avarice addon was not detected. Please install it if you want positional indicators for RSR's overlay!")]
-        AvariceWarning,
-
-        [Description("TextToTalk addon was not detected. Please install it to enable RSR's audio notifications!")]
-        TextToTalkWarning,
-
         [Description("Use Forced Enable Condition")]
         ForcedEnableCondition,
 

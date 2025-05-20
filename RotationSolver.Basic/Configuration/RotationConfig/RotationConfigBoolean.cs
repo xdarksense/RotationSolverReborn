@@ -1,4 +1,4 @@
-﻿using ECommons.DalamudServices;
+﻿using ECommons.Logging;
 
 namespace RotationSolver.Basic.Configuration.RotationConfig;
 
@@ -41,7 +41,7 @@ internal class RotationConfigBoolean : RotationConfigBase
             }
             catch (Exception ex)
             {
-                Svc.Log.Error(ex, "Failed to parse boolean value.");
+                PluginLog.Error($"Failed to parse boolean value: {ex.Message}");
                 return false;
             }
         }

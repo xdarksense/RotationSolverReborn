@@ -10,6 +10,7 @@ using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.ImGuiMethods;
+using ECommons.Logging;
 using ECommons.Reflection;
 using ExCSS;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -75,10 +76,9 @@ public partial class RotationConfigWindow : Window
                 {
                     DrawSideBar();
                 }
-
                 catch (Exception ex)
                 {
-                    Svc.Log.Warning(ex, "Something wrong with sideBar");
+                    PluginLog.Warning($"Something wrong with sideBar: {ex.Message}");
                 }
 
                 ImGui.TableNextColumn();
@@ -87,18 +87,18 @@ public partial class RotationConfigWindow : Window
                 {
                     DrawBody();
                 }
-
                 catch (Exception ex)
                 {
-                    Svc.Log.Warning(ex, "Something wrong with body");
+                    PluginLog.Warning($"Something wrong with body: {ex.Message}");
                 }
 
             }
 
         }
+
         catch (Exception ex)
         {
-            Svc.Log.Warning(ex, "Something wrong with config window.");
+            PluginLog.Warning($"Something wrong with config window: {ex.Message}");
         }
     }
 
@@ -210,23 +210,23 @@ public partial class RotationConfigWindow : Window
                     }
                     else
                     {
-                        Svc.Log.Information("Dalamud release is not a string or null.");
+                        PluginLog.Information("Dalamud release is not a string or null.");
                         return other;
                     }
                 }
                 catch (Exception ex)
                 {
-                    Svc.Log.Information($"Failed to read or deserialize configuration file: {ex.Message}");
+                    PluginLog.Information($"Failed to read or deserialize configuration file: {ex.Message}");
                     return other;
                 }
             }
             else
             {
-                Svc.Log.Information("Configuration file does not exist.");
+                PluginLog.Information("Configuration file does not exist.");
                 return other;
             }
         }
-        Svc.Log.Information("Failed to get Dalamud start info.");
+        PluginLog.Information("Failed to get Dalamud start info.");
         return other;
     }
 
@@ -432,7 +432,6 @@ public partial class RotationConfigWindow : Window
         }
     }
 
-
     private void DrawHeader(float wholeWidth)
     {
         var size = MathF.Max(MathF.Min(wholeWidth, Scale * 128), Scale * MIN_COLUMN_WIDTH);
@@ -474,7 +473,7 @@ public partial class RotationConfigWindow : Window
             var text = UiString.ConfigWindow_NoRotation.GetDescription();
             if (text == null)
             {
-                Svc.Log.Error("UiString.ConfigWindow_NoRotation.GetDescription() returned null.");
+                PluginLog.Error("UiString.ConfigWindow_NoRotation.GetDescription() returned null.");
                 return;
             }
 
@@ -1167,15 +1166,15 @@ public partial class RotationConfigWindow : Window
                 {
                     if (ImGui.Button($"Add Plugin##{plugin.Name}"))
                     {
-                        Svc.Log.Information($"Attempting to add plugin: {plugin.Name} from URL: {plugin.Url}");
+                        PluginLog.Information($"Attempting to add plugin: {plugin.Name} from URL: {plugin.Url}");
                         var success = DalamudReflector.AddPlugin(plugin.Url, plugin.Name);
                         if (success.Result)
                         {
-                            Svc.Log.Information($"Successfully added plugin: {plugin.Name} from URL: {plugin.Url}");
+                            PluginLog.Information($"Successfully added plugin: {plugin.Name} from URL: {plugin.Url}");
                         }
                         else
                         {
-                            Svc.Log.Error($"Failed to add plugin: {plugin.Name} from URL: {plugin.Url}");
+                            PluginLog.Error($"Failed to add plugin: {plugin.Name} from URL: {plugin.Url}");
                         }
                         DalamudReflector.ReloadPluginMasters();
                     }
@@ -1185,10 +1184,10 @@ public partial class RotationConfigWindow : Window
                 {
                     if (ImGui.Button($"Add Repo##{plugin.Name}"))
                     {
-                        Svc.Log.Information($"Attempting to add repository: {plugin.Url}");
+                        PluginLog.Information($"Attempting to add repository: {plugin.Url}");
                         DalamudReflector.AddRepo(plugin.Url, true);
                         DalamudReflector.ReloadPluginMasters();
-                        Svc.Log.Information($"Successfully added repository: {plugin.Url}");
+                        PluginLog.Information($"Successfully added repository: {plugin.Url}");
                     }
                     ImGui.SameLine();
                 }
@@ -1234,7 +1233,7 @@ public partial class RotationConfigWindow : Window
     {
         Service.Config.HostileType = type;
         // Add any additional logic needed when changing the targeting type
-        Svc.Log.Information($"Targeting type changed to: {type}");
+        PluginLog.Information($"Targeting type changed to: {type}");
     }
 
     #endregion
@@ -1834,7 +1833,7 @@ public partial class RotationConfigWindow : Window
             _groupWidth = ImGui.GetItemRectSize().X;
         }
     }
-    
+
     private static float _groupWidth = 100;
     #endregion
 
@@ -2468,7 +2467,7 @@ public partial class RotationConfigWindow : Window
             }
             catch (Exception ex)
             {
-                Svc.Log.Warning(ex, CopyErrorMessage);
+                PluginLog.Warning($"{CopyErrorMessage}: {ex.Message}");
             }
         }
 
@@ -2489,7 +2488,7 @@ public partial class RotationConfigWindow : Window
             }
             catch (Exception ex)
             {
-                Svc.Log.Warning(ex, PasteErrorMessage);
+                PluginLog.Warning($"{PasteErrorMessage}: {ex.Message}");
             }
             finally
             {

@@ -89,7 +89,7 @@ public sealed class SCH_Default : ScholarRotation
     {
         ImGui.TextColored(ImGuiColors.DalamudViolet, "Rotation Tracking:");
         ImGui.Text($"Max Targets to apply Bio to rather than spamming AoW: {GetAoWBreakevenTargets() - 1}");
-        ImGui.TextColored(ImGuiColors.DalamudViolet, "Base Tracking:");
+        ImGui.TextColored(ImGuiColors.DalamudYellow, "Base Tracking:");
         base.DisplayStatus();
     }
     #endregion
@@ -246,7 +246,7 @@ public sealed class SCH_Default : ScholarRotation
         // Deployment Tactics is modified in the base rotation to only use if they have galvanize so can trust that targets are at least valid?
         // The number of times that we adlo to heal a DPS and then would like to use this is actually reasonably high in dungeons
         // TODO: This is typically skipping because the target it's trying to cast the area defense on isn't the galvanized target
-        if ((!RecitationPvE.EnoughLevel || RecitationPvE.Cooldown.IsCoolingDown || PartyMembers.Any(member => member.HasStatus(true, StatusID.Catalyze))) 
+        if ((!RecitationPvE.EnoughLevel || RecitationPvE.Cooldown.IsCoolingDown || PartyMembers.Any(member => member.HasStatus(true, StatusID.Catalyze)))
             && DeploymentTacticsPvE.CanUse(out act)) return true;
 
         // Consolation is great if Seraph is up

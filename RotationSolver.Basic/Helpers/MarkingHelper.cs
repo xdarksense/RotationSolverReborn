@@ -1,5 +1,4 @@
 ﻿using FFXIVClientStructs.FFXIV.Client.Game.UI;
-using System.Collections.Generic;
 
 namespace RotationSolver.Basic.Helpers
 {

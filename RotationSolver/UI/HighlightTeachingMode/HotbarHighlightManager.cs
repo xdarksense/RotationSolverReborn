@@ -1,5 +1,6 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
 using ECommons.DalamudServices;
+using ECommons.Logging;
 using RotationSolver.UI.HighlightTeachingMode.ElementSpecial;
 using RotationSolver.Updaters;
 
@@ -42,7 +43,7 @@ internal static class HotbarHighlightManager
         {
             item.Dispose();
 #if DEBUG
-            Svc.Log.Debug($"Item: {item} from '_drawingElements' was disposed");
+            PluginLog.Debug($"Item: {item} from '_drawingElements' was disposed");
 #endif
         }
         _highLight?.Dispose();

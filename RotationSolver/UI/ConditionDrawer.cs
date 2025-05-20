@@ -3,8 +3,8 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Utility;
-using ECommons.DalamudServices;
 using ECommons.ImGuiMethods;
+using ECommons.Logging;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration.Conditions;
 using RotationSolver.Data;
@@ -612,7 +612,7 @@ internal static class ConditionDrawer
                     }
                     catch (Exception ex)
                     {
-                        Svc.Log.Warning(ex, "Failed to load the condition.");
+                        PluginLog.Warning($"Failed to load the condition: {ex.Message}");
                     }
                     ImGui.CloseCurrentPopup();
                 }

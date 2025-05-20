@@ -1,6 +1,8 @@
 ﻿using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
+using ECommons.Logging;
+using ExCSS;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Rotations.Duties;
 using RotationSolver.Data;
@@ -31,13 +33,13 @@ internal static class RotationUpdater
             var files = Directory.GetFiles(relayFolder);
             foreach (var file in files)
             {
-                Svc.Log.Information($"Deleting {file}");
+                PluginLog.Information($"Deleting {file}");
                 File.Delete(file);
             }
         }
         catch (Exception ex)
         {
-            Svc.Log.Error(ex, "Failed to delete the rotation files");
+            PluginLog.Error($"Failed to delete the rotation files: {ex.Message}");
         }
 
         return Task.CompletedTask;
@@ -91,7 +93,7 @@ internal static class RotationUpdater
         catch (Exception ex)
         {
             WarningHelper.AddSystemWarning($"Failed to load rotations because: {ex.Message}");
-            Svc.Log.Error(ex, "Failed to get custom rotations");
+            PluginLog.Error($"Failed to get custom rotations: {ex.Message}");
         }
         finally
         {
@@ -104,15 +106,15 @@ internal static class RotationUpdater
         var directory = Svc.PluginInterface.AssemblyLocation.Directory;
         if (directory == null || !directory.Exists)
         {
-            Svc.Log.Error("Failed to find main assembly directory");
+            PluginLog.Error("Failed to find main assembly directory");
             return null;
         }
         var assemblyPath = Path.Combine(directory.ToString(),
-        #if DEBUG
+#if DEBUG
             "net9.0-windows\\RebornRotations.dll"
-        #else
+#else
             "RebornRotations.dll"
-        #endif
+#endif
         );
         return LoadOne(assemblyPath);
     }
@@ -140,7 +142,7 @@ internal static class RotationUpdater
             var defaultAssembly = LoadDefaultRotationsFromLocal();
             if (defaultAssembly == null)
             {
-                Svc.Log.Error("Failed to load default rotations from local directory");
+                PluginLog.Error("Failed to load default rotations from local directory");
                 return;
             }
             assemblies.Add(defaultAssembly);
@@ -386,13 +388,13 @@ internal static class RotationUpdater
                 await response.Content.CopyToAsync(stream);
             }
 
-            Svc.Log.Information($"Successfully downloaded {filePath}");
+            PluginLog.Information($"Successfully downloaded {filePath}");
             return true;
         }
         catch (Exception ex)
         {
             WarningHelper.AddSystemWarning($"Failed to download from {url} Please check VPN");
-            Svc.Log.Error(ex, $"Failed to download from {url}");
+            PluginLog.Error($"Failed to download from {url}: {ex.Message}");
         }
         return false;
     }
@@ -417,7 +419,7 @@ internal static class RotationUpdater
         catch (Exception ex)
         {
             WarningHelper.AddSystemWarning("Failed to load " + filePath);
-            Svc.Log.Warning(ex, "Failed to load " + filePath);
+            PluginLog.Warning($"Failed to load {filePath}: {ex.Message}");
         }
         return null;
     }
@@ -473,7 +475,7 @@ internal static class RotationUpdater
         }
         catch (Exception ex)
         {
-            Svc.Log.Warning(ex, $"Failed to load the types from {assembly.FullName}");
+            PluginLog.Warning($"Failed to load the types from {assembly.FullName}: {ex.Message}");
             return [];
         }
     }
@@ -605,7 +607,7 @@ internal static class RotationUpdater
             catch (Exception ex)
             {
                 WarningHelper.AddSystemWarning($"Failed to create the rotation: {t.Name}");
-                Svc.Log.Error(ex, $"Failed to create the rotation: {t.Name}");
+                PluginLog.Error($"Failed to create the rotation: {t.Name}: {ex.Message}");
                 return null;
             }
         }
@@ -626,7 +628,7 @@ internal static class RotationUpdater
                 if (instance == null)
                 {
 #if DEBUG
-                    Svc.Log.Error($"Failed to create instance for rotation: {rotation?.Name}");
+                    PluginLog.Error($"Failed to create instance for rotation: {rotation?.Name}");
 #endif
                     continue;
                 }
@@ -653,7 +655,7 @@ internal static class RotationUpdater
             catch (Exception)
             {
 #if DEBUG
-                Svc.Log.Error($"Failed to create the rotation: {t.Name}");
+                PluginLog.Error($"Failed to create the rotation: {t.Name}");
 #endif
                 return null;
             }

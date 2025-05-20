@@ -3,6 +3,7 @@ using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
+using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using RotationSolver.Basic.Configuration;
@@ -215,7 +216,7 @@ public struct ActionTargetInfo(IBaseAction action)
         }
         catch (Exception ex)
         {
-            Svc.Log.Error($"Exception accessing StatusList for {gameObject?.NameId}: {ex.Message}");
+            PluginLog.Error($"Exception accessing StatusList for {gameObject?.NameId}: {ex.Message}");
             return false;
         }
 
@@ -339,7 +340,7 @@ public struct ActionTargetInfo(IBaseAction action)
         catch (Exception ex)
         {
             // Log the exception for debugging purposes
-            Svc.Log.Error($"Error checking resistance: {ex.Message}");
+            PluginLog.Error($"Error checking resistance: {ex.Message}");
             return false;
         }
 
@@ -850,7 +851,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 return dis <= EffectRange && dis >= 8;
 
             default:
-                Svc.Log.Debug($"{action.Action.Name.ExtractText().ToString()}'s CastType is not valid! The value is {action.Action.CastType}");
+                PluginLog.Debug($"{action.Action.Name.ExtractText()}'s CastType is not valid! The value is {action.Action.CastType}");
                 return false;
         }
     }

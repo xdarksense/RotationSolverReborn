@@ -86,7 +86,7 @@ public sealed class RPR_DefaultPvP : ReaperRotation
         action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
 
-        if ((Player.StatusStack(true, StatusID.Enshrouded_2863) == 1 || Player.WillStatusEndGCD(1, 0, true, StatusID.Enshrouded_2863)) 
+        if ((Player.StatusStack(true, StatusID.Enshrouded_2863) == 1 || Player.WillStatusEndGCD(1, 0, true, StatusID.Enshrouded_2863))
             && CommunioPvP.CanUse(out action)) return true;
 
         if (CrossReapingPvP.CanUse(out action)) return true;

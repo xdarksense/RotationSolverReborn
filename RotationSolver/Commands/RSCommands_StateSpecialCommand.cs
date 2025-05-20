@@ -1,7 +1,6 @@
 ﻿using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using RotationSolver.Extensions;
-using RotationSolver.Helpers;
 using RotationSolver.Updaters;
 
 namespace RotationSolver.Commands
@@ -118,8 +117,6 @@ namespace RotationSolver.Commands
             if (role == JobRole.None) return;
 
             T type = doingSomething(role);
-
-            if (Service.Config.SayOutStateChanged) SpeechHelper.Speak(sayout(type, role));
         }
     }
 }

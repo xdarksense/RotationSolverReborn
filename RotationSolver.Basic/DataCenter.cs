@@ -2,6 +2,7 @@
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
+using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Fate;
@@ -262,7 +263,7 @@ internal static class DataCenter
             }
             catch (Exception ex)
             {
-                Svc.Log.Error(ex.StackTrace ?? ex.Message);
+                PluginLog.Error(ex.StackTrace ?? ex.Message);
             }
 
             return 0;
@@ -645,7 +646,7 @@ internal static class DataCenter
                 }
                 catch (AccessViolationException ex)
                 {
-                    Svc.Log.Error($"AccessViolationException in RefinedHP: {ex.Message}");
+                    PluginLog.Error($"AccessViolationException in RefinedHP: {ex.Message}");
                     continue; // Skip problematic members
                 }
             }
@@ -974,7 +975,7 @@ internal static class DataCenter
         // Check if h is null
         if (h == null)
         {
-            Svc.Log.Error("IsHostileCastingBase: Hostile character is null.");
+            PluginLog.Error("IsHostileCastingBase: Hostile character is null.");
             return false;
         }
 
@@ -989,7 +990,7 @@ internal static class DataCenter
         catch (Exception ex)
         {
             // Log the exception and return false
-            Svc.Log.Error($"IsHostileCastingBase: Exception while checking IsCasting - {ex.Message}");
+            PluginLog.Error($"IsHostileCastingBase: Exception while checking IsCasting - {ex.Message}");
             return false;
         }
 
@@ -1007,7 +1008,7 @@ internal static class DataCenter
         var actionSheet = Service.GetSheet<Action>();
         if (actionSheet == null)
         {
-            Svc.Log.Error("IsHostileCastingBase: Action sheet is null.");
+            PluginLog.Error("IsHostileCastingBase: Action sheet is null.");
             return false;
         }
 
@@ -1015,7 +1016,7 @@ internal static class DataCenter
         var action = actionSheet.GetRow(h.CastActionId);
         if (action.RowId == 0)
         {
-            Svc.Log.Error("IsHostileCastingBase: Action is not initialized.");
+            PluginLog.Error("IsHostileCastingBase: Action is not initialized.");
             return false;
         }
 

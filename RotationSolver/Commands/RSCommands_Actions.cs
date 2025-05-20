@@ -2,6 +2,7 @@
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
+using ECommons.Logging;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Updaters;
 
@@ -106,7 +107,7 @@ namespace RotationSolver.Commands
 
 #if DEBUG
             // if (nextAction is BaseAction debugAct)
-            //     Svc.Log.Debug($"Will Do {debugAct}");
+            //     PluginLog.Debug($"Will Do {debugAct}");
 #endif
 
             if (nextAction is BaseAction baseAct)
@@ -125,7 +126,7 @@ namespace RotationSolver.Commands
 
             if (Service.Config.KeyBoardNoise)
             {
-                PreviewUpdater.PulseActionBar(nextAction.AdjustedID);
+                MiscUpdater.PulseActionBar(nextAction.AdjustedID);
             }
 
             if (nextAction.Use())
@@ -148,7 +149,7 @@ namespace RotationSolver.Commands
             }
             else if (Service.Config.InDebug)
             {
-                Svc.Log.Verbose($"Failed to use the action {nextAction} ({nextAction.AdjustedID})");
+                PluginLog.Verbose($"Failed to use the action {nextAction} ({nextAction.AdjustedID})");
             }
         }
 
@@ -163,7 +164,7 @@ namespace RotationSolver.Commands
             }
             catch (Exception ex)
             {
-                Svc.Log.Warning(ex, "Pulse Failed!");
+                PluginLog.Warning($"Pulse Failed!: {ex.Message}");
                 WarningHelper.AddSystemWarning($"Action bar failed to pulse because: {ex.Message}");
             }
             finally
@@ -180,7 +181,7 @@ namespace RotationSolver.Commands
                 return;
             }
 
-            PreviewUpdater.PulseActionBar(id);
+            MiscUpdater.PulseActionBar(id);
             var time = Service.Config.ClickingDelay.X + random.NextDouble() * (Service.Config.ClickingDelay.Y - Service.Config.ClickingDelay.X);
             Svc.Framework.RunOnTick(() =>
             {
@@ -286,7 +287,7 @@ namespace RotationSolver.Commands
             }
             catch (Exception ex)
             {
-                Svc.Log.Error(ex, "Exception in UpdateRotationState");
+                PluginLog.Error($"Exception in UpdateRotationState: {ex.Message}");
             }
         }
 

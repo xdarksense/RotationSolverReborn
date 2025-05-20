@@ -186,7 +186,6 @@ public static class StatusHelper
     /// <returns></returns>
     public static bool WillStatusEndGCD(this IGameObject obj, uint gcdCount = 0, float offset = 0, bool isFromSelf = true, params StatusID[] statusIDs)
     {
-        if (obj == null || statusIDs == null || Player.Object == null) return false;
         return WillStatusEnd(obj, DataCenter.GCDTime(gcdCount, offset), isFromSelf, statusIDs);
     }
 
@@ -200,8 +199,6 @@ public static class StatusHelper
     /// <returns></returns>
     public static bool WillStatusEnd(this IGameObject obj, float time, bool isFromSelf = true, params StatusID[] statusIDs)
     {
-        if (obj == null || statusIDs == null || Player.Object == null) return false;
-
         if (HasApplyStatus(obj, statusIDs)) return false;
         float statusTime = obj.StatusTime(isFromSelf, statusIDs);
         if (statusTime < 0 && obj.HasStatus(isFromSelf, statusIDs)) return false;
@@ -217,8 +214,6 @@ public static class StatusHelper
     /// <returns></returns>
     public static float StatusTime(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
     {
-        if (obj == null || statusIDs == null || Player.Object == null) return 0;
-
         try
         {
             if (HasApplyStatus(obj, statusIDs)) return float.MaxValue;
@@ -242,8 +237,6 @@ public static class StatusHelper
 
     internal static IEnumerable<float> StatusTimes(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
     {
-        if (obj == null || statusIDs == null || Player.Object == null) yield break;
-
         foreach (var status in obj.GetStatus(isFromSelf, statusIDs))
         {
             yield return status.RemainingTime == 0 ? float.MaxValue : status.RemainingTime;
@@ -259,8 +252,6 @@ public static class StatusHelper
     /// <returns></returns>
     public static byte StatusStack(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
     {
-        if (obj == null || statusIDs == null || Player.Object == null) return 0;
-
         if (HasApplyStatus(obj, statusIDs)) return byte.MaxValue;
         var stacks = obj.StatusStacks(isFromSelf, statusIDs);
         byte min = byte.MaxValue;
@@ -275,8 +266,6 @@ public static class StatusHelper
 
     private static IEnumerable<byte> StatusStacks(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
     {
-        if (obj == null || statusIDs == null || Player.Object == null) yield break;
-
         foreach (var status in obj.GetStatus(isFromSelf, statusIDs))
         {
             yield return (byte)(status.Param == 0 ? byte.MaxValue : status.Param);
@@ -292,8 +281,6 @@ public static class StatusHelper
     /// <returns></returns>
     public static bool HasStatus(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
     {
-        if (obj == null || statusIDs == null || Player.Object == null) return false;
-
         if (HasApplyStatus(obj, statusIDs)) return true;
         foreach (var _ in obj.GetStatus(isFromSelf, statusIDs))
         {
@@ -312,8 +299,6 @@ public static class StatusHelper
     /// </returns>
     public static bool HasApplyStatus(this IGameObject obj, StatusID[] statusIDs)
     {
-        if (obj == null || statusIDs == null || Player.Object == null) return false;
-
         if (DataCenter.InEffectTime && DataCenter.ApplyStatus.TryGetValue(obj.GameObjectId, out var statusId))
         {
             foreach (var s in statusIDs)
@@ -330,7 +315,6 @@ public static class StatusHelper
     /// <param name="status"></param>
     public static void StatusOff(StatusID status)
     {
-        if (Player.Object == null) return;
         if (!Player.Object.HasStatus(false, status)) return;
 
         try
@@ -351,9 +335,9 @@ public static class StatusHelper
     /// <returns>The name of the status.</returns>
     internal static string GetStatusName(StatusID id)
     {
-        if (Player.Object == null) return string.Empty;
-
-        var statusRow = Service.GetSheet<Lumina.Excel.Sheets.Status>().GetRow((uint)id);
+        var sheet = Service.GetSheet<Lumina.Excel.Sheets.Status>();
+        if (sheet == null) return string.Empty;
+        var statusRow = sheet.GetRow((uint)id);
         if (statusRow.RowId == 0) return string.Empty;
         return statusRow.Name.ToString() ?? string.Empty;
     }
@@ -367,9 +351,6 @@ public static class StatusHelper
     /// <returns>An enumerable of statuses.</returns>
     private static IEnumerable<Status> GetStatus(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
     {
-        if (Player.Object == null || obj == null || statusIDs == null || statusIDs.Length == 0)
-            return Array.Empty<Status>();
-
         var allStatuses = obj.GetAllStatus(isFromSelf);
         if (allStatuses == null)
             return Array.Empty<Status>();
@@ -411,37 +392,31 @@ public static class StatusHelper
         if (obj == null) return Enumerable.Empty<Status>();
         if (obj is not IBattleChara b) return Enumerable.Empty<Status>();
 
-        var playerId = Player.Object?.GameObjectId ?? 0;
+        var playerId = Player.Object.GameObjectId;
         var result = new List<Status>();
 
-        try
+        var statusList = b.StatusList;
+        if (statusList == null || statusList.Length == 0)
         {
-            var statusList = b.StatusList;
-            if (statusList == null || statusList.Length == 0)
-            {
-                PluginLog.Error("StatusList is null. Cannot get statuses.");
-                return Enumerable.Empty<Status>();
-            }
-
-            for (int i = 0; i < statusList.Length; i++)
-            {
-                var status = statusList[i];
-                if (status == null || status.StatusId <= 0) continue;
-
-                if (!isFromSelf || status.SourceId == playerId || (status.SourceObject != null && status.SourceObject.OwnerId == playerId))
-                {
-                    result.Add(status);
-                }
-            }
+            PluginLog.Information($"No statuses found for GameObjectId: {obj.GameObjectId}.");
+            return Enumerable.Empty<Status>();
         }
-        catch (Exception ex)
+
+        for (int i = 0; i < statusList.Length; i++)
         {
-            PluginLog.Error($"Failed to get statuses: {ex.Message}");
+            var status = statusList[i];
+            if (status == null || status.StatusId <= 0) continue;
+
+            if (!isFromSelf ||
+                status.SourceId == playerId ||
+                (status.SourceObject?.OwnerId == playerId))
+            {
+                result.Add(status);
+            }
         }
 
         return result;
     }
-
 
     /// <summary>
     /// Check if the status is invincible.

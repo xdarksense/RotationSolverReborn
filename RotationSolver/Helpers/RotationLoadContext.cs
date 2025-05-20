@@ -1,5 +1,5 @@
 ﻿using Dalamud.Plugin;
-using ECommons.DalamudServices;
+using ECommons.Logging;
 using Lumina.Excel;
 //using Lumina.Excel.CustomSheets;
 using System.Runtime.Loader;
@@ -60,7 +60,7 @@ internal class RotationLoadContext(DirectoryInfo? directoryInfo)
         if (!File.Exists(pdbPath))
         {
 #if DEBUG
-            Svc.Log.Information($"Failed to find {pdbPath}");
+            PluginLog.Information($"Failed to find {pdbPath}");
 #endif
             return LoadFromStream(file);
         }

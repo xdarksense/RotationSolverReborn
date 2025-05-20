@@ -2,6 +2,7 @@
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
+using ECommons.Logging;
 
 namespace RotationSolver.Updaters;
 
@@ -65,7 +66,7 @@ internal static partial class TargetUpdater
         }
         catch (Exception ex)
         {
-            Svc.Log.Error($"Error in GetPartyMembers: {ex.Message}");
+            PluginLog.Error($"Error in GetPartyMembers: {ex.Message}");
         }
         return partyMembers;
     }
@@ -87,7 +88,7 @@ internal static partial class TargetUpdater
         }
         catch (Exception ex)
         {
-            Svc.Log.Error($"Error in GetAllianceMembers: {ex.Message}");
+            PluginLog.Error($"Error in GetAllianceMembers: {ex.Message}");
         }
         return allianceMembers;
     }
@@ -120,7 +121,7 @@ internal static partial class TargetUpdater
         }
         catch (Exception ex)
         {
-            Svc.Log.Error($"Error in GetAllHostileTargets: {ex.Message}");
+            PluginLog.Error($"Error in GetAllHostileTargets: {ex.Message}");
         }
         return hostileTargets;
     }
@@ -138,7 +139,7 @@ internal static partial class TargetUpdater
             }
             catch (Exception ex)
             {
-                Svc.Log.Error($"Error in GetFirstHostileTarget: {ex.Message}");
+                PluginLog.Error($"Error in GetFirstHostileTarget: {ex.Message}");
             }
         }
         return null;
@@ -234,7 +235,7 @@ internal static partial class TargetUpdater
             }
             catch (Exception ex)
             {
-                Svc.Log.Error($"Error in GetDeathTarget: {ex.Message}");
+                PluginLog.Error($"Error in GetDeathTarget: {ex.Message}");
             }
         }
         return null;
@@ -347,7 +348,7 @@ internal static partial class TargetUpdater
             }
             catch (NullReferenceException ex)
             {
-                Svc.Log.Error($"NullReferenceException in AddDispelTargets for member {member?.ToString()}: {ex.Message}");
+                PluginLog.Error($"NullReferenceException in AddDispelTargets for member {member?.ToString()}: {ex.Message}");
             }
         }
     }

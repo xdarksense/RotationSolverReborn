@@ -3,6 +3,7 @@ using Dalamud.Game.ClientState.Objects.SubKinds;
 using ECommons.DalamudServices;
 using ECommons.EzIpcManager;
 using ECommons.GameHelpers;
+using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using RotationSolver.Commands;
@@ -267,6 +268,6 @@ internal static class ActionUpdater
     private static void LogError(string message, Exception ex)
     {
         WarningHelper.AddSystemWarning($"{message} because: {ex.Message}");
-        Svc.Log.Error(ex, message);
+        PluginLog.Error($"{message} because: {ex.Message}");
     }
 }

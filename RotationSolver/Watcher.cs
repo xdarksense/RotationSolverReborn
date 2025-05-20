@@ -130,7 +130,7 @@ public static class Watcher
         }
         catch (Exception ex)
         {
-            Svc.Log.Error($"Error in ActionFromEnemy: {ex}");
+            PluginLog.Error($"Error in ActionFromEnemy: {ex}");
         }
     }
 
@@ -238,7 +238,7 @@ public static class Watcher
         }
         catch (Exception ex)
         {
-            Svc.Log.Error($"Error in ActionFromSelf: {ex}");
+            PluginLog.Error($"Error in ActionFromSelf: {ex}");
         }
     }
 

@@ -6,6 +6,7 @@ using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
+using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
@@ -452,7 +453,7 @@ public static class ObjectHelper
         {
             if (Service.Config.InDebug)
             {
-                Svc.Log.Information("IsWolfImmune: WindPack status found");
+                PluginLog.Information("IsWolfImmune: WindPack status found");
             }
             return true;
         }
@@ -462,7 +463,7 @@ public static class ObjectHelper
         {
             if (Service.Config.InDebug)
             {
-                Svc.Log.Information("IsWolfImmune: StonePack status found");
+                PluginLog.Information("IsWolfImmune: StonePack status found");
             }
             return true;
         }
@@ -482,7 +483,7 @@ public static class ObjectHelper
         {
             if (Service.Config.InDebug)
             {
-                Svc.Log.Information("IsJeunoBossImmune: EpicVillain status found");
+                PluginLog.Information("IsJeunoBossImmune: EpicVillain status found");
             }
             return true;
         }
@@ -492,7 +493,7 @@ public static class ObjectHelper
         {
             if (Service.Config.InDebug)
             {
-                Svc.Log.Information("IsJeunoBossImmune: VauntedVillain status found");
+                PluginLog.Information("IsJeunoBossImmune: VauntedVillain status found");
             }
             return true;
         }
@@ -502,7 +503,7 @@ public static class ObjectHelper
         {
             if (Service.Config.InDebug)
             {
-                Svc.Log.Information("IsJeunoBossImmune: FatedVillain status found");
+                PluginLog.Information("IsJeunoBossImmune: FatedVillain status found");
             }
             return true;
         }
@@ -527,7 +528,7 @@ public static class ObjectHelper
         {
             if (Service.Config.InDebug)
             {
-                Svc.Log.Information("IsCODBossImmune: OuterDarkness status found, CloudOfDarkness immune");
+                PluginLog.Information("IsCODBossImmune: OuterDarkness status found, CloudOfDarkness immune");
             }
             return true;
         }
@@ -537,7 +538,7 @@ public static class ObjectHelper
         {
             if (Service.Config.InDebug)
             {
-                Svc.Log.Information("IsCODBossImmune: InnerDarkness status found, Stygian immune");
+                PluginLog.Information("IsCODBossImmune: InnerDarkness status found, Stygian immune");
             }
             return true;
         }
@@ -562,7 +563,7 @@ public static class ObjectHelper
         {
             if (Service.Config.InDebug)
             {
-                Svc.Log.Information("IsCinderDriftImmune: AntiGriefAdd status found, GriefAdd immune");
+                PluginLog.Information("IsCinderDriftImmune: AntiGriefAdd status found, GriefAdd immune");
             }
             return true;
         }
@@ -572,7 +573,7 @@ public static class ObjectHelper
         {
             if (Service.Config.InDebug)
             {
-                Svc.Log.Information("IsCinderDriftImmune: AntiRageAdd status found, RageAdd immune");
+                PluginLog.Information("IsCinderDriftImmune: AntiRageAdd status found, RageAdd immune");
             }
             return true;
         }
@@ -598,7 +599,7 @@ public static class ObjectHelper
         {
             if (Service.Config.InDebug)
             {
-                Svc.Log.Information("IsResistanceImmune: MagicResistance status found");
+                PluginLog.Information("IsResistanceImmune: MagicResistance status found");
             }
             return true;
         }
@@ -608,7 +609,7 @@ public static class ObjectHelper
         {
             if (Service.Config.InDebug)
             {
-                Svc.Log.Information("IsResistanceImmune: RangedResistance status found");
+                PluginLog.Information("IsResistanceImmune: RangedResistance status found");
             }
             return true;
         }
@@ -637,7 +638,7 @@ public static class ObjectHelper
         {
             if (Service.Config.InDebug)
             {
-                Svc.Log.Information("IsOmegaImmune: PacketFilterF status found");
+                PluginLog.Information("IsOmegaImmune: PacketFilterF status found");
             }
             return true;
         }
@@ -647,7 +648,7 @@ public static class ObjectHelper
         {
             if (Service.Config.InDebug)
             {
-                Svc.Log.Information("IsOmegaImmune: PacketFilterM status found");
+                PluginLog.Information("IsOmegaImmune: PacketFilterM status found");
             }
             return true;
         }
@@ -676,7 +677,7 @@ public static class ObjectHelper
         {
             if (Service.Config.InDebug)
             {
-                Svc.Log.Information("IsLimitlessBlue: Bismark found, WhaleBack status not found");
+                PluginLog.Information("IsLimitlessBlue: Bismark found, WhaleBack status not found");
             }
             return true;
         }
@@ -686,7 +687,7 @@ public static class ObjectHelper
         {
             if (Service.Config.InDebug)
             {
-                Svc.Log.Information("IsLimitlessBlue: WillOfTheWater status found");
+                PluginLog.Information("IsLimitlessBlue: WillOfTheWater status found");
             }
             return true;
         }
@@ -696,7 +697,7 @@ public static class ObjectHelper
         {
             if (Service.Config.InDebug)
             {
-                Svc.Log.Information("IsLimitlessBlue: WillOfTheWind status found");
+                PluginLog.Information("IsLimitlessBlue: WillOfTheWind status found");
             }
             return true;
         }
@@ -719,7 +720,7 @@ public static class ObjectHelper
         {
             if (Service.Config.InDebug)
             {
-                Svc.Log.Information("IsHanselorGretelSheilded: StrongOfShield status found, ignoring status haver if player is out of position");
+                PluginLog.Information("IsHanselorGretelSheilded: StrongOfShield status found, ignoring status haver if player is out of position");
             }
             return true;
         }

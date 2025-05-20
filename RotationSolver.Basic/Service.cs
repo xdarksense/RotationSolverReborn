@@ -1,6 +1,7 @@
 ﻿using Dalamud.Utility.Signatures;
 using ECommons.DalamudServices;
 using ECommons.EzHookManager;
+using ECommons.Logging;
 using FFXIVClientStructs.Attributes;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Lumina.Excel;
@@ -72,7 +73,7 @@ internal class Service : IDisposable
         }
         catch (Exception ex)
         {
-            Svc.Log.Warning(ex, "Failed to process VfxCreateDetour");
+            PluginLog.Warning($"Failed to process VfxCreateDetour: {ex.Message}");
         }
 
         return actorVfxCreateHook!.Original(a1, a2, a3, a4, a5, a6, a7);
