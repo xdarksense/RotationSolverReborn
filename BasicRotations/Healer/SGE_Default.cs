@@ -1,3 +1,5 @@
+using Dalamud.Interface.Colors;
+
 namespace RebornRotations.Healer;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.21")]
@@ -73,6 +75,14 @@ public sealed class SGE_Default : SageRotation
 
     #region Tracking Properties
     private IBaseAction? _lastEukrasiaActionAim = null;
+    public override void DisplayStatus()
+    {
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "Rotation Tracking:");
+        ImGui.Text($"Last E.Action Aim Cleared From Queue: {_lastEukrasiaActionAim}");
+        ImGui.Text($"Current E.Action Aim: {_EukrasiaActionAim}");
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "Base Tracking:");
+        base.DisplayStatus();
+    }
     #endregion
 
     #region Countdown Logic
@@ -352,7 +362,7 @@ public sealed class SGE_Default : SageRotation
     {
         act = null;
 
-        if (_EukrasiaActionAim != null && (_EukrasiaActionAim == EukrasianPrognosisPvE || _EukrasiaActionAim == EukrasianPrognosisIiPvE) && _EukrasiaActionAim.CanUse(out act))
+        if (_EukrasiaActionAim != null && (_EukrasiaActionAim == EukrasianPrognosisPvE || _EukrasiaActionAim == EukrasianPrognosisIiPvE) && _EukrasiaActionAim.CanUse(out _))
         {
             if (EukrasiaPvE.CanUse(out act)) return true;
 
@@ -367,7 +377,7 @@ public sealed class SGE_Default : SageRotation
     {
         act = null;
 
-        if (_EukrasiaActionAim != null && _EukrasiaActionAim == EukrasianDiagnosisPvE && _EukrasiaActionAim.CanUse(out act))
+        if (_EukrasiaActionAim != null && _EukrasiaActionAim == EukrasianDiagnosisPvE && _EukrasiaActionAim.CanUse(out _))
         {
             if (EukrasiaPvE.CanUse(out act)) return true;
 
@@ -382,7 +392,7 @@ public sealed class SGE_Default : SageRotation
     {
         act = null;
 
-        if (_EukrasiaActionAim != null && _EukrasiaActionAim == EukrasianDyskrasiaPvE && _EukrasiaActionAim.CanUse(out act))
+        if (_EukrasiaActionAim != null && _EukrasiaActionAim == EukrasianDyskrasiaPvE && _EukrasiaActionAim.CanUse(out _))
         {
             if (EukrasiaPvE.CanUse(out act)) return true;
 
@@ -397,7 +407,7 @@ public sealed class SGE_Default : SageRotation
     {
         act = null;
 
-        if (_EukrasiaActionAim != null && (_EukrasiaActionAim == EukrasianDosisPvE || _EukrasiaActionAim == EukrasianDosisIiPvE || _EukrasiaActionAim == EukrasianDosisIiiPvE) && _EukrasiaActionAim.CanUse(out act))
+        if (_EukrasiaActionAim != null && (_EukrasiaActionAim == EukrasianDosisPvE || _EukrasiaActionAim == EukrasianDosisIiPvE || _EukrasiaActionAim == EukrasianDosisIiiPvE) && _EukrasiaActionAim.CanUse(out _))
         {
             if (EukrasiaPvE.CanUse(out act)) return true;
 

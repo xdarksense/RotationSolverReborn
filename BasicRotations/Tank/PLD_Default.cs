@@ -1,6 +1,8 @@
-﻿namespace RebornRotations.Tank;
+﻿using Dalamud.Interface.Colors;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.20")]
+namespace RebornRotations.Tank;
+
+[Rotation("Default", CombatType.PvE, GameVersion = "7.21")]
 [SourceCode(Path = "main/BasicRotations/Tank/PLD_Default.cs")]
 [Api(4)]
 
@@ -55,6 +57,16 @@ public sealed class PLD_Default : PaladinRotation
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Clemency without Requiescat")]
     public float ClemencyNoRequi { get; set; } = 0.4f;
+    #endregion
+
+    #region Tracking Properties
+    public override void DisplayStatus()
+    {
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "Rotation Tracking:");
+        ImGui.Text($"Use Oath: {UseOath(out _)}");
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "Base Tracking:");
+        base.DisplayStatus();
+    }
     #endregion
 
     #region Countdown Logic

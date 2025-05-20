@@ -1,3 +1,5 @@
+using Dalamud.Interface.Colors;
+
 namespace RebornRotations.Healer;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.21")]
@@ -82,12 +84,15 @@ public sealed class SCH_Default : ScholarRotation
     public bool UseBallparkTTK { get; set; } = true;
     #endregion
 
+    #region Tracking Properties
     public override void DisplayStatus()
     {
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "Rotation Tracking:");
         ImGui.Text($"Max Targets to apply Bio to rather than spamming AoW: {GetAoWBreakevenTargets() - 1}");
-
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "Base Tracking:");
         base.DisplayStatus();
     }
+    #endregion
 
     #region Countdown Logic
     protected override IAction? CountDownAction(float remainTime)

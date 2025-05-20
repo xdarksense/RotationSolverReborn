@@ -36,7 +36,6 @@ internal static class PreviewUpdater
             }
             catch
             {
-#pragma warning disable 0436
                 WarningHelper.AddSystemWarning("Unable to add server bar entry");
                 return;
             }
