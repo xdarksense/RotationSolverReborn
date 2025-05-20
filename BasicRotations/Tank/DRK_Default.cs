@@ -47,7 +47,7 @@ public sealed class DRK_Default : DarkKnightRotation
 
     protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
-        
+
         return base.HealSingleAbility(nextGCD, out act);
     }
 

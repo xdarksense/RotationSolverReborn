@@ -1,4 +1,4 @@
-﻿using ECommons.DalamudServices;
+﻿using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 
 namespace RotationSolver.Basic.Configuration;
@@ -27,7 +27,7 @@ public class MacroInfo
         }
         catch (Exception ex)
         {
-            Svc.Log.Warning(ex, "Failed to add macro.");
+            PluginLog.Warning($"Failed to add macro: {ex.Message}");
             return false;
         }
     }

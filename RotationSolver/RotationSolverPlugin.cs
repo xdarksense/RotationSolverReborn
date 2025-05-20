@@ -6,6 +6,7 @@ using ECommons;
 using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using ECommons.ImGuiMethods;
+using ECommons.Logging;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Commands;
@@ -16,7 +17,6 @@ using RotationSolver.UI;
 using RotationSolver.UI.HighlightTeachingMode;
 using RotationSolver.UI.HighlightTeachingMode.ElementSpecial;
 using RotationSolver.Updaters;
-using System;
 using WelcomeWindow = RotationSolver.UI.WelcomeWindow;
 
 namespace RotationSolver;
@@ -75,7 +75,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         }
         catch (Exception ex)
         {
-            Svc.Log.Warning(ex, "Failed to load config");
+            PluginLog.Warning($"Failed to load config: {ex.Message}");
             Service.Config = new Configs();
         }
 
@@ -135,7 +135,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
             // Check if the id is valid before proceeding
             if (id == 0)
             {
-                Svc.Log.Warning("Invalid territory id: 0");
+                PluginLog.Warning("Invalid territory id: 0");
                 return;
             }
 
@@ -149,7 +149,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
             }
             catch (Exception ex)
             {
-                Svc.Log.Error(ex, "Failed on Territory changed.");
+                PluginLog.Warning($"Failed on Territory changed: {ex.Message}");
             }
         }
 

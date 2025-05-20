@@ -1,4 +1,4 @@
-﻿using ECommons.DalamudServices;
+﻿using ECommons.Logging;
 
 namespace RotationSolver.Basic.Configuration.RotationConfig;
 
@@ -93,7 +93,7 @@ internal abstract class RotationConfigBase : IRotationConfig
         }
         catch (Exception ex)
         {
-            Svc.Log.Error(ex, "Failed to convert type.");
+            PluginLog.Error($"Failed to convert type: {ex.Message}");
             _property.SetValue(_rotation, ChangeType(DefaultValue, type));
         }
     }
@@ -125,7 +125,7 @@ internal abstract class RotationConfigBase : IRotationConfig
             }
 
             // Log a warning and return the default value if no match is found
-            Svc.Log.Warning($"Invalid enum value '{value}' for type '{type.Name}'. Using default value.");
+            PluginLog.Warning($"Invalid enum value '{value}' for type '{type.Name}'. Using default value.");
             return Enum.GetValues(type).GetValue(0) ?? throw new InvalidOperationException($"No default value available for enum type '{type.Name}'.");
         }
         else if (type == typeof(bool))

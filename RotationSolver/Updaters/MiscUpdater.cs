@@ -13,9 +13,9 @@ using RotationSolver.Commands;
 
 namespace RotationSolver.Updaters;
 
-internal static class PreviewUpdater
+internal static class MiscUpdater
 {
-    internal static void UpdatePreview()
+    internal static void UpdateMisc()
     {
         UpdateEntry();
         UpdateCancelCast();
@@ -119,7 +119,6 @@ internal static class PreviewUpdater
 
         var statusTimes = GetStatusTimes();
 
-        // Replace statusTimes.Min() with manual minimum calculation
         float minStatusTime = float.MaxValue;
         for (int i = 0; i < statusTimes.Length; i++)
         {
@@ -155,7 +154,7 @@ internal static class PreviewUpdater
                 }
             }
         }
-        return statusTimes.ToArray();
+        return [.. statusTimes];
     }
 
     internal static unsafe void PulseActionBar(uint actionID)

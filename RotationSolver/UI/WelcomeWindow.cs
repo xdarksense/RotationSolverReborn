@@ -1,6 +1,7 @@
 ﻿using Dalamud.Interface.Colors;
 using Dalamud.Interface.Windowing;
 using ECommons.DalamudServices;
+using ECommons.Logging;
 using RotationSolver.Data;
 
 namespace RotationSolver.UI
@@ -56,17 +57,17 @@ namespace RotationSolver.UI
                     }
                     else
                     {
-                        Svc.Log.Error("Failed to deserialize GitHub commit comparison.");
+                        PluginLog.Error("Failed to deserialize GitHub commit comparison.");
                     }
                 }
                 else
                 {
-                    Svc.Log.Error($"Failed to get comparison: {response.StatusCode}");
+                    PluginLog.Error($"Failed to get comparison: {response.StatusCode}");
                 }
             }
             catch (Exception ex)
             {
-                Svc.Log.Error(ex, "Failed to get comparison");
+                PluginLog.Error($"Failed to get comparison: {ex.Message}");
             }
         }
 
@@ -96,18 +97,18 @@ namespace RotationSolver.UI
                             return release.TagName;
                         }
                     }
-                    return "4.1.0.0";
+                    return "7.2.1.46";
                 }
                 else
                 {
-                    Svc.Log.Error($"Failed to get releases: {response.StatusCode}");
-                    return "4.1.0.0";
+                    PluginLog.Error($"Failed to get releases: {response.StatusCode}");
+                    return "7.2.1.46";
                 }
             }
             catch (Exception ex)
             {
-                Svc.Log.Error(ex, "Failed to get releases");
-                return "4.1.0.0";
+                PluginLog.Error($"Failed to get releases: {ex.Message}");
+                return "7.2.1.46";
             }
         }
 

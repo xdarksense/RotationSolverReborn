@@ -1,6 +1,7 @@
 ﻿using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using ECommons.DalamudServices;
+using ECommons.Logging;
 using RotationSolver.UI.HighlightTeachingMode;
 
 namespace RotationSolver.UI;
@@ -51,7 +52,7 @@ internal class OverlayWindow : Window
                 var drawList = ImGui.GetWindowDrawList();
                 if (drawList.NativePtr == null)
                 {
-                    Svc.Log.Warning($"{nameof(OverlayWindow)}: Window draw list is null.");
+                    PluginLog.Warning($"{nameof(OverlayWindow)}: Window draw list is null.");
                     return;
                 }
 
@@ -66,7 +67,7 @@ internal class OverlayWindow : Window
         }
         catch (Exception ex)
         {
-            Svc.Log.Warning(ex, $"{nameof(OverlayWindow)} failed to draw on Screen.");
+            PluginLog.Warning($"{nameof(OverlayWindow)} failed to draw on Screen. {ex.Message}");
         }
     }
 

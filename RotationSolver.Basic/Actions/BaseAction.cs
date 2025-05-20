@@ -1,5 +1,6 @@
 ﻿using ECommons.DalamudServices;
 using ECommons.GameHelpers;
+using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Action = Lumina.Excel.Sheets.Action;
 
@@ -97,7 +98,7 @@ public class BaseAction : IBaseAction
                 if (!Action.ClassJob.IsValid)
                 {
                     // Log the error for debugging purposes
-                    Svc.Log.Debug($"ClassJob is not valid for Action ID: {ID}");
+                    PluginLog.Debug($"ClassJob is not valid for Action ID: {ID}");
                     return value;
                 }
 

@@ -1,4 +1,4 @@
-﻿using ECommons.DalamudServices;
+﻿using ECommons.Logging;
 
 namespace RotationSolver.Basic.Rotations;
 
@@ -50,7 +50,7 @@ partial class CustomRotation
             }
 
             // Log the exception details
-            Svc.Log.Error(WhyNotValid);
+            PluginLog.Error(WhyNotValid);
 
             IsValid = false;
         }
@@ -91,7 +91,7 @@ partial class CustomRotation
         catch (Exception ex)
         {
             // Log the exception or handle it as needed
-            Svc.Log.Error($"Exception in UpdateHealingActions method: {ex.Message}");
+            PluginLog.Error($"Exception in UpdateHealingActions method: {ex.Message}");
             // Optionally, set actions to null in case of an exception
             ActionHealAreaGCD = ActionHealAreaAbility = ActionHealSingleGCD = ActionHealSingleAbility = null;
         }

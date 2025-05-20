@@ -1,6 +1,7 @@
 ﻿using Dalamud.Configuration;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
+using ECommons.Logging;
 using System.Collections.Concurrent;
 using static RotationSolver.Basic.Configuration.ConfigTypes;
 
@@ -75,11 +76,6 @@ internal partial class Configs : IPluginConfiguration
     Description = "If enabled, movement actions target the object or mob at the center of your screen. If disabled, they target the object or mob your character is facing.",
     Filter = TargetConfig, Section = 2)]
     private static readonly bool _moveTowardsScreenCenter = false;
-
-    [ConditionBool, UI("Audio notification when status changes",
-    Description = "Play a sound when the combat state changes.",
-    Filter = UiInformation)]
-    private static readonly bool _sayOutStateChanged = false;
 
     [ConditionBool, UI("Enable changelog window popup on update",
     Description = "Show a popup window with the changelog when the plugin updates.",
@@ -371,17 +367,9 @@ internal partial class Configs : IPluginConfiguration
         Filter = BasicAutoSwitch)]
     private static readonly bool _autoOffAfterCombat = true;
 
-    [ConditionBool, UI("Auto Open treasure chests",
-        Filter = Extra)]
-    private static readonly bool _autoOpenChest = true;
-
     [ConditionBool, UI("Enable RSR click counter in main menu",
         Filter = Extra)]
     private static readonly bool _enableClickingCount = true;
-
-    [ConditionBool, UI("Auto close the loot window when auto opened the chest.",
-        Parent = nameof(AutoOpenChest))]
-    private static readonly bool _autoCloseChestWindow = true;
 
     [ConditionBool, UI("Hide all warnings",
         Filter = UiInformation)]
@@ -766,7 +754,7 @@ internal partial class Configs : IPluginConfiguration
     public void Save()
     {
 #if DEBUG
-        Svc.Log.Information("Saved configurations.");
+        PluginLog.Information("Saved configurations.");
 #endif
         File.WriteAllText(Svc.PluginInterface.ConfigFile.FullName,
             JsonConvert.SerializeObject(this, Formatting.Indented));

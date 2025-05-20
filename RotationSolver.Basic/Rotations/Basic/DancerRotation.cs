@@ -31,6 +31,78 @@ partial class DancerRotation
     public static byte CompletedSteps => JobGauge.CompletedSteps;
     #endregion
 
+    #region PvE Status Tracking
+    /// <summary>
+    /// Able to execute Last Dance.
+    /// </summary>
+    public static bool HasLastDance => !Player.WillStatusEnd(0, true, StatusID.LastDanceReady);
+
+    /// <summary>
+    /// Has Silken Symmetry status.
+    /// </summary>
+    public static bool HasSilkenSymmetry => !Player.WillStatusEnd(0, true, StatusID.SilkenSymmetry);
+
+    /// <summary>
+    /// Has Flourishing Symmetry status.
+    /// </summary>
+    public static bool HasFlourishingSymmetry => !Player.WillStatusEnd(0, true, StatusID.FlourishingSymmetry);
+
+    /// <summary>
+    /// Has Silken Flow status.
+    /// </summary>
+    public static bool HasSilkenFlow => !Player.WillStatusEnd(0, true, StatusID.SilkenFlow);
+
+    /// <summary>
+    /// Has Flourishing Flow status.
+    /// </summary>
+    public static bool HasFlourishingFlow => !Player.WillStatusEnd(0, true, StatusID.FlourishingFlow);
+
+    /// <summary>
+    /// Has Threefold Fan Dance status.
+    /// </summary>
+    public static bool HasThreefoldFanDance => !Player.WillStatusEnd(0, true, StatusID.ThreefoldFanDance);
+
+    /// <summary>
+    /// Has Fourfold Fan Dance status.
+    /// </summary>
+    public static bool HasFourfoldFanDance => !Player.WillStatusEnd(0, true, StatusID.FourfoldFanDance);
+
+    /// <summary>
+    /// Has Flourishing Starfall status.
+    /// </summary>
+    public static bool HasFlourishingStarfall => !Player.WillStatusEnd(0, true, StatusID.FlourishingStarfall);
+
+    /// <summary>
+    /// Has Standard Finish status.
+    /// </summary>
+    public static bool HasStandardFinish => !Player.WillStatusEnd(0, true, StatusID.StandardFinish);
+
+    /// <summary>
+    /// Has Standard Step status.
+    /// </summary>
+    public static bool HasStandardStep => !Player.WillStatusEnd(0, true, StatusID.StandardStep);
+
+    /// <summary>
+    /// Has Technical Step status.
+    /// </summary>
+    public static bool HasTechnicalStep => !Player.WillStatusEnd(0, true, StatusID.TechnicalStep);
+
+    /// <summary>
+    /// Has Technical Finish status.
+    /// </summary>
+    public static bool HasTechnicalFinish => !Player.WillStatusEnd(0, true, StatusID.TechnicalFinish);
+
+    /// <summary>
+    /// Has Devilment status.
+    /// </summary>
+    public static bool HasDevilment => !Player.WillStatusEnd(0, true, StatusID.Devilment);
+
+    /// <summary>
+    /// Has Closed Position status.
+    /// </summary>
+    public static bool HasClosedPosition => !Player.WillStatusEnd(0, true, StatusID.ClosedPosition);
+    #endregion
+
     #region PvE Actions Unassignable
 
     /// <summary>
@@ -80,6 +152,21 @@ partial class DancerRotation
         ImGui.Text("TillanaPvEReady: " + TillanaPvEReady.ToString());
         ImGui.Text("FinishingMovePvEReady: " + FinishingMovePvEReady.ToString());
         ImGui.Text("DanceOfTheDawnPvEReady: " + DanceOfTheDawnPvEReady.ToString());
+        ImGui.TextColored(ImGuiColors.DalamudOrange, "Status Tracking");
+        ImGui.Text("HasLastDance: " + HasLastDance.ToString());
+        ImGui.Text("HasSilkenSymmetry: " + HasSilkenSymmetry.ToString());
+        ImGui.Text("HasFlourishingSymmetry: " + HasFlourishingSymmetry.ToString());
+        ImGui.Text("HasSilkenFlow: " + HasSilkenFlow.ToString());
+        ImGui.Text("HasFlourishingFlow: " + HasFlourishingFlow.ToString());
+        ImGui.Text("HasThreefoldFanDance: " + HasThreefoldFanDance.ToString());
+        ImGui.Text("HasFourfoldFanDance: " + HasFourfoldFanDance.ToString());
+        ImGui.Text("HasFlourishingStarfall: " + HasFlourishingStarfall.ToString());
+        ImGui.Text("HasStandardFinish: " + HasStandardFinish.ToString());
+        ImGui.Text("HasStandardStep: " + HasStandardStep.ToString());
+        ImGui.Text("HasTechnicalStep: " + HasTechnicalStep.ToString());
+        ImGui.Text("HasTechnicalFinish: " + HasTechnicalFinish.ToString());
+        ImGui.Text("HasDevilment: " + HasDevilment.ToString());
+        ImGui.Text("HasClosedPosition: " + HasClosedPosition.ToString());
     }
     #endregion
 
@@ -142,12 +229,14 @@ partial class DancerRotation
 
     static partial void ModifyReverseCascadePvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.SilkenSymmetry, StatusID.FlourishingSymmetry];
+        //setting.StatusNeed = [StatusID.SilkenSymmetry, StatusID.FlourishingSymmetry];
+        setting.ActionCheck = () => HasSilkenSymmetry || HasFlourishingSymmetry;
     }
 
     static partial void ModifyFountainfallPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.SilkenFlow, StatusID.FlourishingFlow];
+        //setting.StatusNeed = [StatusID.SilkenFlow, StatusID.FlourishingFlow];
+        setting.ActionCheck = () => HasSilkenFlow || HasFlourishingFlow;
     }
 
     static partial void ModifyFanDancePvE(ref ActionSetting setting)
@@ -167,7 +256,8 @@ partial class DancerRotation
 
     static partial void ModifyRisingWindmillPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.SilkenSymmetry, StatusID.FlourishingSymmetry];
+        //setting.StatusNeed = [StatusID.SilkenSymmetry, StatusID.FlourishingSymmetry];
+        setting.ActionCheck = () => HasSilkenSymmetry || HasFlourishingSymmetry;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -176,7 +266,8 @@ partial class DancerRotation
 
     static partial void ModifyBloodshowerPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.SilkenFlow, StatusID.FlourishingFlow];
+        //setting.StatusNeed = [StatusID.SilkenFlow, StatusID.FlourishingFlow];
+        setting.ActionCheck = () => HasSilkenFlow || HasFlourishingFlow;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -195,7 +286,8 @@ partial class DancerRotation
 
     static partial void ModifyFanDanceIiiPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.ThreefoldFanDance];
+        //setting.StatusNeed = [StatusID.ThreefoldFanDance];
+        setting.ActionCheck = () => HasThreefoldFanDance;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -204,7 +296,9 @@ partial class DancerRotation
 
     static partial void ModifyFanDanceIvPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.FourfoldFanDance];
+        //setting.StatusNeed = [StatusID.FourfoldFanDance];
+        setting.ActionCheck = () => HasFourfoldFanDance;
+        setting.MPOverride = () => 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -222,7 +316,9 @@ partial class DancerRotation
 
     static partial void ModifyStarfallDancePvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.FlourishingStarfall];
+        //setting.StatusNeed = [StatusID.FlourishingStarfall];
+        setting.ActionCheck = () => HasFlourishingStarfall;
+        setting.MPOverride = () => 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -232,6 +328,7 @@ partial class DancerRotation
     static partial void ModifyTillanaPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Esprit <= 50 && TillanaPvEReady;
+        setting.MPOverride = () => 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -266,7 +363,8 @@ partial class DancerRotation
 
     static partial void ModifyFlourishPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.StandardFinish];
+        //setting.StatusNeed = [StatusID.StandardFinish];
+        setting.ActionCheck = () => HasStandardFinish;
         setting.StatusProvide = [StatusID.ThreefoldFanDance, StatusID.FourfoldFanDance, StatusID.FinishingMoveReady];
         setting.ActionCheck = () => InCombat;
         setting.IsFriendly = true;
@@ -274,7 +372,8 @@ partial class DancerRotation
 
     static partial void ModifyTechnicalStepPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.StandardFinish];
+        //setting.StatusNeed = [StatusID.StandardFinish];
+        setting.ActionCheck = () => HasStandardFinish;
         setting.UnlockedByQuestID = 68790;
     }
 
@@ -290,7 +389,8 @@ partial class DancerRotation
 
     static partial void ModifyDoubleStandardFinishPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.StandardStep];
+        //setting.StatusNeed = [StatusID.StandardStep];
+        setting.ActionCheck = () => HasStandardStep;
         setting.StatusProvide = [StatusID.LastDanceReady];
         setting.ActionCheck = () => IsDancing && CompletedSteps == 2 && Service.GetAdjustedActionId(ActionID.StandardStepPvE) == ActionID.DoubleStandardFinishPvE;
         setting.CreateConfig = () => new ActionConfig()
@@ -301,7 +401,8 @@ partial class DancerRotation
 
     static partial void ModifyQuadrupleTechnicalFinishPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.TechnicalStep];
+        //setting.StatusNeed = [StatusID.TechnicalStep];
+        setting.ActionCheck = () => HasTechnicalStep;
         setting.StatusProvide = [StatusID.DanceOfTheDawnReady];
         setting.ActionCheck = () => IsDancing && CompletedSteps == 4 && Service.GetAdjustedActionId(ActionID.TechnicalStepPvE) == ActionID.QuadrupleTechnicalFinishPvE;
         setting.CreateConfig = () => new ActionConfig()
@@ -336,23 +437,24 @@ partial class DancerRotation
 
     static partial void ModifyLastDancePvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.LastDanceReady];
+        //setting.StatusNeed = [StatusID.LastDanceReady];
+        setting.ActionCheck = () => !IsDancing && HasLastDance;
+        setting.MPOverride = () => 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
-        //setting.ActionCheck = () => !IsDancing
     }
 
     static partial void ModifyFinishingMovePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => FinishingMovePvEReady;
+        setting.ActionCheck = () => !IsDancing && FinishingMovePvEReady;
         setting.StatusProvide = [StatusID.LastDanceReady];
+        setting.MPOverride = () => 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
-        //setting.ActionCheck = () => !IsDancing
     }
 
     static partial void ModifyDanceOfTheDawnPvE(ref ActionSetting setting)

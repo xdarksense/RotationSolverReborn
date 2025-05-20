@@ -43,7 +43,7 @@ public class BLM_Default : BlackMageRotation
         ImGui.Text($"In AddElementBase Logic: {AddElementBase(out _)}");
         ImGui.Text($"In UsePolyglot Logic: {UsePolyglot(out _)}");
         ImGui.Text($"In MaintainStatus Logic: {MaintainStatus(out _)}");
-        ImGui.TextColored(ImGuiColors.DalamudViolet, "Base Tracking:");
+        ImGui.TextColored(ImGuiColors.DalamudYellow, "Base Tracking:");
         base.DisplayStatus();
     }
     #endregion

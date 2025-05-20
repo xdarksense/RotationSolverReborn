@@ -140,7 +140,7 @@ public sealed class GNB_Default : GunbreakerRotation
                 (HasNoMercy && AmmoComboStep == 0 && !GnashingFangPvE.Cooldown.WillHaveOneCharge(1)) ||
 
                 // Condition 2: Last combo action was Brutal Shell, and either Ammo is capped or Bloodfest conditions are met
-                (IsLastComboAction((ActionID)BrutalShellPvE.ID) && 
+                (IsLastComboAction((ActionID)BrutalShellPvE.ID) &&
                 (IsAmmoCapped || (BloodfestPvE.Cooldown.WillHaveOneCharge(6) && Ammo <= 2 && !NoMercyPvE.Cooldown.WillHaveOneCharge(10) && BloodfestPvE.EnoughLevel))) ||
 
                 // Condition 3: Ammo is capped and one of the following is true:

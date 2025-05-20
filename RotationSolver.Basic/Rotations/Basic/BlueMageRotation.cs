@@ -1,4 +1,4 @@
-using ECommons.DalamudServices;
+using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using CombatRole = RotationSolver.Basic.Data.CombatRole;
 
@@ -167,7 +167,7 @@ partial class BlueMageRotation
             return false;
         if (ActiveActions.Length > 24 || ActiveActions.Length == 0)
         {
-            Svc.Log.Error($"Active actions count {ActiveActions.Length} is invalid.");
+            PluginLog.Error($"Active actions count {ActiveActions.Length} is invalid.");
             return false;
         }
 
@@ -185,7 +185,7 @@ partial class BlueMageRotation
         }
         catch (Exception ex)
         {
-            Svc.Log.Error($"Failed to set BlueMage actions: {ex.Message}");
+            PluginLog.Error($"Failed to set BlueMage actions: {ex.Message}");
             return false;
         }
     }

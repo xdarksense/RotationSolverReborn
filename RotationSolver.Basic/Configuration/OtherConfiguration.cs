@@ -1,5 +1,6 @@
 ﻿using ECommons.DalamudServices;
 using ECommons.ExcelServices;
+using ECommons.Logging;
 using Newtonsoft.Json.Converters;
 
 namespace RotationSolver.Basic.Configuration;
@@ -295,12 +296,12 @@ internal class OtherConfiguration
             }
             catch (IOException ex) when (i < retryCount - 1)
             {
-                Svc.Log.Warning(ex, $"Failed to save the file to {path}. Retrying in {delay}ms...");
+                PluginLog.Warning($"Failed to save the file to {path}. Retrying in {delay}ms...: {ex.Message}");
                 Thread.Sleep(delay); // Wait before retrying
             }
             catch (Exception ex)
             {
-                Svc.Log.Warning(ex, $"Failed to save the file to {path}");
+                PluginLog.Warning($"Failed to save the file to {path}: {ex.Message}");
                 return; // Exit the method if an unexpected exception occurs
             }
         }
@@ -309,7 +310,7 @@ internal class OtherConfiguration
     private static void InitOne<T>(ref T value, string name, bool download = true, bool forceDownload = false) where T : new()
     {
         var path = GetFilePath(name);
-        Svc.Log.Info($"Initializing {name} from {path}");
+        PluginLog.Information($"Initializing {name} from {path}");
 
         if (File.Exists(path) && !forceDownload)
         {
@@ -321,11 +322,11 @@ internal class OtherConfiguration
                     Converters = new List<JsonConverter> { new StringEnumConverter() } // Add this line
                 })!;
                 if (value == null) throw new Exception("Deserialized value is null.");
-                Svc.Log.Info($"Loaded {name} from local file.");
+                PluginLog.Information($"Loaded {name} from local file.");
             }
             catch (Exception ex)
             {
-                Svc.Log.Warning(ex, $"Failed to load {name} from local file. Reinitializing to default.");
+                PluginLog.Warning($"Failed to load {name} from local file. Reinitializing to default: {ex.Message}");
                 value = new T(); // Reinitialize to default
             }
         }
@@ -343,11 +344,12 @@ internal class OtherConfiguration
                     Converters = new List<JsonConverter> { new StringEnumConverter() } // Add this line
                 })!;
                 if (value == null) throw new Exception("Deserialized value is null.");
-                Svc.Log.Info($"Downloaded and loaded {name} from GitHub.");
+                PluginLog.Information($"Downloaded and loaded {name} from GitHub.");
             }
             catch (Exception ex)
             {
-                Svc.Log.Warning(ex, $"Failed to download {name} from GitHub. Reinitializing to default.");
+                PluginLog.Warning($"Failed to download {name} from GitHub. Reinitializing to default. Exception: {ex.Message}");
+                BasicWarningHelper.AddSystemWarning($"Github download failed.");
                 value = new T(); // Reinitialize to default
                 SavePath(value, path); // Save the default value
             }

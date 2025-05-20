@@ -1,5 +1,5 @@
 ﻿using Dalamud.Interface.Utility.Raii;
-using ECommons.DalamudServices;
+using ECommons.Logging;
 
 namespace RotationSolver.UI;
 
@@ -71,7 +71,7 @@ internal class CollapsingHeaderGroup
             }
             catch (Exception ex)
             {
-                Svc.Log.Warning($"An error occurred while drawing the header '{name}': {ex}");
+                PluginLog.Warning($"An error occurred while drawing the header: {ex.Message}");
             }
         }
     }

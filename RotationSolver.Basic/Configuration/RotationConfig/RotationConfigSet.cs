@@ -1,4 +1,4 @@
-﻿using ECommons.DalamudServices;
+﻿using ECommons.Logging;
 using System.Collections;
 
 namespace RotationSolver.Basic.Configuration.RotationConfig;
@@ -52,7 +52,7 @@ internal class RotationConfigSet : IRotationConfigSet
             }
             else
             {
-                Svc.Log.Error($"Failed to find the rotation config type for property '{prop.Name}' with type '{type.FullName ?? type.Name}'");
+                PluginLog.Error($"Failed to find the rotation config type for property '{prop.Name}' with type '{type.FullName ?? type.Name}'");
             }
         }
     }

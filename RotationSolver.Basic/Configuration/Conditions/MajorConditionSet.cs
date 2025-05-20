@@ -1,5 +1,6 @@
 ﻿using ECommons.DalamudServices;
 using ECommons.ExcelServices;
+using ECommons.Logging;
 
 namespace RotationSolver.Basic.Configuration.Conditions;
 
@@ -128,7 +129,7 @@ internal class MajorConditionValue(string name = MajorConditionValue.conditionNa
             }
             catch (Exception ex)
             {
-                Svc.Log.Warning(ex, $"Failed to load the ConditionSet from {p}");
+                PluginLog.Warning($"Failed to load the types from {p}: {ex.Message}");
                 Svc.Chat.Print($"Failed to load the ConditionSet from {p}");
                 return null;
             }

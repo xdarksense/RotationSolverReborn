@@ -123,7 +123,7 @@ public sealed class VPR_Default : ViperRotation
     protected override bool GeneralGCD(out IAction? act)
     {
         act = null;
-        if (AbilityPrio && 
+        if (AbilityPrio &&
             (SerpentsTailPvE.AdjustedID != SerpentsTailPvE.ID
             || TwinfangBitePvE.AdjustedID != TwinfangBitePvE.ID
             || TwinbloodBitePvE.AdjustedID != TwinbloodBitePvE.ID)) return false;

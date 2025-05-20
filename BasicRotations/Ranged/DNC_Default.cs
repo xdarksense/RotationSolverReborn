@@ -1,3 +1,5 @@
+using Dalamud.Interface.Colors;
+
 namespace RebornRotations.Ranged;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.21")]
@@ -22,6 +24,21 @@ public sealed class DNC_Default : DancerRotation
 
     private static bool InBurstStatus => !Player.WillStatusEnd(0, true, StatusID.Devilment);
 
+    #region Tracking Properties
+    public override void DisplayStatus()
+    {
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "Rotation Tracking:");
+        ImGui.Text("InBurstStatus: " + InBurstStatus.ToString());
+        ImGui.Text("ShouldUseLastDance Logic: " + shouldUseLastDance.ToString());
+        ImGui.Text($"UseStandardStep Logic: {UseStandardStep(out _)}");
+        ImGui.Text($"UseClosedPosition Logic: {UseClosedPosition(out _)}");
+        ImGui.Text($"FinishTheDance Logic: {FinishTheDance(out _)}");
+        ImGui.Text($"HandleTillana Logic: {HandleTillana(out _)}");
+        ImGui.TextColored(ImGuiColors.DalamudYellow, "Base Tracking:");
+        base.DisplayStatus();
+    }
+    #endregion
+
     #region Countdown Logic
     // Override the method for actions to be taken during countdown phase of combat
     protected override IAction? CountDownAction(float remainTime)
@@ -45,7 +62,7 @@ public sealed class DNC_Default : DancerRotation
     {
         if (UseClosedPosition(out act)) return true;
 
-        if (Player.HasStatus(true, StatusID.TechnicalFinish))
+        if (HasTechnicalFinish)
         {
             if (DevilmentPvE.CanUse(out act)) return true;
         }
@@ -111,9 +128,9 @@ public sealed class DNC_Default : DancerRotation
         if (!TechnicalStepPvE.Cooldown.ElapsedAfter(116) || TillanaPvE.CanUse(out act))
         {
             // Check for conditions to use Flourish
-            if (((Player.HasStatus(true, StatusID.Devilment)) && (Player.HasStatus(true, StatusID.TechnicalFinish))) || ((!Player.HasStatus(true, StatusID.Devilment)) && (!Player.HasStatus(true, StatusID.TechnicalFinish))))
+            if ((HasDevilment && HasTechnicalFinish) || ((!HasDevilment) && (!HasTechnicalFinish)))
             {
-                if (!Player.HasStatus(true, StatusID.ThreefoldFanDance) && FlourishPvE.CanUse(out act))
+                if (!HasThreefoldFanDance && FlourishPvE.CanUse(out act))
                 {
                     return true;
                 }
@@ -123,11 +140,11 @@ public sealed class DNC_Default : DancerRotation
         // Attempt to use Fan Dance III if available
         if (FanDanceIiiPvE.CanUse(out act, skipAoeCheck: true)) return true;
 
-        var hasProcs = Player.HasStatus(true, StatusID.SilkenFlow) || Player.HasStatus(true, StatusID.SilkenSymmetry) ||
-                       Player.HasStatus(true, StatusID.FlourishingFlow) || Player.HasStatus(true, StatusID.FlourishingSymmetry);
+        var hasProcs = HasSilkenFlow || HasSilkenSymmetry ||
+                       HasFlourishingFlow || HasFlourishingSymmetry;
 
         //Use all feathers on burst or if about to overcap
-        if ((!DevilmentPvE.EnoughLevel || Player.HasStatus(true, StatusID.Devilment) || (Feathers > 3 && hasProcs)) && !Player.HasStatus(true, StatusID.ThreefoldFanDance))
+        if ((!DevilmentPvE.EnoughLevel || HasDevilment || (Feathers > 3 && hasProcs)) && !HasThreefoldFanDance)
         {
             if (FanDanceIiPvE.CanUse(out act)) return true;
             if (FanDancePvE.CanUse(out act)) return true;
@@ -145,7 +162,7 @@ public sealed class DNC_Default : DancerRotation
     protected override bool GeneralGCD(out IAction? act)
     {
         // Attempt to use Closed Position if applicable
-        if (!InCombat && !Player.HasStatus(true, StatusID.ClosedPosition) && ClosedPositionPvE.CanUse(out act))
+        if (!InCombat && !HasClosedPosition && ClosedPositionPvE.CanUse(out act))
         {
 
             if (DancePartnerName != "")
@@ -186,7 +203,7 @@ public sealed class DNC_Default : DancerRotation
         }
 
         // Attempt to use a general attack GCD if none of the above conditions are met
-        if (AttackGCD(out act, Player.HasStatus(true, StatusID.Devilment)))
+        if (AttackGCD(out act, HasDevilment))
         {
             return true;
         }
@@ -242,7 +259,7 @@ public sealed class DNC_Default : DancerRotation
         }
 
         if (FinishingMovePvE.CanUse(out act, skipAoeCheck: true)) return true;
-        if (Esprit < 100 && StarfallDancePvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (Esprit <= 100 && StarfallDancePvE.CanUse(out act, skipAoeCheck: true)) return true;
         if (Player.WillStatusEndGCD(3, 0, true, StatusID.Devilment) && StarfallDancePvE.CanUse(out act, skipAoeCheck: true)) return true;
 
         // Further prioritized GCD abilities
@@ -276,7 +293,7 @@ public sealed class DNC_Default : DancerRotation
 
         // Check for hostiles in range and technical step conditions
         if (!HasHostilesInRange) return false;
-        if (Player.HasStatus(true, StatusID.TechnicalFinish) && Player.WillStatusEndGCD(2, 0, true, StatusID.TechnicalFinish) || (TechnicalStepPvE.Cooldown.IsCoolingDown && TechnicalStepPvE.Cooldown.WillHaveOneCharge(5))) return false;
+        if (HasTechnicalFinish && Player.WillStatusEndGCD(2, 0, true, StatusID.TechnicalFinish) || (TechnicalStepPvE.Cooldown.IsCoolingDown && TechnicalStepPvE.Cooldown.WillHaveOneCharge(5))) return false;
 
         return true;
     }
@@ -287,7 +304,7 @@ public sealed class DNC_Default : DancerRotation
         // Attempt to use Closed Position if available and certain conditions are met
         if (!ClosedPositionPvE.CanUse(out act)) return false;
 
-        if (!Player.HasStatus(true, StatusID.ClosedPosition))
+        if (!HasClosedPosition)
         {
             // Check for party members with Closed Position status
             foreach (var friend in PartyMembers)
@@ -317,7 +334,7 @@ public sealed class DNC_Default : DancerRotation
         }
 
         // Check for Standard Step if targets are in range or status is about to end.
-        if (Player.HasStatus(true, StatusID.StandardStep) && CompletedSteps == 2 &&
+        if (HasStandardStep && CompletedSteps == 2 &&
             (areDanceTargetsInRange || Player.WillStatusEnd(1f, true, StatusID.StandardStep)) &&
             DoubleStandardFinishPvE.CanUse(out act, skipAoeCheck: true))
         {
@@ -325,7 +342,7 @@ public sealed class DNC_Default : DancerRotation
         }
 
         // Check for Technical Step if targets are in range or status is about to end.
-        if (Player.HasStatus(true, StatusID.TechnicalStep) && CompletedSteps == 4 &&
+        if (HasTechnicalStep && CompletedSteps == 4 &&
             (areDanceTargetsInRange || Player.WillStatusEnd(1f, true, StatusID.TechnicalStep)) &&
             QuadrupleTechnicalFinishPvE.CanUse(out act, skipAoeCheck: true))
         {

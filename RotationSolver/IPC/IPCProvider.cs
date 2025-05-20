@@ -1,5 +1,5 @@
-﻿using ECommons.DalamudServices;
-using ECommons.EzIpcManager;
+﻿using ECommons.EzIpcManager;
+using ECommons.Logging;
 using RotationSolver.Commands;
 
 namespace RotationSolver.IPC
@@ -18,7 +18,7 @@ namespace RotationSolver.IPC
         [EzIPC]
         public void Test(string param)
         {
-            Svc.Log.Debug($"IPC Test! Param:{param}");
+            PluginLog.Debug($"IPC Test! Param:{param}");
         }
 
         /// <summary>
@@ -31,11 +31,11 @@ namespace RotationSolver.IPC
             if (DataCenter.PrioritizedNameIds != null)
             {
                 DataCenter.PrioritizedNameIds.Add(nameId);
-                Svc.Log.Debug($"IPC AddPriorityNameID was called. NameID:{nameId}");
+                PluginLog.Debug($"IPC AddPriorityNameID was called. NameID:{nameId}");
             }
             else
             {
-                Svc.Log.Error("DataCenter.PrioritizedNameIds is null.");
+                PluginLog.Error("DataCenter.PrioritizedNameIds is null.");
             }
         }
 
@@ -51,16 +51,16 @@ namespace RotationSolver.IPC
                 if (DataCenter.PrioritizedNameIds.Contains(nameId))
                 {
                     DataCenter.PrioritizedNameIds.Remove(nameId);
-                    Svc.Log.Debug($"IPC RemovePriorityNameID was called. NameID:{nameId}");
+                    PluginLog.Debug($"IPC RemovePriorityNameID was called. NameID:{nameId}");
                 }
                 else
                 {
-                    Svc.Log.Warning($"IPC RemovePriorityNameID was called but NameID:{nameId} was not found.");
+                    PluginLog.Warning($"IPC RemovePriorityNameID was called but NameID:{nameId} was not found.");
                 }
             }
             else
             {
-                Svc.Log.Error("DataCenter.PrioritizedNameIds is null.");
+                PluginLog.Error("DataCenter.PrioritizedNameIds is null.");
             }
         }
 
@@ -74,11 +74,11 @@ namespace RotationSolver.IPC
             if (DataCenter.BlacklistedNameIds != null)
             {
                 DataCenter.BlacklistedNameIds.Add(nameId);
-                Svc.Log.Debug($"IPC AddBlacklistNameID was called. NameID:{nameId}");
+                PluginLog.Debug($"IPC AddBlacklistNameID was called. NameID:{nameId}");
             }
             else
             {
-                Svc.Log.Error("DataCenter.BlacklistedNameIds is null.");
+                PluginLog.Error("DataCenter.BlacklistedNameIds is null.");
             }
         }
 
@@ -94,16 +94,16 @@ namespace RotationSolver.IPC
                 if (DataCenter.BlacklistedNameIds.Contains(nameId))
                 {
                     DataCenter.BlacklistedNameIds.Remove(nameId);
-                    Svc.Log.Debug($"IPC RemoveBlacklistNameID was called. NameID:{nameId}");
+                    PluginLog.Debug($"IPC RemoveBlacklistNameID was called. NameID:{nameId}");
                 }
                 else
                 {
-                    Svc.Log.Warning($"IPC RemoveBlacklistNameID was called but NameID:{nameId} was not found.");
+                    PluginLog.Warning($"IPC RemoveBlacklistNameID was called but NameID:{nameId} was not found.");
                 }
             }
             else
             {
-                Svc.Log.Error("DataCenter.BlacklistedNameIds is null.");
+                PluginLog.Error("DataCenter.BlacklistedNameIds is null.");
             }
         }
 
@@ -115,7 +115,7 @@ namespace RotationSolver.IPC
         public void ChangeOperatingMode(StateCommandType stateCommand)
         {
             RSCommands.UpdateState(stateCommand, (JobRole)DataCenter.Job);
-            Svc.Log.Debug($"IPC ChangeOperatingMode was called. StateCommand:{stateCommand}");
+            PluginLog.Debug($"IPC ChangeOperatingMode was called. StateCommand:{stateCommand}");
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace RotationSolver.IPC
         public void TriggerSpecialState(SpecialCommandType specialCommand)
         {
             DataCenter.SpecialType = specialCommand;
-            Svc.Log.Debug($"IPC TriggerSpecialState was called. SpecialCommand:{specialCommand}");
+            PluginLog.Debug($"IPC TriggerSpecialState was called. SpecialCommand:{specialCommand}");
         }
     }
 }

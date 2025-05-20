@@ -1,4 +1,5 @@
 ﻿using ECommons.DalamudServices;
+using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Action = Lumina.Excel.Sheets.Action;
 
@@ -44,7 +45,7 @@ public static class ActionIdHelper
         var actionManager = ActionManager.Instance();
         if (actionManager == null)
         {
-            Svc.Log.Error("ActionManager.Instance() returned null.");
+            PluginLog.Error("ActionManager.Instance() returned null.");
             return null;
         }
         return actionManager->GetRecastGroupDetail(cdGroup - 1);
