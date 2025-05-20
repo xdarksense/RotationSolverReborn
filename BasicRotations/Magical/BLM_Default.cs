@@ -1,6 +1,8 @@
-﻿namespace RebornRotations.Magical;
+﻿using Dalamud.Interface.Colors;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
+namespace RebornRotations.Magical;
+
+[Rotation("Default", CombatType.PvE, GameVersion = "7.21")]
 [SourceCode(Path = "main/BasicRotations/Magical/BLM_Default.cs")]
 [Api(4)]
 public class BLM_Default : BlackMageRotation
@@ -23,6 +25,27 @@ public class BLM_Default : BlackMageRotation
 
     [RotationConfig(CombatType.PvE, Name = "Use Retrace when out of Leylines in combat and standing still")]
     public bool UseRetrace { get; set; } = false;
+    #endregion
+
+    #region Tracking Properties
+    public override void DisplayStatus()
+    {
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "Rotation Tracking:");
+        ImGui.Text($"In InFireOrIce Logic: {InFireOrIce(out _, out _)}");
+        ImGui.Text($"In GoFire Logic: {GoFire(out _)}");
+        ImGui.Text($"In MaintainIce Logic: {MaintainIce(out _)}");
+        ImGui.Text($"In DoIce Logic: {DoIce(out _)}");
+        ImGui.Text($"In GoFire Logic: {GoFire(out _)}");
+        ImGui.Text($"In MaintainFire Logic: {MaintainFire(out _)}");
+        ImGui.Text($"In DoFire Logic: {DoFire(out _)}");
+        ImGui.Text($"In UseInstanceSpell Logic: {UseInstanceSpell(out _)}");
+        ImGui.Text($"In AddThunder Logic: {AddThunder(out _)}");
+        ImGui.Text($"In AddElementBase Logic: {AddElementBase(out _)}");
+        ImGui.Text($"In UsePolyglot Logic: {UsePolyglot(out _)}");
+        ImGui.Text($"In MaintainStatus Logic: {MaintainStatus(out _)}");
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "Base Tracking:");
+        base.DisplayStatus();
+    }
     #endregion
 
     #region Additional oGCD Logic

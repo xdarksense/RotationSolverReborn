@@ -163,5 +163,5 @@ partial class CustomRotation : ICustomRotation
     /// Creates a system warning to display to the end-user.
     /// </summary>
     /// <param name="warning">The warning message.</param>
-    public void CreateSystemWarning(string warning) => WarningHelper.AddSystemWarning(warning);
+    public void CreateSystemWarning(string warning) => BasicWarningHelper.AddSystemWarning(warning);
 }

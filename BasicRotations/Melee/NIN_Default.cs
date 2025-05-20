@@ -1,5 +1,3 @@
-using Dalamud.Interface.Colors;
-
 namespace RebornRotations.Melee;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.21")]
@@ -28,6 +26,15 @@ public sealed class NIN_Default : NinjaRotation
     // Properties to track RabbitMediumPvE failures and related information.
     //private int _rabbitMediumFailures = GetActionUsageCount((uint)ActionID.RabbitMediumPvE);
     private IBaseAction? _lastNinActionAim = null;
+    // Holds the next ninjutsu action to perform.
+    private IBaseAction? _ninActionAim = null;
+
+    public override void DisplayStatus()
+    {
+        ImGui.Text($"Last Ninjutsu Action Cleared From Queue: {_lastNinActionAim}");
+        ImGui.Text($"Current Ninjutsu Action: {_ninActionAim}");
+        base.DisplayStatus();
+    }
     #endregion
 
     #region CountDown Logic
@@ -1040,39 +1047,6 @@ public sealed class NIN_Default : NinjaRotation
         if (!InCombat && _ninActionAim == null && UseHide
             && TenPvE.Cooldown.IsCoolingDown && HidePvE.CanUse(out act)) return true;
         return base.GeneralGCD(out act);
-    }
-    #endregion
-
-    #region Extra Methods
-    // Holds the next ninjutsu action to perform.
-    private IBaseAction? _ninActionAim = null;
-
-    public override void DisplayStatus()
-    {
-        ImGui.Text($"Ninjutsu Action: {_ninActionAim}");
-        //ImGui.Text($"Mudra Failure Count: {_rabbitMediumFailures}");
-        ImGui.Text($"Last Ninjutsu Action Cleared From Queue: {_lastNinActionAim}");
-        ImGui.Text($"Ninki: {Ninki}");
-        ImGui.Text($"Kazematoi: {Kazematoi}");
-        ImGui.Text($"HasJin: {HasJin}");
-        ImGui.Text($"InTrickAttack: {InTrickAttack}");
-        ImGui.Text($"InMug: {InMug}");
-        ImGui.Text($"NoNinjutsu: {NoNinjutsu}");
-        ImGui.Text($"RaijuStacks: {RaijuStacks}");
-        ImGui.Text($"ShadowWalkerNeeded: {ShadowWalkerNeeded}");
-        ImGui.TextColored(ImGuiColors.DalamudViolet, "PvE Actions");
-        ImGui.Text("FumaShurikenPvEReady: " + FumaShurikenPvEReady.ToString());
-        ImGui.Text("KatonPvEReady: " + KatonPvEReady.ToString());
-        ImGui.Text("RaitonPvEReady: " + RaitonPvEReady.ToString());
-        ImGui.Text("HyotonPvEReady: " + HyotonPvEReady.ToString());
-        ImGui.Text("HutonPvEReady: " + HutonPvEReady.ToString());
-        ImGui.Text("DotonPvEReady: " + DotonPvEReady.ToString());
-        ImGui.Text("SuitonPvEReady: " + SuitonPvEReady.ToString());
-        ImGui.Text("GokaMekkyakuPvEReady: " + GokaMekkyakuPvEReady.ToString());
-        ImGui.Text("HyoshoRanryuPvEReady: " + HyoshoRanryuPvEReady.ToString());
-        ImGui.Text("DeathfrogMediumPvEReady: " + DeathfrogMediumPvEReady.ToString());
-        ImGui.Text("ZeshoMeppoPvEReady: " + ZeshoMeppoPvEReady.ToString());
-        ImGui.Text("TenriJindoPvEReady: " + TenriJindoPvEReady.ToString());
     }
     #endregion
 }

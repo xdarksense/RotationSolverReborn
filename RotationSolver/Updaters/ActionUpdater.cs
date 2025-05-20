@@ -58,6 +58,7 @@ internal static class ActionUpdater
 
     internal static void UpdateNextAction()
     {
+        if (!DataCenter.IsActivated()) return;
         IPlayerCharacter localPlayer = Player.Object;
         var customRotation = DataCenter.CurrentRotation;
 
@@ -265,8 +266,6 @@ internal static class ActionUpdater
 
     private static void LogError(string message, Exception ex)
     {
-#pragma warning disable 0436
-
         WarningHelper.AddSystemWarning($"{message} because: {ex.Message}");
         Svc.Log.Error(ex, message);
     }

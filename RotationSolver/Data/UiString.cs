@@ -55,12 +55,6 @@ namespace RotationSolver.Data
         [Description("Search Result")]
         ConfigWindow_Search_Result,
 
-        [Description("Well, you must be a lazy player!")]
-        ConfigWindow_About_Clicking100k,
-
-        [Description("You're tiring RSR out - give it a break!")]
-        ConfigWindow_About_Clicking500k,
-
         [Description("This includes almost all information available in one combat frame, including the status of all party members, hostile target statuses, skill cooldowns, MP and HP of characters, character locations, hostile target casting status, combo state, combat duration, player level, etc.\n\nIt will then highlight the best action on the hotbar, or help you click it.")]
         ConfigWindow_About_Description,
 
@@ -148,13 +142,13 @@ namespace RotationSolver.Data
         [Description("Forced Conditions have higher priority. If Forced Conditions are met, Disabled Conditions will be ignored.")]
         ConfigWindow_Actions_ConditionDescription,
 
-        [Description("Forced Condition")]
+        [Description("Forced Condition (Unsupported)")]
         ConfigWindow_Actions_ForcedConditionSet,
 
         [Description("Conditions for forced automatic use of action")]
         ConfigWindow_Actions_ForcedConditionSet_Description,
 
-        [Description("Disabled Condition")]
+        [Description("Disabled Condition (Unsupported)")]
         ConfigWindow_Actions_DisabledConditionSet,
 
         [Description("Conditions that disable automatic use of an action")]
@@ -409,7 +403,7 @@ namespace RotationSolver.Data
         [Description("How RSR should use healing abilities")]
         ConfigWindow_Auto_HealingCondition_Description,
 
-        [Description("Custom State Condition")]
+        [Description("Custom State Condition (Unsupported)")]
         ConfigWindow_Auto_StateCondition,
 
         [Description("Heal Area Forced Condition")]

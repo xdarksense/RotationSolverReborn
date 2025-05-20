@@ -2,7 +2,7 @@
 
 namespace RotationSolver.Basic.Helpers
 {
-    internal static class WarningHelper
+    internal static class BasicWarningHelper
     {
         internal static bool AddSystemWarning(string warning)
         {

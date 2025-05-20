@@ -1,8 +1,9 @@
+using Dalamud.Interface.Colors;
 using System.ComponentModel;
 
 namespace RebornRotations.Healer;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.2")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.21")]
 [SourceCode(Path = "main/BasicRotations/Healer/WHM_Default.cs")]
 [Api(4)]
 public sealed class WHM_Default : WhiteMageRotation
@@ -65,6 +66,16 @@ public sealed class WHM_Default : WhiteMageRotation
 
         [Description("Reserve the last charge")]
         ReserveLastCharge,
+    }
+    #endregion
+
+    #region Tracking Properties
+    public override void DisplayStatus()
+    {
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "Rotation Tracking:");
+        ImGui.Text($"Use Lily Heal: {UseLily(out _)}");
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "Base Tracking:");
+        base.DisplayStatus();
     }
     #endregion
 

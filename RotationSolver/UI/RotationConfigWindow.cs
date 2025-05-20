@@ -753,12 +753,6 @@ public partial class RotationConfigWindow : Window
     }
 
     #region About
-    private static readonly SortedList<uint, string> CountStringPair = new()
-{
-    { 100_000, UiString.ConfigWindow_About_Clicking100k.GetDescription() },
-    { 500_000, UiString.ConfigWindow_About_Clicking500k.GetDescription() },
-};
-
     private static void DrawAbout()
     {
         // Draw the punchline with a specific font and color
@@ -809,20 +803,6 @@ public partial class RotationConfigWindow : Window
                 {
                     ImGui.TextWrapped(countStr);
                 }, width, ImGui.CalcTextSize(countStr).X);
-
-                // Draw the appropriate message based on the clicking count
-                foreach (var pair in CountStringPair.Reverse())
-                {
-                    if (clickingCount >= pair.Key && pair.Value != null)
-                    {
-                        countStr = pair.Value;
-                        ImGuiHelper.DrawItemMiddle(() =>
-                        {
-                            ImGui.TextWrapped(countStr);
-                        }, width, ImGui.CalcTextSize(countStr).X);
-                        break;
-                    }
-                }
             }
         }
 
@@ -1615,14 +1595,6 @@ public partial class RotationConfigWindow : Window
                 OtherConfiguration.DancePartnerPriority = workingCopy;
                 OtherConfiguration.SaveDancePartnerPriority();
             }
-            if (Service.Config.InDebug)
-            {
-                ImGui.Text("Current Dance Partner Priority:");
-                foreach (var job in OtherConfiguration.DancePartnerPriority)
-                {
-                    ImGui.BulletText(job.ToString());
-                }
-            }
         }
 
         if (Player.Object != null && DataCenter.PartyMembers != null && Player.Object.IsJobs(Job.SGE))
@@ -1678,14 +1650,6 @@ public partial class RotationConfigWindow : Window
             {
                 OtherConfiguration.KardiaTankPriority = kardiaTankPriority;
                 OtherConfiguration.SaveKardiaTankPriority();
-            }
-            if (Service.Config.InDebug)
-            {
-                ImGui.Text("Current Kardia Tank Priority:");
-                foreach (var job in OtherConfiguration.KardiaTankPriority)
-                {
-                    ImGui.BulletText(job.ToString());
-                }
             }
         }
 
@@ -1749,14 +1713,6 @@ public partial class RotationConfigWindow : Window
                     OtherConfiguration.TheSpearPriority = spearPriority;
                     OtherConfiguration.SaveTheSpearPriority();
                 }
-                if (Service.Config.InDebug)
-                {
-                    ImGui.Text("Current Spear Priority:");
-                    foreach (var job in OtherConfiguration.TheSpearPriority)
-                    {
-                        ImGui.BulletText(job.ToString());
-                    }
-                }
 
                 // The Balance Priority Column
                 ImGui.TableNextColumn();
@@ -1811,14 +1767,6 @@ public partial class RotationConfigWindow : Window
                 {
                     OtherConfiguration.TheBalancePriority = balancePriority;
                     OtherConfiguration.SaveTheBalancePriority();
-                }
-                if (Service.Config.InDebug)
-                {
-                    ImGui.Text("Current Balance Priority:");
-                    foreach (var job in OtherConfiguration.TheBalancePriority)
-                    {
-                        ImGui.BulletText(job.ToString());
-                    }
                 }
 
                 ImGui.EndTable();
@@ -2051,7 +1999,7 @@ public partial class RotationConfigWindow : Window
 
         static void DrawActionDebug()
         {
-            if (!Service.Config.InDebug || !Player.Available) return;
+            if (!Player.AvailableThreadSafe || !Player.Available || !Service.Config.InDebug) return;
 
             if (_activeAction is IBaseAction action)
             {
@@ -3027,7 +2975,7 @@ public partial class RotationConfigWindow : Window
     {
         _allSearchable.DrawItems(Configs.Debug);
 
-        if (!Player.Available || !Service.Config.InDebug) return;
+        if (!Player.AvailableThreadSafe || !Player.Available || !Service.Config.InDebug) return;
 
         _debugHeader?.Draw();
 
@@ -3038,7 +2986,6 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Reset Action Configs: {DataCenter.ResetActionConfigs}");
         if (ImGui.Button("Add Test Warning"))
         {
-#pragma warning disable CS0436
             WarningHelper.AddSystemWarning("This is a test warning.");
         }
     }

@@ -41,51 +41,64 @@ internal partial class Configs : IPluginConfiguration
     public MacroInfo DutyStart { get; set; } = new MacroInfo();
     public MacroInfo DutyEnd { get; set; } = new MacroInfo();
 
-    [UI("What kind of AoE moves to use.", Description = "Full - Use all AoE actions\nCleave - Use only single target AoE actions\nOff - Use no AoE at all", Filter = AutoActionUsage, Section = 3)]
+    [UI("What kind of AoE moves to use.",
+    Description = "Full: Use all available AoE actions.\nCleave: Use only single-target AoE actions.\nOff: Do not use any AoE actions.",
+    Filter = AutoActionUsage, Section = 3)]
     public AoEType AoEType { get; set; } = AoEType.Full;
 
     [ConditionBool, UI("Disable automatically during area transitions.",
-        Filter = BasicAutoSwitch)]
+    Description = "Automatically turn off combat state when moving between different areas.",
+    Filter = BasicAutoSwitch)]
     private static readonly bool _autoOffBetweenArea = true;
 
     [ConditionBool, UI("Disable automatically during cutscenes.",
-        Filter = BasicAutoSwitch)]
+    Description = "Automatically turn off combat state during cutscenes.",
+    Filter = BasicAutoSwitch)]
     private static readonly bool _autoOffCutScene = true;
 
     [ConditionBool, UI("Auto turn off when switching jobs",
-               Filter = BasicAutoSwitch)]
+    Description = "Automatically turn off combat state when you change your job/class.",
+    Filter = BasicAutoSwitch)]
     private static readonly bool _autoOffSwitchClass = true;
 
     [ConditionBool, UI("Auto turn off when dead.",
-        Filter = BasicAutoSwitch)]
+    Description = "Automatically turn off combat state when your character dies.",
+    Filter = BasicAutoSwitch)]
     private static readonly bool _autoOffWhenDead = true;
 
     [ConditionBool, UI("Auto turn off when duty is completed.",
-        Filter = BasicAutoSwitch)]
+    Description = "Automatically turn off combat state when a duty (instance) ends.",
+    Filter = BasicAutoSwitch)]
     private static readonly bool _autoOffWhenDutyCompleted = true;
 
     [ConditionBool, UI("Use movement actions towards the object/mob in the center of the screen",
-        Description = "Use movement actions towards the object/mob in the center of the screen, otherwise toward object/mob your character is facing.",
-        Filter = TargetConfig, Section = 2)]
+    Description = "If enabled, movement actions target the object or mob at the center of your screen. If disabled, they target the object or mob your character is facing.",
+    Filter = TargetConfig, Section = 2)]
     private static readonly bool _moveTowardsScreenCenter = false;
 
     [ConditionBool, UI("Audio notification when status changes",
-        Filter = UiInformation)]
+    Description = "Play a sound when the combat state changes.",
+    Filter = UiInformation)]
     private static readonly bool _sayOutStateChanged = false;
 
     [ConditionBool, UI("Enable changelog window popup on update",
-        Filter = UiInformation)]
+    Description = "Show a popup window with the changelog when the plugin updates.",
+    Filter = UiInformation)]
     private static readonly bool _changelogPopup = true;
 
-    [ConditionBool, UI("Show plugin status in server info bar.",
-        Filter = UiInformation)]
+    [ConditionBool, UI("Show plugin status in DTR bar.",
+    Description = "Display the plugin's current status in the server information bar.",
+    Filter = UiInformation)]
     private static readonly bool _showInfoOnDtr = true;
 
     [ConditionBool, UI("Display plugin status in toast popup",
-        Filter = UiInformation)]
+    Description = "Show a toast notification with the combat state when changed.",
+    Filter = UiInformation)]
     private static readonly bool _showInfoOnToast = false;
 
-    [ConditionBool, UI("Lock movement when casting or performing certain actions.", Filter = Extra)]
+    [ConditionBool, UI("Lock movement when casting or performing certain actions.",
+    Description = "Prevents your character from moving while casting or using specific actions.",
+    Filter = Extra)]
     private static readonly bool _poslockCasting = false;
 
     [UI("", Action = ActionID.PassageOfArmsPvE, Parent = nameof(PoslockCasting))]
@@ -97,42 +110,54 @@ internal partial class Configs : IPluginConfiguration
     [UI("", Action = ActionID.ImprovisationPvE, Parent = nameof(PoslockCasting))]
     public bool PosImprovisation { get; set; } = false;
 
-    [JobConfig, UI("Only used automatically if coded into the rotation", Filter = AutoActionUsage, PvPFilter = JobFilterType.NoJob)]
+    [JobConfig, UI("Only used automatically if coded into the rotation",
+    Description = "This setting is only used if the rotation specifically supports automatic tincture usage.",
+    Filter = AutoActionUsage, PvPFilter = JobFilterType.NoJob)]
     private readonly TinctureUseType _TinctureType = TinctureUseType.Nowhere;
 
-    [ConditionBool, UI("Automatically use Anti-Knockback role actions (Arms Length, Surecast)", Filter = AutoActionUsage)]
+    [ConditionBool, UI("Automatically use Anti-Knockback role actions (Arms Length, Surecast)",
+    Description = "Enable to automatically use anti-knockback abilities when needed based on anti-knockback action list in List menu.",
+    Filter = AutoActionUsage)]
     private static readonly bool _useKnockback = true;
 
-    [ConditionBool, UI("Automatically use HP Potions", Description = "Experimental.",
-        Filter = AutoActionUsage)]
+    [ConditionBool, UI("Automatically use HP Potions",
+    Description = "Enable to allow the plugin to use HP potions automatically. (Experimental feature)",
+    Filter = AutoActionUsage)]
     private static readonly bool _useHpPotions = false;
 
-    [ConditionBool, UI("Automatically use MP Potions", Description = "Experimental.",
-        Filter = AutoActionUsage)]
+    [ConditionBool, UI("Automatically use MP Potions",
+    Description = "Enable to allow the plugin to use MP potions automatically. (Experimental feature)",
+    Filter = AutoActionUsage)]
     private static readonly bool _useMpPotions = false;
 
     [ConditionBool, UI("Prioritize mob/object targets with attack markers",
-        Filter = TargetConfig)]
+    Description = "Targets with attack markers will be prioritized for actions.",
+    Filter = TargetConfig)]
     private static readonly bool _chooseAttackMark = true;
 
-    [ConditionBool, UI("Prioritize enemy parts (i.e. Titan's Heart)",
-        Filter = TargetConfig)]
+    [ConditionBool, UI("Prioritize enemy parts",
+    Description = "Enemy parts, such as Titan's Heart, will be prioritized as targets.",
+    Filter = TargetConfig)]
     private static readonly bool _prioEnemyParts = true;
 
     [ConditionBool, UI("Allow the use of AOEs against priority-marked targets.",
-        Parent = nameof(ChooseAttackMark))]
+    Description = "Enable to allow AoE actions to hit targets with priority markers.",
+    Parent = nameof(ChooseAttackMark))]
     private static readonly bool _canAttackMarkAOE = true;
 
     [ConditionBool, UI("Never attack targets with stop markers.",
-        Filter = TargetConfig)]
+    Description = "Targets with stop markers will not be attacked.",
+    Filter = TargetConfig)]
     private static readonly bool _filterStopMark = true;
 
     [ConditionBool, UI("Treat 1hp targets as invincible.",
-        Filter = TargetConfig)]
+    Description = "Targets with only 1 HP will be treated as invincible and ignored; for rare cases where target is invincible but is not given a status for it.",
+    Filter = TargetConfig)]
     private static readonly bool _filterOneHPInvincible = true;
 
     [ConditionBool, UI("Ignore Non-Fate targets while in a Fate and Fate targets if not in Fate.",
-        Filter = TargetConfig)]
+    Description = "When in a Fate, only Fate targets are considered. When not in a Fate, Fate targets are ignored.",
+    Filter = TargetConfig)]
     private static readonly bool _ignoreNonFateInFate = true;
 
     [ConditionBool, UI("Prevent targeting invalid targets in Bozjan Southern Front and Zadnor",
@@ -412,7 +437,7 @@ internal partial class Configs : IPluginConfiguration
     [Range(0, 1, ConfigUnitType.Percent, 0.02f)]
     public float HealthHealerRatio { get; set; } = 0.4f;
 
-    [JobConfig, UI("Hard cast Raise on players while Swiftcast is on cooldown", Description = "If this is enabled and Swiftcast is on cooldown, you will only attempt to raise while standing still.",
+    [JobConfig, UI("Hard cast Raise while Swiftcast/Dualcast is on cooldown", Description = "If this is enabled and Swiftcast/Dualcast is on cooldown, you will only attempt to raise while standing still.",
         Filter = HealingActionCondition, Section = 2,
         PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _raisePlayerByCasting = true;
@@ -465,8 +490,8 @@ internal partial class Configs : IPluginConfiguration
         PvEFilter = JobFilterType.Raise)]
     public int LessMPNoRaise { get; set; }
 
-    [UI("HP standard deviation for using AoE heal.", Description = "The health difference between a single party member and the whole party, used for deciding between healing a single party member or AOE healing. Leave this alone if you don't understand its use.",
-        Filter = Extra)]
+    [UI("HP standard deviation for using AoE heal.", Description = "Controls how much party members' HP must differ before using AoE healing instead of single-target heals. Lower values require party members to have more similar HP for AoE healing to trigger (more selective). Higher values allow AoE healing even when HP differences are larger (less selective). Adjust only if you want to fine-tune AoE heal behavior.",
+    Filter = Extra)]
     [Range(0, 0.5f, ConfigUnitType.Percent, 0.02f)]
     public float HealthDifference { get; set; } = 0.25f;
 

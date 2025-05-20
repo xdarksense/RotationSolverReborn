@@ -11,7 +11,6 @@ using Lumina.Excel.Sheets;
 using RotationSolver.Commands;
 using RotationSolver.Data;
 using RotationSolver.UI.HighlightTeachingMode;
-using System.Runtime.InteropServices;
 using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule;
 
 namespace RotationSolver.Updaters;
@@ -25,17 +24,9 @@ internal static class MajorUpdater
             if (!Player.AvailableThreadSafe)
                 return false;
 
-            // Replace Svc.Condition.Any() with manual check
-            bool anyCondition = false;
-            foreach (var conditionFlag in Svc.Condition.AsReadOnlySet())
-            {
-                if (Svc.Condition.AsReadOnlySet().Contains(conditionFlag))
-                {
-                    anyCondition = true;
-                    break;
-                }
-            }
-            if (!anyCondition)
+            // Directly check if there are any conditions present
+            var conditions = Svc.Condition.AsReadOnlySet();
+            if (conditions.Count == 0)
                 return false;
 
             if (Svc.Condition[ConditionFlag.BetweenAreas])
@@ -80,33 +71,82 @@ internal static class MajorUpdater
 
         HandleSystemWarnings();
 
+        if (DataCenter.IsActivated())
+        {
+            try
+            {
+                ActionUpdater.UpdateActionInfo();
+                var canDoAction = ActionUpdater.CanDoAction();
+                MovingUpdater.UpdateCanMove(canDoAction);
+
+                if (canDoAction)
+                {
+                    RSCommands.DoAction();
+                }
+
+                MacroUpdater.UpdateMacro();
+                CloseWindow();
+            }
+            catch (Exception ex)
+            {
+                if (_threadException != ex)
+                {
+                    _threadException = ex;
+                    Svc.Log.Error(ex, "Main Thread Exception");
+                    if (Service.Config.InDebug)
+                        BasicWarningHelper.AddSystemWarning("Main Thread Exception");
+                }
+            }
+
+            if (Service.Config.TeachingMode && ActionUpdater.NextAction is not null)
+            {
+                try
+                {
+                    UpdateHighlight();
+                }
+                catch (Exception ex)
+                {
+                    if (_threadException != ex)
+                    {
+                        _threadException = ex;
+                        Svc.Log.Error(ex, "UpdateHighlight Exception");
+                        if (Service.Config.InDebug)
+                            BasicWarningHelper.AddSystemWarning("UpdateHighlight Exception");
+                    }
+                }
+            }
+
+            if (Service.Config.AutoOpenChest)
+            {
+                try
+                {
+                    OpenChest();
+                }
+                catch (Exception ex)
+                {
+                    if (_threadException != ex)
+                    {
+                        _threadException = ex;
+                        Svc.Log.Error(ex, "OpenChest Exception");
+                        if (Service.Config.InDebug)
+                            BasicWarningHelper.AddSystemWarning("OpenChest Exception");
+                    }
+                }
+            }
+        }
+
         try
         {
             PreviewUpdater.UpdatePreview();
-            UpdateHighlight();
-            ActionUpdater.UpdateActionInfo();
-
-            var canDoAction = ActionUpdater.CanDoAction();
-            MovingUpdater.UpdateCanMove(canDoAction);
-
-            if (canDoAction)
-            {
-                RSCommands.DoAction();
-            }
-
-            MacroUpdater.UpdateMacro();
-            CloseWindow();
-            OpenChest();
         }
         catch (Exception ex)
         {
             if (_threadException != ex)
             {
                 _threadException = ex;
-                Svc.Log.Error(ex, "Main Thread Exception");
+                Svc.Log.Error(ex, "UpdatePreview Exception");
                 if (Service.Config.InDebug)
-#pragma warning disable CS0436
-                    WarningHelper.AddSystemWarning("Main Thread Exception");
+                BasicWarningHelper.AddSystemWarning("UpdatePreview Exception");
             }
         }
 
@@ -117,19 +157,20 @@ internal static class MajorUpdater
     {
         if (DataCenter.SystemWarnings.Count > 0)
         {
-            var warningsToRemove = new List<string>();
+            var now = DateTime.Now;
+            var keysToRemove = new List<string>();
 
-            foreach (var warning in DataCenter.SystemWarnings)
+            foreach (var kvp in DataCenter.SystemWarnings)
             {
-                if ((warning.Value + TimeSpan.FromMinutes(10)) < DateTime.Now)
+                if (kvp.Value + TimeSpan.FromMinutes(10) < now)
                 {
-                    warningsToRemove.Add(warning.Key);
+                    keysToRemove.Add(kvp.Key);
                 }
             }
 
-            foreach (var warningKey in warningsToRemove)
+            foreach (var key in keysToRemove)
             {
-                DataCenter.SystemWarnings.Remove(warningKey);
+                DataCenter.SystemWarnings.Remove(key);
             }
         }
     }
@@ -144,8 +185,7 @@ internal static class MajorUpdater
         {
             Svc.Log.Error(tEx, "Worker Task Exception");
             if (Service.Config.InDebug)
-#pragma warning disable CS0436
-                WarningHelper.AddSystemWarning("Inner Worker Exception");
+            WarningHelper.AddSystemWarning("Inner Worker Exception");
         }
     }
 
@@ -159,14 +199,19 @@ internal static class MajorUpdater
 
         try
         {
-            if (Service.Config.AutoReloadRotations)
+            if (DataCenter.VfxDataQueue.Count > 0)
+                RemoveExpiredVfxData();
+
+            bool autoReloadRotations = Service.Config.AutoReloadRotations;
+            if (autoReloadRotations)
             {
                 RotationUpdater.LocalRotationWatcher();
             }
 
             RotationUpdater.UpdateRotation();
 
-            if (DataCenter.IsActivated())
+            bool isActivated = DataCenter.IsActivated();
+            if (isActivated)
             {
                 TargetUpdater.UpdateTargets();
                 StateUpdater.UpdateState();
@@ -176,37 +221,19 @@ internal static class MajorUpdater
 
             RSCommands.UpdateRotationState();
             HotbarHighlightManager.UpdateSettings();
-
-            RemoveExpiredVfxData();
         }
         catch (Exception ex)
         {
             Svc.Log.Error(ex, "Inner Worker Exception");
             if (Service.Config.InDebug)
-#pragma warning disable CS0436
-                WarningHelper.AddSystemWarning("Inner Worker Exception");
+            WarningHelper.AddSystemWarning("Inner Worker Exception");
         }
     }
 
     private static void RemoveExpiredVfxData()
     {
-        var expiredVfx = new List<VfxNewData>();
-        lock (DataCenter.VfxDataQueue)
-        {
-            for (int i = 0; i < DataCenter.VfxDataQueue.Count; i++)
-            {
-                var vfx = DataCenter.VfxDataQueue[i];
-                if (vfx.TimeDuration > TimeSpan.FromSeconds(6))
-                {
-                    expiredVfx.Add(vfx);
-                }
-            }
-
-            foreach (var vfx in expiredVfx)
-            {
-                DataCenter.VfxDataQueue.Remove(vfx);
-            }
-        }
+        DataCenter.VfxDataQueue.RemoveAll(
+                vfx => vfx.TimeDuration > TimeSpan.FromSeconds(6));
     }
 
     private static void UpdateHighlight()
@@ -254,7 +281,6 @@ internal static class MajorUpdater
 
     private static void ShowWarning()
     {
-        // Replace LINQ Any with manual loop for "Avarice"
         bool foundAvarice = false;
         foreach (var p in Svc.PluginInterface.InstalledPlugins)
         {
@@ -266,11 +292,9 @@ internal static class MajorUpdater
         }
         if (!foundAvarice)
         {
-#pragma warning disable CS0436
             WarningHelper.AddSystemWarning(UiString.AvariceWarning.GetDescription());
         }
 
-        // Replace LINQ Any with manual loop for "TextToTalk"
         bool foundTextToTalk = false;
         foreach (var p in Svc.PluginInterface.InstalledPlugins)
         {
@@ -282,7 +306,6 @@ internal static class MajorUpdater
         }
         if (!foundTextToTalk)
         {
-#pragma warning disable CS0436
             WarningHelper.AddSystemWarning(UiString.TextToTalkWarning.GetDescription());
         }
     }
@@ -298,7 +321,8 @@ internal static class MajorUpdater
         var notification = (AtkUnitBase*)Svc.GameGui.GetAddonByName("_Notification", 1);
         if (notification == null) return;
 
-        var atkValues = (AtkValue*)Marshal.AllocHGlobal(2 * sizeof(AtkValue));
+        // Use stackalloc to avoid heap allocation
+        var atkValues = stackalloc AtkValue[2];
         atkValues[0].Type = atkValues[1].Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.Int;
         atkValues[0].Int = 0;
         atkValues[1].Int = 2;
@@ -310,17 +334,12 @@ internal static class MajorUpdater
         {
             Svc.Log.Warning(ex, "Failed to close the window!");
         }
-        finally
-        {
-            Marshal.FreeHGlobal(new IntPtr(atkValues));
-        }
     }
 
     static DateTime _nextOpenTime = DateTime.Now;
     static ulong _lastChest = 0;
     private unsafe static void OpenChest()
     {
-        if (!Service.Config.AutoOpenChest) return;
         if (Player.Object == null) return;
         if (DataCenter.InCombat) return;
         var player = Player.Object;

@@ -16,6 +16,7 @@ internal static class StateUpdater
 
     public static void UpdateState()
     {
+        if (!DataCenter.IsActivated()) return;
         DataCenter.CommandStatus = StatusFromCmdOrCondition();
         DataCenter.AutoStatus = StatusFromAutomatic();
         int attackedTargetsCount = 0;

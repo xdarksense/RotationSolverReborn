@@ -164,7 +164,6 @@ namespace RotationSolver.Commands
             catch (Exception ex)
             {
                 Svc.Log.Warning(ex, "Pulse Failed!");
-#pragma warning disable 0436
                 WarningHelper.AddSystemWarning($"Action bar failed to pulse because: {ex.Message}");
             }
             finally
