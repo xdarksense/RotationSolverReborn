@@ -21,7 +21,7 @@ internal static class DataCenter
 
     public static bool ResetActionConfigs { get; set; } = false;
 
-    public static bool IsActivated() => !Player.Available || State || IsManual || Service.Config.TeachingMode;
+    public static bool IsActivated() => Player.Available && (State || IsManual || Service.Config.TeachingMode);
 
     internal static IBattleChara? HostileTarget
     {
