@@ -942,34 +942,25 @@ public struct ActionTargetInfo(IBaseAction action)
 
         IBattleChara? FindDancePartner()
         {
-            // DancePartnerPriority based on the info from The Balance Discord for Level 100
             var dancePartnerPriority = OtherConfiguration.DancePartnerPriority;
 
             if (!Player.Object.IsJobs(Job.DNC)) return null;
             if (DataCenter.PartyMembers == null) return null;
             if (IGameObjects == null) return null;
 
-            var partyMembers = new List<IBattleChara>();
-
-            foreach (var obj in DataCenter.PartyMembers)
-            {
-                if (ObjectHelper.IsParty(obj) && obj.StatusList != null && obj != Player.Object)
-                {
-                    partyMembers.Add(obj);
-                }
-            }
-
             foreach (var job in dancePartnerPriority)
             {
-                foreach (var member in partyMembers)
+                foreach (var member in DataCenter.PartyMembers)
                 {
                     if (member.IsJobs(job) && !member.IsDead && !member.HasStatus(false, StatusID.DamageDown_2911, StatusID.DamageDown, StatusID.Weakness, StatusID.BrinkOfDeath))
                     {
+                        PluginLog.Debug($"FindDancePartner: {member.Name} selected target0.");
                         return member;
                     }
                 }
             }
 
+            PluginLog.Debug($"FindDancePartner: No target found, using fallback.");
             return RandomMeleeTarget(IGameObjects)
                 ?? RandomRangeTarget(IGameObjects)
                 ?? RandomMagicalTarget(IGameObjects)
@@ -986,21 +977,13 @@ public struct ActionTargetInfo(IBaseAction action)
             if (DataCenter.PartyMembers == null) return null;
             if (IGameObjects == null) return null;
 
-            var partyMembers = new List<IBattleChara>();
-            foreach (var obj in DataCenter.PartyMembers)
-            {
-                if (ObjectHelper.IsParty(obj))
-                {
-                    partyMembers.Add(obj);
-                }
-            }
-
             foreach (var job in TheSpearPriority)
             {
-                foreach (var member in partyMembers)
+                foreach (var member in DataCenter.PartyMembers)
                 {
                     if (member.IsJobs(job) && !member.IsDead)
                     {
+                        PluginLog.Debug($"FindTheSpear: {member.Name} selected target.");
                         return member;
                     }
                 }
@@ -1022,21 +1005,13 @@ public struct ActionTargetInfo(IBaseAction action)
             if (DataCenter.PartyMembers == null) return null;
             if (IGameObjects == null) return null;
 
-            var partyMembers = new List<IBattleChara>();
-            foreach (var obj in DataCenter.PartyMembers)
-            {
-                if (ObjectHelper.IsParty(obj))
-                {
-                    partyMembers.Add(obj);
-                }
-            }
-
             foreach (var job in TheBalancePriority)
             {
-                foreach (var member in partyMembers)
+                foreach (var member in DataCenter.PartyMembers)
                 {
                     if (member.IsJobs(job) && !member.IsDead)
                     {
+                        PluginLog.Debug($"FindTheBalance: {member.Name} selected target.");
                         return member;
                     }
                 }
@@ -1057,22 +1032,52 @@ public struct ActionTargetInfo(IBaseAction action)
             if (DataCenter.PartyMembers == null) return null;
             if (IGameObjects == null) return null;
 
-            // First, prioritize tanks with TankStanceStatus and without Kardion from anyone, accounting for Double Sage parties
-            foreach (var member in DataCenter.PartyMembers.Where(member => member.IsJobCategory(JobRole.Tank)))
+            // 1. Tanks with tank stance and without Kardion
+            foreach (var job in KardiaTankPriority)
             {
-                foreach (var job in KardiaTankPriority)
+                foreach (var m in DataCenter.PartyMembers)
                 {
-                    if (member.IsJobs(job) && !member.IsDead && member.IsParty() && member.HasStatus(false, StatusHelper.TankStanceStatus) && !member.HasStatus(false, StatusID.Kardion))
+                    if (m.IsJobCategory(JobRole.Tank) && m.IsJobs(job) && !m.IsDead)
                     {
-                        return member;
-                    }
-                    else if (member.IsJobs(job) && !member.IsDead && member.IsParty())
-                    {
-                        return member;
+                        if (m.HasStatus(false, StatusHelper.TankStanceStatus) && !m.HasStatus(false, StatusID.Kardion))
+                        {
+                            PluginLog.Debug($"FindKardia: {m.Name} is a tank with TankStanceStatus and without Kardion.");
+                            return m;
+                        }
                     }
                 }
             }
 
+            // 2. Tanks with tank stance (regardless of Kardion)
+            foreach (var job in KardiaTankPriority)
+            {
+                foreach (var m in DataCenter.PartyMembers)
+                {
+                    if (m.IsJobCategory(JobRole.Tank) && m.IsJobs(job) && !m.IsDead)
+                    {
+                        if (m.HasStatus(false, StatusHelper.TankStanceStatus))
+                        {
+                            PluginLog.Debug($"FindKardia: {m.Name} is a tank with TankStanceStatus.");
+                            return m;
+                        }
+                    }
+                }
+            }
+
+            // 3. Any alive tank in priority order
+            foreach (var job in KardiaTankPriority)
+            {
+                foreach (var m in DataCenter.PartyMembers)
+                {
+                    if (m.IsJobCategory(JobRole.Tank) && m.IsJobs(job) && !m.IsDead)
+                    {
+                        PluginLog.Debug($"FindKardia: {m.Name} is a tank fallback.");
+                        return m;
+                    }
+                }
+            }
+
+            PluginLog.Debug($"FindKardia: No target found, using fallback.");
             return FindTankTarget()
                 ?? RandomMeleeTarget(DataCenter.PartyMembers)
                 ?? RandomPhysicalTarget(DataCenter.PartyMembers)
@@ -1089,11 +1094,11 @@ public struct ActionTargetInfo(IBaseAction action)
 
             foreach (var obj in DataCenter.PartyMembers)
             {
-                if (!obj.IsDead && obj.IsParty() && !obj.WillStatusEnd(20, true, StatusID.Catalyze))
+                if (!obj.IsDead && !obj.WillStatusEnd(20, true, StatusID.Catalyze))
                 {
                     return obj;
                 }
-                else if (!obj.IsDead && obj.IsParty() && !obj.WillStatusEnd(20, true, StatusID.Galvanize))
+                else if (!obj.IsDead && !obj.WillStatusEnd(20, true, StatusID.Galvanize))
                 {
                     return obj;
                 }
