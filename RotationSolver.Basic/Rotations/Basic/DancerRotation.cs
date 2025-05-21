@@ -364,9 +364,8 @@ partial class DancerRotation
     static partial void ModifyFlourishPvE(ref ActionSetting setting)
     {
         //setting.StatusNeed = [StatusID.StandardFinish];
-        setting.ActionCheck = () => HasStandardFinish;
         setting.StatusProvide = [StatusID.ThreefoldFanDance, StatusID.FourfoldFanDance, StatusID.FinishingMoveReady];
-        setting.ActionCheck = () => InCombat;
+        setting.ActionCheck = () => InCombat && HasStandardFinish;
         setting.IsFriendly = true;
     }
 
@@ -390,9 +389,8 @@ partial class DancerRotation
     static partial void ModifyDoubleStandardFinishPvE(ref ActionSetting setting)
     {
         //setting.StatusNeed = [StatusID.StandardStep];
-        setting.ActionCheck = () => HasStandardStep;
         setting.StatusProvide = [StatusID.LastDanceReady];
-        setting.ActionCheck = () => IsDancing && CompletedSteps == 2 && Service.GetAdjustedActionId(ActionID.StandardStepPvE) == ActionID.DoubleStandardFinishPvE;
+        setting.ActionCheck = () => HasStandardStep && IsDancing && CompletedSteps == 2 && Service.GetAdjustedActionId(ActionID.StandardStepPvE) == ActionID.DoubleStandardFinishPvE;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -402,9 +400,8 @@ partial class DancerRotation
     static partial void ModifyQuadrupleTechnicalFinishPvE(ref ActionSetting setting)
     {
         //setting.StatusNeed = [StatusID.TechnicalStep];
-        setting.ActionCheck = () => HasTechnicalStep;
         setting.StatusProvide = [StatusID.DanceOfTheDawnReady];
-        setting.ActionCheck = () => IsDancing && CompletedSteps == 4 && Service.GetAdjustedActionId(ActionID.TechnicalStepPvE) == ActionID.QuadrupleTechnicalFinishPvE;
+        setting.ActionCheck = () => HasTechnicalStep && IsDancing && CompletedSteps == 4 && Service.GetAdjustedActionId(ActionID.TechnicalStepPvE) == ActionID.QuadrupleTechnicalFinishPvE;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
