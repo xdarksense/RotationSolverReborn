@@ -59,7 +59,6 @@ internal static class ActionUpdater
 
     internal static void UpdateNextAction()
     {
-        if (!DataCenter.IsActivated()) return;
         IPlayerCharacter localPlayer = Player.Object;
         var customRotation = DataCenter.CurrentRotation;
 

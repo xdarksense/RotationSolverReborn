@@ -59,6 +59,7 @@ internal static class MajorUpdater
             TransitionSafeCommands();
             ActionUpdater.ClearNextAction();
             CustomRotation.MoveTarget = null;
+            ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
             return;
         }
 
@@ -82,11 +83,14 @@ internal static class MajorUpdater
             }
         }
 
-        if (DataCenter.IsActivated())
+        if (DataCenter.IsActivated() && Player.Object != null && Player.Available)
         {
             try
             {
+                TargetUpdater.UpdateTargets();
+                StateUpdater.UpdateState();
                 ActionUpdater.UpdateActionInfo();
+                ActionUpdater.UpdateNextAction();
                 var canDoAction = ActionUpdater.CanDoAction();
                 MovingUpdater.UpdateCanMove(canDoAction);
 
@@ -96,6 +100,7 @@ internal static class MajorUpdater
                 }
 
                 MacroUpdater.UpdateMacro();
+                ActionSequencerUpdater.UpdateActionSequencerAction();
             }
             catch (Exception ex)
             {
@@ -149,6 +154,7 @@ internal static class MajorUpdater
             }
         }
 
+        // Handle Miscellaneous Updates
         try
         {
             MiscUpdater.UpdateMisc();
@@ -167,49 +173,17 @@ internal static class MajorUpdater
         // Handle Update Work in a separate try-catch block to avoid blocking the main thread
         try
         {
-            //Svc.Framework.RunOnTick(UpdateWork);
-            UpdateWork();
-        }
-        catch (Exception tEx)
-        {
-            PluginLog.Error($"UpdateWork Exception: {tEx.Message}");
-            if (Service.Config.InDebug)
-                WarningHelper.AddSystemWarning("UpdateWork Exception");
-        }
-    }
-
-    private static void UpdateWork()
-    {
-        if (!IsValid)
-        {
-            ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
-            return;
-        }
-
-        try
-        {
             if (DataCenter.VfxDataQueue.Count > 0)
                 DataCenter.VfxDataQueue.RemoveAll(vfx => vfx.TimeDuration > TimeSpan.FromSeconds(6));
 
-            bool autoReloadRotations = Service.Config.AutoReloadRotations;
-            if (autoReloadRotations)
+            if (Service.Config.AutoReloadRotations)
             {
                 RotationUpdater.LocalRotationWatcher();
             }
 
-            RotationUpdater.UpdateRotation();
-
-            bool isActivated = DataCenter.IsActivated();
-            if (isActivated)
-            {
-                TargetUpdater.UpdateTargets();
-                StateUpdater.UpdateState();
-                ActionSequencerUpdater.UpdateActionSequencerAction();
-                ActionUpdater.UpdateNextAction();
-            }
-
             RSCommands.UpdateRotationState();
             HotbarHighlightManager.UpdateSettings();
+            RotationUpdater.UpdateRotation();
         }
         catch (Exception ex)
         {
