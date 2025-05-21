@@ -344,7 +344,23 @@ partial class DancerRotation
     {
         setting.IsFriendly = true;
         setting.TargetType = TargetType.DancePartner;
-        setting.ActionCheck = () => !IsDancing && !AllianceMembers.Any(b => b.HasStatus(true, StatusID.ClosedPosition_2026));
+        setting.ActionCheck = () =>
+        {
+            if (IsDancing)
+                return false;
+
+            bool hasClosedPosition = false;
+            foreach (var b in AllianceMembers)
+            {
+                if (b.HasStatus(true, StatusID.ClosedPosition_2026))
+                {
+                    hasClosedPosition = true;
+                    break;
+                }
+            }
+
+            return !hasClosedPosition && DataCenter.PartyMembers.Count >= 2;
+        };
     }
 
     static partial void ModifyEndingPvE(ref ActionSetting setting)

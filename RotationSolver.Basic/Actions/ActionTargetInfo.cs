@@ -952,9 +952,9 @@ public struct ActionTargetInfo(IBaseAction action)
             {
                 foreach (var member in DataCenter.PartyMembers)
                 {
-                    if (member.IsJobs(job) && !member.IsDead && !member.HasStatus(false, StatusID.DamageDown_2911, StatusID.DamageDown, StatusID.Weakness, StatusID.BrinkOfDeath))
+                    if (member.IsJobs(job) && !member.IsDead && !member.HasStatus(false, StatusID.DamageDown_2911, StatusID.DamageDown, StatusID.Weakness, StatusID.BrinkOfDeath) && member != Player.Object)
                     {
-                        PluginLog.Debug($"FindDancePartner: {member.Name} selected target0.");
+                        PluginLog.Debug($"FindDancePartner: {member.Name} selected target.");
                         return member;
                     }
                 }
