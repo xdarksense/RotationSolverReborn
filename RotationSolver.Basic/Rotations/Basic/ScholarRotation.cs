@@ -1,6 +1,6 @@
 namespace RotationSolver.Basic.Rotations.Basic;
 
-partial class ScholarRotation
+public partial class ScholarRotation
 {
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Mind;
@@ -22,7 +22,7 @@ partial class ScholarRotation
     /// </summary>
     public static byte SCHAetherFlowStacks => JobGauge.Aetherflow;
 
-    static float SeraphTimeRaw => JobGauge.SeraphTimer / 1000f;
+    private static float SeraphTimeRaw => JobGauge.SeraphTimer / 1000f;
 
     /// <summary>
     /// 
@@ -92,7 +92,7 @@ partial class ScholarRotation
     #endregion
 
     #region PvE Actions
-    private sealed protected override IBaseAction Raise => ResurrectionPvE;
+    private protected sealed override IBaseAction Raise => ResurrectionPvE;
 
     static partial void ModifyRuinPvE(ref ActionSetting setting)
     {
@@ -237,6 +237,7 @@ partial class ScholarRotation
         {
             AoeCount = 1,
         };
+        setting.ActionCheck = () => DataCenter.PartyMembers.Count >= 2;
     }
 
     static partial void ModifyEmergencyTacticsPvE(ref ActionSetting setting)
@@ -311,7 +312,7 @@ partial class ScholarRotation
 
     static partial void ModifySummonSeraphPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => DataCenter.HasPet();
+        setting.ActionCheck = DataCenter.HasPet;
         setting.IsFriendly = true;
     }
 

@@ -20,9 +20,12 @@ internal class TraitCondition : DelayCondition
 
     protected override bool IsTrueInside(ICustomRotation rotation)
     {
-        if (_trait == null || !Player.AvailableThreadSafe) return false;
+        if (_trait == null || !Player.AvailableThreadSafe)
+        {
+            return false;
+        }
 
-        var result = _trait.EnoughLevel;
+        bool result = _trait.EnoughLevel;
         return result;
     }
 }

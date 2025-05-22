@@ -17,62 +17,56 @@ internal static class MajorUpdater
         get
         {
             if (!Player.AvailableThreadSafe)
+            {
                 return false;
+            }
 
             // Directly check if there are any conditions present
-            var conditions = Svc.Condition.AsReadOnlySet();
-            if (conditions.Count == 0)
-                return false;
-
-            if (Svc.Condition[ConditionFlag.Occupied]
-               || Svc.Condition[ConditionFlag.LoggingOut]
-               || Svc.Condition[ConditionFlag.Occupied30]
-               || Svc.Condition[ConditionFlag.Occupied33]
-               || Svc.Condition[ConditionFlag.Occupied38]
-               || Svc.Condition[ConditionFlag.Occupied39]
-               || Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]
-               || Svc.Condition[ConditionFlag.OccupiedInEvent]
-               || Svc.Condition[ConditionFlag.OccupiedInQuestEvent]
-               || Svc.Condition[ConditionFlag.OccupiedSummoningBell]
-               || Svc.Condition[ConditionFlag.WatchingCutscene]
-               || Svc.Condition[ConditionFlag.WatchingCutscene78]
-               || Svc.Condition[ConditionFlag.BetweenAreas]
-               || Svc.Condition[ConditionFlag.BetweenAreas51]
-               || Svc.Condition[ConditionFlag.InThatPosition]
+            IReadOnlySet<ConditionFlag> conditions = Svc.Condition.AsReadOnlySet();
+            return conditions.Count != 0 && !Svc.Condition[ConditionFlag.Occupied]
+               && !Svc.Condition[ConditionFlag.LoggingOut]
+               && !Svc.Condition[ConditionFlag.Occupied30]
+               && !Svc.Condition[ConditionFlag.Occupied33]
+               && !Svc.Condition[ConditionFlag.Occupied38]
+               && !Svc.Condition[ConditionFlag.Occupied39]
+               && !Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]
+               && !Svc.Condition[ConditionFlag.OccupiedInEvent]
+               && !Svc.Condition[ConditionFlag.OccupiedInQuestEvent]
+               && !Svc.Condition[ConditionFlag.OccupiedSummoningBell]
+               && !Svc.Condition[ConditionFlag.WatchingCutscene]
+               && !Svc.Condition[ConditionFlag.WatchingCutscene78]
+               && !Svc.Condition[ConditionFlag.BetweenAreas]
+               && !Svc.Condition[ConditionFlag.BetweenAreas51]
+               && !Svc.Condition[ConditionFlag.InThatPosition]
                //|| Svc.Condition[ConditionFlag.TradeOpen]
-               || Svc.Condition[ConditionFlag.Crafting]
-               || Svc.Condition[ConditionFlag.ExecutingCraftingAction]
-               || Svc.Condition[ConditionFlag.PreparingToCraft]
-               || Svc.Condition[ConditionFlag.Unconscious]
-               || Svc.Condition[ConditionFlag.MeldingMateria]
-               || Svc.Condition[ConditionFlag.Gathering]
-               || Svc.Condition[ConditionFlag.OperatingSiegeMachine]
-               || Svc.Condition[ConditionFlag.CarryingItem]
-               || Svc.Condition[ConditionFlag.CarryingObject]
-               || Svc.Condition[ConditionFlag.BeingMoved]
-               || Svc.Condition[ConditionFlag.Mounted]
-               || Svc.Condition[ConditionFlag.Mounted2]
-               || Svc.Condition[ConditionFlag.Mounting]
-               || Svc.Condition[ConditionFlag.Mounting71]
-               || Svc.Condition[ConditionFlag.ParticipatingInCustomMatch]
-               || Svc.Condition[ConditionFlag.PlayingLordOfVerminion]
-               || Svc.Condition[ConditionFlag.ChocoboRacing]
-               || Svc.Condition[ConditionFlag.PlayingMiniGame]
-               || Svc.Condition[ConditionFlag.Performing]
-               || Svc.Condition[ConditionFlag.Fishing]
-               || Svc.Condition[ConditionFlag.Transformed]
-               || Svc.Condition[ConditionFlag.UsingHousingFunctions]
-               || Svc.Condition[ConditionFlag.Jumping61]
-               || Svc.Condition[ConditionFlag.SufferingStatusAffliction2]
-               || Svc.Condition[ConditionFlag.RolePlaying]
-               || Svc.Condition[ConditionFlag.InFlight]
-               || Svc.Condition[ConditionFlag.Diving]
-               || Svc.Condition[ConditionFlag.Swimming])
-                {
-                    return true;
-                }
-
-            return true;
+               && !Svc.Condition[ConditionFlag.Crafting]
+               && !Svc.Condition[ConditionFlag.ExecutingCraftingAction]
+               && !Svc.Condition[ConditionFlag.PreparingToCraft]
+               && !Svc.Condition[ConditionFlag.Unconscious]
+               && !Svc.Condition[ConditionFlag.MeldingMateria]
+               && !Svc.Condition[ConditionFlag.Gathering]
+               && !Svc.Condition[ConditionFlag.OperatingSiegeMachine]
+               && !Svc.Condition[ConditionFlag.CarryingItem]
+               && !Svc.Condition[ConditionFlag.CarryingObject]
+               && !Svc.Condition[ConditionFlag.BeingMoved]
+               && !Svc.Condition[ConditionFlag.Mounted]
+               && !Svc.Condition[ConditionFlag.Mounted2]
+               && !Svc.Condition[ConditionFlag.Mounting]
+               && !Svc.Condition[ConditionFlag.Mounting71]
+               && !Svc.Condition[ConditionFlag.ParticipatingInCustomMatch]
+               && !Svc.Condition[ConditionFlag.PlayingLordOfVerminion]
+               && !Svc.Condition[ConditionFlag.ChocoboRacing]
+               && !Svc.Condition[ConditionFlag.PlayingMiniGame]
+               && !Svc.Condition[ConditionFlag.Performing]
+               && !Svc.Condition[ConditionFlag.Fishing]
+               && !Svc.Condition[ConditionFlag.Transformed]
+               && !Svc.Condition[ConditionFlag.UsingHousingFunctions]
+               && !Svc.Condition[ConditionFlag.Jumping61]
+               && !Svc.Condition[ConditionFlag.SufferingStatusAffliction2]
+               && !Svc.Condition[ConditionFlag.RolePlaying]
+               && !Svc.Condition[ConditionFlag.InFlight]
+               && !Svc.Condition[ConditionFlag.Diving]
+               && !Svc.Condition[ConditionFlag.Swimming];
         }
     }
 
@@ -84,7 +78,7 @@ internal static class MajorUpdater
         Svc.Framework.Update += RSRUpdate;
     }
 
-    private unsafe static void RSRUpdate(IFramework framework)
+    private static unsafe void RSRUpdate(IFramework framework)
     {
         HotbarHighlightManager.HotbarIDs.Clear();
 
@@ -106,7 +100,9 @@ internal static class MajorUpdater
                     _threadException = ex;
                     PluginLog.Error($"RSRUpdate TSC Exception: {ex.Message}");
                     if (Service.Config.InDebug)
-                        BasicWarningHelper.AddSystemWarning("RSRUpdate TSC Exception");
+                    {
+                        _ = BasicWarningHelper.AddSystemWarning("RSRUpdate TSC Exception");
+                    }
                 }
             }
         }
@@ -115,7 +111,7 @@ internal static class MajorUpdater
         {
             try
             {
-                var canDoAction = ActionUpdater.CanDoAction();
+                bool canDoAction = ActionUpdater.CanDoAction();
                 MovingUpdater.UpdateCanMove(canDoAction);
 
                 if (canDoAction)
@@ -136,7 +132,9 @@ internal static class MajorUpdater
                     _threadException = ex;
                     PluginLog.Error($"RSRUpdate DC Exception: {ex.Message}");
                     if (Service.Config.InDebug)
-                        BasicWarningHelper.AddSystemWarning("RSRUpdate DC Exception");
+                    {
+                        _ = BasicWarningHelper.AddSystemWarning("RSRUpdate DC Exception");
+                    }
                 }
             }
 
@@ -145,7 +143,7 @@ internal static class MajorUpdater
             {
                 try
                 {
-                    var nextAction = ActionUpdater.NextAction;
+                    IAction nextAction = ActionUpdater.NextAction;
                     HotbarID? hotbar = null;
                     if (nextAction is IBaseItem item)
                     {
@@ -153,19 +151,14 @@ internal static class MajorUpdater
                     }
                     else if (nextAction is IBaseAction baseAction)
                     {
-                        if (baseAction.Action.ActionCategory.RowId == 10 || baseAction.Action.ActionCategory.RowId == 11)
-                        {
-                            hotbar = GetGeneralActionHotbarID(baseAction);
-                        }
-                        else
-                        {
-                            hotbar = new HotbarID(HotbarSlotType.Action, baseAction.AdjustedID);
-                        }
+                        hotbar = baseAction.Action.ActionCategory.RowId is 10 or 11
+                                ? GetGeneralActionHotbarID(baseAction)
+                                : new HotbarID(HotbarSlotType.Action, baseAction.AdjustedID);
                     }
 
                     if (hotbar.HasValue)
                     {
-                        HotbarHighlightManager.HotbarIDs.Add(hotbar.Value);
+                        _ = HotbarHighlightManager.HotbarIDs.Add(hotbar.Value);
                     }
                 }
                 catch (Exception ex)
@@ -175,7 +168,9 @@ internal static class MajorUpdater
                         _threadException = ex;
                         PluginLog.Error($"UpdateHighlight Exception: {ex.Message}");
                         if (Service.Config.InDebug)
-                            BasicWarningHelper.AddSystemWarning("UpdateHighlight Exception");
+                        {
+                            _ = BasicWarningHelper.AddSystemWarning("UpdateHighlight Exception");
+                        }
                     }
                 }
             }
@@ -193,10 +188,10 @@ internal static class MajorUpdater
             // Handle system warnings
             if (DataCenter.SystemWarnings.Count > 0)
             {
-                var now = DateTime.Now;
-                var keysToRemove = new List<string>();
+                DateTime now = DateTime.Now;
+                List<string> keysToRemove = [];
 
-                foreach (var kvp in DataCenter.SystemWarnings)
+                foreach (KeyValuePair<string, DateTime> kvp in DataCenter.SystemWarnings)
                 {
                     if (kvp.Value + TimeSpan.FromMinutes(10) < now)
                     {
@@ -204,15 +199,17 @@ internal static class MajorUpdater
                     }
                 }
 
-                foreach (var key in keysToRemove)
+                foreach (string key in keysToRemove)
                 {
-                    DataCenter.SystemWarnings.Remove(key);
+                    _ = DataCenter.SystemWarnings.Remove(key);
                 }
             }
 
             // Clear old VFX data
             if (DataCenter.VfxDataQueue.Count > 0)
-                DataCenter.VfxDataQueue.RemoveAll(vfx => vfx.TimeDuration > TimeSpan.FromSeconds(6));
+            {
+                _ = DataCenter.VfxDataQueue.RemoveAll(vfx => vfx.TimeDuration > TimeSpan.FromSeconds(6));
+            }
 
             // Check local rotation files
             if (Service.Config.AutoReloadRotations)
@@ -236,17 +233,22 @@ internal static class MajorUpdater
                 _threadException = ex;
                 PluginLog.Error($"Secondary RSRUpdate Exception: {ex.Message}");
                 if (Service.Config.InDebug)
-                    BasicWarningHelper.AddSystemWarning("Secondary RSRUpdate Exception");
+                {
+                    _ = BasicWarningHelper.AddSystemWarning("Secondary RSRUpdate Exception");
+                }
             }
         }
     }
 
     private static HotbarID? GetGeneralActionHotbarID(IBaseAction baseAction)
     {
-        var generalActions = Svc.Data.GetExcelSheet<GeneralAction>();
-        if (generalActions == null) return null;
+        Lumina.Excel.ExcelSheet<GeneralAction> generalActions = Svc.Data.GetExcelSheet<GeneralAction>();
+        if (generalActions == null)
+        {
+            return null;
+        }
 
-        foreach (var gAct in generalActions)
+        foreach (GeneralAction gAct in generalActions)
         {
             if (gAct.Action.RowId == baseAction.ID)
             {

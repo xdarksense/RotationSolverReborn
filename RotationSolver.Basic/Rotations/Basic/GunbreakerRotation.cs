@@ -2,7 +2,7 @@ using Dalamud.Interface.Colors;
 
 namespace RotationSolver.Basic.Rotations.Basic;
 
-partial class GunbreakerRotation
+public partial class GunbreakerRotation
 {
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Strength;
@@ -30,29 +30,15 @@ partial class GunbreakerRotation
     /// <summary>
     /// Gets the maximum amount of ammo available.
     /// </summary>
-    public static byte MaxAmmo() => (byte)(CartridgeChargeIiTrait.EnoughLevel ? 3 : CartridgeChargeTrait.EnoughLevel ? 2 : 0);
+    public static byte MaxAmmo()
+    {
+        return (byte)(CartridgeChargeIiTrait.EnoughLevel ? 3 : CartridgeChargeTrait.EnoughLevel ? 2 : 0);
+    }
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool IsAmmoCapped
-    {
-        get
-        {
-            if (CartridgeChargeIiTrait.EnoughLevel)
-            {
-                return Ammo == 3;
-            }
-            else if (CartridgeChargeTrait.EnoughLevel)
-            {
-                return Ammo == 2;
-            }
-            else
-            {
-                return Ammo == 0;
-            }
-        }
-    }
+    public static bool IsAmmoCapped => CartridgeChargeIiTrait.EnoughLevel ? Ammo == 3 : CartridgeChargeTrait.EnoughLevel ? Ammo == 2 : Ammo == 0;
 
     /// <summary>
     /// Gets the max combo time of the Gnashing Fang combo.
@@ -62,12 +48,12 @@ partial class GunbreakerRotation
     /// <summary>
     /// Gets whether the player is in the Gnashing Fang combo.
     /// </summary>
-    public static bool InGnashingFang => AmmoComboStep == 1 || AmmoComboStep == 2;
+    public static bool InGnashingFang => AmmoComboStep is 1 or 2;
 
     /// <summary>
     /// Gets whether the player is in the Reign combo.
     /// </summary>
-    public static bool InReignCombo => AmmoComboStep == 3 || AmmoComboStep == 4;
+    public static bool InReignCombo => AmmoComboStep is 3 or 4;
 
     /// <summary>
     /// Has No Mercy buff.
@@ -595,8 +581,7 @@ partial class GunbreakerRotation
     /// <inheritdoc/>
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        if (SuperbolidePvE.CanUse(out act)
-            && Player.GetHealthRatio() <= Service.Config.HealthForDyingTanks) return true;
-        return base.EmergencyAbility(nextGCD, out act);
+        return (SuperbolidePvE.CanUse(out act)
+            && Player.GetHealthRatio() <= Service.Config.HealthForDyingTanks) || base.EmergencyAbility(nextGCD, out act);
     }
 }

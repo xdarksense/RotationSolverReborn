@@ -13,11 +13,14 @@
         /// <returns>An array of static properties of the specified type.</returns>
         internal static PropertyInfo[] GetStaticProperties<T>(this Type? type)
         {
-            if (type == null) return Array.Empty<PropertyInfo>();
+            if (type == null)
+            {
+                return Array.Empty<PropertyInfo>();
+            }
 
-            var allProperties = type.GetProperties(BindingFlags.Static | BindingFlags.Public);
-            var filteredProperties = new List<PropertyInfo>();
-            foreach (var prop in allProperties)
+            PropertyInfo[] allProperties = type.GetProperties(BindingFlags.Static | BindingFlags.Public);
+            List<PropertyInfo> filteredProperties = [];
+            foreach (PropertyInfo prop in allProperties)
             {
                 if (typeof(T).IsAssignableFrom(prop.PropertyType) &&
                     prop.GetCustomAttribute<ObsoleteAttribute>() == null)
@@ -26,13 +29,15 @@
                 }
             }
 
-            var baseProperties = type.BaseType?.GetStaticProperties<T>() ?? Array.Empty<PropertyInfo>();
+            PropertyInfo[] baseProperties = type.BaseType?.GetStaticProperties<T>() ?? Array.Empty<PropertyInfo>();
 
             // Combine filteredProperties and baseProperties
-            var result = new PropertyInfo[filteredProperties.Count + baseProperties.Length];
+            PropertyInfo[] result = new PropertyInfo[filteredProperties.Count + baseProperties.Length];
             filteredProperties.CopyTo(result, 0);
             if (baseProperties.Length > 0)
+            {
                 Array.Copy(baseProperties, 0, result, filteredProperties.Count, baseProperties.Length);
+            }
 
             return result;
         }
@@ -44,11 +49,14 @@
         /// <returns>An enumerable of method information.</returns>
         internal static IEnumerable<MethodInfo> GetAllMethodInfo(this Type? type)
         {
-            if (type == null) return Array.Empty<MethodInfo>();
+            if (type == null)
+            {
+                return Array.Empty<MethodInfo>();
+            }
 
-            var allMethods = type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            var filteredMethods = new List<MethodInfo>();
-            foreach (var method in allMethods)
+            MethodInfo[] allMethods = type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            List<MethodInfo> filteredMethods = [];
+            foreach (MethodInfo method in allMethods)
             {
                 if (!method.IsConstructor)
                 {
@@ -56,13 +64,15 @@
                 }
             }
 
-            var baseMethods = type.BaseType?.GetAllMethodInfo() ?? Array.Empty<MethodInfo>();
+            IEnumerable<MethodInfo> baseMethods = type.BaseType?.GetAllMethodInfo() ?? Array.Empty<MethodInfo>();
 
             // Combine filteredMethods and baseMethods
-            var result = new MethodInfo[filteredMethods.Count + baseMethods.Count()];
+            MethodInfo[] result = new MethodInfo[filteredMethods.Count + baseMethods.Count()];
             filteredMethods.CopyTo(result, 0);
             if (baseMethods.Any())
+            {
                 baseMethods.ToArray().CopyTo(result, filteredMethods.Count);
+            }
 
             return result;
         }
@@ -75,10 +85,17 @@
         /// <returns>The property information if found, otherwise null.</returns>
         internal static PropertyInfo? GetPropertyInfo(this Type type, string name)
         {
-            if (type == null) throw new ArgumentNullException(nameof(type));
-            if (string.IsNullOrEmpty(name)) throw new ArgumentException("Property name cannot be null or empty", nameof(name));
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
 
-            var property = type.GetProperty(name, BindingFlags.Static | BindingFlags.Public);
+            if (string.IsNullOrEmpty(name))
+            {
+                throw new ArgumentException("Property name cannot be null or empty", nameof(name));
+            }
+
+            PropertyInfo? property = type.GetProperty(name, BindingFlags.Static | BindingFlags.Public);
 
             return property ?? type.BaseType?.GetPropertyInfo(name);
         }
@@ -91,10 +108,17 @@
         /// <returns>The method information if found, otherwise null.</returns>
         internal static MethodInfo? GetMethodInfo(this Type? type, string name)
         {
-            if (type == null) return null;
-            if (string.IsNullOrEmpty(name)) throw new ArgumentException("Method name cannot be null or empty", nameof(name));
+            if (type == null)
+            {
+                return null;
+            }
 
-            var method = type.GetMethod(name, BindingFlags.Static | BindingFlags.Public);
+            if (string.IsNullOrEmpty(name))
+            {
+                throw new ArgumentException("Method name cannot be null or empty", nameof(name));
+            }
+
+            MethodInfo? method = type.GetMethod(name, BindingFlags.Static | BindingFlags.Public);
 
             return method ?? type.BaseType?.GetMethodInfo(name);
         }

@@ -8,8 +8,8 @@ internal abstract class DelayCondition : ICondition
     public float DelayMax = 0;
     public float DelayOffset = 0;
 
-    RandomDelay _delay = default;
-    OffsetDelay _offsetDelay = default;
+    private RandomDelay _delay = default;
+    private OffsetDelay _offsetDelay = default;
 
     public bool Not = false;
 
@@ -18,7 +18,10 @@ internal abstract class DelayCondition : ICondition
 
     public bool IsTrue(ICustomRotation? rotation)
     {
-        if (rotation == null) return false;
+        if (rotation == null)
+        {
+            return false;
+        }
 
         _callingStack ??= new(64);
 
@@ -39,13 +42,13 @@ internal abstract class DelayCondition : ICondition
         }
 
         _callingStack.Push(this);
-        var value = CheckBefore(rotation) && IsTrueInside(rotation);
+        bool value = CheckBefore(rotation) && IsTrueInside(rotation);
         if (Not)
         {
             value = !value;
         }
-        var result = _delay.Delay(_offsetDelay.Delay(value));
-        _callingStack.Pop();
+        bool result = _delay.Delay(_offsetDelay.Delay(value));
+        _ = _callingStack.Pop();
 
         return result;
     }
@@ -63,17 +66,19 @@ internal abstract class DelayCondition : ICondition
         {
             action = rotation.AllBaseActions.FirstOrDefault(a => (ActionID)a.ID == id);
         }
-        if (action == null) return false;
-        return true;
+        return action != null;
     }
 
     internal static bool CheckMemberInfo<T>(ICustomRotation? rotation, ref string name, ref T? value) where T : MemberInfo
     {
-        if (rotation == null) return false;
+        if (rotation == null)
+        {
+            return false;
+        }
 
         if (!string.IsNullOrEmpty(name) && (value == null || value.Name != name))
         {
-            var memberName = name;
+            string memberName = name;
             if (typeof(T).IsAssignableFrom(typeof(PropertyInfo)))
             {
                 value = (T?)GetAllMembers(rotation.GetType(), RuntimeReflectionExtensions.GetRuntimeProperties).FirstOrDefault(m => m.Name == memberName);
@@ -88,9 +93,12 @@ internal abstract class DelayCondition : ICondition
 
     private static IEnumerable<MemberInfo> GetAllMembers(Type? type, Func<Type, IEnumerable<MemberInfo>> getFunc)
     {
-        if (type == null || getFunc == null) return Array.Empty<MemberInfo>();
+        if (type == null || getFunc == null)
+        {
+            return Array.Empty<MemberInfo>();
+        }
 
-        var methods = getFunc(type);
+        IEnumerable<MemberInfo> methods = getFunc(type);
         return methods.Union(GetAllMembers(type.BaseType, getFunc));
     }
 }

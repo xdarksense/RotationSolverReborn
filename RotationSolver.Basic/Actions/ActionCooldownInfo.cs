@@ -104,7 +104,9 @@ public readonly struct ActionCooldownInfo : ICooldown
     /// <param name="offset">The offset.</param>
     /// <returns>True if one charge has elapsed; otherwise, false.</returns>
     public bool ElapsedOneChargeAfterGCD(uint gcdCount = 0, float offset = 0)
-        => ElapsedOneChargeAfter(DataCenter.GCDTime(gcdCount, offset));
+    {
+        return ElapsedOneChargeAfter(DataCenter.GCDTime(gcdCount, offset));
+    }
 
     /// <summary>
     /// Determines whether one charge has elapsed after the specified time.
@@ -112,7 +114,9 @@ public readonly struct ActionCooldownInfo : ICooldown
     /// <param name="time">The time.</param>
     /// <returns>True if one charge has elapsed; otherwise, false.</returns>
     public bool ElapsedOneChargeAfter(float time)
-        => IsCoolingDown && time <= RecastTimeElapsedOneCharge;
+    {
+        return IsCoolingDown && time <= RecastTimeElapsedOneCharge;
+    }
 
     /// <summary>
     /// Determines whether the action has elapsed after the specified GCD count and offset.
@@ -121,7 +125,9 @@ public readonly struct ActionCooldownInfo : ICooldown
     /// <param name="offset">The offset.</param>
     /// <returns>True if the action has elapsed; otherwise, false.</returns>
     public bool ElapsedAfterGCD(uint gcdCount = 0, float offset = 0)
-        => ElapsedAfter(DataCenter.GCDTime(gcdCount, offset));
+    {
+        return ElapsedAfter(DataCenter.GCDTime(gcdCount, offset));
+    }
 
     /// <summary>
     /// Determines whether the action has elapsed after the specified time.
@@ -129,7 +135,9 @@ public readonly struct ActionCooldownInfo : ICooldown
     /// <param name="time">The time.</param>
     /// <returns>True if the action has elapsed; otherwise, false.</returns>
     public bool ElapsedAfter(float time)
-        => IsCoolingDown && time <= RecastTimeElapsed;
+    {
+        return IsCoolingDown && time <= RecastTimeElapsed;
+    }
 
     /// <summary>
     /// Determines whether the action will have one charge after the specified GCD count and offset.
@@ -138,7 +146,9 @@ public readonly struct ActionCooldownInfo : ICooldown
     /// <param name="offset">The offset.</param>
     /// <returns>True if the action will have one charge; otherwise, false.</returns>
     public bool WillHaveOneChargeGCD(uint gcdCount = 0, float offset = 0)
-        => WillHaveOneCharge(DataCenter.GCDTime(gcdCount, offset));
+    {
+        return WillHaveOneCharge(DataCenter.GCDTime(gcdCount, offset));
+    }
 
     /// <summary>
     /// Determines whether the action will have one charge after the specified remaining time.
@@ -146,7 +156,9 @@ public readonly struct ActionCooldownInfo : ICooldown
     /// <param name="remain">The remaining time.</param>
     /// <returns>True if the action will have one charge; otherwise, false.</returns>
     public bool WillHaveOneCharge(float remain)
-        => HasOneCharge || RecastTimeRemainOneCharge <= remain;
+    {
+        return HasOneCharge || RecastTimeRemainOneCharge <= remain;
+    }
 
     /// <summary>
     /// Determines whether the action will have the specified number of charges after the given GCD count and offset.
@@ -156,7 +168,9 @@ public readonly struct ActionCooldownInfo : ICooldown
     /// <param name="offset">The offset.</param>
     /// <returns>True if the action will have the specified number of charges; otherwise, false.</returns>
     public bool WillHaveXChargesGCD(uint charges, uint gcdCount = 0, float offset = 0)
-        => WillHaveXCharges(charges, DataCenter.GCDTime(gcdCount, offset));
+    {
+        return WillHaveXCharges(charges, DataCenter.GCDTime(gcdCount, offset));
+    }
 
     /// <summary>
     /// Determines whether the action will have the specified number of charges after the given remaining time.
@@ -167,7 +181,9 @@ public readonly struct ActionCooldownInfo : ICooldown
     public bool WillHaveXCharges(uint charges, float remain)
     {
         if (charges <= CurrentCharges)
+        {
             return true;
+        }
 
         float requiredTime = (charges - CurrentCharges - 1) * RecastTimeOneChargeRaw;
         return RecastTimeRemainOneCharge <= remain - requiredTime;
@@ -180,7 +196,7 @@ public readonly struct ActionCooldownInfo : ICooldown
     /// <returns>True if the action was just used; otherwise, false.</returns>
     public bool JustUsedAfter(float time)
     {
-        var elapsed = RecastTimeElapsedRaw % RecastTimeOneChargeRaw;
+        float elapsed = RecastTimeElapsedRaw % RecastTimeOneChargeRaw;
         return elapsed + DataCenter.DefaultGCDRemain < time;
     }
 
@@ -198,24 +214,35 @@ public readonly struct ActionCooldownInfo : ICooldown
             {
                 if (_action.Info.IsRealGCD)
                 {
-                    if (!WillHaveOneChargeGCD(0, 0)) return false;
+                    if (!WillHaveOneChargeGCD(0, 0))
+                    {
+                        return false;
+                    }
                 }
                 else
                 {
-                    if (!HasOneCharge && RecastTimeRemainOneChargeRaw > DataCenter.DefaultGCDRemain) return false;
+                    if (!HasOneCharge && RecastTimeRemainOneChargeRaw > DataCenter.DefaultGCDRemain)
+                    {
+                        return false;
+                    }
                 }
             }
 
             if (!isEmpty)
             {
-                if (RecastTimeRemain > DataCenter.DefaultGCDRemain + DataCenter.DefaultGCDTotal * gcdCountForAbility)
+                if (RecastTimeRemain > DataCenter.DefaultGCDRemain + (DataCenter.DefaultGCDTotal * gcdCountForAbility))
+                {
                     return false;
+                }
             }
         }
 
         if (!_action.Info.IsRealGCD)
         {
-            if (ActionManagerHelper.GetCurrentAnimationLock() > 0) return false;
+            if (ActionManagerHelper.GetCurrentAnimationLock() > 0)
+            {
+                return false;
+            }
         }
         return true;
     }

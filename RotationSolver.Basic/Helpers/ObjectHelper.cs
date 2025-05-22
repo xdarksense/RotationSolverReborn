@@ -7,6 +7,7 @@ using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Logging;
+using ExCSS;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
@@ -23,7 +24,7 @@ namespace RotationSolver.Basic.Helpers;
 /// </summary>
 public static class ObjectHelper
 {
-    static readonly EventHandlerContent[] _eventType =
+    private static readonly EventHandlerContent[] _eventType =
     {
         EventHandlerContent.TreasureHuntDirector,
         EventHandlerContent.Quest,
@@ -36,14 +37,20 @@ public static class ObjectHelper
 
     internal static bool CanProvoke(this IGameObject target)
     {
-        if (target == null) return false;
+        if (target == null)
+        {
+            return false;
+        }
 
-        if (DataCenter.PlayerFateId != 0 && target.FateId() == DataCenter.PlayerFateId) return false;
+        if (DataCenter.PlayerFateId != 0 && target.FateId() == DataCenter.PlayerFateId)
+        {
+            return false;
+        }
 
         // Removed the listed names.
-        if (OtherConfiguration.NoProvokeNames.TryGetValue(Svc.ClientState.TerritoryType, out var ns1))
+        if (OtherConfiguration.NoProvokeNames.TryGetValue(Svc.ClientState.TerritoryType, out string[]? ns1))
         {
-            foreach (var n in ns1)
+            foreach (string n in ns1)
             {
                 if (!string.IsNullOrEmpty(n) && new Regex(n).Match(target.Name?.GetText() ?? string.Empty).Success)
                 {
@@ -79,26 +86,55 @@ public static class ObjectHelper
 
     internal static bool IsAttackable(this IBattleChara battleChara)
     {
-        if (Svc.ClientState == null) return false;
-        if (battleChara.StatusList == null) return false;
-        if (battleChara.IsAllianceMember()) return false;
-        if (!battleChara.IsEnemy()) return false;
-        if (battleChara.IsSpecialExecptionImmune()) return false; // For specific named mobs that are immune to everything.
-        if (battleChara.IsSpecialImmune()) return false;
+        if (Svc.ClientState == null)
+        {
+            return false;
+        }
+
+        if (battleChara.StatusList == null)
+        {
+            return false;
+        }
+
+        if (battleChara.IsAllianceMember())
+        {
+            return false;
+        }
+
+        if (!battleChara.IsEnemy())
+        {
+            return false;
+        }
+
+        if (battleChara.IsSpecialExecptionImmune())
+        {
+            return false; // For specific named mobs that are immune to everything.
+        }
+
+        if (battleChara.IsSpecialImmune())
+        {
+            return false;
+        }
 
         // Dead.
-        if (Service.Config.FilterOneHpInvincible && battleChara.CurrentHp <= 1) return false;
-
-        foreach (var status in battleChara.StatusList)
+        if (Service.Config.FilterOneHpInvincible && battleChara.CurrentHp <= 1)
         {
-            if (StatusHelper.IsInvincible(status) && (DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility || !DataCenter.IsPvP)) return false;
+            return false;
+        }
+
+        foreach (Dalamud.Game.ClientState.Statuses.Status status in battleChara.StatusList)
+        {
+            if (StatusHelper.IsInvincible(status) && ((DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility) || !DataCenter.IsPvP))
+            {
+                return false;
+            }
         }
 
         // In No Hostiles Names
         if (OtherConfiguration.NoHostileNames != null &&
-            OtherConfiguration.NoHostileNames.TryGetValue(Svc.ClientState.TerritoryType, out var ns1))
+            OtherConfiguration.NoHostileNames.TryGetValue(Svc.ClientState.TerritoryType, out string[]? ns1))
         {
-            foreach (var n in ns1)
+            foreach (string n in ns1)
             {
                 if (!string.IsNullOrEmpty(n) && new Regex(n).Match(battleChara.Name.TextValue).Success)
                 {
@@ -110,7 +146,10 @@ public static class ObjectHelper
         // Fate
         if (Service.Config.IgnoreNonFateInFate && DataCenter.Territory?.ContentType != TerritoryContentType.Eureka)
         {
-            if (battleChara.FateId() != 0 && battleChara.FateId() != DataCenter.PlayerFateId) return false;
+            if (battleChara.FateId() != 0 && battleChara.FateId() != DataCenter.PlayerFateId)
+            {
+                return false;
+            }
         }
 
         if (Service.Config.BozjaCEmobtargeting
@@ -133,93 +172,138 @@ public static class ObjectHelper
             }
         }
 
-        if (Service.Config.TargetQuestThings && battleChara.IsOthersPlayersMob()) return false;
+        if (Service.Config.TargetQuestThings && battleChara.IsOthersPlayersMob())
+        {
+            return false;
+        }
 
-        if (battleChara.IsTopPriorityNamedHostile()) return true;
+        if (battleChara.IsTopPriorityNamedHostile())
+        {
+            return true;
+        }
 
-        if (battleChara.IsTopPriorityHostile()) return true;
+        if (battleChara.IsTopPriorityHostile())
+        {
+            return true;
+        }
 
-        if (Service.CountDownTime > 0 || DataCenter.IsPvP) return true;
+        if (Service.CountDownTime > 0 || DataCenter.IsPvP)
+        {
+            return true;
+        }
 
         // Tar on me
-        if (battleChara.TargetObject == Player.Object
-            || battleChara.TargetObject?.OwnerId == Player.Object.GameObjectId) return true;
-
-        return DataCenter.CurrentTargetToHostileType switch
-        {
-            TargetHostileType.AllTargetsCanAttack => true,
-            TargetHostileType.TargetsHaveTarget => battleChara.TargetObject is IBattleChara,
-            TargetHostileType.AllTargetsWhenSolo => DataCenter.PartyMembers.Count == 1 || battleChara.TargetObject is IBattleChara,
-            TargetHostileType.AllTargetsWhenSoloInDuty => (DataCenter.PartyMembers.Count == 1 && (Svc.Condition[ConditionFlag.BoundByDuty] || Svc.Condition[ConditionFlag.BoundByDuty56]))
-                                || battleChara.TargetObject is IBattleChara,
-            _ => true,
-        };
+        return battleChara.TargetObject == Player.Object
+            || battleChara.TargetObject?.OwnerId == Player.Object.GameObjectId || DataCenter.CurrentTargetToHostileType switch
+            {
+                TargetHostileType.AllTargetsCanAttack => true,
+                TargetHostileType.TargetsHaveTarget => battleChara.TargetObject is IBattleChara,
+                TargetHostileType.AllTargetsWhenSolo => DataCenter.PartyMembers.Count == 1 || battleChara.TargetObject is IBattleChara,
+                TargetHostileType.AllTargetsWhenSoloInDuty => (DataCenter.PartyMembers.Count == 1 && (Svc.Condition[ConditionFlag.BoundByDuty] || Svc.Condition[ConditionFlag.BoundByDuty56]))
+                                    || battleChara.TargetObject is IBattleChara,
+                _ => true,
+            };
     }
 
     internal static bool IsBozjanCEFateMob(this IGameObject obj)
     {
-        if (obj == null) return false;
-        if (obj.IsEnemy() == false) return false;
-        if (!DataCenter.IsInBozjanFieldOp) return false;
+        if (obj == null)
+        {
+            return false;
+        }
+
+        if (obj.IsEnemy() == false)
+        {
+            return false;
+        }
+
+        if (!DataCenter.IsInBozjanFieldOp)
+        {
+            return false;
+        }
 
         // Get the EventId of the mob
-        if (obj.GetEventType() == EventHandlerContent.PublicContentDirector)
-            return true;
-
-        return false;
+        return obj.GetEventType() == EventHandlerContent.PublicContentDirector;
     }
 
     internal static bool IsSpecialExecptionImmune(this IBattleChara obj)
     {
-        if (obj == null) return false;
+        if (obj == null)
+        {
+            return false;
+        }
 
-        if (obj.NameId == 9441) return true; // Special case for Bottom gate in CLL
+        if (obj.NameId == 9441)
+        {
+            return true; // Special case for Bottom gate in CLL
+        }
+
         return false;
     }
 
     private static string RemoveControlCharacters(string input)
     {
         if (string.IsNullOrEmpty(input))
+        {
             return input;
+        }
 
         // Use a StringBuilder for efficient string manipulation
-        var output = new StringBuilder(input.Length);
+        StringBuilder output = new(input.Length);
         foreach (char c in input)
         {
             // Exclude control characters and private use area characters
             if (!char.IsControl(c) && (c < '\uE000' || c > '\uF8FF'))
             {
-                output.Append(c);
+                _ = output.Append(c);
             }
         }
         return output.ToString();
     }
 
     internal static unsafe bool IsEnemy(this IGameObject obj)
-    => obj != null
-    && ActionManager.CanUseActionOnTarget((uint)ActionID.BlizzardPvE, obj.Struct());
+    {
+        return obj != null
+        && ActionManager.CanUseActionOnTarget((uint)ActionID.BlizzardPvE, obj.Struct());
+    }
 
     internal static unsafe bool IsAllianceMember(this IGameObject obj)
-        => obj.GameObjectId is not 0
-        && (!DataCenter.IsPvP && DataCenter.IsInAllianceRaid && obj is IPlayerCharacter && (ActionManager.CanUseActionOnTarget((uint)ActionID.RaisePvE, obj.Struct()) || ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, obj.Struct())));
+    {
+        return obj.GameObjectId is not 0
+            && !DataCenter.IsPvP && DataCenter.IsInAllianceRaid && obj is IPlayerCharacter && (ActionManager.CanUseActionOnTarget((uint)ActionID.RaisePvE, obj.Struct()) || ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, obj.Struct()));
+    }
 
     internal static bool IsParty(this IGameObject gameObject)
     {
-        if (gameObject == null) return false;
-
-        if (gameObject.GameObjectId == Player.Object.GameObjectId) return true;
-
-        foreach (var p in Svc.Party)
+        if (gameObject == null)
         {
-            if (p.GameObject?.GameObjectId == gameObject.GameObjectId) return true;
+            return false;
         }
 
-        if (Service.Config.FriendlyPartyNpcHealRaise3 && gameObject.IsNpcPartyMember()) return true;
-        if (Service.Config.ChocoboPartyMember && gameObject.IsPlayerCharacterChocobo()) return true;
-        if (Service.Config.FriendlyBattleNpcHeal && gameObject.IsFriendlyBattleNPC()) return true;
-        if (Service.Config.FocusTargetIsParty && gameObject.IsFocusTarget() && gameObject.IsAllianceMember()) return true;
+        if (gameObject.GameObjectId == Player.Object.GameObjectId)
+        {
+            return true;
+        }
 
-        return false;
+        foreach (Dalamud.Game.ClientState.Party.IPartyMember p in Svc.Party)
+        {
+            if (p.GameObject?.GameObjectId == gameObject.GameObjectId)
+            {
+                return true;
+            }
+        }
+
+        if (Service.Config.FriendlyPartyNpcHealRaise3 && gameObject.IsNpcPartyMember())
+        {
+            return true;
+        }
+
+        if (Service.Config.ChocoboPartyMember && gameObject.IsPlayerCharacterChocobo())
+        {
+            return true;
+        }
+
+        return Service.Config.FriendlyBattleNpcHeal && gameObject.IsFriendlyBattleNPC() || Service.Config.FocusTargetIsParty && gameObject.IsFocusTarget() && gameObject.IsAllianceMember();
     }
 
     internal static bool IsNpcPartyMember(this IGameObject gameObj)
@@ -249,14 +333,37 @@ public static class ObjectHelper
 
     internal static bool IsDeathToRaise(this IGameObject obj)
     {
-        if (obj == null) return false;
-        if (!obj.IsDead || !obj.IsTargetable) return false;
-        if (obj is IBattleChara b && b.CurrentHp != 0) return false;
-        if (obj.HasStatus(false, StatusID.Raise)) return false;
-        if (!Service.Config.RaiseBrinkOfDeath && obj.HasStatus(false, StatusID.BrinkOfDeath)) return false;
-        foreach (var c in DataCenter.PartyMembers)
+        if (obj == null)
         {
-            if (c.CastTargetObjectId == obj.GameObjectId) return false;
+            return false;
+        }
+
+        if (!obj.IsDead || !obj.IsTargetable)
+        {
+            return false;
+        }
+
+        if (obj is IBattleChara b && b.CurrentHp != 0)
+        {
+            return false;
+        }
+
+        if (obj.HasStatus(false, StatusID.Raise))
+        {
+            return false;
+        }
+
+        if (!Service.Config.RaiseBrinkOfDeath && obj.HasStatus(false, StatusID.BrinkOfDeath))
+        {
+            return false;
+        }
+
+        foreach (IBattleChara c in DataCenter.PartyMembers)
+        {
+            if (c.CastTargetObjectId == obj.GameObjectId)
+            {
+                return false;
+            }
         }
 
         return true;
@@ -264,7 +371,7 @@ public static class ObjectHelper
 
     internal static bool IsAlive(this IGameObject obj)
     {
-        return obj is not IBattleChara b || b.CurrentHp > 0 && obj.IsTargetable;
+        return obj is not IBattleChara b || (b.CurrentHp > 0 && obj.IsTargetable);
     }
 
     /// <summary>
@@ -274,7 +381,7 @@ public static class ObjectHelper
     /// <returns></returns>
     public static unsafe ObjectKind GetObjectKind(this IGameObject obj)
     {
-        var s = obj.Struct();
+        FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject* s = obj.Struct();
         return s == null ? default : (ObjectKind)s->ObjectKind;
     }
 
@@ -287,13 +394,19 @@ public static class ObjectHelper
     /// </returns>
     internal static bool IsTopPriorityNamedHostile(this IGameObject obj)
     {
-        if (obj == null) return false;
+        if (obj == null)
+        {
+            return false;
+        }
 
         if (obj is IBattleChara npc)
         {
-            foreach (var id in DataCenter.PrioritizedNameIds)
+            foreach (uint id in DataCenter.PrioritizedNameIds)
             {
-                if (npc.NameId == id) return true;
+                if (npc.NameId == id)
+                {
+                    return true;
+                }
             }
         }
 
@@ -309,32 +422,48 @@ public static class ObjectHelper
     /// </returns>
     internal static bool IsTopPriorityHostile(this IGameObject obj)
     {
-        if (obj == null) return false;
-        if (obj.IsAllianceMember() || obj.IsParty()) return false;
+        if (obj == null)
+        {
+            return false;
+        }
+
+        if (obj.IsAllianceMember() || obj.IsParty())
+        {
+            return false;
+        }
 
         if (obj is IBattleChara b)
         {
             // Check IBattleChara against the priority target list of OIDs
-            if (PriorityTargetHelper.IsPriorityTarget(b.DataId)) return true;
+            if (PriorityTargetHelper.IsPriorityTarget(b.DataId))
+            {
+                return true;
+            }
 
-            if (Player.Job == Job.MCH && obj.HasStatus(true, StatusID.Wildfire)) return true;
+            if (Player.Job == Job.MCH && obj.HasStatus(true, StatusID.Wildfire))
+            {
+                return true;
+            }
 
             // Ensure StatusList is not null before iterating
             if (b.StatusList != null)
             {
-                foreach (var status in b.StatusList)
+                foreach (Dalamud.Game.ClientState.Statuses.Status status in b.StatusList)
                 {
-                    if (StatusHelper.IsPriority(status)) return true;
+                    if (StatusHelper.IsPriority(status))
+                    {
+                        return true;
+                    }
                 }
             }
         }
 
         if (Service.Config.ChooseAttackMark)
         {
-            var targets = MarkingHelper.GetAttackSignTargets();
+            long[] targets = MarkingHelper.GetAttackSignTargets();
             if (targets != null)
             {
-                foreach (var id in targets)
+                foreach (long id in targets)
                 {
                     if (id != 0 && id == (long)obj.GameObjectId && obj.IsEnemy())
                     {
@@ -344,38 +473,57 @@ public static class ObjectHelper
             }
         }
 
-        if (Service.Config.TargetFatePriority && DataCenter.PlayerFateId != 0 && obj.FateId() == DataCenter.PlayerFateId) return true;
+        if (Service.Config.TargetFatePriority && DataCenter.PlayerFateId != 0 && obj.FateId() == DataCenter.PlayerFateId)
+        {
+            return true;
+        }
 
-        var icon = obj.GetNamePlateIcon();
+        uint icon = obj.GetNamePlateIcon();
 
         // Hunting log and weapon
-        if (Service.Config.TargetHuntingRelicLevePriority && (icon == 60092 || icon == 60096 || icon == 71244)) return true;
+        if (Service.Config.TargetHuntingRelicLevePriority && (icon == 60092 || icon == 60096 || icon == 71244))
+        {
+            return true;
+        }
         //60092 Hunt Target
         //60096 Relic Weapon
         //71244 Leve Target
 
         // Quest
-        if (Service.Config.TargetQuestPriority && (icon == 71204 || icon == 71144 || icon == 71224 || icon == 71344 || obj.GetEventType() == EventHandlerContent.Quest)) return true;
+        if (Service.Config.TargetQuestPriority && (icon == 71204 || icon == 71144 || icon == 71224 || icon == 71344 || obj.GetEventType() == EventHandlerContent.Quest))
+        {
+            return true;
+        }
         //71204 Main Quest
         //71144 Major Quest
         //71224 Other Quest
         //71344 Major Quest
 
         // Check if the object is a BattleNpcPart
-        if (Service.Config.PrioEnemyParts && obj.GetBattleNPCSubKind() == BattleNpcSubKind.BattleNpcPart) return true;
-
-        return false;
+        return Service.Config.PrioEnemyParts && obj.GetBattleNPCSubKind() == BattleNpcSubKind.BattleNpcPart;
     }
 
-    internal static unsafe uint GetNamePlateIcon(this IGameObject obj) => obj.Struct()->NamePlateIconId;
+    internal static unsafe uint GetNamePlateIcon(this IGameObject obj)
+    {
+        return obj.Struct()->NamePlateIconId;
+    }
 
-    internal static unsafe EventHandlerContent GetEventType(this IGameObject obj) => obj.Struct()->EventId.ContentId;
+    internal static unsafe EventHandlerContent GetEventType(this IGameObject obj)
+    {
+        return obj.Struct()->EventId.ContentId;
+    }
 
-    internal static unsafe BattleNpcSubKind GetBattleNPCSubKind(this IGameObject obj) => (BattleNpcSubKind)obj.Struct()->SubKind;
+    internal static unsafe BattleNpcSubKind GetBattleNPCSubKind(this IGameObject obj)
+    {
+        return (BattleNpcSubKind)obj.Struct()->SubKind;
+    }
 
-    internal static unsafe uint FateId(this IGameObject obj) => obj.Struct()->FateId;
+    internal static unsafe uint FateId(this IGameObject obj)
+    {
+        return obj.Struct()->FateId;
+    }
 
-    static readonly ConcurrentDictionary<uint, bool> _effectRangeCheck = [];
+    private static readonly ConcurrentDictionary<uint, bool> _effectRangeCheck = [];
 
     /// <summary>
     /// Determines whether the specified game object can be interrupted.
@@ -386,29 +534,53 @@ public static class ObjectHelper
     /// </returns>
     internal static bool CanInterrupt(this IBattleChara obj)
     {
-        if (obj == null) return false;
-        if (obj is not IBattleChara b) return false;
+        if (obj == null)
+        {
+            return false;
+        }
+
+        if (obj is not IBattleChara b)
+        {
+            return false;
+        }
 
         // Ensure the IBattleChara object is valid before accessing its properties
         unsafe
         {
-            if (b.Struct() == null) return false;
+            if (b.Struct() == null)
+            {
+                return false;
+            }
         }
 
-        var baseCheck = b.IsCasting && b.IsCastInterruptible && b.TotalCastTime >= 2;
-        if (!baseCheck) return false;
-        if (!Service.Config.InterruptibleMoreCheck) return false;
+        bool baseCheck = b.IsCasting && b.IsCastInterruptible && b.TotalCastTime >= 2;
+        if (!baseCheck)
+        {
+            return false;
+        }
 
-        if (_effectRangeCheck.TryGetValue(b.CastActionId, out var check)) return check;
+        if (!Service.Config.InterruptibleMoreCheck)
+        {
+            return false;
+        }
 
-        var act = Service.GetSheet<Lumina.Excel.Sheets.Action>().GetRow(b.CastActionId);
-        if (act.RowId == 0) return _effectRangeCheck[b.CastActionId] = false;
-        if (act.CastType == 3 || act.CastType == 4 || (act.EffectRange > 0 && act.EffectRange < 8)) return _effectRangeCheck[b.CastActionId] = false;
+        if (_effectRangeCheck.TryGetValue(b.CastActionId, out bool check))
+        {
+            return check;
+        }
 
-        return _effectRangeCheck[b.CastActionId] = true;
+        Lumina.Excel.Sheets.Action act = Service.GetSheet<Lumina.Excel.Sheets.Action>().GetRow(b.CastActionId);
+        return act.RowId == 0
+            ? (_effectRangeCheck[b.CastActionId] = false)
+            : act.CastType == 3 || act.CastType == 4 || (act.EffectRange > 0 && act.EffectRange < 8)
+            ? (_effectRangeCheck[b.CastActionId] = false)
+            : (_effectRangeCheck[b.CastActionId] = true);
     }
 
-    internal static bool IsDummy(this IBattleChara obj) => obj?.NameId == 541;
+    internal static bool IsDummy(this IBattleChara obj)
+    {
+        return obj?.NameId == 541;
+    }
 
     /// <summary>
     /// Checks if the target is immune due to any special boss mechanic (Wolf, Jeuno, COD, CinderDrift, Resistance, Omega, LimitlessBlue, HanselOrGretel).
@@ -435,11 +607,11 @@ public static class ObjectHelper
     public static bool IsWolfImmune(this IBattleChara obj)
     {
         // Numeric values used instead of name as Lumina does not provide name yet, and may update to change name
-        var WindPack = (StatusID)4389; // Numeric value for "Rsv43891100S74Cfc3B0E74Cfc3B0", unable to hit Wolf of Wind
-        var StonePack = (StatusID)4390; // Numeric value for "Rsv43901100S74Cfc3B0E74Cfc3B0", unable to hit Wolf of Wind
+        StatusID WindPack = (StatusID)4389; // Numeric value for "Rsv43891100S74Cfc3B0E74Cfc3B0", unable to hit Wolf of Wind
+        StatusID StonePack = (StatusID)4390; // Numeric value for "Rsv43901100S74Cfc3B0E74Cfc3B0", unable to hit Wolf of Wind
 
-        var WolfOfWind = obj.NameId == 13846;
-        var WolfOfStone = obj.NameId == 13847;
+        bool WolfOfWind = obj.NameId == 13846;
+        bool WolfOfStone = obj.NameId == 13847;
 
         if (WolfOfWind &&
                 Player.Object.HasStatus(false, WindPack))
@@ -511,10 +683,10 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsCODBossImmune(this IBattleChara obj)
     {
-        var StygianStatus = StatusID.UnnamedStatus_4388;
-        var CloudOfDarknessStatus = StatusID.VeilOfDarkness;
-        var AntiCloudOfDarknessStatus = StatusID.OuterDarkness;
-        var AntiStygianStatus = StatusID.InnerDarkness;
+        StatusID StygianStatus = StatusID.UnnamedStatus_4388;
+        StatusID CloudOfDarknessStatus = StatusID.VeilOfDarkness;
+        StatusID AntiCloudOfDarknessStatus = StatusID.OuterDarkness;
+        StatusID AntiStygianStatus = StatusID.InnerDarkness;
 
         if (obj.HasStatus(false, CloudOfDarknessStatus) &&
                 Player.Object.HasStatus(false, AntiCloudOfDarknessStatus))
@@ -546,10 +718,10 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsCinderDriftImmune(this IBattleChara obj)
     {
-        var GriefAdd = StatusID.BlindToGrief;
-        var RageAdd = StatusID.BlindToRage;
-        var AntiGriefAdd = StatusID.PallOfGrief;
-        var AntiRageAdd = StatusID.PallOfRage;
+        StatusID GriefAdd = StatusID.BlindToGrief;
+        StatusID RageAdd = StatusID.BlindToRage;
+        StatusID AntiGriefAdd = StatusID.PallOfGrief;
+        StatusID AntiRageAdd = StatusID.PallOfRage;
 
         if (obj.HasStatus(false, GriefAdd) &&
                 Player.Object.HasStatus(false, AntiGriefAdd))
@@ -581,11 +753,11 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsResistanceImmune(this IBattleChara obj)
     {
-        var VoidArkMagicResistance = StatusID.MagicResistance;
-        var VoidArkRangedResistance = StatusID.RangedResistance;
-        var LeviMagicResistance = StatusID.MantleOfTheWhorl;
-        var LeviRangedResistance = StatusID.VeilOfTheWhorl;
-        var role = Player.Object?.ClassJob.Value.GetJobRole() ?? JobRole.None;
+        StatusID VoidArkMagicResistance = StatusID.MagicResistance;
+        StatusID VoidArkRangedResistance = StatusID.RangedResistance;
+        StatusID LeviMagicResistance = StatusID.MantleOfTheWhorl;
+        StatusID LeviRangedResistance = StatusID.VeilOfTheWhorl;
+        JobRole role = Player.Object?.ClassJob.Value.GetJobRole() ?? JobRole.None;
 
         if (obj.HasStatus(false, VoidArkMagicResistance, LeviMagicResistance) &&
                 (role == JobRole.RangedMagical || role == JobRole.Healer))
@@ -617,14 +789,14 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsOmegaImmune(this IBattleChara obj)
     {
-        var AntiOmegaF = StatusID.PacketFilterF;
-        var AntiOmegaF_Extreme = StatusID.PacketFilterF_3500;
-        var AntiOmegaM = StatusID.PacketFilterM;
-        var AntiOmegaM_Extreme = StatusID.PacketFilterM_3499;
+        StatusID AntiOmegaF = StatusID.PacketFilterF;
+        StatusID AntiOmegaF_Extreme = StatusID.PacketFilterF_3500;
+        StatusID AntiOmegaM = StatusID.PacketFilterM;
+        StatusID AntiOmegaM_Extreme = StatusID.PacketFilterM_3499;
 
-        var OmegaF = StatusID.OmegaF;
-        var OmegaM = StatusID.OmegaM;
-        var OmegaM2 = StatusID.OmegaM_3454;
+        StatusID OmegaF = StatusID.OmegaF;
+        StatusID OmegaM = StatusID.OmegaM;
+        StatusID OmegaM2 = StatusID.OmegaM_3454;
 
         if (obj.HasStatus(false, OmegaF) &&
                 Player.Object.HasStatus(false, AntiOmegaF, AntiOmegaF_Extreme))
@@ -656,14 +828,14 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsLimitlessBlue(this IBattleChara obj)
     {
-        var WillOfTheWater = StatusID.WillOfTheWater;
-        var WillOfTheWind = StatusID.WillOfTheWind;
-        var WhaleBack = StatusID.Whaleback;
+        StatusID WillOfTheWater = StatusID.WillOfTheWater;
+        StatusID WillOfTheWind = StatusID.WillOfTheWind;
+        StatusID WhaleBack = StatusID.Whaleback;
 
-        var Green = obj.NameId == 3654;
-        var Blue = obj.NameId == 3655;
-        var BismarkShell = obj.NameId == 3656;
-        var BismarkCorona = obj.NameId == 3657;
+        bool Green = obj.NameId == 3654;
+        bool Blue = obj.NameId == 3655;
+        bool BismarkShell = obj.NameId == 3656;
+        bool BismarkCorona = obj.NameId == 3657;
 
         if ((BismarkShell || BismarkCorona) &&
                 !Player.Object.HasStatus(false, WhaleBack))
@@ -705,8 +877,8 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsHanselorGretelShielded(this IBattleChara obj)
     {
-        var strongOfShieldPositional = EnemyPositional.Front;
-        var strongOfShieldStatus = StatusID.StrongOfShield;
+        EnemyPositional strongOfShieldPositional = EnemyPositional.Front;
+        StatusID strongOfShieldStatus = StatusID.StrongOfShield;
 
         if (obj.HasStatus(false, strongOfShieldStatus) &&
                 strongOfShieldPositional != obj.FindEnemyPositional())
@@ -728,9 +900,15 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsBossFromTTK(this IBattleChara obj)
     {
-        if (obj == null) return false;
+        if (obj == null)
+        {
+            return false;
+        }
 
-        if (obj.IsDummy()) return true;
+        if (obj.IsDummy())
+        {
+            return true;
+        }
 
         //Fate
         return obj.GetTTK(true) >= Service.Config.BossTimeToKill;
@@ -743,13 +921,31 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsBossFromIcon(this IBattleChara obj)
     {
-        if (obj == null) return false;
+        if (obj == null)
+        {
+            return false;
+        }
 
-        if (obj.IsDummy()) return true;
+        if (obj.IsDummy())
+        {
+            return true;
+        }
 
         //Icon
-        var npc = obj.GetObjectNPC();
+        Lumina.Excel.Sheets.BNpcBase? npc = obj.GetObjectNPC();
         return npc?.Rank is 1 or 2 or 6;
+    }
+
+    /// <summary>
+    /// Returns object's calculated shield value.
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <returns></returns>
+    public static uint GetObjectShield(this IGameObject obj)
+    {
+        return obj is ICharacter character && character.MaxHp > 0 && character.ShieldPercentage > 0
+            ? character.MaxHp * character.ShieldPercentage / 100
+            : 0;
     }
 
     /// <summary>
@@ -759,10 +955,7 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsDying(this IBattleChara obj)
     {
-        if (obj == null) return false;
-
-        if (obj.IsDummy()) return false;
-        return obj.GetTTK() <= Service.Config.DyingTimeToKill || obj.GetHealthRatio() < Service.Config.IsDyingConfig;
+        return obj != null && !obj.IsDummy() && (obj.GetTTK() <= Service.Config.DyingTimeToKill || obj.GetHealthRatio() < Service.Config.IsDyingConfig);
     }
 
     /// <summary>
@@ -774,10 +967,31 @@ public static class ObjectHelper
     /// </returns>
     internal static unsafe bool InCombat(this IBattleChara obj)
     {
-        if (obj == null) return false;
-        if (obj.Struct() == null) return false;
+        return obj != null && obj.Struct() != null && obj.Struct()->Character.InCombat;
+    }
 
-        return obj.Struct()->Character.InCombat;
+    private static readonly Dictionary<ulong, Vector3> LastPositions = [];
+    internal static bool IsTargetMoving(this IBattleChara target)
+    {
+        if (target == null)
+        {
+            return false;
+        }
+
+        ulong id = target.GameObjectId;
+        Vector3 currentPos = target.Position;
+        if (LastPositions.TryGetValue(id, out Vector3 lastPos))
+        {
+            // You can adjust the threshold as needed
+            bool isMoving = Vector3.Distance(currentPos, lastPos) > 0.01f;
+            LastPositions[id] = currentPos;
+            return isMoving;
+        }
+        else
+        {
+            LastPositions[id] = currentPos;
+            return false; // First check, assume not moving
+        }
     }
 
     private static readonly TimeSpan CheckSpan = TimeSpan.FromSeconds(2.5);
@@ -792,22 +1006,29 @@ public static class ObjectHelper
     /// </returns>
     internal static float GetTTK(this IBattleChara obj, bool wholeTime = false)
     {
-        if (obj == null) return float.NaN;
-        if (obj.IsDummy()) return 999.99f;
+        if (obj == null)
+        {
+            return float.NaN;
+        }
+
+        if (obj.IsDummy())
+        {
+            return 999.99f;
+        }
 
         DateTime startTime = DateTime.MinValue;
         float initialHpRatio = 0;
 
         // Use a snapshot of the RecordedHP collection to avoid modification during enumeration
-        var recordedHPCopy = DataCenter.RecordedHP.ToArray();
+        (DateTime time, SortedList<ulong, float> hpRatios)[] recordedHPCopy = DataCenter.RecordedHP.ToArray();
 
         // Calculate a moving average of HP ratios
         const int movingAverageWindow = 5;
-        Queue<float> hpRatios = new Queue<float>();
+        Queue<float> hpRatios = new();
 
-        foreach (var (time, hpRatiosDict) in recordedHPCopy)
+        foreach ((DateTime time, SortedList<ulong, float> hpRatiosDict) in recordedHPCopy)
         {
-            if (hpRatiosDict != null && hpRatiosDict.TryGetValue(obj.GameObjectId, out var ratio) && ratio != 1)
+            if (hpRatiosDict != null && hpRatiosDict.TryGetValue(obj.GameObjectId, out float ratio) && ratio != 1)
             {
                 if (startTime == DateTime.MinValue)
                 {
@@ -818,34 +1039,43 @@ public static class ObjectHelper
                 hpRatios.Enqueue(ratio);
                 if (hpRatios.Count > movingAverageWindow)
                 {
-                    hpRatios.Dequeue();
+                    _ = hpRatios.Dequeue();
                 }
             }
         }
 
-        if (startTime == DateTime.MinValue || (DateTime.Now - startTime) < CheckSpan) return float.NaN;
+        if (startTime == DateTime.MinValue || (DateTime.Now - startTime) < CheckSpan)
+        {
+            return float.NaN;
+        }
 
         float currentHealthRatio = obj.GetHealthRatio();
-        if (float.IsNaN(currentHealthRatio)) return float.NaN;
+        if (float.IsNaN(currentHealthRatio))
+        {
+            return float.NaN;
+        }
 
         // Manual average calculation to avoid LINQ
         float sum = 0;
         int count = 0;
-        foreach (var r in hpRatios)
+        foreach (float r in hpRatios)
         {
             sum += r;
             count++;
         }
         float avg = count > 0 ? sum / count : 0;
 
-        var hpRatioDifference = initialHpRatio - avg;
-        if (hpRatioDifference <= 0) return float.NaN;
+        float hpRatioDifference = initialHpRatio - avg;
+        if (hpRatioDifference <= 0)
+        {
+            return float.NaN;
+        }
 
-        var elapsedTime = (float)(DateTime.Now - startTime).TotalSeconds;
+        float elapsedTime = (float)(DateTime.Now - startTime).TotalSeconds;
         return elapsedTime / hpRatioDifference * (wholeTime ? 1 : currentHealthRatio);
     }
 
-    private static readonly ConcurrentDictionary<ulong, DateTime> _aliveStartTimes = new();
+    private static readonly ConcurrentDictionary<ulong, DateTime> _aliveStartTimes = [];
 
     /// <summary>
     /// Gets how long the character has been alive in seconds since their last death.
@@ -856,12 +1086,15 @@ public static class ObjectHelper
     /// </returns>
     internal static float TimeAlive(this IBattleChara obj)
     {
-        if (obj == null) return float.NaN;
+        if (obj == null)
+        {
+            return float.NaN;
+        }
 
         // If the character is dead, reset their alive time
         if (obj.IsDead || Svc.Condition[ConditionFlag.BetweenAreas])
         {
-            _aliveStartTimes.TryRemove(obj.GameObjectId, out _);
+            _ = _aliveStartTimes.TryRemove(obj.GameObjectId, out _);
             return 0;
         }
 
@@ -874,7 +1107,7 @@ public static class ObjectHelper
         return (float)(DateTime.Now - _aliveStartTimes[obj.GameObjectId]).TotalSeconds > 30 ? 30 : (float)(DateTime.Now - _aliveStartTimes[obj.GameObjectId]).TotalSeconds;
     }
 
-    private static readonly ConcurrentDictionary<ulong, DateTime> _deadStartTimes = new();
+    private static readonly ConcurrentDictionary<ulong, DateTime> _deadStartTimes = [];
 
     /// <summary>
     /// Gets how long the character has been dead in seconds since their last death.
@@ -885,12 +1118,15 @@ public static class ObjectHelper
     /// </returns>
     internal static float TimeDead(this IBattleChara obj)
     {
-        if (obj == null) return float.NaN;
+        if (obj == null)
+        {
+            return float.NaN;
+        }
 
         // If the character is alive, reset their dead time
         if (!obj.IsDead)
         {
-            _deadStartTimes.TryRemove(obj.GameObjectId, out _);
+            _ = _deadStartTimes.TryRemove(obj.GameObjectId, out _);
             return 0;
         }
 
@@ -912,9 +1148,13 @@ public static class ObjectHelper
     /// </returns>
     internal static bool IsAttacked(this IBattleChara obj)
     {
-        if (obj == null) return false;
-        var now = DateTime.Now;
-        foreach (var (id, time) in DataCenter.AttackedTargets)
+        if (obj == null)
+        {
+            return false;
+        }
+
+        DateTime now = DateTime.Now;
+        foreach ((ulong id, DateTime time) in DataCenter.AttackedTargets)
         {
             if (id == obj.GameObjectId)
             {
@@ -933,8 +1173,15 @@ public static class ObjectHelper
     /// </returns>
     internal static unsafe bool CanSee(this IGameObject obj)
     {
-        if (obj == null) return false;
-        if (obj.Struct() == null) return false;
+        if (obj == null)
+        {
+            return false;
+        }
+
+        if (obj.Struct() == null)
+        {
+            return false;
+        }
 
         const uint specificEnemyId = 3830; // Bioculture Node in Aetherial Chemical Research Facility
         if (obj.GameObjectId == specificEnemyId)
@@ -942,14 +1189,14 @@ public static class ObjectHelper
             return true;
         }
 
-        var point = Player.Object.Position + Vector3.UnitY * Player.GameObject->Height;
-        var tarPt = obj.Position + Vector3.UnitY * obj.Struct()->Height;
-        var direction = tarPt - point;
+        Vector3 point = Player.Object.Position + (Vector3.UnitY * Player.GameObject->Height);
+        Vector3 tarPt = obj.Position + (Vector3.UnitY * obj.Struct()->Height);
+        Vector3 direction = tarPt - point;
 
         int* unknown = stackalloc int[] { 0x4000, 0, 0x4000, 0 };
 
         RaycastHit hit;
-        var ray = new Ray(point, direction);
+        Ray ray = new(point, direction);
 
         return !FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->BGCollisionModule
             ->RaycastMaterialFilter(&hit, &point, &direction, direction.Length(), 1, unknown);
@@ -962,11 +1209,26 @@ public static class ObjectHelper
     /// <returns></returns>
     public static float GetHealthRatio(this IGameObject obj)
     {
-        if (obj == null) return 0;
-        if (obj is not IBattleChara b) return 0;
+        if (obj == null)
+        {
+            return 0;
+        }
 
-        if (DataCenter.RefinedHP.TryGetValue(b.GameObjectId, out var hp)) return hp;
-        if (b.MaxHp == 0) return 0; // Avoid division by zero
+        if (obj is not IBattleChara b)
+        {
+            return 0;
+        }
+
+        if (DataCenter.RefinedHP.TryGetValue(b.GameObjectId, out float hp))
+        {
+            return hp;
+        }
+
+        if (b.MaxHp == 0)
+        {
+            return 0; // Avoid division by zero
+        }
+
         return (float)b.CurrentHp / b.MaxHp;
     }
 
@@ -979,8 +1241,15 @@ public static class ObjectHelper
     /// </returns>
     public static EnemyPositional FindEnemyPositional(this IGameObject enemy)
     {
-        if (enemy == null) return EnemyPositional.None;
-        if (enemy is not IBattleChara b) return EnemyPositional.None;
+        if (enemy == null)
+        {
+            return EnemyPositional.None;
+        }
+
+        if (enemy is not IBattleChara)
+        {
+            return EnemyPositional.None;
+        }
 
         Vector3 pPosition = enemy.Position;
         Vector3 faceVec = enemy.GetFaceVector();
@@ -996,8 +1265,15 @@ public static class ObjectHelper
         const double frontAngle = Math.PI / 4;
         const double rearAngle = Math.PI * 3 / 4;
 
-        if (angle < frontAngle) return EnemyPositional.Front;
-        else if (angle > rearAngle) return EnemyPositional.Rear;
+        if (angle < frontAngle)
+        {
+            return EnemyPositional.Front;
+        }
+        else if (angle > rearAngle)
+        {
+            return EnemyPositional.Rear;
+        }
+
         return EnemyPositional.Flank;
     }
 
@@ -1010,8 +1286,15 @@ public static class ObjectHelper
     /// </returns>
     internal static Vector3 GetFaceVector(this IGameObject obj)
     {
-        if (obj == null) return Vector3.Zero;
-        if (obj is not IBattleChara b) return Vector3.Zero;
+        if (obj == null)
+        {
+            return Vector3.Zero;
+        }
+
+        if (obj is not IBattleChara)
+        {
+            return Vector3.Zero;
+        }
 
         float rotation = obj.Rotation;
         return new Vector3((float)Math.Sin(rotation), 0, (float)Math.Cos(rotation));
@@ -1028,7 +1311,10 @@ public static class ObjectHelper
     internal static double AngleTo(this Vector3 vec1, Vector3 vec2)
     {
         double lengthProduct = vec1.Length() * vec2.Length();
-        if (lengthProduct == 0) return 0;
+        if (lengthProduct == 0)
+        {
+            return 0;
+        }
 
         double dotProduct = Vector3.Dot(vec1, vec2);
         return Math.Acos(dotProduct / lengthProduct);
@@ -1041,10 +1327,17 @@ public static class ObjectHelper
     /// <returns></returns>
     public static float DistanceToPlayer(this IGameObject? obj)
     {
-        if (obj == null) return float.MaxValue;
-        if (obj is not IBattleChara b) return float.MaxValue;
+        if (obj == null)
+        {
+            return float.MaxValue;
+        }
 
-        var distance = Vector3.Distance(Player.Object.Position, obj.Position) - (Player.Object.HitboxRadius + obj.HitboxRadius);
+        if (obj is not IBattleChara)
+        {
+            return float.MaxValue;
+        }
+
+        float distance = Vector3.Distance(Player.Object.Position, obj.Position) - (Player.Object.HitboxRadius + obj.HitboxRadius);
         return distance;
     }
 

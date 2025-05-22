@@ -4,7 +4,7 @@
 /// <summary>
 /// Represents the base class for duty rotations.
 /// </summary>
-partial class DutyRotation : IDisposable
+public partial class DutyRotation : IDisposable
 {
     #region GCD
     public virtual bool EmergencyGCD(out IAction? act)
@@ -147,7 +147,7 @@ partial class DutyRotation : IDisposable
     {
         get
         {
-            var properties = this.GetType().GetRuntimeProperties()
+            IEnumerable<PropertyInfo> properties = GetType().GetRuntimeProperties()
                 .Where(p => DataCenter.DutyActions.Contains(p.GetCustomAttribute<IDAttribute>()?.ID ?? uint.MaxValue));
 
             return properties.Select(p => (IAction)p.GetValue(this)!).ToArray();

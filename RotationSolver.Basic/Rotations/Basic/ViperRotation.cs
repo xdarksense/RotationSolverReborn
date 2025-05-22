@@ -33,7 +33,7 @@ public partial class ViperRotation
     /// <summary>
     /// Indicates that the player is not in a Dread Combo.
     /// </summary>
-    public static bool NODREAD => (byte)JobGauge.DreadCombo == 0;
+    public static bool NODREAD => JobGauge.DreadCombo == 0;
 
     /// <summary>
     /// Gets current ability for Serpent's Tail. NONE = 0, DEATHRATTLE = 1, LASTLASH = 2, FIRSTLEGACY = 3, SECONDLEGACY = 4, THIRDLEGACY = 5, FOURTHLEGACY = 6, TWINSREADY = 7, THRESHREADY = 8, UNCOILEDREADY = 9
@@ -210,24 +210,12 @@ public partial class ViperRotation
     /// <summary>
     /// Indicates that Hunters Instinct is ending before Swiftscaled.
     /// </summary>
-    public static bool HunterLessThanSwift
-    {
-        get
-        {
-            return Player.StatusTime(true, StatusID.HuntersInstinct) < Player.StatusTime(true, StatusID.Swiftscaled);
-        }
-    }
+    public static bool HunterLessThanSwift => Player.StatusTime(true, StatusID.HuntersInstinct) < Player.StatusTime(true, StatusID.Swiftscaled);
 
     /// <summary>
     /// Indicates that Swiftscaled is ending before Hunters Instinct.
     /// </summary>
-    public static bool SwiftLessThanHunter
-    {
-        get
-        {
-            return Player.StatusTime(true, StatusID.Swiftscaled) < Player.StatusTime(true, StatusID.HuntersInstinct);
-        }
-    }
+    public static bool SwiftLessThanHunter => Player.StatusTime(true, StatusID.Swiftscaled) < Player.StatusTime(true, StatusID.HuntersInstinct);
     #endregion
 
     #region PvE Actions
@@ -259,13 +247,13 @@ public partial class ViperRotation
 
     static partial void ModifyFlankstingStrikePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && !UNCOILEDREADY && !TWINSREADY && !THRESHREADY && (HasFlank && HasSting);
+        setting.ActionCheck = () => NODREAD && !UNCOILEDREADY && !TWINSREADY && !THRESHREADY && HasFlank && HasSting;
         setting.StatusProvide = [StatusID.HindstungVenom];
     }
 
     static partial void ModifyFlanksbaneFangPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && !UNCOILEDREADY && !TWINSREADY && !THRESHREADY && (HasFlank && HasBane);
+        setting.ActionCheck = () => NODREAD && !UNCOILEDREADY && !TWINSREADY && !THRESHREADY && HasFlank && HasBane;
         setting.StatusProvide = [StatusID.HindsbaneVenom];
     }
 

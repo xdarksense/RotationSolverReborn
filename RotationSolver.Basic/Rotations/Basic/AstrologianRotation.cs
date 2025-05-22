@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.Basic.Rotations.Basic;
 
-partial class AstrologianRotation
+public partial class AstrologianRotation
 {
     #region JobGauge
 
@@ -111,7 +111,7 @@ partial class AstrologianRotation
     #endregion
 
     #region PvE Actions
-    private sealed protected override IBaseAction? Raise => AscendPvE;
+    private protected sealed override IBaseAction? Raise => AscendPvE;
 
     private static readonly StatusID[] CombustStatus =
     [

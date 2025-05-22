@@ -2,7 +2,7 @@ using Dalamud.Interface.Colors;
 
 namespace RotationSolver.Basic.Rotations.Basic;
 
-partial class SummonerRotation
+public partial class SummonerRotation
 {
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Intelligence;
@@ -88,7 +88,10 @@ partial class SummonerRotation
     /// </summary>
     /// <param name="time"></param>
     /// <returns></returns>
-    protected static bool SummonTimeEndAfter(float time) => SummonTime <= time;
+    protected static bool SummonTimeEndAfter(float time)
+    {
+        return SummonTime <= time;
+    }
 
     /// <summary>
     /// 
@@ -97,7 +100,9 @@ partial class SummonerRotation
     /// <param name="offset"></param>
     /// <returns></returns>
     protected static bool SummonTimeEndAfterGCD(uint gcdCount = 0, float offset = 0)
-        => SummonTimeEndAfter(GCDTime(gcdCount, offset));
+    {
+        return SummonTimeEndAfter(GCDTime(gcdCount, offset));
+    }
 
     private static float AttunmentTimeRaw => JobGauge.AttunementTimerRemaining / 1000f;
 
@@ -111,7 +116,10 @@ partial class SummonerRotation
     /// </summary>
     /// <param name="time"></param>
     /// <returns></returns>
-    protected static bool AttunmentTimeEndAfter(float time) => AttunmentTime <= time;
+    protected static bool AttunmentTimeEndAfter(float time)
+    {
+        return AttunmentTime <= time;
+    }
 
     /// <summary>
     /// 
@@ -120,7 +128,9 @@ partial class SummonerRotation
     /// <param name="offset"></param>
     /// <returns></returns>
     protected static bool AttunmentTimeEndAfterGCD(uint gcdCount = 0, float offset = 0)
-        => AttunmentTimeEndAfter(GCDTime(gcdCount, offset));
+    {
+        return AttunmentTimeEndAfter(GCDTime(gcdCount, offset));
+    }
 
     /// <summary>
     /// 
@@ -279,7 +289,7 @@ partial class SummonerRotation
 
     }
 
-    static RandomDelay _carbuncleDelay = new(() => (2, 2));
+    private static RandomDelay _carbuncleDelay = new(() => (2, 2));
     static partial void ModifySummonCarbunclePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => _carbuncleDelay.Delay(!DataCenter.HasPet() && AttunmentTimeRaw == 0 && SummonTimeRaw == 0) && DataCenter.LastGCD is not ActionID.SummonCarbunclePvE;

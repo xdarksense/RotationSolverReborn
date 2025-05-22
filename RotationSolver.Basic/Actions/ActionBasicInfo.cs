@@ -100,38 +100,28 @@ public readonly struct ActionBasicInfo
     {
         get
         {
-            if (IsPvP && ID != 29711) return 0;
+            if (IsPvP && ID != 29711)
+            {
+                return 0;
+            }
 
-            var mpOver = _action.Setting.MPOverride?.Invoke();
-            if (mpOver.HasValue) return mpOver.Value;
+            uint? mpOver = _action.Setting.MPOverride?.Invoke();
+            if (mpOver.HasValue)
+            {
+                return mpOver.Value;
+            }
 
-            var mp = (uint)ActionManager.GetActionCost(ActionType.Action, AdjustedID, 0, 0, 0, 0);
-            if (mp < 100) return 0;
-
-            return mp;
+            uint mp = (uint)ActionManager.GetActionCost(ActionType.Action, AdjustedID, 0, 0, 0, 0);
+            return mp < 100 ? 0 : mp;
         }
     }
 
     /// <summary>
     /// Determines whether the action is on the player's hotbar or slot.
     /// </summary>
-    public readonly bool IsOnSlot
-    {
-        get
-        {
-            if (_action.Action.ClassJob.RowId == (uint)Job.BLU)
-            {
-                return DataCenter.BluSlots.Contains(ID);
-            }
-
-            if (IsDutyAction)
-            {
-                return DataCenter.DutyActions.Contains(ID);
-            }
-
-            return IsPvP == DataCenter.IsPvP;
-        }
-    }
+    public readonly bool IsOnSlot => _action.Action.ClassJob.RowId == (uint)Job.BLU
+                ? DataCenter.BluSlots.Contains(ID)
+                : IsDutyAction ? DataCenter.DutyActions.Contains(ID) : IsPvP == DataCenter.IsPvP;
 
     /// <summary>
     /// Determines whether the action is a limit break action.
@@ -178,19 +168,42 @@ public readonly struct ActionBasicInfo
     /// <returns>True if the action passes the basic check; otherwise, false.</returns>
     internal readonly bool BasicCheck(bool skipStatusProvideCheck, bool skipComboCheck, bool skipCastingCheck)
     {
-        if (Player.Object.StatusList == null) return false;
+        if (Player.Object.StatusList == null)
+        {
+            return false;
+        }
 
-        if (!IsActionEnabled() || !IsOnSlot) return false;
-        if (IsLimitBreak) return true;
-        if (IsActionDisabled() || !EnoughLevel || !HasEnoughMP() || !SpellUnlocked) return false;
+        if (!IsActionEnabled() || !IsOnSlot)
+        {
+            return false;
+        }
 
-        if (IsStatusNeeded() || IsStatusProvided(skipStatusProvideCheck)) return false;
-        if (IsLimitBreakLevelLow() || !IsComboValid(skipComboCheck) || !IsRoleActionValid()) return false;
-        if (NeedsCasting(skipCastingCheck)) return false;
-        if (IsGeneralGCD && IsStatusProvidedDuringGCD()) return false;
-        if (!IsActionCheckValid() || !IsRotationCheckValid()) return false;
+        if (IsLimitBreak)
+        {
+            return true;
+        }
 
-        return true;
+        if (IsActionDisabled() || !EnoughLevel || !HasEnoughMP() || !SpellUnlocked)
+        {
+            return false;
+        }
+
+        if (IsStatusNeeded() || IsStatusProvided(skipStatusProvideCheck))
+        {
+            return false;
+        }
+
+        if (IsLimitBreakLevelLow() || !IsComboValid(skipComboCheck) || !IsRoleActionValid())
+        {
+            return false;
+        }
+
+        if (NeedsCasting(skipCastingCheck))
+        {
+            return false;
+        }
+
+        return (!IsGeneralGCD || !IsStatusProvidedDuringGCD()) && IsActionCheckValid() && IsRotationCheckValid();
     }
 
     /// <summary>
@@ -198,27 +211,40 @@ public readonly struct ActionBasicInfo
     /// </summary>
     public unsafe bool SpellUnlocked => _action.Action.UnlockLink.RowId <= 0 || UIState.Instance()->IsUnlockLinkUnlockedOrQuestCompleted(_action.Action.UnlockLink.RowId);
 
-    private bool IsActionEnabled() => _action.Config?.IsEnabled ?? false;
+    private bool IsActionEnabled()
+    {
+        return _action.Config?.IsEnabled ?? false;
+    }
 
-    private bool IsActionDisabled() => !IBaseAction.ForceEnable && (DataCenter.DisabledActionSequencer?.Contains(ID) ?? false);
+    private bool IsActionDisabled()
+    {
+        return !IBaseAction.ForceEnable && (DataCenter.DisabledActionSequencer?.Contains(ID) ?? false);
+    }
 
-    private bool HasEnoughMP() => DataCenter.CurrentMp >= MPNeed;
+    private bool HasEnoughMP()
+    {
+        return DataCenter.CurrentMp >= MPNeed;
+    }
 
     private bool IsStatusNeeded()
     {
-        if (Player.Object.StatusList == null) return false;
-        return _action.Setting.StatusNeed != null && Player.Object.WillStatusEndGCD(_action.Config.StatusGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusNeed);
+        return Player.Object.StatusList != null && _action.Setting.StatusNeed != null && Player.Object.WillStatusEndGCD(_action.Config.StatusGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusNeed);
     }
 
     private bool IsStatusProvided(bool skipStatusProvideCheck)
     {
-        if (Player.Object.StatusList == null) return false;
-        return !skipStatusProvideCheck && _action.Setting.StatusProvide != null && !Player.Object.WillStatusEndGCD(_action.Config.StatusGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusProvide);
+        return Player.Object.StatusList != null && !skipStatusProvideCheck && _action.Setting.StatusProvide != null && !Player.Object.WillStatusEndGCD(_action.Config.StatusGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusProvide);
     }
 
-    private bool IsLimitBreakLevelLow() => _action.Action.ActionCategory.RowId == 15 && CustomRotation.LimitBreakLevel <= 1;
+    private bool IsLimitBreakLevelLow()
+    {
+        return _action.Action.ActionCategory.RowId == 15 && CustomRotation.LimitBreakLevel <= 1;
+    }
 
-    private bool IsComboValid(bool skipComboCheck) => skipComboCheck || !IsGeneralGCD || CheckForCombo();
+    private bool IsComboValid(bool skipComboCheck)
+    {
+        return skipComboCheck || !IsGeneralGCD || CheckForCombo();
+    }
 
     private bool IsRoleActionValid()
     {
@@ -242,28 +268,43 @@ public readonly struct ActionBasicInfo
         return _action.Setting.StatusProvide?.Length > 0 && _action.Setting.IsFriendly && IActionHelper.IsLastGCD(true, _action) && DataCenter.TimeSinceLastAction.TotalSeconds < 3;
     }
 
-    private bool IsActionCheckValid() => _action.Setting.ActionCheck?.Invoke() ?? true;
+    private bool IsActionCheckValid()
+    {
+        return _action.Setting.ActionCheck?.Invoke() ?? true;
+    }
 
     private readonly bool CheckForCombo()
     {
-        if (!_action.Config.ShouldCheckCombo) return true;
+        if (!_action.Config.ShouldCheckCombo)
+        {
+            return true;
+        }
 
         if (_action.Setting.ComboIdsNot != null)
         {
-            if (_action.Setting.ComboIdsNot.Contains(DataCenter.LastComboAction)) return false;
+            if (_action.Setting.ComboIdsNot.Contains(DataCenter.LastComboAction))
+            {
+                return false;
+            }
         }
 
-        var comboActions = _action.Action.ActionCombo.RowId != 0
-    ? new ActionID[] { (ActionID)_action.Action.ActionCombo.RowId }
-    : Array.Empty<ActionID>();
+        ActionID[] comboActions = _action.Action.ActionCombo.RowId != 0
+                                ? [(ActionID)_action.Action.ActionCombo.RowId]
+                                : [];
 
-        if (_action.Setting.ComboIds != null) comboActions = [.. comboActions, .. _action.Setting.ComboIds];
+        if (_action.Setting.ComboIds != null)
+        {
+            comboActions = [.. comboActions, .. _action.Setting.ComboIds];
+        }
 
         if (comboActions.Length > 0)
         {
             if (comboActions.Contains(DataCenter.LastComboAction))
             {
-                if (DataCenter.ComboTime < DataCenter.DefaultGCDRemain) return false;
+                if (DataCenter.ComboTime < DataCenter.DefaultGCDRemain)
+                {
+                    return false;
+                }
             }
             else
             {

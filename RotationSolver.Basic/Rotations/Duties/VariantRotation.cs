@@ -8,7 +8,7 @@ public abstract class VariantRotation : DutyRotation
 {
 }
 
-partial class DutyRotation
+public partial class DutyRotation
 {
     /// <summary>
     /// Modifies the settings for Variant Cure PvE.

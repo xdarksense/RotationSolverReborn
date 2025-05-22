@@ -5,7 +5,7 @@ using CombatRole = RotationSolver.Basic.Data.CombatRole;
 namespace RotationSolver.Basic.Rotations.Basic;
 
 
-partial class BlueMageRotation
+public partial class BlueMageRotation
 {
     /// <summary>
     /// 
@@ -154,7 +154,7 @@ partial class BlueMageRotation
     /// </summary>
     public BlueMageRotation()
     {
-        SetBlueMageActions();
+        _ = SetBlueMageActions();
     }
 
     /// <summary>
@@ -164,8 +164,11 @@ partial class BlueMageRotation
     protected unsafe bool SetBlueMageActions()
     {
         if (!Service.Config.SetBluActions)
+        {
             return false;
-        if (ActiveActions.Length > 24 || ActiveActions.Length == 0)
+        }
+
+        if (ActiveActions.Length is > 24 or 0)
         {
             PluginLog.Error($"Active actions count {ActiveActions.Length} is invalid.");
             return false;
@@ -173,10 +176,13 @@ partial class BlueMageRotation
 
         try
         {
-            var idArray = ActiveActions.Where(a => a.Info.SpellUnlocked).Select(a => a.Action.RowId).ToArray();
+            uint[] idArray = ActiveActions.Where(a => a.Info.SpellUnlocked).Select(a => a.Action.RowId).ToArray();
             if (idArray.Equals(GetBlueMageActions()))
+            {
                 return true;
-            var actionManager = ActionManager.Instance();
+            }
+
+            ActionManager* actionManager = ActionManager.Instance();
             fixed (uint* idArrayPtr = idArray)
             {
                 return actionManager->SetBlueMageActions(idArrayPtr);
@@ -192,15 +198,20 @@ partial class BlueMageRotation
 
     private unsafe uint[] GetBlueMageActions()
     {
-        var actionManager = ActionManager.Instance();
-        if (actionManager == null) return [];
+        ActionManager* actionManager = ActionManager.Instance();
+        if (actionManager == null)
+        {
+            return [];
+        }
 
         List<uint> loadedActionIds = [];
-        for (var slot = 1; slot < 24; slot++)
+        for (int slot = 1; slot < 24; slot++)
         {
-            var loadedId = actionManager->GetActiveBlueMageActionInSlot(slot);
+            uint loadedId = actionManager->GetActiveBlueMageActionInSlot(slot);
             if (loadedId > 0)
+            {
                 loadedActionIds.Add(loadedId);
+            }
         }
         return loadedActionIds.ToArray();
     }
@@ -1149,9 +1160,9 @@ partial class BlueMageRotation
     /// </summary>
     public override void DisplayStatus()
     {
-        ImGui.TextWrapped($"Aetheric Mimicry Role: {BlueId.ToString()}");
+        ImGui.TextWrapped($"Aetheric Mimicry Role: {BlueId}");
         ImGui.Text($"This rotation requires the following actions:");
-        foreach (var action in ActiveActions)
+        foreach (IBaseAction action in ActiveActions)
         {
             ImGui.Text($" - {action.Name}");
         }

@@ -2,7 +2,7 @@
 
 namespace RotationSolver.Basic.Rotations.Basic;
 
-partial class DragoonRotation
+public partial class DragoonRotation
 {
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Strength;
@@ -21,7 +21,7 @@ partial class DragoonRotation
     /// <summary>
     /// 
     /// </summary>
-    static float LOTDTimeRaw => JobGauge.LOTDTimer / 1000f;
+    private static float LOTDTimeRaw => JobGauge.LOTDTimer / 1000f;
 
     /// <summary>
     /// 
@@ -33,7 +33,10 @@ partial class DragoonRotation
     /// </summary>
     /// <param name="time"></param>
     /// <returns></returns>
-    protected static bool LOTDEndAfter(float time) => LOTDTime <= time;
+    protected static bool LOTDEndAfter(float time)
+    {
+        return LOTDTime <= time;
+    }
 
     /// <summary>
     /// 
@@ -42,7 +45,9 @@ partial class DragoonRotation
     /// <param name="offset"></param>
     /// <returns></returns>
     protected static bool LOTDEndAfterGCD(uint gctCount = 0, float offset = 0)
-        => LOTDEndAfter(GCDTime(gctCount, offset));
+    {
+        return LOTDEndAfter(GCDTime(gctCount, offset));
+    }
     #endregion
 
     #region PvE Actions Unassignable

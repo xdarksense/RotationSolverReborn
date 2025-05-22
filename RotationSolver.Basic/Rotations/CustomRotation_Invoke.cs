@@ -2,7 +2,7 @@
 
 namespace RotationSolver.Basic.Rotations;
 
-partial class CustomRotation
+public partial class CustomRotation
 {
     /// <inheritdoc/>
     public bool TryInvoke(out IAction? newAction, out IAction? gcdAction)
@@ -26,17 +26,20 @@ partial class CustomRotation
             if (InCombat || CountOfTracking == 0)
             {
                 AverageCountOfLastUsing =
-                    (AverageCountOfLastUsing * CountOfTracking + CountingOfLastUsing)
+                    ((AverageCountOfLastUsing * CountOfTracking) + CountingOfLastUsing)
                     / ++CountOfTracking;
                 MaxCountOfLastUsing = Math.Max(MaxCountOfLastUsing, CountingOfLastUsing);
 
                 AverageCountOfCombatTimeUsing =
-                    (AverageCountOfCombatTimeUsing * (CountOfTracking - 1) + CountingOfCombatTimeUsing)
+                    ((AverageCountOfCombatTimeUsing * (CountOfTracking - 1)) + CountingOfCombatTimeUsing)
                     / CountOfTracking;
                 MaxCountOfCombatTimeUsing = Math.Max(MaxCountOfCombatTimeUsing, CountingOfCombatTimeUsing);
             }
 
-            if (!IsValid) IsValid = true;
+            if (!IsValid)
+            {
+                IsValid = true;
+            }
         }
         catch (Exception? ex)
         {
@@ -44,8 +47,16 @@ partial class CustomRotation
 
             while (ex != null)
             {
-                if (!string.IsNullOrEmpty(ex.Message)) WhyNotValid += "\n" + ex.Message;
-                if (!string.IsNullOrEmpty(ex.StackTrace)) WhyNotValid += "\n" + ex.StackTrace;
+                if (!string.IsNullOrEmpty(ex.Message))
+                {
+                    WhyNotValid += "\n" + ex.Message;
+                }
+
+                if (!string.IsNullOrEmpty(ex.StackTrace))
+                {
+                    WhyNotValid += "\n" + ex.StackTrace;
+                }
+
                 ex = ex.InnerException;
             }
 
@@ -60,13 +71,13 @@ partial class CustomRotation
 
     private void UpdateActions(JobRole role)
     {
-        ActionMoveForwardGCD = MoveForwardGCD(out var act) ? act : null;
+        ActionMoveForwardGCD = MoveForwardGCD(out IAction? act) ? act : null;
 
-        UpdateHealingActions(role, out act);
-        UpdateDefenseActions(out act);
-        UpdateDispelAndRaiseActions(role, out act);
-        UpdatePositionalActions(role, out act);
-        UpdateMovementActions(out act);
+        UpdateHealingActions(role, out _);
+        UpdateDefenseActions(out _);
+        UpdateDispelAndRaiseActions(role, out _);
+        UpdatePositionalActions(role, out _);
+        UpdateMovementActions(out _);
     }
 
     private void UpdateHealingActions(JobRole role, out IAction? act)
@@ -99,8 +110,6 @@ partial class CustomRotation
 
     private void UpdateDefenseActions(out IAction? act)
     {
-        act = null; // Ensure 'act' is assigned before any return
-
         IBaseAction.TargetOverride = TargetType.BeAttacked;
         ActionDefenseAreaGCD = DefenseAreaGCD(out act) ? act : null;
         ActionDefenseSingleGCD = DefenseSingleGCD(out act) ? act : null;
@@ -114,7 +123,7 @@ partial class CustomRotation
         catch (MissingMethodException ex)
         {
             // Log the exception or handle it as needed
-            BasicWarningHelper.AddSystemWarning($"Exception in UpdateDefenseActions method: {ex.Message}");
+            _ = BasicWarningHelper.AddSystemWarning($"Exception in UpdateDefenseActions method: {ex.Message}");
             // Optionally, set actions to null in case of an exception
             ActionDefenseAreaAbility = ActionDefenseSingleAbility = null;
         }
@@ -163,10 +172,8 @@ partial class CustomRotation
 
     private void UpdateMovementActions(out IAction? act)
     {
-        act = null; // Ensure 'act' is assigned before any return
-
         IBaseAction.TargetOverride = TargetType.Move;
-        var movingTarget = MoveForwardAbility(AddlePvE, out act);
+        bool movingTarget = MoveForwardAbility(AddlePvE, out act);
         IBaseAction.TargetOverride = null;
         ActionMoveForwardAbility = movingTarget ? act : null;
 
@@ -188,12 +195,12 @@ partial class CustomRotation
         if (a.PreviewTarget.HasValue && a.PreviewTarget.Value.Target != Player
             && a.PreviewTarget.Value.Target != null)
         {
-            var dir = Player.Position - a.PreviewTarget.Value.Position;
-            var length = dir?.Length() ?? 0;
+            Vector3? dir = Player.Position - a.PreviewTarget.Value.Position;
+            float length = dir?.Length() ?? 0;
             if (length != 0 && dir.HasValue)
             {
-                var d = dir.Value / length;
-                MoveTarget = a.PreviewTarget.Value.Position + d * MathF.Min(length, Player.HitboxRadius + a.PreviewTarget.Value.Target.HitboxRadius);
+                Vector3 d = dir.Value / length;
+                MoveTarget = a.PreviewTarget.Value.Position + (d * MathF.Min(length, Player.HitboxRadius + a.PreviewTarget.Value.Target.HitboxRadius));
             }
             else
             {
@@ -204,8 +211,8 @@ partial class CustomRotation
         {
             if ((ActionID)a.ID == ActionID.EnAvantPvE)
             {
-                var dir = new Vector3(MathF.Sin(Player.Rotation), 0, MathF.Cos(Player.Rotation));
-                MoveTarget = Player.Position + dir * 10; // Consider defining 10 as a constant
+                Vector3 dir = new(MathF.Sin(Player.Rotation), 0, MathF.Cos(Player.Rotation));
+                MoveTarget = Player.Position + (dir * 10); // Consider defining 10 as a constant
             }
             else
             {
@@ -226,7 +233,7 @@ partial class CustomRotation
         try
         {
             // Check for countdown and return the appropriate action if not in combat
-            var countDown = Service.CountDownTime;
+            float countDown = Service.CountDownTime;
             if (countDown > 0 && !DataCenter.InCombat)
             {
                 return CountDownAction(countDown);
@@ -242,23 +249,13 @@ partial class CustomRotation
             // If a GCD action is available, determine if it can be used or if an ability should be used instead
             if (gcdAction != null)
             {
-                if (ActionHelper.CanUseGCD)
-                {
-                    return gcdAction;
-                }
-
-                if (Ability(gcdAction, out var ability))
-                {
-                    return ability;
-                }
-
-                return gcdAction;
+                return ActionHelper.CanUseGCD ? gcdAction : Ability(gcdAction, out IAction? ability) ? ability : gcdAction;
             }
             else
             {
                 // If no GCD action is available, attempt to use an ability
                 IBaseAction.IgnoreClipping = true;
-                if (Ability(AddlePvE, out var ability))
+                if (Ability(AddlePvE, out IAction? ability))
                 {
                     return ability;
                 }
@@ -285,5 +282,8 @@ partial class CustomRotation
     /// </summary>
     /// <param name="remainTime"></param>
     /// <returns></returns>
-    protected virtual IAction? CountDownAction(float remainTime) => null;
+    protected virtual IAction? CountDownAction(float remainTime)
+    {
+        return null;
+    }
 }

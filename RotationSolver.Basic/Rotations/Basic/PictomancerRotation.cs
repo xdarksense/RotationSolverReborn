@@ -58,22 +58,22 @@ public partial class PictomancerRotation
     /// <summary>
     /// Is Pom Motif ready
     /// </summary>
-    public static bool isPomMotifReady => ((byte)JobGauge.CreatureFlags) == 32 || ((byte)JobGauge.CreatureFlags) == 0;
+    public static bool isPomMotifReady => (byte)JobGauge.CreatureFlags is 32 or 0;
 
     /// <summary>
     /// Is Wing Motif ready
     /// </summary>
-    public static bool isWingMotifReady => ((byte)JobGauge.CreatureFlags) == 33 || ((byte)JobGauge.CreatureFlags) == 1;
+    public static bool isWingMotifReady => (byte)JobGauge.CreatureFlags is 33 or 1;
 
     /// <summary>
     /// Is Claw Motif ready
     /// </summary>
-    public static bool isClawMotifReady => ((byte)JobGauge.CreatureFlags) == 19 || ((byte)JobGauge.CreatureFlags) == 3;
+    public static bool isClawMotifReady => (byte)JobGauge.CreatureFlags is 19 or 3;
 
     /// <summary>
     /// Is Maw Motif ready
     /// </summary>
-    public static bool isMawMotifReady => ((byte)JobGauge.CreatureFlags) == 23 || ((byte)JobGauge.CreatureFlags) == 7;
+    public static bool isMawMotifReady => (byte)JobGauge.CreatureFlags is 23 or 7;
 
     /// <summary>
     /// Is Wing ready

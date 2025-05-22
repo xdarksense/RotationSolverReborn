@@ -5,7 +5,7 @@ namespace RotationSolver.Basic.Rotations;
 /// <summary>
 /// Represents a custom rotation with various item-related methods.
 /// </summary>
-partial class CustomRotation
+public partial class CustomRotation
 {
     #region Burst Medicine
 
@@ -40,13 +40,22 @@ partial class CustomRotation
             return false;
         }
 
-        if (DataCenter.CurrentTinctureUseType == TinctureUseType.Nowhere) return false;
-
-        foreach (var medicine in Medicines)
+        if (DataCenter.CurrentTinctureUseType == TinctureUseType.Nowhere)
         {
-            if (medicine.Type != MedicineType) continue;
+            return false;
+        }
 
-            if (medicine.CanUse(out act, clippingCheck)) return true;
+        foreach (MedicineItem medicine in Medicines)
+        {
+            if (medicine.Type != MedicineType)
+            {
+                continue;
+            }
+
+            if (medicine.CanUse(out act, clippingCheck))
+            {
+                return true;
+            }
         }
 
         return false;
@@ -70,10 +79,10 @@ partial class CustomRotation
     /// <returns>True if an MP potion was used; otherwise, false.</returns>
     private static bool UseMpPotion(IAction nextGCD, out IAction? act)
     {
-        var acts = from a in MpPotions
-                   where a.CanUse(out _, true)
-                   orderby a.MaxMp
-                   select a;
+        IOrderedEnumerable<MpPotionItem> acts = from a in MpPotions
+                                                where a.CanUse(out _, true)
+                                                orderby a.MaxMp
+                                                select a;
 
         act = acts.LastOrDefault();
         return act != null;
@@ -97,10 +106,10 @@ partial class CustomRotation
     /// <returns>True if an HP potion was used; otherwise, false.</returns>
     private static bool UseHpPotion(IAction nextGCD, out IAction? act)
     {
-        var acts = from a in HpPotions
-                   where a.CanUse(out _, true)
-                   orderby a.MaxHp
-                   select a;
+        IOrderedEnumerable<HpPotionItem> acts = from a in HpPotions
+                                                where a.CanUse(out _, true)
+                                                orderby a.MaxHp
+                                                select a;
 
         act = acts.LastOrDefault();
         return act != null;

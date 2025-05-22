@@ -16,7 +16,7 @@ internal static class ActionUpdater
 
     static ActionUpdater()
     {
-        EzIPC.Init(typeof(ActionUpdater), "RotationSolverReborn.ActionUpdater");
+        _ = EzIPC.Init(typeof(ActionUpdater), "RotationSolverReborn.ActionUpdater");
     }
 
     [EzIPCEvent] public static Action<uint> NextGCDActionChanged = delegate { };
@@ -37,7 +37,7 @@ internal static class ActionUpdater
     }
 
     private static IBaseAction? _nextGCDAction;
-    const float GcdHeight = 5;
+    private const float GcdHeight = 5;
     internal static IBaseAction? NextGCDAction
     {
         get => _nextGCDAction;
@@ -60,12 +60,12 @@ internal static class ActionUpdater
     internal static void UpdateNextAction()
     {
         IPlayerCharacter localPlayer = Player.Object;
-        var customRotation = DataCenter.CurrentRotation;
+        ICustomRotation? customRotation = DataCenter.CurrentRotation;
 
         try
         {
             if (localPlayer != null && customRotation != null
-                && customRotation.TryInvoke(out var newAction, out var gcdAction))
+                && customRotation.TryInvoke(out IAction? newAction, out IAction? gcdAction))
             {
                 NextAction = newAction;
                 NextGCDAction = gcdAction as IBaseAction;
@@ -80,7 +80,7 @@ internal static class ActionUpdater
         NextAction = NextGCDAction = null;
     }
 
-    internal unsafe static void UpdateCombatInfo()
+    internal static unsafe void UpdateCombatInfo()
     {
         SetAction(NextGCDAction?.AdjustedID ?? 0);
         UpdateCombatTime();
@@ -90,7 +90,7 @@ internal static class ActionUpdater
         UpdateMPTimer();
     }
 
-    private static List<uint> actionOverrideList = new();
+    private static readonly List<uint> actionOverrideList = [];
     private static void SetAction(uint id)
     {
         if (actionOverrideList.Count == 0)
@@ -103,10 +103,10 @@ internal static class ActionUpdater
         }
     }
 
-    static DateTime _startCombatTime = DateTime.MinValue;
+    private static DateTime _startCombatTime = DateTime.MinValue;
     private static void UpdateCombatTime()
     {
-        var lastInCombat = DataCenter.InCombat;
+        bool lastInCombat = DataCenter.InCombat;
         DataCenter.InCombat = Svc.Condition[ConditionFlag.InCombat];
 
         if (!lastInCombat && DataCenter.InCombat)
@@ -128,7 +128,7 @@ internal static class ActionUpdater
             : (float)(DateTime.Now - _startCombatTime).TotalSeconds;
     }
 
-    private unsafe static void UpdateSlots()
+    private static unsafe void UpdateSlots()
     {
         ActionManager* actionManager = ActionManager.Instance();
         for (int i = 0; i < DataCenter.BluSlots.Length; i++)
@@ -141,12 +141,12 @@ internal static class ActionUpdater
         }
     }
 
-    static DateTime _startMovingTime = DateTime.MinValue;
-    static DateTime _stopMovingTime = DateTime.MinValue;
+    private static DateTime _startMovingTime = DateTime.MinValue;
+    private static DateTime _stopMovingTime = DateTime.MinValue;
 
-    private unsafe static void UpdateMoving()
+    private static unsafe void UpdateMoving()
     {
-        var last = DataCenter.IsMoving;
+        bool last = DataCenter.IsMoving;
         DataCenter.IsMoving = AgentMap.Instance()->IsPlayerMoving;
         if (last && !DataCenter.IsMoving)
         {
@@ -170,7 +170,7 @@ internal static class ActionUpdater
     private static bool _isDead = true;
     public static void UpdateLifetime()
     {
-        var lastDead = _isDead;
+        bool lastDead = _isDead;
         _isDead = Player.Object.IsDead;
 
         if (Svc.Condition[ConditionFlag.BetweenAreas])
@@ -196,18 +196,24 @@ internal static class ActionUpdater
             : (float)(DateTime.Now - _startAliveTime).TotalSeconds;
     }
 
-    static uint _lastMP = 0;
-    static DateTime _lastMPUpdate = DateTime.Now;
+    private static uint _lastMP = 0;
+    private static DateTime _lastMPUpdate = DateTime.Now;
 
     internal static float MPUpdateElapsed => (float)(DateTime.Now - _lastMPUpdate).TotalSeconds % 3;
 
     private static void UpdateMPTimer()
     {
         // Ignore if player is Black Mage
-        if (Player.Object.ClassJob.RowId != (uint)ECommons.ExcelServices.Job.BLM) return;
+        if (Player.Object.ClassJob.RowId != (uint)ECommons.ExcelServices.Job.BLM)
+        {
+            return;
+        }
 
         // Ignore if player is Lucid Dreaming
-        if (Player.Object.HasStatus(true, StatusID.LucidDreaming)) return;
+        if (Player.Object.HasStatus(true, StatusID.LucidDreaming))
+        {
+            return;
+        }
 
         if (_lastMP < Player.Object.CurrentMp)
         {
@@ -216,33 +222,32 @@ internal static class ActionUpdater
         _lastMP = Player.Object.CurrentMp;
     }
 
-    internal unsafe static bool CanDoAction()
+    internal static unsafe bool CanDoAction()
     {
-        if (IsPlayerOccupied() || Player.Object.CurrentHp == 0) return false;
+        if (IsPlayerOccupied() || Player.Object.CurrentHp == 0)
+        {
+            return false;
+        }
 
-        if (NextAction == null) return false;
+        if (NextAction == null)
+        {
+            return false;
+        }
 
         // Skip when casting
-        if (Player.Object.TotalCastTime - DataCenter.CalculatedActionAhead > 0) return false;
+        if (Player.Object.TotalCastTime - DataCenter.CalculatedActionAhead > 0)
+        {
+            return false;
+        }
 
         // GCD
         return RSCommands.CanDoAnAction(ActionHelper.CanUseGCD);
     }
 
-    private unsafe static bool IsPlayerOccupied()
+    private static unsafe bool IsPlayerOccupied()
     {
-        if (!MajorUpdater.IsValid || Svc.ClientState.LocalPlayer?.IsTargetable != true)
-        {
-            return true;
-        }
-
-        if (ActionManager.Instance()->ActionQueued && NextAction != null
-            && ActionManager.Instance()->QueuedActionId != NextAction.AdjustedID)
-        {
-            return true;
-        }
-
-        return false;
+        return !MajorUpdater.IsValid || Svc.ClientState.LocalPlayer?.IsTargetable != true || ActionManager.Instance()->ActionQueued && NextAction != null
+            && ActionManager.Instance()->QueuedActionId != NextAction.AdjustedID;
     }
 
     private static void LogError(string message, Exception ex)

@@ -25,7 +25,10 @@ internal class RotationConfigBoolean : RotationConfigBase
     /// <returns><c>true</c> if the command was executed; otherwise, <c>false</c>.</returns>
     public override bool DoCommand(IRotationConfigSet set, string str)
     {
-        if (!base.DoCommand(set, str)) return false;
+        if (!base.DoCommand(set, str))
+        {
+            return false;
+        }
 
         string numStr = str[Name.Length..].Trim();
 

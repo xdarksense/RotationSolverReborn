@@ -2,7 +2,7 @@
 
 namespace RotationSolver.Basic.Rotations.Basic;
 
-partial class NinjaRotation
+public partial class NinjaRotation
 {
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Dexterity;
@@ -11,12 +11,12 @@ partial class NinjaRotation
     /// <summary>
     /// Gets the amount of Ninki available.
     /// </summary>
-    public static byte Ninki => (byte)JobGauge.Ninki;
+    public static byte Ninki => JobGauge.Ninki;
 
     /// <summary>
     /// Gets the current charges for Kazematoi.
     /// </summary>
-    public static byte Kazematoi => (byte)JobGauge.Kazematoi;
+    public static byte Kazematoi => JobGauge.Kazematoi;
 
     /// <summary>
     /// Is enough level for Jin
@@ -637,23 +637,20 @@ partial class NinjaRotation
     [RotationDesc(ActionID.ShukuchiPvE)]
     protected sealed override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
-        if (ShukuchiPvE.CanUse(out act)) return true;
-        return base.MoveForwardAbility(nextGCD, out act);
+        return ShukuchiPvE.CanUse(out act) || base.MoveForwardAbility(nextGCD, out act);
     }
 
     /// <inheritdoc/>
     [RotationDesc(ActionID.FeintPvE)]
     protected sealed override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (FeintPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.Mudra)) return true;
-        return base.DefenseAreaAbility(nextGCD, out act);
+        return (FeintPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.Mudra)) || base.DefenseAreaAbility(nextGCD, out act);
     }
 
     /// <inheritdoc/>
     [RotationDesc(ActionID.ShadeShiftPvE)]
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
-        if (ShadeShiftPvE.CanUse(out act)) return true;
-        return base.DefenseSingleAbility(nextGCD, out act);
+        return ShadeShiftPvE.CanUse(out act) || base.DefenseSingleAbility(nextGCD, out act);
     }
 }

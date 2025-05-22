@@ -6,12 +6,15 @@ internal static class MacroUpdater
 
     public static void UpdateMacro()
     {
-        if (DoingMacro == null && DataCenter.Macros.TryDequeue(out var macro))
+        if (DoingMacro == null && DataCenter.Macros.TryDequeue(out MacroItem? macro))
         {
             DoingMacro = macro;
         }
 
-        if (DoingMacro == null) return;
+        if (DoingMacro == null)
+        {
+            return;
+        }
 
         if (DoingMacro.IsRunning)
         {
@@ -22,6 +25,6 @@ internal static class MacroUpdater
             return;
         }
 
-        DoingMacro.StartUseMacro();
+        _ = DoingMacro.StartUseMacro();
     }
 }

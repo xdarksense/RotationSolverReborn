@@ -5,7 +5,7 @@ using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 
 namespace RotationSolver.Basic.Rotations;
-partial class CustomRotation
+public partial class CustomRotation
 {
     #region Player
     /// <summary>
@@ -63,7 +63,9 @@ partial class CustomRotation
     public static bool IsEvenMinute()
     {
         if (CombatTime <= 0)
+        {
             return false;
+        }
 
         int minutes = (int)Math.Floor(CombatTime / 60f);
         return minutes % 2 == 0;
@@ -77,7 +79,9 @@ partial class CustomRotation
     public static bool IsWithinFirst15SecondsOfEvenMinute()
     {
         if (CombatTime <= 0)
+        {
             return false;
+        }
 
         int minutes = (int)Math.Floor(CombatTime / 60f);
         int secondsInCurrentMinute = (int)Math.Floor(CombatTime % 60f);
@@ -158,15 +162,19 @@ partial class CustomRotation
     /// <returns></returns>
     public static bool CanHitPositional(EnemyPositional positional, IBattleChara enemy)
     {
-        if (enemy == null) return false;
+        if (enemy == null)
+        {
+            return false;
+        }
 
-        if (!enemy.HasPositional()) return true;
+        if (!enemy.HasPositional())
+        {
+            return true;
+        }
 
         EnemyPositional enemy_positional = enemy.FindEnemyPositional();
 
-        if (enemy_positional == positional)
-            return true;
-        return false;
+        return enemy_positional == positional;
     }
 
     /// <summary>
@@ -176,7 +184,9 @@ partial class CustomRotation
     /// <returns>The number of hostile targets within the given range.</returns>
     [Description("The number of hostiles in specified range")]
     public static int NumberOfHostilesInRangeOf(float range)
-        => DataCenter.NumberOfHostilesInRangeOf(range);
+    {
+        return DataCenter.NumberOfHostilesInRangeOf(range);
+    }
 
     /// <summary>
     /// Is there any hostile target in range? 25 for ranged jobs and healer, 3 for melee and tank.
@@ -234,14 +244,13 @@ partial class CustomRotation
     /// The level of the LB.
     /// </summary>
     [Description("Limit Break Level")]
-    public unsafe static byte LimitBreakLevel
+    public static unsafe byte LimitBreakLevel
     {
         get
         {
-            var controller = UIState.Instance()->LimitBreakController;
-            var barValue = *(ushort*)&controller.BarCount;
-            if (barValue == 0) return 0;
-            return (byte)(controller.BarCount / barValue);
+            LimitBreakController controller = UIState.Instance()->LimitBreakController;
+            ushort barValue = *(ushort*)&controller.BarCount;
+            return barValue == 0 ? (byte)0 : (byte)(controller.BarCount / barValue);
         }
     }
 
@@ -398,21 +407,27 @@ partial class CustomRotation
     /// Time from next ability to next GCD
     /// </summary>
     [Description("Time from next ability to next GCD")]
-    public static float NextAbilityToNextGCD => DataCenter.DefaultGCDRemain - (ActionManagerHelper.GetCurrentAnimationLock());
+    public static float NextAbilityToNextGCD => DataCenter.DefaultGCDRemain - ActionManagerHelper.GetCurrentAnimationLock();
 
     /// <summary>
     /// Treats one action as another.
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    public static uint AdjustId(uint id) => Service.GetAdjustedActionId(id);
+    public static uint AdjustId(uint id)
+    {
+        return Service.GetAdjustedActionId(id);
+    }
 
     /// <summary>
     /// Treats one action as another.
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    public static ActionID AdjustId(ActionID id) => Service.GetAdjustedActionId(id);
+    public static ActionID AdjustId(ActionID id)
+    {
+        return Service.GetAdjustedActionId(id);
+    }
 
     /// <summary>
     /// Average amount of times a rotation calls IsLastGCD, IsLastAbility, or IsLastAction.
@@ -631,14 +646,20 @@ partial class CustomRotation
     /// </summary>
     /// <param name="GCD"></param>
     /// <returns></returns>
-    protected static bool StopMovingElapsedLessGCD(int GCD) => StopMovingElapsedLess(GCD * DataCenter.DefaultGCDTotal);
+    protected static bool StopMovingElapsedLessGCD(int GCD)
+    {
+        return StopMovingElapsedLess(GCD * DataCenter.DefaultGCDTotal);
+    }
 
     /// <summary>
     /// <br>WARNING: Do Not make this method the main of your rotation.</br>
     /// </summary>
     /// <param name="time">time in second.</param>
     /// <returns></returns>
-    protected static bool StopMovingElapsedLess(float time) => StopMovingTime <= time;
+    protected static bool StopMovingElapsedLess(float time)
+    {
+        return StopMovingTime <= time;
+    }
 
     /// <summary>
     /// How long the player has been standing still.
@@ -675,7 +696,9 @@ partial class CustomRotation
     /// <param name="offset"></param>
     /// <returns></returns>
     protected static float GCDTime(uint gcdCount = 0, float offset = 0)
-        => DataCenter.GCDTime(gcdCount, offset);
+    {
+        return DataCenter.GCDTime(gcdCount, offset);
+    }
 
     #region Service
 

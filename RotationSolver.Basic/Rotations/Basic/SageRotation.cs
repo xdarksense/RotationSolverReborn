@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.Basic.Rotations.Basic;
 
-partial class SageRotation
+public partial class SageRotation
 {
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Mind;
@@ -21,7 +21,7 @@ partial class SageRotation
     /// </summary>
     public static byte Addersting => AdderstingTrait.EnoughLevel ? JobGauge.Addersting : (byte)0;
 
-    static float AddersgallTimerRaw => JobGauge.AddersgallTimer / 1000f;
+    private static float AddersgallTimerRaw => JobGauge.AddersgallTimer / 1000f;
 
     /// <summary>
     /// Gets the amount of milliseconds elapsed until the next Addersgall is available.
@@ -34,7 +34,10 @@ partial class SageRotation
     /// </summary>
     /// <param name="time"></param>
     /// <returns></returns>
-    protected static bool AddersgallEndAfter(float time) => AddersgallTime <= time;
+    protected static bool AddersgallEndAfter(float time)
+    {
+        return AddersgallTime <= time;
+    }
 
     /// <summary>
     /// Used to determine if the cooldown for the next Addersgall will end within a specified number of GCDs.
@@ -43,7 +46,9 @@ partial class SageRotation
     /// <param name="offset"></param>
     /// <returns></returns>
     protected static bool AddersgallEndAfterGCD(uint gctCount = 0, float offset = 0)
-        => AddersgallEndAfter(GCDTime(gctCount, offset));
+    {
+        return AddersgallEndAfter(GCDTime(gctCount, offset));
+    }
 
     /// <inheritdoc/>
     public override void DisplayStatus()
@@ -468,8 +473,7 @@ partial class SageRotation
     [RotationDesc(ActionID.IcarusPvE)]
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
-        if (IcarusPvE.CanUse(out act)) return true;
-        return base.MoveForwardAbility(nextGCD, out act);
+        return IcarusPvE.CanUse(out act) || base.MoveForwardAbility(nextGCD, out act);
     }
     #endregion
 }

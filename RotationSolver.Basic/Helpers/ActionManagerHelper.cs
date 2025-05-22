@@ -26,10 +26,8 @@ namespace RotationSolver.Basic.Helpers
         /// <returns>The current animation lock duration.</returns>
         public static unsafe float GetCurrentAnimationLock()
         {
-            var actionManager = GetActionManager();
-            if (actionManager == null) return DefaultAnimationLock;
-
-            return *(float*)((byte*)actionManager + AnimationLockOffset);
+            ActionManager* actionManager = GetActionManager();
+            return actionManager == null ? DefaultAnimationLock : *(float*)((byte*)actionManager + AnimationLockOffset);
         }
 
         /// <summary>
@@ -40,7 +38,7 @@ namespace RotationSolver.Basic.Helpers
         /// <returns>The recast time for the specified action.</returns>
         public static unsafe float GetRecastTime(ActionType type, uint id)
         {
-            var actionManager = GetActionManager();
+            ActionManager* actionManager = GetActionManager();
             return actionManager == null ? 0 : actionManager->GetRecastTime(type, id);
         }
 
@@ -61,7 +59,7 @@ namespace RotationSolver.Basic.Helpers
         /// <returns>The elapsed recast time for the specified action.</returns>
         public static unsafe float GetRecastTimeElapsed(ActionType type, uint id)
         {
-            var actionManager = GetActionManager();
+            ActionManager* actionManager = GetActionManager();
             return actionManager == null ? 0 : actionManager->GetRecastTimeElapsed(type, id);
         }
 

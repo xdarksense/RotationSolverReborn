@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.Basic.Rotations.Basic;
 
-partial class PaladinRotation
+public partial class PaladinRotation
 {
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Strength;
@@ -263,8 +263,7 @@ partial class PaladinRotation
         setting.UnlockedByQuestID = 67572;
         setting.CanTarget = t =>
         {
-            if (t.HasStatus(false, StatusHelper.TankStanceStatus)) return false;
-            return true;
+            return !t.HasStatus(false, StatusHelper.TankStanceStatus);
         };
         setting.IsFriendly = true;
     }

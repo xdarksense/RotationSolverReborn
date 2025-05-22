@@ -53,7 +53,7 @@ public interface IBaseAction : IAction
     /// <summary>
     /// The current setting for this action.
     /// </summary>
-    public ActionConfig Config { get; }
+    ActionConfig Config { get; }
 
     /// <summary>
     /// Can I use this action.

@@ -63,11 +63,14 @@ internal static class CombatTypeExtension
     /// </summary>
     /// <param name="type">The combat type.</param>
     /// <returns>The icon identifier.</returns>
-    public static uint GetIcon(this CombatType type) => type switch
+    public static uint GetIcon(this CombatType type)
     {
-        CombatType.Both => 61540u,
-        CombatType.PvE => 61542u,
-        CombatType.PvP => 61544u,
-        _ => 61523u,
-    };
+        return type switch
+        {
+            CombatType.Both => 61540u,
+            CombatType.PvE => 61542u,
+            CombatType.PvP => 61544u,
+            _ => 61523u,
+        };
+    }
 }

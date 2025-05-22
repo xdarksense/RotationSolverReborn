@@ -1,4 +1,5 @@
 using Dalamud.Interface.Colors;
+using System.ComponentModel;
 
 namespace RebornRotations.Healer;
 
@@ -82,6 +83,18 @@ public sealed class SCH_Default : ScholarRotation
 
     [RotationConfig(CombatType.PvE, Name = "Enable ballpark DoT time-to-kill estimator (in addition to normal TTK configs)")]
     public bool UseBallparkTTK { get; set; } = true;
+
+    [RotationConfig(CombatType.PvE, Name = "How to use Deployment Tactics")]
+    public DeploymentTacticsUsageStrategy DeploymentTacticsUsage { get; set; } = DeploymentTacticsUsageStrategy.CatalyzeOnly;
+
+    public enum DeploymentTacticsUsageStrategy : byte
+    {
+        [Description("Use when a party member has Catalyze status")]
+        CatalyzeOnly,
+
+        [Description("Use when a party member has Catalyze or Galvanize status")]
+        CatalyzeOrGalvanize,
+    }
     #endregion
 
     #region Tracking Properties
@@ -114,6 +127,36 @@ public sealed class SCH_Default : ScholarRotation
     {
         // Verified Excog and Indomitability are NOT recognized by "next GCD"
         if (ShouldUseRecitation(nextGCD) && RecitationPvE.CanUse(out act)) return true;
+
+        if (DeploymentTacticsPvE.EnoughLevel && InCombat)
+        {
+            if (DeploymentTacticsUsage == DeploymentTacticsUsageStrategy.CatalyzeOnly)
+            {
+                foreach (IBattleChara member in PartyMembers)
+                {
+                    if (member.HasStatus(true, StatusID.Catalyze))
+                    {
+                        if (DeploymentTacticsPvE.CanUse(out act))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            else if (DeploymentTacticsUsage == DeploymentTacticsUsageStrategy.CatalyzeOrGalvanize)
+            {
+                foreach (IBattleChara member in PartyMembers)
+                {
+                    if (member.HasStatus(true, StatusID.Galvanize))
+                    {
+                        if (DeploymentTacticsPvE.CanUse(out act))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
 
         // Only use emergency tactics if we're healing from a raid wide damage or multiple members need to be healed for doom
         if (nextGCD.IsTheSameTo(false, SuccorPvE, ConcitationPvE, AccessionPvE) && EmergencyTacticsPvE.CanUse(out act))

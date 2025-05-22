@@ -2,7 +2,7 @@
 
 namespace RotationSolver.Basic.Rotations.Basic;
 
-partial class ReaperRotation
+public partial class ReaperRotation
 {
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Strength;
@@ -528,31 +528,27 @@ partial class ReaperRotation
     [RotationDesc(ActionID.HellsIngressPvE)]
     protected sealed override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
-        if (HellsIngressPvE.CanUse(out act)) return true;
-        return base.MoveForwardAbility(nextGCD, out act);
+        return HellsIngressPvE.CanUse(out act) || base.MoveForwardAbility(nextGCD, out act);
     }
 
     /// <inheritdoc/>
     [RotationDesc(ActionID.FeintPvE)]
     protected sealed override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (!HasSoulReaver && !HasEnshrouded && !HasExecutioner && FeintPvE.CanUse(out act)) return true;
-        return base.DefenseAreaAbility(nextGCD, out act);
+        return (!HasSoulReaver && !HasEnshrouded && !HasExecutioner && FeintPvE.CanUse(out act)) || base.DefenseAreaAbility(nextGCD, out act);
     }
 
     /// <inheritdoc/>
     [RotationDesc(ActionID.ArcaneCrestPvE)]
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
-        if (!HasSoulReaver && !HasEnshrouded && !HasExecutioner && ArcaneCrestPvE.CanUse(out act)) return true;
-        return base.DefenseSingleAbility(nextGCD, out act);
+        return (!HasSoulReaver && !HasEnshrouded && !HasExecutioner && ArcaneCrestPvE.CanUse(out act)) || base.DefenseSingleAbility(nextGCD, out act);
     }
 
     ///<inheritdoc/>
     [RotationDesc(ActionID.HellsEgressPvE)]
     protected override bool MoveBackAbility(IAction nextGCD, out IAction? act)
     {
-        if (HellsEgressPvE.CanUse(out act)) return true;
-        return base.MoveBackAbility(nextGCD, out act);
+        return HellsEgressPvE.CanUse(out act) || base.MoveBackAbility(nextGCD, out act);
     }
 }

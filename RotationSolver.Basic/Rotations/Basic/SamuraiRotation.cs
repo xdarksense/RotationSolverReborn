@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.Basic.Rotations.Basic;
 
-partial class SamuraiRotation
+public partial class SamuraiRotation
 {
     #region JobGauge
     /// <summary>
@@ -41,9 +41,21 @@ partial class SamuraiRotation
         get
         {
             byte count = 0;
-            if (HasGetsu) count++;
-            if (HasSetsu) count++;
-            if (HasKa) count++;
+            if (HasGetsu)
+            {
+                count++;
+            }
+
+            if (HasSetsu)
+            {
+                count++;
+            }
+
+            if (HasKa)
+            {
+                count++;
+            }
+
             return count;
         }
     }
@@ -67,13 +79,7 @@ partial class SamuraiRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool IsMoonTimeLessThanFlower
-    {
-        get
-        {
-            return Player.StatusTime(true, StatusID.Fugetsu) < Player.StatusTime(true, StatusID.Fuka);
-        }
-    }
+    public static bool IsMoonTimeLessThanFlower => Player.StatusTime(true, StatusID.Fugetsu) < Player.StatusTime(true, StatusID.Fuka);
 
     /// <summary>
     /// 

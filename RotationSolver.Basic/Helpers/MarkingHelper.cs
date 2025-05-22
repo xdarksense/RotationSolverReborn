@@ -31,18 +31,17 @@ namespace RotationSolver.Basic.Helpers
     /// </summary>
     internal class MarkingHelper
     {
-        private static readonly object _lock = new object();
+        private static readonly object _lock = new();
 
         /// <summary>
         /// Gets the marker for the specified head marker index.
         /// </summary>
         /// <param name="index">The head marker index.</param>
         /// <returns>The object ID of the marker.</returns>
-        internal unsafe static long GetMarker(HeadMarker index)
+        internal static unsafe long GetMarker(HeadMarker index)
         {
-            var instance = MarkingController.Instance();
-            if (instance == null || instance->Markers.Length == 0) return 0;
-            return instance->Markers[(int)index].ObjectId;
+            MarkingController* instance = MarkingController.Instance();
+            return instance == null || instance->Markers.Length == 0 ? 0 : instance->Markers[(int)index].ObjectId;
         }
 
         /// <summary>
@@ -52,11 +51,13 @@ namespace RotationSolver.Basic.Helpers
         {
             get
             {
-                var targets = GetAttackSignTargets();
+                long[] targets = GetAttackSignTargets();
                 for (int i = 0; i < targets.Length; i++)
                 {
                     if (targets[i] != 0)
+                    {
                         return true;
+                    }
                 }
                 return false;
             }
@@ -97,21 +98,25 @@ namespace RotationSolver.Basic.Helpers
         /// </summary>
         /// <param name="charas">The characters to filter.</param>
         /// <returns>The filtered characters.</returns>
-        internal unsafe static IEnumerable<IBattleChara> FilterStopCharacters(IEnumerable<IBattleChara> charas)
+        internal static unsafe IEnumerable<IBattleChara> FilterStopCharacters(IEnumerable<IBattleChara> charas)
         {
-            var stopTargets = GetStopTargets();
-            var ids = new HashSet<long>();
+            long[] stopTargets = GetStopTargets();
+            HashSet<long> ids = [];
             for (int i = 0; i < stopTargets.Length; i++)
             {
                 if (stopTargets[i] != 0)
-                    ids.Add(stopTargets[i]);
+                {
+                    _ = ids.Add(stopTargets[i]);
+                }
             }
 
-            var result = new List<IBattleChara>();
-            foreach (var b in charas)
+            List<IBattleChara> result = [];
+            foreach (IBattleChara b in charas)
             {
                 if (!ids.Contains((long)b.GameObjectId))
+                {
                     result.Add(b);
+                }
             }
             return result;
         }

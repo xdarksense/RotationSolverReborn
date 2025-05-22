@@ -2,23 +2,12 @@
 
 namespace RotationSolver.Basic.Rotations;
 
-partial class CustomRotation
+public partial class CustomRotation
 {
     internal static void LoadActionSetting(ref IBaseAction action)
     {
-        var a = action.Action;
-        if (a.CanTargetAlly || a.CanTargetParty)
-        {
-            action.Setting.IsFriendly = true;
-        }
-        else if (a.CanTargetHostile)
-        {
-            action.Setting.IsFriendly = false;
-        }
-        else
-        {
-            action.Setting.IsFriendly = action.TargetInfo.EffectRange > 5;
-        }
+        Lumina.Excel.Sheets.Action a = action.Action;
+        action.Setting.IsFriendly = a.CanTargetAlly || a.CanTargetParty || !a.CanTargetHostile && action.TargetInfo.EffectRange > 5;
         // TODO: better target type check. (NoNeed?)
     }
 
@@ -81,12 +70,12 @@ partial class CustomRotation
     {
         setting.CanTarget = o =>
         {
-            if (o is not IBattleChara b) return false;
+            if (o is not IBattleChara b)
+            {
+                return false;
+            }
 
-            if (b.IsBossFromIcon() || IsMoving || b.CastActionId == 0) return false;
-
-            if (!b.IsCastInterruptible || ActionID.InterjectPvE.IsCoolingDown()) return true;
-            return false;
+            return !b.IsBossFromIcon() && !IsMoving && b.CastActionId != 0 && (!b.IsCastInterruptible || ActionID.InterjectPvE.IsCoolingDown());
         };
     }
 
@@ -94,10 +83,13 @@ partial class CustomRotation
     {
         setting.ActionCheck = () =>
         {
-            if (!NotInCombatDelay) return false;
-            var players = PartyMembers.GetObjectInRadius(20);
-            if (players.Any(ObjectHelper.InCombat)) return false;
-            return players.Any(p => p.WillStatusEnd(3, false, StatusID.Peloton));
+            if (!NotInCombatDelay)
+            {
+                return false;
+            }
+
+            IEnumerable<IBattleChara> players = PartyMembers.GetObjectInRadius(20);
+            return !players.Any(ObjectHelper.InCombat) && players.Any(p => p.WillStatusEnd(3, false, StatusID.Peloton));
         };
     }
 

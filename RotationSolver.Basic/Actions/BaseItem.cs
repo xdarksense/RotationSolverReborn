@@ -9,7 +9,7 @@ namespace RotationSolver.Basic.Actions;
 /// </summary>
 public class BaseItem : IBaseItem
 {
-    readonly struct ItemCooldown(uint id) : ICooldown
+    private readonly struct ItemCooldown(uint id) : ICooldown
     {
         unsafe float ICooldown.RecastTimeOneChargeRaw => ActionManager.Instance()->GetRecastTime(ActionType.Item, id);
 
@@ -63,7 +63,7 @@ public class BaseItem : IBaseItem
     {
         get
         {
-            if (!Service.Config.RotationItemConfig.TryGetValue(ID, out var value))
+            if (!Service.Config.RotationItemConfig.TryGetValue(ID, out ItemConfig? value))
             {
                 Service.Config.RotationItemConfig[ID] = value = new();
             }
@@ -165,21 +165,35 @@ public class BaseItem : IBaseItem
     public virtual unsafe bool CanUse(out IAction item, bool clippingCheck = false)
     {
         item = this;
-        if (_item.RowId == 0) return false; // Check if the item is uninitialized
-        if (!CanUseThis) return false;
-        if (DataCenter.DisabledActionSequencer?.Contains(ID) ?? false) return false;
-        if (!IsEnabled) return false;
+        if (_item.RowId == 0)
+        {
+            return false; // Check if the item is uninitialized
+        }
+
+        if (!CanUseThis)
+        {
+            return false;
+        }
+
+        if (DataCenter.DisabledActionSequencer?.Contains(ID) ?? false)
+        {
+            return false;
+        }
+
+        if (!IsEnabled)
+        {
+            return false;
+        }
 
         if (ConfigurationHelper.BadStatus.Contains(ActionManager.Instance()->GetActionStatus(ActionType.Item, ID))
-            && ConfigurationHelper.BadStatus.Contains(ActionManager.Instance()->GetActionStatus(ActionType.Item, ID + 1000000))) return false;
+            && ConfigurationHelper.BadStatus.Contains(ActionManager.Instance()->GetActionStatus(ActionType.Item, ID + 1000000)))
+        {
+            return false;
+        }
 
-        var remain = Cooldown.RecastTimeOneChargeRaw - Cooldown.RecastTimeElapsedRaw;
+        float remain = Cooldown.RecastTimeOneChargeRaw - Cooldown.RecastTimeElapsedRaw;
 
-        if (remain > DataCenter.DefaultGCDRemain) return false;
-
-        if (ItemCheck != null && !ItemCheck()) return false;
-
-        return HasIt;
+        return remain <= DataCenter.DefaultGCDRemain && (ItemCheck == null || ItemCheck()) && HasIt;
     }
 
     /// <summary>
@@ -188,19 +202,22 @@ public class BaseItem : IBaseItem
     /// <returns></returns>
     public unsafe bool Use()
     {
-        if (_item.RowId == 0) return false; // Check if the item is uninitialized
-
-        if (InventoryManager.Instance()->GetInventoryItemCount(ID, true) > 0)
+        if (_item.RowId == 0)
         {
-            return ActionManager.Instance()->UseAction(ActionType.Item, ID + 1000000, Player.Object.GameObjectId, A4);
+            return false; // Check if the item is uninitialized
         }
 
-        return ActionManager.Instance()->UseAction(ActionType.Item, ID, Player.Object.GameObjectId, A4);
+        return InventoryManager.Instance()->GetInventoryItemCount(ID, true) > 0
+            ? ActionManager.Instance()->UseAction(ActionType.Item, ID + 1000000, Player.Object.GameObjectId, A4)
+            : ActionManager.Instance()->UseAction(ActionType.Item, ID, Player.Object.GameObjectId, A4);
     }
 
     /// <summary>
     /// To String.
     /// </summary>
     /// <returns></returns>
-    public override string ToString() => Name;
+    public override string ToString()
+    {
+        return Name;
+    }
 }
