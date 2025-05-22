@@ -17,15 +17,27 @@ internal class CollapsingHeaderGroup
 
     public void AddCollapsingHeader(Func<string> name, Action action)
     {
-        if (name is null) throw new ArgumentNullException(nameof(name));
-        if (action is null) throw new ArgumentNullException(nameof(action));
+        if (name is null)
+        {
+            throw new ArgumentNullException(nameof(name));
+        }
+
+        if (action is null)
+        {
+            throw new ArgumentNullException(nameof(action));
+        }
+
         _headers[name] = action;
     }
 
     public void RemoveCollapsingHeader(Func<string> name)
     {
-        if (name is null) throw new ArgumentNullException(nameof(name));
-        _headers.Remove(name);
+        if (name is null)
+        {
+            throw new ArgumentNullException(nameof(name));
+        }
+
+        _ = _headers.Remove(name);
     }
 
     public void ClearCollapsingHeader()
@@ -35,23 +47,29 @@ internal class CollapsingHeaderGroup
 
     public void Draw()
     {
-        var index = -1;
-        foreach (var header in _headers)
+        int index = -1;
+        foreach (KeyValuePair<Func<string>, Action> header in _headers)
         {
             index++;
 
-            if (header.Key is null || header.Value is null) continue;
+            if (header.Key is null || header.Value is null)
+            {
+                continue;
+            }
 
-            var name = header.Key();
-            if (string.IsNullOrEmpty(name)) continue;
+            string name = header.Key();
+            if (string.IsNullOrEmpty(name))
+            {
+                continue;
+            }
 
             try
             {
                 ImGui.Spacing();
                 ImGui.Separator();
-                var selected = index == _openedIndex;
-                var changed = false;
-                using (var font = ImRaii.PushFont(FontManager.GetFont(18)))
+                bool selected = index == _openedIndex;
+                bool changed = false;
+                using (ImRaii.Font font = ImRaii.PushFont(FontManager.GetFont(18)))
                 {
                     changed = ImGui.Selectable(name, selected, ImGuiSelectableFlags.DontClosePopups);
                 }

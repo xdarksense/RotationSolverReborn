@@ -25,28 +25,28 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 {
     private readonly WindowSystem windowSystem;
 
-    static RotationConfigWindow? _rotationConfigWindow;
-    static ControlWindow? _controlWindow;
-    static NextActionWindow? _nextActionWindow;
-    static CooldownWindow? _cooldownWindow;
-    static WelcomeWindow? _changelogWindow;
-    static OverlayWindow? _overlayWindow;
+    private static RotationConfigWindow? _rotationConfigWindow;
+    private static ControlWindow? _controlWindow;
+    private static NextActionWindow? _nextActionWindow;
+    private static CooldownWindow? _cooldownWindow;
+    private static WelcomeWindow? _changelogWindow;
+    private static OverlayWindow? _overlayWindow;
 
-    static readonly List<IDisposable> _dis = new();
+    private static readonly List<IDisposable> _dis = [];
     public static string Name => "Rotation Solver Reborn";
-    internal static readonly List<DrawingHighlightHotbarBase> _drawingElements = new();
+    internal static readonly List<DrawingHighlightHotbarBase> _drawingElements = [];
 
     public static DalamudLinkPayload OpenLinkPayload { get; private set; } = null!;
     public static DalamudLinkPayload? HideWarningLinkPayload { get; private set; }
-    static readonly Random _random = new();
+    private static readonly Random _random = new();
 
     internal IPCProvider IPCProvider;
     public RotationSolverPlugin(IDalamudPluginInterface pluginInterface)
     {
         ECommonsMain.Init(pluginInterface, this, ECommons.Module.DalamudReflector, ECommons.Module.ObjectFunctions);
-        Svc.Framework.RunOnTick(() =>
+        _ = Svc.Framework.RunOnTick(() =>
         {
-            ThreadLoadImageHandler.TryGetIconTextureWrap(0, true, out _);
+            _ = ThreadLoadImageHandler.TryGetIconTextureWrap(0, true, out _);
         });
         IconSet.Init();
 
@@ -56,12 +56,12 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
             // Check if the config file exists before attempting to read and deserialize it
             if (File.Exists(Svc.PluginInterface.ConfigFile.FullName))
             {
-                var oldConfigs = JsonConvert.DeserializeObject<Configs>(
+                Configs oldConfigs = JsonConvert.DeserializeObject<Configs>(
                     File.ReadAllText(Svc.PluginInterface.ConfigFile.FullName))
                     ?? new Configs();
 
                 // Check version and migrate or reset if necessary
-                var newConfigs = Configs.Migrate(oldConfigs);
+                Configs newConfigs = Configs.Migrate(oldConfigs);
                 if (newConfigs.Version != Configs.CurrentVersion)
                 {
                     newConfigs = new Configs(); // Reset to default if versions do not match
@@ -117,10 +117,10 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
         static void DutyState_DutyCompleted(object? sender, ushort e)
         {
-            var delay = TimeSpan.FromSeconds(_random.Next(4, 6));
-            Svc.Framework.RunOnTick(() =>
+            TimeSpan delay = TimeSpan.FromSeconds(_random.Next(4, 6));
+            _ = Svc.Framework.RunOnTick(() =>
             {
-                Service.Config.DutyEnd.AddMacro();
+                _ = Service.Config.DutyEnd.AddMacro();
 
                 if (Service.Config.AutoOffWhenDutyCompleted)
                 {
@@ -140,7 +140,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
                 return;
             }
 
-            var territory = Service.GetSheet<TerritoryType>().GetRow(id);
+            TerritoryType territory = Service.GetSheet<TerritoryType>().GetRow(id);
 
             DataCenter.Territory = new TerritoryInfo(territory);
 
@@ -156,19 +156,30 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
         static void DutyState_DutyStarted(object? sender, ushort e)
         {
-            if (!Player.AvailableThreadSafe) return;
-            if (!Player.Object.IsJobCategory(JobRole.Tank) && !Player.Object.IsJobCategory(JobRole.Healer)) return;
+            if (!Player.AvailableThreadSafe)
+            {
+                return;
+            }
+
+            if (!Player.Object.IsJobCategory(JobRole.Tank) && !Player.Object.IsJobCategory(JobRole.Healer))
+            {
+                return;
+            }
 
             if (DataCenter.Territory?.IsHighEndDuty ?? false)
             {
-                var warning = string.Format(UiString.HighEndWarning.GetDescription(), DataCenter.Territory.ContentFinderName);
+                string warning = string.Format(UiString.HighEndWarning.GetDescription(), DataCenter.Territory.ContentFinderName);
                 WarningHelper.AddSystemWarning(warning);
             }
         }
 
         static void DutyState_DutyWiped(object? sender, ushort e)
         {
-            if (!Player.AvailableThreadSafe) return;
+            if (!Player.AvailableThreadSafe)
+            {
+                return;
+            }
+
             DataCenter.ResetAllRecords();
         }
 
@@ -176,7 +187,10 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
         OpenLinkPayload = pluginInterface.AddChatLinkHandler(0, (id, str) =>
         {
-            if (id == 0) OpenConfigWindow();
+            if (id == 0)
+            {
+                OpenConfigWindow();
+            }
         });
         HideWarningLinkPayload = pluginInterface.AddChatLinkHandler(1, (id, str) =>
         {
@@ -186,16 +200,23 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
                 Svc.Chat.Print("Warning has been hidden.");
             }
         });
-        Task.Run(async () =>
+        _ = Task.Run(async () =>
         {
             await DownloadHelper.DownloadAsync();
-            if (Service.Config.LoadRotationsAtStartup) await RotationUpdater.GetAllCustomRotationsAsync(DownloadOption.Download);
+            if (Service.Config.LoadRotationsAtStartup)
+            {
+                await RotationUpdater.GetAllCustomRotationsAsync(DownloadOption.Download);
+            }
         });
     }
 
     private void OnDraw()
     {
-        if (Svc.GameGui.GameUiHidden) return;
+        if (Svc.GameGui.GameUiHidden)
+        {
+            return;
+        }
+
         windowSystem.Draw();
     }
 
@@ -220,7 +241,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
     internal static void UpdateDisplayWindow()
     {
-        var isValid = MajorUpdater.IsValid && DataCenter.CurrentRotation != null;
+        bool isValid = MajorUpdater.IsValid && DataCenter.CurrentRotation != null;
 
         _nextActionWindow!.IsOpen = isValid && Service.Config.ShowNextActionWindow;
 
@@ -235,7 +256,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
     private static bool AnyHostileTargetWithinDistance(float distance)
     {
-        foreach (var target in DataCenter.AllHostileTargets)
+        foreach (IBattleChara target in DataCenter.AllHostileTargets)
         {
             if (target.DistanceToPlayer() < distance)
             {
@@ -258,7 +279,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         Svc.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
         Svc.PluginInterface.UiBuilder.Draw -= OnDraw;
 
-        foreach (var item in _dis)
+        foreach (IDisposable item in _dis)
         {
             item.Dispose();
         }

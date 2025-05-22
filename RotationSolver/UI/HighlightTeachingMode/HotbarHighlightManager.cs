@@ -17,7 +17,11 @@ internal static class HotbarHighlightManager
         get => _highLight?.Color ?? Vector4.One;
         set
         {
-            if (_highLight == null) return;
+            if (_highLight == null)
+            {
+                return;
+            }
+
             _highLight.Color = value;
         }
     }
@@ -37,7 +41,7 @@ internal static class HotbarHighlightManager
 
     public static void Dispose()
     {
-        foreach (var item in new List<DrawingHighlightHotbarBase>(RotationSolverPlugin._drawingElements))
+        foreach (DrawingHighlightHotbarBase item in new List<DrawingHighlightHotbarBase>(RotationSolverPlugin._drawingElements))
         {
             item.Dispose();
 #if DEBUG
@@ -60,7 +64,7 @@ internal static class HotbarHighlightManager
             })));
         }
 
-        await System.Threading.Tasks.Task.WhenAll([.. drawing2Ds]);
+        _ = await System.Threading.Tasks.Task.WhenAll([.. drawing2Ds]);
         return drawing2Ds.SelectMany(i => i.Result).ToArray();
     }
 }

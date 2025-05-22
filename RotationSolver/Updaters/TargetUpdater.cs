@@ -194,8 +194,8 @@ internal static partial class TargetUpdater
                         }
                     }
                 }
-                List<IBattleChara> deathAllianceHealers = new(deathParty);
-                List<IBattleChara> deathAllianceSupports = new(deathParty);
+                List<IBattleChara> deathAllianceHealers = [.. deathParty];
+                List<IBattleChara> deathAllianceSupports = [.. deathParty];
 
                 if (DataCenter.AllianceMembers != null)
                 {
@@ -212,11 +212,9 @@ internal static partial class TargetUpdater
                     }
                 }
 
-                List<IBattleChara> raisePartyAndAllianceSupports = new(deathParty);
-                raisePartyAndAllianceSupports.AddRange(deathAllianceSupports);
+                List<IBattleChara> raisePartyAndAllianceSupports = [.. deathParty, .. deathAllianceSupports];
 
-                List<IBattleChara> raisePartyAndAllianceHealers = new(deathParty);
-                raisePartyAndAllianceHealers.AddRange(deathAllianceHealers);
+                List<IBattleChara> raisePartyAndAllianceHealers = [.. deathParty, .. deathAllianceHealers];
 
                 RaiseType raisetype = Service.Config.RaiseType;
 
@@ -304,12 +302,9 @@ internal static partial class TargetUpdater
             return deathTanks[0];
         }
 
-        if (deathHealers.Count > 0)
-        {
-            return deathHealers[0];
-        }
-
-        return deathTanks.Count > 0
+        return deathHealers.Count > 0
+            ? deathHealers[0]
+            : deathTanks.Count > 0
             ? deathTanks[0]
             : Service.Config.OffRaiserRaise && deathOffHealers.Count > 0
             ? deathOffHealers[0]

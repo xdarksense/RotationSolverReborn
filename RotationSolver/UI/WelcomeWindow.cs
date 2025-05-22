@@ -8,13 +8,13 @@ namespace RotationSolver.UI
 {
     internal class WelcomeWindow : Window
     {
-        private static readonly HttpClient HttpClient = new HttpClient();
+        private static readonly HttpClient HttpClient = new();
 
         public WelcomeWindow() : base($"Welcome to Rotation Solver Reborn!", BaseFlags)
         {
             Size = new Vector2(650, 500);
             SizeCondition = ImGuiCond.FirstUseEver;
-            if ((_lastSeenChangelog != _assemblyVersion && Service.Config.ChangelogPopup || !Service.Config.FirstTimeSetupDone) && Service.Config.ChangelogPopup)
+            if (((_lastSeenChangelog != _assemblyVersion && Service.Config.ChangelogPopup) || !Service.Config.FirstTimeSetupDone) && Service.Config.ChangelogPopup)
             {
                 PopulateChangelogs();
                 IsOpen = true;
@@ -24,33 +24,33 @@ namespace RotationSolver.UI
         private const ImGuiWindowFlags BaseFlags = ImGuiWindowFlags.NoCollapse
                                     | ImGuiWindowFlags.NoSavedSettings;
 #if DEBUG
-        private string _assemblyVersion = "6.9.6.9"; //kekw
+        private readonly string _assemblyVersion = "6.9.6.9"; //kekw
 #else
         private string _assemblyVersion = typeof(RotationConfigWindow).Assembly.GetName().Version?.ToString() ?? "7.1.5.24";
 #endif
 
-        private string _lastSeenChangelog = Service.Config.LastSeenChangelog;
+        private readonly string _lastSeenChangelog = Service.Config.LastSeenChangelog;
 
         private GitHubCommitComparison _changeLog = new();
 
         private void PopulateChangelogs()
         {
-            Task.Run(GetGithubComparison);
+            _ = Task.Run(GetGithubComparison);
         }
 
         private async Task GetGithubComparison()
         {
-            var comparisonGoal = _lastSeenChangelog == "0.0.0.0" ? await GetNextMostRecentReleaseTag() : _lastSeenChangelog;
+            string comparisonGoal = _lastSeenChangelog == "0.0.0.0" ? await GetNextMostRecentReleaseTag() : _lastSeenChangelog;
             string url = $"https://api.github.com/repos/{Service.USERNAME}/{Service.REPO}/compare/{comparisonGoal}...{_assemblyVersion}";
             try
             {
                 HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd("RotationSolver");
                 HttpClient.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github.v3+json");
-                var response = await HttpClient.GetAsync(url);
+                HttpResponseMessage response = await HttpClient.GetAsync(url);
                 if (response.IsSuccessStatusCode)
                 {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var changeLog = JsonConvert.DeserializeObject<GitHubCommitComparison>(content);
+                    string content = await response.Content.ReadAsStringAsync();
+                    GitHubCommitComparison? changeLog = JsonConvert.DeserializeObject<GitHubCommitComparison>(content);
                     if (changeLog != null)
                     {
                         _changeLog = changeLog;
@@ -73,22 +73,26 @@ namespace RotationSolver.UI
 
         private async Task<string> GetNextMostRecentReleaseTag()
         {
-            var url = $"https://api.github.com/repos/{Service.USERNAME}/{Service.REPO}/releases";
+            string url = $"https://api.github.com/repos/{Service.USERNAME}/{Service.REPO}/releases";
             try
             {
                 HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd("RotationSolver");
                 HttpClient.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github.v3+json");
-                var response = await HttpClient.GetAsync(url);
+                HttpResponseMessage response = await HttpClient.GetAsync(url);
                 if (response.IsSuccessStatusCode)
                 {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var releases = JsonConvert.DeserializeObject<List<GithubRelease.Release>>(content);
-                    var foundLatest = false;
+                    string content = await response.Content.ReadAsStringAsync();
+                    List<GithubRelease.Release>? releases = JsonConvert.DeserializeObject<List<GithubRelease.Release>>(content);
+                    bool foundLatest = false;
                     if (releases?.Count > 0)
                     {
-                        foreach (var release in releases)
+                        foreach (GithubRelease.Release release in releases)
                         {
-                            if (release.Prerelease) continue;
+                            if (release.Prerelease)
+                            {
+                                continue;
+                            }
+
                             if (!foundLatest)
                             {
                                 foundLatest = true;
@@ -114,12 +118,12 @@ namespace RotationSolver.UI
 
         public override void Draw()
         {
-            var windowWidth = ImGui.GetWindowWidth();
+            float windowWidth = ImGui.GetWindowWidth();
             // Centered title
-            var text = UiString.WelcomeWindow_Header.GetDescription();
-            var fontSize = ImGui.GetFontSize();
+            string text = UiString.WelcomeWindow_Header.GetDescription();
+            float fontSize = ImGui.GetFontSize();
             ImGui.PushFont(FontManager.GetFont(fontSize + 10));
-            var textSize = ImGui.CalcTextSize(text).X;
+            float textSize = ImGui.CalcTextSize(text).X;
             ImGuiHelper.DrawItemMiddle(() =>
             {
                 ImGui.TextColored(ImGuiColors.ParsedGold, text);
@@ -152,27 +156,27 @@ namespace RotationSolver.UI
             ImGui.Text("Older changelogs are available on GitHub");
             if (ImGui.Button("Open GitHub"))
             {
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = $"https://github.com/{Service.USERNAME}/{Service.REPO}", UseShellExecute = true });
+                _ = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = $"https://github.com/{Service.USERNAME}/{Service.REPO}", UseShellExecute = true });
             }
         }
 
         private void DrawChangeLog()
         {
-            var text = UiString.WelcomeWindow_Changelog.GetDescription();
-            var textSize = ImGui.CalcTextSize(text).X;
+            string text = UiString.WelcomeWindow_Changelog.GetDescription();
+            float textSize = ImGui.CalcTextSize(text).X;
             ImGuiHelper.DrawItemMiddle(() =>
             {
                 ImGui.TextColored(ImGuiColors.HealerGreen, text);
             }, ImGui.GetWindowWidth(), textSize);
-            var changeLog = _changeLog;
+            GitHubCommitComparison changeLog = _changeLog;
             if (changeLog == null || changeLog.Commits == null || changeLog.Commits.Count == 0)
             {
                 ImGui.Text("No changelog available.");
                 return;
             }
 
-            var commits = new List<Commit>();
-            foreach (var c in changeLog.Commits)
+            List<Commit> commits = new();
+            foreach (Commit c in changeLog.Commits)
             {
                 if (!c.CommitData.Message.Contains("Merge pull request"))
                 {
@@ -186,22 +190,20 @@ namespace RotationSolver.UI
                 {
                     if (commits[i].CommitData.CommitAuthor.Date < commits[j].CommitData.CommitAuthor.Date)
                     {
-                        var temp = commits[i];
-                        commits[i] = commits[j];
-                        commits[j] = temp;
+                        (commits[j], commits[i]) = (commits[i], commits[j]);
                     }
                 }
             }
 
-            var authors = GetAuthorsFromChangeLogs(commits);
-            var commitCount = commits.Count;
-            var authorCount = authors.Count;
+            List<string> authors = GetAuthorsFromChangeLogs(commits);
+            int commitCount = commits.Count;
+            int authorCount = authors.Count;
 
             ImGui.PushFont(FontManager.GetFont(ImGui.GetFontSize() + 1));
             ImGui.Text($"You've missed {commitCount} changes from {authorCount} contributer{(authorCount > 1 ? "s" : "")}!");
             ImGui.PopFont();
 
-            foreach (var commit in commits)
+            foreach (Commit commit in commits)
             {
                 ImGui.Text($"[{commit.CommitData.CommitAuthor.Date:yyyy-MM-dd}]");
 
@@ -214,11 +216,11 @@ namespace RotationSolver.UI
 
             ImGui.NewLine();
             ImGui.Text("Contributors:");
-            foreach (var author in authors)
+            foreach (string author in authors)
             {
                 if (ImGui.Button(author))
                 {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = $"https://github.com/{author}", UseShellExecute = true });
+                    _ = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo { FileName = $"https://github.com/{author}", UseShellExecute = true });
                 }
             }
 
@@ -229,7 +231,7 @@ namespace RotationSolver.UI
             if (changeLog.Files != null)
             {
                 files = changeLog.Files.Count;
-                foreach (var f in changeLog.Files)
+                foreach (CommitFile f in changeLog.Files)
                 {
                     additions += f.Additions;
                     deletions += f.Deletions;
@@ -246,13 +248,13 @@ namespace RotationSolver.UI
 
         private List<string> GetAuthorsFromChangeLogs(IEnumerable<Commit> commits)
         {
-            var authors = new HashSet<string>();
-            foreach (var commit in commits)
+            HashSet<string> authors = new();
+            foreach (Commit commit in commits)
             {
-                authors.Add(commit.CommitData.CommitAuthor.Name);
+                _ = authors.Add(commit.CommitData.CommitAuthor.Name);
             }
-            var authorList = new List<string>();
-            foreach (var author in authors)
+            List<string> authorList = new();
+            foreach (string author in authors)
             {
                 authorList.Add(author);
             }

@@ -1,6 +1,5 @@
 ﻿using RotationSolver.Basic.Configuration;
 using RotationSolver.UI.SearchableConfigs;
-using RotationSolver.UI.SearchableSettings;
 using System.Collections.Concurrent;
 
 namespace RotationSolver.UI;
@@ -15,20 +14,30 @@ internal class SearchableCollection
 
     public SearchableCollection()
     {
-        var properties = typeof(Configs).GetRuntimeProperties();
+        IEnumerable<PropertyInfo> properties = typeof(Configs).GetRuntimeProperties();
         int propertiesLength = 0;
-        foreach (var _ in properties) propertiesLength++;
-        var pairs = new List<SearchPair>(propertiesLength);
-        var parents = new Dictionary<string, CheckBoxSearch>(propertiesLength);
-        var attributes = new ConcurrentDictionary<PropertyInfo, UIAttribute>();
-
-        foreach (var property in properties)
+        foreach (PropertyInfo _ in properties)
         {
-            var ui = property.GetCustomAttribute<UIAttribute>();
-            if (ui == null) continue;
+            propertiesLength++;
+        }
 
-            var item = CreateSearchable(property);
-            if (item == null) continue;
+        List<SearchPair> pairs = new(propertiesLength);
+        Dictionary<string, CheckBoxSearch> parents = new(propertiesLength);
+        _ = new ConcurrentDictionary<PropertyInfo, UIAttribute>();
+
+        foreach (PropertyInfo property in properties)
+        {
+            UIAttribute? ui = property.GetCustomAttribute<UIAttribute>();
+            if (ui == null)
+            {
+                continue;
+            }
+
+            ISearchable? item = CreateSearchable(property);
+            if (item == null)
+            {
+                continue;
+            }
 
             item.PvEFilter = new(ui.PvEFilter);
             item.PvPFilter = new(ui.PvPFilter);
@@ -43,10 +52,10 @@ internal class SearchableCollection
 
         _items = new List<SearchPair>(pairs.Count);
 
-        foreach (var pair in pairs)
+        foreach (SearchPair pair in pairs)
         {
-            var parentName = pair.Attribute.Parent;
-            if (string.IsNullOrEmpty(parentName) || !parents.TryGetValue(parentName, out var parent))
+            string parentName = pair.Attribute.Parent;
+            if (string.IsNullOrEmpty(parentName) || !parents.TryGetValue(parentName, out CheckBoxSearch? parent))
             {
                 _items.Add(pair);
             }
@@ -60,32 +69,32 @@ internal class SearchableCollection
     public void DrawItems(string filter)
     {
         bool isFirst = true;
-        var filteredItems = new Dictionary<byte, List<SearchPair>>();
+        Dictionary<byte, List<SearchPair>> filteredItems = new();
 
-        foreach (var item in _items)
+        foreach (SearchPair item in _items)
         {
             if (item.Attribute.Filter == filter)
             {
                 if (!filteredItems.ContainsKey(item.Attribute.Section))
                 {
-                    filteredItems[item.Attribute.Section] = new List<SearchPair>();
+                    filteredItems[item.Attribute.Section] = [];
                 }
                 filteredItems[item.Attribute.Section].Add(item);
             }
         }
 
-        foreach (var grp in filteredItems)
+        foreach (KeyValuePair<byte, List<SearchPair>> grp in filteredItems)
         {
             if (!isFirst)
             {
                 ImGui.Separator();
             }
 
-            var items = grp.Value;
+            List<SearchPair> items = grp.Value;
             // Simple insertion sort by Attribute.Order
             for (int i = 1; i < items.Count; i++)
             {
-                var temp = items[i];
+                SearchPair temp = items[i];
                 int j = i - 1;
                 while (j >= 0 && items[j].Attribute.Order > temp.Attribute.Order)
                 {
@@ -95,7 +104,7 @@ internal class SearchableCollection
                 items[j + 1] = temp;
             }
 
-            foreach (var item in items)
+            foreach (SearchPair item in items)
             {
                 item.Searchable.Draw();
             }
@@ -106,23 +115,32 @@ internal class SearchableCollection
 
     public ISearchable[] SearchItems(string searchingText)
     {
-        if (string.IsNullOrEmpty(searchingText)) return Array.Empty<ISearchable>();
-
-        var results = new HashSet<ISearchable>();
-        var finalResults = new List<ISearchable>(MaxResultLength);
-
-        foreach (var pair in _items)
+        if (string.IsNullOrEmpty(searchingText))
         {
-            foreach (var searchable in GetChildren(pair.Searchable))
+            return Array.Empty<ISearchable>();
+        }
+
+        HashSet<ISearchable> results = new();
+        List<ISearchable> finalResults = new(MaxResultLength);
+
+        foreach (SearchPair pair in _items)
+        {
+            foreach (ISearchable searchable in GetChildren(pair.Searchable))
             {
-                var parent = GetParent(searchable);
-                if (results.Contains(parent)) continue;
+                ISearchable parent = GetParent(searchable);
+                if (results.Contains(parent))
+                {
+                    continue;
+                }
 
                 if (Similarity(searchable.SearchingKeys, searchingText) > 0)
                 {
-                    results.Add(parent);
+                    _ = results.Add(parent);
                     finalResults.Add(parent);
-                    if (finalResults.Count >= MaxResultLength) break;
+                    if (finalResults.Count >= MaxResultLength)
+                    {
+                        break;
+                    }
                 }
             }
         }
@@ -133,25 +151,41 @@ internal class SearchableCollection
     private static ISearchable? CreateSearchable(PropertyInfo property)
     {
         if (property.Name == nameof(Configs.AutoHeal))
+        {
             return new AutoHealCheckBox(property);
+        }
         else if (property.PropertyType.IsEnum)
+        {
             return new EnumSearch(property);
+        }
         else if (property.PropertyType == typeof(bool))
+        {
             return new CheckBoxSearchNoCondition(property);
+        }
         else if (property.PropertyType == typeof(ConditionBoolean))
+        {
             return new CheckBoxSearchCondition(property);
+        }
         else if (property.PropertyType == typeof(float))
+        {
             return new DragFloatSearch(property);
+        }
         else if (property.PropertyType == typeof(int))
+        {
             return new DragIntSearch(property);
+        }
         else if (property.PropertyType == typeof(Vector2))
+        {
             return new DragFloatRangeSearch(property);
+        }
         else if (property.PropertyType == typeof(Vector2Int))
+        {
             return new DragIntRangeSearch(property);
-        else if (property.PropertyType == typeof(Vector4))
-            return new ColorEditSearch(property);
+        }
         else
-            return null;
+        {
+            return property.PropertyType == typeof(Vector4) ? new ColorEditSearch(property) : (ISearchable?)null;
+        }
     }
 
     private static IEnumerable<ISearchable> GetChildren(ISearchable searchable)
@@ -160,9 +194,9 @@ internal class SearchableCollection
 
         if (searchable is CheckBoxSearch c && c.Children != null)
         {
-            foreach (var child in c.Children)
+            foreach (ISearchable child in c.Children)
             {
-                foreach (var grandChild in GetChildren(child))
+                foreach (ISearchable grandChild in GetChildren(child))
                 {
                     yield return grandChild;
                 }
@@ -170,21 +204,27 @@ internal class SearchableCollection
         }
     }
 
-    private static ISearchable GetParent(ISearchable searchable) => searchable.Parent == null ? searchable : GetParent(searchable.Parent);
+    private static ISearchable GetParent(ISearchable searchable)
+    {
+        return searchable.Parent == null ? searchable : GetParent(searchable.Parent);
+    }
 
     public static float Similarity(string text, string key)
     {
-        if (string.IsNullOrEmpty(text)) return 0;
-
-        var chars = text.Split(_splitChar, StringSplitOptions.RemoveEmptyEntries);
-        var keys = key.Split(_splitChar, StringSplitOptions.RemoveEmptyEntries);
-
-        var startWithCount = 0;
-        var containCount = 0;
-
-        foreach (var c in chars)
+        if (string.IsNullOrEmpty(text))
         {
-            foreach (var k in keys)
+            return 0;
+        }
+
+        string[] chars = text.Split(_splitChar, StringSplitOptions.RemoveEmptyEntries);
+        string[] keys = key.Split(_splitChar, StringSplitOptions.RemoveEmptyEntries);
+
+        int startWithCount = 0;
+        int containCount = 0;
+
+        foreach (string c in chars)
+        {
+            foreach (string k in keys)
             {
                 if (c.StartsWith(k, StringComparison.OrdinalIgnoreCase))
                 {
@@ -197,6 +237,6 @@ internal class SearchableCollection
             }
         }
 
-        return startWithCount * 3 + containCount;
+        return (startWithCount * 3) + containCount;
     }
 }

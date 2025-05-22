@@ -47,13 +47,16 @@ internal static class ImguiTooltips
     /// <param name="act">The action to perform to render the tooltip content.</param>
     public static void ShowTooltip(Action? act)
     {
-        if (act == null || Service.Config.ShowTooltips != true) return;
+        if (act == null || Service.Config.ShowTooltips != true)
+        {
+            return;
+        }
 
         ImGui.SetNextWindowBgAlpha(1);
 
-        using var color = ImRaii.PushColor(ImGuiCol.BorderShadow, ImGuiColors.DalamudWhite);
+        using ImRaii.Color color = ImRaii.PushColor(ImGuiCol.BorderShadow, ImGuiColors.DalamudWhite);
 
-        var globalScale = ImGuiHelpers.GlobalScale;
+        float globalScale = ImGuiHelpers.GlobalScale;
         ImGui.SetNextWindowSizeConstraints(new Vector2(150, 0) * globalScale, new Vector2(1200, 1500) * globalScale);
         ImGui.SetWindowPos(TooltipId, ImGui.GetIO().MousePos);
 

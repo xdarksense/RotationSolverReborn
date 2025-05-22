@@ -4,20 +4,21 @@ using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using ECommons.Logging;
 using RotationSolver.Basic.Configuration;
+using RotationSolver.Helpers;
 using RotationSolver.Updaters;
 
 namespace RotationSolver.Commands
 {
     public static partial class RSCommands
     {
-        static DateTime _lastClickTime = DateTime.MinValue;
-        static bool _lastState;
-        static bool started = false;
+        private static DateTime _lastClickTime = DateTime.MinValue;
+        private static bool _lastState;
+        private static bool started = false;
         internal static DateTime _lastUsedTime = DateTime.MinValue;
         internal static uint _lastActionID;
-        static float _lastCountdownTime = 0;
-        static Job _previousJob = Job.ADV;
-        static readonly Random random = new();
+        private static float _lastCountdownTime = 0;
+        private static Job _previousJob = Job.ADV;
+        private static readonly Random random = new();
 
         public static void IncrementState()
         {
@@ -30,7 +31,7 @@ namespace RotationSolver.Commands
         internal static unsafe bool CanDoAnAction(bool isGCD)
         {
             // Cache frequently accessed properties to avoid redundant calls
-            var currentState = DataCenter.State;
+            bool currentState = DataCenter.State;
 
             if (!_lastState || !currentState)
             {
@@ -39,34 +40,46 @@ namespace RotationSolver.Commands
             }
             _lastState = currentState;
 
-            if (!Player.AvailableThreadSafe) return false;
+            if (!Player.AvailableThreadSafe)
+            {
+                return false;
+            }
 
             // Precompute the delay range to avoid recalculating it multiple times
-            var delayRange = TimeSpan.FromMilliseconds(random.Next(
+            TimeSpan delayRange = TimeSpan.FromMilliseconds(random.Next(
                 (int)(Service.Config.ClickingDelay.X * 1000),
                 (int)(Service.Config.ClickingDelay.Y * 1000)));
 
-            if (DateTime.Now - _lastClickTime < delayRange) return false;
+            if (DateTime.Now - _lastClickTime < delayRange)
+            {
+                return false;
+            }
+
             _lastClickTime = DateTime.Now;
 
             // Avoid unnecessary checks if isGCD is true
-            if (!isGCD && ActionUpdater.NextAction is IBaseAction nextAction && nextAction.Info.IsRealGCD) return false;
-
-            return true;
+            return isGCD || ActionUpdater.NextAction is not IBaseAction nextAction || !nextAction.Info.IsRealGCD;
         }
 
         public static void DoAction()
         {
-            if (!Player.AvailableThreadSafe) return;
-            if (Player.Object.StatusList == null) return;
+            if (!Player.AvailableThreadSafe)
+            {
+                return;
+            }
+
+            if (Player.Object.StatusList == null)
+            {
+                return;
+            }
 
             StatusID[] noCastingStatusArray;
-            var noCastingStatus = OtherConfiguration.NoCastingStatus;
+            HashSet<uint> noCastingStatus = OtherConfiguration.NoCastingStatus;
             if (noCastingStatus != null)
             {
                 noCastingStatusArray = new StatusID[noCastingStatus.Count];
                 int index = 0;
-                foreach (var status in noCastingStatus)
+                foreach (uint status in noCastingStatus)
                 {
                     noCastingStatusArray[index++] = (StatusID)status;
                 }
@@ -78,7 +91,7 @@ namespace RotationSolver.Commands
 
             float minStatusTime = float.MaxValue;
             int statusTimesCount = 0;
-            foreach (var t in Player.Object.StatusTimes(false, noCastingStatusArray))
+            foreach (float t in Player.Object.StatusTimes(false, noCastingStatusArray))
             {
                 statusTimesCount++;
                 if (t < minStatusTime)
@@ -89,15 +102,18 @@ namespace RotationSolver.Commands
 
             if (statusTimesCount > 0)
             {
-                var remainingCastTime = Player.Object.TotalCastTime - Player.Object.CurrentCastTime;
+                float remainingCastTime = Player.Object.TotalCastTime - Player.Object.CurrentCastTime;
                 if (minStatusTime > remainingCastTime && minStatusTime < 5)
                 {
                     return;
                 }
             }
 
-            var nextAction = ActionUpdater.NextAction;
-            if (nextAction == null) return;
+            IAction? nextAction = ActionUpdater.NextAction;
+            if (nextAction == null)
+            {
+                return;
+            }
 
 #if DEBUG
             // if (nextAction is BaseAction debugAct)
@@ -136,9 +152,14 @@ namespace RotationSolver.Commands
                 if (nextAction is BaseAction finalAct)
                 {
                     if (Service.Config.KeyBoardNoise)
+                    {
                         PulseSimulation(nextAction.AdjustedID);
+                    }
 
-                    if (finalAct.Setting.EndSpecial) ResetSpecial();
+                    if (finalAct.Setting.EndSpecial)
+                    {
+                        ResetSpecial();
+                    }
                 }
             }
             else if (Service.Config.InDebug)
@@ -147,13 +168,17 @@ namespace RotationSolver.Commands
             }
         }
 
-        static void PulseSimulation(uint id)
+        private static void PulseSimulation(uint id)
         {
-            if (started) return;
+            if (started)
+            {
+                return;
+            }
+
             started = true;
             try
             {
-                int pulseCount = random.Next((int)Service.Config.KeyboardNoise.X, (int)Service.Config.KeyboardNoise.Y);
+                int pulseCount = random.Next(Service.Config.KeyboardNoise.X, Service.Config.KeyboardNoise.Y);
                 PulseAction(id, pulseCount);
             }
             catch (Exception ex)
@@ -167,7 +192,7 @@ namespace RotationSolver.Commands
             }
         }
 
-        static void PulseAction(uint id, int remainingPulses)
+        private static void PulseAction(uint id, int remainingPulses)
         {
             if (remainingPulses <= 0)
             {
@@ -176,19 +201,25 @@ namespace RotationSolver.Commands
             }
 
             MiscUpdater.PulseActionBar(id);
-            var time = Service.Config.ClickingDelay.X + random.NextDouble() * (Service.Config.ClickingDelay.Y - Service.Config.ClickingDelay.X);
-            Svc.Framework.RunOnTick(() =>
+            double time = Service.Config.ClickingDelay.X + (random.NextDouble() * (Service.Config.ClickingDelay.Y - Service.Config.ClickingDelay.X));
+            _ = Svc.Framework.RunOnTick(() =>
             {
                 PulseAction(id, remainingPulses - 1);
             }, TimeSpan.FromSeconds(time));
         }
 
-        internal static void ResetSpecial() => DoSpecialCommandType(SpecialCommandType.EndSpecial, false);
+        internal static void ResetSpecial()
+        {
+            DoSpecialCommandType(SpecialCommandType.EndSpecial, false);
+        }
 
         internal static void CancelState()
         {
             DataCenter.ResetAllRecords();
-            if (DataCenter.State) DoStateCommandType(StateCommandType.Off);
+            if (DataCenter.State)
+            {
+                DoStateCommandType(StateCommandType.Off);
+            }
         }
 
         internal static void UpdateRotationState()
@@ -202,7 +233,10 @@ namespace RotationSolver.Commands
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                 }
 
-                if (!Player.AvailableThreadSafe) return;
+                if (!Player.AvailableThreadSafe)
+                {
+                    return;
+                }
 
                 // Combine conditions to reduce redundant checks
                 if (Svc.Condition[ConditionFlag.LoggingOut] ||
@@ -218,7 +252,10 @@ namespace RotationSolver.Commands
                 {
                     CancelState();
                     if (Player.Job != _previousJob)
+                    {
                         _previousJob = Player.Job;
+                    }
+
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                     return;
                 }

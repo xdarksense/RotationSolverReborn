@@ -688,12 +688,7 @@ namespace RotationSolver.Data
             }
 
             DescriptionAttribute? attribute = field.GetCustomAttribute<DescriptionAttribute>();
-            if (attribute == null)
-            {
-                return value.ToString();
-            }
-
-            return attribute.Description;
+            return attribute == null ? value.ToString() : attribute.Description;
         }
     }
 }

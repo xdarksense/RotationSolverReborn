@@ -14,10 +14,10 @@ public static class DownloadHelper
 
     private static async Task<T?> DownloadOneAsync<T>(string url)
     {
-        using var client = new HttpClient();
+        using HttpClient client = new();
         try
         {
-            var str = await client.GetStringAsync(url);
+            string str = await client.GetStringAsync(url);
             return JsonConvert.DeserializeObject<T>(str);
         }
         catch (Exception ex)

@@ -11,27 +11,21 @@ internal class DragIntSearch : Searchable
         get
         {
             // Retrieve the current value of the property
-            var value = _property.GetValue(Service.Config);
+            object? value = _property.GetValue(Service.Config);
 
             // Ensure the value is not null before casting to int
-            if (value == null)
-            {
-                throw new InvalidOperationException("The property value cannot be null.");
-            }
-
-            return (int)value;
+            return value == null ? throw new InvalidOperationException("The property value cannot be null.") : (int)value;
         }
-        set
-        {
+
+        set =>
             // Set the property value
             _property.SetValue(Service.Config, value);
-        }
     }
 
     public DragIntSearch(PropertyInfo property) : base(property)
     {
         // Retrieve the RangeAttribute from the property
-        var range = _property.GetCustomAttribute<RangeAttribute>();
+        RangeAttribute? range = _property.GetCustomAttribute<RangeAttribute>();
 
         // Set the minimum value, defaulting to 0 if the attribute is not present
         Min = range != null ? (int)range.MinValue : 0;
@@ -46,13 +40,13 @@ internal class DragIntSearch : Searchable
     protected override void DrawMain()
     {
         // Retrieve the current value of the property
-        var value = Value;
+        int value = Value;
 
         // Set the width for the next item
         ImGui.SetNextItemWidth(Scale * DRAG_WIDTH);
 
         // Cache the hash code to avoid multiple calls to GetHashCode
-        var hashCode = GetHashCode();
+        int hashCode = GetHashCode();
 
         // Draw the drag integer control
         if (ImGui.DragInt($"##Config_{ID}{hashCode}", ref value, Speed, Min, Max))

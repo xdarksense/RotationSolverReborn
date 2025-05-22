@@ -9,13 +9,13 @@ namespace RotationSolver.Helpers;
 internal class RotationLoadContext(DirectoryInfo? directoryInfo)
     : AssemblyLoadContext(true)
 {
-    readonly DirectoryInfo? _directory = directoryInfo;
+    private readonly DirectoryInfo? _directory = directoryInfo;
 
     private static readonly Dictionary<string, Assembly> _handledAssemblies = [];
 
     static RotationLoadContext()
     {
-        var assemblies = new Assembly[]
+        Assembly[] assemblies = new Assembly[]
         {
             typeof(RotationSolverPlugin).Assembly,
             //typeof(Resolver).Assembly,
@@ -25,7 +25,7 @@ internal class RotationLoadContext(DirectoryInfo? directoryInfo)
             //typeof(QuestDialogueText).Assembly,
         };
 
-        foreach (var assembly in assemblies)
+        foreach (Assembly assembly in assemblies)
         {
             _handledAssemblies.Add(assembly.GetName().Name ?? string.Empty, assembly);
         }
@@ -33,12 +33,12 @@ internal class RotationLoadContext(DirectoryInfo? directoryInfo)
 
     protected override Assembly? Load(AssemblyName assemblyName)
     {
-        if (assemblyName.Name != null && _handledAssemblies.TryGetValue(assemblyName.Name, out var value))
+        if (assemblyName.Name != null && _handledAssemblies.TryGetValue(assemblyName.Name, out Assembly? value))
         {
             return value;
         }
 
-        var file = Path.Join(_directory?.FullName ?? string.Empty, $"{assemblyName.Name}.dll");
+        string file = Path.Join(_directory?.FullName ?? string.Empty, $"{assemblyName.Name}.dll");
         if (File.Exists(file))
         {
             try
@@ -55,8 +55,8 @@ internal class RotationLoadContext(DirectoryInfo? directoryInfo)
 
     internal Assembly LoadFromFile(string filePath)
     {
-        using var file = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-        var pdbPath = Path.ChangeExtension(filePath, ".pdb");
+        using FileStream file = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        string pdbPath = Path.ChangeExtension(filePath, ".pdb");
         if (!File.Exists(pdbPath))
         {
 #if DEBUG
@@ -64,7 +64,7 @@ internal class RotationLoadContext(DirectoryInfo? directoryInfo)
 #endif
             return LoadFromStream(file);
         }
-        using var pdbFile = File.Open(pdbPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+        using FileStream pdbFile = File.Open(pdbPath, FileMode.Open, FileAccess.Read, FileShare.Read);
         try
         {
             return LoadFromStream(file, pdbFile);

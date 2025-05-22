@@ -3,9 +3,8 @@ using Dalamud.Interface.Utility;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Configuration.Conditions;
 using RotationSolver.Data;
-using RotationSolver.UI.SearchableConfigs;
 
-namespace RotationSolver.UI.SearchableSettings;
+namespace RotationSolver.UI.SearchableConfigs;
 
 internal class CheckBoxSearchCondition(PropertyInfo property, params ISearchable[] children)
     : CheckBoxSearch(property,
@@ -33,7 +32,11 @@ internal class CheckBoxSearchCondition(PropertyInfo property, params ISearchable
             _condition = (ConditionBoolean)property.GetValue(Service.Config)!;
             AdditionalDraw = () =>
             {
-                if (DataCenter.CurrentRotation == null) return;
+                if (DataCenter.CurrentRotation == null)
+                {
+                    return;
+                }
+
                 GetCondition()?.DrawMain(DataCenter.CurrentRotation);
             };
         }
@@ -139,7 +142,7 @@ internal abstract class CheckBoxSearch : Searchable
         : base(property)
     {
         Action = property.GetCustomAttribute<UIAttribute>()?.Action ?? ActionID.None;
-        foreach (var child in children)
+        foreach (ISearchable child in children)
         {
             AddChild(child);
         }
@@ -155,12 +158,15 @@ internal abstract class CheckBoxSearch : Searchable
 
     protected virtual void DrawChildren()
     {
-        var lastIs = false;
-        foreach (var child in Children)
+        bool lastIs = false;
+        foreach (ISearchable child in Children)
         {
-            if (!child.ShowInChild) continue;
+            if (!child.ShowInChild)
+            {
+                continue;
+            }
 
-            var thisIs = child is CheckBoxSearch c && c.Action != ActionID.None && IconSet.GetTexture(c.Action, out var texture);
+            bool thisIs = child is CheckBoxSearch c && c.Action != ActionID.None && c.Action.GetTexture(out IDalamudTextureWrap? texture);
             if (lastIs && thisIs)
             {
                 ImGui.SameLine();
@@ -178,10 +184,10 @@ internal abstract class CheckBoxSearch : Searchable
 
     protected override void DrawMain()
     {
-        var hasChild = false;
+        bool hasChild = false;
         if (Children != null)
         {
-            foreach (var c in Children)
+            foreach (ISearchable c in Children)
             {
                 if (c.ShowInChild)
                 {
@@ -190,26 +196,29 @@ internal abstract class CheckBoxSearch : Searchable
                 }
             }
         }
-        var hasAdditional = AdditionalDraw != null;
-        var hasSub = hasChild || hasAdditional;
+        bool hasAdditional = AdditionalDraw != null;
+        bool hasSub = hasChild || hasAdditional;
         IDalamudTextureWrap? texture = null;
-        var hasIcon = Action != ActionID.None && IconSet.GetTexture(Action, out texture);
+        bool hasIcon = Action != ActionID.None && Action.GetTexture(out texture);
 
-        var enable = Value;
+        bool enable = Value;
         if (ImGui.Checkbox($"##{ID}", ref enable))
         {
             Value = enable;
         }
-        if (ImGui.IsItemHovered()) ShowTooltip();
+        if (ImGui.IsItemHovered())
+        {
+            ShowTooltip();
+        }
 
         ImGui.SameLine();
 
-        var name = $"{Name}##Config_{ID}{GetHashCode()}";
+        string name = $"{Name}##Config_{ID}{GetHashCode()}";
         if (hasIcon)
         {
             ImGui.BeginGroup();
-            var cursor = ImGui.GetCursorPos();
-            var size = ImGuiHelpers.GlobalScale * 32;
+            Vector2 cursor = ImGui.GetCursorPos();
+            float size = ImGuiHelpers.GlobalScale * 32;
             if (ImGuiHelper.NoPaddingNoColorImageButton(texture!.ImGuiHandle, Vector2.One * size, ID))
             {
                 Value = enable;
@@ -217,16 +226,22 @@ internal abstract class CheckBoxSearch : Searchable
             ImGuiHelper.DrawActionOverlay(cursor, size, enable ? 1 : 0);
             ImGui.EndGroup();
 
-            if (ImGui.IsItemHovered()) ShowTooltip();
+            if (ImGui.IsItemHovered())
+            {
+                ShowTooltip();
+            }
         }
         else if (hasSub)
         {
             if (enable || AlwaysShowChildren)
             {
-                var x = ImGui.GetCursorPosX();
+                float x = ImGui.GetCursorPosX();
                 DrawMiddle();
-                var drawBody = ImGui.TreeNode(name);
-                if (ImGui.IsItemHovered()) ShowTooltip();
+                bool drawBody = ImGui.TreeNode(name);
+                if (ImGui.IsItemHovered())
+                {
+                    ShowTooltip();
+                }
 
                 if (drawBody)
                 {
@@ -245,8 +260,11 @@ internal abstract class CheckBoxSearch : Searchable
             {
                 ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0x0);
                 ImGui.PushStyleColor(ImGuiCol.HeaderActive, 0x0);
-                ImGui.TreeNodeEx(name, ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen);
-                if (ImGui.IsItemHovered()) ShowTooltip(false);
+                _ = ImGui.TreeNodeEx(name, ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen);
+                if (ImGui.IsItemHovered())
+                {
+                    ShowTooltip(false);
+                }
 
                 ImGui.PopStyleColor(2);
             }
@@ -254,9 +272,15 @@ internal abstract class CheckBoxSearch : Searchable
         else
         {
             ImGui.TextWrapped(Name);
-            if (ImGui.IsItemHovered()) ShowTooltip(false);
+            if (ImGui.IsItemHovered())
+            {
+                ShowTooltip(false);
+            }
         }
         // Draw job icon if IsJob is true
-        if (IsJob) DrawJobIcon();
+        if (IsJob)
+        {
+            DrawJobIcon();
+        }
     }
 }

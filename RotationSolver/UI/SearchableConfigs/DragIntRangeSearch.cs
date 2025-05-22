@@ -11,15 +11,8 @@ internal class DragIntRangeSearch : Searchable
     {
         get
         {
-            var baseDesc = base.Description;
-            if (!string.IsNullOrEmpty(baseDesc))
-            {
-                return baseDesc + "\n" + Unit.ToString();
-            }
-            else
-            {
-                return Unit.ToString();
-            }
+            string baseDesc = base.Description;
+            return !string.IsNullOrEmpty(baseDesc) ? baseDesc + "\n" + Unit.ToString() : Unit.ToString();
         }
     }
 
@@ -44,7 +37,7 @@ internal class DragIntRangeSearch : Searchable
     public DragIntRangeSearch(PropertyInfo property) : base(property)
     {
         // Retrieve the RangeAttribute from the property
-        var range = _property.GetCustomAttribute<RangeAttribute>();
+        RangeAttribute? range = _property.GetCustomAttribute<RangeAttribute>();
         Min = (int?)range?.MinValue ?? 0;
         Max = (int?)range?.MaxValue ?? 1;
         Speed = range?.Speed ?? 0.001f;
@@ -53,14 +46,14 @@ internal class DragIntRangeSearch : Searchable
 
     protected override void DrawMain()
     {
-        var minValue = MinValue;
-        var maxValue = MaxValue;
+        int minValue = MinValue;
+        int maxValue = MaxValue;
 
         // Set the width of the drag control
         ImGui.SetNextItemWidth(Scale * DRAG_WIDTH);
 
         // Cache the hash code to avoid multiple calls
-        var hashCode = GetHashCode();
+        int hashCode = GetHashCode();
 
         // Draw the integer range drag control
         if (ImGui.DragIntRange2($"##Config_{ID}{hashCode}", ref minValue, ref maxValue, Speed, Min, Max))
@@ -70,15 +63,24 @@ internal class DragIntRangeSearch : Searchable
         }
 
         // Show tooltip if item is hovered
-        if (ImGui.IsItemHovered()) ShowTooltip();
+        if (ImGui.IsItemHovered())
+        {
+            ShowTooltip();
+        }
 
         // Draw job icon if IsJob is true
-        if (IsJob) DrawJobIcon();
+        if (IsJob)
+        {
+            DrawJobIcon();
+        }
 
         ImGui.SameLine();
         ImGui.TextWrapped(Name);
 
         // Show tooltip if item is hovered
-        if (ImGui.IsItemHovered()) ShowTooltip(false);
+        if (ImGui.IsItemHovered())
+        {
+            ShowTooltip(false);
+        }
     }
 }

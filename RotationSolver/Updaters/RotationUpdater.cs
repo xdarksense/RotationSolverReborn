@@ -581,7 +581,7 @@ internal static class RotationUpdater
         }
 
         // Sort groups by key
-        List<string> sortedKeys = new(groups.Keys);
+        List<string> sortedKeys = [.. groups.Keys];
         sortedKeys.Sort(StringComparer.Ordinal);
 
         List<IGrouping<string, IAction>> result = [];

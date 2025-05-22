@@ -12,8 +12,8 @@
             BaseCommit = new Commit();
             MergeBaseCommit = new Commit();
             Status = string.Empty;
-            Commits = new List<Commit>();
-            Files = new List<CommitFile>();
+            Commits = [];
+            Files = [];
         }
 
         [JsonProperty("url")]
@@ -68,7 +68,7 @@
             CommentsUrl = string.Empty;
             Author = new GithubRelease.Author();
             Committer = new GithubRelease.Author();
-            Parents = new List<Parent>();
+            Parents = [];
         }
 
         [JsonProperty("sha")]
