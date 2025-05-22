@@ -1189,19 +1189,37 @@ public struct ActionTargetInfo(IBaseAction action)
                         // 1. Tanks with tank stance and without Kardion
                         if (m.HasStatus(false, StatusHelper.TankStanceStatus) && !m.HasStatus(false, StatusID.Kardion))
                         {
-                            PluginLog.Debug($"FindKardia: {m.Name} is a tank with TankStanceStatus and without Kardion.");
+                            PluginLog.Debug($"FindKardia 1: {m.Name} is a tank with TankStanceStatus and without Kardion.");
                             return m;
                         }
+                    }
+                }
+            }
 
+            foreach (Job job in KardiaTankPriority)
+            {
+                foreach (IBattleChara m in DataCenter.PartyMembers)
+                {
+                    if (m.IsJobCategory(JobRole.Tank) && m.IsJobs(job) && !m.IsDead)
+                    {
                         // 2. Tanks with tank stance (regardless of Kardion)
                         if (m.HasStatus(false, StatusHelper.TankStanceStatus))
                         {
-                            PluginLog.Debug($"FindKardia: {m.Name} is a tank with TankStanceStatus.");
+                            PluginLog.Debug($"FindKardia 2: {m.Name} is a tank with TankStanceStatus.");
                             return m;
                         }
+                    }
+                }
+            }
 
+            foreach (Job job in KardiaTankPriority)
+            {
+                foreach (IBattleChara m in DataCenter.PartyMembers)
+                {
+                    if (m.IsJobCategory(JobRole.Tank) && m.IsJobs(job) && !m.IsDead)
+                    {
                         // 3. Any alive tank in priority order
-                        PluginLog.Debug($"FindKardia: {m.Name} is a tank fallback.");
+                        PluginLog.Debug($"FindKardia 3: {m.Name} is a tank fallback.");
                         return m;
                     }
                 }
