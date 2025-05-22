@@ -6,7 +6,7 @@ namespace RotationSolver.Basic.Helpers
     {
         internal static bool AddSystemWarning(string warning)
         {
-            var systemWarnings = DataCenter.SystemWarnings;
+            Dictionary<string, DateTime> systemWarnings = DataCenter.SystemWarnings;
             if (systemWarnings == null)
             {
                 // Log the error before throwing the exception

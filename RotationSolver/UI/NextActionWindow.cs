@@ -8,7 +8,7 @@ namespace RotationSolver.UI;
 
 internal class NextActionWindow : Window
 {
-    const ImGuiWindowFlags BaseFlags = ControlWindow.BaseFlags
+    private const ImGuiWindowFlags BaseFlags = ControlWindow.BaseFlags
     | ImGuiWindowFlags.AlwaysAutoResize
     | ImGuiWindowFlags.NoResize;
 
@@ -43,20 +43,20 @@ internal class NextActionWindow : Window
 
     public override unsafe void Draw()
     {
-        var config = Service.Config;
-        var width = config.ControlWindowGCDSize * config.ControlWindowNextSizeRatio;
+        Basic.Configuration.Configs config = Service.Config;
+        float width = config.ControlWindowGCDSize * config.ControlWindowNextSizeRatio;
         DrawGcdCooldown(width, false);
 
-        var percent = 0f;
+        float percent = 0f;
 
-        var actionManager = ActionManager.Instance();
+        ActionManager* actionManager = ActionManager.Instance();
         if (actionManager == null)
         {
             // Handle the case where actionManager is null
             return;
         }
 
-        var group = actionManager->GetRecastGroupDetail(ActionHelper.GCDCooldownGroup - 1);
+        RecastDetail* group = actionManager->GetRecastGroupDetail(ActionHelper.GCDCooldownGroup - 1);
         if (group == null)
         {
             // Handle the case where group is null
@@ -76,35 +76,35 @@ internal class NextActionWindow : Window
             }
         }
 
-        ControlWindow.DrawIAction(ActionUpdater.NextAction, width, percent);
+        _ = ControlWindow.DrawIAction(ActionUpdater.NextAction, width, percent);
     }
 
     public static unsafe void DrawGcdCooldown(float width, bool drawTitle)
     {
-        var remain = DataCenter.DefaultGCDRemain;
-        var total = DataCenter.DefaultGCDTotal;
-        var elapsed = DataCenter.DefaultGCDElapsed;
+        float remain = DataCenter.DefaultGCDRemain;
+        float total = DataCenter.DefaultGCDTotal;
+        float elapsed = DataCenter.DefaultGCDElapsed;
 
         if (drawTitle)
         {
-            var str = $"{remain:F2}s / {total:F2}s";
-            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + width / 2 - ImGui.CalcTextSize(str).X / 2);
+            string str = $"{remain:F2}s / {total:F2}s";
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (width / 2) - (ImGui.CalcTextSize(str).X / 2));
             ImGui.Text(str);
         }
 
-        var cursor = ImGui.GetCursorPos() + ImGui.GetWindowPos();
-        var height = Service.Config.ControlProgressHeight;
+        Vector2 cursor = ImGui.GetCursorPos() + ImGui.GetWindowPos();
+        float height = Service.Config.ControlProgressHeight;
 
         ImGui.ProgressBar(elapsed / total, new Vector2(width, height), string.Empty);
 
-        var actionRemain = DataCenter.DefaultGCDRemain;
+        float actionRemain = DataCenter.DefaultGCDRemain;
         if (actionRemain > 0)
         {
-            var value = total - DataCenter.CalculatedActionAhead;
+            float value = total - DataCenter.CalculatedActionAhead;
 
             if (value > Player.Object.TotalCastTime)
             {
-                var pt = cursor + new Vector2(width, 0) * value / total;
+                Vector2 pt = cursor + (new Vector2(width, 0) * value / total);
 
                 ImGui.GetWindowDrawList().AddLine(pt, pt + new Vector2(0, height),
                     ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudRed), 2);

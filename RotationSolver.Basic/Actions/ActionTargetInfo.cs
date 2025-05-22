@@ -204,12 +204,7 @@ public struct ActionTargetInfo(IBaseAction action)
             return false;
         }
 
-        if (tar.GameObjectId == 0)
-        {
-            return false;
-        }
-
-        return tar.Struct() != null && (IsSpecialAbility(action.Info.ID) || ActionManager.CanUseActionOnTarget(action.Info.AdjustedID, tar.Struct())) && tar.CanSee();
+        return tar.GameObjectId != 0 && tar.Struct() != null && (IsSpecialAbility(action.Info.ID) || ActionManager.CanUseActionOnTarget(action.Info.AdjustedID, tar.Struct())) && tar.CanSee();
     }
 
     private readonly List<ActionID> _specialActions =
@@ -502,17 +497,15 @@ public struct ActionTargetInfo(IBaseAction action)
         {
             return FindTargetAreaMove(range);
         }
-        else if (action.Setting.IsFriendly)
-        {
-            return !Service.Config.UseGroundBeneficialAbility
-                ? null
-                : !Service.Config.UseGroundBeneficialAbilityWhenMoving && DataCenter.IsMoving
-                ? null
-                : FindTargetAreaFriend(range, canAffects, player);
-        }
         else
         {
-            return FindTargetAreaHostile(canTargets, canAffects, action.Config.AoeCount);
+            return action.Setting.IsFriendly
+                ? !Service.Config.UseGroundBeneficialAbility
+                            ? null
+                            : !Service.Config.UseGroundBeneficialAbilityWhenMoving && DataCenter.IsMoving
+                            ? null
+                            : FindTargetAreaFriend(range, canAffects, player)
+                : FindTargetAreaHostile(canTargets, canAffects, action.Config.AoeCount);
         }
     }
 

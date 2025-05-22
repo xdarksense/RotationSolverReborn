@@ -12,16 +12,16 @@ internal class EnumSearch(PropertyInfo property) : Searchable(property)
 
     protected override void DrawMain()
     {
-        var currentValue = Value;
+        int currentValue = Value;
 
         // Create a map of enum values to their descriptions
-        var enumValueToNameMap = new Dictionary<int, string>();
+        Dictionary<int, string> enumValueToNameMap = new();
         foreach (Enum enumValue in Enum.GetValues(_property.PropertyType))
         {
             enumValueToNameMap[Convert.ToInt32(enumValue)] = enumValue.GetDescription();
         }
 
-        var displayNames = enumValueToNameMap.Values.ToArray();
+        string[] displayNames = enumValueToNameMap.Values.ToArray();
 
         if (displayNames.Length > 0)
         {
@@ -30,10 +30,13 @@ internal class EnumSearch(PropertyInfo property) : Searchable(property)
 
             // Find the current index of the selected value
             int currentIndex = enumValueToNameMap.Keys.ToList().IndexOf(currentValue);
-            if (currentIndex == -1) currentIndex = 0; // Default to first item if not found
+            if (currentIndex == -1)
+            {
+                currentIndex = 0; // Default to first item if not found
+            }
 
             // Cache the hash code to avoid multiple calls
-            var hashCode = GetHashCode();
+            int hashCode = GetHashCode();
 
             // Draw the combo box
             if (ImGui.Combo($"##Config_{ID}{hashCode}", ref currentIndex, displayNames, displayNames.Length))
@@ -43,15 +46,24 @@ internal class EnumSearch(PropertyInfo property) : Searchable(property)
         }
 
         // Show tooltip if item is hovered
-        if (ImGui.IsItemHovered()) ShowTooltip();
+        if (ImGui.IsItemHovered())
+        {
+            ShowTooltip();
+        }
 
         // Draw job icon if IsJob is true
-        if (IsJob) DrawJobIcon();
+        if (IsJob)
+        {
+            DrawJobIcon();
+        }
 
         ImGui.SameLine();
         ImGui.TextWrapped(Name);
 
         // Show tooltip if item is hovered
-        if (ImGui.IsItemHovered()) ShowTooltip(false);
+        if (ImGui.IsItemHovered())
+        {
+            ShowTooltip(false);
+        }
     }
 }

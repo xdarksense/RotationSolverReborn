@@ -7,6 +7,7 @@ using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using RotationSolver.Commands;
+using RotationSolver.Helpers;
 
 namespace RotationSolver.Updaters;
 
@@ -246,8 +247,8 @@ internal static class ActionUpdater
 
     private static unsafe bool IsPlayerOccupied()
     {
-        return !MajorUpdater.IsValid || Svc.ClientState.LocalPlayer?.IsTargetable != true || ActionManager.Instance()->ActionQueued && NextAction != null
-            && ActionManager.Instance()->QueuedActionId != NextAction.AdjustedID;
+        return !MajorUpdater.IsValid || Svc.ClientState.LocalPlayer?.IsTargetable != true || (ActionManager.Instance()->ActionQueued && NextAction != null
+            && ActionManager.Instance()->QueuedActionId != NextAction.AdjustedID);
     }
 
     private static void LogError(string message, Exception ex)

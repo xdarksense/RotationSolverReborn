@@ -22,15 +22,13 @@ internal class IConditionConverter : JsonCreationConverter<ICondition>
         {
             return new RotationCondition();
         }
-        else if (FieldExists(nameof(TraitCondition.TraitID), jObject))
-        {
-            return new TraitCondition();
-        }
         else
         {
-            return FieldExists(nameof(NamedCondition.ConditionName), jObject)
-                ? new NamedCondition()
-                : FieldExists(nameof(TerritoryCondition.TerritoryConditionType), jObject) ? new TerritoryCondition() : (ICondition?)null;
+            return FieldExists(nameof(TraitCondition.TraitID), jObject)
+                ? new TraitCondition()
+                : FieldExists(nameof(NamedCondition.ConditionName), jObject)
+                            ? new NamedCondition()
+                            : FieldExists(nameof(TerritoryCondition.TerritoryConditionType), jObject) ? new TerritoryCondition() : (ICondition?)null;
         }
     }
 }

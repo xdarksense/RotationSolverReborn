@@ -26,15 +26,21 @@ public abstract class DrawingHighlightHotbarBase : IDisposable
 
     protected virtual void Dispose(bool disposing)
     {
-        if (_disposed) return;
+        if (_disposed)
+        {
+            return;
+        }
 
         lock (_disposeLock)
         {
-            if (_disposed) return;
+            if (_disposed)
+            {
+                return;
+            }
 
             if (disposing)
             {
-                RotationSolverPlugin._drawingElements.Remove(this);
+                _ = RotationSolverPlugin._drawingElements.Remove(this);
             }
 
             _disposed = true;
@@ -43,13 +49,16 @@ public abstract class DrawingHighlightHotbarBase : IDisposable
 
     internal async Task<IEnumerable<IDrawing2D>> To2DMain()
     {
-        if (!Enable) return Array.Empty<IDrawing2D>();
-        return await Task.FromResult(To2D());
+        return !Enable ? Array.Empty<IDrawing2D>() : await Task.FromResult(To2D());
     }
 
     internal void UpdateOnFrameMain()
     {
-        if (!Enable) return;
+        if (!Enable)
+        {
+            return;
+        }
+
         UpdateOnFrame();
     }
 

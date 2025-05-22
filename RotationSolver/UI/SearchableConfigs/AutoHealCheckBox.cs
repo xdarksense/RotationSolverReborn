@@ -1,6 +1,5 @@
 ﻿using RotationSolver.Basic.Configuration;
 using RotationSolver.Data;
-using RotationSolver.UI.SearchableSettings;
 
 namespace RotationSolver.UI.SearchableConfigs;
 
@@ -23,7 +22,7 @@ internal class AutoHealCheckBox(PropertyInfo property, params ISearchable[] othe
     // Helper to concatenate arrays without LINQ
     private static ISearchable[] ConcatChildren(ISearchable[] otherChildren)
     {
-        var healthChildren = new ISearchable[]
+        ISearchable[] healthChildren = new ISearchable[]
         {
             _healthAreaAbility,
             _healthAreaAbilityHot,
@@ -35,7 +34,7 @@ internal class AutoHealCheckBox(PropertyInfo property, params ISearchable[] othe
             _healthSingleSpellHot,
         };
 
-        var result = new ISearchable[otherChildren.Length + healthChildren.Length];
+        ISearchable[] result = new ISearchable[otherChildren.Length + healthChildren.Length];
         otherChildren.CopyTo(result, 0);
         healthChildren.CopyTo(result, otherChildren.Length);
         return result;
@@ -44,18 +43,16 @@ internal class AutoHealCheckBox(PropertyInfo property, params ISearchable[] othe
     // Method to create DragFloatSearch instances with null checks
     private static DragFloatSearch CreateDragFloatSearch(string propertyName)
     {
-        var property = typeof(Configs).GetRuntimeProperty(propertyName);
-        if (property == null)
-        {
-            throw new ArgumentException($"Property '{propertyName}' not found in Configs.");
-        }
-        return new DragFloatSearch(property);
+        PropertyInfo? property = typeof(Configs).GetRuntimeProperty(propertyName);
+        return property == null
+            ? throw new ArgumentException($"Property '{propertyName}' not found in Configs.")
+            : new DragFloatSearch(property);
     }
 
     protected override void DrawChildren()
     {
         // Draw other children
-        foreach (var child in _otherChildren)
+        foreach (ISearchable child in _otherChildren)
         {
             child.Draw();
         }
@@ -68,13 +65,13 @@ internal class AutoHealCheckBox(PropertyInfo property, params ISearchable[] othe
             ImGui.TableSetupScrollFreeze(0, 1);
             ImGui.TableNextRow(ImGuiTableRowFlags.Headers);
 
-            ImGui.TableNextColumn();
+            _ = ImGui.TableNextColumn();
             ImGui.TableHeader("");
 
-            ImGui.TableNextColumn();
+            _ = ImGui.TableNextColumn();
             ImGui.TableHeader(UiString.NormalTargets.GetDescription());
 
-            ImGui.TableNextColumn();
+            _ = ImGui.TableNextColumn();
             ImGui.TableHeader(UiString.HotTargets.GetDescription());
 
             DrawHealthRow(UiString.HpAoe0Gcd.GetDescription(), _healthAreaAbility, _healthAreaAbilityHot);
@@ -90,13 +87,13 @@ internal class AutoHealCheckBox(PropertyInfo property, params ISearchable[] othe
     private void DrawHealthRow(string description, DragFloatSearch normalTarget, DragFloatSearch hotTarget)
     {
         ImGui.TableNextRow();
-        ImGui.TableNextColumn();
+        _ = ImGui.TableNextColumn();
         ImGui.Text(description);
 
-        ImGui.TableNextColumn();
+        _ = ImGui.TableNextColumn();
         normalTarget?.Draw();
 
-        ImGui.TableNextColumn();
+        _ = ImGui.TableNextColumn();
         hotTarget?.Draw();
     }
 }

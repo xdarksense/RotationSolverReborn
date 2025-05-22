@@ -12,7 +12,7 @@ internal abstract class CtrlWindow(string name) : Window(name, BaseFlags)
 
     public override void PreDraw()
     {
-        var config = Service.Config;
+        Basic.Configuration.Configs config = Service.Config;
         Vector4 bgColor = config.IsControlWindowLock
             ? config.ControlWindowLockBg
             : config.ControlWindowUnlockBg;

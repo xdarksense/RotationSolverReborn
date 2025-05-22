@@ -971,12 +971,7 @@ internal static class DataCenter
     {
         return IsCastingVfx(VfxDataQueue, s =>
         {
-            if (!Player.AvailableThreadSafe)
-            {
-                return false;
-            }
-
-            return (!Player.Object.IsJobCategory(JobRole.Tank) || s.ObjectId == Player.Object.GameObjectId) && (s.Path.StartsWith("vfx/lockon/eff/tank_lockon")
+            return Player.AvailableThreadSafe && (!Player.Object.IsJobCategory(JobRole.Tank) || s.ObjectId == Player.Object.GameObjectId) && (s.Path.StartsWith("vfx/lockon/eff/tank_lockon")
             || s.Path.StartsWith("vfx/lockon/eff/tank_laser"));
         });
     }
@@ -994,7 +989,7 @@ internal static class DataCenter
     public static bool IsCastingVfx(List<VfxNewData> vfxDataQueueCopy, Func<VfxNewData, bool> isVfx)
     {
         // Create a copy of the list to avoid modification during enumeration
-        List<VfxNewData> vfxDataQueueSnapshot = new(vfxDataQueueCopy);
+        List<VfxNewData> vfxDataQueueSnapshot = [.. vfxDataQueueCopy];
 
         // Ensure the list is not empty
         if (vfxDataQueueSnapshot.Count == 0)

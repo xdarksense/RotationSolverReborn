@@ -1,6 +1,4 @@
-﻿using RotationSolver.UI.SearchableConfigs;
-
-namespace RotationSolver.UI.SearchableSettings;
+﻿namespace RotationSolver.UI.SearchableConfigs;
 
 internal interface ISearchable
 {

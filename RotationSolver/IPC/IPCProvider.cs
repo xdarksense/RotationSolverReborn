@@ -8,7 +8,7 @@ namespace RotationSolver.IPC
     {
         internal IPCProvider()
         {
-            EzIPC.Init(this, prefix: "RotationSolverReborn");
+            _ = EzIPC.Init(this, prefix: "RotationSolverReborn");
         }
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace RotationSolver.IPC
             {
                 if (DataCenter.PrioritizedNameIds.Contains(nameId))
                 {
-                    DataCenter.PrioritizedNameIds.Remove(nameId);
+                    _ = DataCenter.PrioritizedNameIds.Remove(nameId);
                     PluginLog.Debug($"IPC RemovePriorityNameID was called. NameID:{nameId}");
                 }
                 else
@@ -93,7 +93,7 @@ namespace RotationSolver.IPC
             {
                 if (DataCenter.BlacklistedNameIds.Contains(nameId))
                 {
-                    DataCenter.BlacklistedNameIds.Remove(nameId);
+                    _ = DataCenter.BlacklistedNameIds.Remove(nameId);
                     PluginLog.Debug($"IPC RemoveBlacklistNameID was called. NameID:{nameId}");
                 }
                 else

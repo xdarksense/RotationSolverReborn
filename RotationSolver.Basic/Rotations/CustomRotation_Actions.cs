@@ -7,7 +7,7 @@ public partial class CustomRotation
     internal static void LoadActionSetting(ref IBaseAction action)
     {
         Lumina.Excel.Sheets.Action a = action.Action;
-        action.Setting.IsFriendly = a.CanTargetAlly || a.CanTargetParty || !a.CanTargetHostile && action.TargetInfo.EffectRange > 5;
+        action.Setting.IsFriendly = a.CanTargetAlly || a.CanTargetParty || (!a.CanTargetHostile && action.TargetInfo.EffectRange > 5);
         // TODO: better target type check. (NoNeed?)
     }
 
@@ -70,12 +70,7 @@ public partial class CustomRotation
     {
         setting.CanTarget = o =>
         {
-            if (o is not IBattleChara b)
-            {
-                return false;
-            }
-
-            return !b.IsBossFromIcon() && !IsMoving && b.CastActionId != 0 && (!b.IsCastInterruptible || ActionID.InterjectPvE.IsCoolingDown());
+            return o is IBattleChara b && !b.IsBossFromIcon() && !IsMoving && b.CastActionId != 0 && (!b.IsCastInterruptible || ActionID.InterjectPvE.IsCoolingDown());
         };
     }
 

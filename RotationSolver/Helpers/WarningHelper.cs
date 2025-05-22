@@ -1,13 +1,10 @@
-﻿namespace RotationSolver.Basic.Helpers;
+﻿namespace RotationSolver.Helpers;
 
 public static class WarningHelper
 {
     public static void AddSystemWarning(string message)
     {
-        if (DataCenter.SystemWarnings == null)
-        {
-            DataCenter.SystemWarnings = new Dictionary<string, DateTime>();
-        }
+        DataCenter.SystemWarnings ??= [];
         if (!DataCenter.SystemWarnings.ContainsKey(message))
         {
             DataCenter.SystemWarnings.Add(message, DateTime.Now);

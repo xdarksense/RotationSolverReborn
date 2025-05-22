@@ -542,12 +542,7 @@ public partial class DancerRotation
             return true;
         }
 
-        if (EntrechatPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        return JetePvE.CanUse(out act) || PirouettePvE.CanUse(out act);
+        return EntrechatPvE.CanUse(out act) || JetePvE.CanUse(out act) || PirouettePvE.CanUse(out act);
     }
     #endregion
 

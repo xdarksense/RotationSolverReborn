@@ -123,10 +123,10 @@ internal class ActionSequencerUpdater
 
         if (!hasUnnamed)
         {
-            List<MajorConditionValue> newConditionSets = new(DataCenter.ConditionSets)
-            {
-                new MajorConditionValue()
-            };
+            List<MajorConditionValue> newConditionSets =
+            [
+.. DataCenter.ConditionSets,                 new MajorConditionValue()
+            ];
             DataCenter.ConditionSets = newConditionSets.ToArray();
         }
     }

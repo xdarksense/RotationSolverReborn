@@ -89,6 +89,7 @@ internal static class MajorUpdater
             {
                 RSCommands.UpdateRotationState();
                 ActionUpdater.ClearNextAction();
+                MiscUpdater.UpdateEntry();
                 CustomRotation.MoveTarget = null;
                 ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
                 return;
