@@ -42,7 +42,7 @@ public partial class RotationConfigWindow : Window
     private const float JOB_ICON_WIDTH = 50;
 
     public RotationConfigWindow()
-    : base("", ImGuiWindowFlags.NoScrollbar, false)
+    : base("###rsrConfigWindow", ImGuiWindowFlags.NoScrollbar, false)
     {
         SizeCondition = ImGuiCond.FirstUseEver;
         Size = new Vector2(740f, 490f);

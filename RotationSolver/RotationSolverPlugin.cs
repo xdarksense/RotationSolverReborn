@@ -202,7 +202,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
     internal static void ChangeUITranslation()
     {
         _rotationConfigWindow!.WindowName = UiString.ConfigWindowHeader.GetDescription()
-            + typeof(RotationConfigWindow).Assembly.GetName().Version?.ToString() ?? "?.?.?";
+            + (typeof(RotationConfigWindow).Assembly.GetName().Version?.ToString() ?? "?.?.?") + "###rsrConfigWindow";
 
         RSCommands.Disable();
         RSCommands.Enable();
