@@ -39,7 +39,7 @@ namespace RotationSolver.Commands
             }
             _lastState = currentState;
 
-            if (!Player.Available) return false;
+            if (!Player.AvailableThreadSafe) return false;
 
             // Precompute the delay range to avoid recalculating it multiple times
             var delayRange = TimeSpan.FromMilliseconds(random.Next(
@@ -57,12 +57,9 @@ namespace RotationSolver.Commands
 
         public static void DoAction()
         {
-            // Cache frequently accessed properties to avoid redundant calls
-            var playerObject = Player.Object;
-            if (playerObject == null) return;
-            if (playerObject.StatusList == null) return;
+            if (!Player.AvailableThreadSafe) return;
+            if (Player.Object.StatusList == null) return;
 
-            // Convert NoCastingStatus to StatusID[] without LINQ
             StatusID[] noCastingStatusArray;
             var noCastingStatus = OtherConfiguration.NoCastingStatus;
             if (noCastingStatus != null)
@@ -79,12 +76,9 @@ namespace RotationSolver.Commands
                 noCastingStatusArray = Array.Empty<StatusID>();
             }
 
-            var statusTimes = playerObject.StatusTimes(false, noCastingStatusArray);
-
-            // Replace Any() and Min() with manual logic
             float minStatusTime = float.MaxValue;
             int statusTimesCount = 0;
-            foreach (var t in statusTimes)
+            foreach (var t in Player.Object.StatusTimes(false, noCastingStatusArray))
             {
                 statusTimesCount++;
                 if (t < minStatusTime)
@@ -95,7 +89,7 @@ namespace RotationSolver.Commands
 
             if (statusTimesCount > 0)
             {
-                var remainingCastTime = playerObject.TotalCastTime - playerObject.CurrentCastTime;
+                var remainingCastTime = Player.Object.TotalCastTime - Player.Object.CurrentCastTime;
                 if (minStatusTime > remainingCastTime && minStatusTime < 5)
                 {
                     return;
@@ -112,7 +106,7 @@ namespace RotationSolver.Commands
 
             if (nextAction is BaseAction baseAct)
             {
-                if (baseAct.Target.Target is IBattleChara target && target != playerObject && target.IsEnemy())
+                if (baseAct.Target.Target is IBattleChara target && target != Player.Object && target.IsEnemy())
                 {
                     DataCenter.HostileTarget = target;
                     if (!DataCenter.IsManual &&
@@ -208,12 +202,12 @@ namespace RotationSolver.Commands
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                 }
 
-                if (Player.Object == null) return;
+                if (!Player.AvailableThreadSafe) return;
 
                 // Combine conditions to reduce redundant checks
                 if (Svc.Condition[ConditionFlag.LoggingOut] ||
-                    (Service.Config.AutoOffWhenDead && !(DataCenter.Territory?.IsPvP ?? false) && Player.Available && Player.Object.CurrentHp == 0) ||
-                    (Service.Config.AutoOffWhenDeadPvP && (DataCenter.Territory?.IsPvP ?? false) && Player.Available && Player.Object.CurrentHp == 0) ||
+                    (Service.Config.AutoOffWhenDead && !(DataCenter.Territory?.IsPvP ?? false) && Player.Object.CurrentHp == 0) ||
+                    (Service.Config.AutoOffWhenDeadPvP && (DataCenter.Territory?.IsPvP ?? false) && Player.Object.CurrentHp == 0) ||
                     (Service.Config.AutoOffPvPMatchEnd && Svc.Condition[ConditionFlag.PvPDisplayActive]) ||
                     (Service.Config.AutoOffCutScene && Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]) ||
                     (Service.Config.AutoOffSwitchClass && Player.Job != _previousJob) ||

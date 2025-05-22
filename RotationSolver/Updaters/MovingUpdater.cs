@@ -18,7 +18,7 @@ internal static class MovingUpdater
         }
 
         // Casting the action in list.
-        if (Svc.Condition?[ConditionFlag.Casting] == true && Player.Available == true)
+        if (Svc.Condition?[ConditionFlag.Casting] == true && Player.AvailableThreadSafe == true)
         {
             Service.CanMove = ActionBasicInfo.ActionsNoNeedCasting.Contains(Player.Object?.CastActionId ?? 0);
             return;

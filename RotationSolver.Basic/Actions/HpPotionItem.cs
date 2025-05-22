@@ -12,7 +12,7 @@ internal class HpPotionItem : BaseItem
     {
         get
         {
-            if (!Player.Available) return 0;
+            if (!Player.AvailableThreadSafe) return 0;
             return Math.Min((uint)(Player.Object.MaxHp * _percent), _maxHp);
         }
     }
@@ -29,7 +29,7 @@ internal class HpPotionItem : BaseItem
     public override bool CanUse(out IAction item, bool clippingCheck)
     {
         item = this;
-        if (!Player.Available) return false;
+        if (!Player.AvailableThreadSafe) return false;
         if (Player.Object.GetHealthRatio() > Service.Config.HealthSingleAbilityHot) return false;
         if (Player.Object.MaxHp - Player.Object.CurrentHp < MaxHp) return false;
         return base.CanUse(out item);

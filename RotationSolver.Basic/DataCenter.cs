@@ -22,7 +22,7 @@ internal static class DataCenter
 
     public static bool ResetActionConfigs { get; set; } = false;
 
-    public static bool IsActivated() => Player.Available && (State || IsManual || Service.Config.TeachingMode);
+    public static bool IsActivated() => Player.AvailableThreadSafe && (State || IsManual || Service.Config.TeachingMode);
 
     internal static IBattleChara? HostileTarget
     {
@@ -491,7 +491,7 @@ internal static class DataCenter
         get
         {
             float radius = 25;
-            if (!Player.Available) return radius;
+            if (!Player.AvailableThreadSafe) return radius;
 
             switch (DataCenter.Role)
             {
@@ -837,7 +837,7 @@ internal static class DataCenter
 
     internal static unsafe void AddActionRec(Action act)
     {
-        if (!Player.Available) return;
+        if (!Player.AvailableThreadSafe) return;
 
         var id = (ActionID)act.RowId;
 
@@ -901,7 +901,7 @@ internal static class DataCenter
     {
         return IsCastingVfx(VfxDataQueue, s =>
         {
-            if (!Player.Available) return false;
+            if (!Player.AvailableThreadSafe) return false;
             if (Player.Object.IsJobCategory(JobRole.Tank) && s.ObjectId != Player.Object.GameObjectId) return false;
 
             if (!s.Path.StartsWith("vfx/lockon/eff/tank_lockon")
@@ -914,7 +914,7 @@ internal static class DataCenter
     {
         return IsCastingVfx(VfxDataQueue, s =>
         {
-            if (!Player.Available) return false;
+            if (!Player.AvailableThreadSafe) return false;
 
             if (!s.Path.StartsWith("vfx/lockon/eff/coshare")
             && !s.Path.StartsWith("vfx/lockon/eff/share_laser")

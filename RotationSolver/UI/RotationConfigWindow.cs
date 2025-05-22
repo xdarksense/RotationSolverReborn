@@ -174,7 +174,7 @@ public partial class RotationConfigWindow : Window
             }
         }
 
-        if (Player.Object != null && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
+        if (Player.AvailableThreadSafe && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
         Player.Job == Job.LTW || Player.Job == Job.WVR || Player.Job == Job.ALC || Player.Job == Job.CUL ||
         Player.Job == Job.MIN || Player.Job == Job.FSH || Player.Job == Job.BTN))
         {
@@ -281,10 +281,10 @@ public partial class RotationConfigWindow : Window
 
         if (enabledIncompatiblePlugin.Name != null)
         {
-            errorText = $"Disable {enabledIncompatiblePlugin.Name}, can cause conflicts.";
+            errorText = $"Disable {enabledIncompatiblePlugin.Name}, can cause conflicts/crashes.";
         }
 
-        if (Player.Object != null && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
+        if (Player.AvailableThreadSafe && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
         Player.Job == Job.LTW || Player.Job == Job.WVR || Player.Job == Job.ALC || Player.Job == Job.CUL ||
         Player.Job == Job.MIN || Player.Job == Job.FSH || Player.Job == Job.BTN))
         {
@@ -1429,7 +1429,6 @@ public partial class RotationConfigWindow : Window
     {
         var rotation = DataCenter.CurrentRotation;
         if (rotation == null) return;
-        if (Player.Object == null) return;
         if (!Player.AvailableThreadSafe) return;
 
         var enable = rotation.IsEnabled;
@@ -1544,7 +1543,7 @@ public partial class RotationConfigWindow : Window
             ImGuiHelper.ReactPopup(key, command, Reset, false);
         }
 
-        if (Player.Object != null && DataCenter.PartyMembers != null && Player.Object.IsJobs(Job.DNC))
+        if (Player.AvailableThreadSafe && DataCenter.PartyMembers != null && Player.Object.IsJobs(Job.DNC))
         {
             ImGui.Spacing();
             ImGui.Text("Dance Partner Priority");
@@ -1596,7 +1595,7 @@ public partial class RotationConfigWindow : Window
             }
         }
 
-        if (Player.Object != null && DataCenter.PartyMembers != null && Player.Object.IsJobs(Job.SGE))
+        if (Player.AvailableThreadSafe && DataCenter.PartyMembers != null && Player.Object.IsJobs(Job.SGE))
         {
             ImGui.Spacing();
             ImGui.Text("Kardia Tank Priority");
@@ -1652,7 +1651,7 @@ public partial class RotationConfigWindow : Window
             }
         }
 
-        if (Player.Object != null && DataCenter.PartyMembers != null && Player.Object.IsJobs(Job.AST))
+        if (Player.AvailableThreadSafe && DataCenter.PartyMembers != null && Player.Object.IsJobs(Job.AST))
         {
             ImGui.Spacing();
 
@@ -1998,7 +1997,7 @@ public partial class RotationConfigWindow : Window
 
         static void DrawActionDebug()
         {
-            if (!Player.AvailableThreadSafe || !Player.Available || !Service.Config.InDebug) return;
+            if (!Player.AvailableThreadSafe || !Service.Config.InDebug) return;
 
             if (_activeAction is IBaseAction action)
             {
@@ -2901,7 +2900,7 @@ public partial class RotationConfigWindow : Window
                 OtherConfiguration.BeneficialPositions[territoryId] = pts = [];
             }
 
-            if (ImGui.Button(UiString.ConfigWindow_List_AddPosition.GetDescription()) && Player.Available) unsafe
+            if (ImGui.Button(UiString.ConfigWindow_List_AddPosition.GetDescription()) && Player.AvailableThreadSafe) unsafe
                 {
                     var point = Player.Object.Position;
                     var pointMathed = point + Vector3.UnitY * 5;
@@ -2974,7 +2973,7 @@ public partial class RotationConfigWindow : Window
     {
         _allSearchable.DrawItems(Configs.Debug);
 
-        if (!Player.AvailableThreadSafe || !Player.Available || !Service.Config.InDebug) return;
+        if (!Player.AvailableThreadSafe || !Service.Config.InDebug) return;
 
         _debugHeader?.Draw();
 

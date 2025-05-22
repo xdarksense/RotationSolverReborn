@@ -200,7 +200,7 @@ public class BaseAction : IBaseAction
 
             var loc = target.Position.Value;
 
-            if (Player.Object == null || ActionManager.Instance() == null)
+            if (ActionManager.Instance() == null)
             {
                 return false;
             }

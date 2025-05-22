@@ -1,6 +1,4 @@
-﻿using Dalamud.Game.ClientState.Conditions;
-using ECommons.DalamudServices;
-using ECommons.Logging;
+﻿using ECommons.Logging;
 using RotationSolver.UI.HighlightTeachingMode.ElementSpecial;
 using RotationSolver.Updaters;
 
@@ -33,7 +31,7 @@ internal static class HotbarHighlightManager
     public static void UpdateSettings()
     {
         //UseTaskToAccelerate = Service.Config.UseTasksForOverlay;
-        Enable = !Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent] && Service.Config.TeachingMode && MajorUpdater.IsValid;
+        Enable = Service.Config.TeachingMode && MajorUpdater.IsValid;
         HighlightColor = Service.Config.TeachingModeColor;
     }
 

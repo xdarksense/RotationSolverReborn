@@ -178,7 +178,6 @@ public readonly struct ActionBasicInfo
     /// <returns>True if the action passes the basic check; otherwise, false.</returns>
     internal readonly bool BasicCheck(bool skipStatusProvideCheck, bool skipComboCheck, bool skipCastingCheck)
     {
-        if (Player.Object == null) return false;
         if (Player.Object.StatusList == null) return false;
 
         if (!IsActionEnabled() || !IsOnSlot) return false;
@@ -207,14 +206,12 @@ public readonly struct ActionBasicInfo
 
     private bool IsStatusNeeded()
     {
-        if (Player.Object == null) return false;
         if (Player.Object.StatusList == null) return false;
         return _action.Setting.StatusNeed != null && Player.Object.WillStatusEndGCD(_action.Config.StatusGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusNeed);
     }
 
     private bool IsStatusProvided(bool skipStatusProvideCheck)
     {
-        if (Player.Object == null) return false;
         if (Player.Object.StatusList == null) return false;
         return !skipStatusProvideCheck && _action.Setting.StatusProvide != null && !Player.Object.WillStatusEndGCD(_action.Config.StatusGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusProvide);
     }
