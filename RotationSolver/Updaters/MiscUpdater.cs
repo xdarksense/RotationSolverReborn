@@ -24,7 +24,7 @@ internal static class MiscUpdater
 
     private static IDtrBarEntry? _dtrEntry;
 
-    private static void UpdateEntry()
+    internal static void UpdateEntry()
     {
         string showStr = RSCommands.EntryString;
         BitmapFontIcon icon = GetJobIcon(Player.Job);

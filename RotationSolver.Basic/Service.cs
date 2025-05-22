@@ -28,7 +28,9 @@ internal class Service : IDisposable
 
     // From https://GitHub.com/PunishXIV/Orbwalker/blame/master/Orbwalker/Memory.cs#L74-L76
     [Signature("F3 0F 10 05 ?? ?? ?? ?? 0F 2E C7", ScanType = ScanType.StaticAddress, Fallibility = Fallibility.Infallible)]
-    private static readonly IntPtr forceDisableMovementPtr = IntPtr.Zero;
+#pragma warning disable IDE0044 // cannot be made readonly
+    private static IntPtr forceDisableMovementPtr = IntPtr.Zero;
+#pragma warning restore IDE0044
 
     private static unsafe ref int ForceDisableMovement => ref *(int*)(forceDisableMovementPtr + 4);
 
