@@ -80,8 +80,17 @@ internal static class ActionUpdater
         NextAction = NextGCDAction = null;
     }
 
-    private static List<uint> actionOverrideList = new();
+    internal unsafe static void UpdateCombatInfo()
+    {
+        SetAction(NextGCDAction?.AdjustedID ?? 0);
+        UpdateCombatTime();
+        UpdateSlots();
+        UpdateMoving();
+        UpdateLifetime();
+        UpdateMPTimer();
+    }
 
+    private static List<uint> actionOverrideList = new();
     private static void SetAction(uint id)
     {
         if (actionOverrideList.Count == 0)
@@ -94,14 +103,29 @@ internal static class ActionUpdater
         }
     }
 
-    internal unsafe static void UpdateActionInfo()
+    static DateTime _startCombatTime = DateTime.MinValue;
+    private static void UpdateCombatTime()
     {
-        SetAction(NextGCDAction?.AdjustedID ?? 0);
-        UpdateCombatTime();
-        UpdateSlots();
-        UpdateMoving();
-        UpdateLifetime();
-        UpdateMPTimer();
+        var lastInCombat = DataCenter.InCombat;
+        DataCenter.InCombat = Svc.Condition[ConditionFlag.InCombat];
+
+        if (!lastInCombat && DataCenter.InCombat)
+        {
+            _startCombatTime = DateTime.Now;
+        }
+        else if (lastInCombat && !DataCenter.InCombat)
+        {
+            _startCombatTime = DateTime.MinValue;
+
+            if (Service.Config.AutoOffAfterCombat)
+            {
+                AutoCancelTime = DateTime.Now.AddSeconds(Service.Config.AutoOffAfterCombatTime);
+            }
+        }
+
+        DataCenter.CombatTimeRaw = _startCombatTime == DateTime.MinValue
+            ? 0
+            : (float)(DateTime.Now - _startCombatTime).TotalSeconds;
     }
 
     private unsafe static void UpdateSlots()
@@ -146,8 +170,6 @@ internal static class ActionUpdater
     private static bool _isDead = true;
     public static void UpdateLifetime()
     {
-        if (Player.Object == null) return;
-
         var lastDead = _isDead;
         _isDead = Player.Object.IsDead;
 
@@ -174,31 +196,6 @@ internal static class ActionUpdater
             : (float)(DateTime.Now - _startAliveTime).TotalSeconds;
     }
 
-    static DateTime _startCombatTime = DateTime.MinValue;
-    private static void UpdateCombatTime()
-    {
-        var lastInCombat = DataCenter.InCombat;
-        DataCenter.InCombat = Svc.Condition[ConditionFlag.InCombat];
-
-        if (!lastInCombat && DataCenter.InCombat)
-        {
-            _startCombatTime = DateTime.Now;
-        }
-        else if (lastInCombat && !DataCenter.InCombat)
-        {
-            _startCombatTime = DateTime.MinValue;
-
-            if (Service.Config.AutoOffAfterCombat)
-            {
-                AutoCancelTime = DateTime.Now.AddSeconds(Service.Config.AutoOffAfterCombatTime);
-            }
-        }
-
-        DataCenter.CombatTimeRaw = _startCombatTime == DateTime.MinValue
-            ? 0
-            : (float)(DateTime.Now - _startCombatTime).TotalSeconds;
-    }
-
     static uint _lastMP = 0;
     static DateTime _lastMPUpdate = DateTime.Now;
 
@@ -206,8 +203,6 @@ internal static class ActionUpdater
 
     private static void UpdateMPTimer()
     {
-        if (Player.Object == null) return;
-
         // Ignore if player is Black Mage
         if (Player.Object.ClassJob.RowId != (uint)ECommons.ExcelServices.Job.BLM) return;
 
@@ -236,21 +231,7 @@ internal static class ActionUpdater
 
     private unsafe static bool IsPlayerOccupied()
     {
-        if (Svc.Condition[ConditionFlag.OccupiedInQuestEvent]
-            || Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]
-            || Svc.Condition[ConditionFlag.Occupied33]
-            || Svc.Condition[ConditionFlag.Occupied38]
-            || Svc.Condition[ConditionFlag.Jumping61]
-            || Svc.Condition[ConditionFlag.BetweenAreas]
-            || Svc.Condition[ConditionFlag.BetweenAreas51]
-            || Svc.Condition[ConditionFlag.Mounted]
-            || Svc.Condition[ConditionFlag.SufferingStatusAffliction2]
-            || Svc.Condition[ConditionFlag.RolePlaying]
-            || Svc.Condition[ConditionFlag.InFlight]
-            || Svc.Condition[ConditionFlag.Diving]
-            || Svc.Condition[ConditionFlag.Swimming]
-            || Svc.Condition[ConditionFlag.Unconscious]
-            || Svc.Condition[ConditionFlag.MeldingMateria])
+        if (!MajorUpdater.IsValid || Svc.ClientState.LocalPlayer?.IsTargetable != true)
         {
             return true;
         }

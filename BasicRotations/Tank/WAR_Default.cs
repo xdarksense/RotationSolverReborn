@@ -25,6 +25,9 @@ public sealed class WAR_Default : WarriorRotation
     [RotationConfig(CombatType.PvE, Name = "Use a stack of Onslaught during when its about to overcap while standing still")]
     public bool YEETCooldown { get; set; } = false;
 
+    [RotationConfig(CombatType.PvE, Name = "Take targets hitbox size into account for Primal Rend distance calculation. (Beta)")]
+    public bool YEETBeta { get; set; } = false;
+
     [Range(1, 20, ConfigUnitType.Yalms)]
     [RotationConfig(CombatType.PvE, Name = "Max distance you can be from the boss for Primal Rend use (Danger, setting too high will get you killed)")]
     public float PrimalRendDistance2 { get; set; } = 3.5f;
@@ -182,7 +185,8 @@ public sealed class WAR_Default : WarriorRotation
         {
             if ((YEET || (!YEET && !IsMoving)) && PrimalRendPvE.CanUse(out act, skipAoeCheck: true))
             {
-                if (PrimalRendPvE.Target.Target?.DistanceToPlayer() < PrimalRendDistance2) return true;
+                if (!YEETBeta && PrimalRendPvE.Target.Target?.DistanceToPlayer() < PrimalRendDistance2) return true;
+                if (YEETBeta && PrimalRendPvE.Target.Target?.DistanceToPlayer() + PrimalRendPvE.Target.Target?.HitboxRadius < PrimalRendDistance2) return true;
             }
             if (PrimalRuinationPvE.CanUse(out act)) return true;
         }

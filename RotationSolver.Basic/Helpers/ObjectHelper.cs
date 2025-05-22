@@ -172,7 +172,6 @@ public static class ObjectHelper
     internal static bool IsSpecialExecptionImmune(this IBattleChara obj)
     {
         if (obj == null) return false;
-        if (Player.Object == null) return false;
 
         if (obj.NameId == 9441) return true; // Special case for Bottom gate in CLL
         return false;
@@ -207,8 +206,6 @@ public static class ObjectHelper
     internal static bool IsParty(this IGameObject gameObject)
     {
         if (gameObject == null) return false;
-
-        if (Player.Object == null) return false;
 
         if (gameObject.GameObjectId == Player.Object.GameObjectId) return true;
 
@@ -317,7 +314,6 @@ public static class ObjectHelper
 
         if (obj is IBattleChara b)
         {
-            if (Player.Object == null) return false;
             // Check IBattleChara against the priority target list of OIDs
             if (PriorityTargetHelper.IsPriorityTarget(b.DataId)) return true;
 
@@ -421,9 +417,6 @@ public static class ObjectHelper
     /// <returns>True if the target is immune due to any special mechanic; otherwise, false.</returns>
     public static bool IsSpecialImmune(this IBattleChara obj)
     {
-        if (obj == null) return false;
-        if (Player.Object == null) return false;
-
         return obj.IsWolfImmune()
             || obj.IsJeunoBossImmune()
             || obj.IsCODBossImmune()
@@ -736,7 +729,6 @@ public static class ObjectHelper
     public static bool IsBossFromTTK(this IBattleChara obj)
     {
         if (obj == null) return false;
-        if (Player.Object == null) return false;
 
         if (obj.IsDummy()) return true;
 
@@ -752,7 +744,6 @@ public static class ObjectHelper
     public static bool IsBossFromIcon(this IBattleChara obj)
     {
         if (obj == null) return false;
-        if (Player.Object == null) return false;
 
         if (obj.IsDummy()) return true;
 
@@ -769,7 +760,6 @@ public static class ObjectHelper
     public static bool IsDying(this IBattleChara obj)
     {
         if (obj == null) return false;
-        if (Player.Object == null) return false;
 
         if (obj.IsDummy()) return false;
         return obj.GetTTK() <= Service.Config.DyingTimeToKill || obj.GetHealthRatio() < Service.Config.IsDyingConfig;
@@ -785,7 +775,6 @@ public static class ObjectHelper
     internal static unsafe bool InCombat(this IBattleChara obj)
     {
         if (obj == null) return false;
-        if (Player.Object == null) return false;
         if (obj.Struct() == null) return false;
 
         return obj.Struct()->Character.InCombat;
@@ -868,7 +857,6 @@ public static class ObjectHelper
     internal static float TimeAlive(this IBattleChara obj)
     {
         if (obj == null) return float.NaN;
-        if (Player.Object == null) return float.NaN;
 
         // If the character is dead, reset their alive time
         if (obj.IsDead || Svc.Condition[ConditionFlag.BetweenAreas])
@@ -898,7 +886,6 @@ public static class ObjectHelper
     internal static float TimeDead(this IBattleChara obj)
     {
         if (obj == null) return float.NaN;
-        if (Player.Object == null) return float.NaN;
 
         // If the character is alive, reset their dead time
         if (!obj.IsDead)
@@ -926,7 +913,6 @@ public static class ObjectHelper
     internal static bool IsAttacked(this IBattleChara obj)
     {
         if (obj == null) return false;
-        if (Player.Object == null) return false;
         var now = DateTime.Now;
         foreach (var (id, time) in DataCenter.AttackedTargets)
         {
@@ -948,7 +934,6 @@ public static class ObjectHelper
     internal static unsafe bool CanSee(this IGameObject obj)
     {
         if (obj == null) return false;
-        if (Player.Object == null) return false;
         if (obj.Struct() == null) return false;
 
         const uint specificEnemyId = 3830; // Bioculture Node in Aetherial Chemical Research Facility
@@ -978,7 +963,6 @@ public static class ObjectHelper
     public static float GetHealthRatio(this IGameObject obj)
     {
         if (obj == null) return 0;
-        if (Player.Object == null) return 0;
         if (obj is not IBattleChara b) return 0;
 
         if (DataCenter.RefinedHP.TryGetValue(b.GameObjectId, out var hp)) return hp;
@@ -996,7 +980,6 @@ public static class ObjectHelper
     public static EnemyPositional FindEnemyPositional(this IGameObject enemy)
     {
         if (enemy == null) return EnemyPositional.None;
-        if (Player.Object == null) return EnemyPositional.None;
         if (enemy is not IBattleChara b) return EnemyPositional.None;
 
         Vector3 pPosition = enemy.Position;
@@ -1028,7 +1011,6 @@ public static class ObjectHelper
     internal static Vector3 GetFaceVector(this IGameObject obj)
     {
         if (obj == null) return Vector3.Zero;
-        if (Player.Object == null) return Vector3.Zero;
         if (obj is not IBattleChara b) return Vector3.Zero;
 
         float rotation = obj.Rotation;
@@ -1060,7 +1042,6 @@ public static class ObjectHelper
     public static float DistanceToPlayer(this IGameObject? obj)
     {
         if (obj == null) return float.MaxValue;
-        if (Player.Object == null) return float.MaxValue;
         if (obj is not IBattleChara b) return float.MaxValue;
 
         var distance = Vector3.Distance(Player.Object.Position, obj.Position) - (Player.Object.HitboxRadius + obj.HitboxRadius);

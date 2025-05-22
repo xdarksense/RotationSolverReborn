@@ -54,7 +54,7 @@ internal abstract class DelayCondition : ICondition
 
     public virtual bool CheckBefore(ICustomRotation rotation)
     {
-        return Player.Available;
+        return Player.AvailableThreadSafe;
     }
 
     internal static bool CheckBaseAction(ICustomRotation rotation, ActionID id, ref IBaseAction? action)

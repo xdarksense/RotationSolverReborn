@@ -388,7 +388,6 @@ public static class StatusHelper
     /// <returns>An enumerable of all statuses.</returns>
     private static IEnumerable<Status> GetAllStatus(this IGameObject obj, bool isFromSelf)
     {
-        if (Player.Object == null) return Enumerable.Empty<Status>();
         if (obj == null) return Enumerable.Empty<Status>();
         if (obj is not IBattleChara b) return Enumerable.Empty<Status>();
 

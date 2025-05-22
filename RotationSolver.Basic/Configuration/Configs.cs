@@ -548,7 +548,7 @@ internal partial class Configs : IPluginConfiguration
     [UI("Clicking actions random delay range.",
         Filter = BasicTimer)]
     [Range(0.00f, 0.25f, ConfigUnitType.Seconds, 0.002f)]
-    public Vector2 ClickingDelay { get; set; } = new(0.01f, 0.1f);
+    public Vector2 ClickingDelay { get; set; } = new(0.1f, 0.2f);
 
     [UI("Downtime healing delay range.", Parent = nameof(HealWhenNothingTodo))]
     [Range(0, 5, ConfigUnitType.Seconds, 0.05f)]
@@ -645,7 +645,7 @@ internal partial class Configs : IPluginConfiguration
 
     [Range(0, 5, ConfigUnitType.None, 1)]
     [UI("Random range of simulated presses per action", Parent = nameof(KeyBoardNoise))]
-    public Vector2Int KeyboardNoise { get; set; } = new(1, 2);
+    public Vector2Int KeyboardNoise { get; set; } = new(2, 3);
 
     [Range(0, 10, ConfigUnitType.None)]
     public int TargetingIndex { get; set; }

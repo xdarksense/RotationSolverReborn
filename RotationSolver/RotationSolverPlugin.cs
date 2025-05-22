@@ -102,11 +102,12 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         Svc.PluginInterface.UiBuilder.Draw += OnDraw;
 
         //HotbarHighlightDrawerManager.Init();
-        HotbarHighlightManager.Init();
 
         MajorUpdater.Enable();
         Watcher.Enable();
         OtherConfiguration.Init();
+
+        HotbarHighlightManager.Init();
 
         Svc.DutyState.DutyStarted += DutyState_DutyStarted;
         Svc.DutyState.DutyWiped += DutyState_DutyWiped;
@@ -155,7 +156,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
         static void DutyState_DutyStarted(object? sender, ushort e)
         {
-            if (!Player.Available) return;
+            if (!Player.AvailableThreadSafe) return;
             if (!Player.Object.IsJobCategory(JobRole.Tank) && !Player.Object.IsJobCategory(JobRole.Healer)) return;
 
             if (DataCenter.Territory?.IsHighEndDuty ?? false)
@@ -167,7 +168,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
         static void DutyState_DutyWiped(object? sender, ushort e)
         {
-            if (!Player.Available) return;
+            if (!Player.AvailableThreadSafe) return;
             DataCenter.ResetAllRecords();
         }
 
@@ -217,17 +218,9 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         _rotationConfigWindow?.Toggle();
     }
 
-    static RandomDelay validDelay = new(() => (0.2f, 0.2f));
-
     internal static void UpdateDisplayWindow()
     {
-        var isValid = validDelay.Delay(MajorUpdater.IsValid
-            && DataCenter.CurrentRotation != null
-            && !Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]
-            && !Svc.Condition[ConditionFlag.Occupied38] //Treasure hunt.
-            && !Svc.Condition[ConditionFlag.WaitingForDuty]
-            && (!Svc.Condition[ConditionFlag.UsingFashionAccessory] || Player.Object.StatusFlags.HasFlag(Dalamud.Game.ClientState.Objects.Enums.StatusFlags.WeaponOut))
-            && !Svc.Condition[ConditionFlag.OccupiedInQuestEvent]);
+        var isValid = MajorUpdater.IsValid && DataCenter.CurrentRotation != null;
 
         _nextActionWindow!.IsOpen = isValid && Service.Config.ShowNextActionWindow;
 

@@ -24,12 +24,53 @@ internal static class MajorUpdater
             if (conditions.Count == 0)
                 return false;
 
-            if (Svc.Condition[ConditionFlag.BetweenAreas])
-                return false;
-            if (Svc.Condition[ConditionFlag.BetweenAreas51])
-                return false;
-            if (Svc.Condition[ConditionFlag.LoggingOut])
-                return false;
+            if (Svc.Condition[ConditionFlag.Occupied]
+               || Svc.Condition[ConditionFlag.LoggingOut]
+               || Svc.Condition[ConditionFlag.Occupied30]
+               || Svc.Condition[ConditionFlag.Occupied33]
+               || Svc.Condition[ConditionFlag.Occupied38]
+               || Svc.Condition[ConditionFlag.Occupied39]
+               || Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]
+               || Svc.Condition[ConditionFlag.OccupiedInEvent]
+               || Svc.Condition[ConditionFlag.OccupiedInQuestEvent]
+               || Svc.Condition[ConditionFlag.OccupiedSummoningBell]
+               || Svc.Condition[ConditionFlag.WatchingCutscene]
+               || Svc.Condition[ConditionFlag.WatchingCutscene78]
+               || Svc.Condition[ConditionFlag.BetweenAreas]
+               || Svc.Condition[ConditionFlag.BetweenAreas51]
+               || Svc.Condition[ConditionFlag.InThatPosition]
+               //|| Svc.Condition[ConditionFlag.TradeOpen]
+               || Svc.Condition[ConditionFlag.Crafting]
+               || Svc.Condition[ConditionFlag.ExecutingCraftingAction]
+               || Svc.Condition[ConditionFlag.PreparingToCraft]
+               || Svc.Condition[ConditionFlag.Unconscious]
+               || Svc.Condition[ConditionFlag.MeldingMateria]
+               || Svc.Condition[ConditionFlag.Gathering]
+               || Svc.Condition[ConditionFlag.OperatingSiegeMachine]
+               || Svc.Condition[ConditionFlag.CarryingItem]
+               || Svc.Condition[ConditionFlag.CarryingObject]
+               || Svc.Condition[ConditionFlag.BeingMoved]
+               || Svc.Condition[ConditionFlag.Mounted]
+               || Svc.Condition[ConditionFlag.Mounted2]
+               || Svc.Condition[ConditionFlag.Mounting]
+               || Svc.Condition[ConditionFlag.Mounting71]
+               || Svc.Condition[ConditionFlag.ParticipatingInCustomMatch]
+               || Svc.Condition[ConditionFlag.PlayingLordOfVerminion]
+               || Svc.Condition[ConditionFlag.ChocoboRacing]
+               || Svc.Condition[ConditionFlag.PlayingMiniGame]
+               || Svc.Condition[ConditionFlag.Performing]
+               || Svc.Condition[ConditionFlag.Fishing]
+               || Svc.Condition[ConditionFlag.Transformed]
+               || Svc.Condition[ConditionFlag.UsingHousingFunctions]
+               || Svc.Condition[ConditionFlag.Jumping61]
+               || Svc.Condition[ConditionFlag.SufferingStatusAffliction2]
+               || Svc.Condition[ConditionFlag.RolePlaying]
+               || Svc.Condition[ConditionFlag.InFlight]
+               || Svc.Condition[ConditionFlag.Diving]
+               || Svc.Condition[ConditionFlag.Swimming])
+                {
+                    return true;
+                }
 
             return true;
         }
@@ -43,54 +84,37 @@ internal static class MajorUpdater
         Svc.Framework.Update += RSRUpdate;
     }
 
-    public static void TransitionSafeCommands()
-    {
-        RSCommands.UpdateRotationState();
-        ActionUpdater.UpdateLifetime();
-    }
-
     private unsafe static void RSRUpdate(IFramework framework)
     {
         HotbarHighlightManager.HotbarIDs.Clear();
-        RotationSolverPlugin.UpdateDisplayWindow();
 
+        // Transistion safe commands
         if (!IsValid)
-        {
-            TransitionSafeCommands();
-            ActionUpdater.ClearNextAction();
-            CustomRotation.MoveTarget = null;
-            ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
-            return;
-        }
-
-        // Handle system warnings
-        if (DataCenter.SystemWarnings.Count > 0)
-        {
-            var now = DateTime.Now;
-            var keysToRemove = new List<string>();
-
-            foreach (var kvp in DataCenter.SystemWarnings)
-            {
-                if (kvp.Value + TimeSpan.FromMinutes(10) < now)
-                {
-                    keysToRemove.Add(kvp.Key);
-                }
-            }
-
-            foreach (var key in keysToRemove)
-            {
-                DataCenter.SystemWarnings.Remove(key);
-            }
-        }
-
-        if (DataCenter.IsActivated() && Player.Object != null && Player.Available)
         {
             try
             {
-                TargetUpdater.UpdateTargets();
-                StateUpdater.UpdateState();
-                ActionUpdater.UpdateActionInfo();
-                ActionUpdater.UpdateNextAction();
+                RSCommands.UpdateRotationState();
+                ActionUpdater.ClearNextAction();
+                CustomRotation.MoveTarget = null;
+                ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
+                return;
+            }
+            catch (Exception ex)
+            {
+                if (_threadException != ex)
+                {
+                    _threadException = ex;
+                    PluginLog.Error($"RSRUpdate TSC Exception: {ex.Message}");
+                    if (Service.Config.InDebug)
+                        BasicWarningHelper.AddSystemWarning("RSRUpdate TSC Exception");
+                }
+            }
+        }
+
+        if (DataCenter.IsActivated())
+        {
+            try
+            {
                 var canDoAction = ActionUpdater.CanDoAction();
                 MovingUpdater.UpdateCanMove(canDoAction);
 
@@ -100,16 +124,19 @@ internal static class MajorUpdater
                 }
 
                 MacroUpdater.UpdateMacro();
+                TargetUpdater.UpdateTargets();
+                StateUpdater.UpdateState();
                 ActionSequencerUpdater.UpdateActionSequencerAction();
+                ActionUpdater.UpdateNextAction();
             }
             catch (Exception ex)
             {
                 if (_threadException != ex)
                 {
                     _threadException = ex;
-                    PluginLog.Error($"Main Thread Exception: {ex.Message}");
+                    PluginLog.Error($"RSRUpdate DC Exception: {ex.Message}");
                     if (Service.Config.InDebug)
-                        BasicWarningHelper.AddSystemWarning("Main Thread Exception");
+                        BasicWarningHelper.AddSystemWarning("RSRUpdate DC Exception");
                 }
             }
 
@@ -154,9 +181,52 @@ internal static class MajorUpdater
             }
         }
 
-        // Handle Miscellaneous Updates
         try
         {
+            // Update various combat tracking perameters,
+            // combat time, blue mage/dutyaction slot info, player movement time, player dead status and MP timer.
+            ActionUpdater.UpdateCombatInfo();
+
+            // Update displaying the additional UI windows
+            RotationSolverPlugin.UpdateDisplayWindow();
+
+            // Handle system warnings
+            if (DataCenter.SystemWarnings.Count > 0)
+            {
+                var now = DateTime.Now;
+                var keysToRemove = new List<string>();
+
+                foreach (var kvp in DataCenter.SystemWarnings)
+                {
+                    if (kvp.Value + TimeSpan.FromMinutes(10) < now)
+                    {
+                        keysToRemove.Add(kvp.Key);
+                    }
+                }
+
+                foreach (var key in keysToRemove)
+                {
+                    DataCenter.SystemWarnings.Remove(key);
+                }
+            }
+
+            // Clear old VFX data
+            if (DataCenter.VfxDataQueue.Count > 0)
+                DataCenter.VfxDataQueue.RemoveAll(vfx => vfx.TimeDuration > TimeSpan.FromSeconds(6));
+
+            // Check local rotation files
+            if (Service.Config.AutoReloadRotations)
+            {
+                RotationUpdater.LocalRotationWatcher();
+            }
+
+            // Change loaded rotation based on job
+            RotationUpdater.UpdateRotation();
+
+            // Change RS state
+            RSCommands.UpdateRotationState();
+
+            HotbarHighlightManager.UpdateSettings();
             MiscUpdater.UpdateMisc();
         }
         catch (Exception ex)
@@ -164,32 +234,10 @@ internal static class MajorUpdater
             if (_threadException != ex)
             {
                 _threadException = ex;
-                PluginLog.Error($"UpdatePreview Exception: {ex.Message}");
+                PluginLog.Error($"Secondary RSRUpdate Exception: {ex.Message}");
                 if (Service.Config.InDebug)
-                    BasicWarningHelper.AddSystemWarning("UpdatePreview Exception");
+                    BasicWarningHelper.AddSystemWarning("Secondary RSRUpdate Exception");
             }
-        }
-
-        // Handle Update Work in a separate try-catch block to avoid blocking the main thread
-        try
-        {
-            if (DataCenter.VfxDataQueue.Count > 0)
-                DataCenter.VfxDataQueue.RemoveAll(vfx => vfx.TimeDuration > TimeSpan.FromSeconds(6));
-
-            if (Service.Config.AutoReloadRotations)
-            {
-                RotationUpdater.LocalRotationWatcher();
-            }
-
-            RSCommands.UpdateRotationState();
-            HotbarHighlightManager.UpdateSettings();
-            RotationUpdater.UpdateRotation();
-        }
-        catch (Exception ex)
-        {
-            PluginLog.Error($"Inner Worker Exception: {ex.Message}");
-            if (Service.Config.InDebug)
-                WarningHelper.AddSystemWarning("Inner Worker Exception");
         }
     }
 

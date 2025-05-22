@@ -171,7 +171,7 @@ public struct ActionTargetInfo(IBaseAction action)
     private unsafe bool CanUseTo(IGameObject tar)
     {
         if (tar == null) return false;
-        if (!Player.Available) return false;
+        if (!Player.AvailableThreadSafe) return false;
         if (tar.GameObjectId == 0) return false;
         if (tar.Struct() == null) return false;
 
@@ -379,11 +379,6 @@ public struct ActionTargetInfo(IBaseAction action)
     {
         var range = Range;
 
-        if (Player.Object == null)
-        {
-            return null;
-        }
-
         if (action == null || action.Setting == null || action.Config == null)
         {
             return null;
@@ -500,8 +495,6 @@ public struct ActionTargetInfo(IBaseAction action)
     /// </returns>
     private TargetResult? FindTargetAreaMove(float range)
     {
-        if (Player.Object == null) return null;
-
         if (Service.Config.MoveAreaActionFarthest)
         {
             Vector3 pPosition = Player.Object.Position;
@@ -558,7 +551,6 @@ public struct ActionTargetInfo(IBaseAction action)
     /// </returns>
     private TargetResult? FindTargetAreaFriend(float range, IEnumerable<IBattleChara> canAffects, IPlayerCharacter player)
     {
-        if (Player.Object == null) return null;
         if (canAffects == null) return null;
 
         // Check if the action's range is zero and handle it as targeting self
@@ -704,7 +696,6 @@ public struct ActionTargetInfo(IBaseAction action)
     /// </returns>
     private IEnumerable<IBattleChara> GetAffectsVector(Vector3? point, IEnumerable<IBattleChara> canAffects)
     {
-        if (Player.Object == null) yield break;
         if (canAffects == null) yield break;
         if (point == null) yield break;
 
@@ -727,7 +718,6 @@ public struct ActionTargetInfo(IBaseAction action)
     /// </returns>
     private IEnumerable<IBattleChara> GetAffectsTarget(IBattleChara tar, IEnumerable<IBattleChara> canAffects)
     {
-        if (Player.Object == null) yield break;
         if (tar == null) yield break;
         if (canAffects == null) yield break;
 
@@ -869,8 +859,6 @@ public struct ActionTargetInfo(IBaseAction action)
     /// <returns></returns>
     public static IBattleChara? FindTargetByType(IEnumerable<IBattleChara> IGameObjects, TargetType type, float healRatio, SpecialActionType actionType)
     {
-        if (!Player.AvailableThreadSafe) return null;
-        if (Player.Object == null) return null;
         if (IGameObjects == null) return null;
 
         if (type == TargetType.Self) return Player.Object;
@@ -1139,7 +1127,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
         IBattleChara? FindTargetForMoving()
         {
-            if (Service.Config == null || Player.Object == null || IGameObjects == null)
+            if (Service.Config == null || IGameObjects == null)
             {
                 return null;
             }

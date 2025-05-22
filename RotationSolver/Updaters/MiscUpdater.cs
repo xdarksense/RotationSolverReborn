@@ -111,7 +111,7 @@ internal static class MiscUpdater
 
     private static unsafe void UpdateCancelCast()
     {
-        if (Player.Object == null || !Player.Object.IsCasting) return;
+        if (!Player.Object.IsCasting) return;
 
         var tarDead = Service.Config.UseStopCasting
             && Svc.Objects.SearchById(Player.Object.CastTargetObjectId) is IBattleChara b
