@@ -22,11 +22,6 @@ internal class HpPotionItem : BaseItem
     public override bool CanUse(out IAction item, bool clippingCheck)
     {
         item = this;
-        if (!Player.AvailableThreadSafe)
-        {
-            return false;
-        }
-
-        return Player.Object.GetHealthRatio() <= Service.Config.HealthSingleAbilityHot && Player.Object.MaxHp - Player.Object.CurrentHp >= MaxHp && base.CanUse(out item);
+        return Player.AvailableThreadSafe && Player.Object.GetHealthRatio() <= Service.Config.HealthSingleAbilityHot && Player.Object.MaxHp - Player.Object.CurrentHp >= MaxHp && base.CanUse(out item);
     }
 }

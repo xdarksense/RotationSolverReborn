@@ -198,12 +198,7 @@ public readonly struct ActionBasicInfo
             return false;
         }
 
-        if (NeedsCasting(skipCastingCheck))
-        {
-            return false;
-        }
-
-        return (!IsGeneralGCD || !IsStatusProvidedDuringGCD()) && IsActionCheckValid() && IsRotationCheckValid();
+        return !NeedsCasting(skipCastingCheck) && (!IsGeneralGCD || !IsStatusProvidedDuringGCD()) && IsActionCheckValid() && IsRotationCheckValid();
     }
 
     /// <summary>

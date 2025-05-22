@@ -23,16 +23,16 @@ internal class Service : IDisposable
     public const int ApiVersion = 4;
 
     [EzHook("40 53 55 56 57 48 81 EC ?? ?? ?? ?? 0F 29 B4 24 ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 84 24 ?? ?? ?? ?? 0F B6 AC 24 ?? ?? ?? ?? 0F 28 F3 49 8B F8", nameof(ActorVfxCreateDetour), true)]
-    private EzHook<ActorVfxCreateDelegate2> actorVfxCreateHook = null!;
+    private readonly EzHook<ActorVfxCreateDelegate2> actorVfxCreateHook = null!;
     private unsafe delegate IntPtr ActorVfxCreateDelegate2(char* a1, nint a2, nint a3, float a4, char a5, ushort a6, char a7);
 
     // From https://GitHub.com/PunishXIV/Orbwalker/blame/master/Orbwalker/Memory.cs#L74-L76
     [Signature("F3 0F 10 05 ?? ?? ?? ?? 0F 2E C7", ScanType = ScanType.StaticAddress, Fallibility = Fallibility.Infallible)]
-    static IntPtr forceDisableMovementPtr = IntPtr.Zero;
+    private static readonly IntPtr forceDisableMovementPtr = IntPtr.Zero;
 
     private static unsafe ref int ForceDisableMovement => ref *(int*)(forceDisableMovementPtr + 4);
 
-    static bool _canMove = true;
+    private static bool _canMove = true;
 
     /// <summary>
     /// Gets or sets a value indicating whether the player can move.
@@ -42,8 +42,12 @@ internal class Service : IDisposable
         get => ForceDisableMovement == 0;
         set
         {
-            var realCanMove = value || DataCenter.NoPoslock;
-            if (_canMove == realCanMove) return;
+            bool realCanMove = value || DataCenter.NoPoslock;
+            if (_canMove == realCanMove)
+            {
+                return;
+            }
+
             _canMove = realCanMove;
 
             if (!realCanMove)
@@ -61,14 +65,14 @@ internal class Service : IDisposable
     {
         try
         {
-            var path = Dalamud.Memory.MemoryHelper.ReadString(new nint(a1), Encoding.ASCII, 256);
-            var obj = Svc.Objects.CreateObjectReference(a2);
+            string path = Dalamud.Memory.MemoryHelper.ReadString(new nint(a1), Encoding.ASCII, 256);
+            IGameObject? obj = Svc.Objects.CreateObjectReference(a2);
             if (obj == null || string.IsNullOrEmpty(path))
             {
                 throw new Exception("Failed to create object reference during VfxCreateDetour");
             }
 
-            var newVfx = new VfxNewData(obj.GameObjectId, path);
+            VfxNewData newVfx = new(obj.GameObjectId, path);
             DataCenter.VfxDataQueue.Add(newVfx);
         }
         catch (Exception ex)
@@ -109,7 +113,9 @@ internal class Service : IDisposable
     /// <param name="id">The action ID.</param>
     /// <returns>The adjusted action ID.</returns>
     public static ActionID GetAdjustedActionId(ActionID id)
-        => (ActionID)GetAdjustedActionId((uint)id);
+    {
+        return (ActionID)GetAdjustedActionId((uint)id);
+    }
 
     /// <summary>
     /// Gets the adjusted action ID.
@@ -117,7 +123,9 @@ internal class Service : IDisposable
     /// <param name="id">The action ID.</param>
     /// <returns>The adjusted action ID.</returns>
     public static unsafe uint GetAdjustedActionId(uint id)
-        => ActionManager.Instance()->GetAdjustedActionId(id);
+    {
+        return ActionManager.Instance()->GetAdjustedActionId(id);
+    }
 
     private static readonly ConcurrentDictionary<Type, AddonAttribute?> AddonCache = new();
 
@@ -128,14 +136,17 @@ internal class Service : IDisposable
     /// <returns>A collection of addon pointers.</returns>
     public static IEnumerable<IntPtr> GetAddons<T>() where T : struct
     {
-        var addon = AddonCache.GetOrAdd(typeof(T), t => t.GetCustomAttribute<AddonAttribute>());
+        AddonAttribute? addon = AddonCache.GetOrAdd(typeof(T), t => t.GetCustomAttribute<AddonAttribute>());
 
-        if (addon is null) return Array.Empty<nint>();
-
-        var addonPointers = new List<IntPtr>();
-        foreach (var str in addon.AddonIdentifiers)
+        if (addon is null)
         {
-            var ptr = Svc.GameGui.GetAddonByName(str, 1);
+            return Array.Empty<nint>();
+        }
+
+        List<nint> addonPointers = new();
+        foreach (string str in addon.AddonIdentifiers)
+        {
+            nint ptr = Svc.GameGui.GetAddonByName(str, 1);
             if (ptr != IntPtr.Zero)
             {
                 addonPointers.Add(ptr);
@@ -150,7 +161,10 @@ internal class Service : IDisposable
     /// </summary>
     /// <typeparam name="T">The type of the Excel row.</typeparam>
     /// <returns>The Excel sheet.</returns>
-    public static ExcelSheet<T> GetSheet<T>() where T : struct, IExcelRow<T> => Svc.Data.GetExcelSheet<T>()!;
+    public static ExcelSheet<T> GetSheet<T>() where T : struct, IExcelRow<T>
+    {
+        return Svc.Data.GetExcelSheet<T>()!;
+    }
 
     /// <summary>
     /// Releases unmanaged resources and performs other cleanup operations.

@@ -234,12 +234,7 @@ public partial class CustomRotation
             return true;
         }
 
-        if (UseMpPotion(nextGCD, out act))
-        {
-            return true;
-        }
-
-        return GeneralUsingAbility(role, nextGCD, out act) || DataCenter.AutoStatus.HasFlag(AutoStatus.Speed) && SpeedAbility(nextGCD, out act);
+        return UseMpPotion(nextGCD, out act) || GeneralUsingAbility(role, nextGCD, out act) || (DataCenter.AutoStatus.HasFlag(AutoStatus.Speed) && SpeedAbility(nextGCD, out act));
     }
 
     /// <summary>

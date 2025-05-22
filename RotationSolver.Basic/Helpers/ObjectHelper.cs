@@ -298,12 +298,7 @@ public static class ObjectHelper
             return true;
         }
 
-        if (Service.Config.ChocoboPartyMember && gameObject.IsPlayerCharacterChocobo())
-        {
-            return true;
-        }
-
-        return Service.Config.FriendlyBattleNpcHeal && gameObject.IsFriendlyBattleNPC() || Service.Config.FocusTargetIsParty && gameObject.IsFocusTarget() && gameObject.IsAllianceMember();
+        return Service.Config.ChocoboPartyMember && gameObject.IsPlayerCharacterChocobo() || (Service.Config.FriendlyBattleNpcHeal && gameObject.IsFriendlyBattleNPC()) || (Service.Config.FocusTargetIsParty && gameObject.IsFocusTarget() && gameObject.IsAllianceMember());
     }
 
     internal static bool IsNpcPartyMember(this IGameObject gameObj)

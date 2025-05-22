@@ -15,7 +15,7 @@ internal class RotationConfigComparer : IEqualityComparer<IRotationConfig>
     /// <returns><c>true</c> if the specified <see cref="IRotationConfig"/> objects are equal; otherwise, <c>false</c>.</returns>
     public bool Equals(IRotationConfig? x, IRotationConfig? y)
     {
-        return x == null && y == null || x != null && y != null && x.Name.Equals(y.Name);
+        return (x == null && y == null) || (x != null && y != null && x.Name.Equals(y.Name));
     }
 
     /// <summary>
