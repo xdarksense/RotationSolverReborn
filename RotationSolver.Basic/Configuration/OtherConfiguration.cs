@@ -35,28 +35,28 @@ internal class OtherConfiguration
     {
         if (!Directory.Exists(Svc.PluginInterface.ConfigDirectory.FullName))
         {
-            Directory.CreateDirectory(Svc.PluginInterface.ConfigDirectory.FullName);
+            _ = Directory.CreateDirectory(Svc.PluginInterface.ConfigDirectory.FullName);
         }
 
-        Task.Run(() => InitOne(ref DangerousStatus, nameof(DangerousStatus)));
-        Task.Run(() => InitOne(ref PriorityStatus, nameof(PriorityStatus)));
-        Task.Run(() => InitOne(ref InvincibleStatus, nameof(InvincibleStatus)));
-        Task.Run(() => InitOne(ref PrioTargetId, nameof(PrioTargetId)));
-        Task.Run(() => InitOne(ref AutoStatusOrder, nameof(AutoStatusOrder)));
-        Task.Run(() => InitOne(ref DancePartnerPriority, nameof(DancePartnerPriority)));
-        Task.Run(() => InitOne(ref TheSpearPriority, nameof(TheSpearPriority)));
-        Task.Run(() => InitOne(ref TheBalancePriority, nameof(TheBalancePriority)));
-        Task.Run(() => InitOne(ref KardiaTankPriority, nameof(KardiaTankPriority)));
-        Task.Run(() => InitOne(ref NoHostileNames, nameof(NoHostileNames)));
-        Task.Run(() => InitOne(ref NoProvokeNames, nameof(NoProvokeNames)));
-        Task.Run(() => InitOne(ref AnimationLockTime, nameof(AnimationLockTime)));
-        Task.Run(() => InitOne(ref HostileCastingArea, nameof(HostileCastingArea)));
-        Task.Run(() => InitOne(ref HostileCastingTank, nameof(HostileCastingTank)));
-        Task.Run(() => InitOne(ref BeneficialPositions, nameof(BeneficialPositions)));
-        Task.Run(() => InitOne(ref RotationSolverRecord, nameof(RotationSolverRecord), false));
-        Task.Run(() => InitOne(ref NoCastingStatus, nameof(NoCastingStatus)));
-        Task.Run(() => InitOne(ref HostileCastingKnockback, nameof(HostileCastingKnockback)));
-        Task.Run(() => InitOne(ref HostileCastingStop, nameof(HostileCastingStop)));
+        _ = Task.Run(() => InitOne(ref DangerousStatus, nameof(DangerousStatus)));
+        _ = Task.Run(() => InitOne(ref PriorityStatus, nameof(PriorityStatus)));
+        _ = Task.Run(() => InitOne(ref InvincibleStatus, nameof(InvincibleStatus)));
+        _ = Task.Run(() => InitOne(ref PrioTargetId, nameof(PrioTargetId)));
+        _ = Task.Run(() => InitOne(ref AutoStatusOrder, nameof(AutoStatusOrder)));
+        _ = Task.Run(() => InitOne(ref DancePartnerPriority, nameof(DancePartnerPriority)));
+        _ = Task.Run(() => InitOne(ref TheSpearPriority, nameof(TheSpearPriority)));
+        _ = Task.Run(() => InitOne(ref TheBalancePriority, nameof(TheBalancePriority)));
+        _ = Task.Run(() => InitOne(ref KardiaTankPriority, nameof(KardiaTankPriority)));
+        _ = Task.Run(() => InitOne(ref NoHostileNames, nameof(NoHostileNames)));
+        _ = Task.Run(() => InitOne(ref NoProvokeNames, nameof(NoProvokeNames)));
+        _ = Task.Run(() => InitOne(ref AnimationLockTime, nameof(AnimationLockTime)));
+        _ = Task.Run(() => InitOne(ref HostileCastingArea, nameof(HostileCastingArea)));
+        _ = Task.Run(() => InitOne(ref HostileCastingTank, nameof(HostileCastingTank)));
+        _ = Task.Run(() => InitOne(ref BeneficialPositions, nameof(BeneficialPositions)));
+        _ = Task.Run(() => InitOne(ref RotationSolverRecord, nameof(RotationSolverRecord), false));
+        _ = Task.Run(() => InitOne(ref NoCastingStatus, nameof(NoCastingStatus)));
+        _ = Task.Run(() => InitOne(ref HostileCastingKnockback, nameof(HostileCastingKnockback)));
+        _ = Task.Run(() => InitOne(ref HostileCastingStop, nameof(HostileCastingStop)));
     }
 
     public static Task Save()
@@ -270,13 +270,15 @@ internal class OtherConfiguration
 
     private static string GetFilePath(string name)
     {
-        var directory = Svc.PluginInterface.ConfigDirectory.FullName;
+        string directory = Svc.PluginInterface.ConfigDirectory.FullName;
 
         return directory + $"\\{name}.json";
     }
 
     private static void Save<T>(T value, string name)
-        => SavePath(value, GetFilePath(name));
+    {
+        SavePath(value, GetFilePath(name));
+    }
 
     private static void SavePath<T>(T value, string path)
     {
@@ -309,7 +311,7 @@ internal class OtherConfiguration
 
     private static void InitOne<T>(ref T value, string name, bool download = true, bool forceDownload = false) where T : new()
     {
-        var path = GetFilePath(name);
+        string path = GetFilePath(name);
         PluginLog.Information($"Initializing {name} from {path}");
 
         if (File.Exists(path) && !forceDownload)
@@ -319,9 +321,13 @@ internal class OtherConfiguration
                 value = JsonConvert.DeserializeObject<T>(File.ReadAllText(path), new JsonSerializerSettings
                 {
                     TypeNameHandling = TypeNameHandling.None,
-                    Converters = new List<JsonConverter> { new StringEnumConverter() } // Add this line
+                    Converters = [new StringEnumConverter()] // Add this line
                 })!;
-                if (value == null) throw new Exception("Deserialized value is null.");
+                if (value == null)
+                {
+                    throw new Exception("Deserialized value is null.");
+                }
+
                 PluginLog.Information($"Loaded {name} from local file.");
             }
             catch (Exception ex)
@@ -334,22 +340,26 @@ internal class OtherConfiguration
         {
             try
             {
-                using var client = new HttpClient();
-                var str = client.GetStringAsync($"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Resources/{name}.json").Result;
+                using HttpClient client = new();
+                string str = client.GetStringAsync($"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Resources/{name}.json").Result;
 
                 File.WriteAllText(path, str);
                 value = JsonConvert.DeserializeObject<T>(str, new JsonSerializerSettings
                 {
                     TypeNameHandling = TypeNameHandling.None,
-                    Converters = new List<JsonConverter> { new StringEnumConverter() } // Add this line
+                    Converters = [new StringEnumConverter()] // Add this line
                 })!;
-                if (value == null) throw new Exception("Deserialized value is null.");
+                if (value == null)
+                {
+                    throw new Exception("Deserialized value is null.");
+                }
+
                 PluginLog.Information($"Downloaded and loaded {name} from GitHub.");
             }
             catch (Exception ex)
             {
                 PluginLog.Warning($"Failed to download {name} from GitHub. Reinitializing to default. Exception: {ex.Message}");
-                BasicWarningHelper.AddSystemWarning($"Github download failed.");
+                _ = BasicWarningHelper.AddSystemWarning($"Github download failed.");
                 value = new T(); // Reinitialize to default
                 SavePath(value, path); // Save the default value
             }

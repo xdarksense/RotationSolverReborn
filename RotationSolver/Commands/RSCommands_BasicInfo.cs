@@ -8,12 +8,12 @@ namespace RotationSolver.Commands
     {
         internal static void Enable()
         {
-            Svc.Commands.AddHandler(Service.COMMAND, new CommandInfo(OnCommand)
+            _ = Svc.Commands.AddHandler(Service.COMMAND, new CommandInfo(OnCommand)
             {
                 HelpMessage = UiString.Commands_Rotation.GetDescription(),
                 ShowInHelp = true,
             });
-            Svc.Commands.AddHandler(Service.ALTCOMMAND, new CommandInfo(OnCommand)
+            _ = Svc.Commands.AddHandler(Service.ALTCOMMAND, new CommandInfo(OnCommand)
             {
                 HelpMessage = UiString.Commands_Rotation.GetDescription(),
                 ShowInHelp = true,
@@ -22,8 +22,8 @@ namespace RotationSolver.Commands
 
         internal static void Disable()
         {
-            Svc.Commands.RemoveHandler(Service.COMMAND);
-            Svc.Commands.RemoveHandler(Service.ALTCOMMAND);
+            _ = Svc.Commands.RemoveHandler(Service.COMMAND);
+            _ = Svc.Commands.RemoveHandler(Service.ALTCOMMAND);
         }
 
         private static void OnCommand(string command, string arguments)
@@ -38,22 +38,22 @@ namespace RotationSolver.Commands
                 command = "off";
             }
 
-            if (TryGetOneEnum<StateCommandType>(command, out var stateType))
+            if (TryGetOneEnum<StateCommandType>(command, out StateCommandType stateType))
             {
-                var indexStr = command.Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
-                if (!int.TryParse(indexStr, out var index))
+                string? indexStr = command.Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
+                if (!int.TryParse(indexStr, out int index))
                 {
                     index = -1;
                 }
                 DoStateCommandType(stateType, index);
             }
-            else if (TryGetOneEnum<SpecialCommandType>(command, out var specialType))
+            else if (TryGetOneEnum<SpecialCommandType>(command, out SpecialCommandType specialType))
             {
                 DoSpecialCommandType(specialType);
             }
-            else if (TryGetOneEnum<OtherCommandType>(command, out var otherType))
+            else if (TryGetOneEnum<OtherCommandType>(command, out OtherCommandType otherType))
             {
-                var extraCommand = command.Substring(otherType.ToString().Length).Trim();
+                string extraCommand = command[otherType.ToString().Length..].Trim();
                 DoOtherCommand(otherType, extraCommand);
             }
             else
@@ -65,7 +65,7 @@ namespace RotationSolver.Commands
         private static bool TryGetOneEnum<T>(string command, out T type) where T : struct, Enum
         {
             type = default;
-            foreach (var c in Enum.GetValues<T>())
+            foreach (T c in Enum.GetValues<T>())
             {
                 if (command.StartsWith(c.ToString(), StringComparison.OrdinalIgnoreCase))
                 {
@@ -78,7 +78,7 @@ namespace RotationSolver.Commands
 
         internal static string GetCommandStr(this Enum command, string extraCommand = "")
         {
-            var cmdStr = $"{Service.COMMAND} {command}";
+            string cmdStr = $"{Service.COMMAND} {command}";
             if (!string.IsNullOrEmpty(extraCommand))
             {
                 cmdStr += $" {extraCommand}";

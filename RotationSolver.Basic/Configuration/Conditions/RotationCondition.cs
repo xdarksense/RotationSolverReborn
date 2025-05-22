@@ -7,7 +7,7 @@ internal class RotationCondition : DelayCondition
     internal PropertyInfo? _prop;
     public string PropertyName = "Not Chosen";
 
-    MethodInfo? _method;
+    private MethodInfo? _method;
     public string MethodName = "Not Chosen";
 
     internal IBaseAction? _action;
@@ -20,9 +20,9 @@ internal class RotationCondition : DelayCondition
 
     public override bool CheckBefore(ICustomRotation rotation)
     {
-        CheckBaseAction(rotation, ID, ref _action);
-        CheckMemberInfo(rotation, ref PropertyName, ref _prop);
-        CheckMemberInfo(rotation, ref MethodName, ref _method);
+        _ = CheckBaseAction(rotation, ID, ref _action);
+        _ = CheckMemberInfo(rotation, ref PropertyName, ref _prop);
+        _ = CheckMemberInfo(rotation, ref MethodName, ref _method);
         return base.CheckBefore(rotation);
     }
 
@@ -31,7 +31,11 @@ internal class RotationCondition : DelayCondition
         switch (ComboConditionType)
         {
             case ComboConditionType.Bool:
-                if (_prop == null) return false;
+                if (_prop == null)
+                {
+                    return false;
+                }
+
                 if (_prop.GetValue(rotation) is bool b)
                 {
                     return b;
@@ -39,9 +43,12 @@ internal class RotationCondition : DelayCondition
                 return false;
 
             case ComboConditionType.Integer:
-                if (_prop == null) return false;
+                if (_prop == null)
+                {
+                    return false;
+                }
 
-                var value = _prop.GetValue(rotation);
+                object? value = _prop.GetValue(rotation);
                 if (value is byte by)
                 {
                     switch (Condition)
@@ -69,7 +76,11 @@ internal class RotationCondition : DelayCondition
                 return false;
 
             case ComboConditionType.Float:
-                if (_prop == null) return false;
+                if (_prop == null)
+                {
+                    return false;
+                }
+
                 if (_prop.GetValue(rotation) is float fl)
                 {
                     switch (Condition)
@@ -87,11 +98,7 @@ internal class RotationCondition : DelayCondition
             case ComboConditionType.Last:
                 try
                 {
-                    if (_method?.Invoke(rotation, new object[] { Param1 > 0, new IAction?[] { _action } }) is bool boo)
-                    {
-                        return boo;
-                    }
-                    return false;
+                    return _method?.Invoke(rotation, new object[] { Param1 > 0, new IAction?[] { _action } }) is bool boo && boo;
                 }
                 catch
                 {

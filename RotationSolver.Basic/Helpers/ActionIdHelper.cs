@@ -15,10 +15,13 @@ public static class ActionIdHelper
     /// </summary>
     /// <param name="actionID">The action ID.</param>
     /// <returns>True if the action is cooling down, otherwise false.</returns>
-    public unsafe static bool IsCoolingDown(this ActionID actionID)
+    public static unsafe bool IsCoolingDown(this ActionID actionID)
     {
-        var action = actionID.GetAction();
-        if (!action.HasValue) return false;
+        Action? action = actionID.GetAction();
+        if (!action.HasValue)
+        {
+            return false;
+        }
 
         // Use IsActionOffCooldown to determine if the action is off cooldown
         return !ActionManager.Instance()->IsActionOffCooldown(ActionType.Action, (uint)actionID);
@@ -29,9 +32,9 @@ public static class ActionIdHelper
     /// </summary>
     /// <param name="cdGroup">The cooldown group.</param>
     /// <returns>True if the action is cooling down, otherwise false.</returns>
-    public unsafe static bool IsCoolingDownGroup(byte cdGroup)
+    public static unsafe bool IsCoolingDownGroup(byte cdGroup)
     {
-        var detail = GetCoolDownDetail(cdGroup);
+        RecastDetail* detail = GetCoolDownDetail(cdGroup);
         return detail != null && detail->IsActive != 0;
     }
 
@@ -42,7 +45,7 @@ public static class ActionIdHelper
     /// <returns>A pointer to the cooldown details.</returns>
     public static unsafe RecastDetail* GetCoolDownDetail(byte cdGroup)
     {
-        var actionManager = ActionManager.Instance();
+        ActionManager* actionManager = ActionManager.Instance();
         if (actionManager == null)
         {
             PluginLog.Error("ActionManager.Instance() returned null.");
@@ -66,7 +69,7 @@ public static class ActionIdHelper
     /// </summary>
     /// <param name="actionID">The action ID.</param>
     /// <returns>The cast time of the action in seconds.</returns>
-    public unsafe static float GetCastTime(this ActionID actionID)
+    public static unsafe float GetCastTime(this ActionID actionID)
     {
         return ActionManager.GetAdjustedCastTime(ActionType.Action, (uint)actionID) / 1000f;
     }

@@ -20,7 +20,10 @@ internal class ActionCondition : DelayCondition
 
     protected override bool IsTrueInside(ICustomRotation rotation)
     {
-        if (_action == null) return false;
+        if (_action == null)
+        {
+            return false;
+        }
 
         switch (ActionConditionType)
         {
@@ -66,7 +69,7 @@ internal class ActionCondition : DelayCondition
                 }
                 break;
             case ActionConditionType.CanUse:
-                return _action.CanUse(out var act);
+                return _action.CanUse(out _);
         }
         return false;
     }

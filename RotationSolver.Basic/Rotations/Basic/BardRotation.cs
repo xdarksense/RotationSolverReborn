@@ -2,7 +2,7 @@ using Dalamud.Interface.Colors;
 
 namespace RotationSolver.Basic.Rotations.Basic;
 
-partial class BardRotation
+public partial class BardRotation
 {
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Dexterity;
@@ -27,7 +27,7 @@ partial class BardRotation
     /// Gets the amount of Soul Voice accumulated
     /// </summary>
     public static byte SoulVoice => JobGauge.SoulVoice;
-    static float SongTimeRaw => JobGauge.SongTimer / 1000f;
+    private static float SongTimeRaw => JobGauge.SongTimer / 1000f;
 
     /// <summary>
     /// Gets the current song timer in milliseconds.
@@ -39,7 +39,10 @@ partial class BardRotation
     /// </summary>
     /// <param name="time"></param>
     /// <returns></returns>
-    protected static bool SongEndAfter(float time) => SongTime <= time;
+    protected static bool SongEndAfter(float time)
+    {
+        return SongTime <= time;
+    }
 
     /// <summary>
     /// 
@@ -53,7 +56,9 @@ partial class BardRotation
     /// <param name="offset"></param>
     /// <returns></returns>
     protected static bool SongEndAfterGCD(uint gctCount = 0, float offset = 0)
-        => SongEndAfter(GCDTime(gctCount, offset));
+    {
+        return SongEndAfter(GCDTime(gctCount, offset));
+    }
     #endregion
 
     #region Status Tracking
@@ -258,9 +263,7 @@ partial class BardRotation
         setting.StatusProvide = [StatusID.HawksEye_3861];
         setting.CanTarget = t =>
         {
-            if (t.WillStatusEndGCD(0, 0, true, StatusID.VenomousBite, StatusID.CausticBite)) return false;
-            if (t.WillStatusEndGCD(0, 0, true, StatusID.Windbite, StatusID.Stormbite)) return false;
-            return true;
+            return !t.WillStatusEndGCD(0, 0, true, StatusID.VenomousBite, StatusID.CausticBite) && !t.WillStatusEndGCD(0, 0, true, StatusID.Windbite, StatusID.Stormbite);
         };
         setting.UnlockedByQuestID = 67252;
         setting.CreateConfig = () => new ActionConfig()

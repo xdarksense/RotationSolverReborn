@@ -16,14 +16,29 @@ public static class TargetFilter
     /// <returns>The dead characters.</returns>
     public static IEnumerable<IBattleChara> GetDeath(this IEnumerable<IBattleChara> charas)
     {
-        if (charas == null) return Enumerable.Empty<IBattleChara>();
-
-        var result = new List<IBattleChara>();
-        foreach (var item in charas)
+        if (charas == null)
         {
-            if (item == null || !item.IsDead || item.CurrentHp != 0 || !item.IsTargetable) continue;
-            if (item.HasStatus(false, StatusID.Raise)) continue;
-            if (!Service.Config.RaiseBrinkOfDeath && item.HasStatus(false, StatusID.BrinkOfDeath)) continue;
+            return Enumerable.Empty<IBattleChara>();
+        }
+
+        List<IBattleChara> result = [];
+        foreach (IBattleChara item in charas)
+        {
+            if (item == null || !item.IsDead || item.CurrentHp != 0 || !item.IsTargetable)
+            {
+                continue;
+            }
+
+            if (item.HasStatus(false, StatusID.Raise))
+            {
+                continue;
+            }
+
+            if (!Service.Config.RaiseBrinkOfDeath && item.HasStatus(false, StatusID.BrinkOfDeath))
+            {
+                continue;
+            }
+
             result.Add(item);
         }
         return result;
@@ -37,25 +52,31 @@ public static class TargetFilter
     /// <returns>The objects that match the roles.</returns>
     public static IEnumerable<IBattleChara> GetJobCategory(this IEnumerable<IBattleChara> objects, params JobRole[] roles)
     {
-        if (objects == null || roles == null || roles.Length == 0) return Enumerable.Empty<IBattleChara>();
-
-        var validJobs = new HashSet<byte>();
-        var classJobs = Service.GetSheet<ClassJob>();
-        if (classJobs == null) return Enumerable.Empty<IBattleChara>();
-
-        foreach (var role in roles)
+        if (objects == null || roles == null || roles.Length == 0)
         {
-            foreach (var job in classJobs)
+            return Enumerable.Empty<IBattleChara>();
+        }
+
+        HashSet<byte> validJobs = [];
+        Lumina.Excel.ExcelSheet<ClassJob> classJobs = Service.GetSheet<ClassJob>();
+        if (classJobs == null)
+        {
+            return Enumerable.Empty<IBattleChara>();
+        }
+
+        foreach (JobRole role in roles)
+        {
+            foreach (ClassJob job in classJobs)
             {
                 if (role == job.GetJobRole())
                 {
-                    validJobs.Add((byte)job.RowId);
+                    _ = validJobs.Add((byte)job.RowId);
                 }
             }
         }
 
-        var result = new List<IBattleChara>();
-        foreach (var obj in objects)
+        List<IBattleChara> result = [];
+        foreach (IBattleChara obj in objects)
         {
             if (obj != null && obj.IsJobs(validJobs))
             {
@@ -74,17 +95,23 @@ public static class TargetFilter
     /// <returns>True if the object is of the specified role, otherwise false.</returns>
     public static bool IsJobCategory(this IGameObject obj, JobRole role)
     {
-        if (obj == null) return false;
+        if (obj == null)
+        {
+            return false;
+        }
 
-        var validJobs = new HashSet<byte>();
-        var classJobs = Service.GetSheet<ClassJob>();
-        if (classJobs == null) return false;
+        HashSet<byte> validJobs = [];
+        Lumina.Excel.ExcelSheet<ClassJob> classJobs = Service.GetSheet<ClassJob>();
+        if (classJobs == null)
+        {
+            return false;
+        }
 
-        foreach (var job in classJobs)
+        foreach (ClassJob job in classJobs)
         {
             if (role == job.GetJobRole())
             {
-                validJobs.Add((byte)job.RowId);
+                _ = validJobs.Add((byte)job.RowId);
             }
         }
 
@@ -99,12 +126,15 @@ public static class TargetFilter
     /// <returns>True if the object is in the valid jobs, otherwise false.</returns>
     public static bool IsJobs(this IGameObject obj, params Job[] validJobs)
     {
-        if (obj == null || validJobs == null || validJobs.Length == 0) return false;
-
-        var validJobSet = new HashSet<byte>();
-        foreach (var job in validJobs)
+        if (obj == null || validJobs == null || validJobs.Length == 0)
         {
-            validJobSet.Add((byte)(uint)job);
+            return false;
+        }
+
+        HashSet<byte> validJobSet = [];
+        foreach (Job job in validJobs)
+        {
+            _ = validJobSet.Add((byte)(uint)job);
         }
 
         return obj.IsJobs(validJobSet);
@@ -112,9 +142,7 @@ public static class TargetFilter
 
     private static bool IsJobs(this IGameObject obj, HashSet<byte> validJobs)
     {
-        if (obj is not IBattleChara b) return false;
-        if (validJobs == null) return false;
-        return validJobs.Contains((byte)b.ClassJob.Value.RowId);
+        return obj is IBattleChara b && validJobs != null && validJobs.Contains((byte)b.ClassJob.Value.RowId);
     }
     #endregion
 
@@ -127,10 +155,13 @@ public static class TargetFilter
     /// <returns>The objects within the radius.</returns>
     public static IEnumerable<T> GetObjectInRadius<T>(this IEnumerable<T> objects, float radius) where T : IGameObject
     {
-        if (objects == null) return Enumerable.Empty<T>();
+        if (objects == null)
+        {
+            return Enumerable.Empty<T>();
+        }
 
-        var result = new List<T>();
-        foreach (var obj in objects)
+        List<T> result = [];
+        foreach (T obj in objects)
         {
             if (obj.DistanceToPlayer() <= radius)
             {

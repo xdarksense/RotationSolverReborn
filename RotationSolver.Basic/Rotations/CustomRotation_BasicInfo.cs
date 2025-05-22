@@ -7,7 +7,7 @@ namespace RotationSolver.Basic.Rotations;
 /// <summary>
 /// Represents a custom rotation for a specific job.
 /// </summary>
-partial class CustomRotation : ICustomRotation
+public partial class CustomRotation : ICustomRotation
 {
     private Job? _job = null;
     private JobRole? _role = null;
@@ -19,12 +19,12 @@ partial class CustomRotation : ICustomRotation
     /// </summary>
     private protected CustomRotation()
     {
-        IconID = IconSet.GetJobIcon(this.Job);
+        IconID = IconSet.GetJobIcon(Job);
         _configs = new RotationConfigSet(this);
     }
 
     /// <inheritdoc/>
-    public Job Job => _job ??= this.GetType().GetCustomAttribute<JobsAttribute>()?.Jobs[0] ?? Job.ADV;
+    public Job Job => _job ??= GetType().GetCustomAttribute<JobsAttribute>()?.Jobs[0] ?? Job.ADV;
 
     /// <inheritdoc/>
     public JobRole Role => _role ??= Svc.Data.GetExcelSheet<ClassJob>()!.GetRow((uint)Job)!.GetJobRole();
@@ -34,9 +34,12 @@ partial class CustomRotation : ICustomRotation
     {
         get
         {
-            if (_name != null) return _name;
+            if (_name != null)
+            {
+                return _name;
+            }
 
-            var classJob = Svc.Data.GetExcelSheet<ClassJob>().GetRow((uint)Job)!;
+            ClassJob classJob = Svc.Data.GetExcelSheet<ClassJob>().GetRow((uint)Job)!;
             return _name = $"{classJob.Abbreviation} - {classJob.Name}";
         }
     }
@@ -44,18 +47,7 @@ partial class CustomRotation : ICustomRotation
     /// <inheritdoc/>
     public bool IsEnabled
     {
-        get => !Service.Config.DisabledJobs.Contains(Job);
-        set
-        {
-            if (value)
-            {
-                Service.Config.DisabledJobs.Remove(Job);
-            }
-            else
-            {
-                Service.Config.DisabledJobs.Add(Job);
-            }
-        }
+        get => !Service.Config.DisabledJobs.Contains(Job); set => _ = value ? Service.Config.DisabledJobs.Remove(Job) : Service.Config.DisabledJobs.Add(Job);
     }
 
     /// <inheritdoc/>
@@ -68,7 +60,7 @@ partial class CustomRotation : ICustomRotation
     public static Vector3? MoveTarget { get; internal set; }
 
     /// <inheritdoc/>
-    public string Description => this.GetType().GetCustomAttribute<RotationAttribute>()?.Description ?? string.Empty;
+    public string Description => GetType().GetCustomAttribute<RotationAttribute>()?.Description ?? string.Empty;
 
     /// <inheritdoc/>
     public IAction? ActionHealAreaGCD { get; private set; }
@@ -139,7 +131,10 @@ partial class CustomRotation : ICustomRotation
     public virtual bool ShowStatus => false;
 
     /// <inheritdoc/>
-    public override string ToString() => this.GetType().GetCustomAttribute<RotationAttribute>()?.Name ?? this.GetType().Name;
+    public override string ToString()
+    {
+        return GetType().GetCustomAttribute<RotationAttribute>()?.Name ?? GetType().Name;
+    }
 
     /// <summary>
     /// Updates the custom fields.
@@ -163,5 +158,8 @@ partial class CustomRotation : ICustomRotation
     /// Creates a system warning to display to the end-user.
     /// </summary>
     /// <param name="warning">The warning message.</param>
-    public void CreateSystemWarning(string warning) => BasicWarningHelper.AddSystemWarning(warning);
+    public void CreateSystemWarning(string warning)
+    {
+        _ = BasicWarningHelper.AddSystemWarning(warning);
+    }
 }

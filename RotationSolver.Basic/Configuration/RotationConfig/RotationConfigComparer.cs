@@ -15,9 +15,7 @@ internal class RotationConfigComparer : IEqualityComparer<IRotationConfig>
     /// <returns><c>true</c> if the specified <see cref="IRotationConfig"/> objects are equal; otherwise, <c>false</c>.</returns>
     public bool Equals(IRotationConfig? x, IRotationConfig? y)
     {
-        if (x == null && y == null) return true;
-        if (x == null || y == null) return false;
-        return x.Name.Equals(y.Name);
+        return x == null && y == null || x != null && y != null && x.Name.Equals(y.Name);
     }
 
     /// <summary>
@@ -27,7 +25,6 @@ internal class RotationConfigComparer : IEqualityComparer<IRotationConfig>
     /// <returns>A hash code for the specified <see cref="IRotationConfig"/>.</returns>
     public int GetHashCode([DisallowNull] IRotationConfig obj)
     {
-        if (obj.Name == null) throw new ArgumentNullException(nameof(obj.Name));
-        return obj.Name.GetHashCode();
+        return obj.Name == null ? throw new ArgumentNullException(nameof(obj.Name)) : obj.Name.GetHashCode();
     }
 }

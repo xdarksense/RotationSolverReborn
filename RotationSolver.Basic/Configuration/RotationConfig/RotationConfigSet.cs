@@ -20,35 +20,44 @@ internal class RotationConfigSet : IRotationConfigSet
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="rotation"/> is <c>null</c>.</exception>
     public RotationConfigSet(ICustomRotation rotation)
     {
-        if (rotation == null) throw new ArgumentNullException(nameof(rotation));
-
-        foreach (var prop in rotation.GetType().GetRuntimeProperties())
+        if (rotation == null)
         {
-            var attr = prop.GetCustomAttribute<RotationConfigAttribute>();
-            if (attr == null) continue;
+            throw new ArgumentNullException(nameof(rotation));
+        }
 
-            var type = prop.PropertyType;
-            if (type == null) continue;
+        foreach (PropertyInfo prop in rotation.GetType().GetRuntimeProperties())
+        {
+            RotationConfigAttribute? attr = prop.GetCustomAttribute<RotationConfigAttribute>();
+            if (attr == null)
+            {
+                continue;
+            }
+
+            Type type = prop.PropertyType;
+            if (type == null)
+            {
+                continue;
+            }
 
             if (type == typeof(bool))
             {
-                Configs.Add(new RotationConfigBoolean(rotation, prop));
+                _ = Configs.Add(new RotationConfigBoolean(rotation, prop));
             }
             else if (type.IsEnum)
             {
-                Configs.Add(new RotationConfigCombo(rotation, prop));
+                _ = Configs.Add(new RotationConfigCombo(rotation, prop));
             }
             else if (type == typeof(float))
             {
-                Configs.Add(new RotationConfigFloat(rotation, prop));
+                _ = Configs.Add(new RotationConfigFloat(rotation, prop));
             }
             else if (type == typeof(int))
             {
-                Configs.Add(new RotationConfigInt(rotation, prop));
+                _ = Configs.Add(new RotationConfigInt(rotation, prop));
             }
             else if (type == typeof(string))
             {
-                Configs.Add(new RotationConfigString(rotation, prop));
+                _ = Configs.Add(new RotationConfigString(rotation, prop));
             }
             else
             {
@@ -61,11 +70,17 @@ internal class RotationConfigSet : IRotationConfigSet
     /// Returns an enumerator that iterates through the collection.
     /// </summary>
     /// <returns>An enumerator that can be used to iterate through the collection.</returns>
-    public IEnumerator<IRotationConfig> GetEnumerator() => Configs.GetEnumerator();
+    public IEnumerator<IRotationConfig> GetEnumerator()
+    {
+        return Configs.GetEnumerator();
+    }
 
     /// <summary>
     /// Returns an enumerator that iterates through a collection.
     /// </summary>
     /// <returns>An enumerator that can be used to iterate through the collection.</returns>
-    IEnumerator IEnumerable.GetEnumerator() => Configs.GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return Configs.GetEnumerator();
+    }
 }

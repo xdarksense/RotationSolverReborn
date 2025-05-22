@@ -8,7 +8,7 @@ namespace RotationSolver.Basic.Helpers
         private static readonly string FilePath = "PrioTargetId.json";
 
         // List of OIDs (DataId)
-        private static HashSet<uint> priorityOids = LoadPriorityOids();
+        private static readonly HashSet<uint> priorityOids = LoadPriorityOids();
 
         // Method to check if the given DataId is a priority target
         public static bool IsPriorityTarget(uint dataId)
@@ -21,8 +21,8 @@ namespace RotationSolver.Basic.Helpers
         {
             if (!priorityOids.Contains(dataId))
             {
-                priorityOids.Add(dataId);
-                OtherConfiguration.SavePrioTargetId();
+                _ = priorityOids.Add(dataId);
+                _ = OtherConfiguration.SavePrioTargetId();
             }
         }
 
@@ -31,10 +31,10 @@ namespace RotationSolver.Basic.Helpers
         {
             if (File.Exists(FilePath))
             {
-                var json = File.ReadAllText(FilePath);
-                return JsonSerializer.Deserialize<HashSet<uint>>(json) ?? new HashSet<uint>();
+                string json = File.ReadAllText(FilePath);
+                return JsonSerializer.Deserialize<HashSet<uint>>(json) ?? [];
             }
-            return new HashSet<uint>();
+            return [];
         }
     }
 }

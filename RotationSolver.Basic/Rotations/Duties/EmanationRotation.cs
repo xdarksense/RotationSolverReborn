@@ -8,7 +8,7 @@ public abstract class EmanationRotation : DutyRotation
 {
 }
 
-partial class DutyRotation
+public partial class DutyRotation
 {
     /// <summary>
     /// Modifies the settings for Vril PvE.

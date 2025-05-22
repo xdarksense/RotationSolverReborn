@@ -72,7 +72,7 @@ public static class JobRoleExtension
     /// <returns>The job role.</returns>
     public static JobRole GetJobRole(this ClassJob job)
     {
-        var role = (JobRole)job.Role;
+        JobRole role = (JobRole)job.Role;
 
         if (role is (JobRole)3 or JobRole.None)
         {

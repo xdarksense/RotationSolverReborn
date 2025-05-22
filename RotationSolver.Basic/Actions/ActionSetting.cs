@@ -110,7 +110,7 @@ public class ActionSetting()
     {
         get
         {
-            var type = IBaseAction.TargetOverride ?? _type;
+            TargetType type = IBaseAction.TargetOverride ?? _type;
             if (IsFriendly)
             {
 

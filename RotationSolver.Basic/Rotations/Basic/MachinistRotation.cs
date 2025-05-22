@@ -2,7 +2,7 @@ using Dalamud.Interface.Colors;
 
 namespace RotationSolver.Basic.Rotations.Basic;
 
-partial class MachinistRotation
+public partial class MachinistRotation
 {
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Dexterity;
@@ -45,9 +45,9 @@ partial class MachinistRotation
     /// </summary>
     public static byte LastSummonBatteryPower => JobGauge.LastSummonBatteryPower;
 
-    static float OverheatTimeRemainingRaw => JobGauge.OverheatTimeRemaining / 1000f;
+    private static float OverheatTimeRemainingRaw => JobGauge.OverheatTimeRemaining / 1000f;
 
-    static float SummonTimeRemainingRaw => JobGauge.SummonTimeRemaining / 1000f;
+    private static float SummonTimeRemainingRaw => JobGauge.SummonTimeRemaining / 1000f;
 
     /// <summary>
     /// Gets the time remaining for Overheat in seconds minus the DefaultGCDRemain.
@@ -64,7 +64,10 @@ partial class MachinistRotation
     /// </summary>
     /// <param name="time"></param>
     /// <returns></returns>
-    protected static bool OverheatedEndAfter(float time) => OverheatTime <= time;
+    protected static bool OverheatedEndAfter(float time)
+    {
+        return OverheatTime <= time;
+    }
 
     /// <summary>
     /// 
@@ -73,7 +76,9 @@ partial class MachinistRotation
     /// <param name="offset"></param>
     /// <returns></returns>
     protected static bool OverheatedEndAfterGCD(uint gctCount = 0, float offset = 0)
-        => OverheatedEndAfter(GCDTime(gctCount, offset));
+    {
+        return OverheatedEndAfter(GCDTime(gctCount, offset));
+    }
     #endregion
 
     #region PvE Actions Unassignable

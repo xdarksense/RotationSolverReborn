@@ -11,18 +11,22 @@ internal static class StateUpdater
         // Job
         || ((DataCenter.Role == JobRole.Healer || Service.Config.UseHealWhenNotAHealer)
         && Service.Config.AutoHeal
-        && (DataCenter.InCombat && CustomRotation.IsLongerThan(Service.Config.AutoHealTimeToKill)
+        && ((DataCenter.InCombat && CustomRotation.IsLongerThan(Service.Config.AutoHealTimeToKill))
             || Service.Config.HealOutOfCombat));
 
     public static void UpdateState()
     {
-        if (!DataCenter.IsActivated()) return;
+        if (!DataCenter.IsActivated())
+        {
+            return;
+        }
+
         DataCenter.CommandStatus = StatusFromCmdOrCondition();
         DataCenter.AutoStatus = StatusFromAutomatic();
         int attackedTargetsCount = 0;
         if (DataCenter.AttackedTargets != null)
         {
-            foreach (var _ in DataCenter.AttackedTargets)
+            foreach ((ulong id, DateTime time) in DataCenter.AttackedTargets)
             {
                 attackedTargetsCount++;
             }
@@ -38,85 +42,130 @@ internal static class StateUpdater
         AutoStatus status = AutoStatus.None;
 
         // Get the user-defined order of AutoStatus flags
-        var autoStatusOrder = OtherConfiguration.AutoStatusOrder?.ToArray() ?? Array.Empty<uint>();
+        uint[] autoStatusOrder = OtherConfiguration.AutoStatusOrder?.ToArray() ?? Array.Empty<uint>();
 
-        foreach (var autoStatus in autoStatusOrder)
+        foreach (uint autoStatus in autoStatusOrder)
         {
             switch (autoStatus)
             {
                 case (uint)AutoStatus.NoCasting:
                     if (ShouldAddNoCasting())
+                    {
                         status |= AutoStatus.NoCasting;
+                    }
+
                     break;
 
                 case (uint)AutoStatus.Dispel:
                     if (ShouldAddDispel())
+                    {
                         status |= AutoStatus.Dispel;
+                    }
+
                     break;
 
                 case (uint)AutoStatus.Interrupt:
                     if (ShouldAddInterrupt())
+                    {
                         status |= AutoStatus.Interrupt;
+                    }
+
                     break;
 
                 case (uint)AutoStatus.AntiKnockback:
                     if (ShouldAddAntiKnockback())
+                    {
                         status |= AutoStatus.AntiKnockback;
+                    }
+
                     break;
 
                 case (uint)AutoStatus.Positional:
                     if (ShouldAddPositional())
+                    {
                         status |= AutoStatus.Positional;
+                    }
+
                     break;
 
                 case (uint)AutoStatus.HealAreaAbility:
                     if (ShouldAddHealAreaAbility())
+                    {
                         status |= AutoStatus.HealAreaAbility;
+                    }
+
                     break;
 
                 case (uint)AutoStatus.HealAreaSpell:
                     if (ShouldAddHealAreaSpell())
+                    {
                         status |= AutoStatus.HealAreaSpell;
+                    }
+
                     break;
 
                 case (uint)AutoStatus.HealSingleAbility:
                     if (ShouldAddHealSingleAbility())
+                    {
                         status |= AutoStatus.HealSingleAbility;
+                    }
+
                     break;
 
                 case (uint)AutoStatus.HealSingleSpell:
                     if (ShouldAddHealSingleSpell())
+                    {
                         status |= AutoStatus.HealSingleSpell;
+                    }
+
                     break;
 
                 case (uint)AutoStatus.DefenseArea:
                     if (ShouldAddDefenseArea())
+                    {
                         status |= AutoStatus.DefenseArea;
+                    }
+
                     break;
 
                 case (uint)AutoStatus.DefenseSingle:
                     if (ShouldAddDefenseSingle())
+                    {
                         status |= AutoStatus.DefenseSingle;
+                    }
+
                     break;
 
                 case (uint)AutoStatus.Raise:
                     if (ShouldAddRaise())
+                    {
                         status |= AutoStatus.Raise;
+                    }
+
                     break;
 
                 case (uint)AutoStatus.Provoke:
                     if (ShouldAddProvoke())
+                    {
                         status |= AutoStatus.Provoke;
+                    }
+
                     break;
 
                 case (uint)AutoStatus.TankStance:
                     if (ShouldAddTankStance())
+                    {
                         status |= AutoStatus.TankStance;
+                    }
+
                     break;
 
                 case (uint)AutoStatus.Speed:
                     if (ShouldAddSpeed())
+                    {
                         status |= AutoStatus.Speed;
+                    }
+
                     break;
 
                 // Add other cases as needed
@@ -139,7 +188,7 @@ internal static class StateUpdater
     {
         if (DataCenter.DispelTarget != null)
         {
-            foreach (var status in DataCenter.DispelTarget.StatusList)
+            foreach (Dalamud.Game.ClientState.Statuses.Status status in DataCenter.DispelTarget.StatusList)
             {
                 if (StatusHelper.IsDangerous(status))
                 {
@@ -164,11 +213,14 @@ internal static class StateUpdater
     {
         if (DataCenter.Role == JobRole.Melee && ActionUpdater.NextGCDAction != null && Service.Config.AutoUseTrueNorth)
         {
-            var id = ActionUpdater.NextGCDAction.ID;
-            var target = ActionUpdater.NextGCDAction.Target.Target;
-            if (target == null) return false;
+            uint id = ActionUpdater.NextGCDAction.ID;
+            IBattleChara? target = ActionUpdater.NextGCDAction.Target.Target;
+            if (target == null)
+            {
+                return false;
+            }
 
-            if (ConfigurationHelper.ActionPositional.TryGetValue((ActionID)id, out var positional)
+            if (ConfigurationHelper.ActionPositional.TryGetValue((ActionID)id, out EnemyPositional positional)
                 && positional != target?.FindEnemyPositional()
                 && target?.HasPositional() == true
                 && !target.HasStatus(false, StatusID.DirectionalDisregard))
@@ -187,14 +239,16 @@ internal static class StateUpdater
     private static bool ShouldAddDefenseSingle()
     {
         if (!DataCenter.InCombat || !Service.Config.UseDefenseAbility)
+        {
             return false;
+        }
 
         if (DataCenter.Role == JobRole.Healer)
         {
-            foreach (var tank in DataCenter.PartyMembers)
+            foreach (IBattleChara tank in DataCenter.PartyMembers)
             {
                 int attackingTankCount = 0;
-                foreach (var hostile in DataCenter.AllHostileTargets)
+                foreach (IBattleChara hostile in DataCenter.AllHostileTargets)
                 {
                     if (hostile.TargetObjectId == tank.GameObjectId)
                     {
@@ -215,7 +269,7 @@ internal static class StateUpdater
 
             int tarOnMeCount = 0;
             int attackedCount = 0;
-            foreach (var hostile in DataCenter.AllHostileTargets)
+            foreach (IBattleChara hostile in DataCenter.AllHostileTargets)
             {
                 if (hostile.DistanceToPlayer() <= 3 && hostile.TargetObject == Player.Object)
                 {
@@ -248,17 +302,23 @@ internal static class StateUpdater
     private static bool ShouldAddHealAreaAbility()
     {
         if (!DataCenter.HPNotFull || !CanUseHealAction)
+        {
             return false;
+        }
 
         // Prioritize area healing if multiple members have DoomNeedHealing
         int doomNeedHealingCount = 0;
-        foreach (var member in DataCenter.PartyMembers)
+        foreach (IBattleChara member in DataCenter.PartyMembers)
         {
             if (member.DoomNeedHealing())
+            {
                 doomNeedHealingCount++;
+            }
         }
         if (doomNeedHealingCount > 1)
+        {
             return true;
+        }
 
         int singleAbility = ShouldHealSingle(StatusHelper.SingleHots,
             Service.Config.HealthSingleAbility,
@@ -271,8 +331,10 @@ internal static class StateUpdater
             float ratio = GetHealingOfTimeRatio(Player.Object, StatusHelper.AreaHots);
 
             if (!canHealAreaAbility)
+            {
                 canHealAreaAbility = DataCenter.PartyMembersDifferHP < Service.Config.HealthDifference
                 && DataCenter.PartyMembersAverHP < Lerp(Service.Config.HealthAreaAbility, Service.Config.HealthAreaAbilityHot, ratio);
+            }
         }
 
         return canHealAreaAbility;
@@ -281,17 +343,23 @@ internal static class StateUpdater
     private static bool ShouldAddHealAreaSpell()
     {
         if (!DataCenter.HPNotFull || !CanUseHealAction)
+        {
             return false;
+        }
 
         // Prioritize area healing if multiple members have DoomNeedHealing
         int doomNeedHealingCount = 0;
-        foreach (var member in DataCenter.PartyMembers)
+        foreach (IBattleChara member in DataCenter.PartyMembers)
         {
             if (member.DoomNeedHealing())
+            {
                 doomNeedHealingCount++;
+            }
         }
         if (doomNeedHealingCount > 1)
+        {
             return true;
+        }
 
         int singleSpell = ShouldHealSingle(StatusHelper.SingleHots,
             Service.Config.HealthSingleSpell,
@@ -304,8 +372,10 @@ internal static class StateUpdater
             float ratio = GetHealingOfTimeRatio(Player.Object, StatusHelper.AreaHots);
 
             if (!canHealAreaSpell)
+            {
                 canHealAreaSpell = DataCenter.PartyMembersDifferHP < Service.Config.HealthDifference
                 && DataCenter.PartyMembersAverHP < Lerp(Service.Config.HealthAreaSpell, Service.Config.HealthAreaSpellHot, ratio);
+            }
         }
 
         return canHealAreaSpell;
@@ -314,7 +384,9 @@ internal static class StateUpdater
     private static bool ShouldAddHealSingleAbility()
     {
         if (!DataCenter.HPNotFull || !CanUseHealAction)
+        {
             return false;
+        }
 
         bool onlyHealSelf = Service.Config.OnlyHealSelfWhenNoHealer
             && DataCenter.Role != JobRole.Healer;
@@ -322,19 +394,18 @@ internal static class StateUpdater
         if (onlyHealSelf)
         {
             // Prioritize healing self if DoomNeedHealing is true
-            if (Player.Object.DoomNeedHealing())
-                return true;
-
-            return ShouldHealSingle(Player.Object, StatusHelper.SingleHots,
+            return Player.Object.DoomNeedHealing() || ShouldHealSingle(Player.Object, StatusHelper.SingleHots,
                 Service.Config.HealthSingleAbility, Service.Config.HealthSingleAbilityHot);
         }
         else
         {
             // Prioritize healing any party member with DoomNeedHealing
-            foreach (var member in DataCenter.PartyMembers)
+            foreach (IBattleChara member in DataCenter.PartyMembers)
             {
                 if (member.DoomNeedHealing())
+                {
                     return true;
+                }
             }
 
             int singleAbility = ShouldHealSingle(StatusHelper.SingleHots,
@@ -348,7 +419,9 @@ internal static class StateUpdater
     private static bool ShouldAddHealSingleSpell()
     {
         if (!DataCenter.HPNotFull || !CanUseHealAction)
+        {
             return false;
+        }
 
         bool onlyHealSelf = Service.Config.OnlyHealSelfWhenNoHealer
             && DataCenter.Role != JobRole.Healer;
@@ -356,19 +429,18 @@ internal static class StateUpdater
         if (onlyHealSelf)
         {
             // Explicitly prioritize "Doom" targets
-            if (Player.Object.DoomNeedHealing())
-                return true;
-
-            return ShouldHealSingle(Player.Object, StatusHelper.SingleHots,
+            return Player.Object.DoomNeedHealing() || ShouldHealSingle(Player.Object, StatusHelper.SingleHots,
                 Service.Config.HealthSingleSpell, Service.Config.HealthSingleSpellHot);
         }
         else
         {
             // Check if any party member with "Doom" needs healing
-            foreach (var member in DataCenter.PartyMembers)
+            foreach (IBattleChara member in DataCenter.PartyMembers)
             {
                 if (member.DoomNeedHealing())
+                {
                     return true;
+                }
             }
 
             int singleSpell = ShouldHealSingle(StatusHelper.SingleHots,
@@ -386,18 +458,10 @@ internal static class StateUpdater
 
     private static bool ShouldAddProvoke()
     {
-        if (!DataCenter.InCombat)
-            return false;
-
-        if (DataCenter.Role == JobRole.Tank
+        return DataCenter.InCombat && DataCenter.Role == JobRole.Tank
             && (Service.Config.AutoProvokeForTank
                 || CountAllianceTanks() < 2)
-            && DataCenter.ProvokeTarget != null)
-        {
-            return true;
-        }
-
-        return false;
+            && DataCenter.ProvokeTarget != null;
     }
 
     private static bool ShouldAddInterrupt()
@@ -407,15 +471,7 @@ internal static class StateUpdater
 
     private static bool ShouldAddTankStance()
     {
-        if (!Service.Config.AutoTankStance || DataCenter.Role != JobRole.Tank)
-            return false;
-
-        if (!AnyAllianceTankWithStance() && !CustomRotation.HasTankStance)
-        {
-            return true;
-        }
-
-        return false;
+        return Service.Config.AutoTankStance && DataCenter.Role == JobRole.Tank && !AnyAllianceTankWithStance() && !CustomRotation.HasTankStance;
     }
 
     private static bool ShouldAddSpeed()
@@ -425,7 +481,7 @@ internal static class StateUpdater
 
     // Helper methods used in condition methods
 
-    static float GetHealingOfTimeRatio(IBattleChara target, params StatusID[] statusIds)
+    private static float GetHealingOfTimeRatio(IBattleChara target, params StatusID[] statusIds)
     {
         const float buffWholeTime = 15;
 
@@ -434,10 +490,10 @@ internal static class StateUpdater
         return Math.Min(1, buffTime / buffWholeTime);
     }
 
-    static int ShouldHealSingle(StatusID[] hotStatus, float healSingle, float healSingleHot)
+    private static int ShouldHealSingle(StatusID[] hotStatus, float healSingle, float healSingleHot)
     {
         int count = 0;
-        foreach (var member in DataCenter.PartyMembers)
+        foreach (IBattleChara member in DataCenter.PartyMembers)
         {
             if (ShouldHealSingle(member, hotStatus, healSingle, healSingleHot))
             {
@@ -447,10 +503,17 @@ internal static class StateUpdater
         return count;
     }
 
-    static bool ShouldHealSingle(IBattleChara target, StatusID[] hotStatus, float healSingle, float healSingleHot)
+    private static bool ShouldHealSingle(IBattleChara target, StatusID[] hotStatus, float healSingle, float healSingleHot)
     {
-        if (target == null) return false;
-        if (target.StatusList == null) return false;
+        if (target == null)
+        {
+            return false;
+        }
+
+        if (target.StatusList == null)
+        {
+            return false;
+        }
 
         // Calculate the ratio of remaining healing-over-time effects on the target. If they have a "Doom" status, treat dot healing as non-existent.
         float ratio = target.DoomNeedHealing() ? 0f : GetHealingOfTimeRatio(target, hotStatus);
@@ -459,20 +522,23 @@ internal static class StateUpdater
         float h = target.DoomNeedHealing() ? 0.2f : target.GetHealthRatio();
 
         // If the target's health is zero or they are invulnerable to healing, return false.
-        if (h == 0 || !target.NoNeedHealingInvuln()) return false;
+        if (h == 0 || !target.NoNeedHealingInvuln())
+        {
+            return false;
+        }
 
         // Compare the target's health ratio to a threshold determined by linear interpolation (Lerp) between `healSingle` and `healSingleHot`.
         return h < Lerp(healSingle, healSingleHot, ratio);
     }
 
-    static float Lerp(float a, float b, float ratio)
+    private static float Lerp(float a, float b, float ratio)
     {
-        return a + (b - a) * ratio;
+        return a + ((b - a) * ratio);
     }
 
     private static AutoStatus StatusFromCmdOrCondition()
     {
-        var status = DataCenter.SpecialType switch
+        AutoStatus status = DataCenter.SpecialType switch
         {
             SpecialCommandType.NoCasting => AutoStatus.NoCasting,
             SpecialCommandType.HealArea => AutoStatus.HealAreaSpell
@@ -523,7 +589,10 @@ internal static class StateUpdater
 
     private static void AddStatus(ref AutoStatus status, AutoStatus flag, Func<bool> getValue)
     {
-        if (status.HasFlag(flag) || !getValue()) return;
+        if (status.HasFlag(flag) || !getValue())
+        {
+            return;
+        }
 
         status |= flag;
     }
@@ -531,7 +600,7 @@ internal static class StateUpdater
     private static int CountAllianceTanks()
     {
         int count = 0;
-        foreach (var member in DataCenter.AllianceMembers)
+        foreach (IBattleChara member in DataCenter.AllianceMembers)
         {
             if (member.IsJobCategory(JobRole.Tank))
             {
@@ -543,7 +612,7 @@ internal static class StateUpdater
 
     private static bool AnyAllianceTankWithStance()
     {
-        foreach (var member in DataCenter.AllianceMembers)
+        foreach (IBattleChara member in DataCenter.AllianceMembers)
         {
             if (member.IsJobCategory(JobRole.Tank) && member.CurrentHp != 0 && member.HasStatus(false, StatusHelper.TankStanceStatus))
             {

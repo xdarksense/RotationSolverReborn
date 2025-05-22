@@ -8,7 +8,7 @@ public abstract class BozjaRotation : DutyRotation
 {
 }
 
-partial class DutyRotation
+public partial class DutyRotation
 {
     static partial void ModifyLostSpellforgePvE(ref ActionSetting setting)
     {

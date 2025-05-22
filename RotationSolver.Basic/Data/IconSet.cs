@@ -92,10 +92,10 @@ public static class IconSet
 
     private static byte[] SvgToPng(byte[] data)
     {
-        using var stream = new MemoryStream(data);
-        using var outStream = new MemoryStream();
-        var svgDocument = SvgDocument.Open<SvgDocument>(stream);
-        using var bitmap = svgDocument.Draw();
+        using MemoryStream stream = new(data);
+        using MemoryStream outStream = new();
+        SvgDocument svgDocument = SvgDocument.Open<SvgDocument>(stream);
+        using System.Drawing.Bitmap bitmap = svgDocument.Draw();
         bitmap.Save(outStream, ImageFormat.Png);
         return outStream.ToArray();
     }
@@ -106,7 +106,10 @@ public static class IconSet
     /// <param name="text">The ITexture instance.</param>
     /// <param name="texture">The output texture.</param>
     /// <returns>True if the texture was found; otherwise, false.</returns>
-    public static bool GetTexture(this ITexture text, out IDalamudTextureWrap texture) => GetTexture(text?.IconID ?? 0, out texture);
+    public static bool GetTexture(this ITexture text, out IDalamudTextureWrap texture)
+    {
+        return GetTexture(text?.IconID ?? 0, out texture);
+    }
 
     /// <summary>
     /// Gets the texture for the specified ID.
@@ -116,11 +119,13 @@ public static class IconSet
     /// <param name="default">The default texture ID.</param>
     /// <returns>True if the texture was found; otherwise, false.</returns>
     public static bool GetTexture(uint id, out IDalamudTextureWrap texture, uint @default = 0)
-        => ThreadLoadImageHandler.TryGetIconTextureWrap(id, true, out texture)
-        || ThreadLoadImageHandler.TryGetIconTextureWrap(id, false, out texture)
-        || ThreadLoadImageHandler.TryGetIconTextureWrap(@default, true, out texture)
-        || ThreadLoadImageHandler.TryGetIconTextureWrap(@default, false, out texture)
-        || ThreadLoadImageHandler.TryGetIconTextureWrap(0, true, out texture);
+    {
+        return ThreadLoadImageHandler.TryGetIconTextureWrap(id, true, out texture)
+            || ThreadLoadImageHandler.TryGetIconTextureWrap(id, false, out texture)
+            || ThreadLoadImageHandler.TryGetIconTextureWrap(@default, true, out texture)
+            || ThreadLoadImageHandler.TryGetIconTextureWrap(@default, false, out texture)
+            || ThreadLoadImageHandler.TryGetIconTextureWrap(0, true, out texture);
+    }
 
     /// <summary>
     /// Gets the texture for the specified path.
@@ -130,9 +135,11 @@ public static class IconSet
     /// <param name="loadingIcon">Indicates whether to use a loading icon.</param>
     /// <returns>True if the texture was found; otherwise, false.</returns>
     public static bool GetTexture(string path, out IDalamudTextureWrap texture, bool loadingIcon = false)
-        => ThreadLoadImageHandler.TryGetTextureWrap(path, out texture)
-        || (loadingIcon && ThreadLoadImageHandler.TryGetTextureWrap("ui/uld/image2.tex", out texture))
-        || ThreadLoadImageHandler.TryGetIconTextureWrap(0, false, out texture); // loading pics.
+    {
+        return ThreadLoadImageHandler.TryGetTextureWrap(path, out texture)
+            || (loadingIcon && ThreadLoadImageHandler.TryGetTextureWrap("ui/uld/image2.tex", out texture))
+            || ThreadLoadImageHandler.TryGetIconTextureWrap(0, false, out texture); // loading pics.
+    }
 
     /// <summary>
     /// Gets the texture for the specified action.
@@ -143,14 +150,9 @@ public static class IconSet
     /// <returns>True if the texture was found; otherwise, false.</returns>
     public static bool GetTexture(this IAction? action, out IDalamudTextureWrap texture, bool isAdjust = true)
     {
-        if (isAdjust && action is IBaseAction)
-        {
-            return GetTexture((ActionID)(action?.AdjustedID ?? 0), out texture);
-        }
-        else
-        {
-            return GetTexture(action?.IconID ?? 0, out texture, 0);
-        }
+        return isAdjust && action is IBaseAction
+            ? GetTexture((ActionID)(action?.AdjustedID ?? 0), out texture)
+            : GetTexture(action?.IconID ?? 0, out texture, 0);
     }
 
     /// <summary>
@@ -172,9 +174,9 @@ public static class IconSet
             return GetTexture(SPRINT_PVE_ICON_ID, out texture, 0);
         }
 
-        if (!_actionIcons.TryGetValue(actionID, out var iconId))
+        if (!_actionIcons.TryGetValue(actionID, out uint iconId))
         {
-            var actionRow = Service.GetSheet<Lumina.Excel.Sheets.Action>().GetRow((uint)actionID);
+            Lumina.Excel.Sheets.Action actionRow = Service.GetSheet<Lumina.Excel.Sheets.Action>().GetRow((uint)actionID);
             iconId = actionRow.Icon;
             _actionIcons[actionID] = iconId;
         }
@@ -340,19 +342,16 @@ public static class IconSet
     /// <returns>The icon ID for the job.</returns>
     public static uint GetJobIcon(Job job)
     {
-        var classJobSheet = Svc.Data.GetExcelSheet<ClassJob>();
+        Lumina.Excel.ExcelSheet<ClassJob> classJobSheet = Svc.Data.GetExcelSheet<ClassJob>();
         if (classJobSheet == null)
         {
             throw new InvalidOperationException("ClassJob sheet not found.");
         }
 
-        var classJobRow = classJobSheet.GetRow((uint)job);
-        if (classJobRow.RowId == 0)
-        {
-            throw new InvalidOperationException($"ClassJob row for job {job} not found.");
-        }
-
-        return GetJobIcon(classJobRow.GetJobRole(), job);
+        ClassJob classJobRow = classJobSheet.GetRow((uint)job);
+        return classJobRow.RowId == 0
+            ? throw new InvalidOperationException($"ClassJob row for job {job} not found.")
+            : GetJobIcon(classJobRow.GetJobRole(), job);
     }
 
     /// <summary>
@@ -365,13 +364,10 @@ public static class IconSet
     {
         const uint ADV_ICON_ID = 62143;
 
-        if (job == Job.ADV) return ADV_ICON_ID;
-
-        if (!_icons.ContainsKey(type) || (uint)job - 1 >= _icons[type].Length)
-        {
-            throw new ArgumentOutOfRangeException(nameof(job), "Invalid job or icon type.");
-        }
-
-        return _icons[type][(uint)job - 1];
+        return job == Job.ADV
+            ? ADV_ICON_ID
+            : !_icons.ContainsKey(type) || (uint)job - 1 >= _icons[type].Length
+            ? throw new ArgumentOutOfRangeException(nameof(job), "Invalid job or icon type.")
+            : _icons[type][(uint)job - 1];
     }
 }

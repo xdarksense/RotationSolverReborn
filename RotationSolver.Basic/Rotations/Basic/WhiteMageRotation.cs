@@ -1,6 +1,6 @@
 namespace RotationSolver.Basic.Rotations.Basic;
 
-partial class WhiteMageRotation
+public partial class WhiteMageRotation
 {
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Mind;
@@ -21,7 +21,7 @@ partial class WhiteMageRotation
     /// <summary>
     /// Gets the raw Lily timer value in seconds.
     /// </summary>
-    static float LilyTimeRaw => JobGauge.LilyTimer / 1000f;
+    private static float LilyTimeRaw => JobGauge.LilyTimer / 1000f;
 
     /// <summary>
     /// Gets the Lily timer value adjusted by the default GCD remain.
@@ -33,7 +33,10 @@ partial class WhiteMageRotation
     /// </summary>
     /// <param name="time">The time in seconds to check against the Lily timer.</param>
     /// <returns>True if the Lily timer will expire after the specified time; otherwise, false.</returns>
-    protected static bool LilyAfter(float time) => LilyTime <= time;
+    protected static bool LilyAfter(float time)
+    {
+        return LilyTime <= time;
+    }
 
     /// <summary>
     /// Determines if the Lily timer will expire after a specified number of GCDs and an optional offset.
@@ -42,7 +45,9 @@ partial class WhiteMageRotation
     /// <param name="offset">An optional offset in seconds to add to the GCD time.</param>
     /// <returns>True if the Lily timer will expire after the specified number of GCDs and offset; otherwise, false.</returns>
     protected static bool LilyAfterGCD(uint gcdCount = 0, float offset = 0)
-        => LilyAfter(GCDTime(gcdCount, offset));
+    {
+        return LilyAfter(GCDTime(gcdCount, offset));
+    }
 
     /// <summary>
     /// Gets the remaining number of Sacred Sight stacks.

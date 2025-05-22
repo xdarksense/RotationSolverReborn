@@ -741,15 +741,15 @@ internal partial class Configs : IPluginConfiguration
     #endregion
 
     [JobConfig]
-    private readonly ConcurrentDictionary<uint, ActionConfig> _rotationActionConfig = new ConcurrentDictionary<uint, ActionConfig>();
+    private readonly ConcurrentDictionary<uint, ActionConfig> _rotationActionConfig = new();
 
     [JobConfig]
-    private readonly ConcurrentDictionary<uint, ItemConfig> _rotationItemConfig = new ConcurrentDictionary<uint, ItemConfig>();
+    private readonly ConcurrentDictionary<uint, ItemConfig> _rotationItemConfig = new();
 
     [JobChoiceConfig]
-    private readonly ConcurrentDictionary<string, string> _rotationConfigurations = new ConcurrentDictionary<string, string>();
+    private readonly ConcurrentDictionary<string, string> _rotationConfigurations = new();
 
-    public ConcurrentDictionary<uint, string> DutyRotationChoice = new ConcurrentDictionary<uint, string>();
+    public ConcurrentDictionary<uint, string> DutyRotationChoice = new();
 
     public void Save()
     {

@@ -33,7 +33,7 @@ internal class RotationConfigFloat : RotationConfigBase
     public RotationConfigFloat(ICustomRotation rotation, PropertyInfo property)
         : base(rotation, property)
     {
-        var attr = property.GetCustomAttribute<RangeAttribute>();
+        RangeAttribute? attr = property.GetCustomAttribute<RangeAttribute>();
         if (attr != null)
         {
             Min = attr.MinValue;

@@ -2,7 +2,7 @@
 
 namespace RotationSolver.Basic.Rotations.Basic;
 
-partial class DancerRotation
+public partial class DancerRotation
 {
     /// <summary>
     /// 
@@ -347,10 +347,12 @@ partial class DancerRotation
         setting.ActionCheck = () =>
         {
             if (IsDancing)
+            {
                 return false;
+            }
 
             bool hasClosedPosition = false;
-            foreach (var b in AllianceMembers)
+            foreach (IBattleChara b in AllianceMembers)
             {
                 if (b.HasStatus(true, StatusID.ClosedPosition_2026))
                 {
@@ -535,11 +537,17 @@ partial class DancerRotation
             return false;
         }
 
-        if (EmboitePvE.CanUse(out act)) return true;
-        if (EntrechatPvE.CanUse(out act)) return true;
-        if (JetePvE.CanUse(out act)) return true;
-        if (PirouettePvE.CanUse(out act)) return true;
-        return false;
+        if (EmboitePvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (EntrechatPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        return JetePvE.CanUse(out act) || PirouettePvE.CanUse(out act);
     }
     #endregion
 
@@ -645,11 +653,7 @@ partial class DancerRotation
     {
         setting.ActionCheck = () =>
         {
-            if (Player.HasStatus(true, StatusID.FlourishingSaberDance) && Player.HasStatus(true, StatusID.SoloStep))
-            {
-                return true;
-            }
-            return false;
+            return Player.HasStatus(true, StatusID.FlourishingSaberDance) && Player.HasStatus(true, StatusID.SoloStep);
         };
         setting.CreateConfig = () => new ActionConfig()
         {

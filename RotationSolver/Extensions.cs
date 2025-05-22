@@ -1,14 +1,10 @@
-﻿namespace RotationSolver.Extensions
+﻿namespace RotationSolver
 {
     public static class CommandTypeExtensions
     {
         public static string ToStateString(this StateCommandType stateType, JobRole role)
         {
-            if (stateType == StateCommandType.Auto)
-            {
-                return $"{stateType} ({DataCenter.TargetingType})";
-            }
-            return stateType.ToString();
+            return stateType == StateCommandType.Auto ? $"{stateType} ({DataCenter.TargetingType})" : stateType.ToString();
         }
 
         public static string ToSpecialString(this SpecialCommandType specialType, JobRole role)

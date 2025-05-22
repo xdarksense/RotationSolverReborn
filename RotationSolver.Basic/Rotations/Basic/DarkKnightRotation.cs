@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.Basic.Rotations.Basic;
 
-partial class DarkKnightRotation
+public partial class DarkKnightRotation
 {
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Strength;
@@ -28,7 +28,7 @@ partial class DarkKnightRotation
     /// </summary>
     public static bool HasDelirium => !Player.WillStatusEnd(0, true, StatusID.Delirium_3836);
 
-    static float DarkSideTimeRemainingRaw => JobGauge.DarksideTimeRemaining / 1000f;
+    private static float DarkSideTimeRemainingRaw => JobGauge.DarksideTimeRemaining / 1000f;
 
     /// <summary>
     /// 
@@ -40,7 +40,10 @@ partial class DarkKnightRotation
     /// </summary>
     /// <param name="time"></param>
     /// <returns></returns>
-    protected static bool DarkSideEndAfter(float time) => DarkSideTime <= time;
+    protected static bool DarkSideEndAfter(float time)
+    {
+        return DarkSideTime <= time;
+    }
 
     /// <summary>
     /// 
@@ -49,9 +52,11 @@ partial class DarkKnightRotation
     /// <param name="offset"></param>
     /// <returns></returns>
     protected static bool DarkSideEndAfterGCD(uint gctCount = 0, float offset = 0)
-        => DarkSideEndAfter(GCDTime(gctCount, offset));
+    {
+        return DarkSideEndAfter(GCDTime(gctCount, offset));
+    }
 
-    static float ShadowTimeRemainingRaw => JobGauge.ShadowTimeRemaining / 1000f;
+    private static float ShadowTimeRemainingRaw => JobGauge.ShadowTimeRemaining / 1000f;
 
     /// <summary>
     /// 
@@ -63,7 +68,10 @@ partial class DarkKnightRotation
     /// </summary>
     /// <param name="time"></param>
     /// <returns></returns>
-    protected static bool ShadowTimeEndAfter(float time) => ShadowTimeRemainingRaw <= time;
+    protected static bool ShadowTimeEndAfter(float time)
+    {
+        return ShadowTimeRemainingRaw <= time;
+    }
 
     /// <summary>
     /// 
@@ -72,7 +80,9 @@ partial class DarkKnightRotation
     /// <param name="offset"></param>
     /// <returns></returns>
     protected static bool ShadowTimeEndAfterGCD(uint gctCount = 0, float offset = 0)
-        => ShadowTimeEndAfter(GCDTime(gctCount, offset));
+    {
+        return ShadowTimeEndAfter(GCDTime(gctCount, offset));
+    }
     #endregion
 
     #region Status Tracking
@@ -428,9 +438,8 @@ partial class DarkKnightRotation
     /// <inheritdoc/>
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        if (LivingDeadPvE.CanUse(out act)
-            && Player.GetHealthRatio() <= Service.Config.HealthForDyingTanks) return true;
-        return base.EmergencyAbility(nextGCD, out act);
+        return (LivingDeadPvE.CanUse(out act)
+            && Player.GetHealthRatio() <= Service.Config.HealthForDyingTanks) || base.EmergencyAbility(nextGCD, out act);
     }
     #region PvP Actions Unassignable
     /// <summary>

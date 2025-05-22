@@ -8,7 +8,7 @@ namespace RotationSolver.Updaters;
 
 internal static class MovingUpdater
 {
-    internal unsafe static void UpdateCanMove(bool doNextAction)
+    internal static unsafe void UpdateCanMove(bool doNextAction)
     {
         // Special state.
         if (Svc.Condition?[ConditionFlag.OccupiedInEvent] == true)
@@ -25,8 +25,8 @@ internal static class MovingUpdater
         }
 
         // Special actions.
-        var statusList = new List<StatusID>(4);
-        var actionList = new List<ActionID>(4);
+        List<StatusID> statusList = new(4);
+        List<ActionID> actionList = new(4);
 
         if (Service.Config?.PosFlameThrower == true)
         {
@@ -45,12 +45,12 @@ internal static class MovingUpdater
         }
 
         // Action
-        var action = DateTime.Now - RSCommands._lastUsedTime < TimeSpan.FromMilliseconds(100)
+        ActionID action = DateTime.Now - RSCommands._lastUsedTime < TimeSpan.FromMilliseconds(100)
             ? (ActionID)RSCommands._lastActionID
             : doNextAction ? (ActionID)(ActionUpdater.NextAction?.AdjustedID ?? 0) : 0;
 
         bool specialActions = ActionManager.GetAdjustedCastTime(ActionType.Action, (uint)action) > 0;
-        foreach (var id in actionList)
+        foreach (ActionID id in actionList)
         {
             if (Service.GetAdjustedActionId(id) == action)
             {
@@ -61,7 +61,7 @@ internal static class MovingUpdater
 
         // Status
         bool specialStatus = false;
-        foreach (var status in statusList)
+        foreach (StatusID status in statusList)
         {
             if (Player.Object?.HasStatus(true, status) == true)
             {
