@@ -12,8 +12,16 @@ public sealed class GNB_Default : GunbreakerRotation
     #region Countdown Logic
     protected override IAction? CountDownAction(float remainTime)
     {
-        if (remainTime <= 0.7 && LightningShotPvE.CanUse(out var act)) return act;
-        if (remainTime <= 1.2 && UseBurstMedicine(out act)) return act;
+        if (remainTime <= 0.7 && LightningShotPvE.CanUse(out IAction? act))
+        {
+            return act;
+        }
+
+        if (remainTime <= 1.2 && UseBurstMedicine(out act))
+        {
+            return act;
+        }
+
         return base.CountDownAction(remainTime);
     }
     #endregion
@@ -22,24 +30,76 @@ public sealed class GNB_Default : GunbreakerRotation
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
         // ST No Mercy Logic
-        if (nextGCD.IsTheSameTo(false, (ActionID)GnashingFangPvE.ID) && NoMercyPvE.CanUse(out act)) return true;
-        if (!GnashingFangPvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)BurstStrikePvE.ID) && NoMercyPvE.CanUse(out act)) return true;
-        if (!BurstStrikePvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)SolidBarrelPvE.ID) && NoMercyPvE.CanUse(out act)) return true;
-        if (!SolidBarrelPvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)BrutalShellPvE.ID) && NoMercyPvE.CanUse(out act)) return true;
-        if (!BrutalShellPvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)KeenEdgePvE.ID) && NoMercyPvE.CanUse(out act)) return true;
+        if (nextGCD.IsTheSameTo(false, (ActionID)GnashingFangPvE.ID) && NoMercyPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (!GnashingFangPvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)BurstStrikePvE.ID) && NoMercyPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (!BurstStrikePvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)SolidBarrelPvE.ID) && NoMercyPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (!SolidBarrelPvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)BrutalShellPvE.ID) && NoMercyPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (!BrutalShellPvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)KeenEdgePvE.ID) && NoMercyPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         // AOE No Mercy Logic
-        if (DemonSlicePvE.CanUse(out _) && nextGCD.IsTheSameTo(false, (ActionID)DoubleDownPvE.ID) && NoMercyPvE.CanUse(out act)) return true;
-        if (!DoubleDownPvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)FatedCirclePvE.ID) && NoMercyPvE.CanUse(out act)) return true;
-        if (!FatedCirclePvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)DemonSlaughterPvE.ID) && NoMercyPvE.CanUse(out act)) return true;
-        if (!DemonSlaughterPvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)DemonSlicePvE.ID) && NoMercyPvE.CanUse(out act)) return true;
+        if (DemonSlicePvE.CanUse(out _) && nextGCD.IsTheSameTo(false, (ActionID)DoubleDownPvE.ID) && NoMercyPvE.CanUse(out act))
+        {
+            return true;
+        }
 
-        if (Ammo == 0 && BloodfestPvE.CanUse(out act)) return true;
+        if (!DoubleDownPvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)FatedCirclePvE.ID) && NoMercyPvE.CanUse(out act))
+        {
+            return true;
+        }
 
-        if (AbdomenTearPvE.CanUse(out act)) return true;
-        if (EyeGougePvE.CanUse(out act)) return true;
-        if (FatedBrandPvE.CanUse(out act)) return true;
-        if (HypervelocityPvE.CanUse(out act)) return true;
+        if (!FatedCirclePvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)DemonSlaughterPvE.ID) && NoMercyPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (!DemonSlaughterPvE.EnoughLevel && nextGCD.IsTheSameTo(false, (ActionID)DemonSlicePvE.ID) && NoMercyPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (Ammo == 0 && BloodfestPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (AbdomenTearPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (EyeGougePvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (FatedBrandPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (HypervelocityPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.EmergencyAbility(nextGCD, out act);
     }
@@ -47,8 +107,16 @@ public sealed class GNB_Default : GunbreakerRotation
     [RotationDesc(ActionID.HeartOfLightPvE, ActionID.ReprisalPvE)]
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (!HasNoMercy && HeartOfLightPvE.CanUse(out act, skipAoeCheck: true)) return true;
-        if (!HasNoMercy && ReprisalPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (!HasNoMercy && HeartOfLightPvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return true;
+        }
+
+        if (!HasNoMercy && ReprisalPvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return true;
+        }
+
         return base.DefenseAreaAbility(nextGCD, out act);
     }
 
@@ -56,16 +124,31 @@ public sealed class GNB_Default : GunbreakerRotation
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
         //10
-        if (CamouflagePvE.CanUse(out act)) return true;
+        if (CamouflagePvE.CanUse(out act))
+        {
+            return true;
+        }
         //15
-        if (HeartOfStonePvE.CanUse(out act)) return true;
+        if (HeartOfStonePvE.CanUse(out act))
+        {
+            return true;
+        }
 
         //30
-        if ((!RampartPvE.Cooldown.IsCoolingDown || RampartPvE.Cooldown.ElapsedAfter(60)) && NebulaPvE.CanUse(out act)) return true;
+        if ((!RampartPvE.Cooldown.IsCoolingDown || RampartPvE.Cooldown.ElapsedAfter(60)) && NebulaPvE.CanUse(out act))
+        {
+            return true;
+        }
         //20
-        if (NebulaPvE.Cooldown.IsCoolingDown && NebulaPvE.Cooldown.ElapsedAfter(60) && RampartPvE.CanUse(out act)) return true;
+        if (NebulaPvE.Cooldown.IsCoolingDown && NebulaPvE.Cooldown.ElapsedAfter(60) && RampartPvE.CanUse(out act))
+        {
+            return true;
+        }
 
-        if (ReprisalPvE.CanUse(out act)) return true;
+        if (ReprisalPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.DefenseSingleAbility(nextGCD, out act);
     }
@@ -73,38 +156,73 @@ public sealed class GNB_Default : GunbreakerRotation
     [RotationDesc(ActionID.AuroraPvE)]
     protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
-        if (AuroraPvE.CanUse(out act, usedUp: true)) return true;
+        if (AuroraPvE.CanUse(out act, usedUp: true))
+        {
+            return true;
+        }
+
         return base.HealSingleAbility(nextGCD, out act);
     }
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        if (JugularRipPvE.CanUse(out act)) return true;
+        if (JugularRipPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         if (DangerZonePvE.CanUse(out act) && !DoubleDownPvE.EnoughLevel)
         {
 
-            if (!IsFullParty && !(DangerZonePvE.Target.Target?.IsBossFromTTK() ?? false)) return true;
+            if (!IsFullParty && !(DangerZonePvE.Target.Target?.IsBossFromTTK() ?? false))
+            {
+                return true;
+            }
 
-            if (!GnashingFangPvE.EnoughLevel && (HasNoMercy || !NoMercyPvE.Cooldown.WillHaveOneCharge(15))) return true;
+            if (!GnashingFangPvE.EnoughLevel && (HasNoMercy || !NoMercyPvE.Cooldown.WillHaveOneCharge(15)))
+            {
+                return true;
+            }
 
-            if (HasNoMercy && GnashingFangPvE.Cooldown.IsCoolingDown) return true;
+            if (HasNoMercy && GnashingFangPvE.Cooldown.IsCoolingDown)
+            {
+                return true;
+            }
 
-            if (!HasNoMercy && !GnashingFangPvE.Cooldown.WillHaveOneCharge(20)) return true;
+            if (!HasNoMercy && !GnashingFangPvE.Cooldown.WillHaveOneCharge(20))
+            {
+                return true;
+            }
         }
 
         if (HasNoMercy && BowShockPvE.CanUse(out act, skipAoeCheck: true))
         {
             //AOE CHECK
-            if (DemonSlicePvE.CanUse(out _) && !IsFullParty) return true;
+            if (DemonSlicePvE.CanUse(out _) && !IsFullParty)
+            {
+                return true;
+            }
 
-            if (!SonicBreakPvE.EnoughLevel && HasNoMercy) return true;
+            if (!SonicBreakPvE.EnoughLevel && HasNoMercy)
+            {
+                return true;
+            }
 
-            if (HasNoMercy && SonicBreakPvE.Cooldown.IsCoolingDown) return true;
+            if (HasNoMercy && SonicBreakPvE.Cooldown.IsCoolingDown)
+            {
+                return true;
+            }
         }
 
-        if (HasNoMercy && IsLastGCD(ActionID.DoubleDownPvE) && BlastingZonePvE.CanUse(out act)) return true;
+        if (HasNoMercy && IsLastGCD(ActionID.DoubleDownPvE) && BlastingZonePvE.CanUse(out act))
+        {
+            return true;
+        }
 
-        if (NoMercyPvE.Cooldown.IsCoolingDown && BloodfestPvE.Cooldown.IsCoolingDown && BlastingZonePvE.CanUse(out act)) return true;
+        if (NoMercyPvE.Cooldown.IsCoolingDown && BloodfestPvE.Cooldown.IsCoolingDown && BlastingZonePvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.AttackAbility(nextGCD, out act);
     }
     #endregion
@@ -114,23 +232,56 @@ public sealed class GNB_Default : GunbreakerRotation
     {
         if (BurstStrikePvE.CanUse(out act))
         {
-            if (IsAmmoCapped && BloodfestPvE.EnoughLevel && NoMercyPvE.Cooldown.WillHaveOneChargeGCD(1)) return true;
+            if (IsAmmoCapped && BloodfestPvE.EnoughLevel && NoMercyPvE.Cooldown.WillHaveOneChargeGCD(1))
+            {
+                return true;
+            }
         }
 
         if (!InReignCombo)
         {
-            if (AmmoComboStep == 0 && GnashingFangPvE.CanUse(out act, skipComboCheck: true)) return true;
-            if (HasNoMercy && DoubleDownPvE.CanUse(out act)) return true;
-            if (HasNoMercy && SonicBreakPvE.CanUse(out act)) return true;
-            if (SavageClawPvE.CanUse(out act, skipComboCheck: true)) return true;
-            if (WickedTalonPvE.CanUse(out act, skipComboCheck: true)) return true;
+            if (AmmoComboStep == 0 && GnashingFangPvE.CanUse(out act, skipComboCheck: true))
+            {
+                return true;
+            }
+
+            if (HasNoMercy && DoubleDownPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (HasNoMercy && SonicBreakPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (SavageClawPvE.CanUse(out act, skipComboCheck: true))
+            {
+                return true;
+            }
+
+            if (WickedTalonPvE.CanUse(out act, skipComboCheck: true))
+            {
+                return true;
+            }
         }
 
         if ((!InGnashingFang && !GnashingFangPvE.Cooldown.HasOneCharge) || InReignCombo)
         {
-            if (LionHeartPvE.CanUse(out act, skipComboCheck: true)) return true;
-            if (NobleBloodPvE.CanUse(out act, skipComboCheck: true)) return true;
-            if (ReignOfBeastsPvE.CanUse(out act, skipComboCheck: true)) return true;
+            if (LionHeartPvE.CanUse(out act, skipComboCheck: true))
+            {
+                return true;
+            }
+
+            if (NobleBloodPvE.CanUse(out act, skipComboCheck: true))
+            {
+                return true;
+            }
+
+            if (ReignOfBeastsPvE.CanUse(out act, skipComboCheck: true))
+            {
+                return true;
+            }
         }
 
         if (BurstStrikePvE.CanUse(out act))
@@ -156,16 +307,41 @@ public sealed class GNB_Default : GunbreakerRotation
 
         if (!InGnashingFang && !InReignCombo)
         {
-            if (FatedCirclePvE.CanUse(out act)) return true;
-            if (DemonSlaughterPvE.CanUse(out act)) return true;
-            if (DemonSlicePvE.CanUse(out act)) return true;
+            if (FatedCirclePvE.CanUse(out act))
+            {
+                return true;
+            }
 
-            if (SolidBarrelPvE.CanUse(out act)) return true;
-            if (BrutalShellPvE.CanUse(out act)) return true;
-            if (KeenEdgePvE.CanUse(out act)) return true;
+            if (DemonSlaughterPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (DemonSlicePvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (SolidBarrelPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (BrutalShellPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (KeenEdgePvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
-        if (LightningShotPvE.CanUse(out act)) return true;
+        if (LightningShotPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.GeneralGCD(out act);
     }

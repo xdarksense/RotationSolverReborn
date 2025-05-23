@@ -18,20 +18,18 @@ public class SCH_DefaultPVP : ScholarRotation
     private bool DoPurify(out IAction? action)
     {
         action = null;
-        if (!UsePurifyPvP) return false;
+        if (!UsePurifyPvP)
+        {
+            return false;
+        }
 
-        var purifiableStatusesIDs = new List<int>
+        List<int> purifiableStatusesIDs = new()
         {
             // Stun, DeepFreeze, HalfAsleep, Sleep, Bind, Heavy, Silence
             1343, 3219, 3022, 1348, 1345, 1344, 1347
         };
 
-        if (purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)))
-        {
-            return PurifyPvP.CanUse(out action);
-        }
-
-        return false;
+        return purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)) && PurifyPvP.CanUse(out action);
     }
     #endregion
 
@@ -39,42 +37,55 @@ public class SCH_DefaultPVP : ScholarRotation
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
-        if (DoPurify(out action)) return true;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (Target.HasStatus(false, StatusID.Guard) && ChainStratagemPvP.CanUse(out action)) return true;
+        if (DoPurify(out action))
+        {
+            return true;
+        }
 
-        return base.EmergencyAbility(nextGCD, out action);
+        return Target.HasStatus(false, StatusID.Guard) && ChainStratagemPvP.CanUse(out action) || base.EmergencyAbility(nextGCD, out action);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
-        if (DiabrosisPvP.CanUse(out action)) return true;
-        if (Target.HasStatus(true, StatusID.Biolysis_3089) && DeploymentTacticsPvP.CanUse(out action, usedUp: true)) return true;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        return base.AttackAbility(nextGCD, out action);
+        if (DiabrosisPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return Target.HasStatus(true, StatusID.Biolysis_3089) && DeploymentTacticsPvP.CanUse(out action, usedUp: true) || base.AttackAbility(nextGCD, out action);
     }
 
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (ExpedientPvP.CanUse(out action)) return true;
-
-        return base.DefenseAreaAbility(nextGCD, out action);
+        return ExpedientPvP.CanUse(out action) || base.DefenseAreaAbility(nextGCD, out action);
     }
 
     protected override bool HealAreaAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (SummonSeraphPvP.CanUse(out action)) return true;
-
-        return base.HealAreaAbility(nextGCD, out action);
+        return SummonSeraphPvP.CanUse(out action) || base.HealAreaAbility(nextGCD, out action);
     }
     #endregion
 
@@ -82,36 +93,54 @@ public class SCH_DefaultPVP : ScholarRotation
     protected override bool DefenseSingleGCD(out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (StoneskinIiPvP.CanUse(out action)) return true;
-
-        return base.DefenseSingleGCD(out action);
+        return StoneskinIiPvP.CanUse(out action) || base.DefenseSingleGCD(out action);
     }
 
     protected override bool HealSingleGCD(out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (HaelanPvP.CanUse(out action)) return true;
-        if (AdloquiumPvP.CanUse(out action, usedUp: true)) return true;
-        return base.HealSingleGCD(out action);
+        if (HaelanPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return AdloquiumPvP.CanUse(out action, usedUp: true) || base.HealSingleGCD(out action);
     }
 
     protected override bool GeneralGCD(out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (Player.HasStatus(true, StatusID.Recitation_3094) && BiolysisPvP.CanUse(out action)) return true;
+        if (Player.HasStatus(true, StatusID.Recitation_3094) && BiolysisPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (AccessionPvP.CanUse(out action)) return true;
+        if (AccessionPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (SeraphicHaloPvP.CanUse(out action)) return true;
-        if (BroilIvPvP.CanUse(out action)) return true;
+        if (SeraphicHaloPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        return base.GeneralGCD(out action);
+        return BroilIvPvP.CanUse(out action) || base.GeneralGCD(out action);
     }
     #endregion
 }

@@ -20,7 +20,7 @@ public sealed class DNC_Default : DancerRotation
     [RotationConfig(CombatType.PvE, Name = "Prevent the use of defense abilties during burst")]
     private bool BurstDefense { get; set; } = true;
     #endregion
-    bool shouldUseLastDance = true;
+    private bool shouldUseLastDance = true;
 
     private static bool InBurstStatus => !Player.WillStatusEnd(0, true, StatusID.Devilment);
 
@@ -47,9 +47,15 @@ public sealed class DNC_Default : DancerRotation
         if (remainTime <= 15)
         {
             // Attempt to use Standard Step if applicable
-            if (StandardStepPvE.CanUse(out var act, skipAoeCheck: true)) return act;
+            if (StandardStepPvE.CanUse(out IAction? act, skipAoeCheck: true))
+            {
+                return act;
+            }
             // Fallback to executing step GCD action if Standard Step is not used
-            if (ExecuteStepGCD(out act)) return act;
+            if (ExecuteStepGCD(out act))
+            {
+                return act;
+            }
         }
         // If none of the above conditions are met, fallback to the base class method
         return base.CountDownAction(remainTime);
@@ -60,32 +66,49 @@ public sealed class DNC_Default : DancerRotation
     // Override the method for handling emergency abilities
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        if (UseClosedPosition(out act)) return true;
+        if (UseClosedPosition(out act))
+        {
+            return true;
+        }
 
         if (HasTechnicalFinish)
         {
-            if (DevilmentPvE.CanUse(out act)) return true;
+            if (DevilmentPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         // Special handling if the last action was Quadruple Technical Finish and level requirement is met
         if (IsLastGCD(ActionID.QuadrupleTechnicalFinishPvE) && TechnicalStepPvE.EnoughLevel)
         {
             // Attempt to use Devilment ignoring clipping checks
-            if (DevilmentPvE.CanUse(out act)) return true;
+            if (DevilmentPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
         // Similar handling for Double Standard Finish when level requirement is not met
         else if (IsLastGCD(ActionID.DoubleStandardFinishPvE) && !TechnicalStepPvE.EnoughLevel)
         {
-            if (DevilmentPvE.CanUse(out act)) return true;
+            if (DevilmentPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         // Use burst medicine if cooldown for Technical Step has elapsed sufficiently
         if (TechnicalStepPvE.Cooldown.ElapsedAfter(115)
-            && UseBurstMedicine(out act)) return true;
+            && UseBurstMedicine(out act))
+        {
+            return true;
+        }
 
         //If dancing or about to dance avoid using abilities to avoid animation lock delaying the dance, except for Devilment
         if (!IsDancing && !(StandardStepPvE.Cooldown.ElapsedAfter(28) || TechnicalStepPvE.Cooldown.ElapsedAfter(118)))
+        {
             return base.EmergencyAbility(nextGCD, out act); // Fallback to base class method if none of the above conditions are met
+        }
 
         act = null;
         return false;
@@ -94,23 +117,39 @@ public sealed class DNC_Default : DancerRotation
     [RotationDesc(ActionID.CuringWaltzPvE, ActionID.ImprovisationPvE)]
     protected override bool HealAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (CuringWaltzPvE.CanUse(out act, usedUp: true)) return true;
-        if (ImprovisationPvE.CanUse(out act, usedUp: true)) return true;
+        if (CuringWaltzPvE.CanUse(out act, usedUp: true))
+        {
+            return true;
+        }
+
+        if (ImprovisationPvE.CanUse(out act, usedUp: true))
+        {
+            return true;
+        }
+
         return base.HealAreaAbility(nextGCD, out act);
     }
 
     [RotationDesc(ActionID.ShieldSambaPvE)]
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if ((!BurstDefense || (BurstDefense && !InBurstStatus)) && ShieldSambaPvE.CanUse(out act)) return true;
+        if ((!BurstDefense || (BurstDefense && !InBurstStatus)) && ShieldSambaPvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.DefenseAreaAbility(nextGCD, out act);
     }
 
     [RotationDesc(ActionID.EnAvantPvE)]
-    protected override bool MoveForwardAbility(IAction nextGCD, out IAction act)
+    protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
-        if (EnAvantPvE.CanUse(out act, usedUp: true)) return true;
-        return false;
+        if (EnAvantPvE.CanUse(out act, usedUp: true))
+        {
+            return true;
+        }
+
+        return base.MoveForwardAbility(nextGCD, out act);
     }
 
     // Override the method for handling attack abilities
@@ -119,13 +158,19 @@ public sealed class DNC_Default : DancerRotation
         act = null;
 
         //If dancing or about to dance avoid using abilities to avoid animation lock delaying the dance
-        if (IsDancing || StandardStepPvE.Cooldown.ElapsedAfter(28) || TechnicalStepPvE.Cooldown.ElapsedAfter(118)) return false;
+        if (IsDancing || StandardStepPvE.Cooldown.ElapsedAfter(28) || TechnicalStepPvE.Cooldown.ElapsedAfter(118))
+        {
+            return false;
+        }
 
         // Prevent triple weaving by checking if an action was just used
-        if (nextGCD.AnimationLockTime > 0.75f) return false;
+        if (nextGCD.AnimationLockTime > 0.75f)
+        {
+            return false;
+        }
 
         // Skip using Flourish if Technical Step is about to come off cooldown
-        if (!TechnicalStepPvE.Cooldown.ElapsedAfter(116) || TillanaPvE.CanUse(out act))
+        if (!TechnicalStepPvE.Cooldown.ElapsedAfter(116) || TillanaPvE.CanUse(out _))
         {
             // Check for conditions to use Flourish
             if ((HasDevilment && HasTechnicalFinish) || ((!HasDevilment) && (!HasTechnicalFinish)))
@@ -138,20 +183,33 @@ public sealed class DNC_Default : DancerRotation
         }
 
         // Attempt to use Fan Dance III if available
-        if (FanDanceIiiPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (FanDanceIiiPvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return true;
+        }
 
-        var hasProcs = HasSilkenFlow || HasSilkenSymmetry ||
+        bool hasProcs = HasSilkenFlow || HasSilkenSymmetry ||
                        HasFlourishingFlow || HasFlourishingSymmetry;
 
         //Use all feathers on burst or if about to overcap
         if ((!DevilmentPvE.EnoughLevel || HasDevilment || (Feathers > 3 && hasProcs)) && !HasThreefoldFanDance)
         {
-            if (FanDanceIiPvE.CanUse(out act)) return true;
-            if (FanDancePvE.CanUse(out act)) return true;
+            if (FanDanceIiPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (FanDancePvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         // Other attacks
-        if (FanDanceIvPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (FanDanceIvPvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return true;
+        }
 
         return base.AttackAbility(nextGCD, out act);
     }
@@ -166,9 +224,15 @@ public sealed class DNC_Default : DancerRotation
         {
 
             if (DancePartnerName != "")
-                foreach (var player in PartyMembers)
+            {
+                foreach (IBattleChara player in PartyMembers)
+                {
                     if (player.Name.ToString() == DancePartnerName)
+                    {
                         ClosedPositionPvE.Target = new TargetResult(player, [player], player.Position);
+                    }
+                }
+            }
 
             return true;
         }
@@ -219,11 +283,20 @@ public sealed class DNC_Default : DancerRotation
     {
         act = null;
 
-        if (IsDancing) return false;
+        if (IsDancing)
+        {
+            return false;
+        }
         // Use Dance of the Dawn immediately if available
-        if (burst && DanceOfTheDawnPvE.CanUse(out act)) return true;
+        if (burst && DanceOfTheDawnPvE.CanUse(out act))
+        {
+            return true;
+        }
 
-        if (HandleTillana(out act)) return true;
+        if (HandleTillana(out act))
+        {
+            return true;
+        }
 
         if (TechnicalStepPvE.Cooldown.ElapsedAfter(103))
         {
@@ -238,32 +311,61 @@ public sealed class DNC_Default : DancerRotation
         if (burst)
         {
             // Make sure Starfall gets used before end of burst
-            if (DevilmentPvE.Cooldown.ElapsedAfter(15) && StarfallDancePvE.CanUse(out act, skipAoeCheck: true)) return true;
+            if (DevilmentPvE.Cooldown.ElapsedAfter(15) && StarfallDancePvE.CanUse(out act, skipAoeCheck: true))
+            {
+                return true;
+            }
 
             // Make sure to FM with enough time left in burst window to LD and SFD while leaving a GCD for a Sabre if needed
-            if (DevilmentPvE.Cooldown.ElapsedAfter(10) && FinishingMovePvE.CanUse(out act, skipAoeCheck: true)) return true;
+            if (DevilmentPvE.Cooldown.ElapsedAfter(10) && FinishingMovePvE.CanUse(out act, skipAoeCheck: true))
+            {
+                return true;
+            }
         }
 
         if (shouldUseLastDance && Esprit <= 90)
         {
-            if (LastDancePvE.CanUse(out act, skipAoeCheck: true)) return true;
+            if (LastDancePvE.CanUse(out act, skipAoeCheck: true))
+            {
+                return true;
+            }
         }
 
         if (HoldStepForTargets)
         {
-            if (HasHostilesInRange && UseStandardStep(out act)) return true;
+            if (HasHostilesInRange && UseStandardStep(out act))
+            {
+                return true;
+            }
         }
         else
         {
-            if (UseStandardStep(out act)) return true;
+            if (UseStandardStep(out act))
+            {
+                return true;
+            }
         }
 
-        if (FinishingMovePvE.CanUse(out act, skipAoeCheck: true)) return true;
-        if (Esprit <= 100 && StarfallDancePvE.CanUse(out act, skipAoeCheck: true)) return true;
-        if (Player.WillStatusEndGCD(3, 0, true, StatusID.Devilment) && StarfallDancePvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (FinishingMovePvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return true;
+        }
+
+        if (Esprit <= 100 && StarfallDancePvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return true;
+        }
+
+        if (Player.WillStatusEndGCD(3, 0, true, StatusID.Devilment) && StarfallDancePvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return true;
+        }
 
         // Further prioritized GCD abilities
-        if ((burst || (Esprit >= 70 && !TechnicalStepPvE.Cooldown.ElapsedAfter(115))) && SaberDancePvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if ((burst || (Esprit >= 70 && !TechnicalStepPvE.Cooldown.ElapsedAfter(115))) && SaberDancePvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return true;
+        }
 
         bool standardReady = StandardStepPvE.Cooldown.ElapsedAfter(28);
         bool technicalReady = TechnicalStepPvE.Cooldown.ElapsedAfter(118);
@@ -271,14 +373,45 @@ public sealed class DNC_Default : DancerRotation
         if (!(standardReady || technicalReady) &&
             (!shouldUseLastDance || !LastDancePvE.CanUse(out act, skipAoeCheck: true)))
         {
-            if (BloodshowerPvE.CanUse(out act)) return true;
-            if (FountainfallPvE.CanUse(out act)) return true;
-            if (RisingWindmillPvE.CanUse(out act)) return true;
-            if (ReverseCascadePvE.CanUse(out act)) return true;
-            if (BladeshowerPvE.CanUse(out act)) return true;
-            if (WindmillPvE.CanUse(out act)) return true;
-            if (FountainPvE.CanUse(out act)) return true;
-            if (CascadePvE.CanUse(out act)) return true;
+            if (BloodshowerPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (FountainfallPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (RisingWindmillPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (ReverseCascadePvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (BladeshowerPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (WindmillPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (FountainPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (CascadePvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         return false;
@@ -288,12 +421,26 @@ public sealed class DNC_Default : DancerRotation
     private bool UseStandardStep(out IAction act)
     {
         // Attempt to use Standard Step if available and certain conditions are met
-        if (!StandardStepPvE.CanUse(out act, skipAoeCheck: true)) return false;
-        if (Player.WillStatusEnd(5f, true, StatusID.StandardFinish)) return true;
+        if (!StandardStepPvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return false;
+        }
+
+        if (Player.WillStatusEnd(5f, true, StatusID.StandardFinish))
+        {
+            return true;
+        }
 
         // Check for hostiles in range and technical step conditions
-        if (!HasHostilesInRange) return false;
-        if (HasTechnicalFinish && Player.WillStatusEndGCD(2, 0, true, StatusID.TechnicalFinish) || (TechnicalStepPvE.Cooldown.IsCoolingDown && TechnicalStepPvE.Cooldown.WillHaveOneCharge(5))) return false;
+        if (!HasHostilesInRange)
+        {
+            return false;
+        }
+
+        if (HasTechnicalFinish && Player.WillStatusEndGCD(2, 0, true, StatusID.TechnicalFinish) || (TechnicalStepPvE.Cooldown.IsCoolingDown && TechnicalStepPvE.Cooldown.WillHaveOneCharge(5)))
+        {
+            return false;
+        }
 
         return true;
     }
@@ -302,17 +449,24 @@ public sealed class DNC_Default : DancerRotation
     private bool UseClosedPosition(out IAction act)
     {
         // Attempt to use Closed Position if available and certain conditions are met
-        if (!ClosedPositionPvE.CanUse(out act)) return false;
+        if (!ClosedPositionPvE.CanUse(out act))
+        {
+            return false;
+        }
 
         if (!HasClosedPosition)
         {
             // Check for party members with Closed Position status
-            foreach (var friend in PartyMembers)
+            foreach (IBattleChara friend in PartyMembers)
             {
                 if (friend.HasStatus(true, StatusID.ClosedPosition_2026))
                 {
                     // Use Closed Position if target is not the same as the friend with the status
-                    if (ClosedPositionPvE.Target.Target != friend) return true;
+                    if (ClosedPositionPvE.Target.Target != friend)
+                    {
+                        return true;
+                    }
+
                     break;
                 }
             }
@@ -324,7 +478,7 @@ public sealed class DNC_Default : DancerRotation
     private bool FinishTheDance(out IAction? act)
     {
         bool areDanceTargetsInRange = false;
-        foreach (var hostile in AllHostileTargets)
+        foreach (IBattleChara hostile in AllHostileTargets)
         {
             if (hostile.DistanceToPlayer() < 14)
             {
@@ -360,7 +514,10 @@ public sealed class DNC_Default : DancerRotation
         if (!DevilmentPvE.CanUse(out _, skipComboCheck: true))
         {
             // Attempt to use Tillana, skipping the AoE check
-            if (TillanaPvE.CanUse(out act, skipAoeCheck: true)) return true;
+            if (TillanaPvE.CanUse(out act, skipAoeCheck: true))
+            {
+                return true;
+            }
         }
 
         // No Tillana action was performed

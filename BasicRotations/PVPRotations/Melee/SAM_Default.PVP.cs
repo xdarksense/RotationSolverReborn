@@ -32,20 +32,18 @@ public sealed class SAM_DefaultPvP : SamuraiRotation
     private bool DoPurify(out IAction? action)
     {
         action = null;
-        if (!UsePurifyPvP) return false;
+        if (!UsePurifyPvP)
+        {
+            return false;
+        }
 
-        var purifiableStatusesIDs = new List<int>
+        List<int> purifiableStatusesIDs = new()
         {
             // Stun, DeepFreeze, HalfAsleep, Sleep, Bind, Heavy, Silence
             1343, 3219, 3022, 1348, 1345, 1344, 1347
         };
 
-        if (purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)))
-        {
-            return PurifyPvP.CanUse(out action);
-        }
-
-        return false;
+        return purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)) && PurifyPvP.CanUse(out action);
     }
     #endregion
 
@@ -53,51 +51,86 @@ public sealed class SAM_DefaultPvP : SamuraiRotation
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
-        if (DoPurify(out action)) return true;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (Player.GetHealthRatio() < BloodBathPvPPercent && BloodbathPvP.CanUse(out action)) return true;
-        if (SwiftPvP.CanUse(out action)) return true;
-        if (CurrentTarget?.GetHealthRatio() <= SmitePvPPercent && SmitePvP.CanUse(out action)) return true;
-        if (!HasHostilesInRange && SotenYeet && HissatsuSotenPvP.CanUse(out action, usedUp: true)) return true;
+        if (DoPurify(out action))
+        {
+            return true;
+        }
 
-        return base.EmergencyAbility(nextGCD, out action);
+        if (Player.GetHealthRatio() < BloodBathPvPPercent && BloodbathPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (SwiftPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (CurrentTarget?.GetHealthRatio() <= SmitePvPPercent && SmitePvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return !HasHostilesInRange && SotenYeet && HissatsuSotenPvP.CanUse(out action, usedUp: true) || base.EmergencyAbility(nextGCD, out action);
     }
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (HissatsuChitenPvP.CanUse(out action)) return true;
-
-        return base.DefenseSingleAbility(nextGCD, out action);
+        return HissatsuChitenPvP.CanUse(out action) || base.DefenseSingleAbility(nextGCD, out action);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (nextGCD.IsTheSameTo(false, ActionID.YukikazePvP, ActionID.GekkoPvP, ActionID.KashaPvP) && HissatsuSotenPvP.CanUse(out action, usedUp: true)) return true;
+        if (nextGCD.IsTheSameTo(false, ActionID.YukikazePvP, ActionID.GekkoPvP, ActionID.KashaPvP) && HissatsuSotenPvP.CanUse(out action, usedUp: true))
+        {
+            return true;
+        }
 
-        if (ZanshinPvP.CanUse(out action, usedUp: true)) return true;
-        if (MineuchiPvP.CanUse(out action, skipTargetStatusNeedCheck: MineuchiAny)) return true;
-        if (HasHostilesInRange && HissatsuChitenPvP.CanUse(out action)) return true;
-        if (HasHostilesInRange && MeikyoShisuiPvP.CanUse(out action)) return true;
+        if (ZanshinPvP.CanUse(out action, usedUp: true))
+        {
+            return true;
+        }
 
-        return base.AttackAbility(nextGCD, out action);
+        if (MineuchiPvP.CanUse(out action, skipTargetStatusNeedCheck: MineuchiAny))
+        {
+            return true;
+        }
+
+        if (HasHostilesInRange && HissatsuChitenPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return HasHostilesInRange && MeikyoShisuiPvP.CanUse(out action) || base.AttackAbility(nextGCD, out action);
     }
 
     [RotationDesc(ActionID.HissatsuSotenPvP)]
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (HissatsuSotenPvP.CanUse(out action)) return true;
-
-        return base.MoveForwardAbility(nextGCD, out action);
+        return HissatsuSotenPvP.CanUse(out action) || base.MoveForwardAbility(nextGCD, out action);
     }
     #endregion
 
@@ -105,19 +138,42 @@ public sealed class SAM_DefaultPvP : SamuraiRotation
     protected override bool GeneralGCD(out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (TendoKaeshiSetsugekkaPvP.CanUse(out action)) return true;
-        if (TendoSetsugekkaPvP.CanUse(out action)) return true;
+        if (TendoKaeshiSetsugekkaPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (KaeshiNamikiriPvP.CanUse(out action)) return true;
-        if (OgiNamikiriPvP.CanUse(out action)) return true;
+        if (TendoSetsugekkaPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (KashaPvP.CanUse(out action)) return true;
-        if (GekkoPvP.CanUse(out action)) return true;
-        if (YukikazePvP.CanUse(out action)) return true;
+        if (KaeshiNamikiriPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        return base.GeneralGCD(out action);
+        if (OgiNamikiriPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (KashaPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (GekkoPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return YukikazePvP.CanUse(out action) || base.GeneralGCD(out action);
     }
     #endregion
 }
