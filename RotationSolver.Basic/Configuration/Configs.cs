@@ -350,7 +350,7 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Use beneficial ground-targeted actions", Filter = HealingActionCondition, Section = 3)]
     private static readonly bool _useGroundBeneficialAbility = true;
 
-    [ConditionBool, UI("Use beneficial AoE actions when moving.", Parent = nameof(UseGroundBeneficialAbility))]
+    [JobConfig, UI("Use beneficial ground-targeted actions when moving.", Parent = nameof(UseGroundBeneficialAbility))]
     private static readonly bool _useGroundBeneficialAbilityWhenMoving = false;
 
     [ConditionBool, UI("Show Cooldown Window", Filter = UiWindows)]
@@ -511,7 +511,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = HealingActionCondition, Section = 3)]
     private static readonly bool _priolowtank = false;
 
-    [UI("The duration of special windows opened by /macro commands by default.",
+    [UI("The duration of special windows opened by /rotation commands by default.",
         Filter = BasicTimer, Section = 1)]
     [Range(1, 20, ConfigUnitType.Seconds, 1f)]
     public float SpecialDuration { get; set; } = 3;
@@ -649,9 +649,6 @@ internal partial class Configs : IPluginConfiguration
 
     [Range(0, 10, ConfigUnitType.None)]
     public int TargetingIndex { get; set; }
-
-    [UI("Beneficial AOE Logic", Parent = nameof(UseGroundBeneficialAbility))]
-    public BeneficialAreaStrategy2 BeneficialAreaStrategy2 { get; set; } = BeneficialAreaStrategy2.OnCalculated;
 
     [UI("Number of hostiles", Parent = nameof(UseDefenseAbility),
         PvEFilter = JobFilterType.Tank)]
