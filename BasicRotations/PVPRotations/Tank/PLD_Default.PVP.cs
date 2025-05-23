@@ -18,20 +18,18 @@ public sealed class PLD_DefaultPvP : PaladinRotation
     private bool DoPurify(out IAction? action)
     {
         action = null;
-        if (!UsePurifyPvP) return false;
+        if (!UsePurifyPvP)
+        {
+            return false;
+        }
 
-        var purifiableStatusesIDs = new List<int>
+        List<int> purifiableStatusesIDs = new()
         {
             // Stun, DeepFreeze, HalfAsleep, Sleep, Bind, Heavy, Silence
             1343, 3219, 3022, 1348, 1345, 1344, 1347
         };
 
-        if (purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)))
-        {
-            return PurifyPvP.CanUse(out action);
-        }
-
-        return false;
+        return purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)) && PurifyPvP.CanUse(out action);
     }
 
     #endregion
@@ -40,31 +38,48 @@ public sealed class PLD_DefaultPvP : PaladinRotation
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
-        if (DoPurify(out action)) return true;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        return base.EmergencyAbility(nextGCD, out action);
+        return DoPurify(out action) || base.EmergencyAbility(nextGCD, out action);
     }
     [RotationDesc(ActionID.BloodwhettingPvP)]
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
-        if (RampartPvP.CanUse(out action)) return true;
-        if (HolySheltronPvP.CanUse(out action)) return true;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        return base.DefenseSingleAbility(nextGCD, out action);
+        if (RampartPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return HolySheltronPvP.CanUse(out action) || base.DefenseSingleAbility(nextGCD, out action);
     }
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (RampagePvP.CanUse(out action)) return true;
-        if (FullSwingPvP.CanUse(out action)) return true;
-        if (ImperatorPvP.CanUse(out action)) return true;
+        if (RampagePvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        return base.AttackAbility(nextGCD, out action);
+        if (FullSwingPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return ImperatorPvP.CanUse(out action) || base.AttackAbility(nextGCD, out action);
     }
     #endregion
 
@@ -72,27 +87,67 @@ public sealed class PLD_DefaultPvP : PaladinRotation
     protected override bool GeneralGCD(out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (BladeOfFaithPvP.CanUse(out action)) return true;
-        if (BladeOfTruthPvP.CanUse(out action)) return true;
-        if (BladeOfValorPvP.CanUse(out action)) return true;
-        if (ConfiteorPvP.CanUse(out action)) return true;
+        if (BladeOfFaithPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (ShieldSmitePvP.CanUse(out action)) return true;
+        if (BladeOfTruthPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (HolySpiritPvP.CanUse(out action)) return true;
+        if (BladeOfValorPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (AtonementPvP.CanUse(out action)) return true;
-        if (SupplicationPvP.CanUse(out action)) return true;
-        if (SepulchrePvP.CanUse(out action)) return true;
+        if (ConfiteorPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (RoyalAuthorityPvP.CanUse(out action)) return true;
-        if (RiotBladePvP.CanUse(out action)) return true;
-        if (FastBladePvP.CanUse(out action)) return true;
+        if (ShieldSmitePvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        return base.GeneralGCD(out action);
+        if (HolySpiritPvP.CanUse(out action))
+        {
+            return true;
+        }
 
+        if (AtonementPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (SupplicationPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (SepulchrePvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (RoyalAuthorityPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (RiotBladePvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return FastBladePvP.CanUse(out action) || base.GeneralGCD(out action);
     }
     #endregion
 }

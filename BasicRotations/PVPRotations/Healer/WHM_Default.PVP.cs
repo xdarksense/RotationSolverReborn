@@ -19,7 +19,7 @@ public class WHM_DefaultPVP : WhiteMageRotation
     {
         action = null;
 
-        var purifiableStatusesIDs = new List<int>
+        List<int> purifiableStatusesIDs = new()
         {
             // Stun, DeepFreeze, HalfAsleep, Sleep, Bind, Heavy, Silence
             1343, 3219, 3022, 1348, 1345, 1344, 1347
@@ -27,9 +27,15 @@ public class WHM_DefaultPVP : WhiteMageRotation
 
         if (purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)))
         {
-            if (AquaveilPvP.CanUse(out action)) return true;
+            if (AquaveilPvP.CanUse(out action))
+            {
+                return true;
+            }
 
-            if (UsePurifyPvP && PurifyPvP.CanUse(out action)) return true;
+            if (UsePurifyPvP && PurifyPvP.CanUse(out action))
+            {
+                return true;
+            }
         }
 
         return false;
@@ -40,27 +46,29 @@ public class WHM_DefaultPVP : WhiteMageRotation
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
-        if (DoPurify(out action)) return true;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        return base.EmergencyAbility(nextGCD, out action);
+        return DoPurify(out action) || base.EmergencyAbility(nextGCD, out action);
     }
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
-
-        return base.DefenseSingleAbility(nextGCD, out action);
+        return (!RespectGuard || !Player.HasStatus(true, StatusID.Guard)) && base.DefenseSingleAbility(nextGCD, out action);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
-        if (DiabrosisPvP.CanUse(out action)) return true;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        return base.AttackAbility(nextGCD, out action);
+        return DiabrosisPvP.CanUse(out action) || base.AttackAbility(nextGCD, out action);
     }
     #endregion
 
@@ -68,40 +76,64 @@ public class WHM_DefaultPVP : WhiteMageRotation
     protected override bool DefenseSingleGCD(out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (StoneskinIiPvP.CanUse(out action)) return true;
-
-        return base.DefenseSingleGCD(out action);
+        return StoneskinIiPvP.CanUse(out action) || base.DefenseSingleGCD(out action);
     }
 
     protected override bool HealSingleGCD(out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (HaelanPvP.CanUse(out action)) return true;
-        if (CureIiiPvP.CanUse(out action)) return true;
-        if (CureIiPvP.CanUse(out action)) return true;
+        if (HaelanPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        return base.HealSingleGCD(out action);
+        if (CureIiiPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return CureIiPvP.CanUse(out action) || base.HealSingleGCD(out action);
     }
 
     protected override bool GeneralGCD(out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (AfflatusMiseryPvP.CanUse(out action)) return true;
+        if (AfflatusMiseryPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (SeraphStrikePvP.CanUse(out action)) return true;
+        if (SeraphStrikePvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (MiracleOfNaturePvP.CanUse(out action)) return true;
+        if (MiracleOfNaturePvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (GlareIvPvP.CanUse(out action)) return true;
-        if (GlareIiiPvP.CanUse(out action)) return true;
+        if (GlareIvPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        return base.GeneralGCD(out action);
+        return GlareIiiPvP.CanUse(out action) || base.GeneralGCD(out action);
     }
     #endregion
 }

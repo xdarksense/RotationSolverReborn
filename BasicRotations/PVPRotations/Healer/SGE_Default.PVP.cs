@@ -18,20 +18,18 @@ public class SGE_DefaultPVP : SageRotation
     private bool DoPurify(out IAction? action)
     {
         action = null;
-        if (!UsePurifyPvP) return false;
+        if (!UsePurifyPvP)
+        {
+            return false;
+        }
 
-        var purifiableStatusesIDs = new List<int>
+        List<int> purifiableStatusesIDs = new()
         {
             // Stun, DeepFreeze, HalfAsleep, Sleep, Bind, Heavy, Silence
             1343, 3219, 3022, 1348, 1345, 1344, 1347
         };
 
-        if (purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)))
-        {
-            return PurifyPvP.CanUse(out action);
-        }
-
-        return false;
+        return purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)) && PurifyPvP.CanUse(out action);
     }
     #endregion
 
@@ -39,23 +37,33 @@ public class SGE_DefaultPVP : SageRotation
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
-        if (DoPurify(out action)) return true;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (!Player.HasStatus(true, StatusID.Kardia_2871) && KardiaPvP.CanUse(out action)) return true;
+        if (DoPurify(out action))
+        {
+            return true;
+        }
 
-        return base.EmergencyAbility(nextGCD, out action);
+        return !Player.HasStatus(true, StatusID.Kardia_2871) && KardiaPvP.CanUse(out action) || base.EmergencyAbility(nextGCD, out action);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (DiabrosisPvP.CanUse(out action)) return true;
-        if (!Target.HasStatus(true, StatusID.Toxikon) && ToxikonPvP.CanUse(out action, usedUp: true)) return true;
+        if (DiabrosisPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        return base.AttackAbility(nextGCD, out action);
+        return !Target.HasStatus(true, StatusID.Toxikon) && ToxikonPvP.CanUse(out action, usedUp: true) || base.AttackAbility(nextGCD, out action);
     }
     #endregion
 
@@ -63,38 +71,54 @@ public class SGE_DefaultPVP : SageRotation
     protected override bool DefenseSingleGCD(out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (StoneskinIiPvP.CanUse(out action)) return true;
-
-        return base.DefenseSingleGCD(out action);
+        return StoneskinIiPvP.CanUse(out action) || base.DefenseSingleGCD(out action);
     }
 
     protected override bool HealSingleGCD(out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (HaelanPvP.CanUse(out action)) return true;
-
-        return base.HealSingleGCD(out action);
+        return HaelanPvP.CanUse(out action) || base.HealSingleGCD(out action);
     }
 
     protected override bool GeneralGCD(out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (PneumaPvP.CanUse(out action)) return true;
+        if (PneumaPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (PsychePvP.CanUse(out action)) return true;
-        if (PhlegmaIiiPvP.CanUse(out action)) return true;
+        if (PsychePvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (!IsLastAction(ActionID.EukrasiaPvP) && InCombat && !Target.HasStatus(true, StatusID.EukrasianDosisIii_3108) && !Player.HasStatus(true, StatusID.Eukrasia) && EukrasiaPvP.CanUse(out action, usedUp: true)) return true;
+        if (PhlegmaIiiPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (DosisIiiPvP.CanUse(out action)) return true;
+        if (!IsLastAction(ActionID.EukrasiaPvP) && InCombat && !Target.HasStatus(true, StatusID.EukrasianDosisIii_3108) && !Player.HasStatus(true, StatusID.Eukrasia) && EukrasiaPvP.CanUse(out action, usedUp: true))
+        {
+            return true;
+        }
 
-        return base.GeneralGCD(out action);
+        return DosisIiiPvP.CanUse(out action) || base.GeneralGCD(out action);
     }
     #endregion
 }

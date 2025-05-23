@@ -49,7 +49,10 @@ public sealed class WAR_Default : WarriorRotation
     #region Countdown Logic
     protected override IAction? CountDownAction(float remainTime)
     {
-        if (remainTime < 0.54f && TomahawkPvE.CanUse(out var act)) return act;
+        if (remainTime < 0.54f && TomahawkPvE.CanUse(out IAction? act))
+        {
+            return act;
+        }
         return base.CountDownAction(remainTime);
     }
     #endregion
@@ -57,30 +60,57 @@ public sealed class WAR_Default : WarriorRotation
     #region oGCD Logic
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        if (InfuriatePvE.CanUse(out act, gcdCountForAbility: 3)) return true;
+        if (InfuriatePvE.CanUse(out act, gcdCountForAbility: 3))
+        {
+            return true;
+        }
 
-        if (!InnerReleasePvE.EnoughLevel && Player.HasStatus(true, StatusID.Berserk) && InfuriatePvE.CanUse(out act, usedUp: true)) return true;
+        if (!InnerReleasePvE.EnoughLevel && Player.HasStatus(true, StatusID.Berserk) && InfuriatePvE.CanUse(out act, usedUp: true))
+        {
+            return true;
+        }
 
-        if (CombatElapsedLessGCD(1)) return false;
+        if (CombatElapsedLessGCD(1))
+        {
+            return false;
+        }
 
         if (!Player.WillStatusEndGCD(2, 0, true, StatusID.SurgingTempest)
             || !StormsEyePvE.EnoughLevel)
         {
-            if (BerserkPvE.CanUse(out act)) return true;
+            if (BerserkPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         if (IsBurstStatus && (InnerReleaseStacks == 0 || InnerReleaseStacks == 3))
         {
-            if (InfuriatePvE.CanUse(out act, usedUp: true)) return true;
+            if (InfuriatePvE.CanUse(out act, usedUp: true))
+            {
+                return true;
+            }
         }
 
-        if (CombatElapsedLessGCD(4)) return false;
+        if (CombatElapsedLessGCD(4))
+        {
+            return false;
+        }
 
-        if (OrogenyPvE.CanUse(out act)) return true;
+        if (OrogenyPvE.CanUse(out act))
+        {
+            return true;
+        }
 
-        if (UpheavalPvE.CanUse(out act)) return true;
+        if (UpheavalPvE.CanUse(out act))
+        {
+            return true;
+        }
 
-        if (Player.HasStatus(false, StatusID.Wrathful) && PrimalWrathPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (Player.HasStatus(false, StatusID.Wrathful) && PrimalWrathPvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return true;
+        }
 
         if (YEETBurst && OnslaughtPvE.CanUse(out act, usedUp: IsBurstStatus) &&
            !IsMoving &&
@@ -100,7 +130,11 @@ public sealed class WAR_Default : WarriorRotation
             return true;
         }
 
-        if (MergedStatus.HasFlag(AutoStatus.MoveForward) && MoveForwardAbility(nextGCD, out act)) return true;
+        if (MergedStatus.HasFlag(AutoStatus.MoveForward) && MoveForwardAbility(nextGCD, out act))
+        {
+            return true;
+        }
+
         return base.AttackAbility(nextGCD, out act);
     }
 
@@ -108,24 +142,36 @@ public sealed class WAR_Default : WarriorRotation
     {
         if ((InCombat && Player.GetHealthRatio() < HealIntuition && NumberOfHostilesInRange > 0) || (InCombat && PartyMembers.Count() is 1 && NumberOfHostilesInRange > 0))
         {
-            if (BloodwhettingPvE.CanUse(out act)) return true;
+            if (BloodwhettingPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         if ((InCombat && Player.GetHealthRatio() < HealIntuition && NumberOfHostilesInRange > 0) || (InCombat && PartyMembers.Count() is 1 && NumberOfHostilesInRange > 0))
         {
-            if (RawIntuitionPvE.CanUse(out act)) return true;
+            if (RawIntuitionPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         if (Player.GetHealthRatio() < ThrillOfBattleHeal)
         {
-            if (ThrillOfBattlePvE.CanUse(out act)) return true;
+            if (ThrillOfBattlePvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         if (!Player.HasStatus(true, StatusID.Holmgang_409))
         {
             if (Player.GetHealthRatio() < EquilibriumHeal)
             {
-                if (EquilibriumPvE.CanUse(out act)) return true;
+                if (EquilibriumPvE.CanUse(out act))
+                {
+                    return true;
+                }
             }
         }
         return base.GeneralAbility(nextGCD, out act);
@@ -137,17 +183,35 @@ public sealed class WAR_Default : WarriorRotation
         bool RawSingleTargets = SoloIntuition;
         act = null;
 
-        if (Player.HasStatus(true, StatusID.Holmgang_409) && Player.GetHealthRatio() < 0.3f) return false;
+        if (Player.HasStatus(true, StatusID.Holmgang_409) && Player.GetHealthRatio() < 0.3f)
+        {
+            return false;
+        }
 
-        if (RawIntuitionPvE.CanUse(out act) && (RawSingleTargets || NumberOfHostilesInRange > 2)) return true;
+        if (RawIntuitionPvE.CanUse(out act) && (RawSingleTargets || NumberOfHostilesInRange > 2))
+        {
+            return true;
+        }
 
-        if (!Player.WillStatusEndGCD(0, 0, true, StatusID.Bloodwhetting, StatusID.RawIntuition)) return false;
+        if (!Player.WillStatusEndGCD(0, 0, true, StatusID.Bloodwhetting, StatusID.RawIntuition))
+        {
+            return false;
+        }
 
-        if (ReprisalPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (ReprisalPvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return true;
+        }
 
-        if ((!RampartPvE.Cooldown.IsCoolingDown || RampartPvE.Cooldown.ElapsedAfter(60)) && VengeancePvE.CanUse(out act)) return true;
+        if ((!RampartPvE.Cooldown.IsCoolingDown || RampartPvE.Cooldown.ElapsedAfter(60)) && VengeancePvE.CanUse(out act))
+        {
+            return true;
+        }
 
-        if (((VengeancePvE.Cooldown.IsCoolingDown && VengeancePvE.Cooldown.ElapsedAfter(60)) || !VengeancePvE.EnoughLevel) && RampartPvE.CanUse(out act)) return true;
+        if (((VengeancePvE.Cooldown.IsCoolingDown && VengeancePvE.Cooldown.ElapsedAfter(60)) || !VengeancePvE.EnoughLevel) && RampartPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.DefenseSingleAbility(nextGCD, out act);
     }
@@ -157,10 +221,16 @@ public sealed class WAR_Default : WarriorRotation
     {
         act = null;
 
-        if (ShakeItOffPvE.Cooldown.IsCoolingDown && !ShakeItOffPvE.Cooldown.WillHaveOneCharge(60)
-            || ReprisalPvE.Cooldown.IsCoolingDown && !ReprisalPvE.Cooldown.WillHaveOneCharge(50)) return false;
+        if ((ShakeItOffPvE.Cooldown.IsCoolingDown && !ShakeItOffPvE.Cooldown.WillHaveOneCharge(60))
+            || (ReprisalPvE.Cooldown.IsCoolingDown && !ReprisalPvE.Cooldown.WillHaveOneCharge(50)))
+        {
+            return false;
+        }
 
-        if (ShakeItOffPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (ShakeItOffPvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return false;
+        }
 
         return base.DefenseAreaAbility(nextGCD, out act);
     }
@@ -171,42 +241,107 @@ public sealed class WAR_Default : WarriorRotation
     {
         if (!Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest))
         {
-            if (ChaoticCyclonePvE.CanUse(out act)) return true;
-            if (InnerChaosPvE.CanUse(out act)) return true;
+            if (ChaoticCyclonePvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (InnerChaosPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         if (!Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest) && !Player.HasStatus(true, StatusID.NascentChaos) && InnerReleaseStacks > 0)
         {
-            if (DecimatePvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-            if (FellCleavePvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
+            if (DecimatePvE.CanUse(out act, skipStatusProvideCheck: true))
+            {
+                return true;
+            }
+
+            if (FellCleavePvE.CanUse(out act, skipStatusProvideCheck: true))
+            {
+                return true;
+            }
         }
 
         if (!Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest) && InnerReleaseStacks == 0)
         {
             if ((YEET || (!YEET && !IsMoving)) && PrimalRendPvE.CanUse(out act, skipAoeCheck: true))
             {
-                if (!YEETBeta && PrimalRendPvE.Target.Target?.DistanceToPlayer() < PrimalRendDistance2) return true;
-                if (YEETBeta && PrimalRendPvE.Target.Target?.DistanceToPlayer() + PrimalRendPvE.Target.Target?.HitboxRadius < PrimalRendDistance2) return true;
+                if (!YEETBeta && PrimalRendPvE.Target.Target?.DistanceToPlayer() < PrimalRendDistance2)
+                {
+                    return true;
+                }
+
+                if (YEETBeta && PrimalRendPvE.Target.Target?.DistanceToPlayer() + PrimalRendPvE.Target.Target?.HitboxRadius < PrimalRendDistance2)
+                {
+                    return true;
+                }
             }
-            if (PrimalRuinationPvE.CanUse(out act)) return true;
+            if (PrimalRuinationPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         // AOE
-        if (!Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest) && DecimatePvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-        if (!SteelCycloneMasteryTrait.IsEnabled && !Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest) && SteelCyclonePvE.CanUse(out act)) return true;
-        if (MythrilTempestPvE.CanUse(out act)) return true;
-        if (OverpowerPvE.CanUse(out act)) return true;
+        if (!Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest) && DecimatePvE.CanUse(out act, skipStatusProvideCheck: true))
+        {
+            return true;
+        }
+
+        if (!SteelCycloneMasteryTrait.IsEnabled && !Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest) && SteelCyclonePvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (MythrilTempestPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (OverpowerPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         // Single Target
-        if (!Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest) && FellCleavePvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-        if (!InnerBeastMasteryTrait.IsEnabled && (!StormsEyePvE.EnoughLevel || !Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest)) && InnerBeastPvE.CanUse(out act)) return true;
-        if (StormsEyePvE.CanUse(out act)) return true;
-        if (StormsPathPvE.CanUse(out act)) return true;
-        if (MaimPvE.CanUse(out act)) return true;
-        if (HeavySwingPvE.CanUse(out act)) return true;
+        if (!Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest) && FellCleavePvE.CanUse(out act, skipStatusProvideCheck: true))
+        {
+            return true;
+        }
+
+        if (!InnerBeastMasteryTrait.IsEnabled && (!StormsEyePvE.EnoughLevel || !Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest)) && InnerBeastPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (StormsEyePvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (StormsPathPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (MaimPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (HeavySwingPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         // Ranged
-        if (TomahawkPvE.CanUse(out act)) return true;
+        if (TomahawkPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.GeneralGCD(out act);
     }
@@ -215,10 +350,16 @@ public sealed class WAR_Default : WarriorRotation
     protected override bool HealSingleGCD(out IAction? act)
     {
         if (!NeverscentFlash && NascentFlashPvE.CanUse(out act)
-            && (InCombat && NascentFlashPvE.Target.Target?.GetHealthRatio() < FlashHeal)) return true;
+            && (InCombat && NascentFlashPvE.Target.Target?.GetHealthRatio() < FlashHeal))
+        {
+            return true;
+        }
 
         if (NeverscentFlash && NascentFlashPvE.CanUse(out act)
-            && (InCombat && !Player.HasStatus(true, StatusID.Defiance) && NascentFlashPvE.Target.Target?.GetHealthRatio() < FlashHeal)) return true;
+            && (InCombat && !Player.HasStatus(true, StatusID.Defiance) && NascentFlashPvE.Target.Target?.GetHealthRatio() < FlashHeal))
+        {
+            return true;
+        }
 
         return base.HealSingleGCD(out act);
     }
