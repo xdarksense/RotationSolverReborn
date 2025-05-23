@@ -18,20 +18,18 @@ public class AST_DefaultPVP : AstrologianRotation
     private bool DoPurify(out IAction? action)
     {
         action = null;
-        if (!UsePurifyPvP) return false;
+        if (!UsePurifyPvP)
+        {
+            return false;
+        }
 
-        var purifiableStatusesIDs = new List<int>
+        List<int> purifiableStatusesIDs = new()
         {
             // Stun, DeepFreeze, HalfAsleep, Sleep, Bind, Heavy, Silence
             1343, 3219, 3022, 1348, 1345, 1344, 1347
         };
 
-        if (purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)))
-        {
-            return PurifyPvP.CanUse(out action);
-        }
-
-        return false;
+        return purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)) && PurifyPvP.CanUse(out action);
     }
     #endregion
 
@@ -39,34 +37,73 @@ public class AST_DefaultPVP : AstrologianRotation
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
-        if (DoPurify(out action)) return true;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (AspectedBeneficPvP_29247.CanUse(out action, usedUp: true)) return true;
+        if (DoPurify(out action))
+        {
+            return true;
+        }
 
-        if (Player.WillStatusEnd(1, true, StatusID.Macrocosmos_3104) && MicrocosmosPvP.CanUse(out action)) return true;
-        if (Player.WillStatusEnd(1, true, StatusID.LadyOfCrowns_4328) && LadyOfCrownsPvE.CanUse(out action)) return true;
-        if (Player.GetHealthRatio() < 0.5 && MicrocosmosPvP.CanUse(out action)) return true;
-        if (OraclePvP.CanUse(out action)) return true;
+        if (AspectedBeneficPvP_29247.CanUse(out action, usedUp: true))
+        {
+            return true;
+        }
 
-        return base.EmergencyAbility(nextGCD, out action);
+        if (Player.WillStatusEnd(1, true, StatusID.Macrocosmos_3104) && MicrocosmosPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (Player.WillStatusEnd(1, true, StatusID.LadyOfCrowns_4328) && LadyOfCrownsPvE.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (Player.GetHealthRatio() < 0.5 && MicrocosmosPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return OraclePvP.CanUse(out action) || base.EmergencyAbility(nextGCD, out action);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (DiabrosisPvP.CanUse(out action)) return true;
+        if (DiabrosisPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (MinorArcanaPvP.CanUse(out action)) return true;
-        if (LordOfCrownsPvP.CanUse(out action)) return true;
+        if (MinorArcanaPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (MacrocosmosPvP.CanUse(out action)) return true;
-        if (GravityIiPvP_29248.CanUse(out action, usedUp: true)) return true;
-        if (FallMaleficPvP_29246.CanUse(out action, usedUp: true)) return true;
+        if (LordOfCrownsPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        return base.AttackAbility(nextGCD, out action);
+        if (MacrocosmosPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (GravityIiPvP_29248.CanUse(out action, usedUp: true))
+        {
+            return true;
+        }
+
+        return FallMaleficPvP_29246.CanUse(out action, usedUp: true) || base.AttackAbility(nextGCD, out action);
     }
     #endregion
 
@@ -74,43 +111,55 @@ public class AST_DefaultPVP : AstrologianRotation
     protected override bool DefenseSingleGCD(out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (StoneskinIiPvP.CanUse(out action)) return true;
-
-        return base.DefenseSingleGCD(out action);
+        return StoneskinIiPvP.CanUse(out action) || base.DefenseSingleGCD(out action);
     }
 
     protected override bool HealSingleGCD(out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (HaelanPvP.CanUse(out action)) return true;
-        if (AspectedBeneficPvP.CanUse(out action, usedUp: true)) return true;
+        if (HaelanPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        return base.HealSingleGCD(out action);
+        return AspectedBeneficPvP.CanUse(out action, usedUp: true) || base.HealSingleGCD(out action);
     }
 
     protected override bool HealAreaGCD(out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (LadyOfCrownsPvP.CanUse(out action)) return true;
-
-        return base.HealAreaGCD(out action);
+        return LadyOfCrownsPvP.CanUse(out action) || base.HealAreaGCD(out action);
     }
 
     protected override bool GeneralGCD(out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (GravityIiPvP.CanUse(out action)) return true;
-        if (FallMaleficPvP.CanUse(out action)) return true;
+        if (GravityIiPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        return base.GeneralGCD(out action);
+        return FallMaleficPvP.CanUse(out action) || base.GeneralGCD(out action);
     }
     #endregion
 }

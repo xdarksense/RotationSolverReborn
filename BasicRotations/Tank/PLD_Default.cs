@@ -73,9 +73,15 @@ public sealed class PLD_Default : PaladinRotation
     protected override IAction? CountDownAction(float remainTime)
     {
         if (remainTime < HolySpiritPvE.Info.CastTime + CountDownAhead
-            && HolySpiritPvE.CanUse(out var act)) return act;
+            && HolySpiritPvE.CanUse(out IAction? act))
+        {
+            return act;
+        }
 
-        if (remainTime < 15 && DivineVeilPvE.CanUse(out act)) return act;
+        if (remainTime < 15 && DivineVeilPvE.CanUse(out act))
+        {
+            return act;
+        }
 
         return base.CountDownAction(remainTime);
     }
@@ -87,42 +93,89 @@ public sealed class PLD_Default : PaladinRotation
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
+        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms))
+        {
+            return false;
+        }
 
-        if (Player.HasStatus(true, StatusID.Cover) && HallowedWithCover && HallowedGroundPvE.CanUse(out act)) return true;
+        if (Player.HasStatus(true, StatusID.Cover) && HallowedWithCover && HallowedGroundPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         if (HallowedGroundPvE.CanUse(out act)
-        && Player.GetHealthRatio() <= HealthForDyingTanks) return true;
+        && Player.GetHealthRatio() <= HealthForDyingTanks)
+        {
+            return true;
+        }
 
         if ((Player.HasStatus(true, StatusID.Rampart) || Player.HasStatus(true, StatusID.Sentinel)) &&
             InterventionPvE.CanUse(out act, skipTargetStatusNeedCheck: true) &&
-            InterventionPvE.Target.Target?.GetHealthRatio() < InterventionClutch) return true;
+            InterventionPvE.Target.Target?.GetHealthRatio() < InterventionClutch)
+        {
+            return true;
+        }
 
         if (CoverPvE.CanUse(out act) && CoverPvE.Target.Target?.DistanceToPlayer() < 10 &&
-            CoverPvE.Target.Target?.GetHealthRatio() < CoverRatio) return true;
+            CoverPvE.Target.Target?.GetHealthRatio() < CoverRatio)
+        {
+            return true;
+        }
 
         if ((HasHostilesInRange && MeleeFoF) || !MeleeFoF)
         {
-            if (!RiotBladePvE.EnoughLevel && nextGCD.IsTheSameTo(true, FastBladePvE) && FightOrFlightPvE.CanUse(out act)) return true;
-            if (!RageOfHalonePvE.EnoughLevel && nextGCD.IsTheSameTo(true, RiotBladePvE, TotalEclipsePvE) && FightOrFlightPvE.CanUse(out act)) return true;
-            if (!ProminencePvE.EnoughLevel && nextGCD.IsTheSameTo(true, RageOfHalonePvE, TotalEclipsePvE) && FightOrFlightPvE.CanUse(out act)) return true;
-            if (!AtonementPvE.EnoughLevel && nextGCD.IsTheSameTo(true, RoyalAuthorityPvE, ProminencePvE) && FightOrFlightPvE.CanUse(out act)) return true;
-            if (AtonementPvE.EnoughLevel && (Player.HasStatus(true, StatusID.AtonementReady, StatusID.SepulchreReady, StatusID.SupplicationReady, StatusID.DivineMight) || IsLastAction(true, RoyalAuthorityPvE)) && FightOrFlightPvE.CanUse(out act)) return true;
+            if (!RiotBladePvE.EnoughLevel && nextGCD.IsTheSameTo(true, FastBladePvE) && FightOrFlightPvE.CanUse(out act))
+            {
+                return true;
+            }
 
+            if (!RageOfHalonePvE.EnoughLevel && nextGCD.IsTheSameTo(true, RiotBladePvE, TotalEclipsePvE) && FightOrFlightPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (!ProminencePvE.EnoughLevel && nextGCD.IsTheSameTo(true, RageOfHalonePvE, TotalEclipsePvE) && FightOrFlightPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (!AtonementPvE.EnoughLevel && nextGCD.IsTheSameTo(true, RoyalAuthorityPvE, ProminencePvE) && FightOrFlightPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (AtonementPvE.EnoughLevel && (Player.HasStatus(true, StatusID.AtonementReady, StatusID.SepulchreReady, StatusID.SupplicationReady, StatusID.DivineMight) || IsLastAction(true, RoyalAuthorityPvE)) && FightOrFlightPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         // if requiscat is able to proc confiteor, use it immediately after Fight or Flight
         if (RequiescatMasteryTrait.EnoughLevel)
         {
-            if ((IsLastAbility(true, FightOrFlightPvE) || HasFightOrFlight) && ImperatorPvE.CanUse(out act, skipAoeCheck: true, usedUp: true)) return true;
-            if ((IsLastAbility(true, FightOrFlightPvE) || HasFightOrFlight) && RequiescatPvE.CanUse(out act, skipAoeCheck: true, usedUp: true)) return true;
+            if ((IsLastAbility(true, FightOrFlightPvE) || HasFightOrFlight) && ImperatorPvE.CanUse(out act, skipAoeCheck: true, usedUp: true))
+            {
+                return true;
+            }
+
+            if ((IsLastAbility(true, FightOrFlightPvE) || HasFightOrFlight) && RequiescatPvE.CanUse(out act, skipAoeCheck: true, usedUp: true))
+            {
+                return true;
+            }
         }
 
         // if requiscat is not able to proc confiteor, use it as AOE tool if able, otherwise as Single Target
         if (!RequiescatMasteryTrait.EnoughLevel)
         {
-            if (HolyCirclePvE.EnoughLevel && NumberOfHostilesInRange >= 1 && (IsLastAbility(true, FightOrFlightPvE) || HasFightOrFlight) && RequiescatPvE.CanUse(out act, skipAoeCheck: true, usedUp: true)) return true;
-            if (!HolyCirclePvE.EnoughLevel && (NumberOfHostilesInRange == 1 || (RequiescatPvE.Target.Target?.IsBossFromIcon() ?? false)) && RequiescatPvE.CanUse(out act, skipAoeCheck: true, usedUp: true)) return true;
+            if (HolyCirclePvE.EnoughLevel && NumberOfHostilesInRange >= 1 && (IsLastAbility(true, FightOrFlightPvE) || HasFightOrFlight) && RequiescatPvE.CanUse(out act, skipAoeCheck: true, usedUp: true))
+            {
+                return true;
+            }
+
+            if (!HolyCirclePvE.EnoughLevel && (NumberOfHostilesInRange == 1 || (RequiescatPvE.Target.Target?.IsBossFromIcon() ?? false)) && RequiescatPvE.CanUse(out act, skipAoeCheck: true, usedUp: true))
+            {
+                return true;
+            }
         }
 
         return base.EmergencyAbility(nextGCD, out act);
@@ -132,9 +185,16 @@ public sealed class PLD_Default : PaladinRotation
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
+        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms))
+        {
+            return false;
+        }
 
-        if (IntervenePvE.CanUse(out act)) return true;
+        if (IntervenePvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.MoveForwardAbility(nextGCD, out act);
     }
 
@@ -142,11 +202,20 @@ public sealed class PLD_Default : PaladinRotation
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
+        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms))
+        {
+            return false;
+        }
 
-        if (DivineVeilPvE.CanUse(out act)) return true;
+        if (DivineVeilPvE.CanUse(out act))
+        {
+            return true;
+        }
 
-        if (PassageOfArmsPvE.CanUse(out act)) return true;
+        if (PassageOfArmsPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.DefenseAreaAbility(nextGCD, out act);
     }
@@ -155,28 +224,48 @@ public sealed class PLD_Default : PaladinRotation
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
+        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms))
+        {
+            return false;
+        }
 
-        if (InterventionTank && InterventionPvE.CanUse(out act)) return true;
+        if (InterventionTank && InterventionPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         // If the player has the Hallowed Ground status, don't use any abilities.
         if (!Player.HasStatus(true, StatusID.HallowedGround))
         {
             // If Bulwark can be used, use it and return true.
-            if (BulwarkPvE.CanUse(out act, skipAoeCheck: true)) return true;
+            if (BulwarkPvE.CanUse(out act, skipAoeCheck: true))
+            {
+                return true;
+            }
 
             // If Oath can be used, use it and return true.
-            if (UseOath(out act)) return true;
+            if (UseOath(out act))
+            {
+                return true;
+            }
 
             // If Rampart is not cooling down or has been cooling down for more than 60 seconds, and Sentinel can be used, use Sentinel and return true.
-            if ((!RampartPvE.Cooldown.IsCoolingDown || RampartPvE.Cooldown.ElapsedAfter(60)) && SentinelPvE.CanUse(out act)) return true;
+            if ((!RampartPvE.Cooldown.IsCoolingDown || RampartPvE.Cooldown.ElapsedAfter(60)) && SentinelPvE.CanUse(out act))
+            {
+                return true;
+            }
 
             // If Sentinel is at an enough level and is cooling down for more than 60 seconds, or if Sentinel is not at an enough level, and Rampart can be used, use Rampart and return true.
-            if ((SentinelPvE.EnoughLevel && SentinelPvE.Cooldown.IsCoolingDown && SentinelPvE.Cooldown.ElapsedAfter(60) || !SentinelPvE.EnoughLevel) && RampartPvE.CanUse(out act)) return true;
+            if (((SentinelPvE.EnoughLevel && SentinelPvE.Cooldown.IsCoolingDown && SentinelPvE.Cooldown.ElapsedAfter(60)) || !SentinelPvE.EnoughLevel) && RampartPvE.CanUse(out act))
+            {
+                return true;
+            }
 
             // If Reprisal can be used, use it and return true.
-            if (ReprisalPvE.CanUse(out act, skipAoeCheck: true)) return true;
-
+            if (ReprisalPvE.CanUse(out act, skipAoeCheck: true))
+            {
+                return true;
+            }
         }
         return base.DefenseSingleAbility(nextGCD, out act);
     }
@@ -188,9 +277,16 @@ public sealed class PLD_Default : PaladinRotation
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
+        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms))
+        {
+            return false;
+        }
 
-        if (InCombat && OathGauge >= WhenToSheltron && WhenToSheltron > 0 && UseOath(out act)) return true;
+        if (InCombat && OathGauge >= WhenToSheltron && WhenToSheltron > 0 && UseOath(out act))
+        {
+            return true;
+        }
+
         return base.GeneralAbility(nextGCD, out act);
     }
 
@@ -198,14 +294,36 @@ public sealed class PLD_Default : PaladinRotation
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
+        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms))
+        {
+            return false;
+        }
 
-        if (BladeOfHonorPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (BladeOfHonorPvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return true;
+        }
 
-        if (FightOrFlightPvE.Cooldown.IsCoolingDown && CircleOfScornPvE.CanUse(out act, skipAoeCheck: true)) return true;
-        if (FightOrFlightPvE.Cooldown.IsCoolingDown && ExpiacionPvE.CanUse(out act, skipAoeCheck: true)) return true;
-        if (FightOrFlightPvE.Cooldown.IsCoolingDown && SpiritsWithinPvE.CanUse(out act)) return true;
-        if (!IsMoving && IntervenePvE.CanUse(out act, usedUp: UseInterveneFight && HasFightOrFlight)) return true;
+        if (FightOrFlightPvE.Cooldown.IsCoolingDown && CircleOfScornPvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return true;
+        }
+
+        if (FightOrFlightPvE.Cooldown.IsCoolingDown && ExpiacionPvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return true;
+        }
+
+        if (FightOrFlightPvE.Cooldown.IsCoolingDown && SpiritsWithinPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (!IsMoving && IntervenePvE.CanUse(out act, usedUp: UseInterveneFight && HasFightOrFlight))
+        {
+            return true;
+        }
+
         return base.AttackAbility(nextGCD, out act);
     }
     #endregion
@@ -216,9 +334,21 @@ public sealed class PLD_Default : PaladinRotation
     protected override bool HealSingleGCD(out IAction? act)
     {
         act = null;
-        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
-        if (RequiescatHealBot && RequiescatStacks > 0 && ClemencyPvE.CanUse(out act, skipCastingCheck: true) && ClemencyPvE.Target.Target?.GetHealthRatio() < ClemencyRequi) return true;
-        if (HealBot && ClemencyPvE.CanUse(out act) && ClemencyPvE.Target.Target?.GetHealthRatio() < ClemencyNoRequi) return true;
+        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms))
+        {
+            return false;
+        }
+
+        if (RequiescatHealBot && RequiescatStacks > 0 && ClemencyPvE.CanUse(out act, skipCastingCheck: true) && ClemencyPvE.Target.Target?.GetHealthRatio() < ClemencyRequi)
+        {
+            return true;
+        }
+
+        if (HealBot && ClemencyPvE.CanUse(out act) && ClemencyPvE.Target.Target?.GetHealthRatio() < ClemencyNoRequi)
+        {
+            return true;
+        }
+
         return base.HealSingleGCD(out act);
     }
 
@@ -226,50 +356,121 @@ public sealed class PLD_Default : PaladinRotation
     protected override bool MyInterruptGCD(out IAction? act)
     {
         act = null;
-        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
+        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms))
+        {
+            return false;
+        }
 
-        if (LowBlowPvE.Cooldown.IsCoolingDown && ShieldBashPvE.CanUse(out act)) return true;
+        if (LowBlowPvE.Cooldown.IsCoolingDown && ShieldBashPvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.MyInterruptGCD(out act);
     }
 
     protected override bool GeneralGCD(out IAction? act)
     {
         act = null;
-        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms)) return false;
+        if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms))
+        {
+            return false;
+        }
 
         // Confiteor Combo
-        if (ConfiteorPvE.CanUse(out act, usedUp: true, skipAoeCheck: true)) return true;
+        if (ConfiteorPvE.CanUse(out act, usedUp: true, skipAoeCheck: true))
+        {
+            return true;
+        }
 
-        if (GoringBladePvE.CanUse(out act)) return true;
+        if (GoringBladePvE.CanUse(out act))
+        {
+            return true;
+        }
 
         // Atonement Combo
-        if ((!FightOrFlightPvE.Cooldown.WillHaveOneCharge(1) || HasFightOrFlight || Player.WillStatusEndGCD(1, 0, true, StatusID.AtonementReady)) && AtonementPvE.CanUse(out act)) return true;
+        if ((!FightOrFlightPvE.Cooldown.WillHaveOneCharge(1) || HasFightOrFlight || Player.WillStatusEndGCD(1, 0, true, StatusID.AtonementReady)) && AtonementPvE.CanUse(out act))
+        {
+            return true;
+        }
+
         if (((!HasAtonementReady && (SepulchreReady || SupplicationReady || HasDivineMight)) ||
              (HasAtonementReady && !HasDivineMight)) &&
             !Player.HasStatus(true, StatusID.Medicated) && !HasFightOrFlight && !RageOfHalonePvE.CanUse(out act, skipComboCheck: false))
         {
-            if (!TotalEclipsePvE.CanUse(out _) && (RiotBladePvE.CanUse(out act) || FastBladePvE.CanUse(out act))) return true;
+            if (!TotalEclipsePvE.CanUse(out _) && (RiotBladePvE.CanUse(out act) || FastBladePvE.CanUse(out act)))
+            {
+                return true;
+            }
         }
-        if ((RageOfHalonePvE.CanUse(out _, skipComboCheck: false) || HasFightOrFlight || Player.WillStatusEndGCD(1, 0, true, StatusID.SupplicationReady)) && SupplicationPvE.CanUse(out act)) return true;
-        if (RequiescatStacks > 0 && IsLastGCD(true, SupplicationPvE) && !HasFightOrFlight && HolySpiritPvE.CanUse(out act, skipCastingCheck: true)) return true;
-        if ((RageOfHalonePvE.CanUse(out _, skipComboCheck: false) || HasFightOrFlight || Player.WillStatusEndGCD(1, 0, true, StatusID.SepulchreReady)) && SepulchrePvE.CanUse(out act)) return true;
+        if ((RageOfHalonePvE.CanUse(out _, skipComboCheck: false) || HasFightOrFlight || Player.WillStatusEndGCD(1, 0, true, StatusID.SupplicationReady)) && SupplicationPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (RequiescatStacks > 0 && IsLastGCD(true, SupplicationPvE) && !HasFightOrFlight && HolySpiritPvE.CanUse(out act, skipCastingCheck: true))
+        {
+            return true;
+        }
+
+        if ((RageOfHalonePvE.CanUse(out _, skipComboCheck: false) || HasFightOrFlight || Player.WillStatusEndGCD(1, 0, true, StatusID.SepulchreReady)) && SepulchrePvE.CanUse(out act))
+        {
+            return true;
+        }
 
         //AoE
-        if ((HasDivineMight || RequiescatStacks > 0) && HolyCirclePvE.CanUse(out act, skipCastingCheck: true)) return true;
-        if (ProminencePvE.CanUse(out act)) return true;
-        if (TotalEclipsePvE.CanUse(out act)) return true;
+        if ((HasDivineMight || RequiescatStacks > 0) && HolyCirclePvE.CanUse(out act, skipCastingCheck: true))
+        {
+            return true;
+        }
+
+        if (ProminencePvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (TotalEclipsePvE.CanUse(out act))
+        {
+            return true;
+        }
 
         //Single Target
-        if ((HasDivineMight || RequiescatStacks > 0) && HolySpiritPvE.CanUse(out act, skipCastingCheck: true)) return true;
+        if ((HasDivineMight || RequiescatStacks > 0) && HolySpiritPvE.CanUse(out act, skipCastingCheck: true))
+        {
+            return true;
+        }
 
-        if (!SupplicationReady && !SepulchreReady && !HasAtonementReady && !HasDivineMight && RoyalAuthorityPvE.CanUse(out act)) return true;
-        if (RageOfHalonePvE.CanUse(out act)) return true;
-        if (RiotBladePvE.CanUse(out act)) return true;
-        if (FastBladePvE.CanUse(out act)) return true;
+        if (!SupplicationReady && !SepulchreReady && !HasAtonementReady && !HasDivineMight && RoyalAuthorityPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (RageOfHalonePvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (RiotBladePvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (FastBladePvE.CanUse(out act))
+        {
+            return true;
+        }
 
         //Ranged
-        if (UseHolyWhenAway && StopMovingTime > 1 && HolySpiritPvE.CanUse(out act)) return true;
-        if (ShieldLobPvE.CanUse(out act)) return true;
+        if (UseHolyWhenAway && StopMovingTime > 1 && HolySpiritPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (ShieldLobPvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.GeneralGCD(out act);
     }
 
@@ -279,10 +480,21 @@ public sealed class PLD_Default : PaladinRotation
 
     private bool UseOath(out IAction? act)
     {
-        act = null;
-        if ((InterventionPvE.Target.Target?.GetHealthRatio() <= InterventionRatio) && InterventionPvE.CanUse(out act)) return true;
-        if (HolySheltronPvE.CanUse(out act)) return true;
-        if (SheltronPvE.CanUse(out act)) return true;
+        if ((InterventionPvE.Target.Target?.GetHealthRatio() <= InterventionRatio) && InterventionPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (HolySheltronPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (SheltronPvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return false;
     }
     #endregion

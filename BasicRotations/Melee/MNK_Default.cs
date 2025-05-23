@@ -50,15 +50,22 @@ public sealed class MNK_Default : MonkRotation
     protected override IAction? CountDownAction(float remainTime)
     {
         // gap closer at the end of countdown
-        if (remainTime <= 0.5 && ThunderclapPvE.CanUse(out var act)) return act; // need to face target to trigger
+        if (remainTime <= 0.5 && ThunderclapPvE.CanUse(out IAction? act))
+        {
+            return act; // need to face target to trigger
+        }
         // true north before pull
-        if (remainTime <= 2 && TrueNorthPvE.CanUse(out act)) return act;
+        if (remainTime <= 2 && TrueNorthPvE.CanUse(out act))
+        {
+            return act;
+        }
         // turn on 5 chakra at -5 prepull 
-        if (remainTime <= 5 && Chakra < 5 && ForbiddenMeditationPvE.CanUse(out act)) return act;
+        if (remainTime <= 5 && Chakra < 5 && ForbiddenMeditationPvE.CanUse(out act))
+        {
+            return act;
+        }
         // formShift to prep opening
-        if (remainTime < 15 && FormShiftPvE.CanUse(out act)) return act;
-
-        return base.CountDownAction(remainTime);
+        return remainTime < 15 && FormShiftPvE.CanUse(out act) ? act : base.CountDownAction(remainTime);
     }
     #endregion
 
@@ -78,7 +85,10 @@ public sealed class MNK_Default : MonkRotation
         // start the fight 8 yarms away from boss for double weaving
         // 'The form shift and meditation prepull are implied. Prepull pot should win out, but choosing to press it in the first few weave slots shouldn¡¯t result in more than a single digit loss'
         // 'there may be a delay before it can be used. Pushing it to the 2nd weave slot should avoid this.'
-        if (AutoPB_Boss && InCombat && CombatElapsedLess(3) && PerfectBalancePvE.CanUse(out act, usedUp: true)) return true;
+        if (AutoPB_Boss && InCombat && CombatElapsedLess(3) && PerfectBalancePvE.CanUse(out act, usedUp: true))
+        {
+            return true;
+        }
         //if (CombatElapsedLessGCD(1) && TheForbiddenChakraPvE.CanUse(out act)) return true; // if it weaves one day in the future...
 
         if (RiddleOfFirePvE.CanUse(out _))
@@ -87,11 +97,19 @@ public sealed class MNK_Default : MonkRotation
             {
                 case RiddleOfFireFirst.Brotherhood:
                 default:
-                    if (IsLastAbility(true, BrotherhoodPvE) && RiddleOfFirePvE.CanUse(out act)) return true;
+                    if (IsLastAbility(true, BrotherhoodPvE) && RiddleOfFirePvE.CanUse(out act))
+                    {
+                        return true;
+                    }
+
                     break;
 
                 case RiddleOfFireFirst.PerfectBalance:
-                    if (IsLastAbility(true, PerfectBalancePvE) && RiddleOfFirePvE.CanUse(out act)) return true;
+                    if (IsLastAbility(true, PerfectBalancePvE) && RiddleOfFirePvE.CanUse(out act))
+                    {
+                        return true;
+                    }
+
                     break;
             }
         }
@@ -99,64 +117,107 @@ public sealed class MNK_Default : MonkRotation
         if (InBrotherhood)
         {
             // 'If you are in brotherhood and forbidden chakra is available, use it.'
-            if (TheForbiddenChakraPvE.CanUse(out act)) return true;
+            if (TheForbiddenChakraPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
         else
         {
             // 'If you are not in brotherhood and brotherhood is about to be available, hold for burst.'
-            if (BrotherhoodPvE.Cooldown.WillHaveOneChargeGCD(1) && TheForbiddenChakraPvE.CanUse(out act)) return true;
+            if (BrotherhoodPvE.Cooldown.WillHaveOneChargeGCD(1) && TheForbiddenChakraPvE.CanUse(out act))
+            {
+                return true;
+            }
             // 'If you are not in brotherhood use it.'
-            if (TheForbiddenChakraPvE.CanUse(out act)) return true;
+            if (TheForbiddenChakraPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
         if (!BrotherhoodPvE.EnoughLevel)
         {
             // 'If you are not high enough level for brotherhood, use it.'
-            if (TheForbiddenChakraPvE.CanUse(out act)) return true;
+            if (TheForbiddenChakraPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
         if (!TheForbiddenChakraPvE.EnoughLevel)
         {
             // 'If you are not high enough level for TheForbiddenChakra, use immediately at 5 chakra.'
-            if (SteelPeakPvE.CanUse(out act)) return true;
+            if (SteelPeakPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
-        if (!HasHostilesInRange && EnlightenmentPvE.CanUse(out act, skipAoeCheck: HowlingSingle2)) return true; // Enlightment
-        if (!HasHostilesInRange && HowlingFistPvE.CanUse(out act, skipAoeCheck: HowlingSingle2)) return true; // Howling Fist
+        if (!HasHostilesInRange && EnlightenmentPvE.CanUse(out act, skipAoeCheck: HowlingSingle2))
+        {
+            return true; // Enlightment
+        }
+
+        if (!HasHostilesInRange && HowlingFistPvE.CanUse(out act, skipAoeCheck: HowlingSingle2))
+        {
+            return true; // Howling Fist
+        }
 
         return base.EmergencyAbility(nextGCD, out act);
     }
 
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
-        if (Player.WillStatusEnd(5, true, StatusID.EarthsRumination) && EarthsReplyPvE.CanUse(out act)) return true;
+        if (Player.WillStatusEnd(5, true, StatusID.EarthsRumination) && EarthsReplyPvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.GeneralAbility(nextGCD, out act);
     }
 
     [RotationDesc(ActionID.ThunderclapPvE)]
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
-        if (ThunderclapPvE.CanUse(out act)) return true;
+        if (ThunderclapPvE.CanUse(out act))
+        {
+            return true;
+        }
         return base.MoveForwardAbility(nextGCD, out act);
     }
 
     [RotationDesc(ActionID.FeintPvE)]
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (FeintPvE.CanUse(out act)) return true;
+        if (FeintPvE.CanUse(out act))
+        {
+            return true;
+        }
         return base.DefenseAreaAbility(nextGCD, out act);
     }
 
     [RotationDesc(ActionID.MantraPvE)]
     protected override bool HealAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (EarthsReplyPvE.CanUse(out act)) return true;
-        if (MantraPvE.CanUse(out act)) return true;
+        if (EarthsReplyPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (MantraPvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.HealAreaAbility(nextGCD, out act);
     }
 
     [RotationDesc(ActionID.RiddleOfEarthPvE)]
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
-        if (RiddleOfEarthPvE.CanUse(out act, usedUp: true)) return true;
+        if (RiddleOfEarthPvE.CanUse(out act, usedUp: true))
+        {
+            return true;
+        }
         return base.DefenseSingleAbility(nextGCD, out act);
     }
 
@@ -171,7 +232,10 @@ public sealed class MNK_Default : MonkRotation
         // you need to position yourself in the centre of the mobs if they are large, that range is only 3 yarms
         if (AutoPB_AOE && NumberOfHostilesInRange >= 2)
         {
-            if (PerfectBalancePvE.CanUse(out act, usedUp: true)) return true;
+            if (PerfectBalancePvE.CanUse(out act, usedUp: true))
+            {
+                return true;
+            }
         }
 
         // opener 2nd burst
@@ -180,7 +244,10 @@ public sealed class MNK_Default : MonkRotation
             && IsLastGCD(true, DragonKickPvE, LeapingOpoPvE, BootshinePvE) // PB must follow an Opo
             && !Player.HasStatus(true, StatusID.FormlessFist) && !Player.HasStatus(true, StatusID.FiresRumination) && !Player.HasStatus(true, StatusID.WindsRumination))
         {
-            if (PerfectBalancePvE.CanUse(out act, usedUp: true)) return true;
+            if (PerfectBalancePvE.CanUse(out act, usedUp: true))
+            {
+                return true;
+            }
         }
 
         // odd min burst
@@ -189,7 +256,10 @@ public sealed class MNK_Default : MonkRotation
             && !PerfectBalancePvE.Cooldown.JustUsedAfter(20)
             && IsLastGCD(true, DragonKickPvE, LeapingOpoPvE, BootshinePvE)) // PB must follow an Opo 
         {
-            if (PerfectBalancePvE.CanUse(out act, usedUp: true)) return true;
+            if (PerfectBalancePvE.CanUse(out act, usedUp: true))
+            {
+                return true;
+            }
         }
 
         // even min burst
@@ -198,21 +268,40 @@ public sealed class MNK_Default : MonkRotation
             && RiddleOfFirePvE.Cooldown.WillHaveOneChargeGCD(3) && BrotherhoodPvE.Cooldown.WillHaveOneCharge(3)
             && IsLastGCD(true, DragonKickPvE, LeapingOpoPvE, BootshinePvE)) // PB must follow an Opo 
         {
-            if (PerfectBalancePvE.CanUse(out act, usedUp: true)) return true;
+            if (PerfectBalancePvE.CanUse(out act, usedUp: true))
+            {
+                return true;
+            }
         }
 
         // use bh when bh and rof are ready (opener) or ask bh to wait for rof's cd to be close and then use bh
         if (!CombatElapsedLessGCD(2)
             && ((BrotherhoodPvE.IsInCooldown && RiddleOfFirePvE.IsInCooldown) || Math.Abs(BrotherhoodPvE.Cooldown.CoolDownGroup - RiddleOfFirePvE.Cooldown.CoolDownGroup) < 3)
-            && BrotherhoodPvE.CanUse(out act)) return true;
+            && BrotherhoodPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         // rof needs to be used on cd or after x gcd in opener
-        if (!CombatElapsedLessGCD(3) && RiddleOfFirePvE.CanUse(out act)) return true; // Riddle Of Fire
+        if (!CombatElapsedLessGCD(3) && RiddleOfFirePvE.CanUse(out act))
+        {
+            return true; // Riddle Of Fire
+        }
         // 'Use on cooldown, unless you know your killtime. You should aim to get as many casts of RoW as you can, and then shift those usages to align with burst as much as possible without losing a use.'
-        if (!CombatElapsedLessGCD(3) && RiddleOfWindPvE.CanUse(out act)) return true; // Riddle Of Wind
+        if (!CombatElapsedLessGCD(3) && RiddleOfWindPvE.CanUse(out act))
+        {
+            return true; // Riddle Of Wind
+        }
 
-        if (EnlightenmentPvE.CanUse(out act, skipAoeCheck: HowlingSingle2)) return true;
-        if (HowlingFistPvE.CanUse(out act, skipAoeCheck: HowlingSingle2)) return true;
+        if (EnlightenmentPvE.CanUse(out act, skipAoeCheck: HowlingSingle2))
+        {
+            return true;
+        }
+
+        if (HowlingFistPvE.CanUse(out act, skipAoeCheck: HowlingSingle2))
+        {
+            return true;
+        }
 
         return base.AttackAbility(nextGCD, out act);
     }
@@ -222,28 +311,76 @@ public sealed class MNK_Default : MonkRotation
     // 'More opos in the fight is better than... in lunar PBs'
     private bool OpoOpoForm(out IAction? act)
     {
-        if (ArmOfTheDestroyerPvE.CanUse(out act)) return true; // Arm Of The Destoryer - aoe
-        if (LeapingOpoPvE.EnoughLevel && LeapingOpoPvE.CanUse(out act)) return true; // Leaping Opo
-        if (DragonKickPvE.CanUse(out act)) return true; // Dragon Kick
-        if (BootshinePvE.CanUse(out act)) return true; //Bootshine - low level
+        if (ArmOfTheDestroyerPvE.CanUse(out act))
+        {
+            return true; // Arm Of The Destoryer - aoe
+        }
+
+        if (LeapingOpoPvE.EnoughLevel && LeapingOpoPvE.CanUse(out act))
+        {
+            return true; // Leaping Opo
+        }
+
+        if (DragonKickPvE.CanUse(out act))
+        {
+            return true; // Dragon Kick
+        }
+
+        if (BootshinePvE.CanUse(out act))
+        {
+            return true; //Bootshine - low level
+        }
+
         return false;
     }
 
     private bool RaptorForm(out IAction? act)
     {
-        if (FourpointFuryPvE.CanUse(out act)) return true; //Fourpoint Fury - aoe
-        if (RisingRaptorPvE.EnoughLevel && RisingRaptorPvE.CanUse(out act)) return true; //Rising Raptor
-        if (TwinSnakesPvE.CanUse(out act)) return true; //Twin Snakes
-        if (TrueStrikePvE.CanUse(out act)) return true; //True Strike - low level
+        if (FourpointFuryPvE.CanUse(out act))
+        {
+            return true; //Fourpoint Fury - aoe
+        }
+
+        if (RisingRaptorPvE.EnoughLevel && RisingRaptorPvE.CanUse(out act))
+        {
+            return true; //Rising Raptor
+        }
+
+        if (TwinSnakesPvE.CanUse(out act))
+        {
+            return true; //Twin Snakes
+        }
+
+        if (TrueStrikePvE.CanUse(out act))
+        {
+            return true; //True Strike - low level
+        }
+
         return false;
     }
 
     private bool CoerlForm(out IAction? act)
     {
-        if (RockbreakerPvE.CanUse(out act)) return true; // Rockbreaker - aoe
-        if (PouncingCoeurlPvE.EnoughLevel && PouncingCoeurlPvE.CanUse(out act)) return true; // Pouncing Coeurl
-        if (DemolishPvE.CanUse(out act)) return true; // Demolish
-        if (SnapPunchPvE.CanUse(out act)) return true; // Snap Punch - low level
+        if (RockbreakerPvE.CanUse(out act))
+        {
+            return true; // Rockbreaker - aoe
+        }
+
+        if (PouncingCoeurlPvE.EnoughLevel && PouncingCoeurlPvE.CanUse(out act))
+        {
+            return true; // Pouncing Coeurl
+        }
+
+        if (DemolishPvE.CanUse(out act))
+        {
+            return true; // Demolish
+        }
+
+        if (SnapPunchPvE.CanUse(out act))
+        {
+            return true; // Snap Punch - low level
+        }
+
         return false;
     }
 
@@ -263,38 +400,87 @@ public sealed class MNK_Default : MonkRotation
             {
                 case MasterfulBlitzUse.UseAsAble:
                 default:
-                    if (PhantomRushPvE.CanUse(out act)) return true;
-                    if (TornadoKickPvE.CanUse(out act)) return true;
+                    if (PhantomRushPvE.CanUse(out act))
+                    {
+                        return true;
+                    }
+
+                    if (TornadoKickPvE.CanUse(out act))
+                    {
+                        return true;
+                    }
 
                     // Needing Solar Nadi and has 3 different beasts
-                    if (RisingPhoenixPvE.CanUse(out act)) return true;
-                    if (FlintStrikePvE.CanUse(out act)) return true;
+                    if (RisingPhoenixPvE.CanUse(out act))
+                    {
+                        return true;
+                    }
+
+                    if (FlintStrikePvE.CanUse(out act))
+                    {
+                        return true;
+                    }
 
                     // Needing Lunar Nadi and has 3 of the same beasts
-                    if (ElixirBurstPvE.CanUse(out act)) return true;
-                    if (ElixirFieldPvE.CanUse(out act)) return true;
+                    if (ElixirBurstPvE.CanUse(out act))
+                    {
+                        return true;
+                    }
+
+                    if (ElixirFieldPvE.CanUse(out act))
+                    {
+                        return true;
+                    }
 
                     // No Nadi and 3 beasts
-                    if (CelestialRevolutionPvE.CanUse(out act)) return true;
+                    if (CelestialRevolutionPvE.CanUse(out act))
+                    {
+                        return true;
+                    }
+
                     break;
 
                 case MasterfulBlitzUse.RiddleOfFireUse:
                     if (Player.HasStatus(true, StatusID.RiddleOfFire) || RiddleOfFirePvE.Cooldown.JustUsedAfter(42))
                     {
                         // Both Nadi and 3 beasts
-                        if (PhantomRushPvE.CanUse(out act)) return true;
-                        if (TornadoKickPvE.CanUse(out act)) return true;
+                        if (PhantomRushPvE.CanUse(out act))
+                        {
+                            return true;
+                        }
+
+                        if (TornadoKickPvE.CanUse(out act))
+                        {
+                            return true;
+                        }
 
                         // Needing Solar Nadi and has 3 different beasts
-                        if (RisingPhoenixPvE.CanUse(out act)) return true;
-                        if (FlintStrikePvE.CanUse(out act)) return true;
+                        if (RisingPhoenixPvE.CanUse(out act))
+                        {
+                            return true;
+                        }
+
+                        if (FlintStrikePvE.CanUse(out act))
+                        {
+                            return true;
+                        }
 
                         // Needing Lunar Nadi and has 3 of the same beasts
-                        if (ElixirBurstPvE.CanUse(out act)) return true;
-                        if (ElixirFieldPvE.CanUse(out act)) return true;
+                        if (ElixirBurstPvE.CanUse(out act))
+                        {
+                            return true;
+                        }
+
+                        if (ElixirFieldPvE.CanUse(out act))
+                        {
+                            return true;
+                        }
 
                         // No Nadi and 3 beasts
-                        if (CelestialRevolutionPvE.CanUse(out act)) return true;
+                        if (CelestialRevolutionPvE.CanUse(out act))
+                        {
+                            return true;
+                        }
                     }
                     break;
             }
@@ -302,40 +488,80 @@ public sealed class MNK_Default : MonkRotation
 
         // 'Because Fire¡¯s Reply grants formless, we have an imposed restriction that we prefer not to use it while under PB, or if we have a formless already.' + 'Cast Fire's Reply after an opo gcd'
         // need to test and see if IsLastGCD(false, ...) is better
-        if ((!Player.HasStatus(true, StatusID.PerfectBalance) && !Player.HasStatus(true, StatusID.FormlessFist) && IsLastGCD(true, DragonKickPvE, LeapingOpoPvE, BootshinePvE) || Player.WillStatusEnd(5, true, StatusID.FiresRumination)) && FiresReplyPvE.CanUse(out act)) return true; // Fires Reply
+        if (((!Player.HasStatus(true, StatusID.PerfectBalance) && !Player.HasStatus(true, StatusID.FormlessFist) && IsLastGCD(true, DragonKickPvE, LeapingOpoPvE, BootshinePvE)) || Player.WillStatusEnd(5, true, StatusID.FiresRumination)) && FiresReplyPvE.CanUse(out act))
+        {
+            return true; // Fires Reply
+        }
         // 'Cast Wind's Reply literally anywhere in the window'
-        if ((!Player.HasStatus(true, StatusID.PerfectBalance) || Player.WillStatusEnd(5, true, StatusID.WindsRumination)) && WindsReplyPvE.CanUse(out act)) return true; // Winds Reply
+        if ((!Player.HasStatus(true, StatusID.PerfectBalance) || Player.WillStatusEnd(5, true, StatusID.WindsRumination)) && WindsReplyPvE.CanUse(out act))
+        {
+            return true; // Winds Reply
+        }
 
         // Opo needs to follow each PB
         // 'This means ¡°bookending¡± any PB usage with opos and spending formless on opos.'
-        if (Player.HasStatus(true, StatusID.FormlessFist) && OpoOpoForm(out act)) return true;
+        if (Player.HasStatus(true, StatusID.FormlessFist) && OpoOpoForm(out act))
+        {
+            return true;
+        }
         //if (Player.StatusStack(true, StatusID.PerfectBalance) == 3 && OpoOpoForm(out act)) return true;
 
         if (Player.HasStatus(true, StatusID.PerfectBalance) && !HasSolar)
         {
             // SolarNadi - fill the missing one - this order is needed for opener
-            if (!BeastChakras.Contains(BeastChakra.Raptor) && RaptorForm(out act)) return true;
-            if (!BeastChakras.Contains(BeastChakra.Coeurl) && CoerlForm(out act)) return true;
-            if (!BeastChakras.Contains(BeastChakra.OpoOpo) && OpoOpoForm(out act)) return true;
+            if (!BeastChakras.Contains(BeastChakra.Raptor) && RaptorForm(out act))
+            {
+                return true;
+            }
+
+            if (!BeastChakras.Contains(BeastChakra.Coeurl) && CoerlForm(out act))
+            {
+                return true;
+            }
+
+            if (!BeastChakras.Contains(BeastChakra.OpoOpo) && OpoOpoForm(out act))
+            {
+                return true;
+            }
         }
 
         if (Player.HasStatus(true, StatusID.PerfectBalance) && HasSolar)
         {
             // 'we still want to prioritize pressing as many opo gcds as possible'
             // LunarNadi
-            if (OpoOpoForm(out act)) return true;
+            if (OpoOpoForm(out act))
+            {
+                return true;
+            }
         }
 
         // whatever you have, press it from left to right
-        if (CoerlForm(out act)) return true;
-        if (RaptorForm(out act)) return true;
-        if (OpoOpoForm(out act)) return true;
+        if (CoerlForm(out act))
+        {
+            return true;
+        }
+
+        if (RaptorForm(out act))
+        {
+            return true;
+        }
+
+        if (OpoOpoForm(out act))
+        {
+            return true;
+        }
 
         // out of range or nothing to do, recharge chakra first
-        if (Chakra < 5 && (EnlightenedMeditationPvE.CanUse(out act) || ForbiddenMeditationPvE.CanUse(out act))) return true;
+        if (Chakra < 5 && (EnlightenedMeditationPvE.CanUse(out act) || ForbiddenMeditationPvE.CanUse(out act)))
+        {
+            return true;
+        }
 
         // out of range or nothing to do, refresh buff second, but dont keep refreshing or it draws too much attention
-        if (AutoFormShift && !Player.HasStatus(true, StatusID.PerfectBalance) && !Player.HasStatus(true, StatusID.FormlessFist) && FormShiftPvE.CanUse(out act)) return true; // Form Shift GCD use
+        if (AutoFormShift && !Player.HasStatus(true, StatusID.PerfectBalance) && !Player.HasStatus(true, StatusID.FormlessFist) && FormShiftPvE.CanUse(out act))
+        {
+            return true; // Form Shift GCD use
+        }
 
         return base.GeneralGCD(out act);
     }
