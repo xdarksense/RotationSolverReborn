@@ -7,20 +7,81 @@ namespace RotationSolver.Basic.Configuration;
 
 internal class OtherConfiguration
 {
+    /// <markdown file="List" name="AoE" section="Actions">
+    /// **`It is recommended to click on the reset button after every patch.`**
+    /// 
+    /// RSR will use group mitigation if any enemy in the enmity list is casting
+    /// one of the listed actions. Usually those actions are raid-wides.
+    /// </markdown>
     public static HashSet<uint> HostileCastingArea = [];
+
+    /// <markdown file="List" name="Tank Buster" section="Actions">
+    /// **`It is recommended to click on the reset button after every patch.`**
+    /// 
+    /// RSR will use mitigation on target (heal) or self (tank) if the target is currently
+    /// being targeted by one of the listed actions.
+    /// </markdown>
     public static HashSet<uint> HostileCastingTank = [];
+
+    /// <markdown file="List" name="Knockback" section="Actions">
+    /// **`It is recommended to click on the reset button after every patch.`**
+    ///
+    /// **Click on "Record knockback actions" at your own peril. Some duties expect you take the
+    /// knockback in order to reach a proper safe-spot, like in Sil'dihn Subterrane (Savage).**
+    /// 
+    /// RSR will use anti-knockback actions when you would be hit by one of the listed actions.
+    /// </markdown>
     public static HashSet<uint> HostileCastingKnockback = [];
+
+    /// <markdown file="List" name="Gaze/Stop" section="Actions">
+    /// **`It is recommended to click on the reset button after every patch.`**
+    /// 
+    /// If the target is casting one of the listed actions, RSR will stop casting
+    /// in the seconds before the action is resolved
+    /// <see cref="RotationSolver.Basic.Configuration.Configs._castingStop">here</see>.
+    /// </markdown>
     public static HashSet<uint> HostileCastingStop = [];
 
     public static SortedList<uint, float> AnimationLockTime = [];
 
     public static Dictionary<uint, string[]> NoHostileNames = [];
     public static Dictionary<uint, string[]> NoProvokeNames = [];
+
+    /// <markdown file="List" name="Beneficial Positions" section="Map-Specific Settings">
+    /// Adds a preferred location used for ground **healing** AoE abilities (example: Earthly Star).
+    ///
+    /// You can add multiple locations, in case a boss fight moves you to another platform, like M4S - Wicked Thunder.
+    /// </markdown>
     public static Dictionary<uint, Vector3[]> BeneficialPositions = [];
 
+    /// <markdown file="List" name="Dispellable Debuffs" section="Statuses">
+    /// **`It is recommended to click on the reset button after every patch.`**
+    /// 
+    /// Listed statuses will be dispelled (Esuna) first before any
+    /// other dispellable statuses.
+    /// </markdown>
     public static HashSet<uint> DangerousStatus = [];
+
+    /// <markdown file="List" name="Priority" section="Statuses">
+    /// **`It is recommended to click on the reset button after every patch.`**
+    /// 
+    /// If running in auto mode, if any enemy in your enmity list has this status,
+    /// it will target them as priority.
+    /// </markdown>
     public static HashSet<uint> PriorityStatus = [];
+
+    /// <markdown file="List" name="Invulnerability" section="Statuses">
+    /// **`It is recommended to click on the reset button after every patch.`**
+    /// 
+    /// Ignores target if they have one of the statuses listed.
+    /// </markdown>
     public static HashSet<uint> InvincibleStatus = [];
+
+    /// <markdown file="List" name="No-Casting Debuffs" section="Statuses">
+    /// **`It is recommended to click on the reset button after every patch.`**
+    /// 
+    /// If you have any of the statuses listed, RSR will stop taking any actions.
+    /// </markdown>
     public static HashSet<uint> NoCastingStatus = [];
     public static HashSet<uint> PrioTargetId = [];
     public static HashSet<uint> AutoStatusOrder = [];

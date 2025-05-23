@@ -23,5 +23,8 @@ public interface ITexture
     /// <summary>
     /// Gets or sets a value indicating whether the texture is enabled.
     /// </summary>
+    /// <markdown file="Actions" name="Enabled (Action Name)">
+    /// Enable or disable the usage of a skill. Turning this option off prevents RSR from using it completely.
+    /// </markdown>
     bool IsEnabled { get; set; }
 }
