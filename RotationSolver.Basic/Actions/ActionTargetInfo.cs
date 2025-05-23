@@ -666,140 +666,114 @@ public struct ActionTargetInfo(IBaseAction action)
             return null;
         }
 
-        // Check if the action's range is zero and handle it as targeting self
+        // If range is zero, always target self
         if (range == 0)
         {
             return new TargetResult(player, [.. GetAffectsVector(player.Position, canAffects)], player.Position);
         }
 
-        BeneficialAreaStrategy2 strategy = Service.Config.BeneficialAreaStrategy2;
-        switch (strategy)
+        // --- Try OnLocations logic first ---
+        _ = OtherConfiguration.BeneficialPositions.TryGetValue(Svc.ClientState.TerritoryType, out Vector3[]? pts);
+        pts ??= [];
+
+        // Use fallback points if no beneficial positions are found
+        if (pts.Length == 0)
         {
-            case BeneficialAreaStrategy2.OnLocations: // Only the list
-                _ = OtherConfiguration.BeneficialPositions.TryGetValue(Svc.ClientState.TerritoryType, out Vector3[]? pts);
-                pts ??= [];
+            if (DataCenter.Territory?.ContentType == TerritoryContentType.Trials ||
+                (DataCenter.Territory?.ContentType == TerritoryContentType.Raids &&
+                 DataCenter.PartyMembers.Count(p => p is IPlayerCharacter) >= 8))
+            {
+                Vector3[] fallbackPoints = new[] { Vector3.Zero, new Vector3(100, 0, 100) };
+                Vector3 closestFallback = fallbackPoints[0];
+                float minDistance = Vector3.Distance(player.Position, fallbackPoints[0]);
 
-                // Use fallback points if no beneficial positions are found
-                if (pts.Length == 0)
+                for (int i = 1; i < fallbackPoints.Length; i++)
                 {
-                    if (DataCenter.Territory?.ContentType == TerritoryContentType.Trials ||
-                        (DataCenter.Territory?.ContentType == TerritoryContentType.Raids &&
-                         DataCenter.PartyMembers.Count(p => p is IPlayerCharacter) >= 8))
+                    float distance = Vector3.Distance(player.Position, fallbackPoints[i]);
+                    if (distance < minDistance)
                     {
-                        Vector3[] fallbackPoints = new[] { Vector3.Zero, new Vector3(100, 0, 100) };
-                        Vector3 closestFallback = fallbackPoints[0];
-                        float minDistance = Vector3.Distance(player.Position, fallbackPoints[0]);
-
-                        for (int i = 1; i < fallbackPoints.Length; i++)
-                        {
-                            float distance = Vector3.Distance(player.Position, fallbackPoints[i]);
-                            if (distance < minDistance)
-                            {
-                                closestFallback = fallbackPoints[i];
-                                minDistance = distance;
-                            }
-                        }
-
-                        pts = [closestFallback];
+                        closestFallback = fallbackPoints[i];
+                        minDistance = distance;
                     }
                 }
 
-                // Find the closest point and apply a random offset
-                if (pts.Length > 0)
+                pts = [closestFallback];
+            }
+        }
+
+        // Find the closest point and apply a random offset
+        if (pts.Length > 0)
+        {
+            Vector3 closest = pts[0];
+            float minDistance = Vector3.Distance(player.Position, pts[0]);
+
+            for (int i = 1; i < pts.Length; i++)
+            {
+                float distance = Vector3.Distance(player.Position, pts[i]);
+                if (distance < minDistance)
                 {
-                    Vector3 closest = pts[0];
-                    float minDistance = Vector3.Distance(player.Position, pts[0]);
-
-                    for (int i = 1; i < pts.Length; i++)
-                    {
-                        float distance = Vector3.Distance(player.Position, pts[i]);
-                        if (distance < minDistance)
-                        {
-                            closest = pts[i];
-                            minDistance = distance;
-                        }
-                    }
-
-                    Random random = new();
-                    double rotation = random.NextDouble() * Math.Tau;
-                    double radius = random.NextDouble();
-                    closest.X += (float)(Math.Sin(rotation) * radius);
-                    closest.Z += (float)(Math.Cos(rotation) * radius);
-
-                    // Check if the closest point is within the effect range
-                    if (Vector3.Distance(player.Position, closest) < player.HitboxRadius + EffectRange)
-                    {
-                        return new TargetResult(player, GetAffectsVector(closest, canAffects).ToArray(), closest);
-                    }
+                    closest = pts[i];
+                    minDistance = distance;
                 }
+            }
 
-                // Return null if strategy is OnLocations and no valid point is found
-                if (strategy == BeneficialAreaStrategy2.OnLocations)
+            Random random = new();
+            double rotation = random.NextDouble() * Math.Tau;
+            double radius = random.NextDouble();
+            closest.X += (float)(Math.Sin(rotation) * radius);
+            closest.Z += (float)(Math.Cos(rotation) * radius);
+
+            // Check if the closest point is within the effect range
+            if (Vector3.Distance(player.Position, closest) < player.HitboxRadius + EffectRange)
+            {
+                return new TargetResult(player, GetAffectsVector(closest, canAffects).ToArray(), closest);
+            }
+        }
+
+        // --- OnCalculated logic (fallback) ---
+        if (Svc.Targets.Target is IBattleChara b && b.DistanceToPlayer() < range &&
+            b.IsBossFromIcon() && b.HasPositional() && b.HitboxRadius <= 8)
+        {
+            // Ensure the player's position is within the range of the ability
+            if (Vector3.Distance(player.Position, b.Position) <= range)
+            {
+                return new TargetResult(b, GetAffectsVector(b.Position, canAffects).ToArray(), b.Position);
+            }
+            else
+            {
+                // Adjust the position to be within the range
+                Vector3 directionToTarget = b.Position - player.Position;
+                Vector3 adjustedPosition = player.Position + (directionToTarget / directionToTarget.Length() * range);
+                return new TargetResult(b, GetAffectsVector(adjustedPosition, canAffects).ToArray(), adjustedPosition);
+            }
+        }
+        else
+        {
+            float effectRange = EffectRange;
+            IBattleChara? attackT = FindTargetByType(DataCenter.PartyMembers.GetObjectInRadius(range + effectRange),
+                TargetType.BeAttacked, action.Config.AutoHealRatio, action.Setting.SpecialType);
+
+            if (attackT == null)
+            {
+                return new TargetResult(player, GetAffectsVector(player.Position, canAffects).ToArray(), player.Position);
+            }
+            else
+            {
+                float disToTankRound = Vector3.Distance(player.Position, attackT.Position) + attackT.HitboxRadius;
+
+                if (disToTankRound < effectRange
+                    || disToTankRound > (2 * effectRange) - player.HitboxRadius)
                 {
-                    return null;
-                }
-
-                break;
-
-            //case BeneficialAreaStrategy2.OnTarget: // Target
-            //    if (Svc.Targets.Target != null && Svc.Targets.Target.DistanceToPlayer() < range)
-            //    {
-            //        var target = Svc.Targets.Target as IBattleChara;
-            //        if (target != null && !target.HasPositional() && target.HitboxRadius <= 8)
-            //        {
-            //            return new TargetResult(player, GetAffects(player.Position, canAffects).ToArray(), player.Position);
-            //        }
-            //        return new TargetResult(target, GetAffects(target?.Position, canAffects).ToArray(), target?.Position);
-            //    }
-            //    break;
-
-            case BeneficialAreaStrategy2.OnCalculated: // OnCalculated
-                if (Svc.Targets.Target is IBattleChara b && b.DistanceToPlayer() < range &&
-                b.IsBossFromIcon() && b.HasPositional() && b.HitboxRadius <= 8)
-                {
-                    // Ensure the player's position is within the range of the ability
-                    if (Vector3.Distance(player.Position, b.Position) <= range)
-                    {
-                        return new TargetResult(b, GetAffectsVector(b.Position, canAffects).ToArray(), b.Position);
-                    }
-                    else
-                    {
-                        // Adjust the position to be within the range
-                        Vector3 directionToTarget = b.Position - player.Position;
-                        Vector3 adjustedPosition = player.Position + (directionToTarget / directionToTarget.Length() * range);
-                        return new TargetResult(b, GetAffectsVector(adjustedPosition, canAffects).ToArray(), adjustedPosition);
-                    }
+                    return new TargetResult(player, GetAffectsVector(player.Position, canAffects).ToArray(), player.Position);
                 }
                 else
                 {
-                    float effectRange = EffectRange;
-                    IBattleChara? attackT = FindTargetByType(DataCenter.PartyMembers.GetObjectInRadius(range + effectRange),
-                        TargetType.BeAttacked, action.Config.AutoHealRatio, action.Setting.SpecialType);
-
-                    if (attackT == null)
-                    {
-                        return new TargetResult(player, GetAffectsVector(player.Position, canAffects).ToArray(), player.Position);
-                    }
-                    else
-                    {
-                        float disToTankRound = Vector3.Distance(player.Position, attackT.Position) + attackT.HitboxRadius;
-
-                        if (disToTankRound < effectRange
-                            || disToTankRound > (2 * effectRange) - player.HitboxRadius)
-                        {
-                            return new TargetResult(player, GetAffectsVector(player.Position, canAffects).ToArray(), player.Position);
-                        }
-                        else
-                        {
-                            Vector3 directionToTank = attackT.Position - player.Position;
-                            Vector3 moveDirection = directionToTank / directionToTank.Length() * Math.Max(0, disToTankRound - effectRange);
-                            return new TargetResult(player, GetAffectsVector(player.Position, canAffects).ToArray(), player.Position + moveDirection);
-                        }
-                    }
+                    Vector3 directionToTank = attackT.Position - player.Position;
+                    Vector3 moveDirection = directionToTank / directionToTank.Length() * Math.Max(0, disToTankRound - effectRange);
+                    return new TargetResult(player, GetAffectsVector(player.Position, canAffects).ToArray(), player.Position + moveDirection);
                 }
+            }
         }
-
-        return null;
     }
 
 

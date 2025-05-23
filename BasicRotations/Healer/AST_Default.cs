@@ -48,9 +48,6 @@ public sealed class AST_Default : AstrologianRotation
     [RotationConfig(CombatType.PvE, Name = "Minimum average HP threshold among party members needed to use Lady Of Crowns")]
     public float LadyOfHeals { get; set; } = 0.8f;
 
-    [RotationConfig(CombatType.PvE, Name = "Use DOT while moving even if it does not need refresh (disabling is a damage down)")]
-    public bool DOTUpkeep { get; set; } = true;
-
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Essential Dignity 3rd charge")]
     public float EssentialDignityThird { get; set; } = 0.8f;
@@ -621,17 +618,17 @@ public sealed class AST_Default : AstrologianRotation
             return true;
         }
 
-        if (CombustIiiPvE.CanUse(out act, skipStatusProvideCheck: DOTUpkeep))
+        if (CombustIiiPvE.CanUse(out act))
         {
             return true;
         }
 
-        if (CombustIiPvE.CanUse(out act, skipStatusProvideCheck: DOTUpkeep))
+        if (CombustIiPvE.CanUse(out act))
         {
             return true;
         }
 
-        if (CombustPvE.CanUse(out act, skipStatusProvideCheck: DOTUpkeep))
+        if (CombustPvE.CanUse(out act))
         {
             return true;
         }
