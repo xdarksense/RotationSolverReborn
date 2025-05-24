@@ -118,9 +118,6 @@ namespace RotationSolver.Data
         [Description("Used to customize when RSR uses specific actions automatically. Click on an action's icon in the left list. Below, you may set the conditions for when that specific action is used. Each action can have different conditions to override the default rotation behavior.")]
         ConfigWindow_Actions_Description,
 
-        [Description("Show on CD window")]
-        ConfigWindow_Actions_ShowOnCDWindow,
-
         [Description("Time-to-kill threshold required for this action to be used")]
         ConfigWindow_Actions_TTK,
 
