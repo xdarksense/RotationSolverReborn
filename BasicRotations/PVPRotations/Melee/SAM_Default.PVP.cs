@@ -61,9 +61,12 @@ public sealed class SAM_DefaultPvP : SamuraiRotation
             return true;
         }
 
-        if (Player.GetHealthRatio() < BloodBathPvPPercent && BloodbathPvP.CanUse(out action))
+        if (BloodbathPvP.CanUse(out action))
         {
-            return true;
+            if (Player.GetHealthRatio() < BloodBathPvPPercent)
+            {
+                return true;
+            }
         }
 
         if (SwiftPvP.CanUse(out action))
@@ -71,12 +74,23 @@ public sealed class SAM_DefaultPvP : SamuraiRotation
             return true;
         }
 
-        if (CurrentTarget?.GetHealthRatio() <= SmitePvPPercent && SmitePvP.CanUse(out action))
+        if (SmitePvP.CanUse(out action))
         {
-            return true;
+            if (CurrentTarget?.GetHealthRatio() <= SmitePvPPercent)
+            {
+                return true;
+            }
         }
 
-        return !HasHostilesInRange && SotenYeet && HissatsuSotenPvP.CanUse(out action, usedUp: true) || base.EmergencyAbility(nextGCD, out action);
+        if (HissatsuSotenPvP.CanUse(out action, usedUp: true))
+        {
+            if (!HasHostilesInRange && SotenYeet)
+            {
+                return true;
+            }
+        }
+
+        return base.EmergencyAbility(nextGCD, out action);
     }
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
@@ -87,7 +101,12 @@ public sealed class SAM_DefaultPvP : SamuraiRotation
             return false;
         }
 
-        return HissatsuChitenPvP.CanUse(out action) || base.DefenseSingleAbility(nextGCD, out action);
+        if (HissatsuChitenPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.DefenseSingleAbility(nextGCD, out action);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
@@ -98,9 +117,12 @@ public sealed class SAM_DefaultPvP : SamuraiRotation
             return false;
         }
 
-        if (nextGCD.IsTheSameTo(false, ActionID.YukikazePvP, ActionID.GekkoPvP, ActionID.KashaPvP) && HissatsuSotenPvP.CanUse(out action, usedUp: true))
+        if (HissatsuSotenPvP.CanUse(out action, usedUp: true))
         {
-            return true;
+            if (nextGCD.IsTheSameTo(false, ActionID.YukikazePvP, ActionID.GekkoPvP, ActionID.KashaPvP))
+            {
+                return true;
+            }
         }
 
         if (ZanshinPvP.CanUse(out action, usedUp: true))
@@ -113,12 +135,23 @@ public sealed class SAM_DefaultPvP : SamuraiRotation
             return true;
         }
 
-        if (HasHostilesInRange && HissatsuChitenPvP.CanUse(out action))
+        if (HissatsuChitenPvP.CanUse(out action))
         {
-            return true;
+            if (HasHostilesInRange)
+            {
+                return true;
+            }
         }
 
-        return HasHostilesInRange && MeikyoShisuiPvP.CanUse(out action) || base.AttackAbility(nextGCD, out action);
+        if (MeikyoShisuiPvP.CanUse(out action))
+        {
+            if (HasHostilesInRange)
+            {
+                return true;
+            }
+        }
+
+        return base.AttackAbility(nextGCD, out action);
     }
 
     [RotationDesc(ActionID.HissatsuSotenPvP)]
@@ -130,7 +163,12 @@ public sealed class SAM_DefaultPvP : SamuraiRotation
             return false;
         }
 
-        return HissatsuSotenPvP.CanUse(out action) || base.MoveForwardAbility(nextGCD, out action);
+        if (HissatsuSotenPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.MoveForwardAbility(nextGCD, out action);
     }
     #endregion
 
@@ -173,7 +211,12 @@ public sealed class SAM_DefaultPvP : SamuraiRotation
             return true;
         }
 
-        return YukikazePvP.CanUse(out action) || base.GeneralGCD(out action);
+        if (YukikazePvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out action);
     }
     #endregion
 }

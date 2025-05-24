@@ -55,25 +55,23 @@ public sealed class MNK_DefaultPvP : MonkRotation
             return true;
         }
 
-        if (InCombat && Player.GetHealthRatio() < 0.8 && RiddleOfEarthPvP.CanUse(out action))
+        if (RiddleOfEarthPvP.CanUse(out action) && InCombat && Player.GetHealthRatio() < 0.8)
         {
             return true;
         }
 
-        if (Player.HasStatus(true, StatusID.EarthResonance) && Player.WillStatusEnd(1, true, StatusID.EarthResonance))
+        if (EarthsReplyPvP.CanUse(out action))
         {
-            if (Player.GetHealthRatio() < 0.5 && EarthsReplyPvP.CanUse(out action))
+            if (Player.HasStatus(true, StatusID.EarthResonance) && Player.WillStatusEnd(1, true, StatusID.EarthResonance))
             {
-                return true;
-            }
-
-            if (Player.WillStatusEnd(1, true, StatusID.EarthResonance) && EarthsReplyPvP.CanUse(out action))
-            {
-                return true;
+                if (Player.GetHealthRatio() < 0.5 || Player.WillStatusEnd(1, true, StatusID.EarthResonance))
+                {
+                    return true;
+                }
             }
         }
 
-        if (Player.GetHealthRatio() < BloodBathPvPPercent && BloodbathPvP.CanUse(out action))
+        if (BloodbathPvP.CanUse(out action) && Player.GetHealthRatio() < BloodBathPvPPercent)
         {
             return true;
         }
@@ -83,7 +81,12 @@ public sealed class MNK_DefaultPvP : MonkRotation
             return true;
         }
 
-        return CurrentTarget?.GetHealthRatio() <= SmitePvPPercent && SmitePvP.CanUse(out action) || base.EmergencyAbility(nextGCD, out action);
+        if (SmitePvP.CanUse(out action) && CurrentTarget?.GetHealthRatio() <= SmitePvPPercent)
+        {
+            return true;
+        }
+
+        return base.EmergencyAbility(nextGCD, out action);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
@@ -94,18 +97,28 @@ public sealed class MNK_DefaultPvP : MonkRotation
             return false;
         }
 
-        if (HasHostilesInRange && RisingPhoenixPvP.CanUse(out action, usedUp: true))
+        if (RisingPhoenixPvP.CanUse(out action, usedUp: true) && HasHostilesInRange)
         {
             return true;
         }
 
-        return HasHostilesInRange && EarthsReplyPvP.CanUse(out action, usedUp: true) || base.AttackAbility(nextGCD, out action);
+        if (EarthsReplyPvP.CanUse(out action, usedUp: true) && HasHostilesInRange)
+        {
+            return true;
+        }
+
+        return base.AttackAbility(nextGCD, out action);
     }
 
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        return (!RespectGuard || !Player.HasStatus(true, StatusID.Guard)) && base.MoveForwardAbility(nextGCD, out action);
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
+
+        return base.MoveForwardAbility(nextGCD, out action);
     }
     #endregion
 
@@ -163,7 +176,12 @@ public sealed class MNK_DefaultPvP : MonkRotation
             return true;
         }
 
-        return DragonKickPvP.CanUse(out action) || base.GeneralGCD(out action);
+        if (DragonKickPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out action);
     }
     #endregion
 }

@@ -6,14 +6,6 @@
 public sealed class GNB_DefaultPvP : GunbreakerRotation
 {
     #region Configurations
-
-    [RotationConfig(CombatType.PvP, Name = "Use Recuperate")]
-    public bool UseRecuperatePvP { get; set; } = true;
-
-    [Range(1, 100, ConfigUnitType.Percent, 1)]
-    [RotationConfig(CombatType.PvP, Name = "Recuperate Threshold")]
-    public int RecuperateThreshold { get; set; } = 75;
-
     [RotationConfig(CombatType.PvP, Name = "Use Purify")]
     public bool UsePurifyPvP { get; set; } = true;
 
@@ -56,7 +48,12 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
             return true;
         }
 
-        return RampartPvP.CanUse(out action) || base.DefenseSingleAbility(nextGCD, out action);
+        if (RampartPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.DefenseSingleAbility(nextGCD, out action);
     }
 
     private static bool ReadyToRock()
@@ -71,7 +68,12 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
             return true;
         }
 
-        return HypervelocityPvPReady;
+        if (HypervelocityPvPReady)
+        {
+            return true;
+        }
+
+        return false;
     }
     private static bool ReadyToRoll()
     {
@@ -90,7 +92,12 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
             return true;
         }
 
-        return FatedBrandPvPReady;
+        if (FatedBrandPvPReady)
+        {
+            return true;
+        }
+
+        return false;
     }
     #endregion
 
@@ -107,8 +114,13 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
         {
             return true;
         }
+
         //You WILL try to save yourself. Configs be damned!
-        return Player.GetHealthRatio() * 100 <= 30 && HeartOfCorundumPvP.CanUse(out action) || base.EmergencyAbility(nextGCD, out action);
+        if (HeartOfCorundumPvP.CanUse(out action) && Player.GetHealthRatio() * 100 <= 30)
+        {
+            return true;
+        }
+        return base.EmergencyAbility(nextGCD, out action);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
@@ -159,7 +171,12 @@ public sealed class GNB_DefaultPvP : GunbreakerRotation
             return true;
         }
 
-        return FatedBrandPvP.CanUse(out action) || base.AttackAbility(nextGCD, out action);
+        if (FatedBrandPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.AttackAbility(nextGCD, out action);
     }
 
     #endregion

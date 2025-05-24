@@ -41,8 +41,12 @@ public class RDM_DefaultPvP : RedMageRotation
         {
             return false;
         }
+        if (DoPurify(out action))
+        {
+            return true;
+        }
 
-        return DoPurify(out action) || base.EmergencyAbility(nextGCD, out action);
+        return base.EmergencyAbility(nextGCD, out action);
     }
 
     [RotationDesc(ActionID.FortePvP)]
@@ -54,7 +58,12 @@ public class RDM_DefaultPvP : RedMageRotation
             return false;
         }
 
-        return FortePvP.CanUse(out action) || base.DefenseSingleAbility(nextGCD, out action);
+        if (FortePvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.DefenseSingleAbility(nextGCD, out action);
     }
 
     [RotationDesc(ActionID.EmboldenPvP)]
@@ -121,7 +130,12 @@ public class RDM_DefaultPvP : RedMageRotation
             return true;
         }
 
-        return ViceOfThornsPvP.CanUse(out action) || base.AttackAbility(nextGCD, out action);
+        if (ViceOfThornsPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.AttackAbility(nextGCD, out action);
     }
     #endregion
 
@@ -169,7 +183,12 @@ public class RDM_DefaultPvP : RedMageRotation
             return true;
         }
 
-        return JoltIiiPvP.CanUse(out action) || base.GeneralGCD(out action);
+        if (JoltIiiPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out action);
     }
     #endregion
 

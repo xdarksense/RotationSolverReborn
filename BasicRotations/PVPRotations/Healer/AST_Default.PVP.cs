@@ -67,7 +67,12 @@ public class AST_DefaultPVP : AstrologianRotation
             return true;
         }
 
-        return OraclePvP.CanUse(out action) || base.EmergencyAbility(nextGCD, out action);
+        if (OraclePvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.EmergencyAbility(nextGCD, out action);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
@@ -103,7 +108,12 @@ public class AST_DefaultPVP : AstrologianRotation
             return true;
         }
 
-        return FallMaleficPvP_29246.CanUse(out action, usedUp: true) || base.AttackAbility(nextGCD, out action);
+        if (FallMaleficPvP_29246.CanUse(out action, usedUp: true))
+        {
+            return true;
+        }
+
+        return base.AttackAbility(nextGCD, out action);
     }
     #endregion
 
@@ -116,7 +126,12 @@ public class AST_DefaultPVP : AstrologianRotation
             return false;
         }
 
-        return StoneskinIiPvP.CanUse(out action) || base.DefenseSingleGCD(out action);
+        if (StoneskinIiPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.DefenseSingleGCD(out action);
     }
 
     protected override bool HealSingleGCD(out IAction? action)
@@ -132,7 +147,12 @@ public class AST_DefaultPVP : AstrologianRotation
             return true;
         }
 
-        return AspectedBeneficPvP.CanUse(out action, usedUp: true) || base.HealSingleGCD(out action);
+        if (AspectedBeneficPvP.CanUse(out action, usedUp: true))
+        {
+            return true;
+        }
+
+        return base.HealSingleGCD(out action);
     }
 
     protected override bool HealAreaGCD(out IAction? action)
@@ -143,7 +163,12 @@ public class AST_DefaultPVP : AstrologianRotation
             return false;
         }
 
-        return LadyOfCrownsPvP.CanUse(out action) || base.HealAreaGCD(out action);
+        if (LadyOfCrownsPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.HealAreaGCD(out action);
     }
 
     protected override bool GeneralGCD(out IAction? action)
@@ -159,7 +184,12 @@ public class AST_DefaultPVP : AstrologianRotation
             return true;
         }
 
-        return FallMaleficPvP.CanUse(out action) || base.GeneralGCD(out action);
+        if (FallMaleficPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out action);
     }
     #endregion
 }

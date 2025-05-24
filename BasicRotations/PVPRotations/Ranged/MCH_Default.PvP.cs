@@ -52,13 +52,23 @@ public sealed class MCH_DefaultPvP : MachinistRotation
             return true;
         }
 
-        return InCombat && DervishPvP.CanUse(out action) || base.EmergencyAbility(nextGCD, out action);
+        if (InCombat && DervishPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.EmergencyAbility(nextGCD, out action);
     }
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        return (!RespectGuard || !Player.HasStatus(true, StatusID.Guard)) && base.DefenseSingleAbility(nextGCD, out action);
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
+
+        return base.DefenseSingleAbility(nextGCD, out action);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
@@ -69,14 +79,20 @@ public sealed class MCH_DefaultPvP : MachinistRotation
             return false;
         }
 
-        if (nextGCD.IsTheSameTo(false, ActionID.DrillPvP, ActionID.BioblasterPvP, ActionID.AirAnchorPvP, ActionID.ChainSawPvP) && AnalysisPvP.CanUse(out action, usedUp: true))
+        if (AnalysisPvP.CanUse(out action, usedUp: true))
         {
-            return true;
+            if (nextGCD.IsTheSameTo(false, ActionID.DrillPvP, ActionID.BioblasterPvP, ActionID.AirAnchorPvP, ActionID.ChainSawPvP))
+            {
+                return true;
+            }
         }
 
-        if (Player.HasStatus(true, StatusID.Overheated_3149) && WildfirePvP.CanUse(out action))
+        if (WildfirePvP.CanUse(out action))
         {
-            return true;
+            if (Player.HasStatus(true, StatusID.Overheated_3149))
+            {
+                return true;
+            }
         }
 
         if (BishopAutoturretPvP.CanUse(out action))
@@ -84,7 +100,12 @@ public sealed class MCH_DefaultPvP : MachinistRotation
             return true;
         }
 
-        return EagleEyeShotPvP.CanUse(out action) || base.AttackAbility(nextGCD, out action);
+        if (EagleEyeShotPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.AttackAbility(nextGCD, out action);
     }
 
     #endregion
@@ -104,9 +125,12 @@ public sealed class MCH_DefaultPvP : MachinistRotation
             return true;
         }
 
-        if (BlazingShotPvP.CanUse(out action) && Player.HasStatus(true, StatusID.Overheated_3149) && !Player.HasStatus(true, StatusID.Analysis))
+        if (BlazingShotPvP.CanUse(out action))
         {
-            return true;
+            if (Player.HasStatus(true, StatusID.Overheated_3149) && !Player.HasStatus(true, StatusID.Analysis))
+            {
+                return true;
+            }
         }
 
         if (DrillPvP.CanUse(out action, usedUp: true))
@@ -129,12 +153,20 @@ public sealed class MCH_DefaultPvP : MachinistRotation
             return true;
         }
 
-        if (ScattergunPvP.CanUse(out action) && !Player.HasStatus(true, StatusID.Overheated_3149))
+        if (ScattergunPvP.CanUse(out action))
+        {
+            if (!Player.HasStatus(true, StatusID.Overheated_3149))
+            {
+                return true;
+            }
+        }
+
+        if (BlastChargePvP.CanUse(out action))
         {
             return true;
         }
 
-        return BlastChargePvP.CanUse(out action) || base.GeneralGCD(out action);
+        return base.GeneralGCD(out action);
     }
     #endregion
 }

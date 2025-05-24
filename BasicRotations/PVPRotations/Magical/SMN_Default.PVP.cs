@@ -42,7 +42,12 @@ public class SMN_DefaultPvP : SummonerRotation
             return false;
         }
 
-        return DoPurify(out action) || base.EmergencyAbility(nextGCD, out action);
+        if (DoPurify(out action))
+        {
+            return true;
+        }
+
+        return base.EmergencyAbility(nextGCD, out action);
     }
 
     [RotationDesc(ActionID.RadiantAegisPvP)]
@@ -54,7 +59,12 @@ public class SMN_DefaultPvP : SummonerRotation
             return false;
         }
 
-        return RadiantAegisPvP.CanUse(out action) || base.DefenseSingleAbility(nextGCD, out action);
+        if (RadiantAegisPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.DefenseSingleAbility(nextGCD, out action);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
@@ -75,7 +85,12 @@ public class SMN_DefaultPvP : SummonerRotation
             return true;
         }
 
-        return NecrotizePvP.CanUse(out action) && !Player.HasStatus(true, StatusID.FirebirdTrance) && !Player.HasStatus(true, StatusID.DreadwyrmTrance_3228) || base.AttackAbility(nextGCD, out action);
+        if (NecrotizePvP.CanUse(out action) && !Player.HasStatus(true, StatusID.FirebirdTrance) && !Player.HasStatus(true, StatusID.DreadwyrmTrance_3228))
+        {
+            return true;
+        }
+
+        return base.AttackAbility(nextGCD, out action);
     }
 
     [RotationDesc(ActionID.CrimsonCyclonePvP)]
@@ -98,7 +113,12 @@ public class SMN_DefaultPvP : SummonerRotation
             return true;
         }
 
-        return CrimsonCyclonePvP.CanUse(out action) && Target.DistanceToPlayer() < 5 || base.MoveForwardAbility(nextGCD, out action);
+        if (CrimsonCyclonePvP.CanUse(out action) && Target.DistanceToPlayer() < 5)
+        {
+            return true;
+        }
+
+        return base.MoveForwardAbility(nextGCD, out action);
     }
 
     #endregion
@@ -142,7 +162,12 @@ public class SMN_DefaultPvP : SummonerRotation
             return true;
         }
 
-        return RuinIiiPvP.CanUse(out action) || base.GeneralGCD(out action);
+        if (RuinIiiPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out action);
     }
     #endregion
 

@@ -67,7 +67,7 @@ internal partial class Configs : IPluginConfiguration
     Filter = BasicAutoSwitch)]
     private static readonly bool _autoOffSwitchClass = true;
 
-    [ConditionBool, UI("Auto turn off when dead.",
+    [ConditionBool, UI("Auto turn off when dead in PvE.",
     Description = "Automatically turn off combat state when your character dies.",
     Filter = BasicAutoSwitch)]
     private static readonly bool _autoOffWhenDead = true;

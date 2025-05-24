@@ -50,14 +50,23 @@ public class WHM_DefaultPVP : WhiteMageRotation
         {
             return false;
         }
+        if (DoPurify(out action))
+        {
+            return true;
+        }
 
-        return DoPurify(out action) || base.EmergencyAbility(nextGCD, out action);
+        return base.EmergencyAbility(nextGCD, out action);
     }
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        return (!RespectGuard || !Player.HasStatus(true, StatusID.Guard)) && base.DefenseSingleAbility(nextGCD, out action);
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
+
+        return base.DefenseSingleAbility(nextGCD, out action);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
@@ -68,7 +77,12 @@ public class WHM_DefaultPVP : WhiteMageRotation
             return false;
         }
 
-        return DiabrosisPvP.CanUse(out action) || base.AttackAbility(nextGCD, out action);
+        if (DiabrosisPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.AttackAbility(nextGCD, out action);
     }
     #endregion
 
@@ -81,7 +95,12 @@ public class WHM_DefaultPVP : WhiteMageRotation
             return false;
         }
 
-        return StoneskinIiPvP.CanUse(out action) || base.DefenseSingleGCD(out action);
+        if (StoneskinIiPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.DefenseSingleGCD(out action);
     }
 
     protected override bool HealSingleGCD(out IAction? action)
@@ -102,7 +121,12 @@ public class WHM_DefaultPVP : WhiteMageRotation
             return true;
         }
 
-        return CureIiPvP.CanUse(out action) || base.HealSingleGCD(out action);
+        if (CureIiPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.HealSingleGCD(out action);
     }
 
     protected override bool GeneralGCD(out IAction? action)
@@ -133,7 +157,12 @@ public class WHM_DefaultPVP : WhiteMageRotation
             return true;
         }
 
-        return GlareIiiPvP.CanUse(out action) || base.GeneralGCD(out action);
+        if (GlareIiiPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out action);
     }
     #endregion
 }

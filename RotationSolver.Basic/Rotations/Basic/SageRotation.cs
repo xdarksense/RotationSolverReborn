@@ -424,6 +424,7 @@ public partial class SageRotation
 
     static partial void ModifyEukrasiaPvP(ref ActionSetting setting)
     {
+        setting.StatusProvide = [StatusID.Eukrasia_3107];
         setting.IsFriendly = true;
     }
 
@@ -442,7 +443,7 @@ public partial class SageRotation
 
     static partial void ModifyKardiaPvP(ref ActionSetting setting)
     {
-
+        setting.StatusProvide = [StatusID.Kardia_2871];
     }
 
 
@@ -462,6 +463,7 @@ public partial class SageRotation
     static partial void ModifyToxikonIiPvP(ref ActionSetting setting)
     {
         setting.ActionCheck = () => Player.HasStatus(true, StatusID.Addersting);
+        setting.TargetStatusProvide = [StatusID.Toxikon];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

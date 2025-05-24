@@ -55,9 +55,12 @@ public sealed class RPR_DefaultPvP : ReaperRotation
             return true;
         }
 
-        if (Player.GetHealthRatio() < BloodBathPvPPercent && BloodbathPvP.CanUse(out action))
+        if (BloodbathPvP.CanUse(out action))
         {
-            return true;
+            if (Player.GetHealthRatio() < BloodBathPvPPercent)
+            {
+                return true;
+            }
         }
 
         if (SwiftPvP.CanUse(out action))
@@ -65,7 +68,15 @@ public sealed class RPR_DefaultPvP : ReaperRotation
             return true;
         }
 
-        return CurrentTarget?.GetHealthRatio() <= SmitePvPPercent && SmitePvP.CanUse(out action) || base.EmergencyAbility(nextGCD, out action);
+        if (SmitePvP.CanUse(out action))
+        {
+            if (CurrentTarget?.GetHealthRatio() <= SmitePvPPercent)
+            {
+                return true;
+            }
+        }
+
+        return base.EmergencyAbility(nextGCD, out action);
     }
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
@@ -76,7 +87,12 @@ public sealed class RPR_DefaultPvP : ReaperRotation
             return false;
         }
 
-        return ArcaneCrestPvP.CanUse(out action) || base.DefenseSingleAbility(nextGCD, out action);
+        if (ArcaneCrestPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.DefenseSingleAbility(nextGCD, out action);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
@@ -87,9 +103,12 @@ public sealed class RPR_DefaultPvP : ReaperRotation
             return false;
         }
 
-        if (HasEnshroudedPvP && LemuresSlicePvP.CanUse(out action))
+        if (LemuresSlicePvP.CanUse(out action))
         {
-            return true;
+            if (HasEnshroudedPvP)
+            {
+                return true;
+            }
         }
 
         if (DeathWarrantPvP.CanUse(out action))
@@ -97,7 +116,12 @@ public sealed class RPR_DefaultPvP : ReaperRotation
             return true;
         }
 
-        return !HasEnshroudedPvP && GrimSwathePvP.CanUse(out action) || base.AttackAbility(nextGCD, out action);
+        if (GrimSwathePvP.CanUse(out action) && !HasEnshroudedPvP)
+        {
+            return true;
+        }
+
+        return base.AttackAbility(nextGCD, out action);
     }
     #endregion
 
@@ -110,10 +134,12 @@ public sealed class RPR_DefaultPvP : ReaperRotation
             return false;
         }
 
-        if ((Player.StatusStack(true, StatusID.Enshrouded_2863) == 1 || Player.WillStatusEndGCD(1, 0, true, StatusID.Enshrouded_2863))
-            && CommunioPvP.CanUse(out action))
+        if (CommunioPvP.CanUse(out action))
         {
-            return true;
+            if (Player.StatusStack(true, StatusID.Enshrouded_2863) == 1 || Player.WillStatusEndGCD(1, 0, true, StatusID.Enshrouded_2863))
+            {
+                return true;
+            }
         }
 
         if (CrossReapingPvP.CanUse(out action))
@@ -131,9 +157,9 @@ public sealed class RPR_DefaultPvP : ReaperRotation
             return true;
         }
 
-        if (Player.StatusStack(true, StatusID.ImmortalSacrifice_3204) > 3)
+        if (PlentifulHarvestPvP.CanUse(out action))
         {
-            if (PlentifulHarvestPvP.CanUse(out action))
+            if (Player.StatusStack(true, StatusID.ImmortalSacrifice_3204) > 3)
             {
                 return true;
             }
@@ -159,7 +185,12 @@ public sealed class RPR_DefaultPvP : ReaperRotation
             return true;
         }
 
-        return SlicePvP.CanUse(out action) || base.GeneralGCD(out action);
+        if (SlicePvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out action);
     }
     #endregion
 }

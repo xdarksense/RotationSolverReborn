@@ -47,7 +47,12 @@ public class SGE_DefaultPVP : SageRotation
             return true;
         }
 
-        return !Player.HasStatus(true, StatusID.Kardia_2871) && KardiaPvP.CanUse(out action) || base.EmergencyAbility(nextGCD, out action);
+        if (KardiaPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.EmergencyAbility(nextGCD, out action);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
@@ -63,7 +68,12 @@ public class SGE_DefaultPVP : SageRotation
             return true;
         }
 
-        return !Target.HasStatus(true, StatusID.Toxikon) && ToxikonPvP.CanUse(out action, usedUp: true) || base.AttackAbility(nextGCD, out action);
+        if (ToxikonPvP.CanUse(out action, usedUp: true))
+        {
+            return true;
+        }
+
+        return base.AttackAbility(nextGCD, out action);
     }
     #endregion
 
@@ -76,7 +86,12 @@ public class SGE_DefaultPVP : SageRotation
             return false;
         }
 
-        return StoneskinIiPvP.CanUse(out action) || base.DefenseSingleGCD(out action);
+        if (StoneskinIiPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.DefenseSingleGCD(out action);
     }
 
     protected override bool HealSingleGCD(out IAction? action)
@@ -87,7 +102,12 @@ public class SGE_DefaultPVP : SageRotation
             return false;
         }
 
-        return HaelanPvP.CanUse(out action) || base.HealSingleGCD(out action);
+        if (HaelanPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.HealSingleGCD(out action);
     }
 
     protected override bool GeneralGCD(out IAction? action)
@@ -113,12 +133,17 @@ public class SGE_DefaultPVP : SageRotation
             return true;
         }
 
-        if (!IsLastAction(ActionID.EukrasiaPvP) && InCombat && !Target.HasStatus(true, StatusID.EukrasianDosisIii_3108) && !Player.HasStatus(true, StatusID.Eukrasia) && EukrasiaPvP.CanUse(out action, usedUp: true))
+        if (EukrasiaPvP.CanUse(out action, usedUp: true) && InCombat && !Target.HasStatus(true, StatusID.EukrasianDosisIii_3108))
         {
             return true;
         }
 
-        return DosisIiiPvP.CanUse(out action) || base.GeneralGCD(out action);
+        if (DosisIiiPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out action);
     }
     #endregion
 }
