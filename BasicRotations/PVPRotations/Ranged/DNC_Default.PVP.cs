@@ -57,13 +57,23 @@ public sealed class DNC_DefaultPvP : DancerRotation
             return true;
         }
 
-        return InCombat && DervishPvP.CanUse(out action) || base.EmergencyAbility(nextGCD, out action);
+        if (InCombat && DervishPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.EmergencyAbility(nextGCD, out action);
     }
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        return (!RespectGuard || !Player.HasStatus(true, StatusID.Guard)) && base.DefenseSingleAbility(nextGCD, out action);
+        if (!RespectGuard || !Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
+
+        return base.DefenseSingleAbility(nextGCD, out action);
     }
 
     protected override bool HealAreaAbility(IAction nextGCD, out IAction? action)
@@ -74,7 +84,12 @@ public sealed class DNC_DefaultPvP : DancerRotation
             return false;
         }
 
-        return CuringWaltzPvP.CanUse(out action) || base.HealAreaAbility(nextGCD, out action);
+        if (CuringWaltzPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.HealAreaAbility(nextGCD, out action);
     }
 
     protected override bool MoveBackAbility(IAction nextGCD, out IAction? action)
@@ -103,7 +118,12 @@ public sealed class DNC_DefaultPvP : DancerRotation
             return true;
         }
 
-        return EagleEyeShotPvP.CanUse(out action) || base.AttackAbility(nextGCD, out action);
+        if (EagleEyeShotPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.AttackAbility(nextGCD, out action);
     }
     #endregion
 
@@ -141,7 +161,12 @@ public sealed class DNC_DefaultPvP : DancerRotation
             return true;
         }
 
-        return CascadePvP.CanUse(out action) || base.GeneralGCD(out action);
+        if (CascadePvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out action);
     }
     #endregion
 

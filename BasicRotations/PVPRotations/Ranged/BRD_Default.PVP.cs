@@ -47,18 +47,34 @@ public sealed class BRD_DefaultPvP : BardRotation
             return true;
         }
 
-        if (InCombat && BraveryPvP.CanUse(out action))
+        if (BraveryPvP.CanUse(out action))
         {
-            return true;
+            if (InCombat)
+            {
+                return true;
+            }
         }
 
-        return InCombat && DervishPvP.CanUse(out action) || base.EmergencyAbility(nextGCD, out action);
+        if (DervishPvP.CanUse(out action))
+        {
+            if (InCombat)
+            {
+                return true;
+            }
+        }
+
+        return base.EmergencyAbility(nextGCD, out action);
     }
 
     [RotationDesc(ActionID.TheWardensPaeanPvP)]
     protected override bool DispelGCD(out IAction? act)
     {
-        return TheWardensPaeanPvP.CanUse(out act) || base.DispelGCD(out act);
+        if (TheWardensPaeanPvP.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.DispelGCD(out act);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
@@ -69,14 +85,20 @@ public sealed class BRD_DefaultPvP : BardRotation
             return false;
         }
 
-        if (RepellingShotPvP.CanUse(out action) && !Player.HasStatus(true, StatusID.Repertoire))
+        if (RepellingShotPvP.CanUse(out action))
         {
-            return true;
+            if (!Player.HasStatus(true, StatusID.Repertoire))
+            {
+                return true;
+            }
         }
 
-        if (SilentNocturnePvP.CanUse(out action) && !Player.HasStatus(true, StatusID.Repertoire))
+        if (SilentNocturnePvP.CanUse(out action))
         {
-            return true;
+            if (!Player.HasStatus(true, StatusID.Repertoire))
+            {
+                return true;
+            }
         }
 
         if (EagleEyeShotPvP.CanUse(out action))
@@ -84,7 +106,12 @@ public sealed class BRD_DefaultPvP : BardRotation
             return true;
         }
 
-        return EncoreOfLightPvP.CanUse(out action, skipAoeCheck: true) || base.AttackAbility(nextGCD, out action);
+        if (EncoreOfLightPvP.CanUse(out action, skipAoeCheck: true))
+        {
+            return true;
+        }
+
+        return base.AttackAbility(nextGCD, out action);
     }
     #endregion
 
@@ -117,7 +144,12 @@ public sealed class BRD_DefaultPvP : BardRotation
             return true;
         }
 
-        return PowerfulShotPvP.CanUse(out action) || base.GeneralGCD(out action);
+        if (PowerfulShotPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out action);
     }
     #endregion
 }

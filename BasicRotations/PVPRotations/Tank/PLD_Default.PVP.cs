@@ -43,7 +43,12 @@ public sealed class PLD_DefaultPvP : PaladinRotation
             return false;
         }
 
-        return DoPurify(out action) || base.EmergencyAbility(nextGCD, out action);
+        if (DoPurify(out action))
+        {
+            return true;
+        }
+
+        return base.EmergencyAbility(nextGCD, out action);
     }
     [RotationDesc(ActionID.BloodwhettingPvP)]
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
@@ -59,7 +64,12 @@ public sealed class PLD_DefaultPvP : PaladinRotation
             return true;
         }
 
-        return HolySheltronPvP.CanUse(out action) || base.DefenseSingleAbility(nextGCD, out action);
+        if (HolySheltronPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.DefenseSingleAbility(nextGCD, out action);
     }
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
@@ -79,7 +89,12 @@ public sealed class PLD_DefaultPvP : PaladinRotation
             return true;
         }
 
-        return ImperatorPvP.CanUse(out action) || base.AttackAbility(nextGCD, out action);
+        if (ImperatorPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.AttackAbility(nextGCD, out action);
     }
     #endregion
 
@@ -147,7 +162,12 @@ public sealed class PLD_DefaultPvP : PaladinRotation
             return true;
         }
 
-        return FastBladePvP.CanUse(out action) || base.GeneralGCD(out action);
+        if (FastBladePvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out action);
     }
     #endregion
 }

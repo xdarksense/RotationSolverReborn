@@ -58,7 +58,7 @@ public sealed class DRG_DefaultPvP : DragoonRotation
             return true;
         }
 
-        if (Player.GetHealthRatio() < BloodBathPvPPercent && BloodbathPvP.CanUse(out action))
+        if (BloodbathPvP.CanUse(out action) && Player.GetHealthRatio() < BloodBathPvPPercent)
         {
             return true;
         }
@@ -68,13 +68,23 @@ public sealed class DRG_DefaultPvP : DragoonRotation
             return true;
         }
 
-        return CurrentTarget?.GetHealthRatio() <= SmitePvPPercent && SmitePvP.CanUse(out action) || base.EmergencyAbility(nextGCD, out action);
+        if (SmitePvP.CanUse(out action) && CurrentTarget?.GetHealthRatio() <= SmitePvPPercent)
+        {
+            return false;
+        }
+
+        return base.EmergencyAbility(nextGCD, out action);
     }
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        return (!RespectGuard || !Player.HasStatus(true, StatusID.Guard)) && base.DefenseSingleAbility(nextGCD, out action);
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
+
+        return base.DefenseSingleAbility(nextGCD, out action);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
@@ -100,7 +110,12 @@ public sealed class DRG_DefaultPvP : DragoonRotation
             return true;
         }
 
-        return HasHostilesInRange && JumpYeet && HighJumpPvP.CanUse(out action) || base.AttackAbility(nextGCD, out action);
+        if (HighJumpPvP.CanUse(out action) && HasHostilesInRange && JumpYeet)
+        {
+            return true;
+        }
+
+        return base.AttackAbility(nextGCD, out action);
     }
 
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? action)
@@ -111,7 +126,12 @@ public sealed class DRG_DefaultPvP : DragoonRotation
             return false;
         }
 
-        return HighJumpPvP.CanUse(out action) || base.MoveForwardAbility(nextGCD, out action);
+        if (HighJumpPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.MoveForwardAbility(nextGCD, out action);
     }
 
     protected override bool MoveBackAbility(IAction nextGCD, out IAction? action)
@@ -122,7 +142,12 @@ public sealed class DRG_DefaultPvP : DragoonRotation
             return false;
         }
 
-        return ElusiveJumpPvP.CanUse(out action) || base.MoveBackAbility(nextGCD, out action);
+        if (ElusiveJumpPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.MoveBackAbility(nextGCD, out action);
     }
     #endregion
 
@@ -170,7 +195,12 @@ public sealed class DRG_DefaultPvP : DragoonRotation
             return true;
         }
 
-        return RaidenThrustPvP.CanUse(out action) || base.GeneralGCD(out action);
+        if (RaidenThrustPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out action);
     }
     #endregion
 }

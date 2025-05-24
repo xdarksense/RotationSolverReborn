@@ -55,16 +55,20 @@ public sealed class VPR_DefaultPvP : ViperRotation
             return true;
         }
 
-        if (SnakeScalesPvP.Cooldown.IsCoolingDown && UncoiledFuryPvP.Cooldown.IsCoolingDown)
+        if (RattlingCoilPvP.CanUse(out action))
         {
-            if (RattlingCoilPvP.CanUse(out action))
+            if (SnakeScalesPvP.Cooldown.IsCoolingDown && UncoiledFuryPvP.Cooldown.IsCoolingDown)
             {
                 return true;
             }
         }
-        if (Player.GetHealthRatio() < BloodBathPvPPercent && BloodbathPvP.CanUse(out action))
+
+        if (BloodbathPvP.CanUse(out action))
         {
-            return true;
+            if (Player.GetHealthRatio() < BloodBathPvPPercent)
+            {
+                return true;
+            }
         }
 
         if (SwiftPvP.CanUse(out action))
@@ -72,13 +76,26 @@ public sealed class VPR_DefaultPvP : ViperRotation
             return true;
         }
 
-        return CurrentTarget?.GetHealthRatio() <= SmitePvPPercent && SmitePvP.CanUse(out action) || base.EmergencyAbility(nextGCD, out action);
+        if (SmitePvP.CanUse(out action))
+        {
+            if (CurrentTarget?.GetHealthRatio() <= SmitePvPPercent)
+            {
+                return true;
+            }
+        }
+
+        return base.EmergencyAbility(nextGCD, out action);
     }
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        return (!RespectGuard || !Player.HasStatus(true, StatusID.Guard)) && !Player.HasStatus(true, StatusID.HardenedScales) && base.DefenseSingleAbility(nextGCD, out action);
+        if ((RespectGuard && Player.HasStatus(true, StatusID.Guard)) || Player.HasStatus(true, StatusID.HardenedScales))
+        {
+            return false;
+        }
+
+        return base.DefenseSingleAbility(nextGCD, out action);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
@@ -129,13 +146,23 @@ public sealed class VPR_DefaultPvP : ViperRotation
             return true;
         }
 
-        return DeathRattlePvP.CanUse(out action) || base.AttackAbility(nextGCD, out action);
+        if (DeathRattlePvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.AttackAbility(nextGCD, out action);
     }
 
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        return (!RespectGuard || !Player.HasStatus(true, StatusID.Guard)) && !Player.HasStatus(true, StatusID.HardenedScales) && base.MoveForwardAbility(nextGCD, out action);
+        if ((RespectGuard && Player.HasStatus(true, StatusID.Guard)) || Player.HasStatus(true, StatusID.HardenedScales))
+        {
+            return false;
+        }
+
+        return base.MoveForwardAbility(nextGCD, out action);
     }
     #endregion
 
@@ -218,7 +245,12 @@ public sealed class VPR_DefaultPvP : ViperRotation
             return true;
         }
 
-        return UncoiledFuryPvP.CanUse(out action, usedUp: true) || base.GeneralGCD(out action);
+        if (UncoiledFuryPvP.CanUse(out action, usedUp: true))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out action);
     }
     #endregion
 }

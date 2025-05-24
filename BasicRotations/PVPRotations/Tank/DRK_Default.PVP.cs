@@ -52,7 +52,12 @@ public sealed class DRK_DefaultPvP : DarkKnightRotation
             return true;
         }
 
-        return InCombat && TheBlackestNightPvP.CanUse(out action) && TheBlackestNightPvP.Cooldown.CurrentCharges == 2 || base.EmergencyAbility(nextGCD, out action);
+        if (TheBlackestNightPvP.CanUse(out action) && TheBlackestNightPvP.Cooldown.CurrentCharges == 2 && InCombat)
+        {
+            return true;
+        }
+
+        return base.EmergencyAbility(nextGCD, out action);
     }
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
@@ -68,7 +73,12 @@ public sealed class DRK_DefaultPvP : DarkKnightRotation
             return true;
         }
 
-        return TheBlackestNightPvP.CanUse(out act) || base.DefenseSingleAbility(nextGCD, out act);
+        if (TheBlackestNightPvP.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.DefenseSingleAbility(nextGCD, out act);
     }
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
@@ -103,7 +113,12 @@ public sealed class DRK_DefaultPvP : DarkKnightRotation
             return true;
         }
 
-        return SaltAndDarknessPvP.CanUse(out action) || base.AttackAbility(nextGCD, out action);
+        if (SaltAndDarknessPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.AttackAbility(nextGCD, out action);
     }
     #endregion
 
@@ -151,7 +166,12 @@ public sealed class DRK_DefaultPvP : DarkKnightRotation
             return true;
         }
 
-        return HardSlashPvP.CanUse(out action) || base.GeneralGCD(out action);
+        if (HardSlashPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out action);
     }
     #endregion
 }

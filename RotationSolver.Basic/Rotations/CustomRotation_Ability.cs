@@ -620,6 +620,11 @@ public partial class CustomRotation
             return true;
         }
 
+        if (DataCenter.IsPvP && !DataCenter.InCombat && SprintPvP.CanUse(out act))
+        {
+            return true;
+        }
+
         if (DataCenter.CurrentDutyRotation?.SpeedAbility(nextGCD, out act) ?? false)
         {
             return true;

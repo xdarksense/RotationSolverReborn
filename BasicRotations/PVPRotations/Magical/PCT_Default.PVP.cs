@@ -52,6 +52,10 @@ public class PCT_DefaultPvP : PictomancerRotation
         {
             return false;
         }
+        if (DoPurify(out action))
+        {
+            return true;
+        }
 
         return DoPurify(out action) || base.EmergencyAbility(nextGCD, out action);
     }
@@ -64,7 +68,12 @@ public class PCT_DefaultPvP : PictomancerRotation
             return false;
         }
 
-        return Player.GetHealthRatio() <= TempuraThreshold && TemperaCoatPvP.CanUse(out action) || base.DefenseSingleAbility(nextGCD, out action);
+        if (TemperaCoatPvP.CanUse(out action) && Player.GetHealthRatio() <= TempuraThreshold)
+        {
+            return true;
+        }
+
+        return base.DefenseSingleAbility(nextGCD, out action);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
@@ -167,7 +176,12 @@ public class PCT_DefaultPvP : PictomancerRotation
             return true;
         }
 
-        return FireInRedPvP.CanUse(out action) || base.GeneralGCD(out action);
+        if (FireInRedPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out action);
     }
     #endregion
 }

@@ -59,7 +59,12 @@ public sealed class WAR_DefaultPvP : WarriorRotation
             return true;
         }
 
-        return BloodwhettingPvP.CanUse(out action) || base.DefenseSingleAbility(nextGCD, out action);
+        if (BloodwhettingPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.DefenseSingleAbility(nextGCD, out action);
     }
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
@@ -94,7 +99,12 @@ public sealed class WAR_DefaultPvP : WarriorRotation
             return true;
         }
 
-        return OrogenyPvP.CanUse(out action) || base.AttackAbility(nextGCD, out action);
+        if (OrogenyPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.AttackAbility(nextGCD, out action);
     }
     #endregion
 
@@ -142,7 +152,12 @@ public sealed class WAR_DefaultPvP : WarriorRotation
             return true;
         }
 
-        return HeavySwingPvP.CanUse(out action) || base.GeneralGCD(out action);
+        if (HeavySwingPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out action);
     }
     #endregion
 }

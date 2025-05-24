@@ -62,7 +62,12 @@ public class BLM_DefaultPVP : BlackMageRotation
             return false;
         }
 
-        return WreathOfIcePvP.CanUse(out action) || base.DefenseSingleAbility(nextGCD, out action);
+        if (WreathOfIcePvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.DefenseSingleAbility(nextGCD, out action);
     }
 
     [RotationDesc(ActionID.AetherialManipulationPvP)]
@@ -99,7 +104,12 @@ public class BLM_DefaultPVP : BlackMageRotation
             return true;
         }
 
-        return LethargyPvP.CanUse(out action) || base.AttackAbility(nextGCD, out action);
+        if (LethargyPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.AttackAbility(nextGCD, out action);
     }
 
     protected override bool GeneralAbility(IAction nextGCD, out IAction? action)
@@ -110,7 +120,12 @@ public class BLM_DefaultPVP : BlackMageRotation
             return false;
         }
 
-        return InCombat && WreathOfFirePvP.CanUse(out action) || base.GeneralAbility(nextGCD, out action);
+        if (WreathOfFirePvP.CanUse(out action) && InCombat)
+        {
+            return true;
+        }
+
+        return base.GeneralAbility(nextGCD, out action);
     }
 
     #endregion
@@ -160,7 +175,12 @@ public class BLM_DefaultPVP : BlackMageRotation
             return true;
         }
 
-        return BlizzardPvP.CanUse(out action) || base.GeneralGCD(out action);
+        if (BlizzardPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out action);
     }
     #endregion
 

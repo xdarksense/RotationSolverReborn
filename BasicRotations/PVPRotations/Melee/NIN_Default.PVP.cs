@@ -60,7 +60,7 @@ public sealed class NIN_DefaultPvP : NinjaRotation
             return true;
         }
 
-        if (Player.GetHealthRatio() < BloodBathPvPPercent && BloodbathPvP.CanUse(out action))
+        if (BloodbathPvP.CanUse(out action) && Player.GetHealthRatio() < BloodBathPvPPercent)
         {
             return true;
         }
@@ -70,7 +70,13 @@ public sealed class NIN_DefaultPvP : NinjaRotation
             return true;
         }
 
-        return CurrentTarget?.GetHealthRatio() <= SmitePvPPercent && SmitePvP.CanUse(out action) || base.EmergencyAbility(nextGCD, out action);
+        if (SmitePvP.CanUse(out action) && CurrentTarget?.GetHealthRatio() <= SmitePvPPercent)
+        {
+            return true;
+        }
+
+
+        return base.EmergencyAbility(nextGCD, out action);
     }
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
@@ -81,7 +87,12 @@ public sealed class NIN_DefaultPvP : NinjaRotation
             return false;
         }
 
-        return (!RespectGuard || !Player.HasStatus(true, StatusID.Guard)) && base.DefenseSingleAbility(nextGCD, out action);
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
+
+        return base.DefenseSingleAbility(nextGCD, out action);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
@@ -102,12 +113,17 @@ public sealed class NIN_DefaultPvP : NinjaRotation
             return true;
         }
 
-        if (HasHostilesInMaxRange && !Player.HasStatus(true, StatusID.ThreeMudra) && BunshinPvP.CanUse(out action))
+        if (BunshinPvP.CanUse(out action) && !Player.HasStatus(true, StatusID.ThreeMudra) && HasHostilesInMaxRange)
         {
             return true;
         }
 
-        return HasHostilesInMaxRange && !Player.HasStatus(true, StatusID.ThreeMudra) && ThreeMudraPvP.CanUse(out action, usedUp: true) || base.AttackAbility(nextGCD, out action);
+        if (ThreeMudraPvP.CanUse(out action, usedUp: true) && !Player.HasStatus(true, StatusID.ThreeMudra) && HasHostilesInMaxRange)
+        {
+            return true;
+        }
+
+        return base.AttackAbility(nextGCD, out action);
     }
 
     #endregion
@@ -178,7 +194,12 @@ public sealed class NIN_DefaultPvP : NinjaRotation
             return true;
         }
 
-        return SpinningEdgePvP.CanUse(out action) || base.GeneralGCD(out action);
+        if (SpinningEdgePvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out action);
     }
     #endregion
 }

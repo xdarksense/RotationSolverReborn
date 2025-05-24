@@ -47,7 +47,12 @@ public class SCH_DefaultPVP : ScholarRotation
             return true;
         }
 
-        return Target.HasStatus(false, StatusID.Guard) && ChainStratagemPvP.CanUse(out action) || base.EmergencyAbility(nextGCD, out action);
+        if (ChainStratagemPvP.CanUse(out action) && Target.HasStatus(false, StatusID.Guard))
+        {
+            return true;
+        }
+
+        return base.EmergencyAbility(nextGCD, out action);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
@@ -63,7 +68,12 @@ public class SCH_DefaultPVP : ScholarRotation
             return true;
         }
 
-        return Target.HasStatus(true, StatusID.Biolysis_3089) && DeploymentTacticsPvP.CanUse(out action, usedUp: true) || base.AttackAbility(nextGCD, out action);
+        if (DeploymentTacticsPvP.CanUse(out action, usedUp: true) && Target.HasStatus(true, StatusID.Biolysis_3089))
+        {
+            return true;
+        }
+
+        return base.AttackAbility(nextGCD, out action);
     }
 
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? action)
@@ -74,7 +84,12 @@ public class SCH_DefaultPVP : ScholarRotation
             return false;
         }
 
-        return ExpedientPvP.CanUse(out action) || base.DefenseAreaAbility(nextGCD, out action);
+        if (ExpedientPvP.CanUse(out action, usedUp: true))
+        {
+            return true;
+        }
+
+        return base.DefenseAreaAbility(nextGCD, out action);
     }
 
     protected override bool HealAreaAbility(IAction nextGCD, out IAction? action)
@@ -85,7 +100,12 @@ public class SCH_DefaultPVP : ScholarRotation
             return false;
         }
 
-        return SummonSeraphPvP.CanUse(out action) || base.HealAreaAbility(nextGCD, out action);
+        if (SummonSeraphPvP.CanUse(out action, usedUp: true))
+        {
+            return true;
+        }
+
+        return base.HealAreaAbility(nextGCD, out action);
     }
     #endregion
 
@@ -98,7 +118,12 @@ public class SCH_DefaultPVP : ScholarRotation
             return false;
         }
 
-        return StoneskinIiPvP.CanUse(out action) || base.DefenseSingleGCD(out action);
+        if (StoneskinIiPvP.CanUse(out action, usedUp: true))
+        {
+            return true;
+        }
+
+        return base.DefenseSingleGCD(out action);
     }
 
     protected override bool HealSingleGCD(out IAction? action)
@@ -114,7 +139,12 @@ public class SCH_DefaultPVP : ScholarRotation
             return true;
         }
 
-        return AdloquiumPvP.CanUse(out action, usedUp: true) || base.HealSingleGCD(out action);
+        if (AdloquiumPvP.CanUse(out action, usedUp: true))
+        {
+            return true;
+        }
+
+        return base.HealSingleGCD(out action);
     }
 
     protected override bool GeneralGCD(out IAction? action)
@@ -125,7 +155,7 @@ public class SCH_DefaultPVP : ScholarRotation
             return false;
         }
 
-        if (Player.HasStatus(true, StatusID.Recitation_3094) && BiolysisPvP.CanUse(out action))
+        if (BiolysisPvP.CanUse(out action) && Player.HasStatus(true, StatusID.Recitation_3094))
         {
             return true;
         }
@@ -140,7 +170,12 @@ public class SCH_DefaultPVP : ScholarRotation
             return true;
         }
 
-        return BroilIvPvP.CanUse(out action) || base.GeneralGCD(out action);
+        if (BroilIvPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out action);
     }
     #endregion
 }
