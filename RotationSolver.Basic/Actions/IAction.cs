@@ -28,9 +28,6 @@ public interface IAction : ITexture, IEnoughLevel
     /// <summary>
     /// Gets or sets a value indicating whether this action is in the cooldown window.
     /// </summary>
-    /// <markdown file="Actions" name="Show on CD window">
-    /// Toggles whether this action is in the <see cref="RotationSolver.UI.CooldownWindow">cooldown</see> window.
-    /// </markdown>
     bool IsInCooldown { get; set; }
 
     /// <summary>
