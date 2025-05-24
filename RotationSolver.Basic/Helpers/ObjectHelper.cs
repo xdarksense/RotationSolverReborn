@@ -429,6 +429,12 @@ public static class ObjectHelper
 
         if (obj is IBattleChara b)
         {
+            // Check IBattleChara bespoke IsSpecialInclusionPriority method
+            if (b.IsSpecialInclusionPriority())
+            {
+                return true;
+            }
+
             // Check IBattleChara against the priority target list of OIDs
             if (PriorityTargetHelper.IsPriorityTarget(b.DataId))
             {
@@ -475,7 +481,7 @@ public static class ObjectHelper
 
         uint icon = obj.GetNamePlateIcon();
 
-        // Hunting log and weapon
+        // Hunt bill, Relic weapon, and Leve target
         if (Service.Config.TargetHuntingRelicLevePriority && (icon == 60092 || icon == 60096 || icon == 71244))
         {
             return true;
@@ -496,6 +502,16 @@ public static class ObjectHelper
 
         // Check if the object is a BattleNpcPart
         return Service.Config.PrioEnemyParts && obj.GetBattleNPCSubKind() == BattleNpcSubKind.BattleNpcPart;
+    }
+
+    internal static bool IsSpecialInclusionPriority(this IBattleChara obj)
+    {
+        if (obj.NameId == 10259)
+        {
+            return true; // Special case Cinduruva in The Tower of Zot
+        }
+
+        return false;
     }
 
     internal static unsafe uint GetNamePlateIcon(this IGameObject obj)

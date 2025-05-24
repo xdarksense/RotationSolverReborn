@@ -64,8 +64,11 @@ namespace RotationSolver.Data
         [Description("RSR has helped you by clicking actions {0:N0} times.")]
         ConfigWindow_About_ClickingCount,
 
-        [Description("Macro")]
+        [Description("State Macros")]
         ConfigWindow_About_Macros,
+
+        [Description("Action and Setting Macros")]
+        ConfigWindow_About_SettingMacros,
 
         [Description("Compatibility")]
         ConfigWindow_About_Compatibility,
