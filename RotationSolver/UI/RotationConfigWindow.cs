@@ -904,6 +904,7 @@ public partial class RotationConfigWindow : Window
     private static readonly CollapsingHeaderGroup _aboutHeaders = new(new()
     {
         { UiString.ConfigWindow_About_Macros.GetDescription, DrawAboutMacros },
+        { UiString.ConfigWindow_About_SettingMacros.GetDescription, DrawAboutSettingsCommands },
         { UiString.ConfigWindow_About_Compatibility.GetDescription, DrawAboutCompatibility },
         { UiString.ConfigWindow_About_Links.GetDescription, DrawAboutLinks },
     });
@@ -938,6 +939,16 @@ public partial class RotationConfigWindow : Window
         DisplayCommandHelp(SpecialCommandType.Burst);
         DisplayCommandHelp(SpecialCommandType.LimitBreak);
         DisplayCommandHelp(SpecialCommandType.NoCasting);
+    }
+
+    private static void DrawAboutSettingsCommands()
+    {
+        // Adjust item spacing for better layout
+        using ImRaii.Style style = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0f, 5f));
+        ImGui.NewLine();
+        ImGui.TextWrapped("These commands can be used to open or change plugin settings directly from chat or macros.");
+        ImGui.NewLine();
+        ImGui.TextWrapped("Simply right clicking any action, setting, or toggle will pop up the macro associated with it.");
     }
 
     // Helper method to display command help
