@@ -508,7 +508,12 @@ public static class ObjectHelper
     {
         if (obj.NameId == 10259)
         {
-            return true; // Special case Cinduruva in The Tower of Zot
+            return true; // Special case; Cinduruva in The Tower of Zot
+        }
+
+        if (obj.NameId == 8145)
+        {
+            return true; // Special case; Root in Dohn Meg boss 2
         }
 
         return false;
