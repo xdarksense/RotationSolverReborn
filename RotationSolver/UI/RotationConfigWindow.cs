@@ -281,12 +281,22 @@ public partial class RotationConfigWindow : Window
     private void DrawErrorZone()
     {
         string errorText = "No internal errors.";
-        //string cautionText;
         float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
+
+        // Dalamud branch warning
+        string branch = DalamudBranch();
+        if (!string.Equals(branch, "release", StringComparison.OrdinalIgnoreCase))
+        {
+            ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth);
+            ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudOrange);
+            ImGui.TextWrapped($"Warning: You are running the '{branch}' branch of Dalamud. For best compatibility, use /xlbranch and switch back to 'release' branch if available for your current version of FFXIV.");
+            ImGui.PopStyleColor();
+            ImGui.PopTextWrapPos();
+            ImGui.Spacing();
+        }
 
         IncompatiblePlugin[] incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
         IncompatiblePlugin enabledIncompatiblePlugin = incompatiblePlugins.FirstOrDefault(p => p.IsEnabled && (int)p.Type == 5);
-        //var installedCautionaryPlugin = incompatiblePlugins.FirstOrDefault(p => p.IsInstalled && (int)p.Type != 5);
 
         if (enabledIncompatiblePlugin.Name != null)
         {
