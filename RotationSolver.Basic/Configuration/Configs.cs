@@ -452,7 +452,7 @@ internal partial class Configs : IPluginConfiguration
     /// </markdown>
     [UI("Melee Range action using offset",
         Filter = AutoActionUsage, Section = 3,
-        PvEFilter = JobFilterType.Melee, PvPFilter = JobFilterType.NoJob)]
+        PvEFilter = JobFilterType.Melee, PvPFilter = JobFilterType.Melee)]
     [Range(0, 5, ConfigUnitType.Yalms, 0.02f)]
     public float MeleeRangeOffset { get; set; } = 1;
 

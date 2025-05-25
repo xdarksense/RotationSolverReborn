@@ -55,6 +55,17 @@ public sealed class VPR_DefaultPvP : ViperRotation
             return true;
         }
 
+        //these have to stay in Emergency because action weirdness with Serpent's Tail adjust ID
+        if (UncoiledTwinbloodPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (UncoiledTwinfangPvP.CanUse(out action))
+        {
+            return true;
+        }
+
         if (RattlingCoilPvP.CanUse(out action))
         {
             if (SnakeScalesPvP.Cooldown.IsCoolingDown && UncoiledFuryPvP.Cooldown.IsCoolingDown)
@@ -132,16 +143,6 @@ public sealed class VPR_DefaultPvP : ViperRotation
         }
 
         if (TwinfangBitePvP.CanUse(out action))
-        {
-            return true;
-        }
-
-        if (UncoiledTwinbloodPvP.CanUse(out action))
-        {
-            return true;
-        }
-
-        if (UncoiledTwinfangPvP.CanUse(out action))
         {
             return true;
         }

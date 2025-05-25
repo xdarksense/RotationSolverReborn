@@ -1115,6 +1115,11 @@ public struct ActionTargetInfo(IBaseAction action)
                 return null;
             }
 
+            if (DataCenter.PartyMembers.Count == 1)
+            {
+                return Player.Object;
+            }
+
             foreach (Job job in TheSpearPriority)
             {
                 foreach (IBattleChara member in DataCenter.PartyMembers)
@@ -1147,6 +1152,11 @@ public struct ActionTargetInfo(IBaseAction action)
             if (DataCenter.PartyMembers == null)
             {
                 return null;
+            }
+
+            if (DataCenter.PartyMembers.Count == 1)
+            {
+                return Player.Object;
             }
 
             foreach (Job job in TheBalancePriority)
