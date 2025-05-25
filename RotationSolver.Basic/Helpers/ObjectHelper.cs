@@ -14,6 +14,7 @@ using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using RotationSolver.Basic.Configuration;
 using System.Collections.Concurrent;
+using System.Drawing;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -506,15 +507,13 @@ public static class ObjectHelper
 
     internal static bool IsSpecialInclusionPriority(this IBattleChara obj)
     {
-        if (obj.NameId == 10259)
+        if (obj.NameId == 10259 || obj.NameId == 8145 || obj.NameId == 12704)
         {
-            return true; // Special case; Cinduruva in The Tower of Zot
+            return true;
         }
-
-        if (obj.NameId == 8145)
-        {
-            return true; // Special case; Root in Dohn Meg boss 2
-        }
+        //10259 Cinduruva in The Tower of Zot
+        //8145 Root in Dohn Meg boss 2
+        //12704 Crystalline Debris 
 
         return false;
     }
