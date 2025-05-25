@@ -59,7 +59,7 @@ internal static class MajorUpdater
                && !Svc.Condition[ConditionFlag.PlayingMiniGame]
                && !Svc.Condition[ConditionFlag.Performing]
                && !Svc.Condition[ConditionFlag.Fishing]
-               && !Svc.Condition[ConditionFlag.Transformed]
+               //&& !Svc.Condition[ConditionFlag.Transformed] Dhon Meg boss enlarges you, making you transformed
                && !Svc.Condition[ConditionFlag.UsingHousingFunctions]
                && !Svc.Condition[ConditionFlag.Jumping61]
                && !Svc.Condition[ConditionFlag.SufferingStatusAffliction2]
