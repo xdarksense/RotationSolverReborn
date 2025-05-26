@@ -121,22 +121,33 @@ internal class MajorConditionValue(string name = MajorConditionValue.conditionNa
 
     public static MajorConditionValue[] Read(string folder)
     {
-        return !Directory.Exists(folder)
-            ? []
-            : Directory.EnumerateFiles(folder, "*.json").Select(p =>
+        if (!Directory.Exists(folder))
+        {
+            return [];
+        }
+
+        List<MajorConditionValue> result = [];
+
+        string[] files = Directory.GetFiles(folder, "*.json");
+        foreach (string p in files)
         {
             string str = File.ReadAllText(p);
 
             try
             {
-                return JsonConvert.DeserializeObject<MajorConditionValue>(str, new IConditionConverter());
+                var obj = JsonConvert.DeserializeObject<MajorConditionValue>(str, new IConditionConverter());
+                if (obj != null && !string.IsNullOrEmpty(obj.Name))
+                {
+                    result.Add(obj);
+                }
             }
             catch (Exception ex)
             {
                 PluginLog.Warning($"Failed to load the types from {p}: {ex.Message}");
                 Svc.Chat.Print($"Failed to load the ConditionSet from {p}");
-                return null;
             }
-        }).OfType<MajorConditionValue>().Where(set => !string.IsNullOrEmpty(set.Name)).ToArray();
+        }
+
+        return result.ToArray();
     }
 }

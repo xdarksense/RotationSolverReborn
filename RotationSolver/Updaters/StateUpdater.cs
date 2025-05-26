@@ -16,11 +16,6 @@ internal static class StateUpdater
 
     public static void UpdateState()
     {
-        if (!DataCenter.IsActivated())
-        {
-            return;
-        }
-
         DataCenter.CommandStatus = StatusFromCmdOrCondition();
         DataCenter.AutoStatus = StatusFromAutomatic();
         int attackedTargetsCount = 0;
@@ -42,7 +37,16 @@ internal static class StateUpdater
         AutoStatus status = AutoStatus.None;
 
         // Get the user-defined order of AutoStatus flags
-        uint[] autoStatusOrder = OtherConfiguration.AutoStatusOrder?.ToArray() ?? Array.Empty<uint>();
+        uint[] autoStatusOrder;
+        if (OtherConfiguration.AutoStatusOrder != null)
+        {
+            var list = OtherConfiguration.AutoStatusOrder;
+            autoStatusOrder = [.. list];
+        }
+        else
+        {
+            autoStatusOrder = [];
+        }
 
         foreach (uint autoStatus in autoStatusOrder)
         {
@@ -299,9 +303,35 @@ internal static class StateUpdater
         return false;
     }
 
+    // Helper: Returns true if there are any healers in the party with HP > 0
+    private static bool AnyLivingHealerInParty()
+    {
+        foreach (IBattleChara member in DataCenter.PartyMembers)
+        {
+            if (member.IsJobCategory(JobRole.Healer) && !member.IsDead)
+                return true;
+        }
+        return false;
+    }
+
+    private static bool NonHealerHealLogic()
+    {
+        if (Service.Config.OnlyHealAsNonHealIfNoHealers && DataCenter.Role != JobRole.Healer && AnyLivingHealerInParty())
+        {
+            return false;
+        }
+        return true;
+    }
+
     private static bool ShouldAddHealAreaAbility()
     {
         if (!DataCenter.HPNotFull || !CanUseHealAction)
+        {
+            return false;
+        }
+
+        // Only allow non-healers to heal if there are no living healers in the party
+        if (!NonHealerHealLogic())
         {
             return false;
         }
@@ -347,6 +377,12 @@ internal static class StateUpdater
             return false;
         }
 
+        // Only allow non-healers to heal if there are no living healers in the party
+        if (!NonHealerHealLogic())
+        {
+            return false;
+        }
+
         // Prioritize area healing if multiple members have DoomNeedHealing
         int doomNeedHealingCount = 0;
         foreach (IBattleChara member in DataCenter.PartyMembers)
@@ -388,6 +424,12 @@ internal static class StateUpdater
             return false;
         }
 
+        // Only allow non-healers to heal if there are no living healers in the party
+        if (!NonHealerHealLogic())
+        {
+            return false;
+        }
+
         bool onlyHealSelf = Service.Config.OnlyHealSelfWhenNoHealer
             && DataCenter.Role != JobRole.Healer;
 
@@ -419,6 +461,12 @@ internal static class StateUpdater
     private static bool ShouldAddHealSingleSpell()
     {
         if (!DataCenter.HPNotFull || !CanUseHealAction)
+        {
+            return false;
+        }
+
+        // Only allow non-healers to heal if there are no living healers in the party
+        if (!NonHealerHealLogic())
         {
             return false;
         }

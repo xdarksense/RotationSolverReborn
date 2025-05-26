@@ -64,7 +64,17 @@ internal abstract class DelayCondition : ICondition
     {
         if (id != ActionID.None && (action == null || (ActionID)action.ID != id))
         {
-            action = rotation.AllBaseActions.FirstOrDefault(a => (ActionID)a.ID == id);
+            IBaseAction? found = null;
+            var all = rotation.AllBaseActions;
+            for (int i = 0; i < all.Length; i++)
+            {
+                if ((ActionID)all[i].ID == id)
+                {
+                    found = all[i];
+                    break;
+                }
+            }
+            action = found;
         }
         return action != null;
     }
@@ -81,11 +91,29 @@ internal abstract class DelayCondition : ICondition
             string memberName = name;
             if (typeof(T).IsAssignableFrom(typeof(PropertyInfo)))
             {
-                value = (T?)GetAllMembers(rotation.GetType(), RuntimeReflectionExtensions.GetRuntimeProperties).FirstOrDefault(m => m.Name == memberName);
+                T? found = null;
+                foreach (var m in GetAllMembers(rotation.GetType(), RuntimeReflectionExtensions.GetRuntimeProperties))
+                {
+                    if (m.Name == memberName)
+                    {
+                        found = m as T;
+                        break;
+                    }
+                }
+                value = found;
             }
             else if (typeof(T).IsAssignableFrom(typeof(MethodInfo)))
             {
-                value = (T?)GetAllMembers(rotation.GetType(), RuntimeReflectionExtensions.GetRuntimeMethods).FirstOrDefault(m => m.Name == memberName);
+                T? found = null;
+                foreach (var m in GetAllMembers(rotation.GetType(), RuntimeReflectionExtensions.GetRuntimeMethods))
+                {
+                    if (m.Name == memberName)
+                    {
+                        found = m as T;
+                        break;
+                    }
+                }
+                value = found;
             }
         }
         return true;

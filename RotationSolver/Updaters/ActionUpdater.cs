@@ -5,7 +5,6 @@ using ECommons.EzIpcManager;
 using ECommons.GameHelpers;
 using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using RotationSolver.Commands;
 using RotationSolver.Helpers;
 
@@ -83,36 +82,30 @@ internal static class ActionUpdater
 
     internal static unsafe void UpdateCombatInfo()
     {
+        var now = DateTime.Now;
         SetAction(NextGCDAction?.AdjustedID ?? 0);
-        UpdateCombatTime();
+        UpdateCombatTime(now);
         UpdateSlots();
-        UpdateMoving();
-        UpdateLifetime();
-        UpdateMPTimer();
+        UpdateMoving(now);
+        UpdateLifetime(now);
+        UpdateMPTimer(now);
     }
 
-    private static readonly List<uint> actionOverrideList = [];
+    private static uint actionOverride = 0;
     private static void SetAction(uint id)
     {
-        if (actionOverrideList.Count == 0)
-        {
-            actionOverrideList.Add(id);
-        }
-        else
-        {
-            actionOverrideList[0] = id;
-        }
+        actionOverride = id;
     }
 
     private static DateTime _startCombatTime = DateTime.MinValue;
-    private static void UpdateCombatTime()
+    private static void UpdateCombatTime(DateTime now)
     {
         bool lastInCombat = DataCenter.InCombat;
         DataCenter.InCombat = Svc.Condition[ConditionFlag.InCombat];
 
         if (!lastInCombat && DataCenter.InCombat)
         {
-            _startCombatTime = DateTime.Now;
+            _startCombatTime = now;
         }
         else if (lastInCombat && !DataCenter.InCombat)
         {
@@ -120,13 +113,13 @@ internal static class ActionUpdater
 
             if (Service.Config.AutoOffAfterCombat)
             {
-                AutoCancelTime = DateTime.Now.AddSeconds(Service.Config.AutoOffAfterCombatTime);
+                AutoCancelTime = now.AddSeconds(Service.Config.AutoOffAfterCombatTime);
             }
         }
 
         DataCenter.CombatTimeRaw = _startCombatTime == DateTime.MinValue
             ? 0
-            : (float)(DateTime.Now - _startCombatTime).TotalSeconds;
+            : (float)(now - _startCombatTime).TotalSeconds;
     }
 
     private static unsafe void UpdateSlots()
@@ -145,56 +138,56 @@ internal static class ActionUpdater
     private static DateTime _startMovingTime = DateTime.MinValue;
     private static DateTime _stopMovingTime = DateTime.MinValue;
 
-    private static unsafe void UpdateMoving()
+    private static void UpdateMoving(DateTime now)
     {
         bool last = DataCenter.IsMoving;
-        DataCenter.IsMoving = AgentMap.Instance()->IsPlayerMoving;
+        DataCenter.IsMoving = Player.IsMoving;
         if (last && !DataCenter.IsMoving)
         {
-            _stopMovingTime = DateTime.Now;
+            _stopMovingTime = now;
         }
         else if (DataCenter.IsMoving && !last)
         {
-            _startMovingTime = DateTime.Now;
+            _startMovingTime = now;
         }
 
         DataCenter.StopMovingRaw = DataCenter.IsMoving
             ? 0
-            : (float)(DateTime.Now - _stopMovingTime).TotalSeconds;
+            : (float)(now - _stopMovingTime).TotalSeconds;
 
         DataCenter.MovingRaw = DataCenter.IsMoving
-            ? (float)(DateTime.Now - _startMovingTime).TotalSeconds
+            ? (float)(now - _startMovingTime).TotalSeconds
             : 0;
     }
     private static DateTime _startDeadTime = DateTime.MinValue;
     private static DateTime _startAliveTime = DateTime.Now;
     private static bool _isDead = true;
-    public static void UpdateLifetime()
+    public static void UpdateLifetime(DateTime now)
     {
         bool lastDead = _isDead;
         _isDead = Player.Object.IsDead;
 
         if (Svc.Condition[ConditionFlag.BetweenAreas])
         {
-            _startAliveTime = DateTime.Now;
+            _startAliveTime = now;
         }
         switch (lastDead)
         {
             case true when !Player.Object.IsDead:
-                _startAliveTime = DateTime.Now;
+                _startAliveTime = now;
                 break;
             case false when Player.Object.IsDead:
-                _startDeadTime = DateTime.Now;
+                _startDeadTime = now;
                 break;
         }
 
         DataCenter.DeadTimeRaw = Player.Object.IsDead
-            ? (float)(DateTime.Now - _startDeadTime).TotalSeconds
+            ? (float)(now - _startDeadTime).TotalSeconds
             : 0;
 
         DataCenter.AliveTimeRaw = Player.Object.IsDead
             ? 0
-            : (float)(DateTime.Now - _startAliveTime).TotalSeconds;
+            : (float)(now - _startAliveTime).TotalSeconds;
     }
 
     private static uint _lastMP = 0;
@@ -202,15 +195,13 @@ internal static class ActionUpdater
 
     internal static float MPUpdateElapsed => (float)(DateTime.Now - _lastMPUpdate).TotalSeconds % 3;
 
-    private static void UpdateMPTimer()
+    private static void UpdateMPTimer(DateTime now)
     {
-        // Ignore if player is Black Mage
         if (Player.Object.ClassJob.RowId != (uint)ECommons.ExcelServices.Job.BLM)
         {
             return;
         }
 
-        // Ignore if player is Lucid Dreaming
         if (Player.Object.HasStatus(true, StatusID.LucidDreaming))
         {
             return;
@@ -218,7 +209,7 @@ internal static class ActionUpdater
 
         if (_lastMP < Player.Object.CurrentMp)
         {
-            _lastMPUpdate = DateTime.Now;
+            _lastMPUpdate = now;
         }
         _lastMP = Player.Object.CurrentMp;
     }

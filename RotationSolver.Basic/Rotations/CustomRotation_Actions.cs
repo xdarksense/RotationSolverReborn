@@ -84,7 +84,19 @@ public partial class CustomRotation
             }
 
             IEnumerable<IBattleChara> players = PartyMembers.GetObjectInRadius(20);
-            return !players.Any(ObjectHelper.InCombat) && players.Any(p => p.WillStatusEnd(3, false, StatusID.Peloton));
+
+            bool anyInCombat = false;
+            bool anyWillStatusEnd = false;
+            foreach (var p in players)
+            {
+                if (ObjectHelper.InCombat(p))
+                    anyInCombat = true;
+                if (p.WillStatusEnd(3, false, StatusID.Peloton))
+                    anyWillStatusEnd = true;
+                if (anyInCombat && anyWillStatusEnd)
+                    break;
+            }
+            return !anyInCombat && anyWillStatusEnd;
         };
     }
 
@@ -250,14 +262,40 @@ public partial class CustomRotation
     /// <summary>
     /// All actions of this rotation.
     /// </summary>
-    public virtual IAction[] AllActions =>
-    [
-        .. AllBaseActions.Where(i => i.Action.IsInJob()),
-        .. Medicines.Where(i => i.HasIt),
-        .. MpPotions.Where(i => i.HasIt),
-        .. HpPotions.Where(i => i.HasIt),
-        .. AllItems.Where(i => i.HasIt),
-    ];
+    public virtual IAction[] AllActions
+    {
+        get
+        {
+            var list = new List<IAction>();
+
+            foreach (var i in AllBaseActions)
+            {
+                if (i.Action.IsInJob())
+                    list.Add(i);
+            }
+            foreach (var i in Medicines)
+            {
+                if (i.HasIt)
+                    list.Add(i);
+            }
+            foreach (var i in MpPotions)
+            {
+                if (i.HasIt)
+                    list.Add(i);
+            }
+            foreach (var i in HpPotions)
+            {
+                if (i.HasIt)
+                    list.Add(i);
+            }
+            foreach (var i in AllItems)
+            {
+                if (i.HasIt)
+                    list.Add(i);
+            }
+            return list.ToArray();
+        }
+    }
 
     /// <summary>
     /// All traits of this action.
@@ -276,7 +314,24 @@ public partial class CustomRotation
     /// <summary>
     /// All bytes or integers of this rotation.
     /// </summary>
-    public PropertyInfo[] AllBytesOrInt => _allBytes ??= GetType().GetStaticProperties<byte>().Union(GetType().GetStaticProperties<int>()).ToArray();
+    public PropertyInfo[] AllBytesOrInt
+    {
+        get
+        {
+            if (_allBytes != null)
+                return _allBytes;
+
+            var bytes = GetType().GetStaticProperties<byte>();
+            var ints = GetType().GetStaticProperties<int>();
+
+            var result = new PropertyInfo[bytes.Length + ints.Length];
+            Array.Copy(bytes, 0, result, 0, bytes.Length);
+            Array.Copy(ints, 0, result, bytes.Length, ints.Length);
+
+            _allBytes = result;
+            return _allBytes;
+        }
+    }
 
     private PropertyInfo[]? _allFloats;
 

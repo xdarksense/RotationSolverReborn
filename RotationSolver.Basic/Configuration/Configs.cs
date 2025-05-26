@@ -415,6 +415,12 @@ internal partial class Configs : IPluginConfiguration
         PvPFilter = JobFilterType.NoHealer, PvEFilter = JobFilterType.NoHealer)]
     private static readonly bool _onlyHealSelfWhenNoHealer = false;
 
+    [ConditionBool, UI("Only use healing abilities as a non-healer if there are no living healers in the party.",
+    Description = "When enabled, non-healer jobs (such as DPS or tanks) will only use healing abilities if there are no healers in the party, or if all healers are incapacitated (at 0 HP). If at least one healer is alive, non-healers will not use healing abilities.",
+    Filter = HealingActionCondition, Section = 1,
+    PvPFilter = JobFilterType.NoHealer, PvEFilter = JobFilterType.NoHealer)]
+    private static readonly bool _onlyHealAsNonHealIfNoHealers = false;
+
     [ConditionBool, UI("Show toggled setting and new value in chat.",
         Filter = UiInformation)]
     private static readonly bool _ShowToggledSettingInChat = false;
@@ -471,6 +477,12 @@ internal partial class Configs : IPluginConfiguration
         PvEFilter = JobFilterType.Healer, PvPFilter = JobFilterType.Healer)]
     [Range(0, 1, ConfigUnitType.Percent, 0.02f)]
     public float HealthHealerRatio { get; set; } = 0.4f;
+
+    [UI("Heal self first if your HP is lower than this.",
+        Filter = HealingActionCondition, Section = 1,
+        PvEFilter = JobFilterType.Healer, PvPFilter = JobFilterType.Healer)]
+    [Range(0, 1, ConfigUnitType.Percent, 0.02f)]
+    public float HealthSelfRatio { get; set; } = 0.4f;
 
     [JobConfig, UI("Hard cast Raise while Swiftcast/Dualcast is on cooldown", Description = "If this is enabled and Swiftcast/Dualcast is on cooldown, you will only attempt to raise while standing still.",
         Filter = HealingActionCondition, Section = 2,

@@ -127,7 +127,7 @@ internal class ActionSequencerUpdater
             [
 .. DataCenter.ConditionSets,                 new MajorConditionValue()
             ];
-            DataCenter.ConditionSets = newConditionSets.ToArray();
+            DataCenter.ConditionSets = [.. newConditionSets];
         }
     }
 
@@ -141,7 +141,7 @@ internal class ActionSequencerUpdater
                 newConditionSets.Add(conditionSet);
             }
         }
-        DataCenter.ConditionSets = newConditionSets.ToArray();
+        DataCenter.ConditionSets = [.. newConditionSets];
 
         string filePath = Path.Combine(_actionSequencerFolder ?? string.Empty, $"{name}.json");
         File.Delete(filePath);

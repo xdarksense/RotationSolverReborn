@@ -1,4 +1,5 @@
 ﻿using ECommons.DalamudServices;
+using ECommons.Logging;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Data;
 using RotationSolver.Updaters;
@@ -80,7 +81,7 @@ public static partial class RSCommands
 
     private static void UpdateSetting(string settingName, string? command)
     {
-        PropertyInfo[] properties = typeof(Configs).GetRuntimeProperties().ToArray(); // Convert to array to use Length
+        PropertyInfo[] properties = [.. typeof(Configs).GetRuntimeProperties()];
         for (int i = 0; i < properties.Length; i++)
         {
             PropertyInfo property = properties[i];
@@ -256,8 +257,28 @@ public static partial class RSCommands
     private static void ToggleActionCommand(string str)
     {
         string trimStr = str.Trim();
-        foreach (IAction? act in RotationUpdater.CurrentRotationActions.OrderByDescending(a => a.Name.Length))
+
+        IAction[] actions = RotationUpdater.CurrentRotationActions;
+        // Create a sorted array by Name.Length descending
+        int n = actions.Length;
+        IAction[] sortedActions = new IAction[n];
+        Array.Copy(actions, sortedActions, n);
+        for (int i = 0; i < n - 1; i++)
         {
+            for (int j = 0; j < n - i - 1; j++)
+            {
+                if (sortedActions[j].Name.Length < sortedActions[j + 1].Name.Length)
+                {
+                    var temp = sortedActions[j];
+                    sortedActions[j] = sortedActions[j + 1];
+                    sortedActions[j + 1] = temp;
+                }
+            }
+        }
+
+        for (int i = 0; i < n; i++)
+        {
+            IAction? act = sortedActions[i];
             // First, check for an exact match.
             if (trimStr.Equals(act.Name, StringComparison.OrdinalIgnoreCase))
             {
@@ -332,11 +353,12 @@ public static partial class RSCommands
                 if (Service.Config.ShowToggledSettingInChat)
                 {
                     Svc.Chat.Print($"Changed setting {config.DisplayName} to {config.Value}");
-                    return;
                 }
+                return;
             }
         }
 
-        Svc.Chat.PrintError(UiString.CommandsInsertActionFailure.GetDescription());
+        // Only log if all commands failed
+        PluginLog.Debug(UiString.CommandsInsertActionFailure.GetDescription());
     }
 }

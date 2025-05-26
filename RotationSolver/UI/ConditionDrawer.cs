@@ -255,8 +255,7 @@ internal static class ConditionDrawer
             group.AddCollapsingHeader(() => pair.Key, () =>
             {
                 int index = 0;
-                // OrderBy(t => t.ID) removed
-                List<IAction> items = pair.ToList();
+                List<IAction> items = [.. pair];
                 items.Sort((a, b) => a.ID.CompareTo(b.ID));
                 foreach (IAction? item in items)
                 {
@@ -534,9 +533,16 @@ internal static class ConditionDrawer
                 {
                     if (popUp.Success)
                     {
-                        IEnumerable<CanUseOption> showedValues = Enum.GetValues<CanUseOption>().Where(i => i.GetAttribute<JsonIgnoreAttribute>() == null);
+                        List<CanUseOption> showedValuesList = [];
+                        foreach (CanUseOption i in Enum.GetValues<CanUseOption>())
+                        {
+                            if (i.GetAttribute<JsonIgnoreAttribute>() == null)
+                            {
+                                showedValuesList.Add(i);
+                            }
+                        }
 
-                        foreach (CanUseOption value in showedValues)
+                        foreach (CanUseOption value in showedValuesList)
                         {
                             bool b = option.HasFlag(value);
                             if (ImGui.Checkbox(value.GetDescription(), ref b))
@@ -793,7 +799,6 @@ internal static class ConditionDrawer
         if (targetCondition.StatusId != StatusID.None &&
             (targetCondition.Status == null || targetCondition.Status.Value.RowId != (uint)targetCondition.StatusId))
         {
-            // Remove LINQ FirstOrDefault
             Status? found = null;
             foreach (Status a in AllStatus)
             {

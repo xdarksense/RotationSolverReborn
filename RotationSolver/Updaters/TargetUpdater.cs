@@ -35,11 +35,14 @@ internal static partial class TargetUpdater
     {
         List<IBattleChara> allTargets = [];
         bool skipDummyCheck = !Service.Config.DisableTargetDummys;
-        foreach (IBattleChara battleChara in Svc.Objects.OfType<IBattleChara>())
+        foreach (var obj in Svc.Objects)
         {
-            if (skipDummyCheck || !battleChara.IsDummy())
+            if (obj is IBattleChara battleChara)
             {
-                allTargets.Add(battleChara);
+                if ((skipDummyCheck || !battleChara.IsDummy()) && battleChara.StatusList != null)
+                {
+                    allTargets.Add(battleChara);
+                }
             }
         }
         return allTargets;
@@ -52,7 +55,7 @@ internal static partial class TargetUpdater
         {
             foreach (IBattleChara member in DataCenter.AllTargets)
             {
-                if (member.StatusList == null || !member.IsParty())
+                if (!member.IsParty())
                 {
                     continue;
                 }
@@ -80,21 +83,25 @@ internal static partial class TargetUpdater
     private static unsafe List<IBattleChara> GetAllianceMembers()
     {
         List<IBattleChara> allianceMembers = [];
-        try
+        RaiseType raisetype = Service.Config.RaiseType;
+        if (raisetype != RaiseType.PartyOnly)
         {
-            foreach (IBattleChara target in DataCenter.AllTargets)
+            try
             {
-                if (ObjectHelper.IsAllianceMember(target) && !target.IsParty() && target.Character() != null &&
-                    target.Character()->CharacterData.OnlineStatus != 15 &&
-                    target.Character()->CharacterData.OnlineStatus != 5 && target.IsTargetable)
+                foreach (IBattleChara target in DataCenter.AllTargets)
                 {
-                    allianceMembers.Add(target);
+                    if (ObjectHelper.IsAllianceMember(target) && !target.IsParty() && target.Character() != null &&
+                        target.Character()->CharacterData.OnlineStatus != 15 &&
+                        target.Character()->CharacterData.OnlineStatus != 5 && target.IsTargetable)
+                    {
+                        allianceMembers.Add(target);
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            PluginLog.Error($"Error in GetAllianceMembers: {ex.Message}");
+            catch (Exception ex)
+            {
+                PluginLog.Error($"Error in GetAllianceMembers: {ex.Message}");
+            }
         }
         return allianceMembers;
     }
@@ -106,7 +113,7 @@ internal static partial class TargetUpdater
         {
             foreach (IBattleChara target in DataCenter.AllTargets)
             {
-                if (target.StatusList == null || !target.IsEnemy() || !target.IsTargetable)
+                if (!target.IsEnemy() || !target.IsTargetable)
                 {
                     continue;
                 }
@@ -237,7 +244,7 @@ internal static partial class TargetUpdater
                     validRaiseTargets.AddRange(deathAll);
                 }
 
-                foreach (RaiseType type in Enum.GetValues(typeof(RaiseType)))
+                foreach (RaiseType type in Enum.GetValues<RaiseType>())
                 {
                     IBattleChara? deathTarget = GetPriorityDeathTarget(validRaiseTargets, type);
                     if (deathTarget != null)

@@ -442,7 +442,8 @@ public static class ObjectHelper
                 return true;
             }
 
-            if (Player.Job == Job.MCH && obj.HasStatus(true, StatusID.Wildfire))
+            // MCH prio targeting for Wildfire
+            if (Player.Job == Job.MCH && obj.HasStatus(true, StatusID.Wildfire) || obj.HasStatus(true, StatusID.Wildfire_1323))
             {
                 return true;
             }
@@ -886,7 +887,7 @@ public static class ObjectHelper
     }
 
     /// <summary>
-    /// Is target Jeuno Boss immune.
+    /// Is target Hansel or Gretel and has the Strong of Shield status.
     /// </summary>
     /// <param name="obj">the object.</param>
     /// <returns></returns>
@@ -900,7 +901,7 @@ public static class ObjectHelper
         {
             if (Service.Config.InDebug)
             {
-                PluginLog.Information("IsHanselorGretelSheilded: StrongOfShield status found, ignoring status haver if player is out of position");
+                PluginLog.Information("IsHanselorGretelShielded: StrongOfShield status found, ignoring status haver if player is out of position");
             }
             return true;
         }

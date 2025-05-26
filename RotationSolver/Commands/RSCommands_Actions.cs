@@ -18,7 +18,7 @@ namespace RotationSolver.Commands
         internal static uint _lastActionID;
         private static float _lastCountdownTime = 0;
         private static Job _previousJob = Job.ADV;
-        private static readonly Random random = new();
+        private static readonly Random random = Random.Shared;
 
         public static void IncrementState()
         {
@@ -40,11 +40,6 @@ namespace RotationSolver.Commands
             }
             _lastState = currentState;
 
-            if (!Player.AvailableThreadSafe)
-            {
-                return false;
-            }
-
             // Precompute the delay range to avoid recalculating it multiple times
             TimeSpan delayRange = TimeSpan.FromMilliseconds(random.Next(
                 (int)(Service.Config.ClickingDelay.X * 1000),
@@ -61,33 +56,36 @@ namespace RotationSolver.Commands
             return isGCD || ActionUpdater.NextAction is not IBaseAction nextAction || !nextAction.Info.IsRealGCD;
         }
 
+        private static StatusID[]? _cachedNoCastingStatusArray = null;
+        private static HashSet<uint>? _cachedNoCastingStatusSet = null;
+
         public static void DoAction()
         {
-            if (!Player.AvailableThreadSafe)
-            {
-                return;
-            }
-
             if (Player.Object.StatusList == null)
             {
                 return;
             }
 
-            StatusID[] noCastingStatusArray;
             HashSet<uint> noCastingStatus = OtherConfiguration.NoCastingStatus;
             if (noCastingStatus != null)
             {
-                noCastingStatusArray = new StatusID[noCastingStatus.Count];
-                int index = 0;
-                foreach (uint status in noCastingStatus)
+                if (_cachedNoCastingStatusSet != noCastingStatus)
                 {
-                    noCastingStatusArray[index++] = (StatusID)status;
+                    _cachedNoCastingStatusArray = new StatusID[noCastingStatus.Count];
+                    int index = 0;
+                    foreach (uint status in noCastingStatus)
+                    {
+                        _cachedNoCastingStatusArray[index++] = (StatusID)status;
+                    }
+                    _cachedNoCastingStatusSet = noCastingStatus;
                 }
             }
             else
             {
-                noCastingStatusArray = Array.Empty<StatusID>();
+                _cachedNoCastingStatusArray = [];
+                _cachedNoCastingStatusSet = null;
             }
+            StatusID[] noCastingStatusArray = _cachedNoCastingStatusArray!;
 
             float minStatusTime = float.MaxValue;
             int statusTimesCount = 0;
@@ -270,13 +268,21 @@ namespace RotationSolver.Commands
                     return;
                 }
 
-                if (Service.Config.StartOnAttackedBySomeone && DataCenter.AllHostileTargets.FirstOrDefault(t => t != null && t is IBattleChara battleChara && battleChara.TargetObjectId == Player.Object.GameObjectId) is IBattleChara target && !ObjectHelper.IsDummy(target))
+                IBattleChara? target = null;
+                if (Service.Config.StartOnAttackedBySomeone && !DataCenter.State)
                 {
-                    if (!DataCenter.State)
+                    foreach (var t in DataCenter.AllHostileTargets)
+                    {
+                        if (t != null && t is IBattleChara battleChara && battleChara.TargetObjectId == Player.Object.GameObjectId)
+                        {
+                            target = battleChara;
+                            break;
+                        }
+                    }
+                    if (target != null && !ObjectHelper.IsDummy(target))
                     {
                         DoStateCommandType(StateCommandType.Manual);
                     }
-                    return;
                 }
 
                 if (Service.Config.StartOnCountdown)
@@ -301,16 +307,13 @@ namespace RotationSolver.Commands
                 }
 
                 // Combine manual and auto condition checks
-                if (DataCenter.CurrentConditionValue.SwitchManualConditionSet?.IsTrue(DataCenter.CurrentRotation) ?? false)
+                if (!DataCenter.State)
                 {
-                    if (!DataCenter.State)
+                    if (DataCenter.CurrentConditionValue.SwitchManualConditionSet?.IsTrue(DataCenter.CurrentRotation) ?? false)
                     {
                         DoStateCommandType(StateCommandType.Manual);
                     }
-                }
-                else if (DataCenter.CurrentConditionValue.SwitchAutoConditionSet?.IsTrue(DataCenter.CurrentRotation) ?? false)
-                {
-                    if (!DataCenter.State)
+                    else if (DataCenter.CurrentConditionValue.SwitchAutoConditionSet?.IsTrue(DataCenter.CurrentRotation) ?? false)
                     {
                         DoStateCommandType(StateCommandType.Auto);
                     }

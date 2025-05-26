@@ -58,13 +58,28 @@ internal static class HotbarHighlightManager
 
         if (RotationSolverPlugin._drawingElements != null)
         {
-            drawing2Ds.AddRange(RotationSolverPlugin._drawingElements.Select(item => System.Threading.Tasks.Task.Run(() =>
+            foreach (var item in RotationSolverPlugin._drawingElements)
             {
-                return item.To2DMain();
-            })));
+                drawing2Ds.Add(Task.Run(() =>
+                {
+                    return item.To2DMain();
+                }));
+            }
         }
 
-        _ = await System.Threading.Tasks.Task.WhenAll([.. drawing2Ds]);
-        return drawing2Ds.SelectMany(i => i.Result).ToArray();
+        _ = await Task.WhenAll(drawing2Ds);
+
+        List<IDrawing2D> result = [];
+        foreach (var task in drawing2Ds)
+        {
+            if (task.Result != null)
+            {
+                foreach (var drawing in task.Result)
+                {
+                    result.Add(drawing);
+                }
+            }
+        }
+        return [.. result];
     }
 }

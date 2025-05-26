@@ -24,7 +24,7 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
         : this()
     {
         Color = color;
-        HotbarIDs = new HashSet<HotbarID>(ids);
+        HotbarIDs = [.. ids];
     }
 
     /// <summary> </summary>
@@ -152,13 +152,22 @@ public class DrawingHighlightHotbar : DrawingHighlightHotbarBase
 
     private static IDalamudTextureWrap? _texture = null;
 
-    private static unsafe IEnumerable<nint> GetAddons<T>() where T : struct
+    private static unsafe List<nint> GetAddons<T>() where T : struct
     {
-        return typeof(T).GetCustomAttribute<AddonAttribute>() is not AddonAttribute on
-            ? Array.Empty<nint>()
-            : on.AddonIdentifiers
-            .Select(str => Svc.GameGui.GetAddonByName(str, 1))
-            .Where(ptr => ptr != nint.Zero);
+        var attr = typeof(T).GetCustomAttribute<AddonAttribute>();
+        if (attr is not AddonAttribute on)
+            return [];
+
+        List<nint> result = [];
+        foreach (var str in on.AddonIdentifiers)
+        {
+            var ptr = Svc.GameGui.GetAddonByName(str, 1);
+            if (ptr != nint.Zero)
+            {
+                result.Add(ptr);
+            }
+        }
+        return result;
     }
 
     private static unsafe bool IsVisible(AtkUnitBase unit)

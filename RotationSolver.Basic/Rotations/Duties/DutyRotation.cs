@@ -65,6 +65,11 @@ public partial class DutyRotation : IDisposable
         act = null; return false;
     }
 
+    public virtual bool DispelAbility(IAction nextGCD, out IAction? act)
+    {
+        act = null; return false;
+    }
+
     public virtual bool AntiKnockbackAbility(IAction nextGCD, out IAction? act)
     {
         act = null; return false;
@@ -147,10 +152,30 @@ public partial class DutyRotation : IDisposable
     {
         get
         {
-            IEnumerable<PropertyInfo> properties = GetType().GetRuntimeProperties()
-                .Where(p => DataCenter.DutyActions.Contains(p.GetCustomAttribute<IDAttribute>()?.ID ?? uint.MaxValue));
+            var runtimeProperties = GetType().GetRuntimeProperties();
+            var propertiesList = new List<PropertyInfo>();
 
-            return properties.Select(p => (IAction)p.GetValue(this)!).ToArray();
+            foreach (var p in runtimeProperties)
+            {
+                var attr = p.GetCustomAttribute<IDAttribute>();
+                uint id = attr != null ? attr.ID : uint.MaxValue;
+                if (DataCenter.DutyActions.Contains(id))
+                {
+                    propertiesList.Add(p);
+                }
+            }
+
+            var actionsList = new List<IAction>();
+            foreach (var prop in propertiesList)
+            {
+                var value = prop.GetValue(this);
+                if (value is IAction action)
+                {
+                    actionsList.Add(action);
+                }
+            }
+
+            return actionsList.ToArray();
         }
     }
 }

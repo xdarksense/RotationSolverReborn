@@ -391,7 +391,7 @@ public static class StatusHelper
         IEnumerable<Status> allStatuses = obj.GetAllStatus(isFromSelf);
         if (allStatuses == null)
         {
-            return Array.Empty<Status>();
+            return [];
         }
 
         // Build HashSet<uint> without LINQ

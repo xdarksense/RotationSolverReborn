@@ -348,11 +348,11 @@ public sealed class NIN_Default : NinjaRotation
             //Vulnerable
             if (ShadowWalkerNeeded && (!MeisuiPvE.Cooldown.IsCoolingDown || !TrickAttackPvE.Cooldown.IsCoolingDown || KunaisBanePvE.Cooldown.IsCoolingDown) && !IsShadowWalking && !HasTenChiJin && SuitonPvE.EnoughLevel && TenPvE.Cooldown.HasOneCharge)
             {
-                if (DeathBlossomPvE.CanUse(out _))
+                if (DeathBlossomPvE.CanUse(out _) && JinPvE.CanUse(out _))
                 {
                     SetNinjutsu(HutonPvE);
                 }
-                else
+                else if (JinPvE.CanUse(out _))
                 {
                     SetNinjutsu(SuitonPvE);
                 }
@@ -366,7 +366,10 @@ public sealed class NIN_Default : NinjaRotation
                 if ((!HasDoton && !IsMoving && !IsLastGCD(true, DotonPvE) && (!TenChiJinPvE.Cooldown.WillHaveOneCharge(6)) && DotonPvE.EnoughLevel)
                     || (!HasDoton && !TenChiJinPvE.Cooldown.IsCoolingDown && DotonPvE.EnoughLevel))
                 {
-                    SetNinjutsu(DotonPvE);
+                    if (JinPvE.CanUse(out _))
+                    {
+                        SetNinjutsu(DotonPvE);
+                    }
                 }
                 else if (KatonPvE.EnoughLevel)
                 {

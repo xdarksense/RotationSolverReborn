@@ -80,7 +80,25 @@ internal static class MajorUpdater
 
     private static unsafe void RSRUpdate(IFramework framework)
     {
-        HotbarHighlightManager.HotbarIDs.Clear();
+        if (Service.Config.TeachingMode)
+        {
+            try
+            {
+                HotbarHighlightManager.HotbarIDs.Clear();
+            }
+            catch (Exception ex)
+            {
+                if (_threadException != ex)
+                {
+                    _threadException = ex;
+                    PluginLog.Error($"HotbarHighlightManager.HotbarIDs.Clear Exception: {ex.Message}");
+                    if (Service.Config.InDebug)
+                    {
+                        _ = BasicWarningHelper.AddSystemWarning("HotbarHighlightManager.HotbarIDs.Clear Exception");
+                    }
+                }
+            }
+        }
 
         // Transistion safe commands
         if (!IsValid)
@@ -224,7 +242,26 @@ internal static class MajorUpdater
             // Change RS state
             RSCommands.UpdateRotationState();
 
-            HotbarHighlightManager.UpdateSettings();
+            if (Service.Config.TeachingMode)
+            {
+                try
+                {
+                    HotbarHighlightManager.UpdateSettings();
+                }
+                catch (Exception ex)
+                {
+                    if (_threadException != ex)
+                    {
+                        _threadException = ex;
+                        PluginLog.Error($"HotbarHighlightManager.UpdateSettings Exception: {ex.Message}");
+                        if (Service.Config.InDebug)
+                        {
+                            _ = BasicWarningHelper.AddSystemWarning("HotbarHighlightManager.UpdateSettings Exception");
+                        }
+                    }
+                }
+            }
+
             MiscUpdater.UpdateMisc();
         }
         catch (Exception ex)

@@ -453,12 +453,12 @@ public partial class NinjaRotation
         FumaShurikenPvE.Setting.Ninjutsu = [TenPvE];
         KatonPvE.Setting.Ninjutsu = [ChiPvE, TenPvE_18805];
         RaitonPvE.Setting.Ninjutsu = [TenPvE, ChiPvE_18806];
-        HyotonPvE.Setting.Ninjutsu = [TenPvE, JinPvE_18807];
-        HutonPvE.Setting.Ninjutsu = [JinPvE, ChiPvE_18806, TenPvE_18805];
-        DotonPvE.Setting.Ninjutsu = [JinPvE, TenPvE_18805, ChiPvE_18806];
+        HyotonPvE.Setting.Ninjutsu = [ChiPvE, JinPvE_18807];
+        HutonPvE.Setting.Ninjutsu = [ChiPvE, JinPvE_18807, TenPvE_18805];
+        DotonPvE.Setting.Ninjutsu = [TenPvE, JinPvE_18807, ChiPvE_18806];
         SuitonPvE.Setting.Ninjutsu = [TenPvE, ChiPvE_18806, JinPvE_18807];
         GokaMekkyakuPvE.Setting.Ninjutsu = [ChiPvE, TenPvE_18805];
-        HyoshoRanryuPvE.Setting.Ninjutsu = [TenPvE, JinPvE_18807];
+        HyoshoRanryuPvE.Setting.Ninjutsu = [ChiPvE, JinPvE_18807];
     }
 
     static partial void ModifyFumaShurikenPvE(ref ActionSetting setting)
@@ -488,11 +488,13 @@ public partial class NinjaRotation
     static partial void ModifyHyotonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => HyotonPvEReady;
+        setting.UnlockedByQuestID = 68488;
     }
 
     static partial void ModifyHutonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => HutonPvEReady && !IsShadowWalking;
+        setting.UnlockedByQuestID = 68488;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -503,6 +505,7 @@ public partial class NinjaRotation
     {
         setting.ActionCheck = () => DotonPvEReady;
         setting.StatusProvide = [StatusID.Doton];
+        setting.UnlockedByQuestID = 68488;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -512,6 +515,7 @@ public partial class NinjaRotation
     static partial void ModifySuitonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => SuitonPvEReady;
+        setting.UnlockedByQuestID = 68488;
         setting.StatusProvide = [StatusID.ShadowWalker];
     }
 
