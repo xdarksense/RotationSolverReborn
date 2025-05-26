@@ -258,7 +258,15 @@ public partial class RotationConfigWindow : Window
         }
 
         IncompatiblePlugin[] incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
-        IncompatiblePlugin installedIncompatiblePlugin = incompatiblePlugins.FirstOrDefault(p => p.IsEnabled);
+        IncompatiblePlugin installedIncompatiblePlugin = default;
+        for (int i = 0; i < incompatiblePlugins.Length; i++)
+        {
+            if (incompatiblePlugins[i].IsEnabled)
+            {
+                installedIncompatiblePlugin = incompatiblePlugins[i];
+                break;
+            }
+        }
         if (installedIncompatiblePlugin.Name != null)
         {
             _ = diagInfo.AppendLine("\nPlugins:");
@@ -296,7 +304,15 @@ public partial class RotationConfigWindow : Window
         }
 
         IncompatiblePlugin[] incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
-        IncompatiblePlugin enabledIncompatiblePlugin = incompatiblePlugins.FirstOrDefault(p => p.IsEnabled && (int)p.Type == 5);
+        IncompatiblePlugin enabledIncompatiblePlugin = default;
+        for (int i = 0; i < incompatiblePlugins.Length; i++)
+        {
+            if (incompatiblePlugins[i].IsEnabled && (int)incompatiblePlugins[i].Type == 5)
+            {
+                enabledIncompatiblePlugin = incompatiblePlugins[i];
+                break;
+            }
+        }
 
         if (enabledIncompatiblePlugin.Name != null)
         {
@@ -1353,8 +1369,7 @@ public partial class RotationConfigWindow : Window
         float wholeWidth = ImGui.GetWindowWidth();
         Type type = rotation.GetType();
 
-        List<RotationDescAttribute?> attrs = new()
-        { RotationDescAttribute.MergeToOne(type.GetCustomAttributes<RotationDescAttribute>()) };
+        List<RotationDescAttribute?> attrs = [RotationDescAttribute.MergeToOne(type.GetCustomAttributes<RotationDescAttribute>())];
 
         foreach (MethodInfo m in type.GetAllMethodInfo())
         {
@@ -1375,20 +1390,27 @@ public partial class RotationConfigWindow : Window
                         continue;
                     }
 
-                    List<IBaseAction> allActions = new();
+                    List<IBaseAction> allActions = [];
                     foreach (ActionID actionId in attr.Actions)
                     {
-                        IBaseAction? action = rotation.AllBaseActions.FirstOrDefault(a => a.ID == (uint)actionId);
+                        IBaseAction? action = null;
+                        foreach (IBaseAction baseAction in rotation.AllBaseActions)
+                        {
+                            if (baseAction.ID == (uint)actionId)
+                            {
+                                action = baseAction;
+                                break;
+                            }
+                        }
                         if (action != null)
                         {
                             allActions.Add(action);
                         }
                     }
 
-
                     bool hasDesc = !string.IsNullOrEmpty(attr.Description);
 
-                    if (!hasDesc && !allActions.Any())
+                    if (!hasDesc && allActions.Count == 0)
                     {
                         continue;
                     }
@@ -2281,10 +2303,32 @@ public partial class RotationConfigWindow : Window
 
     private static void DrawRotationsLoaded()
     {
-        IEnumerable<IGrouping<Assembly, Type>> assemblyGrps = RotationUpdater.CustomRotationsDict
-            .SelectMany(d => d.Value)
-            .SelectMany(g => g.Rotations)
-            .GroupBy(r => r.Assembly);
+        // Build a flat list of all rotations from RotationUpdater.CustomRotationsDict
+        List<Type> allRotations = new();
+        foreach (var dictEntry in RotationUpdater.CustomRotationsDict)
+        {
+            var groupList = dictEntry.Value;
+            foreach (var group in groupList)
+            {
+                foreach (var rotation in group.Rotations)
+                {
+                    allRotations.Add(rotation);
+                }
+            }
+        }
+
+        // Group by Assembly
+        Dictionary<Assembly, List<Type>> assemblyGroups = new();
+        foreach (var rotation in allRotations)
+        {
+            var assembly = rotation.Assembly;
+            if (!assemblyGroups.TryGetValue(assembly, out var list))
+            {
+                list = new List<Type>();
+                assemblyGroups[assembly] = list;
+            }
+            list.Add(rotation);
+        }
 
         using ImRaii.IEndObject table = ImRaii.Table("Rotation Solver AssemblyTable", 3, ImGuiTableFlags.BordersInner
             | ImGuiTableFlags.Resizable
@@ -2304,11 +2348,13 @@ public partial class RotationConfigWindow : Window
             _ = ImGui.TableNextColumn();
             ImGui.TableHeader("Links");
 
-            foreach (IGrouping<Assembly, Type> grp in assemblyGrps)
+            // Iterate over each assembly group
+            foreach (var assemblyPair in assemblyGroups)
             {
                 ImGui.TableNextRow();
 
-                Assembly assembly = grp.Key;
+                Assembly assembly = assemblyPair.Key;
+                List<Type> typesInAssembly = assemblyPair.Value;
 
                 AssemblyInfo info = assembly.GetInfo();
                 _ = ImGui.TableNextColumn();
@@ -2328,25 +2374,70 @@ public partial class RotationConfigWindow : Window
 
                 _ = ImGui.TableNextColumn();
 
-                JobRole lastRole = JobRole.None;
-                foreach (IGrouping<Job, Type>? jobs in grp.GroupBy(r => r.GetCustomAttribute<JobsAttribute>()!.Jobs[0]).OrderBy(g => Svc.Data.GetExcelSheet<ClassJob>()!.GetRow((uint)g.Key)!.GetJobRole()))
+                // Group by Job (using JobsAttribute) and order by JobRole
+                // Build job groups
+                Dictionary<Job, List<Type>> jobGroups = new();
+                foreach (var type in typesInAssembly)
                 {
-                    JobRole role = Svc.Data.GetExcelSheet<ClassJob>()!.GetRow((uint)jobs.Key)!.GetJobRole();
+                    var jobsAttr = type.GetCustomAttribute<JobsAttribute>();
+                    if (jobsAttr == null || jobsAttr.Jobs.Length == 0)
+                        continue;
+                    var job = jobsAttr.Jobs[0];
+                    if (!jobGroups.TryGetValue(job, out var jobList))
+                    {
+                        jobList = new List<Type>();
+                        jobGroups[job] = jobList;
+                    }
+                    jobList.Add(type);
+                }
+
+                // Build a list of jobs and their roles for ordering
+                List<(Job job, JobRole role)> jobOrderList = new();
+                foreach (var job in jobGroups.Keys)
+                {
+                    var classJob = Svc.Data.GetExcelSheet<ClassJob>()?.GetRow((uint)job);
+                    var role = classJob.HasValue ? classJob.Value.GetJobRole() : JobRole.None;
+                    jobOrderList.Add((job, role));
+                }
+
+                // Sort by role
+                jobOrderList.Sort((a, b) => a.role.CompareTo(b.role));
+
+                JobRole lastRole = JobRole.None;
+                foreach (var jobRolePair in jobOrderList)
+                {
+                    var job = jobRolePair.job;
+                    var role = jobRolePair.role;
+                    var jobs = jobGroups[job];
+
                     if (lastRole == role && lastRole != JobRole.None)
                     {
                         ImGui.SameLine();
                     }
-
                     lastRole = role;
 
-                    if (IconSet.GetTexture(IconSet.GetJobIcon(jobs.Key, IconType.Framed), out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture, 62574))
+                    if (IconSet.GetTexture(IconSet.GetJobIcon(job, IconType.Framed), out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture, 62574))
                     {
                         ImGui.Image(texture.ImGuiHandle, Vector2.One * 30 * Scale);
                     }
 
-                    ImguiTooltips.HoveredTooltip(string.Join('\n', jobs.Select(t => t.GetCustomAttribute<UIAttribute>()?.Name ?? t.Name)) +
-                                                 Environment.NewLine +
-                                                 string.Join('\n', jobs.Select(t => t.GetCustomAttribute<RotationAttribute>()?.Type ?? CombatType.None)));
+                    // Build tooltip text
+                    StringBuilder tooltipNames = new();
+                    StringBuilder tooltipTypes = new();
+                    for (int i = 0; i < jobs.Count; i++)
+                    {
+                        var t = jobs[i];
+                        var uiAttr = t.GetCustomAttribute<UIAttribute>();
+                        var rotAttr = t.GetCustomAttribute<RotationAttribute>();
+                        tooltipNames.Append(uiAttr?.Name ?? t.Name);
+                        tooltipTypes.Append(rotAttr?.Type.ToString() ?? CombatType.None.ToString());
+                        if (i < jobs.Count - 1)
+                        {
+                            tooltipNames.Append('\n');
+                            tooltipTypes.Append('\n');
+                        }
+                    }
+                    ImguiTooltips.HoveredTooltip(tooltipNames.ToString() + Environment.NewLine + tooltipTypes.ToString());
                 }
 
                 _ = ImGui.TableNextColumn();
@@ -2475,33 +2566,71 @@ public partial class RotationConfigWindow : Window
 
     #region List
     private static readonly Lazy<Status[]> _allDispelStatus = new(() =>
-    Service.GetSheet<Status>()
-        .Where(s => s.CanDispel)
-        .ToArray());
+    {
+        var sheet = Service.GetSheet<Status>();
+        var list = new List<Status>();
+        foreach (var s in sheet)
+        {
+            if (s.CanDispel)
+            {
+                list.Add(s);
+            }
+        }
+        return [.. list];
+    });
 
     internal static Status[] AllDispelStatus => _allDispelStatus.Value;
 
     private static readonly Lazy<Status[]> _allStatus = new(() =>
-    Service.GetSheet<Status>()?
-        .Where(s => !s.CanDispel && !s.LockMovement && !s.IsGaze && !s.IsFcBuff
-            && !string.IsNullOrEmpty(s.Name.ToString()) && s.Icon != 0)
-    .ToArray() ?? Array.Empty<Status>());
+    {
+        var sheet = Service.GetSheet<Status>();
+        if (sheet == null)
+            return Array.Empty<Status>();
+        var list = new List<Status>();
+        foreach (var s in sheet)
+        {
+            if (!s.CanDispel && !s.LockMovement && !s.IsGaze && !s.IsFcBuff
+                && !string.IsNullOrEmpty(s.Name.ToString()) && s.Icon != 0)
+            {
+                list.Add(s);
+            }
+        }
+        return [.. list];
+    });
 
     internal static Status[] AllStatus => _allStatus.Value;
 
     private static readonly Lazy<GAction[]> _allActions = new(() =>
-        Service.GetSheet<GAction>()
-        .Where(a => !string.IsNullOrEmpty(a.ToString()) && !a.IsPvP && !a.IsPlayerAction
-            && a.ClassJob.RowId == 0 && a.Cast100ms > 0)
-        .ToArray());
+    {
+        var sheet = Service.GetSheet<GAction>();
+        var list = new List<GAction>();
+        foreach (var a in sheet)
+        {
+            if (!string.IsNullOrEmpty(a.ToString()) && !a.IsPvP && !a.IsPlayerAction
+                && a.ClassJob.RowId == 0 && a.Cast100ms > 0)
+            {
+                list.Add(a);
+            }
+        }
+        return [.. list];
+    });
 
     internal static GAction[] AllActions => _allActions.Value;
 
     private const int BadStatusCategory = 2;
     private static readonly Lazy<Status[]> _badStatus = new(() =>
-        Service.GetSheet<Status>()
-            .Where(s => s.StatusCategory == BadStatusCategory && s.Icon != 0)
-            .ToArray());
+    {
+        var sheet = Service.GetSheet<Status>();
+        var list = new List<Status>();
+        foreach (var s in sheet)
+        {
+            if (s.StatusCategory == BadStatusCategory && s.Icon != 0)
+            {
+                list.Add(s);
+            }
+        }
+        return [.. list];
+    });
 
     internal static Status[] BadStatus => _badStatus.Value;
 
@@ -2722,19 +2851,42 @@ public partial class RotationConfigWindow : Window
                 }
 
                 string searchingKey = searching;
-                Status[] matchingStatuses = allStatus
-                    .Where(s => SearchableCollection.Similarity($"{s.Name} {s.RowId}", searchingKey) > 0)
-                    .OrderByDescending(s => SearchableCollection.Similarity($"{s.Name} {s.RowId}", searchingKey))
-                    .ToArray();
 
-                if (matchingStatuses.Length == 0)
+                // Manual filtering and sorting instead of LINQ
+                List<(Status status, double score)> filtered = new List<(Status, double)>();
+                for (int i = 0; i < allStatus.Length; i++)
+                {
+                    Status s = allStatus[i];
+                    double sim = SearchableCollection.Similarity($"{s.Name} {s.RowId}", searchingKey);
+                    if (sim > 0)
+                    {
+                        filtered.Add((s, sim));
+                    }
+                }
+
+                // Sort descending by similarity
+                for (int i = 0; i < filtered.Count - 1; i++)
+                {
+                    for (int j = i + 1; j < filtered.Count; j++)
+                    {
+                        if (filtered[j].score > filtered[i].score)
+                        {
+                            var temp = filtered[i];
+                            filtered[i] = filtered[j];
+                            filtered[j] = temp;
+                        }
+                    }
+                }
+
+                if (filtered.Count == 0)
                 {
                     ImGui.TextColored(ImGuiColors.DalamudRed, "No matching statuses found.");
                     return;
                 }
 
-                foreach (Status status in matchingStatuses)
+                foreach (var tuple in filtered)
                 {
+                    Status status = tuple.status;
                     if (status.Icon != 215049 && IconSet.GetTexture(status.Icon, out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture, notLoadId))
                     {
                         if (index++ % count != 0)
@@ -2843,16 +2995,41 @@ public partial class RotationConfigWindow : Window
 
         ImGui.Spacing();
 
-        foreach (GAction action in actions.Select(a => Service.GetSheet<GAction>().GetRow(a))
-            .Where(a => a.RowId != 0)
-            .OrderByDescending(s => SearchableCollection.Similarity($"{s!.Name} {s.RowId}", _actionSearching)))
+        // Build a list of GAction objects from the action IDs
+        List<GAction> actionList = [];
+        foreach (uint a in actions)
+        {
+            GAction? act = Service.GetSheet<GAction>().GetRow(a);
+            if (act != null)
+            {
+                actionList.Add(act.Value);
+            }
+        }
+
+        // Sort the list by similarity descending
+        for (int i = 0; i < actionList.Count - 1; i++)
+        {
+            for (int j = i + 1; j < actionList.Count; j++)
+            {
+                float simI = SearchableCollection.Similarity($"{actionList[i].Name} {actionList[i].RowId}", _actionSearching);
+                float simJ = SearchableCollection.Similarity($"{actionList[j].Name} {actionList[j].RowId}", _actionSearching);
+                if (simJ > simI)
+                {
+                    var temp = actionList[i];
+                    actionList[i] = actionList[j];
+                    actionList[j] = temp;
+                }
+            }
+        }
+
+        foreach (GAction action in actionList)
         {
             void Reset()
             {
                 removeId = action.RowId;
             }
 
-            string key = $"Action{action!.RowId}";
+            string key = $"Action{action.RowId}";
 
             ImGuiHelper.DrawHotKeysPopup(key, string.Empty, (UiString.ConfigWindow_List_Remove.GetDescription(), Reset, new[] { "Delete" }));
 

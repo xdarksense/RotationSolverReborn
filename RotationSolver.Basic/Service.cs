@@ -6,7 +6,9 @@ using FFXIVClientStructs.Attributes;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Lumina.Excel;
 using RotationSolver.Basic.Configuration;
+using System.Buffers;
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace RotationSolver.Basic;
@@ -140,22 +142,34 @@ internal class Service : IDisposable
     {
         AddonAttribute? addon = AddonCache.GetOrAdd(typeof(T), t => t.GetCustomAttribute<AddonAttribute>());
 
-        if (addon is null)
+        if (addon is null || !addon.AddonIdentifiers.Any())
         {
-            return Array.Empty<nint>();
+            return [];
         }
 
-        List<nint> addonPointers = new();
-        foreach (string str in addon.AddonIdentifiers)
+        // Use ArrayPool to minimize allocations
+        var pool = ArrayPool<nint>.Shared;
+        var buffer = pool.Rent(addon.AddonIdentifiers.Count());
+        int count = 0;
+
+        try
         {
-            nint ptr = Svc.GameGui.GetAddonByName(str, 1);
-            if (ptr != IntPtr.Zero)
+            foreach (string str in addon.AddonIdentifiers)
             {
-                addonPointers.Add(ptr);
+                nint ptr = Svc.GameGui.GetAddonByName(str, 1);
+                if (ptr != IntPtr.Zero)
+                {
+                    buffer[count++] = ptr;
+                }
             }
-        }
 
-        return addonPointers;
+            // Return a copy with the correct length
+            return [.. buffer.Take(count)];
+        }
+        finally
+        {
+            pool.Return(buffer, clearArray: RuntimeHelpers.IsReferenceOrContainsReferences<nint>());
+        }
     }
 
     /// <summary>

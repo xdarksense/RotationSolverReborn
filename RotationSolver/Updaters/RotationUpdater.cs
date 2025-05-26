@@ -259,7 +259,12 @@ internal static class RotationUpdater
             }
         }
 
-        return new(result.ToDictionary(i => i.Key, i => i.Value.ToArray()));
+        SortedList<uint, Type[]> sorted = [];
+        foreach (var pair in result)
+        {
+            sorted.Add(pair.Key, [.. pair.Value]);
+        }
+        return sorted;
     }
 
     private static CustomRotationGroup[] LoadCustomRotationGroup(List<Assembly> assemblies)
@@ -274,7 +279,17 @@ internal static class RotationUpdater
                 AssemblyInfo info = assembly.GetInfo();
                 string authorName = info.Author ?? "Unknown Author";
 
-                if (type.GetInterfaces().Contains(typeof(ICustomRotation))
+                bool implementsICustomRotation = false;
+                foreach (var iface in type.GetInterfaces())
+                {
+                    if (iface == typeof(ICustomRotation))
+                    {
+                        implementsICustomRotation = true;
+                        break;
+                    }
+                }
+
+                if (implementsICustomRotation
                     && !type.IsAbstract && !type.IsInterface && type.GetConstructor(Type.EmptyTypes) != null)
                 {
                     if (apiAttribute?.ApiVersion == Service.ApiVersion)
@@ -313,13 +328,13 @@ internal static class RotationUpdater
         foreach (KeyValuePair<Job, List<Type>> kvp in rotationGroups)
         {
             Job jobId = kvp.Key;
-            Type[] rotations = kvp.Value.ToArray();
+            Type[] rotations = [.. kvp.Value];
 
             result.Add(new CustomRotationGroup(jobId, rotations[0].GetCustomAttribute<JobsAttribute>()!.Jobs,
                 rotations));
         }
 
-        return result.ToArray();
+        return [.. result];
     }
 
 
@@ -519,7 +534,6 @@ internal static class RotationUpdater
 
     public static IEnumerable<IGrouping<string, IAction>>? GroupActions(IEnumerable<IAction> actions)
     {
-        // LINQ removed: .GroupBy, .Where, .OrderBy
         if (actions == null)
         {
             return null;
@@ -688,7 +702,7 @@ internal static class RotationUpdater
 
         CustomRotation.MoveTarget = null;
         DataCenter.CurrentRotation = null;
-        CurrentRotationActions = Array.Empty<IAction>();
+        CurrentRotationActions = [];
 
         static ICustomRotation? GetRotation(Type? t)
         {
@@ -714,32 +728,59 @@ internal static class RotationUpdater
         {
             bool isPvP = DataCenter.IsPvP;
 
-            IEnumerable<Type> rotations = group.Rotations
-                .Where(r =>
+            List<Type> filteredRotations = [];
+            foreach (var r in group.Rotations)
+            {
+                RotationAttribute? rot = r.GetCustomAttribute<RotationAttribute>();
+                if (rot == null)
                 {
-                    RotationAttribute? rot = r.GetCustomAttribute<RotationAttribute>();
-                    if (rot == null)
-                    {
-                        return false;
-                    }
+                    continue;
+                }
 
-                    CombatType type = rot.Type;
-
-                    return isPvP ? type.HasFlag(CombatType.PvP) : type.HasFlag(CombatType.PvE);
-                });
+                CombatType type = rot.Type;
+                if (isPvP ? type.HasFlag(CombatType.PvP) : type.HasFlag(CombatType.PvE))
+                {
+                    filteredRotations.Add(r);
+                }
+            }
 
             string name = isPvP ? Service.Config.PvPRotationChoice : Service.Config.RotationChoice;
-            return GetChosenType(rotations, name);
+            return GetChosenType(filteredRotations, name);
         }
     }
 
     private static Type? GetChosenType(IEnumerable<Type> types, string name)
     {
-        Type? rotation = types.FirstOrDefault(r => r.FullName == name);
+        Type? rotation = null;
+        foreach (var r in types)
+        {
+            if (r.FullName == name)
+            {
+                rotation = r;
+                break;
+            }
+        }
 
-        rotation ??= types.FirstOrDefault(r => r.Assembly.FullName!.Contains("DefaultRotations", StringComparison.OrdinalIgnoreCase));
+        if (rotation == null)
+        {
+            foreach (var r in types)
+            {
+                if (r.Assembly.FullName != null && r.Assembly.FullName.Contains("DefaultRotations", StringComparison.OrdinalIgnoreCase))
+                {
+                    rotation = r;
+                    break;
+                }
+            }
+        }
 
-        rotation ??= types.FirstOrDefault();
+        if (rotation == null)
+        {
+            foreach (var r in types)
+            {
+                rotation = r;
+                break;
+            }
+        }
 
         return rotation;
     }

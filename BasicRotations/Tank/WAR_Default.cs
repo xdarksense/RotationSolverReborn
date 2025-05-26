@@ -1,6 +1,6 @@
 namespace RebornRotations.Tank;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.21")]
 [SourceCode(Path = "main/BasicRotations/Tank/WAR_Default.cs")]
 [Api(4)]
 public sealed class WAR_Default : WarriorRotation
@@ -8,6 +8,9 @@ public sealed class WAR_Default : WarriorRotation
     #region Config Options
     [RotationConfig(CombatType.PvE, Name = "Only use Nascent Flash if Tank Stance is off")]
     public bool NeverscentFlash { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Only use Inner Beast and Fell Cleave when at max Beast Gauge")]
+    public bool MaxBeast { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Use Bloodwhetting/Raw intuition on single enemies")]
     public bool SoloIntuition { get; set; } = false;
@@ -307,12 +310,12 @@ public sealed class WAR_Default : WarriorRotation
         }
 
         // Single Target
-        if (!Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest) && FellCleavePvE.CanUse(out act, skipStatusProvideCheck: true))
+        if ((!Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest) && !MaxBeast) || (MaxBeast && BeastGauge == 100) && FellCleavePvE.CanUse(out act, skipStatusProvideCheck: true))
         {
             return true;
         }
 
-        if (!InnerBeastMasteryTrait.IsEnabled && (!StormsEyePvE.EnoughLevel || !Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest)) && InnerBeastPvE.CanUse(out act))
+        if ((!InnerBeastMasteryTrait.IsEnabled && (!StormsEyePvE.EnoughLevel || !Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest)) && !MaxBeast) || (MaxBeast && BeastGauge == 100) && InnerBeastPvE.CanUse(out act))
         {
             return true;
         }

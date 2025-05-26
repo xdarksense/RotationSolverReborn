@@ -29,6 +29,25 @@ public partial class DancerRotation
     /// 
     /// </summary>
     public static byte CompletedSteps => JobGauge.CompletedSteps;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static IBattleChara? CurrentDancePartner
+    {
+        get
+        {
+            if (Player.HasStatus(true, StatusID.ClosedPosition))
+            {
+                foreach (var member in PartyMembers)
+                {
+                    if (member.HasStatus(true, StatusID.DancePartner))
+                        return member;
+                }
+            }
+            return null;
+        }
+    }
     #endregion
 
     #region PvE Status Tracking
@@ -344,25 +363,6 @@ public partial class DancerRotation
     {
         setting.IsFriendly = true;
         setting.TargetType = TargetType.DancePartner;
-        setting.ActionCheck = () =>
-        {
-            if (IsDancing)
-            {
-                return false;
-            }
-
-            bool hasClosedPosition = false;
-            foreach (IBattleChara b in AllianceMembers)
-            {
-                if (b.HasStatus(true, StatusID.ClosedPosition_2026))
-                {
-                    hasClosedPosition = true;
-                    break;
-                }
-            }
-
-            return !hasClosedPosition && DataCenter.PartyMembers.Count >= 2;
-        };
     }
 
     static partial void ModifyEndingPvE(ref ActionSetting setting)

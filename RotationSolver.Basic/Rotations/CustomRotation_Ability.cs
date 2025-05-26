@@ -43,6 +43,13 @@ public partial class CustomRotation
             return true;
         }
 
+        IBaseAction.TargetOverride = TargetType.Dispel;
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.Dispel)
+            && DispelAbility(nextGCD, out act))
+        {
+            return true;
+        }
+
         IBaseAction.TargetOverride = TargetType.Tank;
         if (DataCenter.CommandStatus.HasFlag(AutoStatus.Shirk))
         {
@@ -288,6 +295,23 @@ public partial class CustomRotation
     protected virtual bool InterruptAbility(IAction nextGCD, out IAction? act)
     {
         if (DataCenter.CurrentDutyRotation?.InterruptAbility(nextGCD, out act) ?? false)
+        {
+            return true;
+        }
+
+        act = null;
+        return false;
+    }
+
+    /// <summary>
+    /// Determines if an interrupt ability can be used.
+    /// </summary>
+    /// <param name="nextGCD">The next GCD action.</param>
+    /// <param name="act">The resulting action.</param>
+    /// <returns>True if the interrupt ability can be used; otherwise, false.</returns>
+    protected virtual bool DispelAbility(IAction nextGCD, out IAction? act)
+    {
+        if (DataCenter.CurrentDutyRotation?.DispelAbility(nextGCD, out act) ?? false)
         {
             return true;
         }

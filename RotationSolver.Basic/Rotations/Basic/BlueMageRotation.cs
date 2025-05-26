@@ -176,7 +176,17 @@ public partial class BlueMageRotation
 
         try
         {
-            uint[] idArray = ActiveActions.Where(a => a.Info.SpellUnlocked).Select(a => a.Action.RowId).ToArray();
+            // Manual filtering and projection to avoid LINQ
+            List<uint> idList = new List<uint>(ActiveActions.Length);
+            foreach (var a in ActiveActions)
+            {
+                if (a.Info.SpellUnlocked)
+                {
+                    idList.Add(a.Action.RowId);
+                }
+            }
+            uint[] idArray = idList.ToArray();
+
             if (idArray.Equals(GetBlueMageActions()))
             {
                 return true;
@@ -187,7 +197,6 @@ public partial class BlueMageRotation
             {
                 return actionManager->SetBlueMageActions(idArrayPtr);
             }
-
         }
         catch (Exception ex)
         {

@@ -114,7 +114,46 @@ internal readonly struct JobFilter
         }
     }
 
-    public Job[] AllJobs => (JobRoles ?? []).SelectMany(JobRoleExtension.ToJobs).Union(Jobs ?? []).ToArray();
+    public Job[] AllJobs
+    {
+        get
+        {
+            List<Job> jobs = [];
+
+            // Add jobs from JobRoles via JobRoleExtension.ToJobs
+            if (JobRoles != null)
+            {
+                foreach (var role in JobRoles)
+                {
+                    var roleJobs = JobRoleExtension.ToJobs(role);
+                    if (roleJobs != null)
+                    {
+                        foreach (var job in roleJobs)
+                        {
+                            if (!jobs.Contains(job))
+                            {
+                                jobs.Add(job);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Add jobs from Jobs array
+            if (Jobs != null)
+            {
+                foreach (var job in Jobs)
+                {
+                    if (!jobs.Contains(job))
+                    {
+                        jobs.Add(job);
+                    }
+                }
+            }
+
+            return [.. jobs];
+        }
+    }
 
     public string Description
     {

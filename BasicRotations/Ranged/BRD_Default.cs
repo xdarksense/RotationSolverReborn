@@ -89,13 +89,13 @@ public sealed class BRD_Default : BardRotation
     }
 
     [RotationDesc(ActionID.TheWardensPaeanPvE)]
-    protected override bool DispelGCD(out IAction? act)
+    protected override bool DispelAbility(IAction nextGCD, out IAction? action)
     {
-        if (BRDEsuna && TheWardensPaeanPvE.CanUse(out act))
+        if (BRDEsuna && TheWardensPaeanPvE.CanUse(out action))
         {
             return true;
         }
-        return base.DispelGCD(out act);
+        return base.DispelAbility(nextGCD, out action);
     }
 
     [RotationDesc(ActionID.NaturesMinnePvE)]

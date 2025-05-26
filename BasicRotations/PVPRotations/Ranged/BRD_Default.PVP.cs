@@ -12,6 +12,9 @@ public sealed class BRD_DefaultPvP : BardRotation
 
     [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
     public bool RespectGuard { get; set; } = true;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Warden's Paean on other players")]
+    public bool BRDEsuna { get; set; } = true;
     #endregion
 
     #region Standard PVP Utilities
@@ -67,14 +70,20 @@ public sealed class BRD_DefaultPvP : BardRotation
     }
 
     [RotationDesc(ActionID.TheWardensPaeanPvP)]
-    protected override bool DispelGCD(out IAction? act)
+    protected override bool DispelAbility(IAction nextGCD, out IAction? action)
     {
-        if (TheWardensPaeanPvP.CanUse(out act))
+        action = null;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
+
+        if (BRDEsuna && TheWardensPaeanPvP.CanUse(out action))
         {
             return true;
         }
 
-        return base.DispelGCD(out act);
+        return base.DispelAbility(nextGCD, out action);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)

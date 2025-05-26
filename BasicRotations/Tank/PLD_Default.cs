@@ -153,7 +153,7 @@ public sealed class PLD_Default : PaladinRotation
         // if requiscat is able to proc confiteor, use it immediately after Fight or Flight
         if (RequiescatMasteryTrait.EnoughLevel)
         {
-            if ((IsLastAbility(true, FightOrFlightPvE) || HasFightOrFlight) && ImperatorPvE.CanUse(out act, skipAoeCheck: true, usedUp: true))
+            if ((IsLastAbility(true, FightOrFlightPvE) || HasFightOrFlight) && ImperatorPvE.CanUse(out act, skipAoeCheck: true, usedUp: true, skipTTKCheck: true))
             {
                 return true;
             }
@@ -304,17 +304,17 @@ public sealed class PLD_Default : PaladinRotation
             return true;
         }
 
-        if (FightOrFlightPvE.Cooldown.IsCoolingDown && CircleOfScornPvE.CanUse(out act, skipAoeCheck: true))
+        if (CircleOfScornPvE.CanUse(out act, skipAoeCheck: true) && FightOrFlightPvE.Cooldown.IsCoolingDown && (ImperatorPvE.EnoughLevel && ImperatorPvE.IsInCooldown || !ImperatorPvE.EnoughLevel))
         {
             return true;
         }
 
-        if (FightOrFlightPvE.Cooldown.IsCoolingDown && ExpiacionPvE.CanUse(out act, skipAoeCheck: true))
+        if (ExpiacionPvE.CanUse(out act, skipAoeCheck: true) && FightOrFlightPvE.Cooldown.IsCoolingDown && (ImperatorPvE.EnoughLevel && ImperatorPvE.IsInCooldown || !ImperatorPvE.EnoughLevel))
         {
             return true;
         }
 
-        if (FightOrFlightPvE.Cooldown.IsCoolingDown && SpiritsWithinPvE.CanUse(out act))
+        if (SpiritsWithinPvE.CanUse(out act, skipAoeCheck: true) && FightOrFlightPvE.Cooldown.IsCoolingDown && (ImperatorPvE.EnoughLevel && ImperatorPvE.IsInCooldown || !ImperatorPvE.EnoughLevel))
         {
             return true;
         }
