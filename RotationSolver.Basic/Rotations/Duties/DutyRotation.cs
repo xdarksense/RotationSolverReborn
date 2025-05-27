@@ -1,4 +1,6 @@
-﻿namespace RotationSolver.Basic.Rotations.Duties;
+﻿using Dalamud.Game.ClientState.Objects.SubKinds;
+
+namespace RotationSolver.Basic.Rotations.Duties;
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 /// <summary>
@@ -144,6 +146,133 @@ public partial class DutyRotation : IDisposable
     /// Gets the hostile target.
     /// </summary>
     public IBattleChara? HostileTarget => DataCenter.HostileTarget;
+
+    /// <summary>
+    /// Check if in combat.
+    /// </summary>
+    public static bool InCombat => DataCenter.InCombat;
+
+    /// <summary>
+    /// This is the player.
+    /// </summary>
+    protected static IPlayerCharacter Player => ECommons.GameHelpers.Player.Object;
+
+    public static byte FreelancerLevel
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.PhantomFreelancer);
+            return stacks == byte.MaxValue ? (byte)12 : stacks;
+        }
+    }
+
+    public static byte KnightLevel
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.PhantomKnight);
+            return stacks == byte.MaxValue ? (byte)12 : stacks;
+        }
+    }
+
+    public static byte CannoneerLevel
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.PhantomCannoneer);
+            return stacks == byte.MaxValue ? (byte)6 : stacks;
+        }
+    }
+
+    public static byte ChemistLevel
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.PhantomChemist);
+            return stacks == byte.MaxValue ? (byte)6 : stacks;
+        }
+    }
+
+    public static byte BardLevel
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.PhantomBard);
+            return stacks == byte.MaxValue ? (byte)4 : stacks;
+        }
+    }
+
+    public static byte TimeMageLevel
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.PhantomTimeMage);
+            return stacks == byte.MaxValue ? (byte)6 : stacks;
+        }
+    }
+
+    public static byte RangerLevel
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.PhantomRanger);
+            return stacks == byte.MaxValue ? (byte)6 : stacks;
+        }
+    }
+
+    public static byte MonkLevel
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.PhantomMonk);
+            return stacks == byte.MaxValue ? (byte)6 : stacks;
+        }
+    }
+
+    public static byte OracleLevel
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.PhantomOracle);
+            return stacks == byte.MaxValue ? (byte)6 : stacks;
+        }
+    }
+
+    public static byte BerserkerLevel
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.PhantomBerserker);
+            return stacks == byte.MaxValue ? (byte)6 : stacks;
+        }
+    }
+
+    public static byte SamuraiLevel
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.PhantomSamurai);
+            return stacks == byte.MaxValue ? (byte)6 : stacks;
+        }
+    }
+
+    public static byte GeomancerLevel
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.PhantomGeomancer);
+            return stacks == byte.MaxValue ? (byte)6 : stacks;
+        }
+    }
+
+    public static byte ThiefLevel
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.PhantomThief);
+            return stacks == byte.MaxValue ? (byte)6 : stacks;
+        }
+    }
 
     /// <summary>
     /// Gets all actions available in the duty rotation.
