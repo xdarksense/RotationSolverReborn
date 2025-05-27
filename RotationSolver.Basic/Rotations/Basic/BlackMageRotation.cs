@@ -517,7 +517,7 @@ public partial class BlackMageRotation
 
     static partial void ModifyLethargyPvP(ref ActionSetting setting)
     {
-        setting.TargetStatusProvide = [StatusID.Lethargy_4333, StatusID.Heavy_1344];
+        setting.TargetStatusProvide = [StatusID.Lethargy, StatusID.Heavy_1344];
     }
 
     static partial void ModifyAetherialManipulationPvP(ref ActionSetting setting)

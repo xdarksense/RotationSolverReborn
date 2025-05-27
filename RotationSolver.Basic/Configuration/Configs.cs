@@ -710,9 +710,8 @@ internal partial class Configs : IPluginConfiguration
     Description = "This setting controls how many oGCDs RSR will try to fit in a single GCD window\nLower numbers mean more oGCDs, but potentially more GCD clipping")]
     private readonly float _action5head = 0.20f;
 
-    [UI("The HP for using Guard.",
-        Filter = HealingActionCondition, Section = 3,
-        PvEFilter = JobFilterType.NoJob)]
+    [JobConfig, UI("The HP for using Guard.",
+        Filter = PvPSpecificControls)]
     [Range(0, 1, ConfigUnitType.Percent, 0.02f)]
     public float HealthForGuard { get; set; } = 0.15f;
 
