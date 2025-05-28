@@ -508,13 +508,14 @@ public static class ObjectHelper
 
     internal static bool IsSpecialInclusionPriority(this IBattleChara obj)
     {
-        if (obj.NameId == 10259 || obj.NameId == 8145 || obj.NameId == 12704)
+        if (obj.NameId == 10259 || obj.NameId == 8145 || obj.NameId == 12704 || obj.NameId == 13668)
         {
             return true;
         }
         //10259 Cinduruva in The Tower of Zot
         //8145 Root in Dohn Meg boss 2
-        //12704 Crystalline Debris 
+        //12704 Crystalline Debris
+        //13668 Mob in Calamity Unbound CE
 
         return false;
     }

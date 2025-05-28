@@ -201,8 +201,8 @@ internal static partial class TargetUpdater
                         }
                     }
                 }
-                List<IBattleChara> deathAllianceHealers = [.. deathParty];
-                List<IBattleChara> deathAllianceSupports = [.. deathParty];
+                List<IBattleChara> deathAllianceHealers = [];
+                List<IBattleChara> deathAllianceSupports = [];
 
                 if (DataCenter.AllianceMembers != null)
                 {
@@ -219,30 +219,30 @@ internal static partial class TargetUpdater
                     }
                 }
 
-                List<IBattleChara> raisePartyAndAllianceSupports = [.. deathParty, .. deathAllianceSupports];
-
-                List<IBattleChara> raisePartyAndAllianceHealers = [.. deathParty, .. deathAllianceHealers];
-
                 RaiseType raisetype = Service.Config.RaiseType;
 
-                List<IBattleChara> validRaiseTargets = [];
+                List<IBattleChara> validRaiseTargets = [.. deathParty];
 
-                if (raisetype == RaiseType.PartyOnly)
+                if (raisetype == RaiseType.PartyAndAllianceSupports)
                 {
-                    validRaiseTargets.AddRange(deathParty);
-                }
-                else if (raisetype == RaiseType.PartyAndAllianceSupports)
-                {
-                    validRaiseTargets.AddRange(raisePartyAndAllianceSupports);
+                    validRaiseTargets.AddRange(deathAllianceSupports);
                 }
                 else if (raisetype == RaiseType.PartyAndAllianceHealers)
                 {
-                    validRaiseTargets.AddRange(raisePartyAndAllianceHealers);
+                    validRaiseTargets.AddRange(deathAllianceHealers);
                 }
                 else if (raisetype == RaiseType.All)
                 {
-                    validRaiseTargets.AddRange(deathAll);
+                    // Add all non-party deaths except those already in party
+                    foreach (var target in deathAll)
+                    {
+                        if (!deathParty.Contains(target))
+                        {
+                            validRaiseTargets.Add(target);
+                        }
+                    }
                 }
+                // For PartyOnly, validRaiseTargets is just deathParty
 
                 foreach (RaiseType type in Enum.GetValues<RaiseType>())
                 {
