@@ -1,6 +1,6 @@
 namespace RebornRotations.Tank;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.15")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.25")]
 [SourceCode(Path = "main/BasicRotations/Tank/WAR_Default.cs")]
 [Api(4)]
 public sealed class WAR_Default : WarriorRotation
@@ -274,7 +274,7 @@ public sealed class WAR_Default : WarriorRotation
                     return true;
                 }
 
-                if (YEETBeta && PrimalRendPvE.Target.Target?.DistanceToPlayer() + PrimalRendPvE.Target.Target?.HitboxRadius < PrimalRendDistance2)
+                if (YEETBeta && PrimalRendPvE.Target.Target?.DistanceToPlayer() - PrimalRendPvE.Target.Target?.HitboxRadius < PrimalRendDistance2)
                 {
                     return true;
                 }

@@ -1,5 +1,4 @@
-﻿using Dalamud.Game.Text.SeStringHandling.Payloads;
-using RotationSolver.Basic.Rotations.Duties;
+﻿using RotationSolver.Basic.Rotations.Duties;
 
 namespace RebornRotations.Duty;
 
@@ -40,6 +39,16 @@ public sealed class PhantomDefault : PhantomRotation
         }
 
         return base.AttackAbility(nextGCD, out act);
+    }
+
+    public override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
+    {
+        if (PhantomGuardPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.DefenseSingleAbility(nextGCD, out act);
     }
 
     public override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)

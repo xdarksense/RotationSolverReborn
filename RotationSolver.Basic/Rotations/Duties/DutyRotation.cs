@@ -145,7 +145,7 @@ public partial class DutyRotation : IDisposable
     /// <summary>
     /// Gets the hostile target.
     /// </summary>
-    public IBattleChara? HostileTarget => DataCenter.HostileTarget;
+    public static IBattleChara? HostileTarget => DataCenter.HostileTarget;
 
     /// <summary>
     /// Check if in combat.
@@ -304,7 +304,7 @@ public partial class DutyRotation : IDisposable
                 }
             }
 
-            return actionsList.ToArray();
+            return [.. actionsList];
         }
     }
 }

@@ -133,7 +133,7 @@ public partial class DutyRotation
     static partial void ModifyPrayPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => KnightLevel >= 2;
-        setting.StatusProvide = [StatusID.EnduringFortitude];
+        setting.StatusProvide = [StatusID.Pray];
     }
 
     /// <summary>
