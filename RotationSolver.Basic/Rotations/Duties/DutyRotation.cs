@@ -162,7 +162,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomFreelancer);
-            return stacks == byte.MaxValue ? (byte)12 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -171,7 +171,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomKnight);
-            return stacks == byte.MaxValue ? (byte)12 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -180,7 +180,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomMonk);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -189,7 +189,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomBard);
-            return stacks == byte.MaxValue ? (byte)4 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -198,7 +198,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomChemist);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -207,7 +207,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomTimeMage);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -216,7 +216,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomCannoneer);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -225,7 +225,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomOracle);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -234,7 +234,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomBerserker);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -243,7 +243,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomRanger);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -252,7 +252,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomThief);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -261,7 +261,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomSamurai);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -270,7 +270,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomGeomancer);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 

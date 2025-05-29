@@ -19,6 +19,7 @@ using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
+using RotationSolver.Basic.Rotations.Duties;
 using RotationSolver.Data;
 using RotationSolver.Helpers;
 using RotationSolver.UI.SearchableConfigs;
@@ -3372,7 +3373,22 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"IsInDelubrumSavage: {DataCenter.IsInDelubrumSavage}");
         ImGui.Text($"IsInBozja: {DataCenter.IsInBozja}");
         ImGui.Spacing();
-        ImGui.Text($"AttackedTargets: {DataCenter.AttackedTargets?.Count() ?? 0}");
+        ImGui.Text($"In Occult Crescent: {DataCenter.IsInOccultCrescentOp}");
+        ImGui.Text($"FreelancerLevel: {DutyRotation.FreelancerLevel}");
+        ImGui.Text($"KnightLevel: {DutyRotation.KnightLevel}");
+        ImGui.Text($"MonkLevel: {DutyRotation.MonkLevel}");
+        ImGui.Text($"BardLevel: {DutyRotation.BardLevel}");
+        ImGui.Text($"ChemistLevel: {DutyRotation.ChemistLevel}");
+        ImGui.Text($"TimeMageLevel: {DutyRotation.TimeMageLevel}");
+        ImGui.Text($"CannoneerLevel: {DutyRotation.CannoneerLevel}");
+        ImGui.Text($"OracleLevel: {DutyRotation.OracleLevel}");
+        ImGui.Text($"BerserkerLevel: {DutyRotation.BerserkerLevel}");
+        ImGui.Text($"RangerLevel: {DutyRotation.RangerLevel}");
+        ImGui.Text($"ThiefLevel: {DutyRotation.ThiefLevel}");
+        ImGui.Text($"SamuraiLevel: {DutyRotation.SamuraiLevel}");
+        ImGui.Text($"GeomancerLevel: {DutyRotation.GeomancerLevel}");
+        ImGui.Spacing();
+        ImGui.Text($"AttackedTargets: {DataCenter.AttackedTargets?.Count ?? 0}");
         if (DataCenter.AttackedTargets != null)
         {
             foreach ((ulong id, DateTime time) in DataCenter.AttackedTargets)
@@ -3569,7 +3585,6 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"Is Alliance: {battleChara.IsAllianceMember()}");
             ImGui.Text($"Distance To Player: {battleChara.DistanceToPlayer()}");
             ImGui.Text($"CanProvoke: {battleChara.CanProvoke()}");
-            ImGui.Text($"NamePlate: {battleChara.GetNamePlateIcon()}");
             ImGui.Text($"StatusFlags: {battleChara.StatusFlags}");
             ImGui.Text($"InView: {Svc.GameGui.WorldToScreen(battleChara.Position, out _)}");
             ImGui.Text($"Enemy Positional: {battleChara.FindEnemyPositional()}");
