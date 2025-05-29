@@ -138,8 +138,8 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyOffensiveAriaPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => BardLevel >= 1;
-        setting.StatusProvide = [StatusID.OffensiveAria];
+        setting.ActionCheck = () => BardLevel >= 1 && !Player.HasStatus(false, StatusID.HerosRime) && !Player.HasStatus(true, StatusID.HerosRime);
+        setting.StatusProvide = [StatusID.OffensiveAria, StatusID.HerosRime];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

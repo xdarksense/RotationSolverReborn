@@ -31,12 +31,12 @@ public static class ObjectHelper
         EventHandlerContent.Quest,
     };
 
-    internal static Lumina.Excel.Sheets.BNpcBase? GetObjectNPC(this IGameObject obj)
+    internal static Lumina.Excel.Sheets.BNpcBase? GetObjectNPC(this IBattleChara battleChara)
     {
-        return obj == null ? null : Service.GetSheet<Lumina.Excel.Sheets.BNpcBase>().GetRow(obj.DataId);
+        return battleChara == null ? null : Service.GetSheet<Lumina.Excel.Sheets.BNpcBase>().GetRow(battleChara.DataId);
     }
 
-    internal static bool CanProvoke(this IGameObject target)
+    internal static bool CanProvoke(this IBattleChara target)
     {
         if (target == null)
         {
@@ -74,25 +74,20 @@ public static class ObjectHelper
         return false;
     }
 
-    internal static bool HasPositional(this IGameObject obj)
+    internal static bool HasPositional(this IBattleChara battleChara)
     {
-        return obj != null && (!(obj.GetObjectNPC()?.IsOmnidirectional ?? false));
+        return battleChara != null && (!(battleChara.GetObjectNPC()?.IsOmnidirectional ?? false));
     }
 
-    internal static unsafe bool IsOthersPlayersMob(this IGameObject obj)
+    internal static unsafe bool IsOthersPlayersMob(this IBattleChara battleChara)
     {
         //SpecialType but no NamePlateIcon
-        return _eventType.Contains(obj.GetEventType()) && obj.GetNamePlateIcon() == 0;
+        return _eventType.Contains(battleChara.GetEventType()) && battleChara.GetNamePlateIcon() == 0;
     }
 
     internal static bool IsAttackable(this IBattleChara battleChara)
     {
         if (Svc.ClientState == null)
-        {
-            return false;
-        }
-
-        if (battleChara.StatusList == null)
         {
             return false;
         }
@@ -206,14 +201,14 @@ public static class ObjectHelper
             };
     }
 
-    internal static bool IsBozjanCEFateMob(this IGameObject obj)
+    internal static bool IsBozjanCEFateMob(this IBattleChara battleChara)
     {
-        if (obj == null)
+        if (battleChara == null)
         {
             return false;
         }
 
-        if (obj.IsEnemy() == false)
+        if (battleChara.IsEnemy() == false)
         {
             return false;
         }
@@ -224,17 +219,17 @@ public static class ObjectHelper
         }
 
         // Get the EventId of the mob
-        return obj.GetEventType() == EventHandlerContent.PublicContentDirector;
+        return battleChara.GetEventType() == EventHandlerContent.PublicContentDirector;
     }
 
-    internal static bool IsSpecialExecptionImmune(this IBattleChara obj)
+    internal static bool IsSpecialExecptionImmune(this IBattleChara battleChara)
     {
-        if (obj == null)
+        if (battleChara == null)
         {
             return false;
         }
 
-        if (obj.NameId == 9441)
+        if (battleChara.NameId == 9441)
         {
             return true; // Special case for Bottom gate in CLL
         }
@@ -268,95 +263,112 @@ public static class ObjectHelper
         && ActionManager.CanUseActionOnTarget((uint)ActionID.BlizzardPvE, obj.Struct());
     }
 
-    internal static unsafe bool IsAllianceMember(this IGameObject obj)
+    internal static unsafe bool IsAllianceMember(this ICharacter obj)
     {
         return obj.GameObjectId is not 0
-            && !DataCenter.IsPvP && DataCenter.IsInAllianceRaid && obj is IPlayerCharacter && (ActionManager.CanUseActionOnTarget((uint)ActionID.RaisePvE, obj.Struct()) || ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, obj.Struct()));
+            && !DataCenter.IsPvP && DataCenter.IsInAllianceRaid && obj is IPlayerCharacter 
+            && (ActionManager.CanUseActionOnTarget((uint)ActionID.RaisePvE, (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)obj.Struct()) 
+            || ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)obj.Struct()));
     }
 
-    internal static bool IsParty(this IGameObject gameObject)
+    internal static bool IsParty(this IBattleChara battleChara)
     {
-        if (gameObject == null)
+        if (battleChara == null)
         {
             return false;
         }
 
-        if (gameObject.GameObjectId == Player.Object.GameObjectId)
+        if (battleChara.GameObjectId == Player.Object.GameObjectId)
         {
             return true;
         }
 
         foreach (Dalamud.Game.ClientState.Party.IPartyMember p in Svc.Party)
         {
-            if (p.GameObject?.GameObjectId == gameObject.GameObjectId)
+            if (p.GameObject?.GameObjectId == battleChara.GameObjectId)
             {
                 return true;
             }
         }
 
-        if (Service.Config.FriendlyPartyNpcHealRaise3 && gameObject.IsNpcPartyMember())
+        if (Service.Config.FriendlyPartyNpcHealRaise3 && battleChara.IsNpcPartyMember())
         {
             return true;
         }
 
-        return Service.Config.ChocoboPartyMember && gameObject.IsPlayerCharacterChocobo() || (Service.Config.FriendlyBattleNpcHeal && gameObject.IsFriendlyBattleNPC()) || (Service.Config.FocusTargetIsParty && gameObject.IsFocusTarget() && gameObject.IsAllianceMember());
+        if (Service.Config.ChocoboPartyMember && battleChara.IsPlayerCharacterChocobo())
+        {
+            return true;
+        }
+
+        if (Service.Config.FriendlyBattleNpcHeal && battleChara.IsFriendlyBattleNPC())
+        {
+            return true;
+        }
+
+        if (Service.Config.FocusTargetIsParty && battleChara.IsFocusTarget() && battleChara.IsAllianceMember())
+        {
+            return true;
+        }
+
+        return false;
     }
 
-    internal static bool IsNpcPartyMember(this IGameObject gameObj)
+    internal static bool IsNpcPartyMember(this IBattleChara battleChara)
     {
-        return gameObj.GetBattleNPCSubKind() == BattleNpcSubKind.NpcPartyMember;
+        return battleChara.GetBattleNPCSubKind() == BattleNpcSubKind.NpcPartyMember;
     }
 
-    internal static bool IsFriendlyBattleNPC(this IGameObject gameObj)
+    internal static bool IsFriendlyBattleNPC(this IBattleChara battleChara)
     {
-        return gameObj.GetNameplateKind() == NameplateKind.FriendlyBattleNPC;
+        return battleChara.GetNameplateKind() == NameplateKind.FriendlyBattleNPC;
     }
 
-    internal static bool IsPlayerCharacterChocobo(this IGameObject gameObj)
+    internal static bool IsPlayerCharacterChocobo(this IBattleChara battleChara)
     {
-        return gameObj.GetBattleNPCSubKind() == BattleNpcSubKind.Chocobo;
+        return battleChara.GetBattleNPCSubKind() == BattleNpcSubKind.Chocobo;
     }
 
-    internal static bool IsFocusTarget(this IGameObject gameObj)
+    internal static bool IsFocusTarget(this IBattleChara battleChara)
     {
-        return Svc.Targets.FocusTarget != null && Svc.Targets.FocusTarget.GameObjectId == gameObj.GameObjectId;
+        return Svc.Targets.FocusTarget != null && Svc.Targets.FocusTarget.GameObjectId == battleChara.GameObjectId;
     }
 
-    internal static bool IsTargetOnSelf(this IBattleChara IBattleChara)
+    internal static bool IsTargetOnSelf(this IBattleChara battleChara)
     {
-        return IBattleChara.TargetObject?.TargetObject == IBattleChara;
+        return battleChara.TargetObject?.TargetObject == battleChara;
     }
 
-    internal static bool IsDeathToRaise(this IGameObject obj)
+    internal static bool IsDeathToRaise(this IBattleChara battleChara)
     {
-        if (obj == null)
+        if (battleChara == null)
         {
             return false;
         }
 
-        if (!obj.IsDead || !obj.IsTargetable)
+        if (!battleChara.IsDead || !battleChara.IsTargetable)
         {
             return false;
         }
 
-        if (obj is IBattleChara b && b.CurrentHp != 0)
+        if (battleChara is IBattleChara b && b.CurrentHp != 0)
         {
             return false;
         }
 
-        if (obj.HasStatus(false, StatusID.Raise))
+        if (battleChara.HasStatus(false, StatusID.Raise))
         {
             return false;
         }
 
-        if (!Service.Config.RaiseBrinkOfDeath && obj.HasStatus(false, StatusID.BrinkOfDeath))
+        if (!Service.Config.RaiseBrinkOfDeath && battleChara.HasStatus(false, StatusID.BrinkOfDeath))
         {
             return false;
         }
 
         foreach (IBattleChara c in DataCenter.PartyMembers)
         {
-            if (c.CastTargetObjectId == obj.GameObjectId)
+            if (c.CastTargetObjectId == battleChara.GameObjectId)
             {
                 return false;
             }
@@ -365,9 +377,9 @@ public static class ObjectHelper
         return true;
     }
 
-    internal static bool IsAlive(this IGameObject obj)
+    internal static bool IsAlive(this IBattleChara battleChara)
     {
-        return obj is not IBattleChara b || (b.CurrentHp > 0 && obj.IsTargetable);
+        return battleChara is not IBattleChara b || (b.CurrentHp > 0 && battleChara.IsTargetable);
     }
 
     /// <summary>
@@ -384,18 +396,18 @@ public static class ObjectHelper
     /// <summary>
     /// Determines whether the specified game object is a top priority hostile target based on its name being listed.
     /// </summary>
-    /// <param name="obj">The game object to check.</param>
+    /// <param name="battleChara">The battleChara to check.</param>
     /// <returns>
     /// <c>true</c> if the game object is a top priority named hostile, target; otherwise, <c>false</c>.
     /// </returns>
-    internal static bool IsTopPriorityNamedHostile(this IGameObject obj)
+    internal static bool IsTopPriorityNamedHostile(this IBattleChara battleChara)
     {
-        if (obj == null)
+        if (battleChara == null)
         {
             return false;
         }
 
-        if (obj is IBattleChara npc)
+        if (battleChara is IBattleChara npc)
         {
             foreach (uint id in DataCenter.PrioritizedNameIds)
             {
@@ -412,23 +424,23 @@ public static class ObjectHelper
     /// <summary>
     /// Determines whether the specified game object is a top priority hostile target.
     /// </summary>
-    /// <param name="obj">The game object to check.</param>
+    /// <param name="battleChara">The game object to check.</param>
     /// <returns>
     /// <c>true</c> if the game object is a top priority hostile target; otherwise, <c>false</c>.
     /// </returns>
-    internal static bool IsTopPriorityHostile(this IGameObject obj)
+    internal static bool IsTopPriorityHostile(this IBattleChara battleChara)
     {
-        if (obj == null)
+        if (battleChara == null)
         {
             return false;
         }
 
-        if (obj.IsAllianceMember() || obj.IsParty())
+        if (battleChara.IsAllianceMember() || battleChara.IsParty())
         {
             return false;
         }
 
-        if (obj is IBattleChara b)
+        if (battleChara is IBattleChara b)
         {
             // Check IBattleChara bespoke IsSpecialInclusionPriority method
             if (b.IsSpecialInclusionPriority())
@@ -443,7 +455,7 @@ public static class ObjectHelper
             }
 
             // MCH prio targeting for Wildfire
-            if (Player.Job == Job.MCH && obj.HasStatus(true, StatusID.Wildfire) || obj.HasStatus(true, StatusID.Wildfire_1323))
+            if (Player.Job == Job.MCH && battleChara.HasStatus(true, StatusID.Wildfire) || battleChara.HasStatus(true, StatusID.Wildfire_1323))
             {
                 return true;
             }
@@ -468,7 +480,7 @@ public static class ObjectHelper
             {
                 foreach (long id in targets)
                 {
-                    if (id != 0 && id == (long)obj.GameObjectId && obj.IsEnemy())
+                    if (id != 0 && id == (long)battleChara.GameObjectId && battleChara.IsEnemy())
                     {
                         return true;
                     }
@@ -476,12 +488,12 @@ public static class ObjectHelper
             }
         }
 
-        if (Service.Config.TargetFatePriority && DataCenter.PlayerFateId != 0 && obj.FateId() == DataCenter.PlayerFateId)
+        if (Service.Config.TargetFatePriority && DataCenter.PlayerFateId != 0 && battleChara.FateId() == DataCenter.PlayerFateId)
         {
             return true;
         }
 
-        uint icon = obj.GetNamePlateIcon();
+        uint icon = battleChara.GetNamePlateIcon();
 
         // Hunt bill, Relic weapon, and Leve target
         if (Service.Config.TargetHuntingRelicLevePriority && (icon == 60092 || icon == 60096 || icon == 71244))
@@ -493,7 +505,7 @@ public static class ObjectHelper
         //71244 Leve Target
 
         // Quest
-        if (Service.Config.TargetQuestPriority && (icon == 71204 || icon == 71144 || icon == 71224 || icon == 71344 || obj.GetEventType() == EventHandlerContent.Quest))
+        if (Service.Config.TargetQuestPriority && (icon == 71204 || icon == 71144 || icon == 71224 || icon == 71344 || battleChara.GetEventType() == EventHandlerContent.Quest))
         {
             return true;
         }
@@ -503,12 +515,12 @@ public static class ObjectHelper
         //71344 Major Quest
 
         // Check if the object is a BattleNpcPart
-        return Service.Config.PrioEnemyParts && obj.GetBattleNPCSubKind() == BattleNpcSubKind.BattleNpcPart;
+        return Service.Config.PrioEnemyParts && battleChara.GetBattleNPCSubKind() == BattleNpcSubKind.BattleNpcPart;
     }
 
-    internal static bool IsSpecialInclusionPriority(this IBattleChara obj)
+    internal static bool IsSpecialInclusionPriority(this IBattleChara battleChara)
     {
-        if (obj.NameId == 10259 || obj.NameId == 8145 || obj.NameId == 12704 || obj.NameId == 13668)
+        if (battleChara.NameId == 10259 || battleChara.NameId == 8145 || battleChara.NameId == 12704 || battleChara.NameId == 13668)
         {
             return true;
         }
@@ -520,24 +532,24 @@ public static class ObjectHelper
         return false;
     }
 
-    internal static unsafe uint GetNamePlateIcon(this IGameObject obj)
+    internal static unsafe uint GetNamePlateIcon(this IBattleChara battleChara)
     {
-        return obj.Struct()->NamePlateIconId;
+        return battleChara.Struct()->NamePlateIconId;
     }
 
-    internal static unsafe EventHandlerContent GetEventType(this IGameObject obj)
+    internal static unsafe EventHandlerContent GetEventType(this IBattleChara battleChara)
     {
-        return obj.Struct()->EventId.ContentId;
+        return battleChara.Struct()->EventId.ContentId;
     }
 
-    internal static unsafe BattleNpcSubKind GetBattleNPCSubKind(this IGameObject obj)
+    internal static unsafe BattleNpcSubKind GetBattleNPCSubKind(this IBattleChara battleChara)
     {
-        return (BattleNpcSubKind)obj.Struct()->SubKind;
+        return (BattleNpcSubKind)battleChara.Struct()->SubKind;
     }
 
-    internal static unsafe uint FateId(this IGameObject obj)
+    internal static unsafe uint FateId(this IBattleChara battleChara)
     {
-        return obj.Struct()->FateId;
+        return battleChara.Struct()->FateId;
     }
 
     private static readonly ConcurrentDictionary<uint, bool> _effectRangeCheck = [];
@@ -545,18 +557,18 @@ public static class ObjectHelper
     /// <summary>
     /// Determines whether the specified game object can be interrupted.
     /// </summary>
-    /// <param name="obj">The game object to check.</param>
+    /// <param name="battleChara">The game object to check.</param>
     /// <returns>
     /// <c>true</c> if the game object can be interrupted; otherwise, <c>false</c>.
     /// </returns>
-    internal static bool CanInterrupt(this IBattleChara obj)
+    internal static bool CanInterrupt(this IBattleChara battleChara)
     {
-        if (obj == null)
+        if (battleChara == null)
         {
             return false;
         }
 
-        if (obj is not IBattleChara b)
+        if (battleChara is not IBattleChara b)
         {
             return false;
         }
@@ -594,41 +606,41 @@ public static class ObjectHelper
             : (_effectRangeCheck[b.CastActionId] = true);
     }
 
-    internal static bool IsDummy(this IBattleChara obj)
+    internal static bool IsDummy(this IBattleChara battleChara)
     {
-        return obj?.NameId == 541;
+        return battleChara?.NameId == 541;
     }
 
     /// <summary>
     /// Checks if the target is immune due to any special boss mechanic (Wolf, Jeuno, COD, CinderDrift, Resistance, Omega, LimitlessBlue, HanselOrGretel).
     /// </summary>
-    /// <param name="obj">The object to check.</param>
+    /// <param name="battleChara">The object to check.</param>
     /// <returns>True if the target is immune due to any special mechanic; otherwise, false.</returns>
-    public static bool IsSpecialImmune(this IBattleChara obj)
+    public static bool IsSpecialImmune(this IBattleChara battleChara)
     {
-        return obj.IsWolfImmune()
-            || obj.IsJeunoBossImmune()
-            || obj.IsCODBossImmune()
-            || obj.IsCinderDriftImmune()
-            || obj.IsResistanceImmune()
-            || obj.IsOmegaImmune()
-            || obj.IsLimitlessBlue()
-            || obj.IsHanselorGretelShielded();
+        return battleChara.IsWolfImmune()
+            || battleChara.IsJeunoBossImmune()
+            || battleChara.IsCODBossImmune()
+            || battleChara.IsCinderDriftImmune()
+            || battleChara.IsResistanceImmune()
+            || battleChara.IsOmegaImmune()
+            || battleChara.IsLimitlessBlue()
+            || battleChara.IsHanselorGretelShielded();
     }
 
     /// <summary>
     /// Is target Wolf add immune.
     /// </summary>
-    /// <param name="obj">the object.</param>
+    /// <param name="battleChara">the object.</param>
     /// <returns></returns>
-    public static bool IsWolfImmune(this IBattleChara obj)
+    public static bool IsWolfImmune(this IBattleChara battleChara)
     {
         // Numeric values used instead of name as Lumina does not provide name yet, and may update to change name
         StatusID WindPack = (StatusID)4389; // Numeric value for "Rsv43891100S74Cfc3B0E74Cfc3B0", unable to hit Wolf of Wind
         StatusID StonePack = (StatusID)4390; // Numeric value for "Rsv43901100S74Cfc3B0E74Cfc3B0", unable to hit Wolf of Wind
 
-        bool WolfOfWind = obj.NameId == 13846;
-        bool WolfOfStone = obj.NameId == 13847;
+        bool WolfOfWind = battleChara.NameId == 13846;
+        bool WolfOfStone = battleChara.NameId == 13847;
 
         if (WolfOfWind &&
                 Player.Object.HasStatus(false, WindPack))
@@ -656,11 +668,11 @@ public static class ObjectHelper
     /// <summary>
     /// Is target Jeuno Boss immune.
     /// </summary>
-    /// <param name="obj">the object.</param>
+    /// <param name="battleChara">the object.</param>
     /// <returns></returns>
-    public static bool IsJeunoBossImmune(this IBattleChara obj)
+    public static bool IsJeunoBossImmune(this IBattleChara battleChara)
     {
-        if (obj.HasStatus(false, StatusID.EpicVillain) &&
+        if (battleChara.HasStatus(false, StatusID.EpicVillain) &&
                 (Player.Object.HasStatus(false, StatusID.VauntedHero) || Player.Object.HasStatus(false, StatusID.FatedHero)))
         {
             if (Service.Config.InDebug)
@@ -670,7 +682,7 @@ public static class ObjectHelper
             return true;
         }
 
-        if (obj.HasStatus(false, StatusID.VauntedVillain) &&
+        if (battleChara.HasStatus(false, StatusID.VauntedVillain) &&
             (Player.Object.HasStatus(false, StatusID.EpicHero) || Player.Object.HasStatus(false, StatusID.FatedHero)))
         {
             if (Service.Config.InDebug)
@@ -680,7 +692,7 @@ public static class ObjectHelper
             return true;
         }
 
-        if (obj.HasStatus(false, StatusID.FatedVillain) &&
+        if (battleChara.HasStatus(false, StatusID.FatedVillain) &&
             (Player.Object.HasStatus(false, StatusID.EpicHero) || Player.Object.HasStatus(false, StatusID.VauntedHero)))
         {
             if (Service.Config.InDebug)
@@ -696,16 +708,16 @@ public static class ObjectHelper
     /// <summary>
     /// Is target COD Boss immune.
     /// </summary>
-    /// <param name="obj">the object.</param>
+    /// <param name="battleChara">the object.</param>
     /// <returns></returns>
-    public static bool IsCODBossImmune(this IBattleChara obj)
+    public static bool IsCODBossImmune(this IBattleChara battleChara)
     {
         StatusID StygianStatus = StatusID.UnnamedStatus_4388;
         StatusID CloudOfDarknessStatus = StatusID.VeilOfDarkness;
         StatusID AntiCloudOfDarknessStatus = StatusID.OuterDarkness;
         StatusID AntiStygianStatus = StatusID.InnerDarkness;
 
-        if (obj.HasStatus(false, CloudOfDarknessStatus) &&
+        if (battleChara.HasStatus(false, CloudOfDarknessStatus) &&
                 Player.Object.HasStatus(false, AntiCloudOfDarknessStatus))
         {
             if (Service.Config.InDebug)
@@ -715,7 +727,7 @@ public static class ObjectHelper
             return true;
         }
 
-        if (obj.HasStatus(false, StygianStatus) &&
+        if (battleChara.HasStatus(false, StygianStatus) &&
             Player.Object.HasStatus(false, AntiStygianStatus))
         {
             if (Service.Config.InDebug)
@@ -731,16 +743,16 @@ public static class ObjectHelper
     /// <summary>
     /// Is target COD Boss immune.
     /// </summary>
-    /// <param name="obj">the object.</param>
+    /// <param name="battleChara">the object.</param>
     /// <returns></returns>
-    public static bool IsCinderDriftImmune(this IBattleChara obj)
+    public static bool IsCinderDriftImmune(this IBattleChara battleChara)
     {
         StatusID GriefAdd = StatusID.BlindToGrief;
         StatusID RageAdd = StatusID.BlindToRage;
         StatusID AntiGriefAdd = StatusID.PallOfGrief;
         StatusID AntiRageAdd = StatusID.PallOfRage;
 
-        if (obj.HasStatus(false, GriefAdd) &&
+        if (battleChara.HasStatus(false, GriefAdd) &&
                 Player.Object.HasStatus(false, AntiGriefAdd))
         {
             if (Service.Config.InDebug)
@@ -750,7 +762,7 @@ public static class ObjectHelper
             return true;
         }
 
-        if (obj.HasStatus(false, RageAdd) &&
+        if (battleChara.HasStatus(false, RageAdd) &&
             Player.Object.HasStatus(false, AntiRageAdd))
         {
             if (Service.Config.InDebug)
@@ -766,9 +778,9 @@ public static class ObjectHelper
     /// <summary>
     /// Is target COD Boss immune.
     /// </summary>
-    /// <param name="obj">the object.</param>
+    /// <param name="battleChara">the object.</param>
     /// <returns></returns>
-    public static bool IsResistanceImmune(this IBattleChara obj)
+    public static bool IsResistanceImmune(this IBattleChara battleChara)
     {
         StatusID VoidArkMagicResistance = StatusID.MagicResistance;
         StatusID VoidArkRangedResistance = StatusID.RangedResistance;
@@ -776,7 +788,7 @@ public static class ObjectHelper
         StatusID LeviRangedResistance = StatusID.VeilOfTheWhorl;
         JobRole role = Player.Object?.ClassJob.Value.GetJobRole() ?? JobRole.None;
 
-        if (obj.HasStatus(false, VoidArkMagicResistance, LeviMagicResistance) &&
+        if (battleChara.HasStatus(false, VoidArkMagicResistance, LeviMagicResistance) &&
                 (role == JobRole.RangedMagical || role == JobRole.Healer))
         {
             if (Service.Config.InDebug)
@@ -786,7 +798,7 @@ public static class ObjectHelper
             return true;
         }
 
-        if (obj.HasStatus(false, VoidArkRangedResistance, LeviRangedResistance) &&
+        if (battleChara.HasStatus(false, VoidArkRangedResistance, LeviRangedResistance) &&
             role == JobRole.RangedPhysical)
         {
             if (Service.Config.InDebug)
@@ -802,9 +814,9 @@ public static class ObjectHelper
     /// <summary>
     /// Is target COD Boss immune.
     /// </summary>
-    /// <param name="obj">the object.</param>
+    /// <param name="battleChara">the object.</param>
     /// <returns></returns>
-    public static bool IsOmegaImmune(this IBattleChara obj)
+    public static bool IsOmegaImmune(this IBattleChara battleChara)
     {
         StatusID AntiOmegaF = StatusID.PacketFilterF;
         StatusID AntiOmegaF_Extreme = StatusID.PacketFilterF_3500;
@@ -815,7 +827,7 @@ public static class ObjectHelper
         StatusID OmegaM = StatusID.OmegaM;
         StatusID OmegaM2 = StatusID.OmegaM_3454;
 
-        if (obj.HasStatus(false, OmegaF) &&
+        if (battleChara.HasStatus(false, OmegaF) &&
                 Player.Object.HasStatus(false, AntiOmegaF, AntiOmegaF_Extreme))
         {
             if (Service.Config.InDebug)
@@ -825,7 +837,7 @@ public static class ObjectHelper
             return true;
         }
 
-        if (obj.HasStatus(false, OmegaM, OmegaM2) &&
+        if (battleChara.HasStatus(false, OmegaM, OmegaM2) &&
             Player.Object.HasStatus(false, AntiOmegaM, AntiOmegaM_Extreme))
         {
             if (Service.Config.InDebug)
@@ -841,18 +853,18 @@ public static class ObjectHelper
     /// <summary>
     /// Is target COD Boss immune.
     /// </summary>
-    /// <param name="obj">the object.</param>
+    /// <param name="battleChara">the object.</param>
     /// <returns></returns>
-    public static bool IsLimitlessBlue(this IBattleChara obj)
+    public static bool IsLimitlessBlue(this IBattleChara battleChara)
     {
         StatusID WillOfTheWater = StatusID.WillOfTheWater;
         StatusID WillOfTheWind = StatusID.WillOfTheWind;
         StatusID WhaleBack = StatusID.Whaleback;
 
-        bool Green = obj.NameId == 3654;
-        bool Blue = obj.NameId == 3655;
-        bool BismarkShell = obj.NameId == 3656;
-        bool BismarkCorona = obj.NameId == 3657;
+        bool Green = battleChara.NameId == 3654;
+        bool Blue = battleChara.NameId == 3655;
+        bool BismarkShell = battleChara.NameId == 3656;
+        bool BismarkCorona = battleChara.NameId == 3657;
 
         if ((BismarkShell || BismarkCorona) &&
                 !Player.Object.HasStatus(false, WhaleBack))
@@ -890,15 +902,15 @@ public static class ObjectHelper
     /// <summary>
     /// Is target Hansel or Gretel and has the Strong of Shield status.
     /// </summary>
-    /// <param name="obj">the object.</param>
+    /// <param name="battleChara">the object.</param>
     /// <returns></returns>
-    public static bool IsHanselorGretelShielded(this IBattleChara obj)
+    public static bool IsHanselorGretelShielded(this IBattleChara battleChara)
     {
         EnemyPositional strongOfShieldPositional = EnemyPositional.Front;
         StatusID strongOfShieldStatus = StatusID.StrongOfShield;
 
-        if (obj.HasStatus(false, strongOfShieldStatus) &&
-                strongOfShieldPositional != obj.FindEnemyPositional())
+        if (battleChara.HasStatus(false, strongOfShieldStatus) &&
+                strongOfShieldPositional != battleChara.FindEnemyPositional())
         {
             if (Service.Config.InDebug)
             {
@@ -913,54 +925,54 @@ public static class ObjectHelper
     /// <summary>
     /// Is target a boss depends on the ttk.
     /// </summary>
-    /// <param name="obj">the object.</param>
+    /// <param name="battleChara">the object.</param>
     /// <returns></returns>
-    public static bool IsBossFromTTK(this IBattleChara obj)
+    public static bool IsBossFromTTK(this IBattleChara battleChara)
     {
-        if (obj == null)
+        if (battleChara == null)
         {
             return false;
         }
 
-        if (obj.IsDummy())
+        if (battleChara.IsDummy())
         {
             return true;
         }
 
         //Fate
-        return obj.GetTTK(true) >= Service.Config.BossTimeToKill;
+        return battleChara.GetTTK(true) >= Service.Config.BossTimeToKill;
     }
 
     /// <summary>
     /// Is target a boss depends on the icon.
     /// </summary>
-    /// <param name="obj">the object.</param>
+    /// <param name="battleChara">the object.</param>
     /// <returns></returns>
-    public static bool IsBossFromIcon(this IBattleChara obj)
+    public static bool IsBossFromIcon(this IBattleChara battleChara)
     {
-        if (obj == null)
+        if (battleChara == null)
         {
             return false;
         }
 
-        if (obj.IsDummy())
+        if (battleChara.IsDummy())
         {
             return true;
         }
 
         //Icon
-        Lumina.Excel.Sheets.BNpcBase? npc = obj.GetObjectNPC();
+        Lumina.Excel.Sheets.BNpcBase? npc = battleChara.GetObjectNPC();
         return npc?.Rank is 1 or 2 or 6;
     }
 
     /// <summary>
     /// Returns object's calculated shield value.
     /// </summary>
-    /// <param name="obj"></param>
+    /// <param name="battleChara"></param>
     /// <returns></returns>
-    public static uint GetObjectShield(this IGameObject obj)
+    public static uint GetObjectShield(this IBattleChara battleChara)
     {
-        return obj is ICharacter character && character.MaxHp > 0 && character.ShieldPercentage > 0
+        return battleChara is ICharacter character && character.MaxHp > 0 && character.ShieldPercentage > 0
             ? character.MaxHp * character.ShieldPercentage / 100
             : 0;
     }
@@ -968,35 +980,35 @@ public static class ObjectHelper
     /// <summary>
     /// Is object dying.
     /// </summary>
-    /// <param name="obj"></param>
+    /// <param name="battleChara"></param>
     /// <returns></returns>
-    public static bool IsDying(this IBattleChara obj)
+    public static bool IsDying(this IBattleChara battleChara)
     {
-        return obj != null && !obj.IsDummy() && (obj.GetTTK() <= Service.Config.DyingTimeToKill || obj.GetHealthRatio() < Service.Config.IsDyingConfig);
+        return battleChara != null && !battleChara.IsDummy() && (battleChara.GetTTK() <= Service.Config.DyingTimeToKill || battleChara.GetHealthRatio() < Service.Config.IsDyingConfig);
     }
 
     /// <summary>
     /// Determines whether the specified battle character is currently in combat.
     /// </summary>
-    /// <param name="obj">The battle character to check.</param>
+    /// <param name="battleChara">The battle character to check.</param>
     /// <returns>
     /// <c>true</c> if the battle character is in combat; otherwise, <c>false</c>.
     /// </returns>
-    internal static unsafe bool InCombat(this IBattleChara obj)
+    internal static unsafe bool InCombat(this IBattleChara battleChara)
     {
-        return obj != null && obj.Struct() != null && obj.Struct()->Character.InCombat;
+        return battleChara != null && battleChara.Struct() != null && battleChara.Struct()->Character.InCombat;
     }
 
     private static readonly Dictionary<ulong, Vector3> LastPositions = [];
-    internal static bool IsTargetMoving(this IBattleChara target)
+    internal static bool IsTargetMoving(this IBattleChara battleChara)
     {
-        if (target == null)
+        if (battleChara == null)
         {
             return false;
         }
 
-        ulong id = target.GameObjectId;
-        Vector3 currentPos = target.Position;
+        ulong id = battleChara.GameObjectId;
+        Vector3 currentPos = battleChara.Position;
         if (LastPositions.TryGetValue(id, out Vector3 lastPos))
         {
             // You can adjust the threshold as needed
@@ -1016,19 +1028,19 @@ public static class ObjectHelper
     /// <summary>
     /// Calculates the estimated time to kill the specified battle character.
     /// </summary>
-    /// <param name="obj">The battle character to calculate the time to kill for.</param>
+    /// <param name="battleChara">The battle character to calculate the time to kill for.</param>
     /// <param name="wholeTime">If set to <c>true</c>, calculates the total time to kill; otherwise, calculates the remaining time to kill.</param>
     /// <returns>
     /// The estimated time to kill the battle character in seconds, or <see cref="float.NaN"/> if the calculation cannot be performed.
     /// </returns>
-    internal static float GetTTK(this IBattleChara obj, bool wholeTime = false)
+    internal static float GetTTK(this IBattleChara battleChara, bool wholeTime = false)
     {
-        if (obj == null)
+        if (battleChara == null)
         {
             return float.NaN;
         }
 
-        if (obj.IsDummy())
+        if (battleChara.IsDummy())
         {
             return 999.99f;
         }
@@ -1037,7 +1049,7 @@ public static class ObjectHelper
         float initialHpRatio = 0;
 
         // Use a snapshot of the RecordedHP collection to avoid modification during enumeration
-        (DateTime time, SortedList<ulong, float> hpRatios)[] recordedHPCopy = DataCenter.RecordedHP.ToArray();
+        (DateTime time, SortedList<ulong, float> hpRatios)[] recordedHPCopy = [.. DataCenter.RecordedHP];
 
         // Calculate a moving average of HP ratios
         const int movingAverageWindow = 5;
@@ -1045,7 +1057,7 @@ public static class ObjectHelper
 
         foreach ((DateTime time, SortedList<ulong, float> hpRatiosDict) in recordedHPCopy)
         {
-            if (hpRatiosDict != null && hpRatiosDict.TryGetValue(obj.GameObjectId, out float ratio) && ratio != 1)
+            if (hpRatiosDict != null && hpRatiosDict.TryGetValue(battleChara.GameObjectId, out float ratio) && ratio != 1)
             {
                 if (startTime == DateTime.MinValue)
                 {
@@ -1066,7 +1078,7 @@ public static class ObjectHelper
             return float.NaN;
         }
 
-        float currentHealthRatio = obj.GetHealthRatio();
+        float currentHealthRatio = battleChara.GetHealthRatio();
         if (float.IsNaN(currentHealthRatio))
         {
             return float.NaN;
@@ -1097,31 +1109,31 @@ public static class ObjectHelper
     /// <summary>
     /// Gets how long the character has been alive in seconds since their last death.
     /// </summary>
-    /// <param name="obj">The battle character to check.</param>
+    /// <param name="battleChara">The battle character to check.</param>
     /// <returns>
     /// The time in seconds since the character's last death or first appearance, or float.NaN if unable to determine.
     /// </returns>
-    internal static float TimeAlive(this IBattleChara obj)
+    internal static float TimeAlive(this IBattleChara battleChara)
     {
-        if (obj == null)
+        if (battleChara == null)
         {
             return float.NaN;
         }
 
         // If the character is dead, reset their alive time
-        if (obj.IsDead || Svc.Condition[ConditionFlag.BetweenAreas])
+        if (battleChara.IsDead || Svc.Condition[ConditionFlag.BetweenAreas])
         {
-            _ = _aliveStartTimes.TryRemove(obj.GameObjectId, out _);
+            _ = _aliveStartTimes.TryRemove(battleChara.GameObjectId, out _);
             return 0;
         }
 
         // If we haven't tracked this character yet, start tracking them
-        if (!_aliveStartTimes.ContainsKey(obj.GameObjectId))
+        if (!_aliveStartTimes.ContainsKey(battleChara.GameObjectId))
         {
-            _aliveStartTimes[obj.GameObjectId] = DateTime.Now;
+            _aliveStartTimes[battleChara.GameObjectId] = DateTime.Now;
         }
 
-        return (float)(DateTime.Now - _aliveStartTimes[obj.GameObjectId]).TotalSeconds > 30 ? 30 : (float)(DateTime.Now - _aliveStartTimes[obj.GameObjectId]).TotalSeconds;
+        return (float)(DateTime.Now - _aliveStartTimes[battleChara.GameObjectId]).TotalSeconds > 30 ? 30 : (float)(DateTime.Now - _aliveStartTimes[battleChara.GameObjectId]).TotalSeconds;
     }
 
     private static readonly ConcurrentDictionary<ulong, DateTime> _deadStartTimes = [];
@@ -1129,43 +1141,43 @@ public static class ObjectHelper
     /// <summary>
     /// Gets how long the character has been dead in seconds since their last death.
     /// </summary>
-    /// <param name="obj">The battle character to check.</param>
+    /// <param name="battleChara">The battle character to check.</param>
     /// <returns>
     /// The time in seconds since the character's death, or float.NaN if unable to determine or character is alive.
     /// </returns>
-    internal static float TimeDead(this IBattleChara obj)
+    internal static float TimeDead(this IBattleChara battleChara)
     {
-        if (obj == null)
+        if (battleChara == null)
         {
             return float.NaN;
         }
 
         // If the character is alive, reset their dead time
-        if (!obj.IsDead)
+        if (!battleChara.IsDead)
         {
-            _ = _deadStartTimes.TryRemove(obj.GameObjectId, out _);
+            _ = _deadStartTimes.TryRemove(battleChara.GameObjectId, out _);
             return 0;
         }
 
         // If we haven't tracked this character's death yet, start tracking them
-        if (!_deadStartTimes.ContainsKey(obj.GameObjectId))
+        if (!_deadStartTimes.ContainsKey(battleChara.GameObjectId))
         {
-            _deadStartTimes[obj.GameObjectId] = DateTime.Now;
+            _deadStartTimes[battleChara.GameObjectId] = DateTime.Now;
         }
 
-        return (float)(DateTime.Now - _deadStartTimes[obj.GameObjectId]).TotalSeconds > 30 ? 30 : (float)(DateTime.Now - _deadStartTimes[obj.GameObjectId]).TotalSeconds;
+        return (float)(DateTime.Now - _deadStartTimes[battleChara.GameObjectId]).TotalSeconds > 30 ? 30 : (float)(DateTime.Now - _deadStartTimes[battleChara.GameObjectId]).TotalSeconds;
     }
 
     /// <summary>
     /// Determines if the specified battle character has been attacked within the last second.
     /// </summary>
-    /// <param name="obj">The battle character to check.</param>
+    /// <param name="battleChara">The battle character to check.</param>
     /// <returns>
     /// <c>true</c> if the battle character has been attacked within the last second; otherwise, <c>false</c>.
     /// </returns>
-    internal static bool IsAttacked(this IBattleChara obj)
+    internal static bool IsAttacked(this IBattleChara battleChara)
     {
-        if (obj == null)
+        if (battleChara == null)
         {
             return false;
         }
@@ -1173,7 +1185,7 @@ public static class ObjectHelper
         DateTime now = DateTime.Now;
         foreach ((ulong id, DateTime time) in DataCenter.AttackedTargets)
         {
-            if (id == obj.GameObjectId)
+            if (id == battleChara.GameObjectId)
             {
                 return now - time >= TimeSpan.FromSeconds(1);
             }
@@ -1184,30 +1196,30 @@ public static class ObjectHelper
     /// <summary>
     /// Determines if the player can see the specified game object.
     /// </summary>
-    /// <param name="obj">The game object to check visibility for.</param>
+    /// <param name="battleChara">The game object to check visibility for.</param>
     /// <returns>
     /// <c>true</c> if the player can see the specified game object; otherwise, <c>false</c>.
     /// </returns>
-    internal static unsafe bool CanSee(this IGameObject obj)
+    internal static unsafe bool CanSee(this IBattleChara battleChara)
     {
-        if (obj == null)
+        if (battleChara == null)
         {
             return false;
         }
 
-        if (obj.Struct() == null)
+        if (battleChara.Struct() == null)
         {
             return false;
         }
 
         const uint specificEnemyId = 3830; // Bioculture Node in Aetherial Chemical Research Facility
-        if (obj.GameObjectId == specificEnemyId)
+        if (battleChara.GameObjectId == specificEnemyId)
         {
             return true;
         }
 
         Vector3 point = Player.Object.Position + (Vector3.UnitY * Player.GameObject->Height);
-        Vector3 tarPt = obj.Position + (Vector3.UnitY * obj.Struct()->Height);
+        Vector3 tarPt = battleChara.Position + (Vector3.UnitY * battleChara.Struct()->Height);
         Vector3 direction = tarPt - point;
 
         int* unknown = stackalloc int[] { 0x4000, 0, 0x4000, 0 };
@@ -1220,18 +1232,18 @@ public static class ObjectHelper
     }
 
     /// <summary>
-    /// Get the <paramref name="obj"/>'s current HP percentage.
+    /// Get the <paramref name="battleChara"/>'s current HP percentage.
     /// </summary>
-    /// <param name="obj"></param>
+    /// <param name="battleChara"></param>
     /// <returns></returns>
-    public static float GetHealthRatio(this IGameObject obj)
+    public static float GetHealthRatio(this IBattleChara battleChara)
     {
-        if (obj == null)
+        if (battleChara == null)
         {
             return 0;
         }
 
-        if (obj is not IBattleChara b)
+        if (battleChara is not IBattleChara b)
         {
             return 0;
         }
@@ -1256,7 +1268,7 @@ public static class ObjectHelper
     /// <returns>
     /// An <see cref="EnemyPositional"/> value indicating whether the player is in front, at the rear, or on the flank of the enemy.
     /// </returns>
-    public static EnemyPositional FindEnemyPositional(this IGameObject enemy)
+    public static EnemyPositional FindEnemyPositional(this IBattleChara enemy)
     {
         if (enemy == null)
         {
@@ -1297,23 +1309,23 @@ public static class ObjectHelper
     /// <summary>
     /// Gets the facing direction vector of the game object.
     /// </summary>
-    /// <param name="obj">The game object.</param>
+    /// <param name="battleChara">The game object.</param>
     /// <returns>
     /// A <see cref="Vector3"/> representing the facing direction of the game object.
     /// </returns>
-    internal static Vector3 GetFaceVector(this IGameObject obj)
+    internal static Vector3 GetFaceVector(this IBattleChara battleChara)
     {
-        if (obj == null)
+        if (battleChara == null)
         {
             return Vector3.Zero;
         }
 
-        if (obj is not IBattleChara)
+        if (battleChara is not IBattleChara)
         {
             return Vector3.Zero;
         }
 
-        float rotation = obj.Rotation;
+        float rotation = battleChara.Rotation;
         return new Vector3((float)Math.Sin(rotation), 0, (float)Math.Cos(rotation));
     }
 
@@ -1338,23 +1350,23 @@ public static class ObjectHelper
     }
 
     /// <summary>
-    /// The distance from <paramref name="obj"/> to the player
+    /// The distance from <paramref name="battleChara"/> to the player
     /// </summary>
-    /// <param name="obj"></param>
+    /// <param name="battleChara"></param>
     /// <returns></returns>
-    public static float DistanceToPlayer(this IGameObject? obj)
+    public static float DistanceToPlayer(this IBattleChara battleChara)
     {
-        if (obj == null)
+        if (battleChara == null)
         {
             return float.MaxValue;
         }
 
-        if (obj is not IBattleChara)
+        if (battleChara is not IBattleChara)
         {
             return float.MaxValue;
         }
 
-        float distance = Vector3.Distance(Player.Object.Position, obj.Position) - (Player.Object.HitboxRadius + obj.HitboxRadius);
+        float distance = Vector3.Distance(Player.Object.Position, battleChara.Position) - (Player.Object.HitboxRadius + battleChara.HitboxRadius);
         return distance;
     }
 

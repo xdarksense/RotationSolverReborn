@@ -3326,7 +3326,6 @@ public partial class RotationConfigWindow : Window
         {() => "Next Action", DrawNextAction },
         {() => "Last Action", DrawLastAction },
         {() => "Others", DrawOthers },
-        {() => "GCD Cooldown Visualization", DrawGCDCooldownStuff },
         {() => "Effect", () =>
             {
                 ImGui.Text(Watcher.ShowStrSelf);
@@ -3525,7 +3524,7 @@ public partial class RotationConfigWindow : Window
 
     private static unsafe void DrawTargetData()
     {
-        IGameObject? target = Svc.Targets.Target;
+        IBattleChara? target = Svc.Targets.Target as IBattleChara;
         if (target == null)
         {
             return;
@@ -3616,57 +3615,6 @@ public partial class RotationConfigWindow : Window
     {
         ImGui.Text($"Combat Time: {DataCenter.CombatTimeRaw}");
         ImGui.Text($"Limit Break: {CustomRotation.LimitBreakLevel}");
-    }
-
-    private static float _maxAnimationLockTime = 0;
-
-    private static void DrawGCDCooldownStuff()
-    {
-        ImGui.Text("GCD Cooldown Visualization");
-
-        ImGui.Text($"GCD Elapsed: {DataCenter.DefaultGCDElapsed}");
-        ImGui.Text($"GCD Remain: {DataCenter.DefaultGCDRemain}");
-        ImGui.Text($"GCD Total: {DataCenter.DefaultGCDTotal}");
-
-        // Visualize the GCD and oGCD slots
-        float gcdTotal = DataCenter.DefaultGCDElapsed + DataCenter.DefaultGCDRemain;
-        float gcdProgress = DataCenter.DefaultGCDElapsed / gcdTotal;
-
-        // Draw the progress bar
-        ImGui.ProgressBar(gcdProgress, new Vector2(-1, 0), $"{DataCenter.DefaultGCDElapsed:F2}s / {gcdTotal:F2}s");
-
-        // Update the maximum Animation Lock Time if the current value is larger
-        float currentAnimationLockTime = ActionManagerHelper.GetCurrentAnimationLock(); // Assuming you have this value
-        if (currentAnimationLockTime > _maxAnimationLockTime)
-        {
-            _maxAnimationLockTime = currentAnimationLockTime;
-        }
-
-        // Calculate the position for the Animation Lock Delay marker
-        float markerPosition = _maxAnimationLockTime / gcdTotal;
-
-        // Draw the marker on the progress bar
-        Vector2 cursorPos = ImGui.GetCursorPos();
-        float progressBarWidth = ImGui.GetContentRegionAvail().X;
-        float markerXPos = cursorPos.X + (progressBarWidth * markerPosition);
-
-        // Draw the marker on the same line as the progress bar
-        ImGui.SetCursorPos(new Vector2(markerXPos, cursorPos.Y - (ImGui.GetTextLineHeight() / 2)));
-        ImGui.Text("|");
-
-        // Check if the marker is hovered and display a tooltip
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip("Most recent recorded animation lock delay");
-        }
-
-        // Reset cursor position
-        ImGui.SetCursorPos(cursorPos);
-
-        // Add space below the progress bar
-        ImGui.Dummy(new Vector2(0, 20));
-
-        // Add any additional visualization for oGCD slots if needed
     }
 
     private static void DrawAction(ActionID id, string type)

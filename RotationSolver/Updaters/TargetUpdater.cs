@@ -14,7 +14,7 @@ internal static partial class TargetUpdater
         _raiseAllTargets = new(() => Service.Config.RaiseDelay);
 
     private static DateTime _lastUpdateTimeToKill = DateTime.MinValue;
-    private static readonly TimeSpan TimeToKillUpdateInterval = TimeSpan.FromSeconds(0.1);
+    private static readonly TimeSpan TimeToKillUpdateInterval = TimeSpan.FromSeconds(1);
 
     internal static void UpdateTargets()
     {

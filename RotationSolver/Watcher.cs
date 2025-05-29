@@ -1,5 +1,4 @@
 ﻿using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Plugin.Ipc;
 using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using ECommons.Hooks;
@@ -14,12 +13,8 @@ namespace RotationSolver;
 
 public static class Watcher
 {
-    private static ICallGateSubscriber<object, object>? IpcSubscriber;
-
     public static void Enable()
     {
-        IpcSubscriber = Svc.PluginInterface.GetIpcSubscriber<object, object>("PingPlugin.Ipc");
-
         ActionEffect.ActionEffectEvent += ActionFromEnemy;
         ActionEffect.ActionEffectEvent += ActionFromSelf;
     }
@@ -38,13 +33,7 @@ public static class Watcher
         try
         {
             // Check Source.
-            IGameObject? source = set.Source;
-            if (source == null)
-            {
-                return;
-            }
-
-            if (source is not IBattleChara battle)
+            if (set.Source is not IBattleChara battle)
             {
                 return;
             }
@@ -60,8 +49,7 @@ public static class Watcher
                 return; // Friend!
             }
 
-            IGameObject? obj = Svc.Objects.SearchById(battle.GameObjectId);
-            if (obj == null)
+            if (Svc.Objects.SearchById(battle.GameObjectId) is not IBattleChara obj)
             {
                 return;
             }
@@ -124,13 +112,13 @@ public static class Watcher
                 }
             }
 
-            if (set.Header.ActionType == ActionType.Action && DataCenter.PartyMembers.Count() >= 4 && set.Action?.Cast100ms > 0)
+            if (set.Header.ActionType == ActionType.Action && DataCenter.PartyMembers.Count >= 4 && set.Action?.Cast100ms > 0)
             {
                 ActionCate? type = set.Action?.GetActionCate();
 
                 if (type is ActionCate.Spell or ActionCate.Weaponskill or ActionCate.Ability)
                 {
-                    int partyMemberCount = DataCenter.PartyMembers.Count();
+                    int partyMemberCount = DataCenter.PartyMembers.Count;
                     int damageEffectCount = 0;
 
                     foreach (TargetEffect effect in set.TargetEffects)
@@ -193,12 +181,6 @@ public static class Watcher
             if (set.Action?.ActionCategory.Value.RowId == (uint)ActionCate.Autoattack)
             {
                 return;
-            }
-
-            uint id = set.Action!.Value.RowId;
-            if (!set.Action.Value.IsRealGCD()) //&& (set.Action?.ClassJob.Id > 0 || Enum.IsDefined((ActionID)id)))
-            {
-                OtherConfiguration.AnimationLockTime[id] = set.Header.AnimationLockTime;
             }
 
             if (set.TargetEffects.Length == 0)
