@@ -175,7 +175,7 @@ internal static class MajorUpdater
 
     private static void RSRUpdateAction(IFramework framework)
     {
-        if (Service.Config.TeachingMode || DataCenter.IsActivated())
+        if (DataCenter.IsActivated())
         {
             try
             {
@@ -469,22 +469,19 @@ internal static class MajorUpdater
 
     private static void RSRUpdateMisc(IFramework framework)
     {
-        if (Service.Config.TeachingMode || DataCenter.IsActivated())
+        try
         {
-            try
+            MiscUpdater.UpdateMisc();
+        }
+        catch (Exception ex)
+        {
+            if (_threadException != ex)
             {
-                MiscUpdater.UpdateMisc();
-            }
-            catch (Exception ex)
-            {
-                if (_threadException != ex)
+                _threadException = ex;
+                PluginLog.Error($"MiscUpdater.UpdateEntry Exception: {ex.Message}");
+                if (Service.Config.InDebug)
                 {
-                    _threadException = ex;
-                    PluginLog.Error($"MiscUpdater.UpdateEntry Exception: {ex.Message}");
-                    if (Service.Config.InDebug)
-                    {
-                        _ = BasicWarningHelper.AddSystemWarning("MiscUpdater.UpdateEntry Exception");
-                    }
+                    _ = BasicWarningHelper.AddSystemWarning("MiscUpdater.UpdateEntry Exception");
                 }
             }
         }
