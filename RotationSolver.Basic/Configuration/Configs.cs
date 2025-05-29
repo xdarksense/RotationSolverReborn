@@ -495,28 +495,23 @@ internal partial class Configs : IPluginConfiguration
     private static readonly bool _raisePlayerBySwift = true;
 
     [JobConfig, UI("Prioritize raising dead players over Healing/Defense.",
-        Filter = HealingActionCondition, Section = 2,
-        PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
+        Filter = HealingActionCondition, Section = 2)]
     private static readonly bool _raisePlayerFirst = false;
 
     [JobConfig, UI("Raise styles",
-        Filter = HealingActionCondition, Section = 2,
-        PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
+        Filter = HealingActionCondition, Section = 2)]
     private readonly RaiseType _RaiseType = RaiseType.PartyOnly;
 
     [JobConfig, UI("Raise players that have the Brink of Death debuff",
-        Filter = HealingActionCondition, Section = 2,
-        PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
+        Filter = HealingActionCondition, Section = 2)]
     private static readonly bool _raiseBrinkOfDeath = true;
 
     [JobConfig, UI("Raise non-Healers from bottom of party list to the top (Light Party 2 Healer Behavior, Experimental)",
-        Filter = HealingActionCondition, Section = 2,
-        PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
+        Filter = HealingActionCondition, Section = 2)]
     private static readonly bool _h2 = false;
 
     [JobConfig, UI("Raise Red Mage and Summoners first if no Tanks or Healers are dead (Experimental)",
-        Filter = HealingActionCondition, Section = 2,
-        PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
+        Filter = HealingActionCondition, Section = 2)]
     private static readonly bool _offRaiserRaise = false;
 
     /// <markdown file="Auto" name="How early before next GCD should RSR use swiftcast for raise" section="Healing Usage and Control">
