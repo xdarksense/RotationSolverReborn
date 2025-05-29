@@ -86,6 +86,16 @@ public sealed class PhantomDefault : PhantomRotation
         return base.MoveForwardAbility(nextGCD, out act);
     }
 
+    public override bool RaiseGCD(out IAction? act)
+    {
+        if (RevivePvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.RaiseGCD(out act);
+    }
+
     public override bool DefenseSingleGCD(out IAction? act)
     {
         if (PrayPvE.CanUse(out act))
