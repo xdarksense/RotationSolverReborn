@@ -3,6 +3,7 @@ using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Logging;
+using RotationSolver.Basic.Rotations.Duties;
 
 namespace RotationSolver.Updaters;
 
@@ -166,8 +167,8 @@ internal static partial class TargetUpdater
 
     private static IBattleChara? GetDeathTarget()
     {
-        if (Player.Job is Job.WHM or Job.SCH or Job.AST or Job.SGE or
-            Job.SMN or Job.RDM)
+        if ((Player.Job is Job.WHM or Job.SCH or Job.AST or Job.SGE or
+            Job.SMN or Job.RDM) || (DutyRotation.ChemistLevel >= 3))
         {
             try
             {
