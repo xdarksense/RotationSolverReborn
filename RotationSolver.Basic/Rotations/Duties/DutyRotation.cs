@@ -175,20 +175,11 @@ public partial class DutyRotation : IDisposable
         }
     }
 
-    public static byte CannoneerLevel
+    public static byte MonkLevel
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.PhantomCannoneer);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
-        }
-    }
-
-    public static byte ChemistLevel
-    {
-        get
-        {
-            byte stacks = Player.StatusStack(true, StatusID.PhantomChemist);
+            byte stacks = Player.StatusStack(true, StatusID.PhantomMonk);
             return stacks == byte.MaxValue ? (byte)6 : stacks;
         }
     }
@@ -202,6 +193,15 @@ public partial class DutyRotation : IDisposable
         }
     }
 
+    public static byte ChemistLevel
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.PhantomChemist);
+            return stacks == byte.MaxValue ? (byte)6 : stacks;
+        }
+    }
+
     public static byte TimeMageLevel
     {
         get
@@ -211,20 +211,11 @@ public partial class DutyRotation : IDisposable
         }
     }
 
-    public static byte RangerLevel
+    public static byte CannoneerLevel
     {
         get
         {
-            byte stacks = Player.StatusStack(true, StatusID.PhantomRanger);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
-        }
-    }
-
-    public static byte MonkLevel
-    {
-        get
-        {
-            byte stacks = Player.StatusStack(true, StatusID.PhantomMonk);
+            byte stacks = Player.StatusStack(true, StatusID.PhantomCannoneer);
             return stacks == byte.MaxValue ? (byte)6 : stacks;
         }
     }
@@ -247,6 +238,24 @@ public partial class DutyRotation : IDisposable
         }
     }
 
+    public static byte RangerLevel
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.PhantomRanger);
+            return stacks == byte.MaxValue ? (byte)6 : stacks;
+        }
+    }
+
+    public static byte ThiefLevel
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.PhantomThief);
+            return stacks == byte.MaxValue ? (byte)6 : stacks;
+        }
+    }
+
     public static byte SamuraiLevel
     {
         get
@@ -261,15 +270,6 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomGeomancer);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
-        }
-    }
-
-    public static byte ThiefLevel
-    {
-        get
-        {
-            byte stacks = Player.StatusStack(true, StatusID.PhantomThief);
             return stacks == byte.MaxValue ? (byte)6 : stacks;
         }
     }
