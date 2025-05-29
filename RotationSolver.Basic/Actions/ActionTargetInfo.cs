@@ -5,6 +5,7 @@ using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using RotationSolver.Basic.Configuration;
 using static RotationSolver.Basic.Configuration.ConfigTypes;
@@ -151,15 +152,15 @@ public struct ActionTargetInfo(IBaseAction action)
     /// <summary>
     /// Determines whether the specified battle character is within the player's view and vision cone based on the configuration settings.
     /// </summary>
-    /// <param name="gameObject">The battle character to check.</param>
+    /// <param name="battleChara">The battle character to check.</param>
     /// <returns>
     /// <c>true</c> if the battle character is within the player's view and vision cone; otherwise, <c>false</c>.
     /// </returns>
-    private static bool InViewTarget(IBattleChara gameObject)
+    private static bool InViewTarget(IBattleChara battleChara)
     {
         if (Service.Config.OnlyAttackInView)
         {
-            if (!Svc.GameGui.WorldToScreen(gameObject.Position, out _))
+            if (!Svc.GameGui.WorldToScreen(battleChara.Position, out _))
             {
                 return false;
             }
@@ -167,7 +168,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
         if (Service.Config.OnlyAttackInVisionCone && Player.Object != null)
         {
-            Vector3 dir = gameObject.Position - Player.Object.Position;
+            Vector3 dir = battleChara.Position - Player.Object.Position;
             Vector3 faceVec = Player.Object.GetFaceVector();
             dir = Vector3.Normalize(dir);
             faceVec = Vector3.Normalize(faceVec);
@@ -192,7 +193,7 @@ public struct ActionTargetInfo(IBaseAction action)
     /// <returns>
     /// <c>true</c> if the game object can be targeted and used for an action; otherwise, <c>false</c>.
     /// </returns>
-    private readonly unsafe bool CanUseTo(IGameObject tar)
+    private readonly unsafe bool CanUseTo(IBattleChara tar)
     {
         if (tar == null)
         {
@@ -204,7 +205,10 @@ public struct ActionTargetInfo(IBaseAction action)
             return false;
         }
 
-        return tar.GameObjectId != 0 && tar.Struct() != null && (IsSpecialAbility(action.Info.ID) || ActionManager.CanUseActionOnTarget(action.Info.AdjustedID, tar.Struct())) && tar.CanSee();
+        return tar.GameObjectId != 0 && tar.Struct() != null &&
+               (IsSpecialAbility(action.Info.ID) ||
+                ActionManager.CanUseActionOnTarget(action.Info.AdjustedID, (GameObject*)tar.Struct())) &&
+               tar.CanSee();
     }
 
     private readonly List<ActionID> _specialActions =
@@ -227,15 +231,15 @@ public struct ActionTargetInfo(IBaseAction action)
     /// <summary>
     /// Performs a general check on the specified battle character to determine if it meets the criteria for targeting.
     /// </summary>
-    /// <param name="gameObject">The battle character to check.</param>
+    /// <param name="battleChara">The battle character to check.</param>
     /// <param name="skipStatusProvideCheck">If set to <c>true</c>, skips the status provide check.</param>
     /// <param name="skipTargetStatusNeedCheck">If set to <c>true</c>, skips the target status need check.</param>
     /// <returns>
     /// <c>true</c> if the battle character meets the criteria for targeting; otherwise, <c>false</c>.
     /// </returns>
-    public readonly bool GeneralCheck(IBattleChara gameObject, bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck)
+    public readonly bool GeneralCheck(IBattleChara battleChara, bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck)
     {
-        if (gameObject == null)
+        if (battleChara == null)
         {
             return false;
         }
@@ -243,32 +247,32 @@ public struct ActionTargetInfo(IBaseAction action)
         // Defensive: check that the underlying struct is valid before accessing StatusList
         unsafe
         {
-            if (gameObject.Struct() == null)
+            if (battleChara.Struct() == null)
             {
                 return false;
             }
         }
 
         // Optionally, check for IsDead or other validity flags if available
-        if (!gameObject.IsTargetable)
+        if (!battleChara.IsTargetable)
         {
             return false;
         }
 
         try
         {
-            if (gameObject.StatusList == null)
+            if (battleChara.StatusList == null)
             {
                 return false;
             }
         }
         catch (Exception ex)
         {
-            PluginLog.Error($"Exception accessing StatusList for {gameObject?.NameId}: {ex.Message}");
+            PluginLog.Error($"Exception accessing StatusList for {battleChara?.NameId}: {ex.Message}");
             return false;
         }
 
-        if (Service.Config.RaiseType == RaiseType.PartyOnly && gameObject.IsAllianceMember() && !gameObject.IsParty())
+        if (Service.Config.RaiseType == RaiseType.PartyOnly && battleChara.IsAllianceMember() && !battleChara.IsParty())
         {
             return false;
         }
@@ -276,7 +280,7 @@ public struct ActionTargetInfo(IBaseAction action)
         bool isBlacklisted = false;
         foreach (uint id in DataCenter.BlacklistedNameIds)
         {
-            if (id == gameObject.NameId)
+            if (id == battleChara.NameId)
             {
                 isBlacklisted = true;
                 break;
@@ -287,7 +291,7 @@ public struct ActionTargetInfo(IBaseAction action)
             return false;
         }
 
-        if (gameObject.IsEnemy() && !gameObject.IsAttackable())
+        if (battleChara.IsEnemy() && !battleChara.IsAttackable())
         {
             return false;
         }
@@ -296,29 +300,29 @@ public struct ActionTargetInfo(IBaseAction action)
         long[] stopTargets = MarkingHelper.GetStopTargets();
         foreach (long stopId in stopTargets)
         {
-            if (stopId == (long)gameObject.GameObjectId)
+            if (stopId == (long)battleChara.GameObjectId)
             {
                 isStopTarget = true;
                 break;
             }
         }
-        return (!isStopTarget || !Service.Config.FilterStopMark) && CheckStatus(gameObject, skipStatusProvideCheck, skipTargetStatusNeedCheck)
-            && CheckTimeToKill(gameObject)
-            && CheckResistance(gameObject);
+        return (!isStopTarget || !Service.Config.FilterStopMark) && CheckStatus(battleChara, skipStatusProvideCheck, skipTargetStatusNeedCheck)
+            && CheckTimeToKill(battleChara)
+            && CheckResistance(battleChara);
     }
 
     /// <summary>
     /// Checks the status of the specified game object to determine if it meets the criteria for the action.
     /// </summary>
-    /// <param name="gameObject">The game object to check.</param>
+    /// <param name="battleChara">The game object to check.</param>
     /// <param name="skipStatusProvideCheck">If set to <c>true</c>, skips the status provide check.</param>
     /// <param name="skipTargetStatusNeedCheck">If set to <c>true</c>, skips the target status need check.</param>
     /// <returns>
     /// <c>true</c> if the game object meets the status criteria for the action; otherwise, <c>false</c>.
     /// </returns>
-    private readonly bool CheckStatus(IGameObject gameObject, bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck)
+    private readonly bool CheckStatus(IBattleChara battleChara, bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck)
     {
-        if (gameObject == null)
+        if (battleChara == null)
         {
             return false;
         }
@@ -330,7 +334,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
         if (action.Setting.TargetStatusNeed != null && !skipTargetStatusNeedCheck)
         {
-            if (gameObject.WillStatusEndGCD(0, 0, action.Setting.StatusFromSelf, action.Setting.TargetStatusNeed))
+            if (battleChara.WillStatusEndGCD(0, 0, action.Setting.StatusFromSelf, action.Setting.TargetStatusNeed))
             {
                 return false;
             }
@@ -338,7 +342,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
         if (action.Setting.TargetStatusProvide != null && !skipStatusProvideCheck)
         {
-            if (!gameObject.WillStatusEndGCD(action.Config.StatusGcdCount, 0, action.Setting.StatusFromSelf, action.Setting.TargetStatusProvide))
+            if (!battleChara.WillStatusEndGCD(action.Config.StatusGcdCount, 0, action.Setting.StatusFromSelf, action.Setting.TargetStatusProvide))
             {
                 return false;
             }
@@ -350,13 +354,13 @@ public struct ActionTargetInfo(IBaseAction action)
     /// <summary>
     /// Checks the resistance status of the specified game object to determine if it meets the criteria for the action.
     /// </summary>
-    /// <param name="gameObject">The game object to check.</param>
+    /// <param name="battleChara">The game object to check.</param>
     /// <returns>
     /// <c>true</c> if the game object meets the resistance criteria for the action; otherwise, <c>false</c>.
     /// </returns>
-    private readonly bool CheckResistance(IGameObject gameObject)
+    private readonly bool CheckResistance(IBattleChara battleChara)
     {
-        if (gameObject == null)
+        if (battleChara == null)
         {
             return false;
         }
@@ -365,21 +369,21 @@ public struct ActionTargetInfo(IBaseAction action)
         {
             if (action.Info.AttackType == AttackType.Magic)
             {
-                if (gameObject.HasStatus(false, StatusHelper.MagicResistance))
+                if (battleChara.HasStatus(false, StatusHelper.MagicResistance))
                 {
                     return false;
                 }
             }
             else if (action.Info.Aspect != Aspect.Piercing) // Physical
             {
-                if (gameObject.HasStatus(false, StatusHelper.PhysicalResistance))
+                if (battleChara.HasStatus(false, StatusHelper.PhysicalResistance))
                 {
                     return false;
                 }
             }
             if (Range >= 20) // Range
             {
-                if (gameObject.HasStatus(false, StatusID.RangedResistance, StatusID.EnergyField))
+                if (battleChara.HasStatus(false, StatusID.RangedResistance, StatusID.EnergyField))
                 {
                     return false;
                 }
@@ -398,18 +402,18 @@ public struct ActionTargetInfo(IBaseAction action)
     /// <summary>
     /// Checks the time to kill of the specified game object to determine if it meets the criteria for the action.
     /// </summary>
-    /// <param name="gameObject">The game object to check.</param>
+    /// <param name="battleChara">The game object to check.</param>
     /// <returns>
     /// <c>true</c> if the game object meets the time to kill criteria for the action; otherwise, <c>false</c>.
     /// </returns>
-    private readonly bool CheckTimeToKill(IGameObject gameObject)
+    private readonly bool CheckTimeToKill(IBattleChara battleChara)
     {
-        if (gameObject == null)
+        if (battleChara == null)
         {
             return false;
         }
 
-        if (gameObject is not IBattleChara b)
+        if (battleChara is not IBattleChara b)
         {
             return false;
         }
@@ -629,13 +633,13 @@ public struct ActionTargetInfo(IBaseAction action)
                     }
 
                     tar = tar / length * range;
-                    return new TargetResult(Player.Object, Array.Empty<IBattleChara>(), new Vector3(pPosition.X + tar.X, pPosition.Y, pPosition.Z + tar.Z));
+                    return new TargetResult(Player.Object, [], new Vector3(pPosition.X + tar.X, pPosition.Y, pPosition.Z + tar.Z));
                 }
             }
             else
             {
                 float rotation = Player.Object.Rotation;
-                return new TargetResult(Player.Object, Array.Empty<IBattleChara>(), new Vector3(pPosition.X + ((float)Math.Sin(rotation) * range), pPosition.Y, pPosition.Z + ((float)Math.Cos(rotation) * range)));
+                return new TargetResult(Player.Object, [], new Vector3(pPosition.X + ((float)Math.Sin(rotation) * range), pPosition.Y, pPosition.Z + ((float)Math.Cos(rotation) * range)));
             }
         }
         else
@@ -945,7 +949,7 @@ public struct ActionTargetInfo(IBaseAction action)
     /// <param name="target">The target object.</param>
     /// <param name="canAffects">The potential objects that can be affected.</param>
     /// <returns>The count of objects that can be targeted.</returns>
-    private readonly int CanGetTargetCount(IGameObject target, IEnumerable<IGameObject> canAffects)
+    private readonly int CanGetTargetCount(IBattleChara target, IEnumerable<IBattleChara> canAffects)
     {
         if (target == null || canAffects == null)
         {
@@ -953,7 +957,7 @@ public struct ActionTargetInfo(IBaseAction action)
         }
 
         int count = 0;
-        foreach (IGameObject t in canAffects)
+        foreach (IBattleChara t in canAffects)
         {
             if (target != t && !CanGetTarget(target, t))
             {
@@ -977,7 +981,7 @@ public struct ActionTargetInfo(IBaseAction action)
     /// <param name="target">The main target object.</param>
     /// <param name="subTarget">The sub-target object.</param>
     /// <returns>True if the sub-target can be targeted; otherwise, false.</returns>
-    private readonly bool CanGetTarget(IGameObject target, IGameObject subTarget)
+    private readonly bool CanGetTarget(IBattleChara target, IBattleChara subTarget)
     {
         if (target == null || subTarget == null)
         {
@@ -1026,15 +1030,15 @@ public struct ActionTargetInfo(IBaseAction action)
 
     /// <summary>
     /// Finds the target based on the specified type and criteria.
-    /// </summary>
-    /// <param name="IGameObjects"></param>
+    /// </summary>IBattleChara battleChara
+    /// <param name="battleChara"></param>
     /// <param name="type"></param>
     /// <param name="healRatio"></param>
     /// <param name="actionType"></param>
     /// <returns></returns>
-    public static IBattleChara? FindTargetByType(IEnumerable<IBattleChara> IGameObjects, TargetType type, float healRatio, SpecialActionType actionType)
+    public static IBattleChara? FindTargetByType(IEnumerable<IBattleChara> battleChara, TargetType type, float healRatio, SpecialActionType actionType)
     {
-        if (IGameObjects == null)
+        if (battleChara == null)
         {
             return null;
         }
@@ -1049,14 +1053,14 @@ public struct ActionTargetInfo(IBaseAction action)
             case SpecialActionType.MeleeRange:
                 {
                     var filtered = new List<IBattleChara>();
-                    foreach (var t in IGameObjects)
+                    foreach (var t in battleChara)
                     {
                         if (t.DistanceToPlayer() >= 3 + (Service.Config?.MeleeRangeOffset ?? 0))
                         {
                             filtered.Add(t);
                         }
                     }
-                    IGameObjects = filtered;
+                    battleChara = filtered;
                 }
                 break;
 
@@ -1070,14 +1074,14 @@ public struct ActionTargetInfo(IBaseAction action)
                     else
                     {
                         var filtered = new List<IBattleChara>();
-                        foreach (var t in IGameObjects)
+                        foreach (var t in battleChara)
                         {
                             if (t.DistanceToPlayer() < Service.Config.DistanceForMoving)
                             {
                                 filtered.Add(t);
                             }
                         }
-                        IGameObjects = filtered;
+                        battleChara = filtered;
                     }
                 }
                 break;
@@ -1088,14 +1092,14 @@ public struct ActionTargetInfo(IBaseAction action)
             case TargetType.Death:
                 {
                     var filtered = new List<IBattleChara>();
-                    foreach (var t in IGameObjects)
+                    foreach (var t in battleChara)
                     {
                         if (ObjectHelper.IsDeathToRaise(t))
                         {
                             filtered.Add(t);
                         }
                     }
-                    IGameObjects = filtered;
+                    battleChara = filtered;
                 }
                 break;
 
@@ -1106,14 +1110,14 @@ public struct ActionTargetInfo(IBaseAction action)
             default:
                 {
                     var filtered = new List<IBattleChara>();
-                    foreach (var t in IGameObjects)
+                    foreach (var t in battleChara)
                     {
                         if (ObjectHelper.IsAlive(t))
                         {
                             filtered.Add(t);
                         }
                     }
-                    IGameObjects = filtered;
+                    battleChara = filtered;
                 }
                 break;
         }
@@ -1128,10 +1132,10 @@ public struct ActionTargetInfo(IBaseAction action)
             TargetType.Heal => FindHealTarget(healRatio),
             TargetType.Interrupt => FindInterruptTarget(),
             TargetType.Tank => FindTankTarget(),
-            TargetType.Melee => IGameObjects != null ? RandomMeleeTarget(IGameObjects) : null,
-            TargetType.Range => IGameObjects != null ? RandomRangeTarget(IGameObjects) : null,
-            TargetType.Magical => IGameObjects != null ? RandomMagicalTarget(IGameObjects) : null,
-            TargetType.Physical => IGameObjects != null ? RandomPhysicalTarget(IGameObjects) : null,
+            TargetType.Melee => battleChara != null ? RandomMeleeTarget(battleChara) : null,
+            TargetType.Range => battleChara != null ? RandomRangeTarget(battleChara) : null,
+            TargetType.Magical => battleChara != null ? RandomMagicalTarget(battleChara) : null,
+            TargetType.Physical => battleChara != null ? RandomPhysicalTarget(battleChara) : null,
             TargetType.DancePartner => FindDancePartner(),
             TargetType.MimicryTarget => FindMimicryTarget(),
             TargetType.TheSpear => FindTheSpear(),
@@ -1198,13 +1202,13 @@ public struct ActionTargetInfo(IBaseAction action)
 
             PluginLog.Debug($"FindDancePartner: No target found, using fallback.");
 
-            IBattleChara? result = RandomMeleeTarget(IGameObjects);
+            IBattleChara? result = RandomMeleeTarget(battleChara);
             if (result != null) return result;
-            result = RandomRangeTarget(IGameObjects);
+            result = RandomRangeTarget(battleChara);
             if (result != null) return result;
-            result = RandomMagicalTarget(IGameObjects);
+            result = RandomMagicalTarget(battleChara);
             if (result != null) return result;
-            result = RandomPhysicalTarget(IGameObjects);
+            result = RandomPhysicalTarget(battleChara);
             if (result != null) return result;
             return null;
         }
@@ -1242,13 +1246,13 @@ public struct ActionTargetInfo(IBaseAction action)
             }
 
             IBattleChara? result = null;
-            result = RandomRangeTarget(IGameObjects);
+            result = RandomRangeTarget(battleChara);
             if (result != null) return result;
-            result = RandomMeleeTarget(IGameObjects);
+            result = RandomMeleeTarget(battleChara);
             if (result != null) return result;
-            result = RandomMagicalTarget(IGameObjects);
+            result = RandomMagicalTarget(battleChara);
             if (result != null) return result;
-            result = RandomPhysicalTarget(IGameObjects);
+            result = RandomPhysicalTarget(battleChara);
             if (result != null) return result;
             return null;
         }
@@ -1285,13 +1289,13 @@ public struct ActionTargetInfo(IBaseAction action)
                 }
             }
 
-            IBattleChara? result = RandomMeleeTarget(IGameObjects);
+            IBattleChara? result = RandomMeleeTarget(battleChara);
             if (result != null) return result;
-            result = RandomRangeTarget(IGameObjects);
+            result = RandomRangeTarget(battleChara);
             if (result != null) return result;
-            result = RandomMagicalTarget(IGameObjects);
+            result = RandomMagicalTarget(battleChara);
             if (result != null) return result;
-            result = RandomPhysicalTarget(IGameObjects);
+            result = RandomPhysicalTarget(battleChara);
             if (result != null) return result;
             return null;
         }
@@ -1393,28 +1397,28 @@ public struct ActionTargetInfo(IBaseAction action)
             IBattleChara? bestGalvanize = null;
             uint bestGalvanizeShield = 0;
 
-            foreach (IBattleChara obj in DataCenter.PartyMembers)
+            foreach (IBattleChara battleChara in DataCenter.PartyMembers)
             {
-                if (obj == null || obj.IsDead)
+                if (battleChara == null || battleChara.IsDead)
                 {
                     continue;
                 }
 
-                uint shield = ObjectHelper.GetObjectShield(obj);
+                uint shield = ObjectHelper.GetObjectShield(battleChara);
 
-                if (!obj.WillStatusEnd(20, true, StatusID.Catalyze))
+                if (!battleChara.WillStatusEnd(20, true, StatusID.Catalyze))
                 {
                     if (bestCatalyze == null || shield > bestCatalyzeShield)
                     {
-                        bestCatalyze = obj;
+                        bestCatalyze = battleChara;
                         bestCatalyzeShield = shield;
                     }
                 }
-                else if (!obj.WillStatusEnd(20, true, StatusID.Galvanize))
+                else if (!battleChara.WillStatusEnd(20, true, StatusID.Galvanize))
                 {
                     if (bestGalvanize == null || shield > bestGalvanizeShield)
                     {
-                        bestGalvanize = obj;
+                        bestGalvanize = battleChara;
                         bestGalvanizeShield = shield;
                     }
                 }
@@ -1437,12 +1441,12 @@ public struct ActionTargetInfo(IBaseAction action)
 
         IBattleChara? FindProvokeTarget()
         {
-            if (IGameObjects == null || DataCenter.ProvokeTarget == null)
+            if (battleChara == null || DataCenter.ProvokeTarget == null)
             {
                 return null;
             }
 
-            foreach (var o in IGameObjects)
+            foreach (var o in battleChara)
             {
                 if (o.GameObjectId == DataCenter.ProvokeTarget.GameObjectId)
                 {
@@ -1454,12 +1458,12 @@ public struct ActionTargetInfo(IBaseAction action)
 
         IBattleChara? FindDeathPeople()
         {
-            if (IGameObjects == null || DataCenter.DeathTarget == null)
+            if (battleChara == null || DataCenter.DeathTarget == null)
             {
                 return null;
             }
 
-            foreach (var o in IGameObjects)
+            foreach (var o in battleChara)
             {
                 if (o.GameObjectId == DataCenter.DeathTarget.GameObjectId)
                 {
@@ -1471,7 +1475,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
         IBattleChara? FindTargetForMoving()
         {
-            return Service.Config == null || IGameObjects == null
+            return Service.Config == null || battleChara == null
                 ? null
                 : Service.Config.MoveTowardsScreenCenter ? FindMoveTargetScreenCenter() : FindMoveTargetFaceDirection();
             IBattleChara? FindMoveTargetScreenCenter()
@@ -1483,7 +1487,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 }
 
                 List<IBattleChara> filteredTargets = new();
-                foreach (var t in IGameObjects)
+                foreach (var t in battleChara)
                 {
                     if (t.DistanceToPlayer() > Service.Config.DistanceForMoving)
                     {
@@ -1514,7 +1518,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 Vector3 faceVec = Player.Object.GetFaceVector();
 
                 List<IBattleChara> filteredTargets = new();
-                foreach (var t in IGameObjects)
+                foreach (var t in battleChara)
                 {
                     if (t.DistanceToPlayer() > Service.Config.DistanceForMoving)
                     {
@@ -1538,13 +1542,13 @@ public struct ActionTargetInfo(IBaseAction action)
 
         IBattleChara? FindHealTarget(float healRatio)
         {
-            if (IGameObjects == null)
+            if (battleChara == null)
             {
                 return null;
             }
 
             bool hasAny = false;
-            foreach (var _ in IGameObjects)
+            foreach (var _ in battleChara)
             {
                 hasAny = true;
                 break;
@@ -1555,7 +1559,7 @@ public struct ActionTargetInfo(IBaseAction action)
             }
 
             List<IBattleChara> filteredGameObjects = new();
-            foreach (var o in IGameObjects)
+            foreach (var o in battleChara)
             {
                 if (!IBaseAction.AutoHealCheck || o.GetHealthRatio() < healRatio)
                 {
@@ -1660,12 +1664,12 @@ public struct ActionTargetInfo(IBaseAction action)
 
         IBattleChara? FindInterruptTarget()
         {
-            if (IGameObjects == null || DataCenter.InterruptTarget == null)
+            if (battleChara == null || DataCenter.InterruptTarget == null)
             {
                 return null;
             }
 
-            foreach (var o in IGameObjects)
+            foreach (var o in battleChara)
             {
                 if (o.GameObjectId == DataCenter.InterruptTarget.GameObjectId)
                 {
@@ -1677,14 +1681,14 @@ public struct ActionTargetInfo(IBaseAction action)
 
         IBattleChara? FindHostile()
         {
-            if (IGameObjects == null)
+            if (battleChara == null)
             {
                 return null;
             }
 
             // Manual Any() check
             bool hasAny = false;
-            foreach (var _ in IGameObjects)
+            foreach (var _ in battleChara)
             {
                 hasAny = true;
                 break;
@@ -1697,7 +1701,7 @@ public struct ActionTargetInfo(IBaseAction action)
             // Filter out characters marked with stop markers
             if (Service.Config.FilterStopMark)
             {
-                IEnumerable<IBattleChara> filteredCharacters = MarkingHelper.FilterStopCharacters(IGameObjects);
+                IEnumerable<IBattleChara> filteredCharacters = MarkingHelper.FilterStopCharacters(battleChara);
                 // Manual Any() check
                 bool filteredHasAny = false;
                 if (filteredCharacters != null)
@@ -1710,7 +1714,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 }
                 if (filteredCharacters != null && filteredHasAny)
                 {
-                    IGameObjects = filteredCharacters;
+                    battleChara = filteredCharacters;
                 }
             }
 
@@ -1718,7 +1722,7 @@ public struct ActionTargetInfo(IBaseAction action)
             if (DataCenter.TreasureCharas != null && DataCenter.TreasureCharas.Length > 0)
             {
                 IBattleChara? treasureChara = null;
-                foreach (var b in IGameObjects)
+                foreach (var b in battleChara)
                 {
                     if (b.GameObjectId == DataCenter.TreasureCharas[0])
                     {
@@ -1732,7 +1736,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 }
 
                 var tempList = new List<IBattleChara>();
-                foreach (var b in IGameObjects)
+                foreach (var b in battleChara)
                 {
                     bool found = false;
                     foreach (var id in DataCenter.TreasureCharas)
@@ -1748,12 +1752,12 @@ public struct ActionTargetInfo(IBaseAction action)
                         tempList.Add(b);
                     }
                 }
-                IGameObjects = tempList;
+                battleChara = tempList;
             }
 
             // Filter high priority hostiles
             var highPriorityHostiles = new List<IBattleChara>();
-            foreach (var b in IGameObjects)
+            foreach (var b in battleChara)
             {
                 if (ObjectHelper.IsTopPriorityHostile(b))
                 {
@@ -1762,7 +1766,7 @@ public struct ActionTargetInfo(IBaseAction action)
             }
             if (highPriorityHostiles.Count > 0)
             {
-                IGameObjects = highPriorityHostiles;
+                battleChara = highPriorityHostiles;
             }
 
             return FindHostileRaw();
@@ -1770,15 +1774,15 @@ public struct ActionTargetInfo(IBaseAction action)
 
         IBattleChara? FindHostileRaw()
         {
-            if (IGameObjects == null)
+            if (battleChara == null)
             {
                 return null;
             }
 
             // Prepare a list to sort manually
-            List<IGameObject> objects = [.. IGameObjects];
+            List<IBattleChara> objects = [.. battleChara];
 
-            List<IGameObject> filtered;
+            List<IBattleChara> filtered;
             switch (DataCenter.TargetingType)
             {
                 case TargetingType.Small:
@@ -1874,7 +1878,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 case TargetingType.PvPHealers:
                     {
                         // Filter for healers
-                        List<IGameObject> healers = [];
+                        List<IBattleChara> healers = [];
                         foreach (var p in objects)
                         {
                             if (p.IsJobs(JobRole.Healer.ToJobs()))
@@ -1894,7 +1898,7 @@ public struct ActionTargetInfo(IBaseAction action)
                     }
                 case TargetingType.PvPTanks:
                     {
-                        List<IGameObject> tanks = [];
+                        List<IBattleChara> tanks = [];
                         foreach (var p in objects)
                         {
                             if (p.IsJobs(JobRole.Tank.ToJobs()))
@@ -1914,7 +1918,7 @@ public struct ActionTargetInfo(IBaseAction action)
                     }
                 case TargetingType.PvPDPS:
                     {
-                        List<IGameObject> dps = [];
+                        List<IBattleChara> dps = [];
                         foreach (var p in objects)
                         {
                             if (p.IsJobs(JobRole.AllDPS.ToJobs()))
@@ -1970,14 +1974,14 @@ public struct ActionTargetInfo(IBaseAction action)
 
         IBattleChara? FindBeAttackedTarget()
         {
-            if (IGameObjects == null)
+            if (battleChara == null)
             {
                 return null;
             }
 
             // Manual Any() check
             bool hasAny = false;
-            foreach (var _ in IGameObjects)
+            foreach (var _ in battleChara)
             {
                 hasAny = true;
                 break;
@@ -1989,7 +1993,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
             // attachedT = IGameObjects.Where(ObjectHelper.IsTargetOnSelf)
             List<IBattleChara> attachedT = [];
-            foreach (var t in IGameObjects)
+            foreach (var t in battleChara)
             {
                 if (ObjectHelper.IsTargetOnSelf(t))
                 {
@@ -2002,7 +2006,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 // If attachedT is empty, try tanks with TankStanceStatus
                 if (attachedT.Count == 0)
                 {
-                    foreach (var tank in IGameObjects)
+                    foreach (var tank in battleChara)
                     {
                         if (tank.HasStatus(false, StatusHelper.TankStanceStatus))
                         {
@@ -2014,7 +2018,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 // If still empty, try tanks by job category
                 if (attachedT.Count == 0)
                 {
-                    foreach (var tank in IGameObjects.GetJobCategory(JobRole.Tank))
+                    foreach (var tank in battleChara.GetJobCategory(JobRole.Tank))
                     {
                         attachedT.Add(tank);
                     }
@@ -2023,7 +2027,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 // If still empty, fallback to all
                 if (attachedT.Count == 0)
                 {
-                    foreach (var t in IGameObjects)
+                    foreach (var t in battleChara)
                     {
                         attachedT.Add(t);
                     }
@@ -2070,14 +2074,14 @@ public struct ActionTargetInfo(IBaseAction action)
 
         IBattleChara? FindDispelTarget()
         {
-            if (IGameObjects == null || DataCenter.DispelTarget == null)
+            if (battleChara == null || DataCenter.DispelTarget == null)
             {
                 return null;
             }
 
             // Manual Any() check for GameObjectId match
             bool found = false;
-            foreach (var o in IGameObjects)
+            foreach (var o in battleChara)
             {
                 if (o.GameObjectId == DataCenter.DispelTarget.GameObjectId)
                 {
@@ -2091,7 +2095,7 @@ public struct ActionTargetInfo(IBaseAction action)
             }
 
             // Manual FirstOrDefault for a battle chara with a dispellable status
-            foreach (var o in IGameObjects)
+            foreach (var o in battleChara)
             {
                 if (o is IBattleChara b)
                 {
@@ -2110,7 +2114,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
         IBattleChara? FindTankTarget()
         {
-            return IGameObjects == null ? null : RandomPickByJobs(IGameObjects, JobRole.Tank);
+            return battleChara == null ? null : RandomPickByJobs(battleChara, JobRole.Tank);
         }
     }
 

@@ -42,8 +42,6 @@ internal class OtherConfiguration
     /// </markdown>
     public static HashSet<uint> HostileCastingStop = [];
 
-    public static SortedList<uint, float> AnimationLockTime = [];
-
     public static Dictionary<uint, string[]> NoHostileNames = [];
     public static Dictionary<uint, string[]> NoProvokeNames = [];
 
@@ -110,7 +108,6 @@ internal class OtherConfiguration
         _ = Task.Run(() => InitOne(ref KardiaTankPriority, nameof(KardiaTankPriority)));
         _ = Task.Run(() => InitOne(ref NoHostileNames, nameof(NoHostileNames)));
         _ = Task.Run(() => InitOne(ref NoProvokeNames, nameof(NoProvokeNames)));
-        _ = Task.Run(() => InitOne(ref AnimationLockTime, nameof(AnimationLockTime)));
         _ = Task.Run(() => InitOne(ref HostileCastingArea, nameof(HostileCastingArea)));
         _ = Task.Run(() => InitOne(ref HostileCastingTank, nameof(HostileCastingTank)));
         _ = Task.Run(() => InitOne(ref BeneficialPositions, nameof(BeneficialPositions)));
@@ -134,7 +131,6 @@ internal class OtherConfiguration
             await SaveTheBalancePriority();
             await SaveKardiaTankPriority();
             await SaveNoHostileNames();
-            await SaveAnimationLockTime();
             await SaveHostileCastingArea();
             await SaveHostileCastingTank();
             await SaveBeneficialPositions();
@@ -322,11 +318,6 @@ internal class OtherConfiguration
     public static Task SaveNoHostileNames()
     {
         return Task.Run(() => Save(NoHostileNames, nameof(NoHostileNames)));
-    }
-
-    public static Task SaveAnimationLockTime()
-    {
-        return Task.Run(() => Save(AnimationLockTime, nameof(AnimationLockTime)));
     }
 
     private static string GetFilePath(string name)

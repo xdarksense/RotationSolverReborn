@@ -18,7 +18,7 @@ internal static class MovingUpdater
         }
 
         // Casting the action in list.
-        if (Svc.Condition?[ConditionFlag.Casting] == true && Player.AvailableThreadSafe == true)
+        if (Svc.Condition?[ConditionFlag.Casting] == true)
         {
             Service.CanMove = ActionBasicInfo.ActionsNoNeedCasting.Contains(Player.Object?.CastActionId ?? 0);
             return;
@@ -45,9 +45,19 @@ internal static class MovingUpdater
         }
 
         // Action
-        ActionID action = DateTime.Now - RSCommands._lastUsedTime < TimeSpan.FromMilliseconds(100)
-            ? (ActionID)RSCommands._lastActionID
-            : doNextAction ? (ActionID)(ActionUpdater.NextAction?.AdjustedID ?? 0) : 0;
+        ActionID action;
+        if (DateTime.Now - RSCommands._lastUsedTime < TimeSpan.FromMilliseconds(100))
+        {
+            action = (ActionID)RSCommands._lastActionID;
+        }
+        else if (doNextAction)
+        {
+            action = (ActionID)(ActionUpdater.NextAction?.AdjustedID ?? 0);
+        }
+        else
+        {
+            action = 0;
+        }
 
         bool specialActions = ActionManager.GetAdjustedCastTime(ActionType.Action, (uint)action) > 0;
         foreach (ActionID id in actionList)
@@ -63,7 +73,7 @@ internal static class MovingUpdater
         bool specialStatus = false;
         foreach (StatusID status in statusList)
         {
-            if (Player.Object?.HasStatus(true, status) == true)
+            if (Player.Object.HasStatus(true, status) == true)
             {
                 specialStatus = true;
                 break;

@@ -166,7 +166,7 @@ public static class StatusHelper
     /// </summary>
     /// <param name="Invulnp"></param>
     /// <returns></returns>
-    public static bool NoNeedHealingInvuln(this IGameObject Invulnp)
+    public static bool NoNeedHealingInvuln(this IBattleChara Invulnp)
     {
         return Invulnp.WillStatusEndGCD(2, 0, false, NoNeedHealingStatus);
     }
@@ -176,7 +176,7 @@ public static class StatusHelper
     /// </summary>
     /// <param name="Doomp"></param>
     /// <returns></returns>
-    public static bool DoomNeedHealing(this IGameObject Doomp)
+    public static bool DoomNeedHealing(this IBattleChara Doomp)
     {
         return Doomp.HasStatus(false, DoomHealStatus);
     }
@@ -184,53 +184,53 @@ public static class StatusHelper
     /// <summary>
     /// Will any of <paramref name="statusIDs"/> end after <paramref name="gcdCount"/> GCDs plus <paramref name="offset"/> seconds?
     /// </summary>
-    /// <param name="obj"></param>
+    /// <param name="battleChara"></param>
     /// <param name="gcdCount"></param>
     /// <param name="offset"></param>
     /// <param name="isFromSelf"></param>
     /// <param name="statusIDs"></param>
     /// <returns></returns>
-    public static bool WillStatusEndGCD(this IGameObject obj, uint gcdCount = 0, float offset = 0, bool isFromSelf = true, params StatusID[] statusIDs)
+    public static bool WillStatusEndGCD(this IBattleChara battleChara, uint gcdCount = 0, float offset = 0, bool isFromSelf = true, params StatusID[] statusIDs)
     {
-        return WillStatusEnd(obj, DataCenter.GCDTime(gcdCount, offset), isFromSelf, statusIDs);
+        return WillStatusEnd(battleChara, DataCenter.GCDTime(gcdCount, offset), isFromSelf, statusIDs);
     }
 
     /// <summary>
     /// Will any of <paramref name="statusIDs"/> end after <paramref name="time"/> seconds?
     /// </summary>
-    /// <param name="obj"></param>
+    /// <param name="battleChara"></param>
     /// <param name="time"></param>
     /// <param name="isFromSelf"></param>
     /// <param name="statusIDs"></param>
     /// <returns></returns>
-    public static bool WillStatusEnd(this IGameObject obj, float time, bool isFromSelf = true, params StatusID[] statusIDs)
+    public static bool WillStatusEnd(this IBattleChara battleChara, float time, bool isFromSelf = true, params StatusID[] statusIDs)
     {
-        if (HasApplyStatus(obj, statusIDs))
+        if (HasApplyStatus(battleChara, statusIDs))
         {
             return false;
         }
 
-        float statusTime = obj.StatusTime(isFromSelf, statusIDs);
-        return (statusTime >= 0 || !obj.HasStatus(isFromSelf, statusIDs)) && statusTime <= time;
+        float statusTime = battleChara.StatusTime(isFromSelf, statusIDs);
+        return (statusTime >= 0 || !battleChara.HasStatus(isFromSelf, statusIDs)) && statusTime <= time;
     }
 
     /// <summary>
     /// Get the remaining time of the status.
     /// </summary>
-    /// <param name="obj"></param>
+    /// <param name="battleChara"></param>
     /// <param name="isFromSelf"></param>
     /// <param name="statusIDs"></param>
     /// <returns></returns>
-    public static float StatusTime(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
+    public static float StatusTime(this IBattleChara battleChara, bool isFromSelf, params StatusID[] statusIDs)
     {
         try
         {
-            if (HasApplyStatus(obj, statusIDs))
+            if (HasApplyStatus(battleChara, statusIDs))
             {
                 return float.MaxValue;
             }
 
-            IEnumerable<float> times = obj.StatusTimes(isFromSelf, statusIDs);
+            IEnumerable<float> times = battleChara.StatusTimes(isFromSelf, statusIDs);
             float min = float.MaxValue;
             bool found = false;
             foreach (float t in times)
@@ -251,9 +251,9 @@ public static class StatusHelper
         }
     }
 
-    internal static IEnumerable<float> StatusTimes(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
+    internal static IEnumerable<float> StatusTimes(this IBattleChara battleChara, bool isFromSelf, params StatusID[] statusIDs)
     {
-        foreach (Status status in obj.GetStatus(isFromSelf, statusIDs))
+        foreach (Status status in battleChara.GetStatus(isFromSelf, statusIDs))
         {
             yield return status.RemainingTime == 0 ? float.MaxValue : status.RemainingTime;
         }
@@ -262,18 +262,18 @@ public static class StatusHelper
     /// <summary>
     /// Get the stack count of the status.
     /// </summary>
-    /// <param name="obj"></param>
+    /// <param name="battleChara"></param>
     /// <param name="isFromSelf"></param>
     /// <param name="statusIDs"></param>
     /// <returns></returns>
-    public static byte StatusStack(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
+    public static byte StatusStack(this IBattleChara battleChara, bool isFromSelf, params StatusID[] statusIDs)
     {
-        if (HasApplyStatus(obj, statusIDs))
+        if (HasApplyStatus(battleChara, statusIDs))
         {
             return byte.MaxValue;
         }
 
-        IEnumerable<byte> stacks = obj.StatusStacks(isFromSelf, statusIDs);
+        IEnumerable<byte> stacks = battleChara.StatusStacks(isFromSelf, statusIDs);
         byte min = byte.MaxValue;
         bool found = false;
         foreach (byte s in stacks)
@@ -288,9 +288,9 @@ public static class StatusHelper
         return found ? min : (byte)0;
     }
 
-    private static IEnumerable<byte> StatusStacks(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
+    private static IEnumerable<byte> StatusStacks(this IBattleChara battleChara, bool isFromSelf, params StatusID[] statusIDs)
     {
-        foreach (Status status in obj.GetStatus(isFromSelf, statusIDs))
+        foreach (Status status in battleChara.GetStatus(isFromSelf, statusIDs))
         {
             yield return (byte)(status.Param == 0 ? byte.MaxValue : status.Param);
         }
@@ -299,18 +299,18 @@ public static class StatusHelper
     /// <summary>
     /// Check if the object has any of the specified statuses.
     /// </summary>
-    /// <param name="obj"></param>
+    /// <param name="battleChara"></param>
     /// <param name="isFromSelf"></param>
     /// <param name="statusIDs"></param>
     /// <returns></returns>
-    public static bool HasStatus(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
+    public static bool HasStatus(this IBattleChara battleChara, bool isFromSelf, params StatusID[] statusIDs)
     {
-        if (HasApplyStatus(obj, statusIDs))
+        if (HasApplyStatus(battleChara, statusIDs))
         {
             return true;
         }
 
-        foreach (Status _ in obj.GetStatus(isFromSelf, statusIDs))
+        foreach (Status _ in battleChara.GetStatus(isFromSelf, statusIDs))
         {
             return true;
         }
@@ -320,14 +320,14 @@ public static class StatusHelper
     /// <summary>
     /// Checks if the specified status needs to be applied to the given object.
     /// </summary>
-    /// <param name="obj"></param>
+    /// <param name="battleChara"></param>
     /// <param name="statusIDs">An array of <see cref="StatusID"/> to check against.</param>
     /// <returns>
     /// <c>true</c> if any of the specified statuses have to be applied to the object; otherwise, <c>false</c>.
     /// </returns>
-    public static bool HasApplyStatus(this IGameObject obj, StatusID[] statusIDs)
+    public static bool HasApplyStatus(this IBattleChara battleChara, StatusID[] statusIDs)
     {
-        if (DataCenter.InEffectTime && DataCenter.ApplyStatus.TryGetValue(obj.GameObjectId, out uint statusId))
+        if (DataCenter.InEffectTime && DataCenter.ApplyStatus.TryGetValue(battleChara.GameObjectId, out uint statusId))
         {
             foreach (StatusID s in statusIDs)
             {
@@ -382,13 +382,13 @@ public static class StatusHelper
     /// <summary>
     /// Get the statuses of the specified object.
     /// </summary>
-    /// <param name="obj">The object to get the statuses from.</param>
+    /// <param name="battleChara">The object to get the statuses from.</param>
     /// <param name="isFromSelf">Whether the statuses are from self.</param>
     /// <param name="statusIDs">The status IDs to look for.</param>
     /// <returns>An enumerable of statuses.</returns>
-    private static IEnumerable<Status> GetStatus(this IGameObject obj, bool isFromSelf, params StatusID[] statusIDs)
+    private static IEnumerable<Status> GetStatus(this IBattleChara battleChara, bool isFromSelf, params StatusID[] statusIDs)
     {
-        IEnumerable<Status> allStatuses = obj.GetAllStatus(isFromSelf);
+        IEnumerable<Status> allStatuses = battleChara.GetAllStatus(isFromSelf);
         if (allStatuses == null)
         {
             return [];
@@ -415,7 +415,7 @@ public static class StatusHelper
         }
         catch (Exception ex)
         {
-            PluginLog.Error($"Failed to retrieve statuses for GameObjectId: {obj.GameObjectId}. Exception: {ex.Message}");
+            PluginLog.Error($"Failed to retrieve statuses for GameObjectId: {battleChara.GameObjectId}. Exception: {ex.Message}");
         }
 
         return result;
@@ -424,29 +424,24 @@ public static class StatusHelper
     /// <summary>
     /// Get all statuses of the specified object.
     /// </summary>
-    /// <param name="obj">The object to get the statuses from.</param>
+    /// <param name="battleChara">The object to get the statuses from.</param>
     /// <param name="isFromSelf">Whether the statuses are from self.</param>
     /// <returns>An enumerable of all statuses.</returns>
-    private static IEnumerable<Status> GetAllStatus(this IGameObject obj, bool isFromSelf)
+    private static IEnumerable<Status> GetAllStatus(this IBattleChara battleChara, bool isFromSelf)
     {
-        if (obj == null)
+        if (battleChara == null)
         {
-            return Enumerable.Empty<Status>();
-        }
-
-        if (obj is not IBattleChara b)
-        {
-            return Enumerable.Empty<Status>();
+            return [];
         }
 
         ulong playerId = Player.Object.GameObjectId;
         List<Status> result = [];
 
-        StatusList statusList = b.StatusList;
+        StatusList statusList = battleChara.StatusList;
         if (statusList == null || statusList.Length == 0)
         {
-            PluginLog.Information($"No statuses found for GameObjectId: {obj.GameObjectId}.");
-            return Enumerable.Empty<Status>();
+            PluginLog.Information($"No statuses found for GameObjectId: {battleChara.GameObjectId}.");
+            return [];
         }
 
         for (int i = 0; i < statusList.Length; i++)

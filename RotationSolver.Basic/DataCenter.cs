@@ -60,7 +60,7 @@ internal static class DataCenter
         }
     }
 
-    internal static MajorConditionValue[] ConditionSets { get; set; } = Array.Empty<MajorConditionValue>();
+    internal static MajorConditionValue[] ConditionSets { get; set; } = [];
 
     /// <summary>
     /// Only recorded 15s hps.
@@ -105,7 +105,7 @@ internal static class DataCenter
             HashSet<ushort> allianceTerritoryIds =
             [
             151, 174, 372, 508, 556, 627, 734, 776, 826, 882, 917, 966, 1054, 1118, 1178, 1248, 1241
-        ];
+            ];
             return allianceTerritoryIds.Contains(TerritoryID);
         }
     }
@@ -399,10 +399,10 @@ internal static class DataCenter
                 IBattleChara? b = null;
                 for (int j = 0; j < AllTargets.Count; j++)
                 {
-                    IBattleChara obj = AllTargets[j];
-                    if (obj.GetNamePlateIcon() == i)
+                    IBattleChara battleChara = AllTargets[j];
+                    if (battleChara.GetNamePlateIcon() == i)
                     {
-                        b = obj;
+                        b = battleChara;
                         break;
                     }
                 }
@@ -414,7 +414,7 @@ internal static class DataCenter
                 charas.Add(b.GameObjectId);
             }
 
-            return charas.ToArray();
+            return [.. charas];
         }
     }
 
@@ -424,10 +424,12 @@ internal static class DataCenter
     {
         get
         {
+            float jobRange = JobRange;
             int count = 0;
-            foreach (IBattleChara o in AllHostileTargets)
+            var targets = AllHostileTargets;
+            for (int i = 0, n = targets.Count; i < n; i++)
             {
-                if (o.DistanceToPlayer() < JobRange)
+                if (targets[i].DistanceToPlayer() < jobRange)
                 {
                     count++;
                 }
@@ -435,14 +437,16 @@ internal static class DataCenter
             return count;
         }
     }
+
     public static int NumberOfHostilesInMaxRange
     {
         get
         {
             int count = 0;
-            foreach (IBattleChara o in AllHostileTargets)
+            var targets = AllHostileTargets;
+            for (int i = 0, n = targets.Count; i < n; i++)
             {
-                if (o.DistanceToPlayer() < 25)
+                if (targets[i].DistanceToPlayer() < 25)
                 {
                     count++;
                 }
@@ -450,12 +454,14 @@ internal static class DataCenter
             return count;
         }
     }
+
     public static int NumberOfHostilesInRangeOf(float range)
     {
         int count = 0;
-        foreach (IBattleChara o in AllHostileTargets)
+        var targets = AllHostileTargets;
+        for (int i = 0, n = targets.Count; i < n; i++)
         {
-            if (o.DistanceToPlayer() < range)
+            if (targets[i].DistanceToPlayer() < range)
             {
                 count++;
             }
@@ -469,10 +475,13 @@ internal static class DataCenter
     {
         get
         {
+            float jobRange = JobRange;
             int count = 0;
-            foreach (IBattleChara o in AllHostileTargets)
+            var targets = AllHostileTargets;
+            for (int i = 0, n = targets.Count; i < n; i++)
             {
-                if (o.DistanceToPlayer() < JobRange && o.CanSee())
+                var o = targets[i];
+                if (o.DistanceToPlayer() < jobRange && o.CanSee())
                 {
                     count++;
                 }
@@ -524,9 +533,10 @@ internal static class DataCenter
         {
             float total = 0;
             int count = 0;
-            foreach (IBattleChara b in AllHostileTargets)
+            var targets = AllHostileTargets;
+            for (int i = 0, n = targets.Count; i < n; i++)
             {
-                float tTK = b.GetTTK();
+                float tTK = targets[i].GetTTK();
                 if (!float.IsNaN(tTK))
                 {
                     total += tTK;
@@ -988,19 +998,15 @@ internal static class DataCenter
 
     public static bool IsCastingVfx(List<VfxNewData> vfxDataQueueCopy, Func<VfxNewData, bool> isVfx)
     {
-        // Create a copy of the list to avoid modification during enumeration
-        List<VfxNewData> vfxDataQueueSnapshot = [.. vfxDataQueueCopy];
-
-        // Ensure the list is not empty
-        if (vfxDataQueueSnapshot.Count == 0)
+        // If thread safety is not a concern, avoid copying the list
+        if (vfxDataQueueCopy.Count == 0)
         {
             return false;
         }
 
-        // Iterate over the copied list
-        foreach (VfxNewData vfx in vfxDataQueueSnapshot)
+        for (int i = 0, n = vfxDataQueueCopy.Count; i < n; i++)
         {
-            if (isVfx(vfx))
+            if (isVfx(vfxDataQueueCopy[i]))
             {
                 return true;
             }

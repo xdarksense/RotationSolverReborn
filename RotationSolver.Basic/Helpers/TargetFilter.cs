@@ -18,7 +18,7 @@ public static class TargetFilter
     {
         if (charas == null)
         {
-            return Enumerable.Empty<IBattleChara>();
+            return [];
         }
 
         List<IBattleChara> result = [];
@@ -90,12 +90,12 @@ public static class TargetFilter
     /// <summary>
     /// Is the target the role.
     /// </summary>
-    /// <param name="obj">The game object.</param>
+    /// <param name="battleChara">The game object.</param>
     /// <param name="role">The role to check.</param>
     /// <returns>True if the object is of the specified role, otherwise false.</returns>
-    public static bool IsJobCategory(this IGameObject obj, JobRole role)
+    public static bool IsJobCategory(this IBattleChara battleChara, JobRole role)
     {
-        if (obj == null)
+        if (battleChara == null)
         {
             return false;
         }
@@ -115,18 +115,18 @@ public static class TargetFilter
             }
         }
 
-        return obj.IsJobs(validJobs);
+        return battleChara.IsJobs(validJobs);
     }
 
     /// <summary>
     /// Is the target in the jobs.
     /// </summary>
-    /// <param name="obj">The game object.</param>
+    /// <param name="battleChara">The game object.</param>
     /// <param name="validJobs">The valid jobs.</param>
     /// <returns>True if the object is in the valid jobs, otherwise false.</returns>
-    public static bool IsJobs(this IGameObject obj, params Job[] validJobs)
+    public static bool IsJobs(this IBattleChara battleChara, params Job[] validJobs)
     {
-        if (obj == null || validJobs == null || validJobs.Length == 0)
+        if (battleChara == null || validJobs == null || validJobs.Length == 0)
         {
             return false;
         }
@@ -137,12 +137,12 @@ public static class TargetFilter
             _ = validJobSet.Add((byte)(uint)job);
         }
 
-        return obj.IsJobs(validJobSet);
+        return battleChara.IsJobs(validJobSet);
     }
 
-    private static bool IsJobs(this IGameObject obj, HashSet<byte> validJobs)
+    private static bool IsJobs(this IGameObject battleChara, HashSet<byte> validJobs)
     {
-        return obj is IBattleChara b && validJobs != null && validJobs.Contains((byte)b.ClassJob.Value.RowId);
+        return battleChara is IBattleChara b && validJobs != null && validJobs.Contains((byte)b.ClassJob.Value.RowId);
     }
     #endregion
 
@@ -153,11 +153,11 @@ public static class TargetFilter
     /// <param name="objects">The list of objects.</param>
     /// <param name="radius">The radius to filter by.</param>
     /// <returns>The objects within the radius.</returns>
-    public static IEnumerable<T> GetObjectInRadius<T>(this IEnumerable<T> objects, float radius) where T : IGameObject
+    public static IEnumerable<T> GetObjectInRadius<T>(this IEnumerable<T> objects, float radius) where T : IBattleChara
     {
         if (objects == null)
         {
-            return Enumerable.Empty<T>();
+            return [];
         }
 
         List<T> result = [];

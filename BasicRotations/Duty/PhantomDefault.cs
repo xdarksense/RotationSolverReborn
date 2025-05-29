@@ -23,6 +23,11 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
+        if (InCombat && HerosRimePvE.CanUse(out act))
+        {
+            return true;
+        }
+
         if (InCombat && PhantomAimPvE.CanUse(out act))
         {
             return true;
@@ -33,10 +38,7 @@ public sealed class PhantomDefault : PhantomRotation
 
     public override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        if (OffensiveAriaPvE.CanUse(out act))
-        {
-            return true;
-        }
+
 
         return base.AttackAbility(nextGCD, out act);
     }
