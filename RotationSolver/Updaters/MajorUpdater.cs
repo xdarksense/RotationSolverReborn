@@ -109,10 +109,10 @@ internal static class MajorUpdater
                 if (_threadException != ex)
                 {
                     _threadException = ex;
-                    PluginLog.Error($"HotbarHighlightManager.HotbarIDs.Clear Exception: {ex.Message}");
+                    PluginLog.Error($"RSRTeachingModeUpdate Exception: {ex.Message}");
                     if (Service.Config.InDebug)
                     {
-                        _ = BasicWarningHelper.AddSystemWarning("HotbarHighlightManager.HotbarIDs.Clear Exception");
+                        _ = BasicWarningHelper.AddSystemWarning("RSRTeachingModeUpdate Exception");
                     }
                 }
             }
@@ -137,10 +137,10 @@ internal static class MajorUpdater
                 if (_threadException != ex)
                 {
                     _threadException = ex;
-                    PluginLog.Error($"RSRUpdate TSC Exception: {ex.Message}");
+                    PluginLog.Error($"RSRInvalidUpdate Exception: {ex.Message}");
                     if (Service.Config.InDebug)
                     {
-                        _ = BasicWarningHelper.AddSystemWarning("RSRUpdate TSC Exception");
+                        _ = BasicWarningHelper.AddSystemWarning("RSRInvalidUpdate Exception");
                     }
                 }
             }
@@ -162,10 +162,10 @@ internal static class MajorUpdater
                     if (_threadException != ex)
                     {
                         _threadException = ex;
-                        PluginLog.Error($"MovingUpdater Exception: {ex.Message}");
+                        PluginLog.Error($"RSRUpdateMoving Exception: {ex.Message}");
                         if (Service.Config.InDebug)
                         {
-                            _ = BasicWarningHelper.AddSystemWarning("MovingUpdater Exception");
+                            _ = BasicWarningHelper.AddSystemWarning("RSRUpdateMoving Exception");
                         }
                     }
                 }
@@ -189,10 +189,10 @@ internal static class MajorUpdater
                 if (_threadException != ex)
                 {
                     _threadException = ex;
-                    PluginLog.Error($"RSCommands.DoAction Exception: {ex.Message}");
+                    PluginLog.Error($"RSRUpdateAction Exception: {ex.Message}");
                     if (Service.Config.InDebug)
                     {
-                        _ = BasicWarningHelper.AddSystemWarning("RSCommands.DoAction Exception");
+                        _ = BasicWarningHelper.AddSystemWarning("RSRUpdateAction Exception");
                     }
                 }
             }
@@ -210,10 +210,10 @@ internal static class MajorUpdater
             if (_threadException != ex)
             {
                 _threadException = ex;
-                PluginLog.Error($"MacroUpdater.UpdateMacro Exception: {ex.Message}");
+                PluginLog.Error($"RSRUpdateMacro Exception: {ex.Message}");
                 if (Service.Config.InDebug)
                 {
-                    _ = BasicWarningHelper.AddSystemWarning("MacroUpdater.UpdateMacro Exception");
+                    _ = BasicWarningHelper.AddSystemWarning("RSRUpdateMacro Exception");
                 }
             }
         }
@@ -232,10 +232,10 @@ internal static class MajorUpdater
                 if (_threadException != ex)
                 {
                     _threadException = ex;
-                    PluginLog.Error($"TargetUpdater.UpdateTargets Exception: {ex.Message}");
+                    PluginLog.Error($"RSRUpdateTarget Exception: {ex.Message}");
                     if (Service.Config.InDebug)
                     {
-                        _ = BasicWarningHelper.AddSystemWarning("TargetUpdater.UpdateTargets Exception");
+                        _ = BasicWarningHelper.AddSystemWarning("RSRUpdateTarget Exception");
                     }
                 }
             }
@@ -253,10 +253,10 @@ internal static class MajorUpdater
             if (_threadException != ex)
             {
                 _threadException = ex;
-                PluginLog.Error($"StateUpdater.UpdateState Exception: {ex.Message}");
+                PluginLog.Error($"RSRUpdateState Exception: {ex.Message}");
                 if (Service.Config.InDebug)
                 {
-                    _ = BasicWarningHelper.AddSystemWarning("StateUpdater.UpdateState Exception");
+                    _ = BasicWarningHelper.AddSystemWarning("RSRUpdateState Exception");
                 }
             }
         }
@@ -275,10 +275,10 @@ internal static class MajorUpdater
                 if (_threadException != ex)
                 {
                     _threadException = ex;
-                    PluginLog.Error($"ActionSequencerUpdater.UpdateActionSequencerAction Exception: {ex.Message}");
+                    PluginLog.Error($"RSRUpdateActionSequencer Exception: {ex.Message}");
                     if (Service.Config.InDebug)
                     {
-                        _ = BasicWarningHelper.AddSystemWarning("ActionSequencerUpdater.UpdateActionSequencerAction Exception");
+                        _ = BasicWarningHelper.AddSystemWarning("RSRUpdateActionSequencer Exception");
                     }
                 }
             }
@@ -298,10 +298,10 @@ internal static class MajorUpdater
                 if (_threadException != ex)
                 {
                     _threadException = ex;
-                    PluginLog.Error($"ActionUpdater.UpdateNextAction Exception: {ex.Message}");
+                    PluginLog.Error($"RSRUpdateNextAction Exception: {ex.Message}");
                     if (Service.Config.InDebug)
                     {
-                        _ = BasicWarningHelper.AddSystemWarning("ActionUpdater.UpdateNextAction Exception");
+                        _ = BasicWarningHelper.AddSystemWarning("RSRUpdateNextAction Exception");
                     }
                 }
             }
@@ -337,10 +337,10 @@ internal static class MajorUpdater
                 if (_threadException != ex)
                 {
                     _threadException = ex;
-                    PluginLog.Error($"UpdateHighlight Exception: {ex.Message}");
+                    PluginLog.Error($"RSRUpdateHighlight Exception: {ex.Message}");
                     if (Service.Config.InDebug)
                     {
-                        _ = BasicWarningHelper.AddSystemWarning("UpdateHighlight Exception");
+                        _ = BasicWarningHelper.AddSystemWarning("RSRUpdateHighlight Exception");
                     }
                 }
             }
@@ -361,10 +361,10 @@ internal static class MajorUpdater
                 if (_threadException != ex)
                 {
                     _threadException = ex;
-                    PluginLog.Error($"UpdateCombatInfo Exception: {ex.Message}");
+                    PluginLog.Error($"RSRUpdateCombatInfo Exception: {ex.Message}");
                     if (Service.Config.InDebug)
                     {
-                        _ = BasicWarningHelper.AddSystemWarning("UpdateCombatInfo Exception");
+                        _ = BasicWarningHelper.AddSystemWarning("RSRUpdateCombatInfo Exception");
                     }
                 }
             }
@@ -396,20 +396,35 @@ internal static class MajorUpdater
         // Handle system warnings
         if (DataCenter.SystemWarnings.Count > 0)
         {
-            DateTime now = DateTime.Now;
-            List<string> keysToRemove = [];
-
-            foreach (KeyValuePair<string, DateTime> kvp in DataCenter.SystemWarnings)
+            try
             {
-                if (kvp.Value + TimeSpan.FromMinutes(10) < now)
+                DateTime now = DateTime.Now;
+                List<string> keysToRemove = [];
+
+                foreach (KeyValuePair<string, DateTime> kvp in DataCenter.SystemWarnings)
                 {
-                    keysToRemove.Add(kvp.Key);
+                    if (kvp.Value + TimeSpan.FromMinutes(10) < now)
+                    {
+                        keysToRemove.Add(kvp.Key);
+                    }
+                }
+
+                foreach (string key in keysToRemove)
+                {
+                    _ = DataCenter.SystemWarnings.Remove(key);
                 }
             }
-
-            foreach (string key in keysToRemove)
+            catch (Exception ex)
             {
-                _ = DataCenter.SystemWarnings.Remove(key);
+                if (_threadException != ex)
+                {
+                    _threadException = ex;
+                    PluginLog.Error($"RSRUpdateSystemWarnings Exception: {ex.Message}");
+                    if (Service.Config.InDebug)
+                    {
+                        _ = BasicWarningHelper.AddSystemWarning("RSRUpdateSystemWarnings Exception");
+                    }
+                }
             }
         }
     }
@@ -419,7 +434,22 @@ internal static class MajorUpdater
         // Clear old VFX data
         if (DataCenter.VfxDataQueue.Count > 0)
         {
-            _ = DataCenter.VfxDataQueue.RemoveAll(vfx => vfx.TimeDuration > TimeSpan.FromSeconds(6));
+            try
+            {
+                _ = DataCenter.VfxDataQueue.RemoveAll(vfx => vfx.TimeDuration > TimeSpan.FromSeconds(6));
+            }
+            catch (Exception ex)
+            {
+                if (_threadException != ex)
+                {
+                    _threadException = ex;
+                    PluginLog.Error($"RSRUpdateVfxDataQueue Exception: {ex.Message}");
+                    if (Service.Config.InDebug)
+                    {
+                        _ = BasicWarningHelper.AddSystemWarning("RSRUpdateVfxDataQueue Exception");
+                    }
+                }
+            }
         }
     }
 
@@ -428,25 +458,78 @@ internal static class MajorUpdater
         // Check local rotation files
         if (Service.Config.AutoReloadRotations)
         {
-            RotationUpdater.LocalRotationWatcher();
+            try
+            {
+                RotationUpdater.LocalRotationWatcher();
+                return;
+            }
+            catch (Exception ex)
+            {
+                if (_threadException != ex)
+                {
+                    _threadException = ex;
+                    PluginLog.Error($"RSRUpdateLocalRotationWatcher Exception: {ex.Message}");
+                    if (Service.Config.InDebug)
+                    {
+                        _ = BasicWarningHelper.AddSystemWarning("RSRUpdateLocalRotationWatcher Exception");
+                    }
+                }
+            }
         }
     }
 
     private static void RSRUpdateRotation(IFramework framework)
     {
         // Change loaded rotation based on job
-        RotationUpdater.UpdateRotation();
+        if (IsValid)
+        {
+            try
+            {
+                RotationUpdater.UpdateRotation();
+                return;
+            }
+            catch (Exception ex)
+            {
+                if (_threadException != ex)
+                {
+                    _threadException = ex;
+                    PluginLog.Error($"RSRUpdateRotation Exception: {ex.Message}");
+                    if (Service.Config.InDebug)
+                    {
+                        _ = BasicWarningHelper.AddSystemWarning("RSRUpdateRotation Exception");
+                    }
+                }
+            }
+        }
     }
 
     private static void RSRUpdateRotationState(IFramework framework)
     {
         // Change RS state
-        RSCommands.UpdateRotationState();
+        if (IsValid)
+        {
+            try
+            {
+                RSCommands.UpdateRotationState();
+            }
+            catch (Exception ex)
+            {
+                if (_threadException != ex)
+                {
+                    _threadException = ex;
+                    PluginLog.Error($"RSRUpdateRotationState Exception: {ex.Message}");
+                    if (Service.Config.InDebug)
+                    {
+                        _ = BasicWarningHelper.AddSystemWarning("RSRUpdateRotationState Exception");
+                    }
+                }
+            }
+        }
     }
 
     private static void RSRUpdateTeachingModeSettings(IFramework framework)
     {
-        if (Service.Config.TeachingMode)
+        if (Service.Config.TeachingMode && IsValid)
         {
             try
             {
@@ -457,10 +540,10 @@ internal static class MajorUpdater
                 if (_threadException != ex)
                 {
                     _threadException = ex;
-                    PluginLog.Error($"HotbarHighlightManager.UpdateSettings Exception: {ex.Message}");
+                    PluginLog.Error($"RSRUpdateTeachingModeSettings Exception: {ex.Message}");
                     if (Service.Config.InDebug)
                     {
-                        _ = BasicWarningHelper.AddSystemWarning("HotbarHighlightManager.UpdateSettings Exception");
+                        _ = BasicWarningHelper.AddSystemWarning("RSRUpdateTeachingModeSettings Exception");
                     }
                 }
             }
@@ -469,19 +552,23 @@ internal static class MajorUpdater
 
     private static void RSRUpdateMisc(IFramework framework)
     {
-        try
+
+        if (IsValid)
         {
-            MiscUpdater.UpdateMisc();
-        }
-        catch (Exception ex)
-        {
-            if (_threadException != ex)
+            try
             {
-                _threadException = ex;
-                PluginLog.Error($"MiscUpdater.UpdateEntry Exception: {ex.Message}");
-                if (Service.Config.InDebug)
+                MiscUpdater.UpdateMisc();
+            }
+            catch (Exception ex)
+            {
+                if (_threadException != ex)
                 {
-                    _ = BasicWarningHelper.AddSystemWarning("MiscUpdater.UpdateEntry Exception");
+                    _threadException = ex;
+                    PluginLog.Error($"RSRUpdateMisc Exception: {ex.Message}");
+                    if (Service.Config.InDebug)
+                    {
+                        _ = BasicWarningHelper.AddSystemWarning("RSRUpdateMisc Exception");
+                    }
                 }
             }
         }
