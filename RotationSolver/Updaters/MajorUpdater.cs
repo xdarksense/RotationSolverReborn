@@ -149,7 +149,7 @@ internal static class MajorUpdater
 
     private static void RSRUpdateMoving(IFramework framework)
     {
-        if (Service.Config.TeachingMode || DataCenter.IsActivated())
+        if (DataCenter.IsActivated())
         {
             if (Service.Config.PoslockCasting && ActionUpdater.CanDoAction() is not false)
             {
@@ -201,19 +201,22 @@ internal static class MajorUpdater
 
     private static void RSRUpdateMacro(IFramework framework)
     {
-        try
+        if (DataCenter.IsActivated())
         {
-            MacroUpdater.UpdateMacro();
-        }
-        catch (Exception ex)
-        {
-            if (_threadException != ex)
+            try
             {
-                _threadException = ex;
-                PluginLog.Error($"RSRUpdateMacro Exception: {ex.Message}");
-                if (Service.Config.InDebug)
+                MacroUpdater.UpdateMacro();
+            }
+            catch (Exception ex)
+            {
+                if (_threadException != ex)
                 {
-                    _ = BasicWarningHelper.AddSystemWarning("RSRUpdateMacro Exception");
+                    _threadException = ex;
+                    PluginLog.Error($"RSRUpdateMacro Exception: {ex.Message}");
+                    if (Service.Config.InDebug)
+                    {
+                        _ = BasicWarningHelper.AddSystemWarning("RSRUpdateMacro Exception");
+                    }
                 }
             }
         }
@@ -221,7 +224,7 @@ internal static class MajorUpdater
 
     private static void RSRUpdateTarget(IFramework framework)
     {
-        if (Service.Config.TeachingMode || DataCenter.IsActivated())
+        if (DataCenter.IsActivated())
         {
             try
             {
@@ -244,19 +247,22 @@ internal static class MajorUpdater
 
     private static void RSRUpdateState(IFramework framework)
     {
-        try
+        if (DataCenter.IsActivated())
         {
-            StateUpdater.UpdateState();
-        }
-        catch (Exception ex)
-        {
-            if (_threadException != ex)
+            try
             {
-                _threadException = ex;
-                PluginLog.Error($"RSRUpdateState Exception: {ex.Message}");
-                if (Service.Config.InDebug)
+                StateUpdater.UpdateState();
+            }
+            catch (Exception ex)
+            {
+                if (_threadException != ex)
                 {
-                    _ = BasicWarningHelper.AddSystemWarning("RSRUpdateState Exception");
+                    _threadException = ex;
+                    PluginLog.Error($"RSRUpdateState Exception: {ex.Message}");
+                    if (Service.Config.InDebug)
+                    {
+                        _ = BasicWarningHelper.AddSystemWarning("RSRUpdateState Exception");
+                    }
                 }
             }
         }
@@ -264,7 +270,7 @@ internal static class MajorUpdater
 
     private static void RSRUpdateActionSequencer(IFramework framework)
     {
-        if (Service.Config.TeachingMode || DataCenter.IsActivated())
+        if (DataCenter.IsActivated())
         {
             try
             {
@@ -287,7 +293,7 @@ internal static class MajorUpdater
 
     private static void RSRUpdateNextAction(IFramework framework)
     {
-        if (Service.Config.TeachingMode || DataCenter.IsActivated())
+        if (DataCenter.IsActivated())
         {
             try
             {
@@ -347,25 +353,24 @@ internal static class MajorUpdater
         }
     }
 
+
+
     private static void RSRUpdateCombatInfo(IFramework framework)
     {
         // Update various combat tracking parameters
-        if (Service.Config.TeachingMode || DataCenter.IsActivated())
+        try
         {
-            try
+            ActionUpdater.UpdateCombatInfo();
+        }
+        catch (Exception ex)
+        {
+            if (_threadException != ex)
             {
-                ActionUpdater.UpdateCombatInfo();
-            }
-            catch (Exception ex)
-            {
-                if (_threadException != ex)
+                _threadException = ex;
+                PluginLog.Error($"RSRUpdateCombatInfo Exception: {ex.Message}");
+                if (Service.Config.InDebug)
                 {
-                    _threadException = ex;
-                    PluginLog.Error($"RSRUpdateCombatInfo Exception: {ex.Message}");
-                    if (Service.Config.InDebug)
-                    {
-                        _ = BasicWarningHelper.AddSystemWarning("RSRUpdateCombatInfo Exception");
-                    }
+                    _ = BasicWarningHelper.AddSystemWarning("RSRUpdateCombatInfo Exception");
                 }
             }
         }
@@ -456,12 +461,11 @@ internal static class MajorUpdater
     private static void RSRUpdateLocalRotationWatcher(IFramework framework)
     {
         // Check local rotation files
-        if (Service.Config.AutoReloadRotations)
+        if (Service.Config.AutoReloadRotations && IsValid)
         {
             try
             {
                 RotationUpdater.LocalRotationWatcher();
-                return;
             }
             catch (Exception ex)
             {
@@ -486,7 +490,6 @@ internal static class MajorUpdater
             try
             {
                 RotationUpdater.UpdateRotation();
-                return;
             }
             catch (Exception ex)
             {
