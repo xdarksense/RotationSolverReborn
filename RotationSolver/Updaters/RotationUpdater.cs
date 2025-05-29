@@ -671,6 +671,11 @@ internal static class RotationUpdater
 
     private static void UpdateCustomRotation()
     {
+        if (Player.Object == null)
+        {
+            return;
+        }
+
         Job nowJob = (Job)Player.Object.ClassJob.RowId;
         foreach (CustomRotationGroup group in CustomRotations)
         {
