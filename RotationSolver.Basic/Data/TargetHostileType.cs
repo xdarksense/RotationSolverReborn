@@ -20,7 +20,7 @@ public enum TargetHostileType : byte
     /// <summary>
     /// All targets when solo in duty, or previously engaged.
     /// </summary>
-    [Description("All targets when solo in duty, or previously engaged.")]
+    [Description("All targets when solo in duty (includes Occult Crescent), or previously engaged.")]
     AllTargetsWhenSoloInDuty,
 
     /// <summary>

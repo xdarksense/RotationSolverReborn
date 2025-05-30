@@ -284,7 +284,7 @@ public struct ActionTargetInfo(IBaseAction action)
             return false;
         }
 
-        if (!battleChara.IsAttackable())
+        if (battleChara.IsEnemy() && !battleChara.IsAttackable())
         {
             return false;
         }
