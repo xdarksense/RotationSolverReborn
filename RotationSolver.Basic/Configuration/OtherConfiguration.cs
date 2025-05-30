@@ -81,7 +81,6 @@ internal class OtherConfiguration
     /// If you have any of the statuses listed, RSR will stop taking any actions.
     /// </markdown>
     public static HashSet<uint> NoCastingStatus = [];
-    public static HashSet<uint> PrioTargetId = [];
     public static HashSet<uint> AutoStatusOrder = [];
     public static List<Job> DancePartnerPriority = [];
     public static List<Job> TheSpearPriority = [];
@@ -100,7 +99,6 @@ internal class OtherConfiguration
         _ = Task.Run(() => InitOne(ref DangerousStatus, nameof(DangerousStatus)));
         _ = Task.Run(() => InitOne(ref PriorityStatus, nameof(PriorityStatus)));
         _ = Task.Run(() => InitOne(ref InvincibleStatus, nameof(InvincibleStatus)));
-        _ = Task.Run(() => InitOne(ref PrioTargetId, nameof(PrioTargetId)));
         _ = Task.Run(() => InitOne(ref AutoStatusOrder, nameof(AutoStatusOrder)));
         _ = Task.Run(() => InitOne(ref DancePartnerPriority, nameof(DancePartnerPriority)));
         _ = Task.Run(() => InitOne(ref TheSpearPriority, nameof(TheSpearPriority)));
@@ -124,7 +122,6 @@ internal class OtherConfiguration
             await SavePriorityStatus();
             await SaveDangerousStatus();
             await SaveInvincibleStatus();
-            await SavePrioTargetId();
             await SaveAutoStatusOrder();
             await SaveDancePartnerPriority();
             await SaveTheSpearPriority();
@@ -247,17 +244,6 @@ internal class OtherConfiguration
     public static Task SaveBeneficialPositions()
     {
         return Task.Run(() => Save(BeneficialPositions, nameof(BeneficialPositions)));
-    }
-
-    public static void ResetPrioTargetId()
-    {
-        InitOne(ref PrioTargetId, nameof(PrioTargetId), true, true);
-        SavePrioTargetId().Wait();
-    }
-
-    public static Task SavePrioTargetId()
-    {
-        return Task.Run(() => Save(PrioTargetId, nameof(PrioTargetId)));
     }
 
     public static void ResetAutoStatusOrder()

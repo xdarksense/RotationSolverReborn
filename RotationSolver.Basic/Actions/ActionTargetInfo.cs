@@ -244,7 +244,6 @@ public struct ActionTargetInfo(IBaseAction action)
             return false;
         }
 
-        // Defensive: check that the underlying struct is valid before accessing StatusList
         unsafe
         {
             if (battleChara.Struct() == null)
@@ -253,7 +252,6 @@ public struct ActionTargetInfo(IBaseAction action)
             }
         }
 
-        // Optionally, check for IsDead or other validity flags if available
         if (!battleChara.IsTargetable)
         {
             return false;
@@ -272,11 +270,6 @@ public struct ActionTargetInfo(IBaseAction action)
             return false;
         }
 
-        if (Service.Config.RaiseType == RaiseType.PartyOnly && battleChara.IsAllianceMember() && !battleChara.IsParty())
-        {
-            return false;
-        }
-
         bool isBlacklisted = false;
         foreach (uint id in DataCenter.BlacklistedNameIds)
         {
@@ -291,7 +284,7 @@ public struct ActionTargetInfo(IBaseAction action)
             return false;
         }
 
-        if (battleChara.IsEnemy() && !battleChara.IsAttackable())
+        if (!battleChara.IsAttackable())
         {
             return false;
         }
