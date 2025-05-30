@@ -48,7 +48,7 @@ public class BaseAction : IBaseAction
     public uint AdjustedID => Info.AdjustedID;
 
     /// <inheritdoc/>
-    public float AnimationLockTime => ActionManagerHelper.GetCurrentAnimationLock();
+    public static float AnimationLockTime => Player.AnimationLock;
 
     /// <inheritdoc/>
     public uint SortKey => Cooldown.CoolDownGroup;
@@ -103,11 +103,6 @@ public class BaseAction : IBaseAction
                 }
 
                 _ = Action.ClassJob.Value;
-
-                if (value.TimeToUntargetable == 0)
-                {
-                    value.TimeToUntargetable = value.TimeToKill;
-                }
 
                 if (Setting.TargetStatusProvide != null)
                 {
@@ -195,9 +190,8 @@ public class BaseAction : IBaseAction
 
     private bool IsTimeToKillValid()
     {
-        return DataCenter.AverageTTK >= Config.TimeToKill && DataCenter.AverageTTK >= Config.TimeToUntargetable;
+        return DataCenter.AverageTTK >= Config.TimeToKill;
     }
-
 
     /// <inheritdoc/>
     public unsafe bool Use()

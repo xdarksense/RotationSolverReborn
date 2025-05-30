@@ -1,4 +1,6 @@
-﻿namespace RotationSolver.Basic.Rotations.Duties;
+﻿using Dalamud.Interface.Colors;
+
+namespace RotationSolver.Basic.Rotations.Duties;
 
 /// <summary>
 /// Represents a rotation for phantom duties in the game.
@@ -10,6 +12,52 @@ public partial class PhantomRotation : DutyRotation
 
 public partial class DutyRotation
 {
+    /// <summary>
+    /// Displays the rotation status on the window.
+    /// </summary>
+    public virtual void DisplayStatus()
+    {
+        ImGui.TextColored(ImGuiColors.DalamudRed, "Freelancer");
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "Knight");
+        ImGui.TextColored(ImGuiColors.DalamudWhite, "Monk");
+        ImGui.TextColored(ImGuiColors.DalamudWhite2, "Bard");
+        ImGui.TextColored(ImGuiColors.DalamudYellow, "Chemist");
+        ImGui.TextColored(ImGuiColors.ParsedBlue, "Time Mage");
+        ImGui.TextColored(ImGuiColors.ParsedGold, "Cannoneer");
+        ImGui.TextColored(ImGuiColors.ParsedGreen, "Oracle");
+        ImGui.Text("HasCleansing: " + HasCleansing.ToString());
+        ImGui.Text("HasStarfall: " + HasStarfall.ToString());
+        ImGui.Text("HasPhantomJudgment: " + HasPhantomJudgment.ToString());
+        ImGui.Text("HasBlessing: " + HasBlessing.ToString());
+        ImGui.TextColored(ImGuiColors.ParsedOrange, "Berserker");
+        ImGui.TextColored(ImGuiColors.ParsedPink, "Ranger");
+        ImGui.TextColored(ImGuiColors.ParsedPurple, "Thief");
+        ImGui.TextColored(ImGuiColors.TankBlue, "Samurai");
+        ImGui.TextColored(ImGuiColors.DPSRed, "Geomancer");
+    }
+
+    #region Status Tracking
+    /// <summary>
+    /// Able to execute Cleansing.
+    /// </summary>
+    public static bool HasCleansing => !Player.WillStatusEnd(0, true, StatusID.PredictionOfCleansing) || !Player.WillStatusEnd(0, false, StatusID.PredictionOfCleansing);
+
+    /// <summary>
+    /// Able to execute Starfall.
+    /// </summary>
+    public static bool HasStarfall => (!Player.WillStatusEnd(0, true, StatusID.PredictionOfStarfall) || !Player.WillStatusEnd(0, false, StatusID.PredictionOfStarfall)) && (ObjectHelper.GetEffectiveHpPercent(Player) > 90 || HasTankInvuln);
+
+    /// <summary>
+    /// Able to execute Phantom Judgment.
+    /// </summary>
+    public static bool HasPhantomJudgment => !Player.WillStatusEnd(0, true, StatusID.PredictionOfJudgment) || !Player.WillStatusEnd(0, false, StatusID.PredictionOfJudgment);
+
+    /// <summary>
+    /// Able to execute Blessing.
+    /// </summary>
+    public static bool HasBlessing => !Player.WillStatusEnd(0, true, StatusID.PredictionOfBlessing) || !Player.WillStatusEnd(0, false, StatusID.PredictionOfBlessing);
+    #endregion
+
     #region Freelancer
     /// <summary>
     /// Modifies the settings for Occult Resuscitation.
@@ -394,8 +442,7 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyCleansingPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => OracleLevel >= 1;
-        setting.StatusNeed = [StatusID.PredictionOfCleansing];
+        setting.ActionCheck = () => OracleLevel >= 1 && HasCleansing;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -408,8 +455,7 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyStarfallPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => OracleLevel >= 1 && (ObjectHelper.GetEffectiveHp(Player) > 0.9f || HasTankInvuln);
-        setting.StatusNeed = [StatusID.PredictionOfStarfall];
+        setting.ActionCheck = () => OracleLevel >= 1 && HasStarfall;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -422,8 +468,7 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyPhantomJudgmentPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => OracleLevel >= 1;
-        setting.StatusNeed = [StatusID.PredictionOfJudgment];
+        setting.ActionCheck = () => OracleLevel >= 1 && HasPhantomJudgment;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -436,8 +481,7 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyBlessingPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => OracleLevel >= 1;
-        setting.StatusNeed = [StatusID.PredictionOfBlessing];
+        setting.ActionCheck = () => OracleLevel >= 1 && HasBlessing;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

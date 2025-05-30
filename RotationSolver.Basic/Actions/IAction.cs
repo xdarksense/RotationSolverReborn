@@ -16,11 +16,6 @@ public interface IAction : ITexture, IEnoughLevel
     uint AdjustedID { get; }
 
     /// <summary>
-    /// Gets the animation lock time of this action.
-    /// </summary>
-    float AnimationLockTime { get; }
-
-    /// <summary>
     /// Gets the key used for sorting this action.
     /// </summary>
     uint SortKey { get; }

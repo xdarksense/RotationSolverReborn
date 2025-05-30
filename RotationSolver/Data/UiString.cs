@@ -31,7 +31,7 @@ namespace RotationSolver.Data
         [Description("No rotations loaded! Please check the rotations tab!")]
         ConfigWindow_NoRotation,
 
-        [Description("The duty rotation you chose. Click to modify.")]
+        [Description("Current duty logic.")]
         ConfigWindow_DutyRotationDesc,
 
         [Description("Remove")]
@@ -117,6 +117,9 @@ namespace RotationSolver.Data
 
         [Description("Status")]
         ConfigWindow_Rotation_Status,
+
+        [Description("Duty Rotation Status")]
+        ConfigWindow_DutyRotation_Status,
 
         [Description("Used to customize when RSR uses specific actions automatically. Click on an action's icon in the left list. Below, you may set the conditions for when that specific action is used. Each action can have different conditions to override the default rotation behavior.")]
         ConfigWindow_Actions_Description,

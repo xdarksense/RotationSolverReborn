@@ -163,6 +163,17 @@ public static class StatusHelper
     };
 
     /// <summary>
+    /// Statuses for the Phantom Oracle spell PredictPvE.
+    /// </summary>
+    public static StatusID[] OracleStatuses { get; } =
+    [
+        StatusID.PredictionOfCleansing,
+        StatusID.PredictionOfStarfall,
+        StatusID.PredictionOfJudgment,
+        StatusID.PredictionOfBlessing
+    ];
+
+    /// <summary>
     /// Check whether the target needs to be healing.
     /// </summary>
     /// <param name="Invulnp"></param>

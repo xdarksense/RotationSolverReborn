@@ -2,18 +2,12 @@
 
 namespace RebornRotations.Duty;
 
-[Rotation("Phantom Default", CombatType.PvE)]
+[Rotation("Phantom Jobs Loaded", CombatType.PvE)]
 
 public sealed class PhantomDefault : PhantomRotation
 {
     public override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        #region Oracle Emergency Abilities, use or die
-        if (PhantomJudgmentPvE.CanUse(out act))
-        {
-            return true;
-        }
-
         if (CleansingPvE.CanUse(out act))
         {
             return true;
@@ -23,7 +17,6 @@ public sealed class PhantomDefault : PhantomRotation
         {
             return true;
         }
-        #endregion
 
         return base.EmergencyAbility(nextGCD, out act);
     }
@@ -93,6 +86,12 @@ public sealed class PhantomDefault : PhantomRotation
 
     public override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
+        act = null;
+        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated))
+        {
+            return false;
+        }
+
         if (InCombat && PhantomDoomPvE.CanUse(out act))
         {
             return true;
@@ -165,6 +164,11 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
+        if (PhantomJudgmentPvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.HealSingleAbility(nextGCD, out act);
     }
 
@@ -180,6 +184,7 @@ public sealed class PhantomDefault : PhantomRotation
         {
             return true;
         }
+
         if (PhantomJudgmentPvE.CanUse(out act))
         {
             return true;

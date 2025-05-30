@@ -63,12 +63,7 @@ public class ActionConfig()
     /// <markdown file="Actions" name="Time-to-kill threshold required for this action to be used">
     /// Minimum time-to-kill on the target for this action to be considered enabled in the rotation and used.
     /// </markdown>
-    public float TimeToKill { get; set; } = 0;
-
-    /// <summary>
-    /// How many ttu should this action use.
-    /// </summary>
-    public float TimeToUntargetable { get; set; } = 0;
+    public int TimeToKill { get; set; } = 0;
 
     /// <summary>
     /// The heal ratio for the auto heal.

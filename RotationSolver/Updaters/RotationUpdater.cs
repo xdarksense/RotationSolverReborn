@@ -607,15 +607,11 @@ internal static class RotationUpdater
     }
 
     // Helper class for grouping (since LINQ's Grouping is not available)
-    private class SimpleGrouping<TKey, TElement> : IGrouping<TKey, TElement>
+    private class SimpleGrouping<TKey, TElement>(TKey key, IEnumerable<TElement> elements) : IGrouping<TKey, TElement>
     {
-        private readonly IEnumerable<TElement> _elements;
-        public SimpleGrouping(TKey key, IEnumerable<TElement> elements)
-        {
-            Key = key;
-            _elements = elements;
-        }
-        public TKey Key { get; }
+        private readonly IEnumerable<TElement> _elements = elements;
+
+        public TKey Key { get; } = key;
         public IEnumerator<TElement> GetEnumerator()
         {
             return _elements.GetEnumerator();
