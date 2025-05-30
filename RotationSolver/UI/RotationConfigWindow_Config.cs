@@ -351,7 +351,6 @@ public partial class RotationConfigWindow
     {
     { UiString.ConfigWindow_Target_Config.GetDescription, DrawTargetConfig },
     { UiString.ConfigWindow_List_Hostile.GetDescription, DrawTargetHostile },
-    { UiString.ConfigWindow_List_TargetPriority.GetDescription, DrawTargetPriority },
     });
 
     /// <summary>
@@ -411,49 +410,6 @@ public partial class RotationConfigWindow
                 (Delete, new[] { VirtualKey.DELETE }),
                 (Up, new[] { VirtualKey.UP }),
                 (Down, new[] { VirtualKey.DOWN }));
-        }
-    }
-
-    private static void DrawTargetPriority()
-    {
-        // Convert HashSet<uint> to string[] for ImGui input
-        HashSet<uint> prioIdSet = OtherConfiguration.PrioTargetId;
-        string[] prioId = new string[prioIdSet.Count];
-        int idx = 0;
-        foreach (uint id in prioIdSet)
-        {
-            prioId[idx++] = id.ToString();
-        }
-
-        // Begin new column for Prioritized Target Names
-        _ = ImGui.TableNextColumn();
-        ImGui.TextWrapped(UiString.ConfigWindow_List_PrioTargetDesc.GetDescription());
-
-        // List all DataIds in the current list
-        ImGui.Text("Current Priority DataIds:");
-        foreach (uint id in prioIdSet)
-        {
-            ImGui.Text(id.ToString());
-        }
-
-        _ = ImGui.TableNextColumn();
-        if (ImGui.Button("Reset and Update Target Priority List"))
-        {
-            OtherConfiguration.ResetPrioTargetId();
-        }
-
-        // Render a button to add the DataId of the current target
-        if (ImGui.Button("Add Current Target"))
-        {
-            IGameObject? currentTarget = Svc.Targets.Target;
-            if (currentTarget != null)
-            {
-                uint dataId = currentTarget.DataId;
-                PriorityTargetHelper.AddPriorityTarget(dataId);
-                _ = prioIdSet.Add(dataId);
-                OtherConfiguration.PrioTargetId = prioIdSet;
-                _ = OtherConfiguration.SavePrioTargetId();
-            }
         }
     }
     #endregion

@@ -26,6 +26,12 @@ public partial class CustomRotation
     public static bool HasTankStance => Player?.HasStatus(true, StatusHelper.TankStanceStatus) ?? false;
 
     /// <summary>
+    /// 
+    /// </summary>
+    [Description("Has tank stance")]
+    public static bool HasTankInvuln => Player?.HasStatus(true, StatusHelper.NoNeedHealingStatus) ?? false;
+
+    /// <summary>
     /// Check the player is moving, such as running, walking or jumping.
     /// </summary>
     [Description("Is Moving or Jumping")]
@@ -183,7 +189,7 @@ public partial class CustomRotation
     /// <param name="range">The range to check (in yalms).</param>
     /// <returns>The number of hostile targets within the given range.</returns>
     [Description("The number of hostiles in specified range")]
-    public static int NumberOfHostilesInRangeOf(float range)
+    public static int NumberOfHostilesInRangeOf(int range)
     {
         return DataCenter.NumberOfHostilesInRangeOf(range);
     }
@@ -407,7 +413,12 @@ public partial class CustomRotation
     /// Time from next ability to next GCD
     /// </summary>
     [Description("Time from next ability to next GCD")]
-    public static float NextAbilityToNextGCD => DataCenter.DefaultGCDRemain - ActionManagerHelper.GetCurrentAnimationLock();
+    public static float NextAbilityToNextGCD => DataCenter.DefaultGCDRemain - ActionManagerHelper.AnimationLock;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static float AnimationLock => ActionManagerHelper.AnimationLock;
 
     /// <summary>
     /// Treats one action as another.
@@ -666,28 +677,27 @@ public partial class CustomRotation
     /// <br>WARNING: Do Not make this method the main of your rotation.</br>
     /// </summary>
     [Description("Stop moving time")]
-    public static float StopMovingTime => IsMoving ? 0 : DataCenter.StopMovingRaw + DataCenter.DefaultGCDRemain;
-
+    public static float StopMovingTime => DataCenter.StopMovingRaw;
 
     /// <summary>
     /// How long the player has been moving.
     /// <br>WARNING: Do Not make this method the main of your rotation.</br>
     /// </summary>
     [Description("Moving time")]
-    public static float MovingTime => IsMoving ? DataCenter.MovingRaw + DataCenter.DefaultGCDRemain : 0;
+    public static float MovingTime => DataCenter.MovingRaw;
     /// <summary>
     /// How long the player has been alive.
     /// <br>WARNING: Do Not make this method the main of your rotation.</br>
     /// </summary>
     [Description("How long the player has been alive.")]
-    public static float AliveTime => Player.IsAlive() ? DataCenter.AliveTimeRaw + DataCenter.DefaultGCDRemain : 0;
+    public static float AliveTime => DataCenter.AliveTimeRaw;
 
     /// <summary>
     /// How long the player has been dead.
     /// <br>WARNING: Do Not make this method the main of your rotation.</br>
     /// </summary>
     [Description("How long the player has been dead.")]
-    public static float DeadTime => Player.IsAlive() ? 0 : DataCenter.DeadTimeRaw + DataCenter.DefaultGCDRemain;
+    public static float DeadTime => DataCenter.DeadTimeRaw;
 
     /// <summary>
     /// Time from GCD.

@@ -460,7 +460,7 @@ public sealed class SCH_Default : ScholarRotation
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
         // Count how many hostile targets are within 5 units
-        int closeTargetCount = NumberOfHostilesInRangeOf(5f);
+        int closeTargetCount = NumberOfHostilesInRangeOf(5);
 
         if (BanefulImpactionPvE.CanUse(out act) &&
             (closeTargetCount > 3 // Mobs are grouped up
@@ -615,7 +615,7 @@ public sealed class SCH_Default : ScholarRotation
             return false;
         }
 
-        int nearbyHostiles = NumberOfHostilesInRangeOf(5f);
+        int nearbyHostiles = NumberOfHostilesInRangeOf(5);
 
         float expectedHPToLive12Seconds = 1f;
 

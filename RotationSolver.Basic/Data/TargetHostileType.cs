@@ -20,7 +20,7 @@ public enum TargetHostileType : byte
     /// <summary>
     /// All targets when solo in duty, or previously engaged.
     /// </summary>
-    [Description("All targets when solo in duty, or previously engaged.")]
+    [Description("All targets when solo in duty (includes Occult Crescent), or previously engaged.")]
     AllTargetsWhenSoloInDuty,
 
     /// <summary>
@@ -29,21 +29,12 @@ public enum TargetHostileType : byte
     [Description("All targets when solo, or previously engaged.")]
     AllTargetsWhenSolo,
 
-    /// <summary>
-    /// Targets in your enemy list.
-    /// </summary>
-    [Description("Only attack targets in your parties enemy list")]
-    TargetIsInEnemiesList,
+    //[Description("Only attack targets in your parties enemy list")]
+    //TargetIsInEnemiesList,
 
-    /// <summary>
-    /// All targets when solo, or only attack targets in your parties enemy list.
-    /// </summary>
-    [Description("All targets when solo, or only attack targets in your parties enemy list")]
-    AllTargetsWhenSoloTargetIsInEnemiesList,
+    //[Description("All targets when solo, or only attack targets in your parties enemy list")]
+    //AllTargetsWhenSoloTargetIsInEnemiesList,
 
-    /// <summary>
-    /// All targets when solo in duty, or only attack targets in your parties enemy list.
-    /// </summary>
-    [Description("All targets when solo in duty, or only attack targets in your parties enemy list")]
-    AllTargetsWhenSoloInDutyTargetIsInEnemiesList,
+    //[Description("All targets when solo in duty, or only attack targets in your parties enemy list")]
+    //AllTargetsWhenSoloInDutyTargetIsInEnemiesList,
 }

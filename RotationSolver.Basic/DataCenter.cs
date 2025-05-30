@@ -140,13 +140,12 @@ internal static class DataCenter
 
     #endregion
 
-    #region Bozja
+    #region Occult Crescent
 
     /// <summary>
     /// Determines if the current content is Bozjan Southern Front or Zadnor.
     /// </summary>
     public static bool IsInOccultCrescentOp => Territory?.ContentType == TerritoryContentType.OccultCrescent;
-
     #endregion
 
     public static ushort TerritoryID => Svc.ClientState.TerritoryType;
@@ -280,10 +279,16 @@ internal static class DataCenter
     }
 
     #region GCD
+
     /// <summary>
     /// Returns the time remaining until the next GCD (Global Cooldown) after considering the current animation lock.
     /// </summary>
-    public static float NextAbilityToNextGCD => DefaultGCDRemain - ActionManagerHelper.GetCurrentAnimationLock();
+    public static float AnimationLock => Player.AnimationLock;
+
+    /// <summary>
+    /// Returns the time remaining until the next GCD (Global Cooldown) after considering the current animation lock.
+    /// </summary>
+    public static float NextAbilityToNextGCD => DefaultGCDRemain - Player.AnimationLock;
 
     /// <summary>
     /// Returns the total duration of the default GCD.
@@ -353,7 +358,7 @@ internal static class DataCenter
     internal static float CombatTimeRaw { get; set; }
     private static DateTime _startRaidTime = DateTime.MinValue;
 
-    internal static float RaidTimeRaw
+    internal static int RaidTimeRaw
     {
         get
         {
@@ -364,7 +369,7 @@ internal static class DataCenter
             }
 
             // Calculate and return the total seconds elapsed since the raid started.
-            return (float)(DateTime.Now - _startRaidTime).TotalSeconds;
+            return (int)(DateTime.Now - _startRaidTime).TotalSeconds;
         }
         set
         {
@@ -464,7 +469,7 @@ internal static class DataCenter
         }
     }
 
-    public static int NumberOfHostilesInRangeOf(float range)
+    public static int NumberOfHostilesInRangeOf(int range)
     {
         int count = 0;
         var targets = AllHostileTargets;
@@ -484,7 +489,7 @@ internal static class DataCenter
     {
         get
         {
-            float jobRange = JobRange;
+            int jobRange = JobRange;
             int count = 0;
             var targets = AllHostileTargets;
             for (int i = 0, n = targets.Count; i < n; i++)
@@ -514,17 +519,17 @@ internal static class DataCenter
         }
     }
 
-    public static float JobRange
+    public static int JobRange
     {
         get
         {
-            float radius = 25;
+            int radius = 25;
             if (!Player.AvailableThreadSafe)
             {
                 return radius;
             }
 
-            switch (DataCenter.Role)
+            switch (Role)
             {
                 case JobRole.Tank:
                 case JobRole.Melee:
@@ -536,16 +541,16 @@ internal static class DataCenter
         }
     }
 
-    public static float AverageTTK
+    public static int AverageTTK
     {
         get
         {
-            float total = 0;
+            int total = 0;
             int count = 0;
             var targets = AllHostileTargets;
             for (int i = 0, n = targets.Count; i < n; i++)
             {
-                float tTK = targets[i].GetTTK();
+                int tTK = targets[i].GetTTK();
                 if (!float.IsNaN(tTK))
                 {
                     total += tTK;
@@ -740,7 +745,7 @@ internal static class DataCenter
     private static float GetPartyMemberHPRatio(IBattleChara member)
     {
         if (member == null)
-        {
+    {
             throw new ArgumentNullException(nameof(member));
         }
 
@@ -853,9 +858,7 @@ internal static class DataCenter
     internal static Queue<MacroItem> Macros { get; } = new Queue<MacroItem>();
 
     #region Action Record
-    //public const float MinAnimationLock = 0.6f;
-
-    private const int QUEUECAPACITY = 32;
+    private const int QUEUECAPACITY = 200;
     private static readonly Queue<ActionRec> _actions = new(QUEUECAPACITY);
     private static readonly Queue<DamageRec> _damages = new(QUEUECAPACITY);
 

@@ -17,56 +17,29 @@ internal static class MajorUpdater
         get
         {
             if (!Player.AvailableThreadSafe)
-            {
                 return false;
-            }
 
-            // Directly check if there are any conditions present
-            IReadOnlySet<ConditionFlag> conditions = Svc.Condition.AsReadOnlySet();
-            return conditions.Count != 0 && !Svc.Condition[ConditionFlag.Occupied]
-               && !Svc.Condition[ConditionFlag.LoggingOut]
-               && !Svc.Condition[ConditionFlag.Occupied30]
-               && !Svc.Condition[ConditionFlag.Occupied33]
-               && !Svc.Condition[ConditionFlag.Occupied38]
-               && !Svc.Condition[ConditionFlag.Occupied39]
-               && !Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]
-               && !Svc.Condition[ConditionFlag.OccupiedInEvent]
-               && !Svc.Condition[ConditionFlag.OccupiedInQuestEvent]
-               && !Svc.Condition[ConditionFlag.OccupiedSummoningBell]
-               && !Svc.Condition[ConditionFlag.WatchingCutscene]
-               && !Svc.Condition[ConditionFlag.WatchingCutscene78]
-               && !Svc.Condition[ConditionFlag.BetweenAreas]
-               && !Svc.Condition[ConditionFlag.BetweenAreas51]
-               && !Svc.Condition[ConditionFlag.InThatPosition]
-               //|| Svc.Condition[ConditionFlag.TradeOpen]
-               && !Svc.Condition[ConditionFlag.Crafting]
-               && !Svc.Condition[ConditionFlag.ExecutingCraftingAction]
-               && !Svc.Condition[ConditionFlag.PreparingToCraft]
-               && !Svc.Condition[ConditionFlag.Unconscious]
-               && !Svc.Condition[ConditionFlag.MeldingMateria]
-               && !Svc.Condition[ConditionFlag.Gathering]
-               && !Svc.Condition[ConditionFlag.OperatingSiegeMachine]
-               && !Svc.Condition[ConditionFlag.CarryingItem]
-               && !Svc.Condition[ConditionFlag.CarryingObject]
-               && !Svc.Condition[ConditionFlag.BeingMoved]
-               && !Svc.Condition[ConditionFlag.Mounted]
-               && !Svc.Condition[ConditionFlag.Mounted2]
-               && !Svc.Condition[ConditionFlag.Mounting]
-               && !Svc.Condition[ConditionFlag.Mounting71]
-               && !Svc.Condition[ConditionFlag.ParticipatingInCustomMatch]
-               && !Svc.Condition[ConditionFlag.PlayingLordOfVerminion]
-               && !Svc.Condition[ConditionFlag.ChocoboRacing]
-               && !Svc.Condition[ConditionFlag.PlayingMiniGame]
-               && !Svc.Condition[ConditionFlag.Performing]
-               && !Svc.Condition[ConditionFlag.Fishing]
-               //&& !Svc.Condition[ConditionFlag.Transformed] Dhon Meg boss enlarges you, making you transformed
-               && !Svc.Condition[ConditionFlag.UsingHousingFunctions]
-               && !Svc.Condition[ConditionFlag.Jumping61]
-               && !Svc.Condition[ConditionFlag.SufferingStatusAffliction2]
-               && !Svc.Condition[ConditionFlag.RolePlaying]
-               && !Svc.Condition[ConditionFlag.InFlight]
-               && !Svc.Condition[ConditionFlag.Diving]
-               && !Svc.Condition[ConditionFlag.Swimming];
+            // Replace Svc.Condition.Any() with manual check
+            bool anyCondition = false;
+            foreach (var conditionFlag in Svc.Condition.AsReadOnlySet())
+            {
+                if (Svc.Condition.AsReadOnlySet().Contains(conditionFlag))
+                {
+                    anyCondition = true;
+                    break;
+                }
+            }
+            if (!anyCondition)
+                return false;
+
+            if (Svc.Condition[ConditionFlag.BetweenAreas])
+                return false;
+            if (Svc.Condition[ConditionFlag.BetweenAreas51])
+                return false;
+            if (Svc.Condition[ConditionFlag.LoggingOut])
+                return false;
+
+            return true;
         }
     }
 

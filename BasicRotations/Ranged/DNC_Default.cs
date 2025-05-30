@@ -164,7 +164,7 @@ public sealed class DNC_Default : DancerRotation
         }
 
         // Prevent triple weaving by checking if an action was just used
-        if (nextGCD.AnimationLockTime > 0.75f)
+        if (AnimationLock > 0.75f)
         {
             return false;
         }

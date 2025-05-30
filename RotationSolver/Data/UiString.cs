@@ -31,7 +31,7 @@ namespace RotationSolver.Data
         [Description("No rotations loaded! Please check the rotations tab!")]
         ConfigWindow_NoRotation,
 
-        [Description("The duty rotation you chose. Click to modify.")]
+        [Description("Current duty logic.")]
         ConfigWindow_DutyRotationDesc,
 
         [Description("Remove")]
@@ -117,6 +117,9 @@ namespace RotationSolver.Data
 
         [Description("Status")]
         ConfigWindow_Rotation_Status,
+
+        [Description("Duty Rotation Status")]
+        ConfigWindow_DutyRotation_Status,
 
         [Description("Used to customize when RSR uses specific actions automatically. Click on an action's icon in the left list. Below, you may set the conditions for when that specific action is used. Each action can have different conditions to override the default rotation behavior.")]
         ConfigWindow_Actions_Description,
@@ -283,14 +286,8 @@ namespace RotationSolver.Data
         [Description("Beneficial AoE locations")]
         ConfigWindow_List_BeneficialPositions,
 
-        [Description("Enemies that will be prioritized. This system is under construction and experimental but should be stable.")]
-        ConfigWindow_List_PrioTargetDesc,
-
         [Description("Enemies that will never be targeted")]
         ConfigWindow_List_NoHostileDesc,
-
-        [Description("The name of the enemy that you want to prioritize")]
-        ConfigWindow_List_PrioTargetName,
 
         [Description("The name of the enemy that you don't want to target")]
         ConfigWindow_List_NoHostilesName,
@@ -447,9 +444,6 @@ namespace RotationSolver.Data
 
         [Description("Hostile")]
         ConfigWindow_List_Hostile,
-
-        [Description("Target Priority")]
-        ConfigWindow_List_TargetPriority,
 
         [Description("Enemy targeting logic. Adding more options cycles them when using /rotation Auto.\nUse /rotation Settings TargetingTypes add <option> to add,\n/rotation Settings TargetingTypes remove <option> to remove,\nand /rotation Settings TargetingTypes removeall to remove all options.")]
         ConfigWindow_Param_HostileDesc,

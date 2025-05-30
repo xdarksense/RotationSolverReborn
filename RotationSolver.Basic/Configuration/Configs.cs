@@ -308,7 +308,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig, Section = 1)]
     private static readonly bool _targetHuntingRelicLevePriority = true;
 
-    [ConditionBool, UI("Target quest priority.",
+    [ConditionBool, UI("Target quest priority (Overrides engage setting).",
         Filter = TargetConfig, Section = 1)]
     private static readonly bool _targetQuestPriority = true;
 

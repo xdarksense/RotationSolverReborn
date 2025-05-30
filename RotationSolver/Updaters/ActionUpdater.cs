@@ -37,7 +37,6 @@ internal static class ActionUpdater
     }
 
     private static IBaseAction? _nextGCDAction;
-    private const float GcdHeight = 5;
     internal static IBaseAction? NextGCDAction
     {
         get => _nextGCDAction;
@@ -137,7 +136,6 @@ internal static class ActionUpdater
 
     private static DateTime _startMovingTime = DateTime.MinValue;
     private static DateTime _stopMovingTime = DateTime.MinValue;
-
     private static void UpdateMoving(DateTime now)
     {
         bool last = DataCenter.IsMoving;
@@ -153,12 +151,13 @@ internal static class ActionUpdater
 
         DataCenter.StopMovingRaw = DataCenter.IsMoving
             ? 0
-            : (float)(now - _stopMovingTime).TotalSeconds;
+            : Math.Min(10, (float)(now - _stopMovingTime).TotalSeconds);
 
         DataCenter.MovingRaw = DataCenter.IsMoving
-            ? (float)(now - _startMovingTime).TotalSeconds
+            ? Math.Min(10, (float)(now - _startMovingTime).TotalSeconds)
             : 0;
     }
+
     private static DateTime _startDeadTime = DateTime.MinValue;
     private static DateTime _startAliveTime = DateTime.Now;
     private static bool _isDead = true;
@@ -182,18 +181,18 @@ internal static class ActionUpdater
         }
 
         DataCenter.DeadTimeRaw = Player.Object.IsDead
-            ? (float)(now - _startDeadTime).TotalSeconds
+            ? Math.Min(10, (float)(now - _startDeadTime).TotalSeconds)
             : 0;
 
         DataCenter.AliveTimeRaw = Player.Object.IsDead
             ? 0
-            : (float)(now - _startAliveTime).TotalSeconds;
+            : Math.Min(10, (float)(now - _startAliveTime).TotalSeconds);
     }
 
     private static uint _lastMP = 0;
     private static DateTime _lastMPUpdate = DateTime.Now;
 
-    internal static float MPUpdateElapsed => (float)(DateTime.Now - _lastMPUpdate).TotalSeconds % 3;
+    internal static float MPUpdateElapsed => (float)((DateTime.Now - _lastMPUpdate).TotalSeconds % 3);
 
     private static void UpdateMPTimer(DateTime now)
     {
@@ -236,10 +235,39 @@ internal static class ActionUpdater
         return RSCommands.CanDoAnAction(ActionHelper.CanUseGCD);
     }
 
-    private static unsafe bool IsPlayerOccupied()
+    private unsafe static bool IsPlayerOccupied()
     {
-        return !MajorUpdater.IsValid || Svc.ClientState.LocalPlayer?.IsTargetable != true || (ActionManager.Instance()->ActionQueued && NextAction != null
-            && ActionManager.Instance()->QueuedActionId != NextAction.AdjustedID);
+        if (Svc.ClientState.LocalPlayer?.IsTargetable != true)
+        {
+            return true;
+        }
+
+        if (Svc.Condition[ConditionFlag.OccupiedInQuestEvent]
+            || Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]
+            || Svc.Condition[ConditionFlag.Occupied33]
+            || Svc.Condition[ConditionFlag.Occupied38]
+            || Svc.Condition[ConditionFlag.Jumping61]
+            || Svc.Condition[ConditionFlag.BetweenAreas]
+            || Svc.Condition[ConditionFlag.BetweenAreas51]
+            || Svc.Condition[ConditionFlag.Mounted]
+            || Svc.Condition[ConditionFlag.SufferingStatusAffliction2]
+            || Svc.Condition[ConditionFlag.RolePlaying]
+            || Svc.Condition[ConditionFlag.InFlight]
+            || Svc.Condition[ConditionFlag.Diving]
+            || Svc.Condition[ConditionFlag.Swimming]
+            || Svc.Condition[ConditionFlag.Unconscious]
+            || Svc.Condition[ConditionFlag.MeldingMateria])
+        {
+            return true;
+        }
+
+        if (ActionManager.Instance()->ActionQueued && NextAction != null
+            && ActionManager.Instance()->QueuedActionId != NextAction.AdjustedID)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private static void LogError(string message, Exception ex)

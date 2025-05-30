@@ -104,7 +104,7 @@ public partial class RotationConfigWindow : Window
 
     private static void DrawDutyRotation()
     {
-        Basic.Rotations.Duties.DutyRotation? dutyRotation = DataCenter.CurrentDutyRotation;
+        DutyRotation? dutyRotation = DataCenter.CurrentDutyRotation;
         if (dutyRotation == null)
         {
             return;
@@ -126,35 +126,11 @@ public partial class RotationConfigWindow : Window
             return;
         }
 
-        const string popUpId = "Right Duty Rotation Popup";
         if (ImGui.Selectable(rot.Name, false, ImGuiSelectableFlags.None, new Vector2(0, 20)))
         {
-            ImGui.OpenPopup(popUpId);
+           
         }
         ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_DutyRotationDesc.GetDescription());
-
-        using ImRaii.IEndObject popup = ImRaii.Popup(popUpId);
-        if (popup)
-        {
-            foreach (Type type in rotations)
-            {
-                RotationAttribute? r = type.GetCustomAttribute<RotationAttribute>();
-                if (r == null)
-                {
-                    continue;
-                }
-
-                if (ImGui.Selectable("None"))
-                {
-                    Service.Config.DutyRotationChoice[Svc.ClientState.TerritoryType] = string.Empty;
-                }
-
-                if (ImGui.Selectable(r.Name) && !string.IsNullOrEmpty(type.FullName))
-                {
-                    Service.Config.DutyRotationChoice[Svc.ClientState.TerritoryType] = type.FullName;
-                }
-            }
-        }
     }
 
     private bool CheckErrors()
@@ -544,7 +520,7 @@ public partial class RotationConfigWindow : Window
             return;
         }
 
-        Type[] rotations = Array.Empty<Type>();
+        Type[] rotations = [];
         foreach (RotationUpdater.CustomRotationGroup customRotation in RotationUpdater.CustomRotations)
         {
             if (customRotation.ClassJobIds.Contains((Job)(Player.Object?.ClassJob.RowId ?? 0)))
@@ -564,8 +540,8 @@ public partial class RotationConfigWindow : Window
             }
 
             rotations = DataCenter.IsPvP
-                ? rotations.Where(r => r.GetCustomAttribute<RotationAttribute>()?.Type.HasFlag(CombatType.PvP) ?? false).ToArray()
-                : rotations.Where(r => r.GetCustomAttribute<RotationAttribute>()?.Type.HasFlag(CombatType.PvE) ?? false).ToArray();
+                ? [.. rotations.Where(r => r.GetCustomAttribute<RotationAttribute>()?.Type.HasFlag(CombatType.PvP) ?? false)]
+                : [.. rotations.Where(r => r.GetCustomAttribute<RotationAttribute>()?.Type.HasFlag(CombatType.PvE) ?? false)];
 
             float iconSize = Math.Max(Scale * MIN_COLUMN_WIDTH, Math.Min(wholeWidth, Scale * JOB_ICON_WIDTH));
             float comboSize = ImGui.CalcTextSize(rot.Name).X;
@@ -1354,6 +1330,8 @@ public partial class RotationConfigWindow : Window
         { UiString.ConfigWindow_Rotation_Description.GetDescription, DrawRotationDescription },
 
         { GetRotationStatusHead,  DrawRotationStatus },
+        
+        { GetDutyRotationStatusHead,  DrawDutyRotationStatus },
 
         { UiString.ConfigWindow_Rotation_Configuration.GetDescription, DrawRotationConfiguration },
 
@@ -1513,6 +1491,22 @@ public partial class RotationConfigWindow : Window
     private static void DrawRotationStatus()
     {
         DataCenter.CurrentRotation?.DisplayStatus();
+    }
+
+    private static string GetDutyRotationStatusHead()
+    {
+        DutyRotation? rotation = DataCenter.CurrentDutyRotation;
+        string status = UiString.ConfigWindow_DutyRotation_Status.GetDescription();
+        return rotation == null ? string.Empty : status;
+    }
+
+    private static void DrawDutyRotationStatus()
+    {
+        if (DataCenter.CurrentDutyRotation == null)
+        {
+            return;
+        }
+        DataCenter.CurrentDutyRotation?.DisplayStatus();
     }
 
     private static string ToCommandStr(OtherCommandType type, string str, string extra = "")
@@ -2066,9 +2060,9 @@ public partial class RotationConfigWindow : Window
 
                 ImGui.Separator();
 
-                float ttk = config.TimeToKill;
+                int ttk = config.TimeToKill;
                 ImGui.SetNextItemWidth(Scale * 150);
-                if (ImGui.DragFloat($"{UiString.ConfigWindow_Actions_TTK.GetDescription()}##{a}",
+                if (ImGui.DragInt($"{UiString.ConfigWindow_Actions_TTK.GetDescription()}##{a}",
                     ref ttk, 0.1f, 0, 120, $"{ttk:F2}{ConfigUnitType.Seconds.ToSymbol()}"))
                 {
                     config.TimeToKill = ttk;
@@ -3425,6 +3419,8 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"    {condition}");
         }
         ImGui.Text($"OnlineStatus: {Player.OnlineStatus}");
+        ImGui.Text($"Effective Hp: {ObjectHelper.GetEffectiveHp(Player.Object)}");
+        ImGui.Text($"Effective Hp Percent: {ObjectHelper.GetEffectiveHpPercent(Player.Object)}");
         ImGui.Text($"IsDead: {Player.Object.IsDead}");
         ImGui.Text($"DoomNeedHealing: {Player.Object.DoomNeedHealing()}");
         ImGui.Text($"Dead Time: {DataCenter.DeadTimeRaw}");
@@ -3632,11 +3628,22 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"Name Id: {battleChara.NameId}");
             ImGui.Text($"Data Id: {battleChara.DataId}");
             ImGui.Text($"HP: {battleChara.CurrentHp} / {battleChara.MaxHp}");
-            ImGui.Text($"Is Enemy Action Check: {battleChara.IsEnemy()}");
+            ImGui.Spacing();
             ImGui.Text($"Is Attackable: {battleChara.IsAttackable()}");
+            ImGui.Text($"Is Others Players Mob: {battleChara.IsOthersPlayersMob()}");
+            ImGui.Text($"Is Alliance: {battleChara.IsAllianceMember()}");
+            ImGui.Text($"Is Enemy Action Check: {battleChara.IsEnemy()}");
+            ImGui.Text($"IsSpecialExecptionImmune: {battleChara.IsSpecialExecptionImmune()}");
+            ImGui.Text($"IsSpecialImmune: {battleChara.IsSpecialImmune()}");
+            ImGui.Text($"IsTopPriorityNamedHostile: {battleChara.IsTopPriorityNamedHostile()}");
+            ImGui.Text($"IsTopPriorityHostile: {battleChara.IsTopPriorityHostile()}");
+            ImGui.Spacing();
             ImGui.Text($"FateID: {battleChara.FateId().ToString() ?? string.Empty}");
             ImGui.Text($"EventType: {battleChara.GetEventType().ToString() ?? string.Empty}");
+            ImGui.Text($"IsOccultCEMob: {battleChara.IsOccultCEMob()}");
+            ImGui.Text($"IsOccultFateMob: {battleChara.IsOccultFateMob()}");
             ImGui.Text($"IsBozjanCEFateMob: {battleChara.IsBozjanCEFateMob()}");
+            ImGui.Spacing();
             ImGui.Text($"Is Current Focus Target: {battleChara.IsFocusTarget()}");
             ImGui.Text($"TTK: {battleChara.GetTTK()}");
             ImGui.Text($"Is Boss TTK: {battleChara.IsBossFromTTK()}");
@@ -3661,7 +3668,6 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"NameplateKind: {battleChara.GetNameplateKind()}");
             ImGui.Text($"BattleNPCSubKind: {battleChara.GetBattleNPCSubKind()}");
             ImGui.Text($"Is Top Priority Hostile: {battleChara.IsTopPriorityHostile()}");
-            ImGui.Text($"Is Others Players Mob: {battleChara.IsOthersPlayersMob()}");
             ImGui.Text($"Targetable: {battleChara.Struct()->Character.GameObject.TargetableStatus}");
             ImGui.Spacing();
             ImGui.Text($"Statuses:");
@@ -3683,7 +3689,7 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"GCD Remain: {DataCenter.DefaultGCDRemain}");
         ImGui.Text($"GCD Elapsed: {DataCenter.DefaultGCDElapsed}");
         ImGui.Text($"Calculated Action Ahead: {DataCenter.CalculatedActionAhead}");
-        ImGui.Text($"Animation Lock Delay: {ActionManagerHelper.GetCurrentAnimationLock()}");
+        ImGui.Text($"Animation Lock Delay: {DataCenter.AnimationLock}");
     }
 
     private static void DrawLastAction()
