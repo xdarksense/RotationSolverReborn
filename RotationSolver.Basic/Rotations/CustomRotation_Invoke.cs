@@ -190,7 +190,7 @@ public partial class CustomRotation
         ActionSpeedAbility = SpeedAbility(AddlePvE, out act) ? act : null;
     }
 
-    private void UpdateMoveTarget(IBaseAction a)
+    private static void UpdateMoveTarget(IBaseAction a)
     {
         if (a.PreviewTarget.HasValue && a.PreviewTarget.Value.Target != Player
             && a.PreviewTarget.Value.Target != null)

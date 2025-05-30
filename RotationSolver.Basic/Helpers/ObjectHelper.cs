@@ -97,11 +97,6 @@ public static class ObjectHelper
 
     internal static bool IsAttackable(this IBattleChara battleChara)
     {
-        if (Svc.ClientState == null)
-        {
-            return false;
-        }
-
         if (battleChara.IsAllianceMember())
         {
             return false;
@@ -194,6 +189,12 @@ public static class ObjectHelper
         }
 
         if (Service.CountDownTime > 0 || DataCenter.IsPvP)
+        {
+            return true;
+        }
+
+        //Special cases for Black Star and Mythic Idol, which do not have valid target objects but are still attackable.
+        if (battleChara.NameId == 13726 || battleChara.NameId == 13636)
         {
             return true;
         }
@@ -1020,6 +1021,18 @@ public static class ObjectHelper
     {
         return battleChara is ICharacter character && character.MaxHp > 0 && character.ShieldPercentage > 0
             ? character.MaxHp * character.ShieldPercentage / 100
+            : 0;
+    }
+
+    /// <summary>
+    /// Returns object's calculated effective HP.
+    /// </summary>
+    /// <param name="battleChara"></param>
+    /// <returns></returns>
+    public static uint GetEffectiveHp(this IBattleChara battleChara)
+    {
+        return battleChara is ICharacter
+            ? battleChara.CurrentHp + ObjectHelper.GetObjectShield(battleChara)
             : 0;
     }
 

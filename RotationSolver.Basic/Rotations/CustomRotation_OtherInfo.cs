@@ -26,6 +26,12 @@ public partial class CustomRotation
     public static bool HasTankStance => Player?.HasStatus(true, StatusHelper.TankStanceStatus) ?? false;
 
     /// <summary>
+    /// 
+    /// </summary>
+    [Description("Has tank stance")]
+    public static bool HasTankInvuln => Player?.HasStatus(true, StatusHelper.NoNeedHealingStatus) ?? false;
+
+    /// <summary>
     /// Check the player is moving, such as running, walking or jumping.
     /// </summary>
     [Description("Is Moving or Jumping")]

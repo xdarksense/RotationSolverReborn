@@ -101,6 +101,7 @@ public static class StatusHelper
         StatusID.LivingDead,
         //StatusID.WalkingDead,
         StatusID.Superbolide,
+        StatusID.Invulnerability,
     };
 
     /// <summary>
