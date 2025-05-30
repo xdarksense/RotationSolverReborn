@@ -985,6 +985,9 @@ public struct ActionTargetInfo(IBaseAction action)
         Vector3 dir = target.Position - pPos;
         Vector3 tdir = subTarget.Position - pPos;
 
+        float dirLen = dir.Length();
+        _ = tdir.Length();
+
         switch (action.Action.CastType)
         {
             case 2: // Circle
@@ -995,17 +998,23 @@ public struct ActionTargetInfo(IBaseAction action)
                 {
                     return false;
                 }
-
-                tdir += dir / dir.Length() * target.HitboxRadius / (float)Math.Sin(_alpha);
-                return Vector3.Dot(dir, tdir) / (dir.Length() * tdir.Length()) >= Math.Cos(_alpha);
+                if (dirLen == 0)
+                    return false;
+                tdir += dir / dirLen * target.HitboxRadius / (float)Math.Sin(_alpha);
+                dirLen = dir.Length();
+                float tdirLen = tdir.Length();
+                if (dirLen == 0 || tdirLen == 0)
+                    return false;
+                return Vector3.Dot(dir, tdir) / (dirLen * tdirLen) >= Math.Cos(_alpha);
 
             case 4: // Line
                 if (subTarget.DistanceToPlayer() > EffectRange)
                 {
                     return false;
                 }
-
-                return Vector3.Cross(dir, tdir).Length() / dir.Length() <= 2 + target.HitboxRadius
+                if (dirLen == 0)
+                    return false;
+                return Vector3.Cross(dir, tdir).Length() / dirLen <= 2 + target.HitboxRadius
                     && Vector3.Dot(dir, tdir) >= 0;
 
             case 10: // Donut

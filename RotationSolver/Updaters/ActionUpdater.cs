@@ -118,7 +118,7 @@ internal static class ActionUpdater
 
         DataCenter.CombatTimeRaw = _startCombatTime == DateTime.MinValue
             ? 0
-            : (int)(now - _startCombatTime).TotalSeconds;
+            : (float)(now - _startCombatTime).TotalSeconds;
     }
 
     private static unsafe void UpdateSlots()
@@ -151,10 +151,10 @@ internal static class ActionUpdater
 
         DataCenter.StopMovingRaw = DataCenter.IsMoving
             ? 0
-            : Math.Min(10, (int)(now - _stopMovingTime).TotalSeconds);
+            : Math.Min(10, (float)(now - _stopMovingTime).TotalSeconds);
 
         DataCenter.MovingRaw = DataCenter.IsMoving
-            ? Math.Min(10, (int)(now - _startMovingTime).TotalSeconds)
+            ? Math.Min(10, (float)(now - _startMovingTime).TotalSeconds)
             : 0;
     }
 
@@ -181,18 +181,18 @@ internal static class ActionUpdater
         }
 
         DataCenter.DeadTimeRaw = Player.Object.IsDead
-            ? Math.Min(10, (int)(now - _startDeadTime).TotalSeconds)
+            ? Math.Min(10, (float)(now - _startDeadTime).TotalSeconds)
             : 0;
 
         DataCenter.AliveTimeRaw = Player.Object.IsDead
             ? 0
-            : Math.Min(10, (int)(now - _startAliveTime).TotalSeconds);
+            : Math.Min(10, (float)(now - _startAliveTime).TotalSeconds);
     }
 
     private static uint _lastMP = 0;
     private static DateTime _lastMPUpdate = DateTime.Now;
 
-    internal static int MPUpdateElapsed => (int)((DateTime.Now - _lastMPUpdate).TotalSeconds % 3);
+    internal static float MPUpdateElapsed => (float)((DateTime.Now - _lastMPUpdate).TotalSeconds % 3);
 
     private static void UpdateMPTimer(DateTime now)
     {
