@@ -157,6 +157,59 @@ public partial class DutyRotation : IDisposable
     /// </summary>
     protected static IPlayerCharacter Player => ECommons.GameHelpers.Player.Object;
 
+    /// <summary>
+    /// Does player have swift cast, dual cast or triple cast.
+    /// </summary>
+    [Description("Has Swift")]
+    public static bool HasSwift => Player?.HasStatus(true, StatusHelper.SwiftcastStatus) ?? false;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [Description("Has tank stance")]
+    public static bool HasTankStance => Player?.HasStatus(true, StatusHelper.TankStanceStatus) ?? false;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [Description("Has tank stance")]
+    public static bool HasTankInvuln => Player?.HasStatus(true, StatusHelper.NoNeedHealingStatus) ?? false;
+
+    /// <summary>
+    /// In the burst status.
+    /// </summary>
+    [Description("Is burst")]
+    public static bool IsBurst => MergedStatus.HasFlag(AutoStatus.Burst);
+
+    /// <summary>
+    /// Is RSR enabled.
+    /// </summary>
+    [Description("The state of auto. True for on.")]
+    public static bool AutoState => DataCenter.State;
+
+    /// <summary>
+    /// Is RSR in manual mode.
+    /// </summary>
+    [Description("The state of manual. True for manual.")]
+    public static bool IsManual => DataCenter.IsManual;
+
+    /// <summary>
+    /// The merged status, which contains <see cref="AutoState"/> and <see cref="CommandStatus"/>.
+    /// </summary>
+    public static AutoStatus MergedStatus => DataCenter.MergedStatus;
+
+    /// <summary>
+    /// The automatic status, which is checked from RS.
+    /// </summary>
+    public static AutoStatus AutoStatus => DataCenter.AutoStatus;
+
+    /// <summary>
+    /// The CMD status, which is checked from the player.
+    /// </summary>
+    public static AutoStatus CommandStatus => DataCenter.CommandStatus;
+
+    #region Phantom Levels
+
     public static byte FreelancerLevel
     {
         get
@@ -274,6 +327,7 @@ public partial class DutyRotation : IDisposable
         }
     }
 
+    #endregion
     /// <summary>
     /// Gets all actions available in the duty rotation.
     /// </summary>

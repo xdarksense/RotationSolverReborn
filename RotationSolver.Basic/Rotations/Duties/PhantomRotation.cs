@@ -389,12 +389,69 @@ public partial class DutyRotation
     }
 
     /// <summary>
+    /// Modifies the settings for Cleansing.
+    /// </summary>
+    /// <param name="setting">The action setting to modify.</param>
+    static partial void ModifyCleansingPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => OracleLevel >= 1;
+        setting.StatusNeed = [StatusID.PredictionOfCleansing];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    /// <summary>
+    /// Modifies the settings for Starfall.
+    /// </summary>
+    /// <param name="setting">The action setting to modify.</param>
+    static partial void ModifyStarfallPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => OracleLevel >= 1 && (ObjectHelper.GetEffectiveHp(Player) > 0.9f || HasTankInvuln);
+        setting.StatusNeed = [StatusID.PredictionOfStarfall];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    /// <summary>
+    /// Modifies the settings for Phantom Judgment.
+    /// </summary>
+    /// <param name="setting">The action setting to modify.</param>
+    static partial void ModifyPhantomJudgmentPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => OracleLevel >= 1;
+        setting.StatusNeed = [StatusID.PredictionOfJudgment];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    /// <summary>
+    /// Modifies the settings for Blessing.
+    /// </summary>
+    /// <param name="setting">The action setting to modify.</param>
+    static partial void ModifyBlessingPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => OracleLevel >= 1;
+        setting.StatusNeed = [StatusID.PredictionOfBlessing];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    /// <summary>
     /// Modifies the settings for Recuperation.
     /// </summary>
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyRecuperationPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => OracleLevel >= 2;
+        setting.StatusProvide = [StatusID.Recuperation_4271, StatusID.FortifiedRecuperation];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -407,7 +464,8 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyPhantomDoomPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => OracleLevel >= 3;
+        setting.ActionCheck = () => OracleLevel >= 3 && InCombat;
+        setting.TargetStatusProvide = [StatusID.PhantomDoom];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -421,6 +479,7 @@ public partial class DutyRotation
     static partial void ModifyPhantomRejuvenationPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => OracleLevel >= 4;
+        setting.StatusProvide = [StatusID.PhantomRejuvenation];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -434,6 +493,7 @@ public partial class DutyRotation
     static partial void ModifyInvulnerabilityPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => OracleLevel >= 6;
+        setting.TargetStatusProvide = [StatusID.Invulnerability];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

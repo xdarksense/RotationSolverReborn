@@ -293,7 +293,7 @@ public partial class CustomRotation
                 if (i.HasIt)
                     list.Add(i);
             }
-            return list.ToArray();
+            return [.. list];
         }
     }
 
