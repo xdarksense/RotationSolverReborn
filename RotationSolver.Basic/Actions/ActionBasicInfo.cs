@@ -247,7 +247,7 @@ public readonly struct ActionBasicInfo
 
     private bool NeedsCasting(bool skipCastingCheck)
     {
-        return CastTime > 0 && !Player.Object.HasStatus(true, new[] { StatusID.Swiftcast, StatusID.Triplecast, StatusID.Dualcast }) && !ActionsNoNeedCasting.Contains(ID) &&
+        return CastTime > 0 && !Player.Object.HasStatus(true, [StatusID.Swiftcast, StatusID.Triplecast, StatusID.Dualcast]) && !ActionsNoNeedCasting.Contains(ID) &&
                (DataCenter.SpecialType == SpecialCommandType.NoCasting || (DateTime.Now > DataCenter.KnockbackStart && DateTime.Now < DataCenter.KnockbackFinished) ||
                 (DataCenter.NoPoslock && DataCenter.IsMoving && !skipCastingCheck));
     }

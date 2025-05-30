@@ -250,11 +250,11 @@ internal static class DataCenter
 
     public static bool IsMoving { get; internal set; }
 
-    internal static int StopMovingRaw { get; set; }
+    internal static float StopMovingRaw { get; set; }
 
-    internal static int MovingRaw { get; set; }
-    internal static int DeadTimeRaw { get; set; }
-    internal static int AliveTimeRaw { get; set; }
+    internal static float MovingRaw { get; set; }
+    internal static float DeadTimeRaw { get; set; }
+    internal static float AliveTimeRaw { get; set; }
 
     public static unsafe ushort PlayerFateId
     {
@@ -355,7 +355,7 @@ internal static class DataCenter
     /// </summary>
     public static bool NotInCombatDelay => _notInCombatDelay.Delay(!InCombat);
 
-    internal static int CombatTimeRaw { get; set; }
+    internal static float CombatTimeRaw { get; set; }
     private static DateTime _startRaidTime = DateTime.MinValue;
 
     internal static int RaidTimeRaw
