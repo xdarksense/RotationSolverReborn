@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using ECommons.GameHelpers;
+using System.Collections.Concurrent;
 using Action = Lumina.Excel.Sheets.Action;
 
 namespace RotationSolver.Basic.Helpers;
@@ -12,6 +13,9 @@ internal static class ActionHelper
     /// The cooldown group for general GCD actions.
     /// </summary>
     internal const byte GCDCooldownGroup = 58;
+
+    /// <inheritdoc/>
+    public static float AnimationLockTime => Player.AnimationLock;
 
     /// <summary>
     /// Gets the action category of the specified action.

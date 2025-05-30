@@ -569,14 +569,22 @@ public static class ObjectHelper
 
     internal static bool IsSpecialInclusionPriority(this IBattleChara battleChara)
     {
-        if (battleChara.NameId == 10259 || battleChara.NameId == 8145 || battleChara.NameId == 12704 || battleChara.NameId == 13668)
+        if (battleChara.NameId == 6737
+            || battleChara.NameId == 6738
+            || battleChara.NameId == 8145
+            || battleChara.NameId == 10259
+            || battleChara.NameId == 12704
+            || battleChara.NameId == 13668)
         {
             return true;
         }
-        //10259 Cinduruva in The Tower of Zot
+        //6737 forlorn maiden
+        //6738 forlorn maiden
         //8145 Root in Dohn Meg boss 2
+        //10259 Cinduruva in The Tower of Zot
         //12704 Crystalline Debris
         //13668 Mob in Calamity Unbound CE
+
 
         return false;
     }
@@ -1032,8 +1040,22 @@ public static class ObjectHelper
     public static uint GetEffectiveHp(this IBattleChara battleChara)
     {
         return battleChara is ICharacter
-            ? battleChara.CurrentHp + ObjectHelper.GetObjectShield(battleChara)
+            ? battleChara.CurrentHp + GetObjectShield(battleChara)
             : 0;
+    }
+
+    /// <summary>
+    /// Returns object's calculated effective HP as a percentage of Max HP, rounded down to the nearest whole number.
+    /// </summary>
+    /// <param name="battleChara"></param>
+    /// <returns>Effective HP percentage (0-100). Returns 0 if MaxHp is 0 or not an ICharacter.</returns>
+    public static int GetEffectiveHpPercent(this IBattleChara battleChara)
+    {
+        if (battleChara is not ICharacter character || character.MaxHp == 0)
+            return 0;
+
+        uint effectiveHp = character.CurrentHp + ObjectHelper.GetObjectShield(battleChara);
+        return (int)Math.Floor((float)effectiveHp / character.MaxHp * 100f);
     }
 
     /// <summary>
@@ -1092,16 +1114,16 @@ public static class ObjectHelper
     /// <returns>
     /// The estimated time to kill the battle character in seconds, or <see cref="float.NaN"/> if the calculation cannot be performed.
     /// </returns>
-    internal static float GetTTK(this IBattleChara battleChara, bool wholeTime = false)
+    internal static int GetTTK(this IBattleChara battleChara, bool wholeTime = false)
     {
         if (battleChara == null)
         {
-            return float.NaN;
+            return 0;
         }
 
         if (battleChara.IsDummy())
         {
-            return 999.99f;
+            return 999;
         }
 
         DateTime startTime = DateTime.MinValue;
@@ -1134,33 +1156,33 @@ public static class ObjectHelper
 
         if (startTime == DateTime.MinValue || (DateTime.Now - startTime) < CheckSpan)
         {
-            return float.NaN;
+            return 0;
         }
 
         float currentHealthRatio = battleChara.GetHealthRatio();
-        if (float.IsNaN(currentHealthRatio))
+        if (currentHealthRatio == 0)
         {
-            return float.NaN;
+            return 0;
         }
 
         // Manual average calculation to avoid LINQ
-        float sum = 0;
+        int sum = 0;
         int count = 0;
-        foreach (float r in hpRatios)
+        foreach (int r in hpRatios.Select(v => (int)v))
         {
             sum += r;
             count++;
         }
-        float avg = count > 0 ? sum / count : 0;
+        int avg = count > 0 ? sum / count : 0;
 
         float hpRatioDifference = initialHpRatio - avg;
         if (hpRatioDifference <= 0)
         {
-            return float.NaN;
+            return 0;
         }
 
-        float elapsedTime = (float)(DateTime.Now - startTime).TotalSeconds;
-        return elapsedTime / hpRatioDifference * (wholeTime ? 1 : currentHealthRatio);
+        int elapsedTime = (int)(DateTime.Now - startTime).TotalSeconds;
+        return (int)(elapsedTime / hpRatioDifference * (wholeTime ? 1 : currentHealthRatio));
     }
 
     private static readonly ConcurrentDictionary<ulong, DateTime> _aliveStartTimes = [];

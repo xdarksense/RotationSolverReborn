@@ -63,12 +63,6 @@ public readonly struct ActionBasicInfo
     public Aspect Aspect { get; }
 
     /// <summary>
-    /// Gets the animation lock time of the action.
-    /// </summary>
-    [Obsolete("Use ActionManagerHelper.GetCurrentAnimationLock()")]
-    public readonly float AnimationLockTime => ActionManagerHelper.GetCurrentAnimationLock();
-
-    /// <summary>
     /// Gets the level required to use the action.
     /// </summary>
     public readonly byte Level => _action.Action.ClassJobLevel;

@@ -411,8 +411,8 @@ public struct ActionTargetInfo(IBaseAction action)
             return false;
         }
 
-        float time = b.GetTTK();
-        return float.IsNaN(time) || time >= action.Config.TimeToKill;
+        int time = b.GetTTK();
+        return time >= 0 && time >= action.Config.TimeToKill;
     }
 
     #endregion
@@ -1787,8 +1787,8 @@ public struct ActionTargetInfo(IBaseAction action)
                         {
                             int cmp = a.HitboxRadius.CompareTo(b.HitboxRadius);
                             if (cmp != 0) return cmp;
-                            float aHp = a is IBattleChara ba ? ba.CurrentHp : float.MaxValue;
-                            float bHp = b is IBattleChara bb ? bb.CurrentHp : float.MaxValue;
+                            int aHp = a is IBattleChara ba ? (int)ba.CurrentHp : int.MaxValue;
+                            int bHp = b is IBattleChara bb ? (int)bb.CurrentHp : int.MaxValue;
                             return aHp.CompareTo(bHp);
                         });
                     }
@@ -1800,8 +1800,8 @@ public struct ActionTargetInfo(IBaseAction action)
                         {
                             int cmp = a.HitboxRadius.CompareTo(b.HitboxRadius);
                             if (cmp != 0) return cmp;
-                            float aHp = a is IBattleChara ba ? ba.CurrentHp : 0;
-                            float bHp = b is IBattleChara bb ? bb.CurrentHp : 0;
+                            int aHp = a is IBattleChara ba ? (int)ba.CurrentHp : 0;
+                            int bHp = b is IBattleChara bb ? (int)bb.CurrentHp : 0;
                             return bHp.CompareTo(aHp);
                         });
                     }
@@ -1828,8 +1828,8 @@ public struct ActionTargetInfo(IBaseAction action)
                     filtered = [.. objects];
                     filtered.Sort((a, b) =>
                     {
-                        float aPct = a is IBattleChara ba && ba.MaxHp != 0 ? (float)ba.CurrentHp / ba.MaxHp : 0;
-                        float bPct = b is IBattleChara bb && bb.MaxHp != 0 ? (float)bb.CurrentHp / bb.MaxHp : 0;
+                        int aPct = a is IBattleChara ba && ba.MaxHp != 0 ? (int)ba.CurrentHp / (int)ba.MaxHp : 0;
+                        int bPct = b is IBattleChara bb && bb.MaxHp != 0 ? (int)bb.CurrentHp / (int)bb.MaxHp : 0;
                         return bPct.CompareTo(aPct);
                     });
                     break;
@@ -1837,8 +1837,8 @@ public struct ActionTargetInfo(IBaseAction action)
                     filtered = [.. objects];
                     filtered.Sort((a, b) =>
                     {
-                        float aPct = a is IBattleChara ba && ba.MaxHp != 0 ? (float)ba.CurrentHp / ba.MaxHp : 0;
-                        float bPct = b is IBattleChara bb && bb.MaxHp != 0 ? (float)bb.CurrentHp / bb.MaxHp : 0;
+                        int aPct = a is IBattleChara ba && ba.MaxHp != 0 ? (int)ba.CurrentHp / (int)ba.MaxHp : 0;
+                        int bPct = b is IBattleChara bb && bb.MaxHp != 0 ? (int)bb.CurrentHp / (int)bb.MaxHp : 0;
                         return aPct.CompareTo(bPct);
                     });
                     break;
@@ -2036,7 +2036,7 @@ public struct ActionTargetInfo(IBaseAction action)
             if (Service.Config.Priolowtank)
             {
                 IBattleChara? lowest = null;
-                float minHealth = float.MaxValue;
+                float minHealth = int.MaxValue;
                 foreach (var t in attachedT)
                 {
                     float health = ObjectHelper.GetHealthRatio(t);
@@ -2051,7 +2051,7 @@ public struct ActionTargetInfo(IBaseAction action)
             else
             {
                 IBattleChara? lowest = null;
-                float minHealth = float.MaxValue;
+                float minHealth = int.MaxValue;
                 foreach (var t in attachedT)
                 {
                     float health = ObjectHelper.GetHealthRatio(t);
