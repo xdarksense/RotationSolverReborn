@@ -140,13 +140,12 @@ internal static class DataCenter
 
     #endregion
 
-    #region Bozja
+    #region Occult Crescent
 
     /// <summary>
     /// Determines if the current content is Bozjan Southern Front or Zadnor.
     /// </summary>
     public static bool IsInOccultCrescentOp => Territory?.ContentType == TerritoryContentType.OccultCrescent;
-
     #endregion
 
     public static ushort TerritoryID => Svc.ClientState.TerritoryType;

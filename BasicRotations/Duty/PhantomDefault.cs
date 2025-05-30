@@ -39,7 +39,6 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
 
-
         return base.AttackAbility(nextGCD, out act);
     }
 
@@ -106,5 +105,15 @@ public sealed class PhantomDefault : PhantomRotation
         }
 
         return base.DefenseSingleGCD(out act);
+    }
+
+    public override bool GeneralGCD(out IAction? act)
+    {
+        if (DeadlyBlowPvE.CanUse(out act, skipComboCheck: true))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out act);
     }
 }
