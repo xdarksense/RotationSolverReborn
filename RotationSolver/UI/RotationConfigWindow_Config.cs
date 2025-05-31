@@ -432,11 +432,18 @@ public partial class RotationConfigWindow
     });
     private static void DrawInternalTab()
     {
+        ImGui.Text($"Configs/Backups location: {Svc.PluginInterface.ConfigFile.Directory}");
+        ImGui.Text($"{DataCenter.HoldingRestore}");
+        
         if (ImGui.Button("Backup Configs"))
         {
-            Svc.PluginInterface.ConfigFile.CopyTo(Svc.PluginInterface.ConfigFile.Directory+"\\RotationSolverRebornConfigs_Backup.json", true);
+            Service.Config.Backup();
         }
-        ImGui.Text($"Backup will be here: {Svc.PluginInterface.ConfigFile.Directory}");
+        
+        if (ImGui.Button("Restore Configs"))
+        {
+            Service.Config.Restore();
+        }
     }
 
     private static void DrawEventTab()

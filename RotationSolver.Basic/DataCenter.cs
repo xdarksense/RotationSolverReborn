@@ -74,6 +74,7 @@ internal static class DataCenter
     public static DutyRotation? CurrentDutyRotation { get; internal set; }
 
     public static Dictionary<string, DateTime> SystemWarnings { get; set; } = [];
+    public static bool HoldingRestore = false;
 
     internal static bool NoPoslock => Svc.Condition[ConditionFlag.OccupiedInEvent]
                                       || !Service.Config.PoslockCasting

@@ -63,6 +63,11 @@ public partial class RotationConfigWindow : Window
 
     public override void Draw()
     {
+        if (DataCenter.HoldingRestore)
+        {
+            IsOpen = false;
+            DataCenter.HoldingRestore = false;
+        }
         using ImRaii.Style style = ImRaii.PushStyle(ImGuiStyleVar.SelectableTextAlign, new Vector2(0.5f, 0.5f));
         try
         {
