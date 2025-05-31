@@ -126,10 +126,10 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
-        if (OccultCounterPvE.CanUse(out act))
-        {
-            return true;
-        }
+        //if (OccultCounterPvE.CanUse(out act))
+        //{
+        //    return true;
+        //}
 
         if (BattleBellPvE.CanUse(out act))
         {

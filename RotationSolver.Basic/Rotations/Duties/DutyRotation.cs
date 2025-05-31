@@ -210,6 +210,30 @@ public partial class DutyRotation : IDisposable
 
     #region Phantom Levels
 
+    /// <summary>
+    /// Gets the name of the current active Phantom Job, or null if none are active.
+    /// </summary>
+    public static string? ActivePhantomJob
+    {
+        get
+        {
+            if (FreelancerLevel > 0) return "Freelancer";
+            if (KnightLevel > 0) return "Knight";
+            if (MonkLevel > 0) return "Monk";
+            if (BardLevel > 0) return "Bard";
+            if (ChemistLevel > 0) return "Chemist";
+            if (TimeMageLevel > 0) return "Time Mage";
+            if (CannoneerLevel > 0) return "Cannoneer";
+            if (OracleLevel > 0) return "Oracle";
+            if (BerserkerLevel > 0) return "Berserker";
+            if (RangerLevel > 0) return "Ranger";
+            if (ThiefLevel > 0) return "Thief";
+            if (SamuraiLevel > 0) return "Samurai";
+            if (GeomancerLevel > 0) return "Geomancer";
+            return null;
+        }
+    }
+
     public static byte FreelancerLevel
     {
         get
