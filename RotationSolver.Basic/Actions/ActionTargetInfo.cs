@@ -1129,6 +1129,7 @@ public struct ActionTargetInfo(IBaseAction action)
             TargetType.Range => battleChara != null ? RandomRangeTarget(battleChara) : null,
             TargetType.Magical => battleChara != null ? RandomMagicalTarget(battleChara) : null,
             TargetType.Physical => battleChara != null ? RandomPhysicalTarget(battleChara) : null,
+            TargetType.PhantomMob => FindPhantomMob(),
             TargetType.DancePartner => FindDancePartner(),
             TargetType.MimicryTarget => FindMimicryTarget(),
             TargetType.TheSpear => FindTheSpear(),
@@ -1137,6 +1138,25 @@ public struct ActionTargetInfo(IBaseAction action)
             TargetType.Deployment => FindDeploymentTacticsTarget(),
             _ => FindHostile(),
         };
+
+        IBattleChara? FindPhantomMob()
+        {
+            if (DataCenter.AllHostileTargets.Count < 1)
+            {
+                return null;
+            }
+
+            foreach (IBattleChara battlechara in DataCenter.AllHostileTargets)
+            {
+                if (!battlechara.IsBossFromIcon() && ObjectHelper.DistanceToPlayer(battlechara) < 30)
+                {
+                    PluginLog.Debug($"FindPhantomDoom: {battlechara.Name} selected target.");
+                    return battlechara;
+                }
+            }
+
+            return null;
+        }
 
         IBattleChara? FindDancePartner()
         {
@@ -2150,7 +2170,7 @@ public struct ActionTargetInfo(IBaseAction action)
         }
 
         CombatRole? neededRole = DataCenter.BluRole;
-        return neededRole != null && neededRole != CombatRole.None && (int)neededRole == (int)player.GetRole();
+        return neededRole != null && neededRole != CombatRole.NonCombat && (int)neededRole == (int)player.GetRole();
     }
 
     internal static IBattleChara? RandomPhysicalTarget(IEnumerable<IBattleChara> tars)
@@ -2247,6 +2267,7 @@ public enum TargetType : byte
     TheSpear,
     Kardia,
     Deployment,
+    PhantomMob,
 }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 

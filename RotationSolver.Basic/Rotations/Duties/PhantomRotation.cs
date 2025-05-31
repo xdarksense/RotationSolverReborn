@@ -66,6 +66,7 @@ public partial class DutyRotation
     static partial void ModifyOccultResuscitationPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => FreelancerLevel >= 5;
+        setting.TargetType = TargetType.Self;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -136,6 +137,7 @@ public partial class DutyRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
+            IsEnabled = false,
         };
     }
 
@@ -172,6 +174,7 @@ public partial class DutyRotation
     static partial void ModifyOccultChakraPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => MonkLevel >= 5;
+        setting.TargetType = TargetType.Self;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -296,6 +299,7 @@ public partial class DutyRotation
     static partial void ModifyOccultSlowgaPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => TimeMageLevel >= 1;
+        setting.TargetType = TargetType.PhantomMob;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -335,6 +339,7 @@ public partial class DutyRotation
     static partial void ModifyOccultDispelPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => TimeMageLevel >= 4;
+        setting.TargetType = TargetType.Dispel;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -512,6 +517,7 @@ public partial class DutyRotation
     static partial void ModifyPhantomDoomPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => OracleLevel >= 3 && InCombat;
+        setting.TargetType = TargetType.PhantomMob;
         setting.TargetStatusProvide = [StatusID.PhantomDoom];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -653,6 +659,7 @@ public partial class DutyRotation
     static partial void ModifyStealPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => ThiefLevel >= 2;
+        setting.TargetType = TargetType.PhantomMob;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -665,7 +672,7 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyVigilancePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ThiefLevel >= 3;
+        setting.ActionCheck = () => ThiefLevel >= 3 && !InCombat;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -678,7 +685,7 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyTrapDetectionPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ThiefLevel >= 4;
+        setting.ActionCheck = () => ThiefLevel >= 4 && DataCenter.IsInForkedTower;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -707,6 +714,7 @@ public partial class DutyRotation
     static partial void ModifyMineuchiPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => SamuraiLevel >= 1;
+        setting.TargetType = TargetType.Interrupt;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -720,6 +728,7 @@ public partial class DutyRotation
     static partial void ModifyShirahadoriPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => SamuraiLevel >= 2;
+        setting.TargetType = TargetType.Self;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -761,6 +770,7 @@ public partial class DutyRotation
     static partial void ModifyBattleBellPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => GeomancerLevel >= 1;
+        setting.TargetType = TargetType.Self;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -773,6 +783,7 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyWeatherPvE(ref ActionSetting setting)
     {
+        //TODO: Implement Weather logic, will need bespoke targeting
         setting.ActionCheck = () => GeomancerLevel >= 2;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -800,6 +811,7 @@ public partial class DutyRotation
     static partial void ModifySuspendPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => GeomancerLevel >= 4;
+        setting.TargetStatusProvide = [StatusID.Suspend];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

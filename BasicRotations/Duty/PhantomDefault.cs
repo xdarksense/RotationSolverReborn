@@ -81,6 +81,20 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
+        if (VigilancePvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (OccultSprintPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (!InCombat && SuspendPvE.CanUse(out act))
+        {
+            return true;
+        }
         return base.GeneralAbility(nextGCD, out act);
     }
 
@@ -92,7 +106,32 @@ public sealed class PhantomDefault : PhantomRotation
             return false;
         }
 
-        if (InCombat && PhantomDoomPvE.CanUse(out act))
+        if (PhantomDoomPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (OccultQuickPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (ZeninagePvE.CanUse(out act))
+        {
+            return true;
+        }
+        
+        if (PhantomKickPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (OccultCounterPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (BattleBellPvE.CanUse(out act))
         {
             return true;
         }
@@ -113,6 +152,16 @@ public sealed class PhantomDefault : PhantomRotation
         }
 
         if (InvulnerabilityPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (ShirahadoriPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (CounterstancePvE.CanUse(out act))
         {
             return true;
         }
@@ -148,6 +197,31 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
+        if (OccultMageMasherPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (PilferWeaponPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (TrapDetectionPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (ShirahadoriPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (CounterstancePvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.DefenseAreaAbility(nextGCD, out act);
     }
 
@@ -165,6 +239,11 @@ public sealed class PhantomDefault : PhantomRotation
         }
 
         if (PhantomJudgmentPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (OccultChakraPvE.CanUse(out act))
         {
             return true;
         }
@@ -209,6 +288,22 @@ public sealed class PhantomDefault : PhantomRotation
         return base.MoveForwardAbility(nextGCD, out act);
     }
 
+    public override bool MyInterruptGCD(out IAction? act)
+    {
+        act = null;
+        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated))
+        {
+            return false;
+        }
+
+        if (MineuchiPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.MyInterruptGCD(out act);
+    }
+
     public override bool RaiseGCD(out IAction? act)
     {
         act = null;
@@ -225,6 +320,38 @@ public sealed class PhantomDefault : PhantomRotation
         return base.RaiseGCD(out act);
     }
 
+    public override bool DispelGCD(out IAction? act)
+    {
+        act = null;
+        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated))
+        {
+            return false;
+        }
+
+        if (OccultDispelPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.DispelGCD(out act);
+    }
+
+    public override bool HealSingleGCD(out IAction? act)
+    {
+        act = null;
+        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated))
+        {
+            return false;
+        }
+
+        if (OccultResuscitationPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.HealSingleGCD(out act);
+    }
+
     public override bool DefenseSingleGCD(out IAction? act)
     {
         act = null;
@@ -234,6 +361,11 @@ public sealed class PhantomDefault : PhantomRotation
         }
 
         if (PrayPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (RingingRespitePvE.CanUse(out act))
         {
             return true;
         }
@@ -297,6 +429,15 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
+        if (OccultCometPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (IainukiPvE.CanUse(out act))
+        {
+            return true;
+        }
         return base.GeneralGCD(out act);
     }
 }
