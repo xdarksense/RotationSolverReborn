@@ -16,10 +16,12 @@ internal static class ActionContextMenu
         contextMenu.OnMenuOpened += AddActionMenu;
     }
 
+    //TODO: Cleanup when the enable/disable is available
+    //The primary issue is that HoveredActionChanged is not triggered when you are no longer hovering a valid action, unlike HoverItemChanged.
+    //This is a Dalamud issue that I will need to fix and PR to them.
     private static void AddActionMenu(IMenuOpenedArgs args)
     {
         var contextAction = new BaseAction((ActionID)Svc.GameGui.HoveredAction.ActionID);
-        
         Svc.GameGui.HoveredActionChanged += (sender, e) => { contextAction = new BaseAction((ActionID)Svc.GameGui.HoveredAction.ActionID); };
         Svc.GameGui.HoveredItemChanged += (sender, e) => { Svc.GameGui.HoveredAction.ActionID = 0; };
         
@@ -72,8 +74,9 @@ internal static class ActionContextMenu
         };
 
         subMenuEntry.OnClicked += args => BuildSubMenu(args, contextAction);
-
-        args.AddMenuItem(subMenuEntry);
+        
+        //TODO: Add more functions here 
+        // args.AddMenuItem(subMenuEntry);
     }
 
     private static void BuildSubMenu(IMenuItemClickedArgs args, BaseAction contextAction)
