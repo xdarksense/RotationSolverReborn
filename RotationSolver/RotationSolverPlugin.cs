@@ -106,7 +106,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         MajorUpdater.Enable();
         Watcher.Enable();
         OtherConfiguration.Init();
-
+        ActionContextMenu.Init();
         HotbarHighlightManager.Init();
 
         Svc.DutyState.DutyStarted += DutyState_DutyStarted;
