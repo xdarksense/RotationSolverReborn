@@ -319,8 +319,8 @@ public static class ObjectHelper
     internal static unsafe bool IsAllianceMember(this ICharacter obj)
     {
         return obj.GameObjectId is not 0
-            && !DataCenter.IsPvP && DataCenter.IsInAllianceRaid && obj is IPlayerCharacter 
-            && (ActionManager.CanUseActionOnTarget((uint)ActionID.RaisePvE, (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)obj.Struct()) 
+            && !DataCenter.IsPvP && DataCenter.IsInAllianceRaid && obj is IPlayerCharacter
+            && (ActionManager.CanUseActionOnTarget((uint)ActionID.RaisePvE, (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)obj.Struct())
             || ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)obj.Struct()));
     }
 
@@ -1114,16 +1114,16 @@ public static class ObjectHelper
     /// <returns>
     /// The estimated time to kill the battle character in seconds, or <see cref="float.NaN"/> if the calculation cannot be performed.
     /// </returns>
-    internal static int GetTTK(this IBattleChara battleChara, bool wholeTime = false)
+    internal static float GetTTK(this IBattleChara battleChara, bool wholeTime = false)
     {
         if (battleChara == null)
         {
-            return 0;
+            return float.NaN;
         }
 
         if (battleChara.IsDummy())
         {
-            return 999;
+            return 999.99f;
         }
 
         DateTime startTime = DateTime.MinValue;
@@ -1156,33 +1156,33 @@ public static class ObjectHelper
 
         if (startTime == DateTime.MinValue || (DateTime.Now - startTime) < CheckSpan)
         {
-            return 0;
+            return float.NaN;
         }
 
         float currentHealthRatio = battleChara.GetHealthRatio();
-        if (currentHealthRatio == 0)
+        if (float.IsNaN(currentHealthRatio))
         {
-            return 0;
+            return float.NaN;
         }
 
         // Manual average calculation to avoid LINQ
-        int sum = 0;
+        float sum = 0;
         int count = 0;
-        foreach (int r in hpRatios.Select(v => (int)v))
+        foreach (float r in hpRatios)
         {
             sum += r;
             count++;
         }
-        int avg = count > 0 ? sum / count : 0;
+        float avg = count > 0 ? sum / count : 0;
 
         float hpRatioDifference = initialHpRatio - avg;
         if (hpRatioDifference <= 0)
         {
-            return 0;
+            return float.NaN;
         }
 
-        int elapsedTime = (int)(DateTime.Now - startTime).TotalSeconds;
-        return (int)(elapsedTime / hpRatioDifference * (wholeTime ? 1 : currentHealthRatio));
+        float elapsedTime = (float)(DateTime.Now - startTime).TotalSeconds;
+        return elapsedTime / hpRatioDifference * (wholeTime ? 1 : currentHealthRatio);
     }
 
     private static readonly ConcurrentDictionary<ulong, DateTime> _aliveStartTimes = [];

@@ -269,6 +269,34 @@ public sealed class PhantomDefault : PhantomRotation
             }
         }
 
+        if (SilverCannonPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        //TODO: If enemy is undead should we prioritize this over SilverCannon?
+        //TODO2: Figure out a way to identify target is undead
+        if (HolyCannonPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        // Only one of shock or dark can be used, prioritize Shock
+        if (ShockCannonPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (DarkCannonPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (PhantomFirePvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.GeneralGCD(out act);
     }
 }
