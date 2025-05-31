@@ -17,6 +17,9 @@ public partial class DutyRotation
     /// </summary>
     public virtual void DisplayStatus()
     {
+        ImGui.Text("ActivePhantomJob: " + (ActivePhantomJob?.ToString() ?? "N/A"));
+        ImGui.Spacing();
+        ImGui.TextColored(ImGuiColors.DalamudRed, "Freelancer");
         ImGui.TextColored(ImGuiColors.DalamudRed, "Freelancer");
         ImGui.TextColored(ImGuiColors.DalamudViolet, "Knight");
         ImGui.TextColored(ImGuiColors.DalamudWhite, "Monk");
@@ -137,7 +140,6 @@ public partial class DutyRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            IsEnabled = false,
         };
     }
 
