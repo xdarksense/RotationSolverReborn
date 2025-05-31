@@ -30,7 +30,7 @@ public partial class CustomRotation
                 return act;
             }
 
-            if (DataCenter.MergedStatus.HasFlag(AutoStatus.Interrupt))
+            if (DataCenter.CommandStatus.HasFlag(AutoStatus.Interrupt))
             {
                 if (DataCenter.CurrentDutyRotation?.MyInterruptGCD(out act) == true)
                 {
@@ -94,6 +94,7 @@ public partial class CustomRotation
 
             if (DataCenter.CommandStatus.HasFlag(AutoStatus.HealAreaSpell))
             {
+                IBaseAction.AutoHealCheck = true;
                 if (DataCenter.CurrentDutyRotation?.HealAreaGCD(out act) == true)
                     return act;
 
@@ -101,9 +102,9 @@ public partial class CustomRotation
                 {
                     return action;
                 }
+                IBaseAction.AutoHealCheck = false;
             }
-            if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealAreaSpell)
-                && CanHealAreaSpell)
+            if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealAreaSpell) && (CanHealAreaSpell || DataCenter.IsInOccultCrescentOp))
             {
                 IBaseAction.AutoHealCheck = true;
                 if (DataCenter.CurrentDutyRotation?.HealAreaGCD(out act) == true)
@@ -116,19 +117,8 @@ public partial class CustomRotation
 
                 IBaseAction.AutoHealCheck = false;
             }
-            if (DataCenter.CommandStatus.HasFlag(AutoStatus.HealSingleSpell)
-                && CanHealSingleSpell)
-            {
-                if (DataCenter.CurrentDutyRotation?.HealSingleGCD(out act) == true)
-                    return act;
 
-                if (HealSingleGCD(out IAction? action))
-                {
-                    return action;
-                }
-
-            }
-            if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealSingleSpell))
+            if (DataCenter.CommandStatus.HasFlag(AutoStatus.HealSingleSpell))
             {
                 IBaseAction.AutoHealCheck = true;
                 if (DataCenter.CurrentDutyRotation?.HealSingleGCD(out act) == true)
@@ -138,14 +128,12 @@ public partial class CustomRotation
                 {
                     return action;
                 }
-
                 IBaseAction.AutoHealCheck = false;
             }
-
-            if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealSingleSpell))
+            if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealSingleSpell) && (CanHealSingleSpell || DataCenter.IsInOccultCrescentOp))
             {
                 IBaseAction.AutoHealCheck = true;
-                if (DataCenter.CurrentDutyRotation?.DefenseAreaGCD(out act) == true)
+                if (DataCenter.CurrentDutyRotation?.HealSingleGCD(out act) == true)
                     return act;
 
                 if (HealSingleGCD(out IAction? action))
@@ -154,17 +142,6 @@ public partial class CustomRotation
                 }
 
                 IBaseAction.AutoHealCheck = false;
-            }
-
-            if (DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseArea))
-            {
-                if (DataCenter.CurrentDutyRotation?.DefenseAreaGCD(out act) == true)
-                    return act;
-
-                if (DefenseAreaGCD(out IAction? action))
-                {
-                    return action;
-                }
             }
 
             IBaseAction.TargetOverride = null;
@@ -484,12 +461,12 @@ public partial class CustomRotation
     /// <summary>
     /// Attempts to use the Heal Area GCD action.
     /// </summary>
-    /// <param name="act">The action to be performed.</param>
+    /// <param name="action">The action to be performed.</param>
     /// <returns>True if the action can be used; otherwise, false.</returns>
     [RotationDesc(DescType.HealAreaGCD)]
-    protected virtual bool HealAreaGCD(out IAction? act)
+    protected virtual bool HealAreaGCD(out IAction? action)
     {
-        act = null;
+        action = null;
         if (ShouldSkipAction())
         {
             return false;
@@ -501,7 +478,7 @@ public partial class CustomRotation
         }
 
         IBaseAction.ShouldEndSpecial = false;
-        act = null!; return false;
+        action = null!; return false;
     }
 
     /// <summary>

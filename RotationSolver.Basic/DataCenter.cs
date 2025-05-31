@@ -146,6 +146,12 @@ internal static class DataCenter
     /// Determines if the current content is Bozjan Southern Front or Zadnor.
     /// </summary>
     public static bool IsInOccultCrescentOp => Territory?.ContentType == TerritoryContentType.OccultCrescent;
+
+    /// <summary>
+    /// Determines if the current content is Forked Tower.
+    /// </summary>
+    public static bool IsInForkedTower => Territory?.ContentType == TerritoryContentType.OccultCrescent 
+        && Player.Object.HasStatus(false, StatusID.DutiesAsAssigned_4228);
     #endregion
 
     public static ushort TerritoryID => Svc.ClientState.TerritoryType;

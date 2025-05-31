@@ -3440,6 +3440,7 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"IsInBozja: {DataCenter.IsInBozja}");
         ImGui.Spacing();
         ImGui.Text($"In Occult Crescent: {DataCenter.IsInOccultCrescentOp}");
+        ImGui.Text($"Is In ForkedTower: {DataCenter.IsInForkedTower}");
         ImGui.Text($"FreelancerLevel: {DutyRotation.FreelancerLevel}");
         ImGui.Text($"KnightLevel: {DutyRotation.KnightLevel}");
         ImGui.Text($"MonkLevel: {DutyRotation.MonkLevel}");
