@@ -433,7 +433,6 @@ public partial class RotationConfigWindow
     private static void DrawInternalTab()
     {
         ImGui.Text($"Configs/Backups location: {Svc.PluginInterface.ConfigFile.Directory}");
-        ImGui.Text($"{DataCenter.HoldingRestore}");
         
         if (ImGui.Button("Backup Configs"))
         {
