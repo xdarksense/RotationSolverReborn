@@ -1,7 +1,8 @@
-﻿using Dalamud.Game.Gui.ContextMenu;
+﻿using Dalamud.Game.Addon.Lifecycle;
+using Dalamud.Game.Gui;
+using Dalamud.Game.Gui.ContextMenu;
 using Dalamud.Plugin.Services;
 using ECommons.DalamudServices;
-using Action = Lumina.Excel.Sheets.Action;
 
 namespace RotationSolver.UI;
 
@@ -17,29 +18,25 @@ internal static class ActionContextMenu
 
     private static void AddActionMenu(IMenuOpenedArgs args)
     {
-        var contextAction = new BaseAction((ActionID)Svc.GameGui.HoveredAction.ActionID, false);
-
-        Svc.Log.Debug(
-            $"Menu spawned from {args.AddonName}, {args.AddonPtr}, {args.AgentPtr}, {args.EventInterfaces}, {args.MenuType}, {args.Target}");
-        Svc.Log.Debug($"Menu spawned over {contextAction.Name}/{Svc.GameGui.HoveredAction.ActionKind}");
-
-        var entry = new MenuItem
+        var contextAction = new BaseAction((ActionID)Svc.GameGui.HoveredAction.ActionID);
+        
+        Svc.GameGui.HoveredActionChanged += (sender, e) => { contextAction = new BaseAction((ActionID)Svc.GameGui.HoveredAction.ActionID); };
+        Svc.GameGui.HoveredItemChanged += (sender, e) => { Svc.GameGui.HoveredAction.ActionID = 0; };
+        
+        if (contextAction == null || Svc.GameGui.HoveredAction.ActionID == 0)
         {
-            Name = "RotationSolverReborn",
-            IsSubmenu = true,
-            PrefixChar = 'R',
-            PrefixColor = 545
-        };
+            return;
+        }
+        
+        Svc.Log.Debug(
+            $"Menu attempted spawned from {contextAction.Name}/{Svc.GameGui.HoveredAction.ActionID},{Svc.GameGui.HoveredItem}, {args.AddonName}, {args.AddonPtr}, {args.AgentPtr}, {args.EventInterfaces}, {args.MenuType}, {args.Target}");
 
-        entry.OnClicked += args => BuildSubMenu(args, contextAction);
-
-        args.AddMenuItem(entry);
-    }
-
-    private static void BuildSubMenu(IMenuItemClickedArgs args, BaseAction contextAction)
-    {
-        var entries = new List<MenuItem>();
-
+        if (args.AddonName == null || !args.AddonName.Contains("ActionBar") || contextAction == null)
+        {
+            return;
+        }
+        
+        #region Enable/Disable Action
         if (contextAction.IsEnabled)
         {
             var enabledEntry = new MenuItem
@@ -49,8 +46,8 @@ internal static class ActionContextMenu
                 PrefixColor = 545
             };
             
-            enabledEntry.OnClicked += clickedEntry => contextAction.IsEnabled = false;
-            entries.Add(enabledEntry);
+            enabledEntry.OnClicked += clickedEntry => { contextAction.IsEnabled = false; }; 
+            args.AddMenuItem(enabledEntry);
         }
         else
         {
@@ -60,11 +57,32 @@ internal static class ActionContextMenu
                 PrefixChar = 'R',
                 PrefixColor = 545
             };
-            
-            enabledEntry.OnClicked += clickedEntry => contextAction.IsEnabled = true;
-            entries.Add(enabledEntry);
+
+            enabledEntry.OnClicked += clickedEntry => { contextAction.IsEnabled = true; };
+            args.AddMenuItem(enabledEntry);
         }
+        #endregion
         
-        args.OpenSubmenu(entries);
+        var subMenuEntry = new MenuItem
+        {
+            Name = "Extra Functions",
+            IsSubmenu = true,
+            PrefixChar = 'R',
+            PrefixColor = 545
+        };
+
+        subMenuEntry.OnClicked += args => BuildSubMenu(args, contextAction);
+
+        args.AddMenuItem(subMenuEntry);
+    }
+
+    private static void BuildSubMenu(IMenuItemClickedArgs args, BaseAction contextAction)
+    {
+        var entries = new List<MenuItem>();
+
+        if (entries.Count > 0)
+        {
+            args.OpenSubmenu(entries);
+        }
     }
 }
