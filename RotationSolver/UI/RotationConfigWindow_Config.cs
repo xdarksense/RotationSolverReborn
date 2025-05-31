@@ -424,11 +424,20 @@ public partial class RotationConfigWindow
     private static readonly CollapsingHeaderGroup _extraHeader = new(new Dictionary<Func<string>, Action>
     {
     { UiString.ConfigWindow_EventItem.GetDescription, DrawEventTab },
+    { UiString.ConfigWindow_Internal.GetDescription, DrawInternalTab },
     {
         UiString.ConfigWindow_Extra_Others.GetDescription,
         () => _allSearchable.DrawItems(Configs.Extra)
     },
     });
+    private static void DrawInternalTab()
+    {
+        if (ImGui.Button("Backup Configs"))
+        {
+            Svc.PluginInterface.ConfigFile.CopyTo(Svc.PluginInterface.ConfigFile.Directory+"\\RotationSolverRebornConfigs_Backup.json", true);
+        }
+        ImGui.Text($"Backup will be here: {Svc.PluginInterface.ConfigFile.Directory}");
+    }
 
     private static void DrawEventTab()
     {
