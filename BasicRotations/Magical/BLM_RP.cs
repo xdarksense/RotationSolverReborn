@@ -1,6 +1,6 @@
 ﻿namespace RebornRotations.Magical;
 
-[Rotation("RebornPowerdox(TESTING)", CombatType.PvE, GameVersion = "7.2")]
+[Rotation("RebornPowerdox(TESTING)", CombatType.PvE, GameVersion = "7.21")]
 [SourceCode(Path = "main/BasicRotations/Magical/BLM_RP.cs")]
 [Api(4)]
 public class BLM_RP : BlackMageRotation
@@ -21,10 +21,12 @@ public class BLM_RP : BlackMageRotation
 
     protected override IAction? CountDownAction(float remainTime)
     {
-        IAction act;
         if (remainTime < BlizzardIiiPvE.Info.CastTime + CountDownAhead)
         {
-            if (BlizzardIiiPvE.CanUse(out act)) return act;
+            if (BlizzardIiiPvE.CanUse(out IAction act))
+            {
+                return act;
+            }
         }
         return base.CountDownAction(remainTime);
     }
@@ -34,28 +36,51 @@ public class BLM_RP : BlackMageRotation
 
         if (InCombat && HasHostilesInRange)
         {
-            if (UseMedicine && UseBurstMedicine(out act)) return true;
+            if (UseMedicine && UseBurstMedicine(out act))
+            {
+                return true;
+            }
 
-            if (LeylineMadness && LeyLinesPvE.CanUse(out act, usedUp: Leyline2Madness)) return true;
-            if (!IsLastAbility(ActionID.LeyLinesPvE) && UseRetrace && RetracePvE.CanUse(out act)) return true;
+            if (LeylineMadness && LeyLinesPvE.CanUse(out act, usedUp: Leyline2Madness))
+            {
+                return true;
+            }
+
+            if (!IsLastAbility(ActionID.LeyLinesPvE) && UseRetrace && RetracePvE.CanUse(out act))
+            {
+                return true;
+            }
 
             if (InAstralFire && CurrentMp < 800)
             {
                 if (!ManafontPvE.Cooldown.IsCoolingDown)
                 {
-                    if (ManafontPvE.CanUse(out act)) return true;
+                    if (ManafontPvE.CanUse(out act))
+                    {
+                        return true;
+                    }
                 }
             }
 
             if (!IsPolyglotStacksMaxed)
             {
-                if (AmplifierPvE.CanUse(out act)) return true;
+                if (AmplifierPvE.CanUse(out act))
+                {
+                    return true;
+                }
             }
 
             if (CanMakeInstant && InUmbralIce && !IsParadoxActive)
             {
-                if (SwiftcastPvE.CanUse(out act)) return true;
-                if (TriplecastPvE.CanUse(out act, usedUp: true)) return true;
+                if (SwiftcastPvE.CanUse(out act))
+                {
+                    return true;
+                }
+
+                if (TriplecastPvE.CanUse(out act, usedUp: true))
+                {
+                    return true;
+                }
             }
 
         }
@@ -72,53 +97,104 @@ public class BLM_RP : BlackMageRotation
     {
         //2 target thunder
         if (HighThunderIiPvE.CanUse(out act)
-            && (HighThunderIiPvE.Target.Target?.WillStatusEndGCD(HighThunderIiPvE.Config.StatusGcdCount, 0, true, HighThunderIiPvE.Setting.TargetStatusProvide ?? []) ?? false)) return true;
+            && (HighThunderIiPvE.Target.Target?.WillStatusEndGCD(HighThunderIiPvE.Config.StatusGcdCount, 0, true, HighThunderIiPvE.Setting.TargetStatusProvide ?? []) ?? false))
+        {
+            return true;
+        }
+
         if (ThunderIvPvE.CanUse(out act)
-            && (ThunderIvPvE.Target.Target?.WillStatusEndGCD(ThunderIvPvE.Config.StatusGcdCount, 0, true, ThunderIvPvE.Setting.TargetStatusNeed ?? []) ?? false)) return true;
+            && (ThunderIvPvE.Target.Target?.WillStatusEndGCD(ThunderIvPvE.Config.StatusGcdCount, 0, true, ThunderIvPvE.Setting.TargetStatusNeed ?? []) ?? false))
+        {
+            return true;
+        }
+
         if (ThunderIiPvE.CanUse(out act)
-            && (ThunderIiPvE.Target.Target?.WillStatusEndGCD(ThunderIiPvE.Config.StatusGcdCount, 0, true, ThunderIiPvE.Setting.TargetStatusNeed ?? []) ?? false)) return true;
+            && (ThunderIiPvE.Target.Target?.WillStatusEndGCD(ThunderIiPvE.Config.StatusGcdCount, 0, true, ThunderIiPvE.Setting.TargetStatusNeed ?? []) ?? false))
+        {
+            return true;
+        }
 
         //1 target thunder
         if (HighThunderPvE.CanUse(out act)
-            && (HighThunderPvE.Target.Target?.WillStatusEndGCD(HighThunderPvE.Config.StatusGcdCount, 0, true, HighThunderPvE.Setting.TargetStatusProvide ?? []) ?? false)) return true;
+            && (HighThunderPvE.Target.Target?.WillStatusEndGCD(HighThunderPvE.Config.StatusGcdCount, 0, true, HighThunderPvE.Setting.TargetStatusProvide ?? []) ?? false))
+        {
+            return true;
+        }
+
         if (ThunderIiiPvE.CanUse(out act)
-            && (ThunderIiiPvE.Target.Target?.WillStatusEndGCD(ThunderIiiPvE.Config.StatusGcdCount, 0, true, ThunderIiiPvE.Setting.TargetStatusNeed ?? []) ?? false)) return true;
+            && (ThunderIiiPvE.Target.Target?.WillStatusEndGCD(ThunderIiiPvE.Config.StatusGcdCount, 0, true, ThunderIiiPvE.Setting.TargetStatusNeed ?? []) ?? false))
+        {
+            return true;
+        }
+
         if (ThunderPvE.CanUse(out act)
-            && (ThunderPvE.Target.Target?.WillStatusEndGCD(ThunderPvE.Config.StatusGcdCount, 0, true, ThunderPvE.Setting.TargetStatusNeed ?? []) ?? false)) return true;
+            && (ThunderPvE.Target.Target?.WillStatusEndGCD(ThunderPvE.Config.StatusGcdCount, 0, true, ThunderPvE.Setting.TargetStatusNeed ?? []) ?? false))
+        {
+            return true;
+        }
 
         if ((IsPolyglotStacksMaxed && (EnochianEndAfterGCD(0) || AmplifierPvE.Cooldown.WillHaveOneChargeGCD(0))) || Player.HasStatus(true, StatusID.LeyLines))
         {
-            if (FoulPvE.CanUse(out act, skipAoeCheck: !XenoglossyPvE.EnoughLevel)) return true;
-            if (XenoglossyPvE.CanUse(out act)) return true;
+            if (FoulPvE.CanUse(out act, skipAoeCheck: !XenoglossyPvE.EnoughLevel))
+            {
+                return true;
+            }
+
+            if (XenoglossyPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
-        if (ParadoxPvE.CanUse(out act)) return true;
+        if (ParadoxPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         if (NextGCDisInstant && InUmbralIce)
         {
             if (IsSoulStacksMaxed)
             {
-                if (BlizzardIiiPvE.CanUse(out act)) return true;
+                if (BlizzardIiiPvE.CanUse(out act))
+                {
+                    return true;
+                }
             }
             if (UmbralHearts < 3)
             {
-                if (BlizzardIvPvE.CanUse(out act)) return true;
+                if (BlizzardIvPvE.CanUse(out act))
+                {
+                    return true;
+                }
             }
         }
 
         if (Player.HasStatus(true, StatusID.Firestarter))
         {
-            if (FireIiiPvE.CanUse(out act)) return true;
+            if (FireIiiPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
-        if (DespairPvE.CanUse(out act)) return true;
+        if (DespairPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         if (IsSoulStacksMaxed)
         {
-            if (TransposePvE.CanUse(out act)) return true;
+            if (TransposePvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
-        if (UmbralSoulPvE.CanUse(out act)) return true;
+        if (UmbralSoulPvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.GeneralGCD(out act);
     }
 }

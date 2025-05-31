@@ -15,7 +15,7 @@ namespace RotationSolver.Basic.Data;
 public unsafe class MacroItem(IGameObject? target, RaptureMacroModule.Macro* macro)
 {
     private IGameObject? _lastTarget;
-    readonly RaptureMacroModule.Macro* _macro = macro;
+    private readonly RaptureMacroModule.Macro* _macro = macro;
 
     /// <summary>
     /// The target of this macro.
@@ -33,7 +33,10 @@ public unsafe class MacroItem(IGameObject? target, RaptureMacroModule.Macro* mac
     /// <returns>True if the macro started successfully; otherwise, false.</returns>
     public bool StartUseMacro()
     {
-        if (RaptureShellModule.Instance()->MacroCurrentLine > -1) return false;
+        if (RaptureShellModule.Instance()->MacroCurrentLine > -1)
+        {
+            return false;
+        }
 
         _lastTarget = Svc.Targets.Target;
         Svc.Targets.Target = Target;
@@ -49,7 +52,10 @@ public unsafe class MacroItem(IGameObject? target, RaptureMacroModule.Macro* mac
     /// <returns>True if the macro ended successfully; otherwise, false.</returns>
     public bool EndUseMacro()
     {
-        if (RaptureShellModule.Instance()->MacroCurrentLine > -1) return false;
+        if (RaptureShellModule.Instance()->MacroCurrentLine > -1)
+        {
+            return false;
+        }
 
         Svc.Targets.Target = _lastTarget;
 

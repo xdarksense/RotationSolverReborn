@@ -1,6 +1,7 @@
 ﻿using Dalamud.Interface.Utility;
 using Dalamud.Interface.Windowing;
 using ECommons.DalamudServices;
+using ECommons.Logging;
 using RotationSolver.UI.HighlightTeachingMode;
 
 namespace RotationSolver.UI;
@@ -10,7 +11,7 @@ namespace RotationSolver.UI;
 /// </summary>
 internal class OverlayWindow : Window
 {
-    const ImGuiWindowFlags BaseFlags = ImGuiWindowFlags.NoBackground
+    private const ImGuiWindowFlags BaseFlags = ImGuiWindowFlags.NoBackground
     | ImGuiWindowFlags.NoBringToFrontOnFocus
     | ImGuiWindowFlags.NoDecoration
     | ImGuiWindowFlags.NoDocking
@@ -35,10 +36,12 @@ internal class OverlayWindow : Window
         base.PreDraw();
     }
 
-    public unsafe override void Draw()
+    public override unsafe void Draw()
     {
         if (!HotbarHighlightManager.Enable || Svc.ClientState == null || Svc.ClientState.LocalPlayer == null)
+        {
             return;
+        }
 
         ImGui.GetStyle().AntiAliasedFill = false;
 
@@ -48,17 +51,17 @@ internal class OverlayWindow : Window
 
             if (HotbarHighlightManager._drawingElements2D != null)
             {
-                var drawList = ImGui.GetWindowDrawList();
+                ImDrawListPtr drawList = ImGui.GetWindowDrawList();
                 if (drawList.NativePtr == null)
                 {
-                    Svc.Log.Warning($"{nameof(OverlayWindow)}: Window draw list is null.");
+                    PluginLog.Warning($"{nameof(OverlayWindow)}: Window draw list is null.");
                     return;
                 }
 
-                var elements = HotbarHighlightManager._drawingElements2D;
-                var sortedElements = new List<IDrawing2D>(elements);
+                IDrawing2D[] elements = HotbarHighlightManager._drawingElements2D;
+                List<IDrawing2D> sortedElements = new(elements);
                 sortedElements.Sort((a, b) => GetDrawingOrder(a).CompareTo(GetDrawingOrder(b)));
-                foreach (var item in sortedElements)
+                foreach (IDrawing2D item in sortedElements)
                 {
                     item.Draw();
                 }
@@ -66,7 +69,7 @@ internal class OverlayWindow : Window
         }
         catch (Exception ex)
         {
-            Svc.Log.Warning(ex, $"{nameof(OverlayWindow)} failed to draw on Screen.");
+            PluginLog.Warning($"{nameof(OverlayWindow)} failed to draw on Screen. {ex.Message}");
         }
     }
 
@@ -80,15 +83,12 @@ internal class OverlayWindow : Window
 
     private int GetDrawingOrder(object drawing)
     {
-        switch (drawing)
+        return drawing switch
         {
-            case PolylineDrawing poly:
-                return poly._thickness == 0 ? 0 : 1;
-            case ImageDrawing:
-                return 1;
-            default:
-                return 2;
-        }
+            PolylineDrawing poly => poly._thickness == 0 ? 0 : 1,
+            ImageDrawing => 1,
+            _ => 2,
+        };
     }
 
     public override void PostDraw()

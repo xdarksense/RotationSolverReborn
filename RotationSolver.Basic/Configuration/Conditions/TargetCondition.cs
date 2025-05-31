@@ -42,33 +42,28 @@ internal class TargetCondition : DelayCondition
             _ => null,
         };
 
-        if (TargetConditionType == TargetConditionType.IsNull)
-        {
-            return tar == null;
-        }
-
-        if (tar == null) return false;
-
-        return TargetConditionType switch
-        {
-            TargetConditionType.HasStatus => tar.HasStatus(FromSelf, StatusId),
-            TargetConditionType.IsBossFromTTK => tar.IsBossFromTTK(),
-            TargetConditionType.IsBossFromIcon => tar.IsBossFromIcon(),
-            TargetConditionType.IsDying => tar.IsDying(),
-            TargetConditionType.InCombat => tar.InCombat(),
-            TargetConditionType.Distance => CheckDistance(tar),
-            TargetConditionType.StatusEnd => !tar.WillStatusEnd(DistanceOrTime, FromSelf, StatusId),
-            TargetConditionType.StatusEndGCD => !tar.WillStatusEndGCD((uint)GCD, DistanceOrTime, FromSelf, StatusId),
-            TargetConditionType.TimeToKill => CheckTimeToKill(tar),
-            TargetConditionType.CastingAction => CheckCastingAction(tar),
-            TargetConditionType.CastingActionTime => CheckCastingActionTime(tar),
-            TargetConditionType.HP => CheckHP(tar),
-            TargetConditionType.HPRatio => CheckHPRatio(tar),
-            TargetConditionType.MP => CheckMP(tar),
-            TargetConditionType.TargetName => CheckTargetName(tar),
-            TargetConditionType.TargetRole => CheckTargetRole(tar),
-            _ => false,
-        };
+        return TargetConditionType == TargetConditionType.IsNull
+            ? tar == null
+            : tar != null && TargetConditionType switch
+            {
+                TargetConditionType.HasStatus => tar.HasStatus(FromSelf, StatusId),
+                TargetConditionType.IsBossFromTTK => tar.IsBossFromTTK(),
+                TargetConditionType.IsBossFromIcon => tar.IsBossFromIcon(),
+                TargetConditionType.IsDying => tar.IsDying(),
+                TargetConditionType.InCombat => tar.InCombat(),
+                TargetConditionType.Distance => CheckDistance(tar),
+                TargetConditionType.StatusEnd => !tar.WillStatusEnd(DistanceOrTime, FromSelf, StatusId),
+                TargetConditionType.StatusEndGCD => !tar.WillStatusEndGCD((uint)GCD, DistanceOrTime, FromSelf, StatusId),
+                TargetConditionType.TimeToKill => CheckTimeToKill(tar),
+                TargetConditionType.CastingAction => CheckCastingAction(tar),
+                TargetConditionType.CastingActionTime => CheckCastingActionTime(tar),
+                TargetConditionType.HP => CheckHP(tar),
+                TargetConditionType.HPRatio => CheckHPRatio(tar),
+                TargetConditionType.MP => CheckMP(tar),
+                TargetConditionType.TargetName => CheckTargetName(tar),
+                TargetConditionType.TargetRole => CheckTargetRole(tar),
+                _ => false,
+            };
     }
 
     private bool CheckDistance(IBattleChara tar)
@@ -100,8 +95,8 @@ internal class TargetCondition : DelayCondition
             return false;
         }
 
-        var actionRow = Service.GetSheet<Lumina.Excel.Sheets.Action>().GetRow(tar.CastActionId);
-        var castName = actionRow.Name.ExtractText();
+        Lumina.Excel.Sheets.Action actionRow = Service.GetSheet<Lumina.Excel.Sheets.Action>().GetRow(tar.CastActionId);
+        string castName = actionRow.Name.ExtractText();
         return CastingActionName == castName;
     }
 
@@ -157,19 +152,11 @@ internal class TargetCondition : DelayCondition
 
     private bool CheckTargetName(IBattleChara tar)
     {
-        if (string.IsNullOrEmpty(CastingActionName))
-        {
-            return false;
-        }
-        return tar.Name.TextValue == CastingActionName;
+        return !string.IsNullOrEmpty(CastingActionName) && tar.Name.TextValue == CastingActionName;
     }
     private bool CheckTargetRole(IBattleChara tar)
     {
-        if (string.IsNullOrEmpty(CombatRole))
-        {
-            return false;
-        }
-        return tar.GetRole().ToString() == CombatRole;
+        return !string.IsNullOrEmpty(CombatRole) && tar.GetRole().ToString() == CombatRole;
     }
 }
 

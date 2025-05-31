@@ -11,14 +11,14 @@ internal class DragFloatSearch : Searchable
     {
         get
         {
-            var baseDesc = base.Description;
+            string baseDesc = base.Description;
             return !string.IsNullOrEmpty(baseDesc) ? baseDesc + "\n" + Unit.ToString() : Unit.ToString();
         }
     }
 
     public DragFloatSearch(PropertyInfo property) : base(property)
     {
-        var range = _property.GetCustomAttribute<RangeAttribute>();
+        RangeAttribute? range = _property.GetCustomAttribute<RangeAttribute>();
         if (range != null)
         {
             Min = range.MinValue;
@@ -43,11 +43,11 @@ internal class DragFloatSearch : Searchable
 
     protected override void DrawMain()
     {
-        var value = Value;
+        float value = Value;
         ImGui.SetNextItemWidth(Scale * DRAG_WIDTH);
 
         // Cache the hash code to avoid multiple calls
-        var hashCode = GetHashCode();
+        int hashCode = GetHashCode();
 
         // Draw slider or drag float based on unit type
         if (Unit == ConfigUnitType.Percent)
@@ -69,19 +69,35 @@ internal class DragFloatSearch : Searchable
         }
 
         // Show tooltip if item is hovered
-        if (ImGui.IsItemHovered()) ShowTooltip();
+        if (ImGui.IsItemHovered())
+        {
+            ShowTooltip();
+        }
 
         // Draw job icon if applicable
-        if (IsJob) DrawJobIcon();
+        if (IsJob)
+        {
+            DrawJobIcon();
+        }
 
         ImGui.SameLine();
 
         // Set text color if specified
-        if (Color != 0) ImGui.PushStyleColor(ImGuiCol.Text, Color);
+        if (Color != 0)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, Color);
+        }
+
         ImGui.TextWrapped(Name);
-        if (Color != 0) ImGui.PopStyleColor();
+        if (Color != 0)
+        {
+            ImGui.PopStyleColor();
+        }
 
         // Show tooltip if item is hovered
-        if (ImGui.IsItemHovered()) ShowTooltip(false);
+        if (ImGui.IsItemHovered())
+        {
+            ShowTooltip(false);
+        }
     }
 }

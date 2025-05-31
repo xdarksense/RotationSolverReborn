@@ -2,7 +2,7 @@ using Dalamud.Interface.Colors;
 
 namespace RotationSolver.Basic.Rotations.Basic;
 
-partial class WarriorRotation
+public partial class WarriorRotation
 {
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Strength;
@@ -83,7 +83,7 @@ partial class WarriorRotation
     #endregion
 
     #region PvE Actions
-    private sealed protected override IBaseAction TankStance => DefiancePvE;
+    private protected sealed override IBaseAction TankStance => DefiancePvE;
 
     static partial void ModifyHeavySwingPvE(ref ActionSetting setting)
     {
@@ -430,24 +430,21 @@ partial class WarriorRotation
     /// <inheritdoc/>
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        if (HolmgangPvE.CanUse(out act)
-            && Player.GetHealthRatio() <= Service.Config.HealthForDyingTanks) return true;
-        return base.EmergencyAbility(nextGCD, out act);
+        return (HolmgangPvE.CanUse(out act)
+            && Player.GetHealthRatio() <= Service.Config.HealthForDyingTanks) || base.EmergencyAbility(nextGCD, out act);
     }
 
     /// <inheritdoc/>
     [RotationDesc(ActionID.OnslaughtPvE)]
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
-        if (OnslaughtPvE.CanUse(out act)) return true;
-        return base.MoveForwardAbility(nextGCD, out act);
+        return OnslaughtPvE.CanUse(out act) || base.MoveForwardAbility(nextGCD, out act);
     }
 
     /// <inheritdoc/>
     [RotationDesc(ActionID.PrimalRendPvE)]
     protected override bool MoveForwardGCD(out IAction? act)
     {
-        if (PrimalRendPvE.CanUse(out act, skipAoeCheck: true)) return true;
-        return base.MoveForwardGCD(out act);
+        return PrimalRendPvE.CanUse(out act, skipAoeCheck: true) || base.MoveForwardGCD(out act);
     }
 }

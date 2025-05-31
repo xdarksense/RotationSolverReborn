@@ -29,20 +29,18 @@ public class PCT_DefaultPvP : PictomancerRotation
     private bool DoPurify(out IAction? action)
     {
         action = null;
-        if (!UsePurifyPvP) return false;
+        if (!UsePurifyPvP)
+        {
+            return false;
+        }
 
-        var purifiableStatusesIDs = new List<int>
+        List<int> purifiableStatusesIDs = new()
         {
             // Stun, DeepFreeze, HalfAsleep, Sleep, Bind, Heavy, Silence
             1343, 3219, 3022, 1348, 1345, 1344, 1347
         };
 
-        if (purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)))
-        {
-            return PurifyPvP.CanUse(out action);
-        }
-
-        return false;
+        return purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)) && PurifyPvP.CanUse(out action);
     }
     #endregion
 
@@ -50,18 +48,30 @@ public class PCT_DefaultPvP : PictomancerRotation
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
-        if (DoPurify(out action)) return true;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
+        if (DoPurify(out action))
+        {
+            return true;
+        }
 
-        return base.EmergencyAbility(nextGCD, out action);
+        return DoPurify(out action) || base.EmergencyAbility(nextGCD, out action);
     }
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (Player.GetHealthRatio() <= TempuraThreshold && TemperaCoatPvP.CanUse(out action)) return true;
+        if (TemperaCoatPvP.CanUse(out action) && Player.GetHealthRatio() <= TempuraThreshold)
+        {
+            return true;
+        }
 
         return base.DefenseSingleAbility(nextGCD, out action);
     }
@@ -69,28 +79,61 @@ public class PCT_DefaultPvP : PictomancerRotation
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
         //if (CometPvP.CanUse(out action)) return true;
-        if (RustPvP.CanUse(out action)) return true;
-        if (PhantomDartPvP.CanUse(out action)) return true;
+        if (RustPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (PhantomDartPvP.CanUse(out action))
+        {
+            return true;
+        }
 
         if (FreeBurst || CurrentTarget?.GetHealthRatio() <= BurstThreshold)
         {
             // Use all Muses in sequence for maximum burst
-            if (PomMusePvP.CanUse(out action, usedUp: true)) return true;
-            if (WingedMusePvP.CanUse(out action, usedUp: true)) return true;
-            if (ClawedMusePvP.CanUse(out action, usedUp: true)) return true;
-            if (FangedMusePvP.CanUse(out action, usedUp: true)) return true;
+            if (PomMusePvP.CanUse(out action, usedUp: true))
+            {
+                return true;
+            }
+
+            if (WingedMusePvP.CanUse(out action, usedUp: true))
+            {
+                return true;
+            }
+
+            if (ClawedMusePvP.CanUse(out action, usedUp: true))
+            {
+                return true;
+            }
+
+            if (FangedMusePvP.CanUse(out action, usedUp: true))
+            {
+                return true;
+            }
         }
 
         switch (IsMoving)
         {
             case true:
-                if (ReleaseSubtractivePalettePvP.CanUse(out action)) return true;
+                if (ReleaseSubtractivePalettePvP.CanUse(out action))
+                {
+                    return true;
+                }
+
                 break;
             case false:
-                if (SubtractivePalettePvP.CanUse(out action)) return true;
+                if (SubtractivePalettePvP.CanUse(out action))
+                {
+                    return true;
+                }
+
                 break;
         }
 
@@ -103,18 +146,40 @@ public class PCT_DefaultPvP : PictomancerRotation
     protected override bool GeneralGCD(out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (StarPrismPvP.CanUse(out action)) return true;
+        if (StarPrismPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (MogOfTheAgesPvP.CanUse(out action)) return true;
-        if (RetributionOfTheMadeenPvP.CanUse(out action)) return true;
+        if (MogOfTheAgesPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (CometInBlackPvP.CanUse(out action, usedUp: true)) return true;
+        if (RetributionOfTheMadeenPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (CreatureMotifPvP.CanUse(out action)) return true;
+        if (CometInBlackPvP.CanUse(out action, usedUp: true))
+        {
+            return true;
+        }
 
-        if (FireInRedPvP.CanUse(out action)) return true;
+        if (CreatureMotifPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (FireInRedPvP.CanUse(out action))
+        {
+            return true;
+        }
 
         return base.GeneralGCD(out action);
     }

@@ -1,7 +1,7 @@
 using Dalamud.Interface.Colors;
 
 namespace RotationSolver.Basic.Rotations.Basic;
-partial class MonkRotation
+public partial class MonkRotation
 {
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Strength;
@@ -135,13 +135,13 @@ partial class MonkRotation
 
     static partial void ModifySteeledMeditationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (!InBrotherhood && Chakra < 5 || InBrotherhood && Chakra < 10);
+        setting.ActionCheck = () => (!InBrotherhood && Chakra < 5) || (InBrotherhood && Chakra < 10);
         setting.IsFriendly = true;
     }
 
     static partial void ModifySteelPeakPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InCombat && (!InBrotherhood && Chakra == 5 || InBrotherhood && Chakra >= 5);
+        setting.ActionCheck = () => InCombat && ((!InBrotherhood && Chakra == 5) || (InBrotherhood && Chakra >= 5));
         setting.UnlockedByQuestID = 66094;
     }
 
@@ -188,13 +188,13 @@ partial class MonkRotation
 
     static partial void ModifyInspiritedMeditationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (!InBrotherhood && Chakra < 5 || InBrotherhood && Chakra < 10);
+        setting.ActionCheck = () => (!InBrotherhood && Chakra < 5) || (InBrotherhood && Chakra < 10);
         setting.IsFriendly = true;
     }
 
     static partial void ModifyHowlingFistPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InCombat && (!InBrotherhood && Chakra == 5 || InBrotherhood && Chakra >= 5);
+        setting.ActionCheck = () => InCombat && ((!InBrotherhood && Chakra == 5) || (InBrotherhood && Chakra >= 5));
         setting.UnlockedByQuestID = 66599;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -247,13 +247,13 @@ partial class MonkRotation
 
     static partial void ModifyForbiddenMeditationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (!InBrotherhood && Chakra < 5 || InBrotherhood && Chakra < 10);
+        setting.ActionCheck = () => (!InBrotherhood && Chakra < 5) || (InBrotherhood && Chakra < 10);
         setting.IsFriendly = true;
     }
 
     static partial void ModifyTheForbiddenChakraPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InCombat && (!InBrotherhood && Chakra == 5 || InBrotherhood && Chakra >= 5);
+        setting.ActionCheck = () => InCombat && ((!InBrotherhood && Chakra == 5) || (InBrotherhood && Chakra >= 5));
         setting.UnlockedByQuestID = 67564;
     }
 
@@ -355,13 +355,13 @@ partial class MonkRotation
 
     static partial void ModifyEnlightenedMeditationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (!InBrotherhood && Chakra < 5 || InBrotherhood && Chakra < 10);
+        setting.ActionCheck = () => (!InBrotherhood && Chakra < 5) || (InBrotherhood && Chakra < 10);
         setting.IsFriendly = true;
     }
 
     static partial void ModifyEnlightenmentPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InCombat && (!InBrotherhood && Chakra == 5 || InBrotherhood && Chakra >= 5);
+        setting.ActionCheck = () => InCombat && ((!InBrotherhood && Chakra == 5) || (InBrotherhood && Chakra >= 5));
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,

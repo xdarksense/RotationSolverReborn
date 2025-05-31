@@ -1,5 +1,4 @@
 ﻿using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Plugin.Ipc;
 using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using ECommons.Hooks;
@@ -14,12 +13,8 @@ namespace RotationSolver;
 
 public static class Watcher
 {
-    private static ICallGateSubscriber<object, object>? IpcSubscriber;
-
     public static void Enable()
     {
-        IpcSubscriber = Svc.PluginInterface.GetIpcSubscriber<object, object>("PingPlugin.Ipc");
-
         ActionEffect.ActionEffectEvent += ActionFromEnemy;
         ActionEffect.ActionEffectEvent += ActionFromSelf;
     }
@@ -38,27 +33,46 @@ public static class Watcher
         try
         {
             // Check Source.
-            var source = set.Source;
-            if (source == null) return;
-            if (source is not IBattleChara battle) return;
-            if (battle is IPlayerCharacter) return;
-            const int FriendSubKind = 9;
-            if (battle.SubKind == FriendSubKind) return; // Friend!
-            var obj = Svc.Objects.SearchById(battle.GameObjectId);
-            if (obj == null) return;
-            if (obj is IPlayerCharacter) return;
+            if (set.Source is not IBattleChara battle)
+            {
+                return;
+            }
 
-            var playerObject = Player.Object;
-            if (playerObject == null) return;
+            if (battle is IPlayerCharacter)
+            {
+                return;
+            }
+
+            const int FriendSubKind = 9;
+            if (battle.SubKind == FriendSubKind)
+            {
+                return; // Friend!
+            }
+
+            if (Svc.Objects.SearchById(battle.GameObjectId) is not IBattleChara obj)
+            {
+                return;
+            }
+
+            if (obj is IPlayerCharacter)
+            {
+                return;
+            }
+
+            IPlayerCharacter playerObject = Player.Object;
+            if (playerObject == null)
+            {
+                return;
+            }
 
             float damageRatio = 0;
-            foreach (var effect in set.TargetEffects)
+            foreach (TargetEffect effect in set.TargetEffects)
             {
                 if (effect.TargetID == playerObject.GameObjectId)
                 {
                     for (int i = 0; i < 8; i++)
                     {
-                        var entry = effect[i];
+                        EffectEntry entry = effect[i];
                         if (entry.type == ActionEffectType.Damage)
                         {
                             damageRatio += (float)entry.value / playerObject.MaxHp;
@@ -71,12 +85,16 @@ public static class Watcher
 
             ShowStrEnemy = $"Damage Ratio: {damageRatio}\n{set}";
 
-            foreach (var effect in set.TargetEffects)
+            foreach (TargetEffect effect in set.TargetEffects)
             {
-                if (effect.TargetID != playerObject.GameObjectId) continue;
-                if (effect.GetSpecificTypeEffect(ActionEffectType.Knockback, out var entry))
+                if (effect.TargetID != playerObject.GameObjectId)
                 {
-                    var knock = Svc.Data.GetExcelSheet<Knockback>()?.GetRow(entry.value);
+                    continue;
+                }
+
+                if (effect.GetSpecificTypeEffect(ActionEffectType.Knockback, out EffectEntry entry))
+                {
+                    Knockback? knock = Svc.Data.GetExcelSheet<Knockback>()?.GetRow(entry.value);
                     if (knock != null)
                     {
                         DataCenter.KnockbackStart = DateTime.Now;
@@ -86,29 +104,29 @@ public static class Watcher
                         }
                         if (set.Action.HasValue && !OtherConfiguration.HostileCastingKnockback.Contains(set.Action.Value.RowId) && Service.Config.RecordKnockbackies)
                         {
-                            OtherConfiguration.HostileCastingKnockback.Add(set.Action.Value.RowId);
-                            OtherConfiguration.Save();
+                            _ = OtherConfiguration.HostileCastingKnockback.Add(set.Action.Value.RowId);
+                            _ = OtherConfiguration.Save();
                         }
                     }
                     break;
                 }
             }
 
-            if (set.Header.ActionType == ActionType.Action && DataCenter.PartyMembers.Count() >= 4 && set.Action?.Cast100ms > 0)
+            if (set.Header.ActionType == ActionType.Action && DataCenter.PartyMembers.Count >= 4 && set.Action?.Cast100ms > 0)
             {
-                var type = set.Action?.GetActionCate();
+                ActionCate? type = set.Action?.GetActionCate();
 
                 if (type is ActionCate.Spell or ActionCate.Weaponskill or ActionCate.Ability)
                 {
-                    int partyMemberCount = DataCenter.PartyMembers.Count();
+                    int partyMemberCount = DataCenter.PartyMembers.Count;
                     int damageEffectCount = 0;
 
-                    foreach (var effect in set.TargetEffects)
+                    foreach (TargetEffect effect in set.TargetEffects)
                     {
-                        foreach (var partyMember in DataCenter.PartyMembers)
+                        foreach (IBattleChara partyMember in DataCenter.PartyMembers)
                         {
                             if (partyMember.GameObjectId == effect.TargetID &&
-                                effect.GetSpecificTypeEffect(ActionEffectType.Damage, out var damageEffect) &&
+                                effect.GetSpecificTypeEffect(ActionEffectType.Damage, out EffectEntry damageEffect) &&
                                 (damageEffect.value > 0 || (damageEffect.param0 & 6) == 6))
                             {
                                 damageEffectCount++;
@@ -121,8 +139,8 @@ public static class Watcher
                     {
                         if (Service.Config.RecordCastingArea)
                         {
-                            OtherConfiguration.HostileCastingArea.Add(set.Action!.Value.RowId);
-                            OtherConfiguration.SaveHostileCastingArea();
+                            _ = OtherConfiguration.HostileCastingArea.Add(set.Action!.Value.RowId);
+                            _ = OtherConfiguration.SaveHostileCastingArea();
                         }
                     }
                 }
@@ -130,7 +148,7 @@ public static class Watcher
         }
         catch (Exception ex)
         {
-            Svc.Log.Error($"Error in ActionFromEnemy: {ex}");
+            PluginLog.Error($"Error in ActionFromEnemy: {ex}");
         }
     }
 
@@ -139,23 +157,39 @@ public static class Watcher
     {
         try
         {
-            var playerObject = Player.Object;
-            if (set.Source == null || playerObject == null) return;
-            if (set.Source.GameObjectId != playerObject.GameObjectId) return;
-            if (set.Header.ActionType != ActionType.Action && set.Header.ActionType != ActionType.Item) return;
-            if (set.Action == null) return;
-            if (set.Action?.ActionCategory.Value.RowId == (uint)ActionCate.Autoattack) return;
-
-            var id = set.Action!.Value.RowId;
-            if (!set.Action.Value.IsRealGCD()) //&& (set.Action?.ClassJob.Id > 0 || Enum.IsDefined((ActionID)id)))
+            IPlayerCharacter playerObject = Player.Object;
+            if (set.Source == null || playerObject == null)
             {
-                OtherConfiguration.AnimationLockTime[id] = set.Header.AnimationLockTime;
+                return;
             }
 
-            if (set.TargetEffects.Length == 0) return;
+            if (set.Source.GameObjectId != playerObject.GameObjectId)
+            {
+                return;
+            }
 
-            var action = set.Action;
-            var tar = set.Target;
+            if (set.Header.ActionType is not ActionType.Action and not ActionType.Item)
+            {
+                return;
+            }
+
+            if (set.Action == null)
+            {
+                return;
+            }
+
+            if (set.Action?.ActionCategory.Value.RowId == (uint)ActionCate.Autoattack)
+            {
+                return;
+            }
+
+            if (set.TargetEffects.Length == 0)
+            {
+                return;
+            }
+
+            Lumina.Excel.Sheets.Action? action = set.Action;
+            IGameObject? tar = set.Target;
 
             // Record
             DataCenter.AddActionRec(action!.Value);
@@ -163,12 +197,12 @@ public static class Watcher
 
             DataCenter.HealHP = set.GetSpecificTypeEffect(ActionEffectType.Heal);
             DataCenter.ApplyStatus = set.GetSpecificTypeEffect(ActionEffectType.ApplyStatusEffectTarget);
-            var effects = set.GetSpecificTypeEffect(ActionEffectType.ApplyStatusEffectSource);
+            Dictionary<ulong, uint> effects = set.GetSpecificTypeEffect(ActionEffectType.ApplyStatusEffectSource);
             try
             {
                 if (effects != null)
                 {
-                    foreach (var effect in effects)
+                    foreach (KeyValuePair<ulong, uint> effect in effects)
                     {
                         DataCenter.ApplyStatus[effect.Key] = effect.Value;
                     }
@@ -180,7 +214,7 @@ public static class Watcher
             }
 
             uint mpGain = 0;
-            foreach (var effect in set.GetSpecificTypeEffect(ActionEffectType.MpGain))
+            foreach (KeyValuePair<ulong, uint> effect in set.GetSpecificTypeEffect(ActionEffectType.MpGain))
             {
                 if (effect.Key == playerObject.GameObjectId)
                 {
@@ -192,16 +226,19 @@ public static class Watcher
             DataCenter.EffectTime = DateTime.Now;
             DataCenter.EffectEndTime = DateTime.Now.AddSeconds(set.Header.AnimationLockTime + 1);
 
-            var attackedTargets = DataCenter.AttackedTargets;
-            var attackedTargetsCount = DataCenter.AttackedTargetsCount;
+            Queue<(ulong id, DateTime time)> attackedTargets = DataCenter.AttackedTargets;
+            int attackedTargetsCount = DataCenter.AttackedTargetsCount;
 
-            foreach (var effect in set.TargetEffects)
+            foreach (TargetEffect effect in set.TargetEffects)
             {
-                if (!effect.GetSpecificTypeEffect(ActionEffectType.Damage, out _)) continue;
+                if (!effect.GetSpecificTypeEffect(ActionEffectType.Damage, out _))
+                {
+                    continue;
+                }
 
                 // Check if the target is already in the attacked targets list
                 bool targetExists = false;
-                foreach (var target in attackedTargets)
+                foreach ((ulong id, DateTime time) target in attackedTargets)
                 {
                     if (target.id == effect.TargetID)
                     {
@@ -209,18 +246,21 @@ public static class Watcher
                         break;
                     }
                 }
-                if (targetExists) continue;
+                if (targetExists)
+                {
+                    continue;
+                }
 
                 // Ensure the current target is not dequeued
                 while (attackedTargets.Count >= attackedTargetsCount)
                 {
-                    var oldestTarget = attackedTargets.Peek();
+                    (ulong id, DateTime time) oldestTarget = attackedTargets.Peek();
                     if (oldestTarget.id == effect.TargetID)
                     {
                         // If the oldest target is the current target, break the loop to avoid dequeuing it
                         break;
                     }
-                    attackedTargets.Dequeue();
+                    _ = attackedTargets.Dequeue();
                 }
 
                 // Enqueue the new target
@@ -228,17 +268,24 @@ public static class Watcher
             }
 
             // Macro
-            var regexOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
-            var events = Service.Config.Events;
-            foreach (var item in events)
+            RegexOptions regexOptions = RegexOptions.Compiled | RegexOptions.IgnoreCase;
+            List<ActionEventInfo> events = Service.Config.Events;
+            foreach (ActionEventInfo item in events)
             {
-                if (!Regex.IsMatch(action.Value.Name.ExtractText(), item.Name, regexOptions)) continue;
-                if (item.AddMacro(tar)) break;
+                if (!Regex.IsMatch(action.Value.Name.ExtractText(), item.Name, regexOptions))
+                {
+                    continue;
+                }
+
+                if (item.AddMacro(tar))
+                {
+                    break;
+                }
             }
         }
         catch (Exception ex)
         {
-            Svc.Log.Error($"Error in ActionFromSelf: {ex}");
+            PluginLog.Error($"Error in ActionFromSelf: {ex}");
         }
     }
 

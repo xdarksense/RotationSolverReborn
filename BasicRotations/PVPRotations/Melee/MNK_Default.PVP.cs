@@ -26,20 +26,18 @@ public sealed class MNK_DefaultPvP : MonkRotation
     private bool DoPurify(out IAction? action)
     {
         action = null;
-        if (!UsePurifyPvP) return false;
+        if (!UsePurifyPvP)
+        {
+            return false;
+        }
 
-        var purifiableStatusesIDs = new List<int>
+        List<int> purifiableStatusesIDs = new()
         {
             // Stun, DeepFreeze, HalfAsleep, Sleep, Bind, Heavy, Silence
             1343, 3219, 3022, 1348, 1345, 1344, 1347
         };
 
-        if (purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)))
-        {
-            return PurifyPvP.CanUse(out action);
-        }
-
-        return false;
+        return purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)) && PurifyPvP.CanUse(out action);
     }
     #endregion
 
@@ -47,20 +45,46 @@ public sealed class MNK_DefaultPvP : MonkRotation
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
-        if (DoPurify(out action)) return true;
-
-        if (InCombat && Player.GetHealthRatio() < 0.8 && RiddleOfEarthPvP.CanUse(out action)) return true;
-
-        if (Player.HasStatus(true, StatusID.EarthResonance) && Player.WillStatusEnd(1, true, StatusID.EarthResonance))
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
         {
-            if (Player.GetHealthRatio() < 0.5 && EarthsReplyPvP.CanUse(out action)) return true;
-            if (Player.WillStatusEnd(1, true, StatusID.EarthResonance) && EarthsReplyPvP.CanUse(out action)) return true;
+            return false;
         }
 
-        if (Player.GetHealthRatio() < BloodBathPvPPercent && BloodbathPvP.CanUse(out action)) return true;
-        if (SwiftPvP.CanUse(out action)) return true;
-        if (CurrentTarget?.GetHealthRatio() <= SmitePvPPercent && SmitePvP.CanUse(out action)) return true;
+        if (DoPurify(out action))
+        {
+            return true;
+        }
+
+        if (RiddleOfEarthPvP.CanUse(out action) && InCombat && Player.GetHealthRatio() < 0.8)
+        {
+            return true;
+        }
+
+        if (EarthsReplyPvP.CanUse(out action))
+        {
+            if (Player.HasStatus(true, StatusID.EarthResonance) && Player.WillStatusEnd(1, true, StatusID.EarthResonance))
+            {
+                if (Player.GetHealthRatio() < 0.5 || Player.WillStatusEnd(1, true, StatusID.EarthResonance))
+                {
+                    return true;
+                }
+            }
+        }
+
+        if (BloodbathPvP.CanUse(out action) && Player.GetHealthRatio() < BloodBathPvPPercent)
+        {
+            return true;
+        }
+
+        if (SwiftPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (SmitePvP.CanUse(out action) && CurrentTarget?.GetHealthRatio() <= SmitePvPPercent)
+        {
+            return true;
+        }
 
         return base.EmergencyAbility(nextGCD, out action);
     }
@@ -68,10 +92,20 @@ public sealed class MNK_DefaultPvP : MonkRotation
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (HasHostilesInRange && RisingPhoenixPvP.CanUse(out action, usedUp: true)) return true;
-        if (HasHostilesInRange && EarthsReplyPvP.CanUse(out action, usedUp: true)) return true;
+        if (RisingPhoenixPvP.CanUse(out action, usedUp: true) && HasHostilesInRange)
+        {
+            return true;
+        }
+
+        if (EarthsReplyPvP.CanUse(out action, usedUp: true) && HasHostilesInRange)
+        {
+            return true;
+        }
 
         return base.AttackAbility(nextGCD, out action);
     }
@@ -79,7 +113,10 @@ public sealed class MNK_DefaultPvP : MonkRotation
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
         return base.MoveForwardAbility(nextGCD, out action);
     }
@@ -89,20 +126,60 @@ public sealed class MNK_DefaultPvP : MonkRotation
     protected override bool GeneralGCD(out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (PhantomRushPvP.CanUse(out action)) return true;
+        if (PhantomRushPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (FiresReplyPvP.CanUse(out action)) return true;
-        if (WindsReplyPvP.CanUse(out action)) return true;
-        if (FlintsReplyPvP.CanUse(out action, usedUp: true)) return true;
+        if (FiresReplyPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (PouncingCoeurlPvP.CanUse(out action)) return true;
-        if (RisingRaptorPvP.CanUse(out action)) return true;
-        if (LeapingOpoPvP.CanUse(out action)) return true;
-        if (DemolishPvP.CanUse(out action)) return true;
-        if (TwinSnakesPvP.CanUse(out action)) return true;
-        if (DragonKickPvP.CanUse(out action)) return true;
+        if (WindsReplyPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (FlintsReplyPvP.CanUse(out action, usedUp: true))
+        {
+            return true;
+        }
+
+        if (PouncingCoeurlPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (RisingRaptorPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (LeapingOpoPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (DemolishPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (TwinSnakesPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (DragonKickPvP.CanUse(out action))
+        {
+            return true;
+        }
 
         return base.GeneralGCD(out action);
     }

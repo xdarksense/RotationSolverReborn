@@ -68,7 +68,7 @@ internal enum RotationConfigWindowTab : byte
 /// <summary>
 /// Struct representing an incompatible plugin.
 /// </summary>
-public struct IncompatiblePlugin
+public readonly struct IncompatiblePlugin
 {
     public string Name { get; init; }
     public string Icon { get; init; }
@@ -83,9 +83,9 @@ public struct IncompatiblePlugin
     {
         get
         {
-            var name = this.Name;
-            var installedPlugins = Svc.PluginInterface.InstalledPlugins;
-            foreach (var x in installedPlugins)
+            string name = Name;
+            IEnumerable<Dalamud.Plugin.IExposedPlugin> installedPlugins = Svc.PluginInterface.InstalledPlugins;
+            foreach (Dalamud.Plugin.IExposedPlugin x in installedPlugins)
             {
                 if ((x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase)) && x.IsLoaded)
                 {
@@ -104,9 +104,9 @@ public struct IncompatiblePlugin
     {
         get
         {
-            var name = this.Name;
-            var installedPlugins = Svc.PluginInterface.InstalledPlugins;
-            foreach (var x in installedPlugins)
+            string name = Name;
+            IEnumerable<Dalamud.Plugin.IExposedPlugin> installedPlugins = Svc.PluginInterface.InstalledPlugins;
+            foreach (Dalamud.Plugin.IExposedPlugin x in installedPlugins)
             {
                 if (x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase))
                 {
@@ -123,7 +123,7 @@ public struct IncompatiblePlugin
 /// <summary>
 /// Struct representing an incompatible plugin.
 /// </summary>
-public struct AutoDutyPlugin
+public readonly struct AutoDutyPlugin
 {
     public string Name { get; init; }
     public string Icon { get; init; }
@@ -138,9 +138,9 @@ public struct AutoDutyPlugin
     {
         get
         {
-            var name = this.Name;
-            var installedPlugins = Svc.PluginInterface.InstalledPlugins;
-            foreach (var x in installedPlugins)
+            string name = Name;
+            IEnumerable<Dalamud.Plugin.IExposedPlugin> installedPlugins = Svc.PluginInterface.InstalledPlugins;
+            foreach (Dalamud.Plugin.IExposedPlugin x in installedPlugins)
             {
                 if ((x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase)) && x.IsLoaded)
                 {
@@ -159,9 +159,9 @@ public struct AutoDutyPlugin
     {
         get
         {
-            var name = this.Name;
-            var installedPlugins = Svc.PluginInterface.InstalledPlugins;
-            foreach (var x in installedPlugins)
+            string name = Name;
+            IEnumerable<Dalamud.Plugin.IExposedPlugin> installedPlugins = Svc.PluginInterface.InstalledPlugins;
+            foreach (Dalamud.Plugin.IExposedPlugin x in installedPlugins)
             {
                 if (x.Name.Equals(name, StringComparison.OrdinalIgnoreCase) || x.InternalName.Equals(name, StringComparison.OrdinalIgnoreCase))
                 {

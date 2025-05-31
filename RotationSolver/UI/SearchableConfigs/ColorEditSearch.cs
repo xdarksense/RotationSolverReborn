@@ -10,11 +10,11 @@ internal class ColorEditSearch(PropertyInfo property) : Searchable(property)
 
     protected override void DrawMain()
     {
-        var value = Value;
+        Vector4 value = Value;
         ImGui.SetNextItemWidth(DRAG_WIDTH * 1.5f * Scale);
 
         // Cache the hash code to avoid multiple calls
-        var hashCode = GetHashCode();
+        int hashCode = GetHashCode();
 
         // Draw the color edit control
         if (ImGui.ColorEdit4($"{Name}##Config_{ID}{hashCode}", ref value))
@@ -23,6 +23,9 @@ internal class ColorEditSearch(PropertyInfo property) : Searchable(property)
         }
 
         // Show tooltip if item is hovered
-        if (ImGui.IsItemHovered()) ShowTooltip();
+        if (ImGui.IsItemHovered())
+        {
+            ShowTooltip();
+        }
     }
 }

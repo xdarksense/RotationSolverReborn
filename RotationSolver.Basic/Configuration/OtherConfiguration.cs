@@ -1,25 +1,85 @@
 ﻿using ECommons.DalamudServices;
 using ECommons.ExcelServices;
+using ECommons.Logging;
 using Newtonsoft.Json.Converters;
 
 namespace RotationSolver.Basic.Configuration;
 
 internal class OtherConfiguration
 {
+    /// <markdown file="List" name="AoE" section="Actions">
+    /// **`It is recommended to click on the reset button after every patch.`**
+    /// 
+    /// RSR will use group mitigation if any enemy in the enmity list is casting
+    /// one of the listed actions. Usually those actions are raid-wides.
+    /// </markdown>
     public static HashSet<uint> HostileCastingArea = [];
-    public static HashSet<uint> HostileCastingTank = [];
-    public static HashSet<uint> HostileCastingKnockback = [];
-    public static HashSet<uint> HostileCastingStop = [];
 
-    public static SortedList<uint, float> AnimationLockTime = [];
+    /// <markdown file="List" name="Tank Buster" section="Actions">
+    /// **`It is recommended to click on the reset button after every patch.`**
+    /// 
+    /// RSR will use mitigation on target (heal) or self (tank) if the target is currently
+    /// being targeted by one of the listed actions.
+    /// </markdown>
+    public static HashSet<uint> HostileCastingTank = [];
+
+    /// <markdown file="List" name="Knockback" section="Actions">
+    /// **`It is recommended to click on the reset button after every patch.`**
+    ///
+    /// **Click on "Record knockback actions" at your own peril. Some duties expect you take the
+    /// knockback in order to reach a proper safe-spot, like in Sil'dihn Subterrane (Savage).**
+    /// 
+    /// RSR will use anti-knockback actions when you would be hit by one of the listed actions.
+    /// </markdown>
+    public static HashSet<uint> HostileCastingKnockback = [];
+
+    /// <markdown file="List" name="Gaze/Stop" section="Actions">
+    /// **`It is recommended to click on the reset button after every patch.`**
+    /// 
+    /// If the target is casting one of the listed actions, RSR will stop casting
+    /// in the seconds before the action is resolved
+    /// <see cref="RotationSolver.Basic.Configuration.Configs._castingStop">here</see>.
+    /// </markdown>
+    public static HashSet<uint> HostileCastingStop = [];
 
     public static Dictionary<uint, string[]> NoHostileNames = [];
     public static Dictionary<uint, string[]> NoProvokeNames = [];
+
+    /// <markdown file="List" name="Beneficial Positions" section="Map-Specific Settings">
+    /// Adds a preferred location used for ground **healing** AoE abilities (example: Earthly Star).
+    ///
+    /// You can add multiple locations, in case a boss fight moves you to another platform, like M4S - Wicked Thunder.
+    /// </markdown>
     public static Dictionary<uint, Vector3[]> BeneficialPositions = [];
 
+    /// <markdown file="List" name="Dispellable Debuffs" section="Statuses">
+    /// **`It is recommended to click on the reset button after every patch.`**
+    /// 
+    /// Listed statuses will be dispelled (Esuna) first before any
+    /// other dispellable statuses.
+    /// </markdown>
     public static HashSet<uint> DangerousStatus = [];
+
+    /// <markdown file="List" name="Priority" section="Statuses">
+    /// **`It is recommended to click on the reset button after every patch.`**
+    /// 
+    /// If running in auto mode, if any enemy in your enmity list has this status,
+    /// it will target them as priority.
+    /// </markdown>
     public static HashSet<uint> PriorityStatus = [];
+
+    /// <markdown file="List" name="Invulnerability" section="Statuses">
+    /// **`It is recommended to click on the reset button after every patch.`**
+    /// 
+    /// Ignores target if they have one of the statuses listed.
+    /// </markdown>
     public static HashSet<uint> InvincibleStatus = [];
+
+    /// <markdown file="List" name="No-Casting Debuffs" section="Statuses">
+    /// **`It is recommended to click on the reset button after every patch.`**
+    /// 
+    /// If you have any of the statuses listed, RSR will stop taking any actions.
+    /// </markdown>
     public static HashSet<uint> NoCastingStatus = [];
     public static HashSet<uint> PrioTargetId = [];
     public static HashSet<uint> AutoStatusOrder = [];
@@ -34,28 +94,27 @@ internal class OtherConfiguration
     {
         if (!Directory.Exists(Svc.PluginInterface.ConfigDirectory.FullName))
         {
-            Directory.CreateDirectory(Svc.PluginInterface.ConfigDirectory.FullName);
+            _ = Directory.CreateDirectory(Svc.PluginInterface.ConfigDirectory.FullName);
         }
 
-        Task.Run(() => InitOne(ref DangerousStatus, nameof(DangerousStatus)));
-        Task.Run(() => InitOne(ref PriorityStatus, nameof(PriorityStatus)));
-        Task.Run(() => InitOne(ref InvincibleStatus, nameof(InvincibleStatus)));
-        Task.Run(() => InitOne(ref PrioTargetId, nameof(PrioTargetId)));
-        Task.Run(() => InitOne(ref AutoStatusOrder, nameof(AutoStatusOrder)));
-        Task.Run(() => InitOne(ref DancePartnerPriority, nameof(DancePartnerPriority)));
-        Task.Run(() => InitOne(ref TheSpearPriority, nameof(TheSpearPriority)));
-        Task.Run(() => InitOne(ref TheBalancePriority, nameof(TheBalancePriority)));
-        Task.Run(() => InitOne(ref KardiaTankPriority, nameof(KardiaTankPriority)));
-        Task.Run(() => InitOne(ref NoHostileNames, nameof(NoHostileNames)));
-        Task.Run(() => InitOne(ref NoProvokeNames, nameof(NoProvokeNames)));
-        Task.Run(() => InitOne(ref AnimationLockTime, nameof(AnimationLockTime)));
-        Task.Run(() => InitOne(ref HostileCastingArea, nameof(HostileCastingArea)));
-        Task.Run(() => InitOne(ref HostileCastingTank, nameof(HostileCastingTank)));
-        Task.Run(() => InitOne(ref BeneficialPositions, nameof(BeneficialPositions)));
-        Task.Run(() => InitOne(ref RotationSolverRecord, nameof(RotationSolverRecord), false));
-        Task.Run(() => InitOne(ref NoCastingStatus, nameof(NoCastingStatus)));
-        Task.Run(() => InitOne(ref HostileCastingKnockback, nameof(HostileCastingKnockback)));
-        Task.Run(() => InitOne(ref HostileCastingStop, nameof(HostileCastingStop)));
+        _ = Task.Run(() => InitOne(ref DangerousStatus, nameof(DangerousStatus)));
+        _ = Task.Run(() => InitOne(ref PriorityStatus, nameof(PriorityStatus)));
+        _ = Task.Run(() => InitOne(ref InvincibleStatus, nameof(InvincibleStatus)));
+        _ = Task.Run(() => InitOne(ref PrioTargetId, nameof(PrioTargetId)));
+        _ = Task.Run(() => InitOne(ref AutoStatusOrder, nameof(AutoStatusOrder)));
+        _ = Task.Run(() => InitOne(ref DancePartnerPriority, nameof(DancePartnerPriority)));
+        _ = Task.Run(() => InitOne(ref TheSpearPriority, nameof(TheSpearPriority)));
+        _ = Task.Run(() => InitOne(ref TheBalancePriority, nameof(TheBalancePriority)));
+        _ = Task.Run(() => InitOne(ref KardiaTankPriority, nameof(KardiaTankPriority)));
+        _ = Task.Run(() => InitOne(ref NoHostileNames, nameof(NoHostileNames)));
+        _ = Task.Run(() => InitOne(ref NoProvokeNames, nameof(NoProvokeNames)));
+        _ = Task.Run(() => InitOne(ref HostileCastingArea, nameof(HostileCastingArea)));
+        _ = Task.Run(() => InitOne(ref HostileCastingTank, nameof(HostileCastingTank)));
+        _ = Task.Run(() => InitOne(ref BeneficialPositions, nameof(BeneficialPositions)));
+        _ = Task.Run(() => InitOne(ref RotationSolverRecord, nameof(RotationSolverRecord), false));
+        _ = Task.Run(() => InitOne(ref NoCastingStatus, nameof(NoCastingStatus)));
+        _ = Task.Run(() => InitOne(ref HostileCastingKnockback, nameof(HostileCastingKnockback)));
+        _ = Task.Run(() => InitOne(ref HostileCastingStop, nameof(HostileCastingStop)));
     }
 
     public static Task Save()
@@ -72,7 +131,6 @@ internal class OtherConfiguration
             await SaveTheBalancePriority();
             await SaveKardiaTankPriority();
             await SaveNoHostileNames();
-            await SaveAnimationLockTime();
             await SaveHostileCastingArea();
             await SaveHostileCastingTank();
             await SaveBeneficialPositions();
@@ -262,20 +320,17 @@ internal class OtherConfiguration
         return Task.Run(() => Save(NoHostileNames, nameof(NoHostileNames)));
     }
 
-    public static Task SaveAnimationLockTime()
-    {
-        return Task.Run(() => Save(AnimationLockTime, nameof(AnimationLockTime)));
-    }
-
     private static string GetFilePath(string name)
     {
-        var directory = Svc.PluginInterface.ConfigDirectory.FullName;
+        string directory = Svc.PluginInterface.ConfigDirectory.FullName;
 
         return directory + $"\\{name}.json";
     }
 
     private static void Save<T>(T value, string name)
-        => SavePath(value, GetFilePath(name));
+    {
+        SavePath(value, GetFilePath(name));
+    }
 
     private static void SavePath<T>(T value, string path)
     {
@@ -295,12 +350,12 @@ internal class OtherConfiguration
             }
             catch (IOException ex) when (i < retryCount - 1)
             {
-                Svc.Log.Warning(ex, $"Failed to save the file to {path}. Retrying in {delay}ms...");
+                PluginLog.Warning($"Failed to save the file to {path}. Retrying in {delay}ms...: {ex.Message}");
                 Thread.Sleep(delay); // Wait before retrying
             }
             catch (Exception ex)
             {
-                Svc.Log.Warning(ex, $"Failed to save the file to {path}");
+                PluginLog.Warning($"Failed to save the file to {path}: {ex.Message}");
                 return; // Exit the method if an unexpected exception occurs
             }
         }
@@ -308,8 +363,8 @@ internal class OtherConfiguration
 
     private static void InitOne<T>(ref T value, string name, bool download = true, bool forceDownload = false) where T : new()
     {
-        var path = GetFilePath(name);
-        Svc.Log.Info($"Initializing {name} from {path}");
+        string path = GetFilePath(name);
+        PluginLog.Information($"Initializing {name} from {path}");
 
         if (File.Exists(path) && !forceDownload)
         {
@@ -318,14 +373,18 @@ internal class OtherConfiguration
                 value = JsonConvert.DeserializeObject<T>(File.ReadAllText(path), new JsonSerializerSettings
                 {
                     TypeNameHandling = TypeNameHandling.None,
-                    Converters = new List<JsonConverter> { new StringEnumConverter() } // Add this line
+                    Converters = [new StringEnumConverter()] // Add this line
                 })!;
-                if (value == null) throw new Exception("Deserialized value is null.");
-                Svc.Log.Info($"Loaded {name} from local file.");
+                if (value == null)
+                {
+                    throw new Exception("Deserialized value is null.");
+                }
+
+                PluginLog.Information($"Loaded {name} from local file.");
             }
             catch (Exception ex)
             {
-                Svc.Log.Warning(ex, $"Failed to load {name} from local file. Reinitializing to default.");
+                PluginLog.Warning($"Failed to load {name} from local file. Reinitializing to default: {ex.Message}");
                 value = new T(); // Reinitialize to default
             }
         }
@@ -333,21 +392,26 @@ internal class OtherConfiguration
         {
             try
             {
-                using var client = new HttpClient();
-                var str = client.GetStringAsync($"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Resources/{name}.json").Result;
+                using HttpClient client = new();
+                string str = client.GetStringAsync($"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Resources/{name}.json").Result;
 
                 File.WriteAllText(path, str);
                 value = JsonConvert.DeserializeObject<T>(str, new JsonSerializerSettings
                 {
                     TypeNameHandling = TypeNameHandling.None,
-                    Converters = new List<JsonConverter> { new StringEnumConverter() } // Add this line
+                    Converters = [new StringEnumConverter()] // Add this line
                 })!;
-                if (value == null) throw new Exception("Deserialized value is null.");
-                Svc.Log.Info($"Downloaded and loaded {name} from GitHub.");
+                if (value == null)
+                {
+                    throw new Exception("Deserialized value is null.");
+                }
+
+                PluginLog.Information($"Downloaded and loaded {name} from GitHub.");
             }
             catch (Exception ex)
             {
-                Svc.Log.Warning(ex, $"Failed to download {name} from GitHub. Reinitializing to default.");
+                PluginLog.Warning($"Failed to download {name} from GitHub. Reinitializing to default. Exception: {ex.Message}");
+                _ = BasicWarningHelper.AddSystemWarning($"Github download failed.");
                 value = new T(); // Reinitialize to default
                 SavePath(value, path); // Save the default value
             }

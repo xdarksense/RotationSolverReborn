@@ -2,16 +2,10 @@
 using Dalamud.Plugin.Services;
 using ECommons.DalamudServices;
 using ECommons.GameHelpers;
-using ECommons.ImGuiMethods;
-using FFXIVClientStructs.FFXIV.Client.Game.Control;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
-using FFXIVClientStructs.FFXIV.Client.Game.UI;
-using FFXIVClientStructs.FFXIV.Component.GUI;
+using ECommons.Logging;
 using Lumina.Excel.Sheets;
 using RotationSolver.Commands;
-using RotationSolver.Data;
 using RotationSolver.UI.HighlightTeachingMode;
-using System.Runtime.InteropServices;
 using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule;
 
 namespace RotationSolver.Updaters;
@@ -23,225 +17,488 @@ internal static class MajorUpdater
         get
         {
             if (!Player.AvailableThreadSafe)
-                return false;
-
-            // Replace Svc.Condition.Any() with manual check
-            bool anyCondition = false;
-            foreach (var conditionFlag in Svc.Condition.AsReadOnlySet())
             {
-                if (Svc.Condition.AsReadOnlySet().Contains(conditionFlag))
-                {
-                    anyCondition = true;
-                    break;
-                }
+                return false;
             }
-            if (!anyCondition)
-                return false;
 
-            if (Svc.Condition[ConditionFlag.BetweenAreas])
-                return false;
-            if (Svc.Condition[ConditionFlag.BetweenAreas51])
-                return false;
-            if (Svc.Condition[ConditionFlag.LoggingOut])
-                return false;
-
-            return true;
+            // Directly check if there are any conditions present
+            IReadOnlySet<ConditionFlag> conditions = Svc.Condition.AsReadOnlySet();
+            return conditions.Count != 0 && !Svc.Condition[ConditionFlag.Occupied]
+               && !Svc.Condition[ConditionFlag.LoggingOut]
+               && !Svc.Condition[ConditionFlag.Occupied30]
+               && !Svc.Condition[ConditionFlag.Occupied33]
+               && !Svc.Condition[ConditionFlag.Occupied38]
+               && !Svc.Condition[ConditionFlag.Occupied39]
+               && !Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]
+               && !Svc.Condition[ConditionFlag.OccupiedInEvent]
+               && !Svc.Condition[ConditionFlag.OccupiedInQuestEvent]
+               && !Svc.Condition[ConditionFlag.OccupiedSummoningBell]
+               && !Svc.Condition[ConditionFlag.WatchingCutscene]
+               && !Svc.Condition[ConditionFlag.WatchingCutscene78]
+               && !Svc.Condition[ConditionFlag.BetweenAreas]
+               && !Svc.Condition[ConditionFlag.BetweenAreas51]
+               && !Svc.Condition[ConditionFlag.InThatPosition]
+               //|| Svc.Condition[ConditionFlag.TradeOpen]
+               && !Svc.Condition[ConditionFlag.Crafting]
+               && !Svc.Condition[ConditionFlag.ExecutingCraftingAction]
+               && !Svc.Condition[ConditionFlag.PreparingToCraft]
+               && !Svc.Condition[ConditionFlag.Unconscious]
+               && !Svc.Condition[ConditionFlag.MeldingMateria]
+               && !Svc.Condition[ConditionFlag.Gathering]
+               && !Svc.Condition[ConditionFlag.OperatingSiegeMachine]
+               && !Svc.Condition[ConditionFlag.CarryingItem]
+               && !Svc.Condition[ConditionFlag.CarryingObject]
+               && !Svc.Condition[ConditionFlag.BeingMoved]
+               && !Svc.Condition[ConditionFlag.Mounted]
+               && !Svc.Condition[ConditionFlag.Mounted2]
+               && !Svc.Condition[ConditionFlag.Mounting]
+               && !Svc.Condition[ConditionFlag.Mounting71]
+               && !Svc.Condition[ConditionFlag.ParticipatingInCustomMatch]
+               && !Svc.Condition[ConditionFlag.PlayingLordOfVerminion]
+               && !Svc.Condition[ConditionFlag.ChocoboRacing]
+               && !Svc.Condition[ConditionFlag.PlayingMiniGame]
+               && !Svc.Condition[ConditionFlag.Performing]
+               && !Svc.Condition[ConditionFlag.Fishing]
+               //&& !Svc.Condition[ConditionFlag.Transformed] Dhon Meg boss enlarges you, making you transformed
+               && !Svc.Condition[ConditionFlag.UsingHousingFunctions]
+               && !Svc.Condition[ConditionFlag.Jumping61]
+               && !Svc.Condition[ConditionFlag.SufferingStatusAffliction2]
+               && !Svc.Condition[ConditionFlag.RolePlaying]
+               && !Svc.Condition[ConditionFlag.InFlight]
+               && !Svc.Condition[ConditionFlag.Diving]
+               && !Svc.Condition[ConditionFlag.Swimming];
         }
     }
 
     private static Exception? _threadException;
-    private static DateTime _lastUpdatedWork = DateTime.Now;
-    private static DateTime _warningsLastDisplayed = DateTime.MinValue;
 
     public static void Enable()
     {
         ActionSequencerUpdater.Enable(Svc.PluginInterface.ConfigDirectory.FullName + "\\Conditions");
-        Svc.Framework.Update += RSRUpdate;
+        Svc.Framework.Update += RSRTeachingModeUpdate;
+        Svc.Framework.Update += RSRInvalidUpdate;
+        Svc.Framework.Update += RSRUpdateMoving;
+        Svc.Framework.Update += RSRUpdateAction;
+        Svc.Framework.Update += RSRUpdateMacro;
+        Svc.Framework.Update += RSRUpdateTarget;
+        Svc.Framework.Update += RSRUpdateState;
+        Svc.Framework.Update += RSRUpdateActionSequencer;
+        Svc.Framework.Update += RSRUpdateNextAction;
+        Svc.Framework.Update += RSRUpdateHighlight;
+        Svc.Framework.Update += RSRUpdateCombatInfo;
+        Svc.Framework.Update += RSRUpdateDisplayWindow;
+        Svc.Framework.Update += RSRUpdateSystemWarnings;
+        Svc.Framework.Update += RSRUpdateVfxDataQueue;
+        Svc.Framework.Update += RSRUpdateLocalRotationWatcher;
+        Svc.Framework.Update += RSRUpdateRotation;
+        Svc.Framework.Update += RSRUpdateRotationState;
+        Svc.Framework.Update += RSRUpdateTeachingModeSettings;
+        Svc.Framework.Update += RSRUpdateMisc;
     }
 
-    public static void TransitionSafeCommands()
+    private static void RSRTeachingModeUpdate(IFramework framework)
     {
-        RSCommands.UpdateRotationState();
-        ActionUpdater.UpdateLifetime();
+        if (Service.Config.TeachingMode)
+        {
+            try
+            {
+                HotbarHighlightManager.HotbarIDs.Clear();
+            }
+            catch (Exception ex)
+            {
+                if (_threadException != ex)
+                {
+                    _threadException = ex;
+                    PluginLog.Error($"HotbarHighlightManager.HotbarIDs.Clear Exception: {ex.Message}");
+                    if (Service.Config.InDebug)
+                    {
+                        _ = BasicWarningHelper.AddSystemWarning("HotbarHighlightManager.HotbarIDs.Clear Exception");
+                    }
+                }
+            }
+        }
     }
 
-    private unsafe static void RSRUpdate(IFramework framework)
+    private static void RSRInvalidUpdate(IFramework framework)
     {
-        HotbarHighlightManager.HotbarIDs.Clear();
-        RotationSolverPlugin.UpdateDisplayWindow();
-
         if (!IsValid)
         {
-            TransitionSafeCommands();
-            ActionUpdater.ClearNextAction();
-            CustomRotation.MoveTarget = null;
-            return;
+            try
+            {
+                RSCommands.UpdateRotationState();
+                ActionUpdater.ClearNextAction();
+                MiscUpdater.UpdateEntry();
+                CustomRotation.MoveTarget = null;
+                ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
+                return;
+            }
+            catch (Exception ex)
+            {
+                if (_threadException != ex)
+                {
+                    _threadException = ex;
+                    PluginLog.Error($"RSRUpdate TSC Exception: {ex.Message}");
+                    if (Service.Config.InDebug)
+                    {
+                        _ = BasicWarningHelper.AddSystemWarning("RSRUpdate TSC Exception");
+                    }
+                }
+            }
         }
+    }
 
-        HandleSystemWarnings();
+    private static void RSRUpdateMoving(IFramework framework)
+    {
+        if (Service.Config.TeachingMode || DataCenter.IsActivated())
+        {
+            if (Service.Config.PoslockCasting && ActionUpdater.CanDoAction() is not false)
+            {
+                try
+                {
+                    MovingUpdater.UpdateCanMove(ActionUpdater.CanDoAction());
+                }
+                catch (Exception ex)
+                {
+                    if (_threadException != ex)
+                    {
+                        _threadException = ex;
+                        PluginLog.Error($"MovingUpdater Exception: {ex.Message}");
+                        if (Service.Config.InDebug)
+                        {
+                            _ = BasicWarningHelper.AddSystemWarning("MovingUpdater Exception");
+                        }
+                    }
+                }
+            }
+        }
+    }
 
+    private static void RSRUpdateAction(IFramework framework)
+    {
+        if (Service.Config.TeachingMode || DataCenter.IsActivated())
+        {
+            try
+            {
+                if (ActionUpdater.CanDoAction())
+                {
+                    RSCommands.DoAction();
+                }
+            }
+            catch (Exception ex)
+            {
+                if (_threadException != ex)
+                {
+                    _threadException = ex;
+                    PluginLog.Error($"RSCommands.DoAction Exception: {ex.Message}");
+                    if (Service.Config.InDebug)
+                    {
+                        _ = BasicWarningHelper.AddSystemWarning("RSCommands.DoAction Exception");
+                    }
+                }
+            }
+        }
+    }
+
+    private static void RSRUpdateMacro(IFramework framework)
+    {
         try
         {
-            PreviewUpdater.UpdatePreview();
-            UpdateHighlight();
-            ActionUpdater.UpdateActionInfo();
-
-            var canDoAction = ActionUpdater.CanDoAction();
-            MovingUpdater.UpdateCanMove(canDoAction);
-
-            if (canDoAction)
-            {
-                RSCommands.DoAction();
-            }
-
             MacroUpdater.UpdateMacro();
-            CloseWindow();
-            OpenChest();
         }
         catch (Exception ex)
         {
             if (_threadException != ex)
             {
                 _threadException = ex;
-                Svc.Log.Error(ex, "Main Thread Exception");
+                PluginLog.Error($"MacroUpdater.UpdateMacro Exception: {ex.Message}");
                 if (Service.Config.InDebug)
-#pragma warning disable CS0436
-                    WarningHelper.AddSystemWarning("Main Thread Exception");
-            }
-        }
-
-        HandleWorkUpdate();
-    }
-
-    private static void HandleSystemWarnings()
-    {
-        if (DataCenter.SystemWarnings.Count > 0)
-        {
-            var warningsToRemove = new List<string>();
-
-            foreach (var warning in DataCenter.SystemWarnings)
-            {
-                if ((warning.Value + TimeSpan.FromMinutes(10)) < DateTime.Now)
                 {
-                    warningsToRemove.Add(warning.Key);
+                    _ = BasicWarningHelper.AddSystemWarning("MacroUpdater.UpdateMacro Exception");
                 }
             }
-
-            foreach (var warningKey in warningsToRemove)
-            {
-                DataCenter.SystemWarnings.Remove(warningKey);
-            }
         }
     }
 
-    private static void HandleWorkUpdate()
+    private static void RSRUpdateTarget(IFramework framework)
     {
-        try
+        if (Service.Config.TeachingMode || DataCenter.IsActivated())
         {
-            Svc.Framework.RunOnTick(UpdateWork);
-        }
-        catch (Exception tEx)
-        {
-            Svc.Log.Error(tEx, "Worker Task Exception");
-            if (Service.Config.InDebug)
-#pragma warning disable CS0436
-                WarningHelper.AddSystemWarning("Inner Worker Exception");
-        }
-    }
-
-    private static void UpdateWork()
-    {
-        if (!IsValid)
-        {
-            ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
-            return;
-        }
-
-        try
-        {
-            if (Service.Config.AutoReloadRotations)
-            {
-                RotationUpdater.LocalRotationWatcher();
-            }
-
-            RotationUpdater.UpdateRotation();
-
-            if (DataCenter.IsActivated())
+            try
             {
                 TargetUpdater.UpdateTargets();
-                StateUpdater.UpdateState();
-                ActionSequencerUpdater.UpdateActionSequencerAction();
-                ActionUpdater.UpdateNextAction();
             }
+            catch (Exception ex)
+            {
+                if (_threadException != ex)
+                {
+                    _threadException = ex;
+                    PluginLog.Error($"TargetUpdater.UpdateTargets Exception: {ex.Message}");
+                    if (Service.Config.InDebug)
+                    {
+                        _ = BasicWarningHelper.AddSystemWarning("TargetUpdater.UpdateTargets Exception");
+                    }
+                }
+            }
+        }
+    }
 
-            RSCommands.UpdateRotationState();
-            HotbarHighlightManager.UpdateSettings();
-
-            RemoveExpiredVfxData();
+    private static void RSRUpdateState(IFramework framework)
+    {
+        try
+        {
+            StateUpdater.UpdateState();
         }
         catch (Exception ex)
         {
-            Svc.Log.Error(ex, "Inner Worker Exception");
-            if (Service.Config.InDebug)
-#pragma warning disable CS0436
-                WarningHelper.AddSystemWarning("Inner Worker Exception");
+            if (_threadException != ex)
+            {
+                _threadException = ex;
+                PluginLog.Error($"StateUpdater.UpdateState Exception: {ex.Message}");
+                if (Service.Config.InDebug)
+                {
+                    _ = BasicWarningHelper.AddSystemWarning("StateUpdater.UpdateState Exception");
+                }
+            }
         }
     }
 
-    private static void RemoveExpiredVfxData()
+    private static void RSRUpdateActionSequencer(IFramework framework)
     {
-        var expiredVfx = new List<VfxNewData>();
-        lock (DataCenter.VfxDataQueue)
+        if (Service.Config.TeachingMode || DataCenter.IsActivated())
         {
-            for (int i = 0; i < DataCenter.VfxDataQueue.Count; i++)
+            try
             {
-                var vfx = DataCenter.VfxDataQueue[i];
-                if (vfx.TimeDuration > TimeSpan.FromSeconds(6))
+                ActionSequencerUpdater.UpdateActionSequencerAction();
+            }
+            catch (Exception ex)
+            {
+                if (_threadException != ex)
                 {
-                    expiredVfx.Add(vfx);
+                    _threadException = ex;
+                    PluginLog.Error($"ActionSequencerUpdater.UpdateActionSequencerAction Exception: {ex.Message}");
+                    if (Service.Config.InDebug)
+                    {
+                        _ = BasicWarningHelper.AddSystemWarning("ActionSequencerUpdater.UpdateActionSequencerAction Exception");
+                    }
+                }
+            }
+        }
+    }
+
+    private static void RSRUpdateNextAction(IFramework framework)
+    {
+        if (Service.Config.TeachingMode || DataCenter.IsActivated())
+        {
+            try
+            {
+                ActionUpdater.UpdateNextAction();
+            }
+            catch (Exception ex)
+            {
+                if (_threadException != ex)
+                {
+                    _threadException = ex;
+                    PluginLog.Error($"ActionUpdater.UpdateNextAction Exception: {ex.Message}");
+                    if (Service.Config.InDebug)
+                    {
+                        _ = BasicWarningHelper.AddSystemWarning("ActionUpdater.UpdateNextAction Exception");
+                    }
+                }
+            }
+        }
+    }
+
+    private static void RSRUpdateHighlight(IFramework framework)
+    {
+        if (Service.Config.TeachingMode && ActionUpdater.NextAction is not null)
+        {
+            try
+            {
+                IAction nextAction = ActionUpdater.NextAction;
+                HotbarID? hotbar = null;
+                if (nextAction is IBaseItem item)
+                {
+                    hotbar = new HotbarID(HotbarSlotType.Item, item.ID);
+                }
+                else if (nextAction is IBaseAction baseAction)
+                {
+                    hotbar = baseAction.Action.ActionCategory.RowId is 10 or 11
+                            ? GetGeneralActionHotbarID(baseAction)
+                            : new HotbarID(HotbarSlotType.Action, baseAction.AdjustedID);
+                }
+
+                if (hotbar.HasValue)
+                {
+                    _ = HotbarHighlightManager.HotbarIDs.Add(hotbar.Value);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (_threadException != ex)
+                {
+                    _threadException = ex;
+                    PluginLog.Error($"UpdateHighlight Exception: {ex.Message}");
+                    if (Service.Config.InDebug)
+                    {
+                        _ = BasicWarningHelper.AddSystemWarning("UpdateHighlight Exception");
+                    }
+                }
+            }
+        }
+    }
+
+    private static void RSRUpdateCombatInfo(IFramework framework)
+    {
+        // Update various combat tracking parameters
+        if (Service.Config.TeachingMode || DataCenter.IsActivated())
+        {
+            try
+            {
+                ActionUpdater.UpdateCombatInfo();
+            }
+            catch (Exception ex)
+            {
+                if (_threadException != ex)
+                {
+                    _threadException = ex;
+                    PluginLog.Error($"UpdateCombatInfo Exception: {ex.Message}");
+                    if (Service.Config.InDebug)
+                    {
+                        _ = BasicWarningHelper.AddSystemWarning("UpdateCombatInfo Exception");
+                    }
+                }
+            }
+        }
+    }
+
+    private static void RSRUpdateDisplayWindow(IFramework framework)
+    {
+        try
+        {
+            RotationSolverPlugin.UpdateDisplayWindow();
+        }
+        catch (Exception ex)
+        {
+            if (_threadException != ex)
+            {
+                _threadException = ex;
+                PluginLog.Error($"RSRUpdateDisplayWindow Exception: {ex.Message}");
+                if (Service.Config.InDebug)
+                {
+                    _ = BasicWarningHelper.AddSystemWarning("RSRUpdateDisplayWindow Exception");
+                }
+            }
+        }
+    }
+
+    private static void RSRUpdateSystemWarnings(IFramework framework)
+    {
+        // Handle system warnings
+        if (DataCenter.SystemWarnings.Count > 0)
+        {
+            DateTime now = DateTime.Now;
+            List<string> keysToRemove = [];
+
+            foreach (KeyValuePair<string, DateTime> kvp in DataCenter.SystemWarnings)
+            {
+                if (kvp.Value + TimeSpan.FromMinutes(10) < now)
+                {
+                    keysToRemove.Add(kvp.Key);
                 }
             }
 
-            foreach (var vfx in expiredVfx)
+            foreach (string key in keysToRemove)
             {
-                DataCenter.VfxDataQueue.Remove(vfx);
+                _ = DataCenter.SystemWarnings.Remove(key);
             }
         }
     }
 
-    private static void UpdateHighlight()
+    private static void RSRUpdateVfxDataQueue(IFramework framework)
     {
-        if (!Service.Config.TeachingMode || ActionUpdater.NextAction is not IAction nextAction) return;
-
-        HotbarID? hotbar = null;
-        if (nextAction is IBaseItem item)
+        // Clear old VFX data
+        if (DataCenter.VfxDataQueue.Count > 0)
         {
-            hotbar = new HotbarID(HotbarSlotType.Item, item.ID);
+            _ = DataCenter.VfxDataQueue.RemoveAll(vfx => vfx.TimeDuration > TimeSpan.FromSeconds(6));
         }
-        else if (nextAction is IBaseAction baseAction)
+    }
+
+    private static void RSRUpdateLocalRotationWatcher(IFramework framework)
+    {
+        // Check local rotation files
+        if (Service.Config.AutoReloadRotations)
         {
-            if (baseAction.Action.ActionCategory.RowId == 10 || baseAction.Action.ActionCategory.RowId == 11)
+            RotationUpdater.LocalRotationWatcher();
+        }
+    }
+
+    private static void RSRUpdateRotation(IFramework framework)
+    {
+        // Change loaded rotation based on job
+        RotationUpdater.UpdateRotation();
+    }
+
+    private static void RSRUpdateRotationState(IFramework framework)
+    {
+        // Change RS state
+        RSCommands.UpdateRotationState();
+    }
+
+    private static void RSRUpdateTeachingModeSettings(IFramework framework)
+    {
+        if (Service.Config.TeachingMode)
+        {
+            try
             {
-                hotbar = GetGeneralActionHotbarID(baseAction);
+                HotbarHighlightManager.UpdateSettings();
             }
-            else
+            catch (Exception ex)
             {
-                hotbar = new HotbarID(HotbarSlotType.Action, baseAction.AdjustedID);
+                if (_threadException != ex)
+                {
+                    _threadException = ex;
+                    PluginLog.Error($"HotbarHighlightManager.UpdateSettings Exception: {ex.Message}");
+                    if (Service.Config.InDebug)
+                    {
+                        _ = BasicWarningHelper.AddSystemWarning("HotbarHighlightManager.UpdateSettings Exception");
+                    }
+                }
             }
         }
+    }
 
-        if (hotbar.HasValue)
+    private static void RSRUpdateMisc(IFramework framework)
+    {
+        if (Service.Config.TeachingMode || DataCenter.IsActivated())
         {
-            HotbarHighlightManager.HotbarIDs.Add(hotbar.Value);
+            try
+            {
+                MiscUpdater.UpdateMisc();
+            }
+            catch (Exception ex)
+            {
+                if (_threadException != ex)
+                {
+                    _threadException = ex;
+                    PluginLog.Error($"MiscUpdater.UpdateEntry Exception: {ex.Message}");
+                    if (Service.Config.InDebug)
+                    {
+                        _ = BasicWarningHelper.AddSystemWarning("MiscUpdater.UpdateEntry Exception");
+                    }
+                }
+            }
         }
     }
 
     private static HotbarID? GetGeneralActionHotbarID(IBaseAction baseAction)
     {
-        var generalActions = Svc.Data.GetExcelSheet<GeneralAction>();
-        if (generalActions == null) return null;
+        Lumina.Excel.ExcelSheet<GeneralAction> generalActions = Svc.Data.GetExcelSheet<GeneralAction>();
+        if (generalActions == null)
+        {
+            return null;
+        }
 
-        foreach (var gAct in generalActions)
+        foreach (GeneralAction gAct in generalActions)
         {
             if (gAct.Action.RowId == baseAction.ID)
             {
@@ -252,134 +509,28 @@ internal static class MajorUpdater
         return null;
     }
 
-    private static void ShowWarning()
-    {
-        // Replace LINQ Any with manual loop for "Avarice"
-        bool foundAvarice = false;
-        foreach (var p in Svc.PluginInterface.InstalledPlugins)
-        {
-            if (p.InternalName == "Avarice")
-            {
-                foundAvarice = true;
-                break;
-            }
-        }
-        if (!foundAvarice)
-        {
-#pragma warning disable CS0436
-            WarningHelper.AddSystemWarning(UiString.AvariceWarning.GetDescription());
-        }
-
-        // Replace LINQ Any with manual loop for "TextToTalk"
-        bool foundTextToTalk = false;
-        foreach (var p in Svc.PluginInterface.InstalledPlugins)
-        {
-            if (p.InternalName == "TextToTalk")
-            {
-                foundTextToTalk = true;
-                break;
-            }
-        }
-        if (!foundTextToTalk)
-        {
-#pragma warning disable CS0436
-            WarningHelper.AddSystemWarning(UiString.TextToTalkWarning.GetDescription());
-        }
-    }
-
-    static DateTime _closeWindowTime = DateTime.Now;
-    private unsafe static void CloseWindow()
-    {
-        if (_closeWindowTime < DateTime.Now) return;
-
-        var needGreedWindow = Svc.GameGui.GetAddonByName("NeedGreed", 1);
-        if (needGreedWindow == IntPtr.Zero) return;
-
-        var notification = (AtkUnitBase*)Svc.GameGui.GetAddonByName("_Notification", 1);
-        if (notification == null) return;
-
-        var atkValues = (AtkValue*)Marshal.AllocHGlobal(2 * sizeof(AtkValue));
-        atkValues[0].Type = atkValues[1].Type = FFXIVClientStructs.FFXIV.Component.GUI.ValueType.Int;
-        atkValues[0].Int = 0;
-        atkValues[1].Int = 2;
-        try
-        {
-            notification->FireCallback(2, atkValues);
-        }
-        catch (Exception ex)
-        {
-            Svc.Log.Warning(ex, "Failed to close the window!");
-        }
-        finally
-        {
-            Marshal.FreeHGlobal(new IntPtr(atkValues));
-        }
-    }
-
-    static DateTime _nextOpenTime = DateTime.Now;
-    static ulong _lastChest = 0;
-    private unsafe static void OpenChest()
-    {
-        if (!Service.Config.AutoOpenChest) return;
-        if (Player.Object == null) return;
-        if (DataCenter.InCombat) return;
-        var player = Player.Object;
-
-        object? treasure = null;
-        foreach (var o in Svc.Objects)
-        {
-            if (o == null) continue;
-            var dis = Vector3.Distance(player.Position, o.Position) - player.HitboxRadius - o.HitboxRadius;
-            if (dis > 0.5f) continue;
-
-            var address = (GameObject*)(void*)o.Address;
-            if (address->ObjectKind != ObjectKind.Treasure) continue;
-
-            bool opened = false;
-            foreach (var item in Loot.Instance()->Items)
-            {
-                if (item.ChestObjectId == o.GameObjectId)
-                {
-                    opened = true;
-                    break;
-                }
-            }
-            if (opened) continue;
-
-            treasure = o;
-            break;
-        }
-
-        if (treasure == null) return;
-        if (DateTime.Now < _nextOpenTime) return;
-
-        var treasureGameObject = treasure as IGameObject;
-        if (treasureGameObject == null) return;
-
-        if (treasureGameObject.GameObjectId == _lastChest && DateTime.Now - _nextOpenTime < TimeSpan.FromSeconds(10)) return;
-
-        _nextOpenTime = DateTime.Now.AddSeconds(new Random().NextDouble() + 0.2);
-        _lastChest = treasureGameObject.GameObjectId;
-
-        try
-        {
-            Svc.Targets.Target = treasureGameObject;
-            TargetSystem.Instance()->InteractWithObject((GameObject*)(void*)treasureGameObject.Address);
-            Notify.Plain($"Try to open the chest {treasureGameObject.Name}");
-        }
-        catch (Exception ex)
-        {
-            Svc.Log.Error(ex, "Failed to open the chest!");
-        }
-
-        if (!Service.Config.AutoCloseChestWindow) return;
-        _closeWindowTime = DateTime.Now.AddSeconds(0.5);
-    }
-
     public static void Dispose()
     {
-        Svc.Framework.Update -= RSRUpdate;
-        PreviewUpdater.Dispose();
+        Svc.Framework.Update -= RSRTeachingModeUpdate;
+        Svc.Framework.Update -= RSRInvalidUpdate;
+        Svc.Framework.Update -= RSRUpdateMoving;
+        Svc.Framework.Update -= RSRUpdateAction;
+        Svc.Framework.Update -= RSRUpdateMacro;
+        Svc.Framework.Update -= RSRUpdateTarget;
+        Svc.Framework.Update -= RSRUpdateState;
+        Svc.Framework.Update -= RSRUpdateActionSequencer;
+        Svc.Framework.Update -= RSRUpdateNextAction;
+        Svc.Framework.Update -= RSRUpdateHighlight;
+        Svc.Framework.Update -= RSRUpdateCombatInfo;
+        Svc.Framework.Update -= RSRUpdateDisplayWindow;
+        Svc.Framework.Update -= RSRUpdateSystemWarnings;
+        Svc.Framework.Update -= RSRUpdateVfxDataQueue;
+        Svc.Framework.Update -= RSRUpdateLocalRotationWatcher;
+        Svc.Framework.Update -= RSRUpdateRotation;
+        Svc.Framework.Update -= RSRUpdateRotationState;
+        Svc.Framework.Update -= RSRUpdateTeachingModeSettings;
+        Svc.Framework.Update -= RSRUpdateMisc;
+        MiscUpdater.Dispose();
         ActionSequencerUpdater.SaveFiles();
         ActionUpdater.ClearNextAction();
     }

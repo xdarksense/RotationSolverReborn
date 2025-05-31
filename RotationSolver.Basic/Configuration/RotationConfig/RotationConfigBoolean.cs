@@ -1,4 +1,4 @@
-﻿using ECommons.DalamudServices;
+﻿using ECommons.Logging;
 
 namespace RotationSolver.Basic.Configuration.RotationConfig;
 
@@ -25,7 +25,10 @@ internal class RotationConfigBoolean : RotationConfigBase
     /// <returns><c>true</c> if the command was executed; otherwise, <c>false</c>.</returns>
     public override bool DoCommand(IRotationConfigSet set, string str)
     {
-        if (!base.DoCommand(set, str)) return false;
+        if (!base.DoCommand(set, str))
+        {
+            return false;
+        }
 
         string numStr = str[Name.Length..].Trim();
 
@@ -41,7 +44,7 @@ internal class RotationConfigBoolean : RotationConfigBase
             }
             catch (Exception ex)
             {
-                Svc.Log.Error(ex, "Failed to parse boolean value.");
+                PluginLog.Error($"Failed to parse boolean value: {ex.Message}");
                 return false;
             }
         }

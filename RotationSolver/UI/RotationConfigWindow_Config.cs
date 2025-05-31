@@ -7,7 +7,7 @@ using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Configuration.Conditions;
 using RotationSolver.Data;
 
-using RotationSolver.UI.SearchableSettings;
+using RotationSolver.UI.SearchableConfigs;
 using RotationSolver.Updaters;
 
 namespace RotationSolver.UI;
@@ -17,7 +17,7 @@ public partial class RotationConfigWindow
     private string _searchText = string.Empty;
     private ISearchable[] _searchResults = new ISearchable[0];
 
-    internal static SearchableCollection _allSearchable = new SearchableCollection();
+    internal static SearchableCollection _allSearchable = new();
 
     private void SearchingBox()
     {
@@ -33,83 +33,19 @@ public partial class RotationConfigWindow
         _baseHeader?.Draw();
     }
 
-    private static readonly CollapsingHeaderGroup _baseHeader = new CollapsingHeaderGroup(new Dictionary<Func<string>, Action>
+    private static readonly CollapsingHeaderGroup _baseHeader = new(new Dictionary<Func<string>, Action>
     {
         { UiString.ConfigWindow_Basic_Timer.GetDescription, DrawBasicTimer },
         { UiString.ConfigWindow_Basic_NamedConditions.GetDescription, DrawBasicNamedConditions },
         { UiString.ConfigWindow_Basic_Others.GetDescription, DrawBasicOthers },
     });
 
-    private static readonly uint PING_COLOR = ImGui.ColorConvertFloat4ToU32(ImGuiColors.ParsedGreen);
-    private static readonly uint LOCK_TIME_COLOR = ImGui.ColorConvertFloat4ToU32(ImGuiColors.ParsedBlue);
-    private static readonly uint WEAPON_DELAY_COLOR = ImGui.ColorConvertFloat4ToU32(ImGuiColors.ParsedGold);
-    private static readonly uint IDEAL_CLICK_TIME_COLOR = ImGui.ColorConvertFloat4ToU32(new Vector4(0.8f, 0f, 0f, 1f));
-    private static readonly uint CLICK_TIME_COLOR = ImGui.ColorConvertFloat4ToU32(ImGuiColors.ParsedPink);
-    private static readonly uint ADVANCE_TIME_COLOR = ImGui.ColorConvertFloat4ToU32(ImGuiColors.DalamudYellow);
-    private static readonly uint ADVANCE_ABILITY_TIME_COLOR = ImGui.ColorConvertFloat4ToU32(ImGuiColors.ParsedOrange);
-    const float gcdSize = 50, ogcdSize = 40, pingHeight = 12, spacingHeight = 8;
-
-    private static unsafe void AddPingLockTime(ImDrawListPtr drawList, Vector2 lineStart, float sizePerTime, float ping, float animationLockTime, float advanceTime, uint color, float clickTime)
-    {
-        if (drawList.NativePtr == null) throw new ArgumentNullException(nameof(drawList));
-
-        const float pingHeight = 12;
-        const float spacingHeight = 8;
-        const float lineThickness = 1.5f;
-        const float clickLineThickness = 2.5f;
-
-        var size = new Vector2(ping * sizePerTime, pingHeight);
-        drawList.AddRectFilled(lineStart, lineStart + size, ChangeAlpha(PING_COLOR));
-        if (ImGuiHelper.IsInRect(lineStart, size))
-        {
-            ImguiTooltips.ShowTooltip(UiString.ConfigWindow_Basic_Ping.GetDescription());
-        }
-
-        var rectStart = lineStart + new Vector2(ping * sizePerTime, 0);
-        size = new Vector2(animationLockTime * sizePerTime, pingHeight);
-        drawList.AddRectFilled(rectStart, rectStart + size, ChangeAlpha(LOCK_TIME_COLOR));
-        if (ImGuiHelper.IsInRect(rectStart, size))
-        {
-            ImguiTooltips.ShowTooltip(UiString.ConfigWindow_Basic_AnimationLockTime.GetDescription());
-        }
-
-        drawList.AddLine(lineStart - new Vector2(0, spacingHeight), lineStart + new Vector2(0, pingHeight * 2 + spacingHeight / 2), IDEAL_CLICK_TIME_COLOR, lineThickness);
-
-        rectStart = lineStart + new Vector2(-advanceTime * sizePerTime, pingHeight);
-        size = new Vector2(advanceTime * sizePerTime, pingHeight);
-        drawList.AddRectFilled(rectStart, rectStart + size, ChangeAlpha(color));
-        if (ImGuiHelper.IsInRect(rectStart, size))
-        {
-            ImguiTooltips.ShowTooltip(() =>
-            {
-                ImGui.TextWrapped(UiString.ConfigWindow_Basic_ClickingDuration.GetDescription());
-
-                ImGui.Separator();
-
-                ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(IDEAL_CLICK_TIME_COLOR),
-                    UiString.ConfigWindow_Basic_IdealClickingTime.GetDescription());
-
-                ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(CLICK_TIME_COLOR),
-                    UiString.ConfigWindow_Basic_RealClickingTime.GetDescription());
-            });
-        }
-
-        float time = 0;
-        while (time < advanceTime)
-        {
-            var start = lineStart + new Vector2((time - advanceTime) * sizePerTime, 0);
-            drawList.AddLine(start + new Vector2(0, pingHeight), start + new Vector2(0, pingHeight * 2 + spacingHeight), CLICK_TIME_COLOR, clickLineThickness);
-
-            time += clickTime;
-        }
-    }
-
     private static void DrawBasicTimer()
     {
         _allSearchable.DrawItems(Configs.BasicTimer);
     }
 
-    private static readonly CollapsingHeaderGroup _autoSwitch = new CollapsingHeaderGroup(new Dictionary<Func<string>, Action>
+    private static readonly CollapsingHeaderGroup _autoSwitch = new(new Dictionary<Func<string>, Action>
     {
         {
             UiString.ConfigWindow_Basic_SwitchCancelConditionSet.GetDescription,
@@ -128,13 +64,13 @@ public partial class RotationConfigWindow
         HeaderSize = 18,
     };
 
-    private static readonly Dictionary<int, bool> _isOpen = new Dictionary<int, bool>();
+    private static readonly Dictionary<int, bool> _isOpen = [];
 
     private static void DrawBasicNamedConditions()
     {
         // Ensure there is always an empty named condition at the end
         bool hasEmpty = false;
-        var namedConditions = DataCenter.CurrentConditionValue.NamedConditions;
+        (string Name, ConditionSet Condition)[] namedConditions = DataCenter.CurrentConditionValue.NamedConditions;
         for (int i = 0; i < namedConditions.Length; i++)
         {
             if (string.IsNullOrEmpty(namedConditions[i].Name))
@@ -146,8 +82,8 @@ public partial class RotationConfigWindow
         if (!hasEmpty)
         {
             // Append (string.Empty, new ConditionSet()) to the array
-            var oldArray = DataCenter.CurrentConditionValue.NamedConditions;
-            var newArray = new (string Name, ConditionSet Condition)[oldArray.Length + 1];
+            (string Name, ConditionSet Condition)[] oldArray = DataCenter.CurrentConditionValue.NamedConditions;
+            (string Name, ConditionSet Condition)[] newArray = new (string Name, ConditionSet Condition)[oldArray.Length + 1];
             for (int i = 0; i < oldArray.Length; i++)
             {
                 newArray[i] = oldArray[i];
@@ -161,15 +97,15 @@ public partial class RotationConfigWindow
         int removeIndex = -1;
         for (int i = 0; i < DataCenter.CurrentConditionValue.NamedConditions.Length; i++)
         {
-            var value = _isOpen.TryGetValue(i, out var open) && open;
+            bool value = _isOpen.TryGetValue(i, out bool open) && open;
 
-            var toggle = value ? FontAwesomeIcon.ArrowUp : FontAwesomeIcon.ArrowDown;
+            FontAwesomeIcon toggle = value ? FontAwesomeIcon.ArrowUp : FontAwesomeIcon.ArrowDown;
             float ItemSpacing = 20 * Scale; // Changed from const to local variable
-            var width = ImGui.GetWindowWidth() - ImGuiEx.CalcIconSize(FontAwesomeIcon.Ban).X
-                - ImGuiEx.CalcIconSize(toggle).X - ImGui.GetStyle().ItemSpacing.X * 2 - ItemSpacing;
+            float width = ImGui.GetWindowWidth() - ImGuiEx.CalcIconSize(FontAwesomeIcon.Ban).X
+                - ImGuiEx.CalcIconSize(toggle).X - (ImGui.GetStyle().ItemSpacing.X * 2) - ItemSpacing;
 
             ImGui.SetNextItemWidth(width);
-            ImGui.InputTextWithHint($"##Rotation Solver Named Condition{i}", UiString.ConfigWindow_Condition_ConditionName.GetDescription(),
+            _ = ImGui.InputTextWithHint($"##Rotation Solver Named Condition{i}", UiString.ConfigWindow_Condition_ConditionName.GetDescription(),
                 ref DataCenter.CurrentConditionValue.NamedConditions[i].Name, 1024);
 
             ImGui.SameLine();
@@ -196,8 +132,8 @@ public partial class RotationConfigWindow
         if (removeIndex > -1)
         {
             // Convert array to list, remove, then back to array
-            var oldArray = DataCenter.CurrentConditionValue.NamedConditions;
-            var newList = new List<(string Name, ConditionSet Condition)>(oldArray.Length - 1);
+            (string Name, ConditionSet Condition)[] oldArray = DataCenter.CurrentConditionValue.NamedConditions;
+            List<(string Name, ConditionSet Condition)> newList = new(oldArray.Length - 1);
             for (int i = 0; i < oldArray.Length; i++)
             {
                 if (i != removeIndex)
@@ -211,7 +147,7 @@ public partial class RotationConfigWindow
 
     private static void DrawBasicOthers()
     {
-        var set = DataCenter.CurrentConditionValue;
+        MajorConditionValue set = DataCenter.CurrentConditionValue;
 
         const string popUpId = "Right Set Popup";
         if (ImGui.Selectable(set.Name, false, ImGuiSelectableFlags.None, new Vector2(0, 20)))
@@ -220,10 +156,10 @@ public partial class RotationConfigWindow
         }
         ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_ConditionSetDesc.GetDescription());
 
-        using var popup = ImRaii.Popup(popUpId);
+        using ImRaii.IEndObject popup = ImRaii.Popup(popUpId);
         if (popup)
         {
-            var combos = DataCenter.ConditionSets;
+            MajorConditionValue[] combos = DataCenter.ConditionSets;
             for (int i = 0; i < combos.Length; i++)
             {
                 void DeleteFile()
@@ -234,11 +170,11 @@ public partial class RotationConfigWindow
                 if (combos[i].Name == set.Name)
                 {
                     ImGuiHelper.SetNextWidthWithName(set.Name);
-                    ImGui.InputText("##MajorConditionValue", ref set.Name, 100);
+                    _ = ImGui.InputText("##MajorConditionValue", ref set.Name, 100);
                 }
                 else
                 {
-                    var key = "Condition Set At " + i.ToString();
+                    string key = "Condition Set At " + i.ToString();
                     ImGuiHelper.DrawHotKeysPopup(key, string.Empty, (UiString.ConfigWindow_List_Remove.GetDescription(), DeleteFile, ["Delete"]));
 
                     if (ImGui.Selectable(combos[i].Name))
@@ -278,7 +214,7 @@ public partial class RotationConfigWindow
         _UIHeader?.Draw();
     }
 
-    private static readonly CollapsingHeaderGroup _UIHeader = new CollapsingHeaderGroup(new Dictionary<Func<string>, Action>
+    private static readonly CollapsingHeaderGroup _UIHeader = new(new Dictionary<Func<string>, Action>
     {
         {
             UiString.ConfigWindow_UI_Information.GetDescription,
@@ -437,8 +373,8 @@ public partial class RotationConfigWindow
 
         for (int i = 0; i < Service.Config.TargetingTypes.Count; i++)
         {
-            var targetType = Service.Config.TargetingTypes[i];
-            var key = $"TargetingTypePopup_{i}";
+            TargetingType targetType = Service.Config.TargetingTypes[i];
+            string key = $"TargetingTypePopup_{i}";
 
             void Delete()
             {
@@ -462,10 +398,10 @@ public partial class RotationConfigWindow
                 (UiString.ConfigWindow_Actions_MoveUp.GetDescription(), Up, new[] { "↑" }),
                 (UiString.ConfigWindow_Actions_MoveDown.GetDescription(), Down, new[] { "↓" }));
 
-            var names = Enum.GetNames(typeof(TargetingType));
-            var targetingType = (int)Service.Config.TargetingTypes[i];
-            var text = UiString.ConfigWindow_Param_HostileCondition.GetDescription();
-            ImGui.SetNextItemWidth(ImGui.CalcTextSize(text).X + 30 * Scale);
+            string[] names = Enum.GetNames(typeof(TargetingType));
+            int targetingType = (int)Service.Config.TargetingTypes[i];
+            string text = UiString.ConfigWindow_Param_HostileCondition.GetDescription();
+            ImGui.SetNextItemWidth(ImGui.CalcTextSize(text).X + (30 * Scale));
             if (ImGui.Combo(text + "##HostileCondition" + i, ref targetingType, names, names.Length))
             {
                 Service.Config.TargetingTypes[i] = (TargetingType)targetingType;
@@ -481,26 +417,26 @@ public partial class RotationConfigWindow
     private static void DrawTargetPriority()
     {
         // Convert HashSet<uint> to string[] for ImGui input
-        var prioIdSet = OtherConfiguration.PrioTargetId;
+        HashSet<uint> prioIdSet = OtherConfiguration.PrioTargetId;
         string[] prioId = new string[prioIdSet.Count];
         int idx = 0;
-        foreach (var id in prioIdSet)
+        foreach (uint id in prioIdSet)
         {
             prioId[idx++] = id.ToString();
         }
 
         // Begin new column for Prioritized Target Names
-        ImGui.TableNextColumn();
+        _ = ImGui.TableNextColumn();
         ImGui.TextWrapped(UiString.ConfigWindow_List_PrioTargetDesc.GetDescription());
 
         // List all DataIds in the current list
         ImGui.Text("Current Priority DataIds:");
-        foreach (var id in prioIdSet)
+        foreach (uint id in prioIdSet)
         {
             ImGui.Text(id.ToString());
         }
 
-        ImGui.TableNextColumn();
+        _ = ImGui.TableNextColumn();
         if (ImGui.Button("Reset and Update Target Priority List"))
         {
             OtherConfiguration.ResetPrioTargetId();
@@ -509,14 +445,14 @@ public partial class RotationConfigWindow
         // Render a button to add the DataId of the current target
         if (ImGui.Button("Add Current Target"))
         {
-            var currentTarget = Svc.Targets.Target;
+            IGameObject? currentTarget = Svc.Targets.Target;
             if (currentTarget != null)
             {
                 uint dataId = currentTarget.DataId;
                 PriorityTargetHelper.AddPriorityTarget(dataId);
-                prioIdSet.Add(dataId);
+                _ = prioIdSet.Add(dataId);
                 OtherConfiguration.PrioTargetId = prioIdSet;
-                OtherConfiguration.SavePrioTargetId();
+                _ = OtherConfiguration.SavePrioTargetId();
             }
         }
     }
@@ -560,7 +496,7 @@ public partial class RotationConfigWindow
 
         for (int i = 0; i < Service.Config.Events.Count; i++)
         {
-            var eve = Service.Config.Events[i];
+            ActionEventInfo eve = Service.Config.Events[i];
             eve.DisplayEvent();
 
             ImGui.SameLine();

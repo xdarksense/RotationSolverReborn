@@ -6,6 +6,7 @@ using ECommons;
 using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using ECommons.ImGuiMethods;
+using ECommons.Logging;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Commands;
@@ -16,7 +17,6 @@ using RotationSolver.UI;
 using RotationSolver.UI.HighlightTeachingMode;
 using RotationSolver.UI.HighlightTeachingMode.ElementSpecial;
 using RotationSolver.Updaters;
-using System;
 using WelcomeWindow = RotationSolver.UI.WelcomeWindow;
 
 namespace RotationSolver;
@@ -25,28 +25,28 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 {
     private readonly WindowSystem windowSystem;
 
-    static RotationConfigWindow? _rotationConfigWindow;
-    static ControlWindow? _controlWindow;
-    static NextActionWindow? _nextActionWindow;
-    static CooldownWindow? _cooldownWindow;
-    static WelcomeWindow? _changelogWindow;
-    static OverlayWindow? _overlayWindow;
+    private static RotationConfigWindow? _rotationConfigWindow;
+    private static ControlWindow? _controlWindow;
+    private static NextActionWindow? _nextActionWindow;
+    private static CooldownWindow? _cooldownWindow;
+    private static WelcomeWindow? _changelogWindow;
+    private static OverlayWindow? _overlayWindow;
 
-    static readonly List<IDisposable> _dis = new();
+    private static readonly List<IDisposable> _dis = [];
     public static string Name => "Rotation Solver Reborn";
-    internal static readonly List<DrawingHighlightHotbarBase> _drawingElements = new();
+    internal static readonly List<DrawingHighlightHotbarBase> _drawingElements = [];
 
     public static DalamudLinkPayload OpenLinkPayload { get; private set; } = null!;
     public static DalamudLinkPayload? HideWarningLinkPayload { get; private set; }
-    static readonly Random _random = new();
+    private static readonly Random _random = new();
 
     internal IPCProvider IPCProvider;
     public RotationSolverPlugin(IDalamudPluginInterface pluginInterface)
     {
         ECommonsMain.Init(pluginInterface, this, ECommons.Module.DalamudReflector, ECommons.Module.ObjectFunctions);
-        Svc.Framework.RunOnTick(() =>
+        _ = Svc.Framework.RunOnTick(() =>
         {
-            ThreadLoadImageHandler.TryGetIconTextureWrap(0, true, out _);
+            _ = ThreadLoadImageHandler.TryGetIconTextureWrap(0, true, out _);
         });
         IconSet.Init();
 
@@ -56,12 +56,12 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
             // Check if the config file exists before attempting to read and deserialize it
             if (File.Exists(Svc.PluginInterface.ConfigFile.FullName))
             {
-                var oldConfigs = JsonConvert.DeserializeObject<Configs>(
+                Configs oldConfigs = JsonConvert.DeserializeObject<Configs>(
                     File.ReadAllText(Svc.PluginInterface.ConfigFile.FullName))
                     ?? new Configs();
 
                 // Check version and migrate or reset if necessary
-                var newConfigs = Configs.Migrate(oldConfigs);
+                Configs newConfigs = Configs.Migrate(oldConfigs);
                 if (newConfigs.Version != Configs.CurrentVersion)
                 {
                     newConfigs = new Configs(); // Reset to default if versions do not match
@@ -75,7 +75,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         }
         catch (Exception ex)
         {
-            Svc.Log.Warning(ex, "Failed to load config");
+            PluginLog.Warning($"Failed to load config: {ex.Message}");
             Service.Config = new Configs();
         }
 
@@ -102,11 +102,12 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         Svc.PluginInterface.UiBuilder.Draw += OnDraw;
 
         //HotbarHighlightDrawerManager.Init();
-        HotbarHighlightManager.Init();
 
         MajorUpdater.Enable();
         Watcher.Enable();
         OtherConfiguration.Init();
+
+        HotbarHighlightManager.Init();
 
         Svc.DutyState.DutyStarted += DutyState_DutyStarted;
         Svc.DutyState.DutyWiped += DutyState_DutyWiped;
@@ -116,10 +117,10 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
         static void DutyState_DutyCompleted(object? sender, ushort e)
         {
-            var delay = TimeSpan.FromSeconds(_random.Next(4, 6));
-            Svc.Framework.RunOnTick(() =>
+            TimeSpan delay = TimeSpan.FromSeconds(_random.Next(4, 6));
+            _ = Svc.Framework.RunOnTick(() =>
             {
-                Service.Config.DutyEnd.AddMacro();
+                _ = Service.Config.DutyEnd.AddMacro();
 
                 if (Service.Config.AutoOffWhenDutyCompleted)
                 {
@@ -135,11 +136,11 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
             // Check if the id is valid before proceeding
             if (id == 0)
             {
-                Svc.Log.Warning("Invalid territory id: 0");
+                PluginLog.Warning("Invalid territory id: 0");
                 return;
             }
 
-            var territory = Service.GetSheet<TerritoryType>().GetRow(id);
+            TerritoryType territory = Service.GetSheet<TerritoryType>().GetRow(id);
 
             DataCenter.Territory = new TerritoryInfo(territory);
 
@@ -149,26 +150,36 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
             }
             catch (Exception ex)
             {
-                Svc.Log.Error(ex, "Failed on Territory changed.");
+                PluginLog.Warning($"Failed on Territory changed: {ex.Message}");
             }
         }
 
         static void DutyState_DutyStarted(object? sender, ushort e)
         {
-            if (!Player.Available) return;
-            if (!Player.Object.IsJobCategory(JobRole.Tank) && !Player.Object.IsJobCategory(JobRole.Healer)) return;
+            if (!Player.AvailableThreadSafe)
+            {
+                return;
+            }
+
+            if (!Player.Object.IsJobCategory(JobRole.Tank) && !Player.Object.IsJobCategory(JobRole.Healer))
+            {
+                return;
+            }
 
             if (DataCenter.Territory?.IsHighEndDuty ?? false)
             {
-                var warning = string.Format(UiString.HighEndWarning.GetDescription(), DataCenter.Territory.ContentFinderName);
-#pragma warning disable CS0436
+                string warning = string.Format(UiString.HighEndWarning.GetDescription(), DataCenter.Territory.ContentFinderName);
                 WarningHelper.AddSystemWarning(warning);
             }
         }
 
         static void DutyState_DutyWiped(object? sender, ushort e)
         {
-            if (!Player.Available) return;
+            if (!Player.AvailableThreadSafe)
+            {
+                return;
+            }
+
             DataCenter.ResetAllRecords();
         }
 
@@ -176,7 +187,10 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
         OpenLinkPayload = pluginInterface.AddChatLinkHandler(0, (id, str) =>
         {
-            if (id == 0) OpenConfigWindow();
+            if (id == 0)
+            {
+                OpenConfigWindow();
+            }
         });
         HideWarningLinkPayload = pluginInterface.AddChatLinkHandler(1, (id, str) =>
         {
@@ -186,23 +200,30 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
                 Svc.Chat.Print("Warning has been hidden.");
             }
         });
-        Task.Run(async () =>
+        _ = Task.Run(async () =>
         {
             await DownloadHelper.DownloadAsync();
-            if (Service.Config.LoadRotationsAtStartup) await RotationUpdater.GetAllCustomRotationsAsync(DownloadOption.Download);
+            if (Service.Config.LoadRotationsAtStartup)
+            {
+                await RotationUpdater.GetAllCustomRotationsAsync(DownloadOption.Download);
+            }
         });
     }
 
     private void OnDraw()
     {
-        if (Svc.GameGui.GameUiHidden) return;
+        if (Svc.GameGui.GameUiHidden)
+        {
+            return;
+        }
+
         windowSystem.Draw();
     }
 
     internal static void ChangeUITranslation()
     {
         _rotationConfigWindow!.WindowName = UiString.ConfigWindowHeader.GetDescription()
-            + typeof(RotationConfigWindow).Assembly.GetName().Version?.ToString() ?? "?.?.?";
+            + (typeof(RotationConfigWindow).Assembly.GetName().Version?.ToString() ?? "?.?.?") + "###rsrConfigWindow";
 
         RSCommands.Disable();
         RSCommands.Enable();
@@ -218,17 +239,9 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         _rotationConfigWindow?.Toggle();
     }
 
-    static RandomDelay validDelay = new(() => (0.2f, 0.2f));
-
     internal static void UpdateDisplayWindow()
     {
-        var isValid = validDelay.Delay(MajorUpdater.IsValid
-            && DataCenter.CurrentRotation != null
-            && !Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent]
-            && !Svc.Condition[ConditionFlag.Occupied38] //Treasure hunt.
-            && !Svc.Condition[ConditionFlag.WaitingForDuty]
-            && (!Svc.Condition[ConditionFlag.UsingFashionAccessory] || Player.Object.StatusFlags.HasFlag(Dalamud.Game.ClientState.Objects.Enums.StatusFlags.WeaponOut))
-            && !Svc.Condition[ConditionFlag.OccupiedInQuestEvent]);
+        bool isValid = MajorUpdater.IsValid && DataCenter.CurrentRotation != null;
 
         _nextActionWindow!.IsOpen = isValid && Service.Config.ShowNextActionWindow;
 
@@ -243,7 +256,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
     private static bool AnyHostileTargetWithinDistance(float distance)
     {
-        foreach (var target in DataCenter.AllHostileTargets)
+        foreach (IBattleChara target in DataCenter.AllHostileTargets)
         {
             if (target.DistanceToPlayer() < distance)
             {
@@ -266,7 +279,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         Svc.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
         Svc.PluginInterface.UiBuilder.Draw -= OnDraw;
 
-        foreach (var item in _dis)
+        foreach (IDisposable item in _dis)
         {
             item.Dispose();
         }

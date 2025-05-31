@@ -22,21 +22,13 @@ internal class IConditionConverter : JsonCreationConverter<ICondition>
         {
             return new RotationCondition();
         }
-        else if (FieldExists(nameof(TraitCondition.TraitID), jObject))
-        {
-            return new TraitCondition();
-        }
-        else if (FieldExists(nameof(NamedCondition.ConditionName), jObject))
-        {
-            return new NamedCondition();
-        }
-        else if (FieldExists(nameof(TerritoryCondition.TerritoryConditionType), jObject))
-        {
-            return new TerritoryCondition();
-        }
         else
         {
-            return null;
+            return FieldExists(nameof(TraitCondition.TraitID), jObject)
+                ? new TraitCondition()
+                : FieldExists(nameof(NamedCondition.ConditionName), jObject)
+                            ? new NamedCondition()
+                            : FieldExists(nameof(TerritoryCondition.TerritoryConditionType), jObject) ? new TerritoryCondition() : (ICondition?)null;
         }
     }
 }
@@ -62,7 +54,7 @@ internal abstract class JsonCreationConverter<T> : JsonConverter
         JObject jObject = JObject.Load(reader);
 
         // Create target object based on JObject
-        var target = Create(jObject);
+        T? target = Create(jObject);
 
         // Populate the object properties
         if (target != null)

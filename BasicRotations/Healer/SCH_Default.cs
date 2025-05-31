@@ -1,3 +1,6 @@
+using Dalamud.Interface.Colors;
+using System.ComponentModel;
+
 namespace RebornRotations.Healer;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.21")]
@@ -80,25 +83,62 @@ public sealed class SCH_Default : ScholarRotation
 
     [RotationConfig(CombatType.PvE, Name = "Enable ballpark DoT time-to-kill estimator (in addition to normal TTK configs)")]
     public bool UseBallparkTTK { get; set; } = true;
+
+    [RotationConfig(CombatType.PvE, Name = "How to use Deployment Tactics")]
+    public DeploymentTacticsUsageStrategy DeploymentTacticsUsage { get; set; } = DeploymentTacticsUsageStrategy.CatalyzeOnly;
+
+    public enum DeploymentTacticsUsageStrategy : byte
+    {
+        [Description("Use when a party member has Catalyze status")]
+        CatalyzeOnly,
+
+        [Description("Use when a party member has Catalyze or Galvanize status")]
+        CatalyzeOrGalvanize,
+    }
     #endregion
 
+    #region Tracking Properties
     public override void DisplayStatus()
     {
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "Rotation Tracking:");
         ImGui.Text($"Max Targets to apply Bio to rather than spamming AoW: {GetAoWBreakevenTargets() - 1}");
-
+        ImGui.TextColored(ImGuiColors.DalamudYellow, "Base Tracking:");
         base.DisplayStatus();
     }
+    #endregion
 
     #region Countdown Logic
     protected override IAction? CountDownAction(float remainTime)
     {
-        if (SummonEosPvE.CanUse(out var act)) return act;
+        if (SummonEosPvE.CanUse(out IAction? act))
+        {
+            return act;
+        }
 
-        if (remainTime < RuinPvE.Info.CastTime + CountDownAhead && RuinPvE.CanUse(out act)) return act;
-        if (remainTime < 3 && UseBurstMedicine(out act)) return act;
-        if (remainTime is < 4 and > 3 && DeploymentTacticsPvE.CanUse(out act)) return act;
-        if (remainTime is < 7 and > 6 && AdloquiumDuringCountdown && AdloquiumPvE.CanUse(out act)) return act;
-        if (remainTime <= 15 && UseRecitationInOpener && RecitationPvE.CanUse(out act)) return act;
+        if (remainTime < RuinPvE.Info.CastTime + CountDownAhead && RuinPvE.CanUse(out act))
+        {
+            return act;
+        }
+
+        if (remainTime < 3 && UseBurstMedicine(out act))
+        {
+            return act;
+        }
+
+        if (remainTime is < 4 and > 3 && DeploymentTacticsPvE.CanUse(out act))
+        {
+            return act;
+        }
+
+        if (remainTime is < 7 and > 6 && AdloquiumDuringCountdown && AdloquiumPvE.CanUse(out act))
+        {
+            return act;
+        }
+
+        if (remainTime <= 15 && UseRecitationInOpener && RecitationPvE.CanUse(out act))
+        {
+            return act;
+        }
 
         return base.CountDownAction(remainTime);
     }
@@ -108,13 +148,46 @@ public sealed class SCH_Default : ScholarRotation
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
         // Verified Excog and Indomitability are NOT recognized by "next GCD"
-        if (ShouldUseRecitation(nextGCD) && RecitationPvE.CanUse(out act)) return true;
+        if (ShouldUseRecitation(nextGCD) && RecitationPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (DeploymentTacticsPvE.EnoughLevel && InCombat)
+        {
+            if (DeploymentTacticsUsage == DeploymentTacticsUsageStrategy.CatalyzeOnly)
+            {
+                foreach (IBattleChara member in PartyMembers)
+                {
+                    if (member.HasStatus(true, StatusID.Catalyze))
+                    {
+                        if (DeploymentTacticsPvE.CanUse(out act))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            else if (DeploymentTacticsUsage == DeploymentTacticsUsageStrategy.CatalyzeOrGalvanize)
+            {
+                foreach (IBattleChara member in PartyMembers)
+                {
+                    if (member.HasStatus(true, StatusID.Galvanize))
+                    {
+                        if (DeploymentTacticsPvE.CanUse(out act))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
 
         // Only use emergency tactics if we're healing from a raid wide damage or multiple members need to be healed for doom
         if (nextGCD.IsTheSameTo(false, SuccorPvE, ConcitationPvE, AccessionPvE) && EmergencyTacticsPvE.CanUse(out act))
         {
             int count = 0;
-            foreach (var member in PartyMembers)
+            foreach (IBattleChara member in PartyMembers)
             {
                 if (member.DistanceToPlayer() <= 15)
                 {
@@ -122,18 +195,26 @@ public sealed class SCH_Default : ScholarRotation
                     {
                         count++;
                         if (count > 1)
+                        {
                             break;
+                        }
                     }
                 }
             }
             if (count > 1)
+            {
                 return true;
+            }
         }
 
         // Remove Aetherpact
-        foreach (var item in PartyMembers)
+        foreach (IBattleChara item in PartyMembers)
         {
-            if (!item.HasStatus(true, StatusID.FeyUnion_1223)) continue;
+            if (!item.HasStatus(true, StatusID.FeyUnion_1223))
+            {
+                continue;
+            }
+
             if (item.GetHealthRatio() >= AetherpactRemove)
             {
                 act = AetherpactPvE;
@@ -142,44 +223,74 @@ public sealed class SCH_Default : ScholarRotation
         }
 
         // Burn Consolation if about to run out of time on Seraph and still have charges
-        if (SeraphTime < 3 && ConsolationPvE.CanUse(out act, usedUp: true)) return true;
-
-        return base.EmergencyAbility(nextGCD, out act);
+        return SeraphTime < 3 && ConsolationPvE.CanUse(out act, usedUp: true) || base.EmergencyAbility(nextGCD, out act);
     }
 
     [RotationDesc(ActionID.SummonSeraphPvE, ActionID.ConsolationPvE, ActionID.SacredSoilPvE, ActionID.IndomitabilityPvE, ActionID.WhisperingDawnPvE_16537, ActionID.FeyBlessingPvE, ActionID.SeraphismPvE)]
     protected override bool HealAreaAbility(IAction nextGCD, out IAction? act)
     {
         // Always try to use Indomitability if we've just used Recitation and are area healing
-        if (HasRecitation && IndomitabilityPvE.CanUse(out act)) return true;
+        if (HasRecitation && IndomitabilityPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         // Always use Consolation if we have a Seraph out and need area healing/shielding
-        if (ConsolationPvE.CanUse(out act, usedUp: true)) return true;
+        if (ConsolationPvE.CanUse(out act, usedUp: true))
+        {
+            return true;
+        }
 
         // This is normally an inefficient choice, but there are *some* mechanics where it can be a good idea to burst heal at lower efficiency (likely triggering GCD Succors as well)
         if (PartyMembersAverHP < EmergencyHealPercent)
         {
-            if (FeyBlessingPvE.CanUse(out act)) return true;
-            if (IndomitabilityPvE.CanUse(out act)) return true;
+            if (FeyBlessingPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (IndomitabilityPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         // Otherwise we use fairy abilities as these are cheaper/better than our aether charges
-        if (WhisperingDawnPvE_16537.CanUse(out act)) return true;
-        if (FeyBlessingPvE.CanUse(out act)) return true;
+        if (WhisperingDawnPvE_16537.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (FeyBlessingPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         if (WhisperingDawnPvE_16537.Cooldown.IsCoolingDown && FeyBlessingPvE.Cooldown.IsCoolingDown)
         {
-            if (SummonSeraphPvE.CanUse(out act)) return true;
+            if (SummonSeraphPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         // Once we have enhanced regen on sacred soil this becomes incredibly efficient for healing (500 potency HoT) in addition to being a defensive ability
-        if (EnhancedSacredSoilTrait.EnoughLevel && SacredSoilHeal && ShouldUseSacredSoil(out act)) return true;
+        if (EnhancedSacredSoilTrait.EnoughLevel && SacredSoilHeal && ShouldUseSacredSoil(out act))
+        {
+            return true;
+        }
 
         // Seraphism is really good but we want to save it if we can, and should alternate it with Summon Seraph defensively outside of the hardest content
-        if ((SummonSeraphPvE.Cooldown.IsCoolingDown || CurrentMp <= EmergencyHealingMPThreshold) && SeraphismPvE.CanUse(out act)) return true;
+        if ((SummonSeraphPvE.Cooldown.IsCoolingDown || CurrentMp <= EmergencyHealingMPThreshold) && SeraphismPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         // Lower Priority Indomitability without Recitation
-        if (IndomitabilityPvE.CanUse(out act)) return true;
+        if (IndomitabilityPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.HealAreaAbility(nextGCD, out act);
     }
@@ -189,8 +300,8 @@ public sealed class SCH_Default : ScholarRotation
     {
         // Check if any tank matches Excogitation target
         bool tankHasExcogTarget = false;
-        var tanks = PartyMembers.GetJobCategory(JobRole.Tank);
-        foreach (var member in tanks)
+        IEnumerable<IBattleChara> tanks = PartyMembers.GetJobCategory(JobRole.Tank);
+        foreach (IBattleChara member in tanks)
         {
             if (member == ExcogitationPvE.Target.Target)
             {
@@ -199,11 +310,13 @@ public sealed class SCH_Default : ScholarRotation
             }
         }
         if (HasRecitation && tankHasExcogTarget && ExcogitationPvE.CanUse(out act))
+        {
             return true;
+        }
 
         // Check if any party member has Fey Union status
         bool haveLink = false;
-        foreach (var p in PartyMembers)
+        foreach (IBattleChara p in PartyMembers)
         {
             if (p.HasStatus(true, StatusID.FeyUnion_1223))
             {
@@ -216,21 +329,43 @@ public sealed class SCH_Default : ScholarRotation
             FairyGauge >= LinkFairyGauge &&
             !haveLink &&
             AetherpactPvE.Target.Target.GetHealthRatio() <= AetherpactMinimum)
+        {
             return true;
+        }
 
         // Otherwise we'll spend aether charges; we didn't burn it on the tank above so use excog based on oGCD heal toggle
-        if (ExcogitationPvE.Target.Target.GetHealthRatio() >= ExcogHeal && ExcogitationPvE.CanUse(out act)) return true;
+        if (ExcogitationPvE.Target.Target.GetHealthRatio() >= ExcogHeal && ExcogitationPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         // Once we have enhanced regen on sacred soil we should be willing to use it even for single target [500 potency+DR aoe vs Lustrate's 600 potency single target]
-        if (EnhancedSacredSoilTrait.EnoughLevel && SacredSoilHeal && ShouldUseSacredSoil(out act)) return true;
-        if (LustratePvE.CanUse(out act)) return true; // Technically Whispering Dawn is better to burn first, but the 15y range from the faerie makes this unreliable in dungeons
+        if (EnhancedSacredSoilTrait.EnoughLevel && SacredSoilHeal && ShouldUseSacredSoil(out act))
+        {
+            return true;
+        }
+
+        if (LustratePvE.CanUse(out act))
+        {
+            return true; // Technically Whispering Dawn is better to burn first, but the 15y range from the faerie makes this unreliable in dungeons
+        }
 
         // Use aoe faerie abilities even for single target to avoid GCD heals
-        if (WhisperingDawnPvE_16537.CanUse(out act)) return true;
-        if (FeyBlessingPvE.CanUse(out act)) return true;
+        if (WhisperingDawnPvE_16537.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (FeyBlessingPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         // We don't have any other resources to use, so we'll use link even if it only has a small amount of charges
-        if (!haveLink && FairyGauge > 20 && AetherpactPvE.CanUse(out act)) return true;
+        if (!haveLink && FairyGauge > 20 && AetherpactPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.HealSingleAbility(nextGCD, out act);
     }
@@ -241,27 +376,49 @@ public sealed class SCH_Default : ScholarRotation
         // Deployment Tactics is modified in the base rotation to only use if they have galvanize so can trust that targets are at least valid?
         // The number of times that we adlo to heal a DPS and then would like to use this is actually reasonably high in dungeons
         // TODO: This is typically skipping because the target it's trying to cast the area defense on isn't the galvanized target
-        if (DeploymentTacticsPvE.CanUse(out act)) return true;
+        if ((!RecitationPvE.EnoughLevel || RecitationPvE.Cooldown.IsCoolingDown || PartyMembers.Any(member => member.HasStatus(true, StatusID.Catalyze)))
+            && DeploymentTacticsPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         // Consolation is great if Seraph is up
-        if (ConsolationPvE.CanUse(out act, usedUp: true)) return true;
+        if (ConsolationPvE.CanUse(out act, usedUp: true))
+        {
+            return true;
+        }
 
         // It's always good as a defensive ability
-        if (ShouldUseSacredSoil(out act)) return true;
+        if (ShouldUseSacredSoil(out act))
+        {
+            return true;
+        }
 
         // Should be using this manually in high end content, but if it's enabled let's use it
-        if (ExpedientPvE.CanUse(out act)) return true;
+        if (ExpedientPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         // Seraphism is really good but we want to save it if we can, and should alternate it with Summon Seraph outside of the hardest content
-        if ((SummonSeraphPvE.Cooldown.IsCoolingDown || CurrentMp <= EmergencyHealingMPThreshold) && SeraphismPvE.CanUse(out act)) return true;
+        if ((SummonSeraphPvE.Cooldown.IsCoolingDown || CurrentMp <= EmergencyHealingMPThreshold) && SeraphismPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         if (WhisperingDawnPvE_16537.Cooldown.IsCoolingDown && FeyBlessingPvE.Cooldown.IsCoolingDown)
         {
-            if (SummonSeraphPvE.CanUse(out act)) return true;
+            if (SummonSeraphPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         // It's better than nothing for an oGCD, and at level 40 is the only thing we've got
-        if (FeyIlluminationPvE_16538.CanUse(out act)) return true;
+        if (FeyIlluminationPvE_16538.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.DefenseAreaAbility(nextGCD, out act);
     }
@@ -269,9 +426,21 @@ public sealed class SCH_Default : ScholarRotation
     [RotationDesc(ActionID.ProtractionPvE, ActionID.ExcogitationPvE, ActionID.SacredSoilPvE)]
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
-        if (ProtractionPvE.CanUse(out act)) return true;
-        if (ExcogitationPvE.CanUse(out act)) return true;
-        if (ShouldUseSacredSoil(out act)) return true;
+        if (ProtractionPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (ExcogitationPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (ShouldUseSacredSoil(out act))
+        {
+            return true;
+        }
+
         return base.DefenseSingleAbility(nextGCD, out act);
     }
 
@@ -279,7 +448,10 @@ public sealed class SCH_Default : ScholarRotation
     protected override bool SpeedAbility(IAction nextGCD, out IAction? act)
     {
         // Should be using this manually in high end content, but if it's enabled let's use it
-        if (InCombat && ExpedientPvE.CanUse(out act, usedUp: true)) return true;
+        if (InCombat && ExpedientPvE.CanUse(out act, usedUp: true))
+        {
+            return true;
+        }
 
         return base.SpeedAbility(nextGCD, out act);
     }
@@ -300,7 +472,10 @@ public sealed class SCH_Default : ScholarRotation
 
         if (IsBurst)
         {
-            if (ChainStratagemPvE.CanUse(out act)) return true;
+            if (ChainStratagemPvE.CanUse(out act))
+            {
+                return true;
+            }
 
             // We could likely make better decisions for both this and energy drain if JobGauge.Aetherflow was available
             if (!HasAetherflow && AetherflowPvE.Cooldown.IsCoolingDown && // No Aether and aetherflow is on cooldown
@@ -315,10 +490,16 @@ public sealed class SCH_Default : ScholarRotation
 
         if ((ShouldDissipate && DissipationPvE.EnoughLevel && DissipationPvE.Cooldown.WillHaveOneChargeGCD(2) && DissipationPvE.IsEnabled) || AetherflowPvE.Cooldown.WillHaveOneChargeGCD(2))
         {
-            if (EnergyDrainPvE.CanUse(out act, usedUp: true)) return true;
+            if (EnergyDrainPvE.CanUse(out act, usedUp: true))
+            {
+                return true;
+            }
         }
 
-        if (!HasAetherflow && AetherflowPvE.CanUse(out act)) return true;
+        if (!HasAetherflow && AetherflowPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.AttackAbility(nextGCD, out act);
     }
@@ -329,15 +510,32 @@ public sealed class SCH_Default : ScholarRotation
     protected override bool HealAreaGCD(out IAction? act)
     {
         act = null;
-        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
+        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
+        {
+            return false;
+        }
 
         // If emergency tactics is up we are using succor for raidwide recovery not shields
-        if (HasEmergencyTactics && SuccorPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
+        if (HasEmergencyTactics && SuccorPvE.CanUse(out act, skipStatusProvideCheck: true))
+        {
+            return true;
+        }
 
         // Only have all 3 checks in case players have added their own custom configurations based on current level.
-        if (AccessionPvE.CanUse(out act, skipCastingCheck: true)) return true;
-        if (ConcitationPvE.CanUse(out act)) return true;
-        if (SuccorPvE.CanUse(out act)) return true;
+        if (AccessionPvE.CanUse(out act, skipCastingCheck: true))
+        {
+            return true;
+        }
+
+        if (ConcitationPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (SuccorPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.HealAreaGCD(out act);
     }
@@ -346,11 +544,25 @@ public sealed class SCH_Default : ScholarRotation
     protected override bool HealSingleGCD(out IAction? act)
     {
         act = null;
-        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
+        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
+        {
+            return false;
+        }
 
-        if (ManifestationPvE.CanUse(out act, skipCastingCheck: true)) return true;
-        if (AdloquiumPvE.CanUse(out act)) return true;
-        if (PhysickPvE.CanUse(out act)) return true;
+        if (ManifestationPvE.CanUse(out act, skipCastingCheck: true))
+        {
+            return true;
+        }
+
+        if (AdloquiumPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (PhysickPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.HealSingleGCD(out act);
     }
@@ -359,12 +571,26 @@ public sealed class SCH_Default : ScholarRotation
     protected override bool DefenseAreaGCD(out IAction? act)
     {
         act = null;
-        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
+        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
+        {
+            return false;
+        }
 
         // Only have all 3 checks in case players have added their own custom configurations.
-        if (AccessionPvE.CanUse(out act, skipCastingCheck: true)) return true;
-        if (ConcitationPvE.CanUse(out act)) return true;
-        if (SuccorPvE.CanUse(out act)) return true;
+        if (AccessionPvE.CanUse(out act, skipCastingCheck: true))
+        {
+            return true;
+        }
+
+        if (ConcitationPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (SuccorPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.DefenseAreaGCD(out act);
     }
@@ -372,20 +598,29 @@ public sealed class SCH_Default : ScholarRotation
     protected override bool GeneralGCD(out IAction? act)
     {
         act = null;
-        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise)) return false;
+        if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
+        {
+            return false;
+        }
 
         // Summon Eos
-        if (SummonEosPvE.CanUse(out act)) return true;
+        if (SummonEosPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         // Don't use attacks if we're in a wipe scenario spamming rezzes and heals
-        if (CurrentMp < EmergencyHealingMPThreshold) return false;
+        if (CurrentMp < EmergencyHealingMPThreshold)
+        {
+            return false;
+        }
 
         int nearbyHostiles = NumberOfHostilesInRangeOf(5f);
 
-        var expectedHPToLive12Seconds = 1f;
+        float expectedHPToLive12Seconds = 1f;
 
         int partyMemberCount = 0;
-        foreach (var _ in PartyMembers)
+        foreach (IBattleChara _ in PartyMembers)
         {
             partyMemberCount++;
         }
@@ -414,49 +649,129 @@ public sealed class SCH_Default : ScholarRotation
         */
         if (!BioIiPvE.EnoughLevel)
         {
-            if (BioPvE.CanUse(out act) && BioPvE.Target.Target.CurrentHp >= expectedHPToLive12Seconds) return true;
-            if (RuinPvE.CanUse(out act)) return true;
-            if (BioPvE.CanUse(out act, skipTTKCheck: true)) return true;
+            if (BioPvE.CanUse(out act) && BioPvE.Target.Target.CurrentHp >= expectedHPToLive12Seconds)
+            {
+                return true;
+            }
+
+            if (RuinPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (BioPvE.CanUse(out act, skipTTKCheck: true))
+            {
+                return true;
+            }
         }
         else if (!ArtOfWarPvE.EnoughLevel)
         {
-            if (BioIiPvE.CanUse(out act) && BioIiPvE.Target.Target.CurrentHp >= expectedHPToLive12Seconds) return true; // No better options still and configured TTK should cover whether we want to use it
-            if (RuinPvE.CanUse(out act)) return true;
+            if (BioIiPvE.CanUse(out act) && BioIiPvE.Target.Target.CurrentHp >= expectedHPToLive12Seconds)
+            {
+                return true; // No better options still and configured TTK should cover whether we want to use it
+            }
+
+            if (RuinPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
         else if (!BroilMasteryTrait.EnoughLevel)
         {
-            if (BioIiPvE.CanUse(out act) && nearbyHostiles < GetAoWBreakevenTargets() && BioIiPvE.Target.Target.CurrentHp >= expectedHPToLive12Seconds) return true; // This is better against 2 targets IFF it will last >= 24 seconds
-            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 0) return true;
-            if (RuinPvE.CanUse(out act)) return true; // 25m range may still allow us to do better than AoW does even at same potency and with a cast time
+            if (BioIiPvE.CanUse(out act) && nearbyHostiles < GetAoWBreakevenTargets() && BioIiPvE.Target.Target.CurrentHp >= expectedHPToLive12Seconds)
+            {
+                return true; // This is better against 2 targets IFF it will last >= 24 seconds
+            }
+
+            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 0)
+            {
+                return true;
+            }
+
+            if (RuinPvE.CanUse(out act))
+            {
+                return true; // 25m range may still allow us to do better than AoW does even at same potency and with a cast time
+            }
         }
         else if (!BroilMasteryIiTrait.EnoughLevel)
         {
-            if (BioIiPvE.CanUse(out act) && nearbyHostiles < GetAoWBreakevenTargets() && BioIiPvE.Target.Target.CurrentHp >= expectedHPToLive12Seconds) return true; // This is better against 3 targets IFF it will last >= 24 seconds
-            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 1) return true;
-            if (BroilPvE.CanUse(out act)) return true;
-            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 0) return true;
+            if (BioIiPvE.CanUse(out act) && nearbyHostiles < GetAoWBreakevenTargets() && BioIiPvE.Target.Target.CurrentHp >= expectedHPToLive12Seconds)
+            {
+                return true; // This is better against 3 targets IFF it will last >= 24 seconds
+            }
+
+            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 1)
+            {
+                return true;
+            }
+
+            if (BroilPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 0)
+            {
+                return true;
+            }
         }
         else if (!BroilIiiPvE.EnoughLevel)
         {
-            if (BioIiPvE.CanUse(out act) && nearbyHostiles < GetAoWBreakevenTargets() && BioIiPvE.Target.Target.CurrentHp >= expectedHPToLive12Seconds) return true; // This is better against 3 targets IFF it will last >= 24 seconds
-            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 1) return true;
-            if (BroilIiPvE.CanUse(out act)) return true;
+            if (BioIiPvE.CanUse(out act) && nearbyHostiles < GetAoWBreakevenTargets() && BioIiPvE.Target.Target.CurrentHp >= expectedHPToLive12Seconds)
+            {
+                return true; // This is better against 3 targets IFF it will last >= 24 seconds
+            }
+
+            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 1)
+            {
+                return true;
+            }
+
+            if (BroilIiPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
         else if (!BroilIvPvE.EnoughLevel)
         {
-            if (BiolysisPvE.CanUse(out act) && nearbyHostiles < GetAoWBreakevenTargets() && BiolysisPvE.Target.Target.CurrentHp >= expectedHPToLive12Seconds) return true; // This is better against 4 targets IFF it will last >= 27 seconds
-            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 1) return true;
-            if (BroilIiiPvE.CanUse(out act)) return true;
+            if (BiolysisPvE.CanUse(out act) && nearbyHostiles < GetAoWBreakevenTargets() && BiolysisPvE.Target.Target.CurrentHp >= expectedHPToLive12Seconds)
+            {
+                return true; // This is better against 4 targets IFF it will last >= 27 seconds
+            }
+
+            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 1)
+            {
+                return true;
+            }
+
+            if (BroilIiiPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
         else
         {
-            if (BiolysisPvE.CanUse(out act) && nearbyHostiles < GetAoWBreakevenTargets() && BiolysisPvE.Target.Target.CurrentHp >= expectedHPToLive12Seconds) return true; // This is better against 4 targets IFF it will last >= 27 seconds
-            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 1) return true;
-            if (BroilIvPvE.CanUse(out act)) return true;
+            if (BiolysisPvE.CanUse(out act) && nearbyHostiles < GetAoWBreakevenTargets() && BiolysisPvE.Target.Target.CurrentHp >= expectedHPToLive12Seconds)
+            {
+                return true; // This is better against 4 targets IFF it will last >= 27 seconds
+            }
+
+            if (ArtOfWarPvE.CanUse(out act, skipAoeCheck: true) && nearbyHostiles > 1)
+            {
+                return true;
+            }
+
+            if (BroilIvPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         // Starting at 38, we always default to Ruin II when moving and no bio targets
-        if (MovingTime > RuinTime && RuinIiPvE.CanUse(out act)) return true;
+        if (MovingTime > RuinTime && RuinIiPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.GeneralGCD(out act);
     }
@@ -468,14 +783,16 @@ public sealed class SCH_Default : ScholarRotation
     private bool ShouldUseRecitation(IAction nextGCD)
     {
         if (!RecitationPvE.EnoughLevel || RecitationPvE.Cooldown.IsCoolingDown)
+        {
             return false;
+        }
 
         // Big Excog the tank if they look dangerous
         if (!ExcogitationPvE.Cooldown.IsCoolingDown)
         {
             bool tankNeedsExcog = false;
-            var tanks = PartyMembers.GetJobCategory(JobRole.Tank);
-            foreach (var member in tanks)
+            IEnumerable<IBattleChara> tanks = PartyMembers.GetJobCategory(JobRole.Tank);
+            foreach (IBattleChara member in tanks)
             {
                 if (member.GetHealthRatio() <= ExcogHeal && !member.NoNeedHealingInvuln())
                 {
@@ -484,23 +801,19 @@ public sealed class SCH_Default : ScholarRotation
                 }
             }
             if (tankNeedsExcog || MergedStatus.HasFlag(AutoStatus.DefenseSingle))
+            {
                 return true;
+            }
         }
 
         // Check average hp as a quick check on whether we're in a raid wide healing situation
         if (!IndomitabilityPvE.Cooldown.IsCoolingDown && PartyMembersAverHP <= ReciteIndomitability)
+        {
             return true;
+        }
 
         // Or if we're desperate and hard casting Adlo (or potentially succor)
-        IAction[] recitationActions;
-        if (ReciteSuccor)
-        {
-            recitationActions = [AccessionPvE, ConcitationPvE, SuccorPvE, AdloquiumPvE, ManifestationPvE];
-        }
-        else
-        {
-            recitationActions = [AdloquiumPvE, ManifestationPvE];
-        }
+        IAction[] recitationActions = ReciteSuccor ? [AccessionPvE, ConcitationPvE, SuccorPvE, AdloquiumPvE, ManifestationPvE] : [AdloquiumPvE, ManifestationPvE];
         return nextGCD.IsTheSameTo(true, recitationActions);
     }
 
@@ -514,7 +827,10 @@ public sealed class SCH_Default : ScholarRotation
             passedSacredMoveCheck = true;
         }
 
-        if (passedSacredMoveCheck && SacredSoilPvE.CanUse(out act)) return true;
+        if (passedSacredMoveCheck && SacredSoilPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         act = null;
         return false;
@@ -547,9 +863,12 @@ public sealed class SCH_Default : ScholarRotation
         get
         {
             int healerCount = 0;
-            var healers = PartyMembers.GetJobCategory(JobRole.Healer);
-            foreach (var h in healers)
+            IEnumerable<IBattleChara> healers = PartyMembers.GetJobCategory(JobRole.Healer);
+            foreach (IBattleChara h in healers)
+            {
                 healerCount++;
+            }
+
             return base.CanHealSingleSpell && (GCDHeal || healerCount < 2);
         }
     }
@@ -558,9 +877,12 @@ public sealed class SCH_Default : ScholarRotation
         get
         {
             int healerCount = 0;
-            var healers = PartyMembers.GetJobCategory(JobRole.Healer);
-            foreach (var h in healers)
+            IEnumerable<IBattleChara> healers = PartyMembers.GetJobCategory(JobRole.Healer);
+            foreach (IBattleChara h in healers)
+            {
                 healerCount++;
+            }
+
             return base.CanHealAreaSpell && (GCDHeal || healerCount < 2);
         }
     }

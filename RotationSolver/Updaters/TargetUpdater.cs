@@ -2,6 +2,8 @@
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
+using ECommons.Logging;
+using RotationSolver.Basic.Rotations.Duties;
 
 namespace RotationSolver.Updaters;
 
@@ -12,12 +14,10 @@ internal static partial class TargetUpdater
         _raiseAllTargets = new(() => Service.Config.RaiseDelay);
 
     private static DateTime _lastUpdateTimeToKill = DateTime.MinValue;
-    private static readonly TimeSpan TimeToKillUpdateInterval = TimeSpan.FromSeconds(0.1);
+    private static readonly TimeSpan TimeToKillUpdateInterval = TimeSpan.FromSeconds(1);
 
     internal static void UpdateTargets()
     {
-        if (Player.Object == null) return;
-        if (DataCenter.State == false && !Service.Config.TeachingMode && (!DataCenter.InCombat || !Player.IsInDuty)) return;
         DataCenter.AllTargets = GetAllTargets();
         if (DataCenter.AllTargets != null)
         {
@@ -34,13 +34,16 @@ internal static partial class TargetUpdater
 
     private static List<IBattleChara> GetAllTargets()
     {
-        var allTargets = new List<IBattleChara>();
+        List<IBattleChara> allTargets = [];
         bool skipDummyCheck = !Service.Config.DisableTargetDummys;
-        foreach (IBattleChara battleChara in Svc.Objects.OfType<IBattleChara>())
+        foreach (var obj in Svc.Objects)
         {
-            if (skipDummyCheck || !battleChara.IsDummy())
+            if (obj is IBattleChara battleChara)
             {
-                allTargets.Add(battleChara);
+                if ((skipDummyCheck || !battleChara.IsDummy()) && battleChara.StatusList != null)
+                {
+                    allTargets.Add(battleChara);
+                }
             }
         }
         return allTargets;
@@ -48,15 +51,23 @@ internal static partial class TargetUpdater
 
     private static unsafe List<IBattleChara> GetPartyMembers()
     {
-        var partyMembers = new List<IBattleChara>();
+        List<IBattleChara> partyMembers = [];
         try
         {
-            foreach (var member in DataCenter.AllTargets)
+            foreach (IBattleChara member in DataCenter.AllTargets)
             {
-                if (member.StatusList == null || !member.IsParty()) continue;
-                var character = member.Character();
-                if (character == null) continue;
-                var status = character->CharacterData.OnlineStatus;
+                if (!member.IsParty())
+                {
+                    continue;
+                }
+
+                FFXIVClientStructs.FFXIV.Client.Game.Character.Character* character = member.Character();
+                if (character == null)
+                {
+                    continue;
+                }
+
+                byte status = character->CharacterData.OnlineStatus;
                 if (status != 15 && status != 5 && member.IsTargetable)
                 {
                     partyMembers.Add(member);
@@ -65,47 +76,54 @@ internal static partial class TargetUpdater
         }
         catch (Exception ex)
         {
-            Svc.Log.Error($"Error in GetPartyMembers: {ex.Message}");
+            PluginLog.Error($"Error in GetPartyMembers: {ex.Message}");
         }
         return partyMembers;
     }
 
     private static unsafe List<IBattleChara> GetAllianceMembers()
     {
-        var allianceMembers = new List<IBattleChara>();
-        try
+        List<IBattleChara> allianceMembers = [];
+        RaiseType raisetype = Service.Config.RaiseType;
+        if (raisetype != RaiseType.PartyOnly)
         {
-            foreach (var target in DataCenter.AllTargets)
+            try
             {
-                if (ObjectHelper.IsAllianceMember(target) && !target.IsParty() && target.Character() != null &&
-                    target.Character()->CharacterData.OnlineStatus != 15 &&
-                    target.Character()->CharacterData.OnlineStatus != 5 && target.IsTargetable)
+                foreach (IBattleChara target in DataCenter.AllTargets)
                 {
-                    allianceMembers.Add(target);
+                    if (ObjectHelper.IsAllianceMember(target) && !target.IsParty() && target.Character() != null &&
+                        target.Character()->CharacterData.OnlineStatus != 15 &&
+                        target.Character()->CharacterData.OnlineStatus != 5 && target.IsTargetable)
+                    {
+                        allianceMembers.Add(target);
+                    }
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Svc.Log.Error($"Error in GetAllianceMembers: {ex.Message}");
+            catch (Exception ex)
+            {
+                PluginLog.Error($"Error in GetAllianceMembers: {ex.Message}");
+            }
         }
         return allianceMembers;
     }
 
     private static List<IBattleChara> GetAllHostileTargets()
     {
-        var hostileTargets = new List<IBattleChara>();
+        List<IBattleChara> hostileTargets = [];
         try
         {
-            foreach (var target in DataCenter.AllTargets)
+            foreach (IBattleChara target in DataCenter.AllTargets)
             {
-                if (target.StatusList == null || !target.IsEnemy() || !target.IsTargetable) continue;
+                if (!target.IsEnemy() || !target.IsTargetable)
+                {
+                    continue;
+                }
 
                 bool hasInvincible = false;
-                var statusList = target.StatusList;
+                Dalamud.Game.ClientState.Statuses.StatusList statusList = target.StatusList;
                 for (int i = 0; i < statusList.Length; i++)
                 {
-                    var status = statusList[i];
+                    Dalamud.Game.ClientState.Statuses.Status? status = statusList[i];
                     if (status != null && StatusHelper.IsInvincible(status))
                     {
                         hasInvincible = true;
@@ -113,21 +131,24 @@ internal static partial class TargetUpdater
                     }
                 }
                 if (hasInvincible &&
-                    (DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility || !DataCenter.IsPvP)) continue;
+                    ((DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility) || !DataCenter.IsPvP))
+                {
+                    continue;
+                }
 
                 hostileTargets.Add(target);
             }
         }
         catch (Exception ex)
         {
-            Svc.Log.Error($"Error in GetAllHostileTargets: {ex.Message}");
+            PluginLog.Error($"Error in GetAllHostileTargets: {ex.Message}");
         }
         return hostileTargets;
     }
 
     private static IBattleChara? GetFirstHostileTarget(Func<IBattleChara, bool> predicate)
     {
-        foreach (var target in DataCenter.AllHostileTargets)
+        foreach (IBattleChara target in DataCenter.AllHostileTargets)
         {
             try
             {
@@ -138,7 +159,7 @@ internal static partial class TargetUpdater
             }
             catch (Exception ex)
             {
-                Svc.Log.Error($"Error in GetFirstHostileTarget: {ex.Message}");
+                PluginLog.Error($"Error in GetFirstHostileTarget: {ex.Message}");
             }
         }
         return null;
@@ -146,95 +167,96 @@ internal static partial class TargetUpdater
 
     private static IBattleChara? GetDeathTarget()
     {
-        if (Player.Job == Job.WHM || Player.Job == Job.SCH || Player.Job == Job.AST || Player.Job == Job.SGE ||
-            Player.Job == Job.SMN || Player.Job == Job.RDM)
+        if ((Player.Job is Job.WHM or Job.SCH or Job.AST or Job.SGE or
+            Job.SMN or Job.RDM) || (DutyRotation.ChemistLevel >= 3))
         {
             try
             {
-                var deathParty = new List<IBattleChara>();
+                List<IBattleChara> deathParty = [];
                 if (DataCenter.PartyMembers != null)
                 {
-                    foreach (var target in DataCenter.PartyMembers.GetDeath())
+                    foreach (IBattleChara target in DataCenter.PartyMembers.GetDeath())
                     {
-                        if (!target.IsEnemy())
+                        if (!target.IsEnemy() && !target.IsTargetMoving())
                         {
                             deathParty.Add(target);
                         }
                     }
                 }
-                var deathAll = new List<IBattleChara>();
-                foreach (var target in DataCenter.AllTargets.GetDeath())
+                List<IBattleChara> deathAll = [];
+                foreach (IBattleChara target in DataCenter.AllTargets.GetDeath())
                 {
-                    if (!target.IsEnemy())
+                    if (!target.IsEnemy() && !target.IsTargetMoving())
                     {
                         deathAll.Add(target);
                     }
                 }
-                var deathAllianceMembers = new List<IBattleChara>();
+                List<IBattleChara> deathAllianceMembers = [];
                 if (DataCenter.AllianceMembers != null)
                 {
-                    foreach (var target in DataCenter.AllianceMembers.GetDeath())
+                    foreach (IBattleChara target in DataCenter.AllianceMembers.GetDeath())
                     {
-                        if (!target.IsEnemy())
+                        if (!target.IsEnemy() && !target.IsTargetMoving())
                         {
                             deathAllianceMembers.Add(target);
                         }
                     }
                 }
-                var deathAllianceHealers = new List<IBattleChara>(deathParty);
-                var deathAllianceSupports = new List<IBattleChara>(deathParty);
+                List<IBattleChara> deathAllianceHealers = [];
+                List<IBattleChara> deathAllianceSupports = [];
 
                 if (DataCenter.AllianceMembers != null)
                 {
-                    foreach (var member in DataCenter.AllianceMembers)
+                    foreach (IBattleChara member in DataCenter.AllianceMembers)
                     {
-                        if (member.IsJobCategory(JobRole.Healer))
+                        if (member.IsJobCategory(JobRole.Healer) && !member.IsTargetMoving())
                         {
                             deathAllianceHealers.Add(member);
                         }
-                        if (member.IsJobCategory(JobRole.Healer) || member.IsJobCategory(JobRole.Tank))
+                        if ((member.IsJobCategory(JobRole.Healer) || member.IsJobCategory(JobRole.Tank)) && !member.IsTargetMoving())
                         {
                             deathAllianceSupports.Add(member);
                         }
                     }
                 }
 
-                var raisePartyAndAllianceSupports = new List<IBattleChara>(deathParty);
-                raisePartyAndAllianceSupports.AddRange(deathAllianceSupports);
+                RaiseType raisetype = Service.Config.RaiseType;
 
-                var raisePartyAndAllianceHealers = new List<IBattleChara>(deathParty);
-                raisePartyAndAllianceHealers.AddRange(deathAllianceHealers);
+                List<IBattleChara> validRaiseTargets = [.. deathParty];
 
-                var raisetype = Service.Config.RaiseType;
-
-                var validRaiseTargets = new List<IBattleChara>();
-
-                if (raisetype == RaiseType.PartyOnly)
+                if (raisetype == RaiseType.PartyAndAllianceSupports)
                 {
-                    validRaiseTargets.AddRange(deathParty);
-                }
-                else if (raisetype == RaiseType.PartyAndAllianceSupports)
-                {
-                    validRaiseTargets.AddRange(raisePartyAndAllianceSupports);
+                    validRaiseTargets.AddRange(deathAllianceSupports);
                 }
                 else if (raisetype == RaiseType.PartyAndAllianceHealers)
                 {
-                    validRaiseTargets.AddRange(raisePartyAndAllianceHealers);
+                    validRaiseTargets.AddRange(deathAllianceHealers);
                 }
                 else if (raisetype == RaiseType.All)
                 {
-                    validRaiseTargets.AddRange(deathAll);
+                    // Add all non-party deaths except those already in party
+                    foreach (var target in deathAll)
+                    {
+                        if (!deathParty.Contains(target))
+                        {
+                            validRaiseTargets.Add(target);
+                        }
+                    }
                 }
+                // For PartyOnly, validRaiseTargets is just deathParty
 
-                foreach (RaiseType type in Enum.GetValues(typeof(RaiseType)))
+                foreach (RaiseType type in Enum.GetValues<RaiseType>())
                 {
-                    var deathTarget = GetPriorityDeathTarget(validRaiseTargets, type);
-                    if (deathTarget != null) return deathTarget;
+                    IBattleChara? deathTarget = GetPriorityDeathTarget(validRaiseTargets, type);
+                    if (deathTarget != null)
+                    {
+                        return deathTarget;
+                    }
                 }
             }
             catch (Exception ex)
             {
-                Svc.Log.Error($"Error in GetDeathTarget: {ex.Message}");
+                PluginLog.Error($"Error in GetDeathTarget: {ex.Message}");
             }
         }
         return null;
@@ -242,14 +264,17 @@ internal static partial class TargetUpdater
 
     private static IBattleChara? GetPriorityDeathTarget(List<IBattleChara> validRaiseTargets, RaiseType raiseType = RaiseType.PartyOnly)
     {
-        if (validRaiseTargets.Count == 0) return null;
+        if (validRaiseTargets.Count == 0)
+        {
+            return null;
+        }
 
-        var deathTanks = new List<IBattleChara>();
-        var deathHealers = new List<IBattleChara>();
-        var deathOffHealers = new List<IBattleChara>();
-        var deathOthers = new List<IBattleChara>();
+        List<IBattleChara> deathTanks = [];
+        List<IBattleChara> deathHealers = [];
+        List<IBattleChara> deathOffHealers = [];
+        List<IBattleChara> deathOthers = [];
 
-        foreach (var chara in validRaiseTargets)
+        foreach (IBattleChara chara in validRaiseTargets)
         {
             if (chara.IsJobCategory(JobRole.Tank))
             {
@@ -280,32 +305,38 @@ internal static partial class TargetUpdater
             deathOthers.Reverse();
         }
 
-        if (deathTanks.Count > 1) return deathTanks[0];
-        if (deathHealers.Count > 0) return deathHealers[0];
-        if (deathTanks.Count > 0) return deathTanks[0];
-        if (Service.Config.OffRaiserRaise && deathOffHealers.Count > 0) return deathOffHealers[0];
+        if (deathTanks.Count > 1)
+        {
+            return deathTanks[0];
+        }
 
-        return deathOthers.Count > 0 ? deathOthers[0] : null;
+        return deathHealers.Count > 0
+            ? deathHealers[0]
+            : deathTanks.Count > 0
+            ? deathTanks[0]
+            : Service.Config.OffRaiserRaise && deathOffHealers.Count > 0
+            ? deathOffHealers[0]
+            : deathOthers.Count > 0 ? deathOthers[0] : null;
     }
 
     private static IBattleChara? GetDispelTarget()
     {
-        if (Player.Job == Job.WHM || Player.Job == Job.SCH || Player.Job == Job.AST || Player.Job == Job.SGE ||
-            Player.Job == Job.BRD)
+        if (Player.Job is Job.WHM or Job.SCH or Job.AST or Job.SGE or
+            Job.BRD)
         {
-            var weakenPeople = new List<IBattleChara>();
-            var dyingPeople = new List<IBattleChara>();
+            List<IBattleChara> weakenPeople = [];
+            List<IBattleChara> dyingPeople = [];
 
             AddDispelTargets(DataCenter.PartyMembers, weakenPeople);
 
-            foreach (var person in weakenPeople)
+            foreach (IBattleChara person in weakenPeople)
             {
                 bool hasDangerous = false;
                 if (person.StatusList != null)
                 {
                     for (int i = 0; i < person.StatusList.Length; i++)
                     {
-                        var status = person.StatusList[i];
+                        Dalamud.Game.ClientState.Statuses.Status? status = person.StatusList[i];
                         if (status != null && status.IsDangerous())
                         {
                             hasDangerous = true;
@@ -326,9 +357,12 @@ internal static partial class TargetUpdater
 
     private static void AddDispelTargets(List<IBattleChara>? members, List<IBattleChara> targetList)
     {
-        if (members == null) return;
+        if (members == null)
+        {
+            return;
+        }
 
-        foreach (var member in members)
+        foreach (IBattleChara member in members)
         {
             try
             {
@@ -336,7 +370,7 @@ internal static partial class TargetUpdater
                 {
                     for (int i = 0; i < member.StatusList.Length; i++)
                     {
-                        var status = member.StatusList[i];
+                        Dalamud.Game.ClientState.Statuses.Status? status = member.StatusList[i];
                         if (status != null && status.CanDispel())
                         {
                             targetList.Add(member);
@@ -347,7 +381,7 @@ internal static partial class TargetUpdater
             }
             catch (NullReferenceException ex)
             {
-                Svc.Log.Error($"NullReferenceException in AddDispelTargets for member {member?.ToString()}: {ex.Message}");
+                PluginLog.Error($"NullReferenceException in AddDispelTargets for member {member?.ToString()}: {ex.Message}");
             }
         }
     }
@@ -357,9 +391,9 @@ internal static partial class TargetUpdater
         IBattleChara? closestTarget = null;
         float closestDistance = float.MaxValue;
 
-        foreach (var target in targets)
+        foreach (IBattleChara target in targets)
         {
-            var distance = ObjectHelper.DistanceToPlayer(target);
+            float distance = ObjectHelper.DistanceToPlayer(target);
             if (distance < closestDistance)
             {
                 closestDistance = distance;
@@ -372,17 +406,21 @@ internal static partial class TargetUpdater
 
     private static void UpdateTimeToKill()
     {
-        var now = DateTime.Now;
-        if (now - _lastUpdateTimeToKill < TimeToKillUpdateInterval) return;
+        DateTime now = DateTime.Now;
+        if (now - _lastUpdateTimeToKill < TimeToKillUpdateInterval)
+        {
+            return;
+        }
+
         _lastUpdateTimeToKill = now;
 
         if (DataCenter.RecordedHP.Count >= DataCenter.HP_RECORD_TIME)
         {
-            DataCenter.RecordedHP.Dequeue();
+            _ = DataCenter.RecordedHP.Dequeue();
         }
 
-        var currentHPs = new SortedList<ulong, float>();
-        foreach (var target in DataCenter.AllTargets)
+        SortedList<ulong, float> currentHPs = [];
+        foreach (IBattleChara target in DataCenter.AllTargets)
         {
             if (target.CurrentHp != 0)
             {

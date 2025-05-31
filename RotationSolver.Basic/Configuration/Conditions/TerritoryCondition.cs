@@ -14,7 +14,11 @@ internal class TerritoryCondition : DelayCondition
         switch (TerritoryConditionType)
         {
             case TerritoryConditionType.TerritoryContentType:
-                if (DataCenter.Territory != null) result = (int)DataCenter.Territory.Id == TerritoryId;
+                if (DataCenter.Territory != null)
+                {
+                    result = (int)DataCenter.Territory.Id == TerritoryId;
+                }
+
                 break;
 
             case TerritoryConditionType.DutyName:

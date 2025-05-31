@@ -32,12 +32,8 @@ public unsafe struct Countdown
     {
         get
         {
-            var instance = (Countdown*)Framework.Instance()->GetUIModule()->GetAgentModule()->GetAgentByInternalId(AgentId.CountDownSettingDialog);
-            if (instance == null)
-            {
-                throw new InvalidOperationException("Countdown instance is null.");
-            }
-            return instance;
+            Countdown* instance = (Countdown*)Framework.Instance()->GetUIModule()->GetAgentModule()->GetAgentByInternalId(AgentId.CountDownSettingDialog);
+            return instance == null ? throw new InvalidOperationException("Countdown instance is null.") : instance;
         }
     }
 
@@ -48,13 +44,13 @@ public unsafe struct Countdown
     {
         get
         {
-            var inst = Instance;
+            Countdown* inst = Instance;
             if (inst == null)
             {
                 return 0;
             }
 
-            var remainingTime = inst->Active != 0 ? inst->Timer : 0;
+            float remainingTime = inst->Active != 0 ? inst->Timer : 0;
             return remainingTime;
         }
     }

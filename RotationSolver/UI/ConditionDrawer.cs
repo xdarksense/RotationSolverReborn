@@ -3,8 +3,8 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Utility;
-using ECommons.DalamudServices;
 using ECommons.ImGuiMethods;
+using ECommons.Logging;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration.Conditions;
 using RotationSolver.Data;
@@ -18,8 +18,15 @@ internal static class ConditionDrawer
 {
     internal static void DrawMain(this ConditionSet? conditionSet, ICustomRotation? rotation)
     {
-        if (conditionSet == null) return;
-        if (rotation == null) return;
+        if (conditionSet == null)
+        {
+            return;
+        }
+
+        if (rotation == null)
+        {
+            return;
+        }
 
         DrawCondition(conditionSet.IsTrue(rotation), conditionSet.GetHashCode().ToString(), ref conditionSet.Not);
         ImGui.SameLine();
@@ -28,10 +35,10 @@ internal static class ConditionDrawer
 
     internal static void DrawCondition(bool? tag, string id, ref bool isNot)
     {
-        float size = IconSize * (1 + 8 / 82);
+        float size = IconSize * (1 + (8 / 82));
         if (!tag.HasValue)
         {
-            if (IconSet.GetTexture("ui/uld/image2.tex", out var texture, true) || IconSet.GetTexture(0u, out texture))
+            if (IconSet.GetTexture("ui/uld/image2.tex", out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture, true) || IconSet.GetTexture(0u, out texture))
             {
                 if (ImGuiHelper.SilenceImageButton(texture.ImGuiHandle, Vector2.One * size, false, id))
                 {
@@ -43,7 +50,7 @@ internal static class ConditionDrawer
         }
         else
         {
-            if (IconSet.GetTexture("ui/uld/readycheck_hr1.tex", out var texture, true))
+            if (IconSet.GetTexture("ui/uld/readycheck_hr1.tex", out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture, true))
             {
                 if (ImGuiHelper.SilenceImageButton(texture.ImGuiHandle, Vector2.One * size,
                     new Vector2(tag.Value ? 0 : 0.5f, 0),
@@ -58,18 +65,18 @@ internal static class ConditionDrawer
 
     internal static void DrawCondition(bool? tag)
     {
-        float size = IconSize * (1 + 8 / 82);
+        float size = IconSize * (1 + (8 / 82));
 
         if (!tag.HasValue)
         {
-            if (IconSet.GetTexture("ui/uld/image2.tex", out var texture, true) || IconSet.GetTexture(0u, out texture))
+            if (IconSet.GetTexture("ui/uld/image2.tex", out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture, true) || IconSet.GetTexture(0u, out texture))
             {
                 ImGui.Image(texture.ImGuiHandle, Vector2.One * size);
             }
         }
         else
         {
-            if (IconSet.GetTexture("ui/uld/readycheck_hr1.tex", out var texture, true))
+            if (IconSet.GetTexture("ui/uld/readycheck_hr1.tex", out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture, true))
             {
                 ImGui.Image(texture.ImGuiHandle, Vector2.One * size,
                     new Vector2(tag.Value ? 0 : 0.5f, 0),
@@ -80,34 +87,44 @@ internal static class ConditionDrawer
 
     private static IEnumerable<MemberInfo> GetAllMethods(this Type? type, Func<Type, IEnumerable<MemberInfo>> getFunc)
     {
-        if (type == null || getFunc == null) return Array.Empty<MemberInfo>();
+        if (type == null || getFunc == null)
+        {
+            return Array.Empty<MemberInfo>();
+        }
 
-        var methods = getFunc(type);
-        var baseMethods = type.BaseType.GetAllMethods(getFunc);
+        IEnumerable<MemberInfo> methods = getFunc(type);
+        IEnumerable<MemberInfo> baseMethods = type.BaseType.GetAllMethods(getFunc);
 
         // Union without LINQ
-        var set = new HashSet<MemberInfo>(methods);
-        foreach (var m in baseMethods)
-            set.Add(m);
+        HashSet<MemberInfo> set = new(methods);
+        foreach (MemberInfo m in baseMethods)
+        {
+            _ = set.Add(m);
+        }
+
         return set;
     }
 
     public static bool DrawByteEnum<T>(string name, ref T value) where T : struct, Enum
     {
-        var allValues = Enum.GetValues<T>();
-        var tempList = new List<T>();
-        foreach (var i in allValues)
+        T[] allValues = Enum.GetValues<T>();
+        List<T> tempList = new();
+        foreach (T i in allValues)
         {
             if (i.GetAttribute<ObsoleteAttribute>() == null)
+            {
                 tempList.Add(i);
+            }
         }
-        var values = tempList.ToArray();
+        T[] values = tempList.ToArray();
 
-        var index = Array.IndexOf(values, value);
+        int index = Array.IndexOf(values, value);
 
-        var names = new string[values.Length];
+        string[] names = new string[values.Length];
         for (int i = 0; i < values.Length; i++)
+        {
             names[i] = values[i].GetDescription();
+        }
 
         if (ImGuiHelper.SelectableCombo(name, names, ref index))
         {
@@ -121,14 +138,14 @@ internal static class ConditionDrawer
     {
         ImGui.Text(name);
         id = "##" + id;
-        var result = DrawDragFloat(type, name1 + id, ref value.X);
+        bool result = DrawDragFloat(type, name1 + id, ref value.X);
         result |= DrawDragFloat(type, name2 + id, ref value.Y);
         return result;
     }
 
     public static bool DrawDragFloat3(ConfigUnitType type, string name, ref Vector3 value, string id, string name1, string name2, string name3, Func<Vector3>? func = null)
     {
-        var result = false;
+        bool result = false;
         if (func == null)
         {
             ImGui.Text(name);
@@ -153,13 +170,13 @@ internal static class ConditionDrawer
     {
         // Display the value with appropriate formatting based on the unit type
         ImGui.SameLine();
-        var show = type == ConfigUnitType.Percent ? $"{value * 100:F1}{type.ToSymbol()}" : $"{value:F2}{type.ToSymbol()}";
+        string show = type == ConfigUnitType.Percent ? $"{value * 100:F1}{type.ToSymbol()}" : $"{value:F2}{type.ToSymbol()}";
 
         // Set the width for the next item
         ImGui.SetNextItemWidth(Math.Max(50 * ImGuiHelpers.GlobalScale, ImGui.CalcTextSize(show).X));
 
         // Draw the appropriate control based on the unit type
-        var result = type == ConfigUnitType.Percent ? ImGui.SliderFloat(name, ref value, 0, 1, show)
+        bool result = type == ConfigUnitType.Percent ? ImGui.SliderFloat(name, ref value, 0, 1, show)
             : ImGui.DragFloat(name, ref value, 0.1f, 0, 0, show);
 
         // Append the type description to the tooltip if it is not null or empty
@@ -207,44 +224,54 @@ internal static class ConditionDrawer
     private const int count = 8;
     public static void ActionSelectorPopUp(string popUpId, CollapsingHeaderGroup group, ICustomRotation rotation, Action<IAction> action, Action? others = null)
     {
-        if (group == null) return;
+        if (group == null)
+        {
+            return;
+        }
 
-        using var popUp = ImRaii.Popup(popUpId);
+        using ImRaii.IEndObject popUp = ImRaii.Popup(popUpId);
 
-        if (!popUp.Success) return;
+        if (!popUp.Success)
+        {
+            return;
+        }
 
         others?.Invoke();
 
         group.ClearCollapsingHeader();
 
-        var filtered = new List<IBaseAction>();
-        foreach (var i in rotation.AllBaseActions)
+        List<IBaseAction> filtered = new();
+        foreach (IBaseAction i in rotation.AllBaseActions)
         {
             if (i.Action.IsInJob())
+            {
                 filtered.Add(i);
+            }
         }
-        var grouped = RotationUpdater.GroupActions(filtered.ToArray());
+        IEnumerable<IGrouping<string, IAction>>? grouped = RotationUpdater.GroupActions(filtered.ToArray());
 
-        foreach (var pair in grouped!)
+        foreach (IGrouping<string, IAction> pair in grouped!)
         {
             group.AddCollapsingHeader(() => pair.Key, () =>
             {
-                var index = 0;
-                // OrderBy(t => t.ID) removed
-                var items = pair.ToList();
+                int index = 0;
+                List<IAction> items = [.. pair];
                 items.Sort((a, b) => a.ID.CompareTo(b.ID));
-                foreach (var item in items)
+                foreach (IAction? item in items)
                 {
-                    if (!item.GetTexture(out var icon)) continue;
+                    if (!item.GetTexture(out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon))
+                    {
+                        continue;
+                    }
 
                     if (index++ % count != 0)
                     {
                         ImGui.SameLine();
                     }
 
-                    using (var group = ImRaii.Group())
+                    using (ImRaii.IEndObject group = ImRaii.Group())
                     {
-                        var cursor = ImGui.GetCursorPos();
+                        Vector2 cursor = ImGui.GetCursorPos();
                         if (ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, Vector2.One * IconSize, group.GetHashCode().ToString()))
                         {
                             action?.Invoke(item);
@@ -253,7 +280,7 @@ internal static class ConditionDrawer
                         ImGuiHelper.DrawActionOverlay(cursor, IconSize, 1);
                     }
 
-                    var name = item.Name;
+                    string name = item.Name;
                     if (!string.IsNullOrEmpty(name))
                     {
                         ImguiTooltips.HoveredTooltip(name);
@@ -273,11 +300,14 @@ internal static class ConditionDrawer
             return;
         }
 
-        condition.CheckBefore(rotation);
+        _ = condition.CheckBefore(rotation);
 
         condition.DrawBefore();
 
-        if (condition is DelayCondition delay) delay.DrawDelay();
+        if (condition is DelayCondition delay)
+        {
+            delay.DrawDelay();
+        }
 
         ImGui.SameLine();
 
@@ -301,7 +331,7 @@ internal static class ConditionDrawer
         ImGui.SameLine();
 
         ImGui.SetNextItemWidth(40 * ImGuiHelpers.GlobalScale);
-        ImGui.DragFloat($"##Offset Delay {condition.GetHashCode()}", ref condition.DelayOffset, 0.1f, MIN, MAX,
+        _ = ImGui.DragFloat($"##Offset Delay {condition.GetHashCode()}", ref condition.DelayOffset, 0.1f, MIN, MAX,
             $"{condition.DelayOffset:F1}{ConfigUnitType.Seconds.ToSymbol()}");
 
         ImguiTooltips.HoveredTooltip(UiString.ActionSequencer_Offset_Description.GetDescription() +
@@ -352,10 +382,12 @@ internal static class ConditionDrawer
 
     private static void DrawAfter(this NamedCondition namedCondition, ICustomRotation _)
     {
-        var namedConditions = DataCenter.CurrentConditionValue.NamedConditions;
-        var namesList = new List<string>();
-        foreach (var p in namedConditions)
+        (string Name, ConditionSet Condition)[] namedConditions = DataCenter.CurrentConditionValue.NamedConditions;
+        List<string> namesList = new();
+        foreach ((string Name, ConditionSet Condition) p in namedConditions)
+        {
             namesList.Add(p.Name);
+        }
 
         ImGuiHelper.SearchCombo($"##Comparation{namedCondition.GetHashCode()}", namedCondition.ConditionName, ref searchTxt,
             namesList.ToArray(), i => i.ToString(), i =>
@@ -368,28 +400,31 @@ internal static class ConditionDrawer
 
     private static void DrawAfter(this TraitCondition traitCondition, ICustomRotation rotation)
     {
-        var name = traitCondition._trait?.Name ?? string.Empty;
-        var popUpKey = "Trait Condition Pop Up" + traitCondition.GetHashCode().ToString();
+        string name = traitCondition._trait?.Name ?? string.Empty;
+        string popUpKey = "Trait Condition Pop Up" + traitCondition.GetHashCode().ToString();
 
-        using (var popUp = ImRaii.Popup(popUpKey))
+        using (ImRaii.IEndObject popUp = ImRaii.Popup(popUpKey))
         {
             if (popUp.Success)
             {
-                var index = 0;
-                foreach (var trait in rotation.AllTraits)
+                int index = 0;
+                foreach (Basic.Traits.IBaseTrait trait in rotation.AllTraits)
                 {
-                    if (!trait.GetTexture(out var traitIcon)) continue;
+                    if (!trait.GetTexture(out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? traitIcon))
+                    {
+                        continue;
+                    }
 
                     if (index++ % count != 0)
                     {
                         ImGui.SameLine();
                     }
 
-                    using (var group = ImRaii.Group())
+                    using (ImRaii.IEndObject group = ImRaii.Group())
                     {
                         if (group.Success)
                         {
-                            var cursor = ImGui.GetCursorPos();
+                            Vector2 cursor = ImGui.GetCursorPos();
                             if (ImGuiHelper.NoPaddingNoColorImageButton(traitIcon.ImGuiHandle, Vector2.One * IconSize, trait.GetHashCode().ToString()))
                             {
                                 traitCondition.TraitID = trait.ID;
@@ -399,7 +434,7 @@ internal static class ConditionDrawer
                         }
                     }
 
-                    var tooltip = trait.Name;
+                    string tooltip = trait.Name;
                     if (!string.IsNullOrEmpty(tooltip))
                     {
                         ImguiTooltips.HoveredTooltip(tooltip);
@@ -408,46 +443,52 @@ internal static class ConditionDrawer
             }
         }
 
-        if (traitCondition._trait?.GetTexture(out var icon) ?? false || IconSet.GetTexture(4, out icon))
+        if (traitCondition._trait?.GetTexture(out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon) ?? false || IconSet.GetTexture(4, out icon))
         {
-            var cursor = ImGui.GetCursorPos();
+            Vector2 cursor = ImGui.GetCursorPos();
             if (ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, Vector2.One * IconSize, traitCondition.GetHashCode().ToString()))
             {
-                if (!ImGui.IsPopupOpen(popUpKey)) ImGui.OpenPopup(popUpKey);
+                if (!ImGui.IsPopupOpen(popUpKey))
+                {
+                    ImGui.OpenPopup(popUpKey);
+                }
             }
             ImGuiHelper.DrawActionOverlay(cursor, IconSize, -1);
             ImguiTooltips.HoveredTooltip(name);
         }
 
         ImGui.SameLine();
-        var i = 0;
-        ImGuiHelper.SelectableCombo($"##Category{traitCondition.GetHashCode()}",
+        int i = 0;
+        _ = ImGuiHelper.SelectableCombo($"##Category{traitCondition.GetHashCode()}",
         [
             UiString.ActionConditionType_EnoughLevel.GetDescription()
         ], ref i);
         ImGui.SameLine();
     }
 
-    private static readonly CollapsingHeaderGroup _actionsList = new CollapsingHeaderGroup(new Dictionary<Func<string>, Action>())
+    private static readonly CollapsingHeaderGroup _actionsList = new([])
     {
         HeaderSize = 12,
     };
 
-    static string searchTxt = string.Empty;
+    private static string searchTxt = string.Empty;
 
     private static void DrawAfter(this ActionCondition actionCondition, ICustomRotation rotation)
     {
-        var name = actionCondition._action?.Name ?? string.Empty;
-        var popUpKey = "Action Condition Pop Up" + actionCondition.GetHashCode().ToString();
+        string name = actionCondition._action?.Name ?? string.Empty;
+        string popUpKey = "Action Condition Pop Up" + actionCondition.GetHashCode().ToString();
 
         ActionSelectorPopUp(popUpKey, _actionsList, rotation, item => actionCondition.ID = (ActionID)item.ID);
 
-        if ((actionCondition._action?.GetTexture(out var icon) ?? false) || IconSet.GetTexture(4, out icon))
+        if ((actionCondition._action?.GetTexture(out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon) ?? false) || IconSet.GetTexture(4, out icon))
         {
-            var cursor = ImGui.GetCursorPos();
+            Vector2 cursor = ImGui.GetCursorPos();
             if (ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, Vector2.One * IconSize, actionCondition.GetHashCode().ToString()))
             {
-                if (!ImGui.IsPopupOpen(popUpKey)) ImGui.OpenPopup(popUpKey);
+                if (!ImGui.IsPopupOpen(popUpKey))
+                {
+                    ImGui.OpenPopup(popUpKey);
+                }
             }
             ImGuiHelper.DrawActionOverlay(cursor, IconSize, 1);
             ImguiTooltips.HoveredTooltip(name);
@@ -455,13 +496,13 @@ internal static class ConditionDrawer
 
         ImGui.SameLine();
 
-        DrawByteEnum($"##Category{actionCondition.GetHashCode()}", ref actionCondition.ActionConditionType);
+        _ = DrawByteEnum($"##Category{actionCondition.GetHashCode()}", ref actionCondition.ActionConditionType);
 
         switch (actionCondition.ActionConditionType)
         {
             case ActionConditionType.Elapsed:
             case ActionConditionType.Remain:
-                DrawDragFloat(ConfigUnitType.Seconds, $"##Seconds{actionCondition.GetHashCode()}", ref actionCondition.Time);
+                _ = DrawDragFloat(ConfigUnitType.Seconds, $"##Seconds{actionCondition.GetHashCode()}", ref actionCondition.Time);
                 break;
 
             case ActionConditionType.ElapsedGCD:
@@ -477,23 +518,33 @@ internal static class ConditionDrawer
                 break;
 
             case ActionConditionType.CanUse:
-                var popUpId = "Can Use Id" + actionCondition.GetHashCode().ToString();
-                var option = (CanUseOption)actionCondition.Param1;
+                string popUpId = "Can Use Id" + actionCondition.GetHashCode().ToString();
+                CanUseOption option = (CanUseOption)actionCondition.Param1;
 
                 if (ImGui.Selectable($"{option}##CanUse{actionCondition.GetHashCode()}"))
                 {
-                    if (!ImGui.IsPopupOpen(popUpId)) ImGui.OpenPopup(popUpId);
+                    if (!ImGui.IsPopupOpen(popUpId))
+                    {
+                        ImGui.OpenPopup(popUpId);
+                    }
                 }
 
-                using (var popUp = ImRaii.Popup(popUpId))
+                using (ImRaii.IEndObject popUp = ImRaii.Popup(popUpId))
                 {
                     if (popUp.Success)
                     {
-                        var showedValues = Enum.GetValues<CanUseOption>().Where(i => i.GetAttribute<JsonIgnoreAttribute>() == null);
-
-                        foreach (var value in showedValues)
+                        List<CanUseOption> showedValuesList = [];
+                        foreach (CanUseOption i in Enum.GetValues<CanUseOption>())
                         {
-                            var b = option.HasFlag(value);
+                            if (i.GetAttribute<JsonIgnoreAttribute>() == null)
+                            {
+                                showedValuesList.Add(i);
+                            }
+                        }
+
+                        foreach (CanUseOption value in showedValuesList)
+                        {
+                            bool b = option.HasFlag(value);
                             if (ImGui.Checkbox(value.GetDescription(), ref b))
                             {
                                 option ^= value;
@@ -506,7 +557,7 @@ internal static class ConditionDrawer
 
             case ActionConditionType.CurrentCharges:
             case ActionConditionType.MaxCharges:
-                DrawCondition(actionCondition, ref actionCondition.Param2);
+                _ = DrawCondition(actionCondition, ref actionCondition.Param2);
 
                 if (DrawDragInt($"{UiString.ActionSequencer_Charges.GetDescription()}##Charges{actionCondition.GetHashCode()}", ref actionCondition.Param1))
                 {
@@ -522,13 +573,13 @@ internal static class ConditionDrawer
 
         ImGui.SameLine();
 
-        DrawByteEnum($"##Rule{conditionSet.GetHashCode()}", ref conditionSet.Type);
+        _ = DrawByteEnum($"##Rule{conditionSet.GetHashCode()}", ref conditionSet.Type);
 
         ImGui.Spacing();
 
         for (int i = 0; i < conditionSet.Conditions.Count; i++)
         {
-            var condition = conditionSet.Conditions[i];
+            ICondition condition = conditionSet.Conditions[i];
 
             void Delete()
             {
@@ -551,11 +602,11 @@ internal static class ConditionDrawer
 
             void Copy()
             {
-                var str = JsonConvert.SerializeObject(conditionSet.Conditions[i], Formatting.Indented);
+                string str = JsonConvert.SerializeObject(conditionSet.Conditions[i], Formatting.Indented);
                 ImGui.SetClipboardText(str);
             }
 
-            var key = $"Condition Pop Up: {condition.GetHashCode()}";
+            string key = $"Condition Pop Up: {condition.GetHashCode()}";
 
             ImGuiHelper.DrawHotKeysPopup(key, string.Empty,
                 (UiString.ConfigWindow_List_Remove.GetDescription(), Delete, ["Delete"]),
@@ -592,7 +643,7 @@ internal static class ConditionDrawer
                 ImGui.OpenPopup("Popup" + conditionSet.GetHashCode().ToString());
             }
 
-            using var popUp = ImRaii.Popup("Popup" + conditionSet.GetHashCode().ToString());
+            using ImRaii.IEndObject popUp = ImRaii.Popup("Popup" + conditionSet.GetHashCode().ToString());
             if (popUp)
             {
                 AddOneCondition<ConditionSet>(UiString.ConfigWindow_ConditionSet.GetDescription());
@@ -604,15 +655,15 @@ internal static class ConditionDrawer
                 AddOneCondition<TerritoryCondition>(UiString.ConfigWindow_Territoryset.GetDescription());
                 if (ImGui.Selectable(UiString.ActionSequencer_FromClipboard.GetDescription()))
                 {
-                    var str = ImGui.GetClipboardText();
+                    string str = ImGui.GetClipboardText();
                     try
                     {
-                        var set = JsonConvert.DeserializeObject<ICondition>(str, new IConditionConverter())!;
+                        ICondition set = JsonConvert.DeserializeObject<ICondition>(str, new IConditionConverter())!;
                         conditionSet.Conditions.Add(set);
                     }
                     catch (Exception ex)
                     {
-                        Svc.Log.Warning(ex, "Failed to load the condition.");
+                        PluginLog.Warning($"Failed to load the condition: {ex.Message}");
                     }
                     ImGui.CloseCurrentPopup();
                 }
@@ -631,7 +682,7 @@ internal static class ConditionDrawer
 
     private static void DrawAfter(this RotationCondition rotationCondition, ICustomRotation rotation)
     {
-        DrawByteEnum($"##Category{rotationCondition.GetHashCode()}", ref rotationCondition.ComboConditionType);
+        _ = DrawByteEnum($"##Category{rotationCondition.GetHashCode()}", ref rotationCondition.ComboConditionType);
 
         switch (rotationCondition.ComboConditionType)
         {
@@ -653,9 +704,9 @@ internal static class ConditionDrawer
                     rotationCondition.PropertyName = i.Name;
                 });
 
-                DrawCondition(rotationCondition, ref rotationCondition.Condition);
+                _ = DrawCondition(rotationCondition, ref rotationCondition.Condition);
 
-                DrawDragInt($"##Value{rotationCondition.GetHashCode()}", ref rotationCondition.Param1);
+                _ = DrawDragInt($"##Value{rotationCondition.GetHashCode()}", ref rotationCondition.Param1);
 
                 break;
 
@@ -667,21 +718,21 @@ internal static class ConditionDrawer
                     rotationCondition.PropertyName = i.Name;
                 });
 
-                DrawCondition(rotationCondition, ref rotationCondition.Condition);
+                _ = DrawCondition(rotationCondition, ref rotationCondition.Condition);
 
-                DrawDragFloat(ConfigUnitType.None, $"##Value{rotationCondition.GetHashCode()}", ref rotationCondition.Param2);
+                _ = DrawDragFloat(ConfigUnitType.None, $"##Value{rotationCondition.GetHashCode()}", ref rotationCondition.Param2);
                 break;
 
             case ComboConditionType.Last:
                 ImGui.SameLine();
 
-                var names = new string[]
+                string[] names = new string[]
                     {
                         nameof(CustomRotation.IsLastGCD),
                         nameof(CustomRotation.IsLastAction),
                         nameof(CustomRotation.IsLastAbility),
                     };
-                var index = Math.Max(0, Array.IndexOf(names, rotationCondition.MethodName));
+                int index = Math.Max(0, Array.IndexOf(names, rotationCondition.MethodName));
                 if (ImGuiHelper.SelectableCombo($"##Last{rotationCondition.GetHashCode()}", names, ref index))
                 {
                     rotationCondition.MethodName = names[index];
@@ -689,24 +740,27 @@ internal static class ConditionDrawer
 
                 ImGui.SameLine();
 
-                var name = rotationCondition._action?.Name ?? string.Empty;
+                string name = rotationCondition._action?.Name ?? string.Empty;
 
-                var popUpKey = "Rotation Condition Pop Up" + rotationCondition.GetHashCode().ToString();
+                string popUpKey = "Rotation Condition Pop Up" + rotationCondition.GetHashCode().ToString();
 
                 ActionSelectorPopUp(popUpKey, _actionsList, rotation, item => rotationCondition.ID = (ActionID)item.ID);
 
-                if (rotationCondition._action?.GetTexture(out var icon) ?? false || IconSet.GetTexture(4, out icon))
+                if (rotationCondition._action?.GetTexture(out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon) ?? false || IconSet.GetTexture(4, out icon))
                 {
-                    var cursor = ImGui.GetCursorPos();
+                    Vector2 cursor = ImGui.GetCursorPos();
                     if (ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, Vector2.One * IconSize, rotationCondition.GetHashCode().ToString()))
                     {
-                        if (!ImGui.IsPopupOpen(popUpKey)) ImGui.OpenPopup(popUpKey);
+                        if (!ImGui.IsPopupOpen(popUpKey))
+                        {
+                            ImGui.OpenPopup(popUpKey);
+                        }
                     }
                     ImGuiHelper.DrawActionOverlay(cursor, IconSize, 1);
                 }
 
                 ImGui.SameLine();
-                ImGuiHelper.SelectableCombo($"##Adjust{rotationCondition.GetHashCode()}",
+                _ = ImGuiHelper.SelectableCombo($"##Adjust{rotationCondition.GetHashCode()}",
                 [
                     UiString.ActionSequencer_Original.GetDescription(),
                     UiString.ActionSequencer_Adjusted.GetDescription(),
@@ -722,13 +776,15 @@ internal static class ConditionDrawer
         {
             if (_allStatus == null)
             {
-                var ids = Enum.GetValues<StatusID>();
-                var tempList = new List<Status>();
-                foreach (var id in ids)
+                StatusID[] ids = Enum.GetValues<StatusID>();
+                List<Status> tempList = new();
+                foreach (StatusID id in ids)
                 {
-                    var status = Service.GetSheet<Status>().GetRow((uint)id);
+                    Status status = Service.GetSheet<Status>().GetRow((uint)id);
                     if (status.RowId != 0)
+                    {
                         tempList.Add(status);
+                    }
                 }
                 _allStatus = tempList.ToArray();
             }
@@ -738,14 +794,13 @@ internal static class ConditionDrawer
 
     private static void DrawAfter(this TargetCondition targetCondition, ICustomRotation rotation)
     {
-        DelayCondition.CheckBaseAction(rotation, targetCondition.ID, ref targetCondition._action);
+        _ = DelayCondition.CheckBaseAction(rotation, targetCondition.ID, ref targetCondition._action);
 
         if (targetCondition.StatusId != StatusID.None &&
             (targetCondition.Status == null || targetCondition.Status.Value.RowId != (uint)targetCondition.StatusId))
         {
-            // Remove LINQ FirstOrDefault
             Status? found = null;
-            foreach (var a in AllStatus)
+            foreach (Status a in AllStatus)
             {
                 if (a.RowId == (uint)targetCondition.StatusId)
                 {
@@ -756,7 +811,7 @@ internal static class ConditionDrawer
             targetCondition.Status = found;
         }
 
-        var popUpKey = "Target Condition Pop Up" + targetCondition.GetHashCode().ToString();
+        string popUpKey = "Target Condition Pop Up" + targetCondition.GetHashCode().ToString();
 
         ActionSelectorPopUp(popUpKey, _actionsList, rotation, item => targetCondition.ID = (ActionID)item.ID, () =>
         {
@@ -782,7 +837,7 @@ internal static class ConditionDrawer
             }
         });
 
-        if (targetCondition._action != null ? targetCondition._action.GetTexture(out var icon) || IconSet.GetTexture(4, out icon)
+        if (targetCondition._action != null ? targetCondition._action.GetTexture(out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon) || IconSet.GetTexture(4, out icon)
             : IconSet.GetTexture(targetCondition.TargetType switch
             {
                 TargetType.Target => 16u,
@@ -791,22 +846,25 @@ internal static class ConditionDrawer
                 _ => 0,
             }, out icon))
         {
-            var cursor = ImGui.GetCursorPos();
+            Vector2 cursor = ImGui.GetCursorPos();
             if (ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, Vector2.One * IconSize, targetCondition.GetHashCode().ToString()))
             {
-                if (!ImGui.IsPopupOpen(popUpKey)) ImGui.OpenPopup(popUpKey);
+                if (!ImGui.IsPopupOpen(popUpKey))
+                {
+                    ImGui.OpenPopup(popUpKey);
+                }
             }
             ImGuiHelper.DrawActionOverlay(cursor, IconSize, 1);
 
-            var description = targetCondition._action != null ? string.Format(UiString.ActionSequencer_ActionTarget.GetDescription(), targetCondition._action.Name)
+            string description = targetCondition._action != null ? string.Format(UiString.ActionSequencer_ActionTarget.GetDescription(), targetCondition._action.Name)
                 : targetCondition.TargetType.GetDescription();
             ImguiTooltips.HoveredTooltip(description);
         }
 
         ImGui.SameLine();
-        DrawByteEnum($"##Category{targetCondition.GetHashCode()}", ref targetCondition.TargetConditionType);
+        _ = DrawByteEnum($"##Category{targetCondition.GetHashCode()}", ref targetCondition.TargetConditionType);
 
-        var popupId = "Status Finding Popup" + targetCondition.GetHashCode().ToString();
+        string popupId = "Status Finding Popup" + targetCondition.GetHashCode().ToString();
 
         RotationConfigWindow.StatusPopUp(popupId, AllStatus, ref searchTxt, status =>
         {
@@ -816,12 +874,15 @@ internal static class ConditionDrawer
 
         void DrawStatusIcon()
         {
-            if (IconSet.GetTexture(targetCondition.Status?.Icon ?? 16220, out var icon)
+            if (IconSet.GetTexture(targetCondition.Status?.Icon ?? 16220, out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon)
                 || IconSet.GetTexture(16220, out icon))
             {
                 if (ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, new Vector2(IconSize * 3 / 4, IconSize) * ImGuiHelpers.GlobalScale, targetCondition.GetHashCode().ToString()))
                 {
-                    if (!ImGui.IsPopupOpen(popupId)) ImGui.OpenPopup(popupId);
+                    if (!ImGui.IsPopupOpen(popupId))
+                    {
+                        ImGui.OpenPopup(popupId);
+                    }
                 }
                 ImguiTooltips.HoveredTooltip(targetCondition.Status?.Name.ExtractText() ?? string.Empty);
             }
@@ -835,7 +896,7 @@ internal static class ConditionDrawer
 
                 ImGui.SameLine();
 
-                var check = targetCondition.FromSelf ? 1 : 0;
+                int check = targetCondition.FromSelf ? 1 : 0;
                 if (ImGuiHelper.SelectableCombo($"From Self {targetCondition.GetHashCode()}",
                 [
                     UiString.ActionSequencer_StatusAll.GetDescription(),
@@ -862,9 +923,9 @@ internal static class ConditionDrawer
                     targetCondition.FromSelf = check != 0;
                 }
 
-                DrawCondition(targetCondition, ref targetCondition.Param2);
+                _ = DrawCondition(targetCondition, ref targetCondition.Param2);
 
-                DrawDragFloat(ConfigUnitType.Seconds, $"s##Seconds{targetCondition.GetHashCode()}", ref targetCondition.DistanceOrTime);
+                _ = DrawDragFloat(ConfigUnitType.Seconds, $"s##Seconds{targetCondition.GetHashCode()}", ref targetCondition.DistanceOrTime);
                 break;
 
 
@@ -884,12 +945,12 @@ internal static class ConditionDrawer
                     targetCondition.FromSelf = check != 0;
                 }
 
-                DrawDragInt($"GCD##GCD{targetCondition.GetHashCode()}", ref targetCondition.GCD);
-                DrawDragFloat(ConfigUnitType.Seconds, $"{UiString.ActionSequencer_TimeOffset.GetDescription()}##Ability{targetCondition.GetHashCode()}", ref targetCondition.DistanceOrTime);
+                _ = DrawDragInt($"GCD##GCD{targetCondition.GetHashCode()}", ref targetCondition.GCD);
+                _ = DrawDragFloat(ConfigUnitType.Seconds, $"{UiString.ActionSequencer_TimeOffset.GetDescription()}##Ability{targetCondition.GetHashCode()}", ref targetCondition.DistanceOrTime);
                 break;
 
             case TargetConditionType.Distance:
-                DrawCondition(targetCondition, ref targetCondition.Param2);
+                _ = DrawCondition(targetCondition, ref targetCondition.Param2);
 
                 if (DrawDragFloat(ConfigUnitType.Yalms, $"##yalm{targetCondition.GetHashCode()}", ref targetCondition.DistanceOrTime))
                 {
@@ -900,48 +961,48 @@ internal static class ConditionDrawer
             case TargetConditionType.CastingAction:
                 ImGui.SameLine();
                 ImGuiHelper.SetNextWidthWithName(targetCondition.CastingActionName);
-                ImGui.InputText($"Ability Name##CastingActionName{targetCondition.GetHashCode()}", ref targetCondition.CastingActionName, 128);
+                _ = ImGui.InputText($"Ability Name##CastingActionName{targetCondition.GetHashCode()}", ref targetCondition.CastingActionName, 128);
                 break;
 
             case TargetConditionType.CastingActionTime:
-                DrawCondition(targetCondition, ref targetCondition.Param2);
-                DrawDragFloat(ConfigUnitType.Seconds, $"##CastingActionTimeUntil{targetCondition.GetHashCode()}", ref targetCondition.DistanceOrTime);
+                _ = DrawCondition(targetCondition, ref targetCondition.Param2);
+                _ = DrawDragFloat(ConfigUnitType.Seconds, $"##CastingActionTimeUntil{targetCondition.GetHashCode()}", ref targetCondition.DistanceOrTime);
                 break;
 
             case TargetConditionType.HPRatio:
-                DrawCondition(targetCondition, ref targetCondition.Param2);
+                _ = DrawCondition(targetCondition, ref targetCondition.Param2);
 
-                DrawDragFloat(ConfigUnitType.Percent, $"##HPRatio{targetCondition.GetHashCode()}", ref targetCondition.DistanceOrTime);
+                _ = DrawDragFloat(ConfigUnitType.Percent, $"##HPRatio{targetCondition.GetHashCode()}", ref targetCondition.DistanceOrTime);
                 break;
 
             case TargetConditionType.MP:
             case TargetConditionType.HP:
-                DrawCondition(targetCondition, ref targetCondition.Param2);
+                _ = DrawCondition(targetCondition, ref targetCondition.Param2);
 
-                DrawDragInt($"##HPorMP{targetCondition.GetHashCode()}", ref targetCondition.GCD);
+                _ = DrawDragInt($"##HPorMP{targetCondition.GetHashCode()}", ref targetCondition.GCD);
                 break;
 
             case TargetConditionType.TimeToKill:
-                DrawCondition(targetCondition, ref targetCondition.Param2);
+                _ = DrawCondition(targetCondition, ref targetCondition.Param2);
 
-                DrawDragFloat(ConfigUnitType.Seconds, $"##TimeToKill{targetCondition.GetHashCode()}", ref targetCondition.DistanceOrTime);
+                _ = DrawDragFloat(ConfigUnitType.Seconds, $"##TimeToKill{targetCondition.GetHashCode()}", ref targetCondition.DistanceOrTime);
                 break;
 
             case TargetConditionType.TargetName:
                 ImGui.SameLine();
                 ImGuiHelper.SetNextWidthWithName(targetCondition.CastingActionName);
-                ImGui.InputText($"Name##TargetName{targetCondition.GetHashCode()}", ref targetCondition.CastingActionName, 128);
+                _ = ImGui.InputText($"Name##TargetName{targetCondition.GetHashCode()}", ref targetCondition.CastingActionName, 128);
                 break;
             case TargetConditionType.TargetRole:
                 ImGui.SameLine();
                 ImGuiHelper.SetNextWidthWithName(targetCondition.CombatRole.ToString());
-                ImGui.InputText($"Name##TargetRole{targetCondition.GetHashCode()}", ref targetCondition.CombatRole, 128);
+                _ = ImGui.InputText($"Name##TargetRole{targetCondition.GetHashCode()}", ref targetCondition.CombatRole, 128);
                 break;
         }
 
         if (targetCondition._action == null && targetCondition.TargetType == TargetType.Target)
         {
-            using var style = ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudRed);
+            using ImRaii.Color style = ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DalamudRed);
             ImGui.TextWrapped(UiString.ConfigWindow_Condition_TargetWarning.GetDescription());
         }
     }
@@ -953,14 +1014,18 @@ internal static class ConditionDrawer
         {
             if (_territoryNames == null)
             {
-                var sheet = Service.GetSheet<TerritoryType>();
-                var tempList = new List<string>();
+                Lumina.Excel.ExcelSheet<TerritoryType> sheet = Service.GetSheet<TerritoryType>();
+                List<string> tempList = new();
                 if (sheet != null)
                 {
-                    foreach (var t in sheet)
+                    foreach (TerritoryType t in sheet)
                     {
-                        var name = t.PlaceName.Value.Name.ExtractText();
-                        if (string.IsNullOrEmpty(name)) continue;
+                        string name = t.PlaceName.Value.Name.ExtractText();
+                        if (string.IsNullOrEmpty(name))
+                        {
+                            continue;
+                        }
+
                         tempList.Add(name);
                     }
                 }
@@ -977,19 +1042,21 @@ internal static class ConditionDrawer
         {
             if (_dutyNames == null)
             {
-                var sheet = Service.GetSheet<ContentFinderCondition>();
-                var tempSet = new HashSet<string>();
+                Lumina.Excel.ExcelSheet<ContentFinderCondition> sheet = Service.GetSheet<ContentFinderCondition>();
+                HashSet<string> tempSet = new();
                 if (sheet != null)
                 {
-                    foreach (var t in sheet)
+                    foreach (ContentFinderCondition t in sheet)
                     {
-                        var name = t.Name.ExtractText();
+                        string name = t.Name.ExtractText();
                         if (!string.IsNullOrEmpty(name))
-                            tempSet.Add(name);
+                        {
+                            _ = tempSet.Add(name);
+                        }
                     }
                 }
                 // Reverse
-                var arr = new string[tempSet.Count];
+                string[] arr = new string[tempSet.Count];
                 tempSet.CopyTo(arr);
                 Array.Reverse(arr);
                 _dutyNames = arr;

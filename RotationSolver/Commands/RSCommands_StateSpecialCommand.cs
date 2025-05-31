@@ -1,7 +1,5 @@
 ﻿using ECommons.DalamudServices;
 using ECommons.GameHelpers;
-using RotationSolver.Extensions;
-using RotationSolver.Helpers;
 using RotationSolver.Updaters;
 
 namespace RotationSolver.Commands
@@ -16,10 +14,16 @@ namespace RotationSolver.Commands
 
         private static void UpdateToast()
         {
-            if (!Service.Config.ShowInfoOnToast) return;
+            if (!Service.Config.ShowInfoOnToast)
+            {
+                return;
+            }
 
             string currentMessage = $" {EntryString}";
-            if (currentMessage == _lastToastMessage) return;
+            if (currentMessage == _lastToastMessage)
+            {
+                return;
+            }
 
             Svc.Toasts.ShowQuest(currentMessage, new Dalamud.Game.Gui.Toast.QuestToastOptions
             {
@@ -29,7 +33,9 @@ namespace RotationSolver.Commands
             _lastToastMessage = currentMessage;
         }
 
-        public static unsafe void DoStateCommandType(StateCommandType stateType, int index = -1) => DoOneCommandType((type, role) => type.ToStateString(role), role =>
+        public static unsafe void DoStateCommandType(StateCommandType stateType, int index = -1)
+        {
+            DoOneCommandType((type, role) => type.ToStateString(role), role =>
         {
             if (DataCenter.State)
             {
@@ -38,6 +44,7 @@ namespace RotationSolver.Commands
             UpdateState(stateType, role);
             return stateType;
         });
+        }
 
         private static StateCommandType AdjustStateType(StateCommandType stateType, ref int index)
         {
@@ -102,24 +109,32 @@ namespace RotationSolver.Commands
             UpdateToast();
         }
 
-        private static void DoSpecialCommandType(SpecialCommandType specialType, bool sayout = true) => DoOneCommandType((type, role) => type.ToSpecialString(role), role =>
+        private static void DoSpecialCommandType(SpecialCommandType specialType, bool sayout = true)
+        {
+            DoOneCommandType((type, role) => type.ToSpecialString(role), role =>
         {
             _specialString = specialType.ToSpecialString(role);
             DataCenter.SpecialType = specialType;
-            if (sayout) UpdateToast();
+            if (sayout)
+            {
+                UpdateToast();
+            }
+
             return specialType;
         });
+        }
 
         private static void DoOneCommandType<T>(Func<T, JobRole, string> sayout, Func<JobRole, T> doingSomething)
             where T : struct, Enum
         {
-            var role = Player.Object?.ClassJob.Value.GetJobRole() ?? JobRole.None;
+            JobRole role = Player.Object?.ClassJob.Value.GetJobRole() ?? JobRole.None;
 
-            if (role == JobRole.None) return;
+            if (role == JobRole.None)
+            {
+                return;
+            }
 
-            T type = doingSomething(role);
-
-            if (Service.Config.SayOutStateChanged) SpeechHelper.Speak(sayout(type, role));
+            _ = doingSomething(role);
         }
     }
 }

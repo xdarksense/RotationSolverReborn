@@ -55,12 +55,6 @@ namespace RotationSolver.Data
         [Description("Search Result")]
         ConfigWindow_Search_Result,
 
-        [Description("Well, you must be a lazy player!")]
-        ConfigWindow_About_Clicking100k,
-
-        [Description("You're tiring RSR out - give it a break!")]
-        ConfigWindow_About_Clicking500k,
-
         [Description("This includes almost all information available in one combat frame, including the status of all party members, hostile target statuses, skill cooldowns, MP and HP of characters, character locations, hostile target casting status, combo state, combat duration, player level, etc.\n\nIt will then highlight the best action on the hotbar, or help you click it.")]
         ConfigWindow_About_Description,
 
@@ -70,8 +64,11 @@ namespace RotationSolver.Data
         [Description("RSR has helped you by clicking actions {0:N0} times.")]
         ConfigWindow_About_ClickingCount,
 
-        [Description("Macro")]
+        [Description("State Macros")]
         ConfigWindow_About_Macros,
+
+        [Description("Action and Setting Macros")]
+        ConfigWindow_About_SettingMacros,
 
         [Description("Compatibility")]
         ConfigWindow_About_Compatibility,
@@ -124,9 +121,6 @@ namespace RotationSolver.Data
         [Description("Used to customize when RSR uses specific actions automatically. Click on an action's icon in the left list. Below, you may set the conditions for when that specific action is used. Each action can have different conditions to override the default rotation behavior.")]
         ConfigWindow_Actions_Description,
 
-        [Description("Show on CD window")]
-        ConfigWindow_Actions_ShowOnCDWindow,
-
         [Description("Time-to-kill threshold required for this action to be used")]
         ConfigWindow_Actions_TTK,
 
@@ -148,13 +142,13 @@ namespace RotationSolver.Data
         [Description("Forced Conditions have higher priority. If Forced Conditions are met, Disabled Conditions will be ignored.")]
         ConfigWindow_Actions_ConditionDescription,
 
-        [Description("Forced Condition")]
+        [Description("Forced Condition (Unsupported)")]
         ConfigWindow_Actions_ForcedConditionSet,
 
         [Description("Conditions for forced automatic use of action")]
         ConfigWindow_Actions_ForcedConditionSet_Description,
 
-        [Description("Disabled Condition")]
+        [Description("Disabled Condition (Unsupported)")]
         ConfigWindow_Actions_DisabledConditionSet,
 
         [Description("Conditions that disable automatic use of an action")]
@@ -409,7 +403,7 @@ namespace RotationSolver.Data
         [Description("How RSR should use healing abilities")]
         ConfigWindow_Auto_HealingCondition_Description,
 
-        [Description("Custom State Condition")]
+        [Description("Custom State Condition (Unsupported)")]
         ConfigWindow_Auto_StateCondition,
 
         [Description("Heal Area Forced Condition")]
@@ -543,12 +537,6 @@ namespace RotationSolver.Data
 
         [Description("Please separately bind damage reduction/shield cooldowns in case RSR fails at a crucial moment in {0}!")]
         HighEndWarning,
-
-        [Description("Avarice addon was not detected. Please install it if you want positional indicators for RSR's overlay!")]
-        AvariceWarning,
-
-        [Description("TextToTalk addon was not detected. Please install it to enable RSR's audio notifications!")]
-        TextToTalkWarning,
 
         [Description("Use Forced Enable Condition")]
         ForcedEnableCondition,
@@ -700,12 +688,7 @@ namespace RotationSolver.Data
             }
 
             DescriptionAttribute? attribute = field.GetCustomAttribute<DescriptionAttribute>();
-            if (attribute == null)
-            {
-                return value.ToString();
-            }
-
-            return attribute.Description;
+            return attribute == null ? value.ToString() : attribute.Description;
         }
     }
 }

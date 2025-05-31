@@ -8,7 +8,7 @@ namespace RotationSolver.Basic.Data
     public class JobGaugeManager
     {
         private readonly IJobGauges jobGauges;
-        private readonly object lockObject = new object();
+        private readonly object lockObject = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JobGaugeManager"/> class.

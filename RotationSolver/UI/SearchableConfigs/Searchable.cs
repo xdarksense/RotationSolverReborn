@@ -4,8 +4,6 @@ using ECommons.ExcelServices;
 using Lumina.Excel.Sheets;
 using RotationSolver.Data;
 
-using RotationSolver.UI.SearchableSettings;
-
 namespace RotationSolver.UI.SearchableConfigs;
 
 internal readonly struct JobFilter
@@ -97,11 +95,11 @@ internal readonly struct JobFilter
     {
         get
         {
-            var canDraw = true;
+            bool canDraw = true;
 
             if (JobRoles != null)
             {
-                var role = DataCenter.CurrentRotation?.Role;
+                JobRole? role = DataCenter.CurrentRotation?.Role;
                 if (role.HasValue)
                 {
                     canDraw = JobRoles.Contains(role.Value);
@@ -116,13 +114,52 @@ internal readonly struct JobFilter
         }
     }
 
-    public Job[] AllJobs => (JobRoles ?? []).SelectMany(JobRoleExtension.ToJobs).Union(Jobs ?? []).ToArray();
+    public Job[] AllJobs
+    {
+        get
+        {
+            List<Job> jobs = [];
+
+            // Add jobs from JobRoles via JobRoleExtension.ToJobs
+            if (JobRoles != null)
+            {
+                foreach (var role in JobRoles)
+                {
+                    var roleJobs = JobRoleExtension.ToJobs(role);
+                    if (roleJobs != null)
+                    {
+                        foreach (var job in roleJobs)
+                        {
+                            if (!jobs.Contains(job))
+                            {
+                                jobs.Add(job);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Add jobs from Jobs array
+            if (Jobs != null)
+            {
+                foreach (var job in Jobs)
+                {
+                    if (!jobs.Contains(job))
+                    {
+                        jobs.Add(job);
+                    }
+                }
+            }
+
+            return [.. jobs];
+        }
+    }
 
     public string Description
     {
         get
         {
-            var roleOrJob = string.Join("\n",
+            string roleOrJob = string.Join("\n",
                 AllJobs.Select(job => Svc.Data.GetExcelSheet<ClassJob>()?.GetRow((uint)job).Name ?? job.ToString()));
             return string.Format(UiString.NotInJob.GetDescription(), roleOrJob);
         }
@@ -142,10 +179,8 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
     {
         get
         {
-            var ui = _property.GetCustomAttribute<UIAttribute>();
-            if (ui == null) return string.Empty;
-
-            return ui.Name;
+            UIAttribute? ui = _property.GetCustomAttribute<UIAttribute>();
+            return ui == null ? string.Empty : ui.Name;
         }
     }
 
@@ -153,10 +188,8 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
     {
         get
         {
-            var ui = _property.GetCustomAttribute<UIAttribute>();
-            if (ui == null || string.IsNullOrEmpty(ui.Description)) return string.Empty;
-
-            return ui.Description;
+            UIAttribute? ui = _property.GetCustomAttribute<UIAttribute>();
+            return ui == null || string.IsNullOrEmpty(ui.Description) ? string.Empty : ui.Description;
         }
     }
 
@@ -164,9 +197,13 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
     {
         get
         {
-            var result = Service.COMMAND + " " + OtherCommandType.Settings.ToString() + " " + _property.Name;
-            var extra = _property.GetValue(Service.ConfigDefault)?.ToString();
-            if (!string.IsNullOrEmpty(extra)) result += " " + extra;
+            string result = Service.COMMAND + " " + OtherCommandType.Settings.ToString() + " " + _property.Name;
+            string? extra = _property.GetValue(Service.ConfigDefault)?.ToString();
+            if (!string.IsNullOrEmpty(extra))
+            {
+                result += " " + extra;
+            }
+
             return result;
         }
     }
@@ -186,7 +223,7 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
     public unsafe void Draw()
     {
         // Determine the appropriate filter based on the context (PvP or PvE)
-        var filter = DataCenter.IsPvP ? PvPFilter : PvEFilter;
+        JobFilter filter = DataCenter.IsPvP ? PvPFilter : PvEFilter;
 
         // Check if the filter allows drawing
         if (!filter.CanDraw)
@@ -198,13 +235,13 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
             }
 
             // Get the text color for disabled text
-            var textColor = *ImGui.GetStyleColorVec4(ImGuiCol.Text);
+            Vector4 textColor = *ImGui.GetStyleColorVec4(ImGuiCol.Text);
 
             // Push the disabled text color style
             ImGui.PushStyleColor(ImGuiCol.Text, *ImGui.GetStyleColorVec4(ImGuiCol.TextDisabled));
 
             // Calculate the cursor position
-            var cursor = ImGui.GetCursorPos() + ImGui.GetWindowPos() - new Vector2(ImGui.GetScrollX(), ImGui.GetScrollY());
+            Vector2 cursor = ImGui.GetCursorPos() + ImGui.GetWindowPos() - new Vector2(ImGui.GetScrollX(), ImGui.GetScrollY());
 
             // Ensure Name is not null before using it
             if (!string.IsNullOrEmpty(Name))
@@ -216,15 +253,15 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
             ImGui.PopStyleColor();
 
             // Calculate the text size and item rectangle size
-            var step = ImGui.CalcTextSize(Name ?? string.Empty);
-            var size = ImGui.GetItemRectSize();
-            var height = step.Y / 2;
-            var wholeWidth = step.X;
+            Vector2 step = ImGui.CalcTextSize(Name ?? string.Empty);
+            Vector2 size = ImGui.GetItemRectSize();
+            float height = step.Y / 2;
+            float wholeWidth = step.X;
 
             // Draw lines to indicate disabled state
             while (height < size.Y)
             {
-                var pt = cursor + new Vector2(0, height);
+                Vector2 pt = cursor + new Vector2(0, height);
                 ImGui.GetWindowDrawList().AddLine(pt, pt + new Vector2(Math.Min(wholeWidth, size.X), 0), ImGui.ColorConvertFloat4ToU32(textColor));
                 height += step.Y;
                 wholeWidth -= size.X;
@@ -239,7 +276,7 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
         DrawMain();
 
         // Prepare the group for the popup menu
-        ImGuiHelper.PrepareGroup(Popup_Key, Command, () => ResetToDefault());
+        ImGuiHelper.PrepareGroup(Popup_Key, Command, ResetToDefault);
     }
 
     protected abstract void DrawMain();
@@ -247,7 +284,7 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
 
     protected void ShowTooltip(bool showHand = true)
     {
-        var showDesc = !string.IsNullOrEmpty(Description);
+        bool showDesc = !string.IsNullOrEmpty(Description);
         if (showDesc || (Tooltips != null && Tooltips.Length > 0))
         {
             ImguiTooltips.ShowTooltip(() =>
@@ -260,11 +297,11 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
                 {
                     ImGui.Separator();
                 }
-                var wholeWidth = ImGui.GetWindowWidth();
+                float wholeWidth = ImGui.GetWindowWidth();
 
                 if (Tooltips != null)
                 {
-                    foreach (var tooltip in Tooltips)
+                    foreach (LinkDescription tooltip in Tooltips)
                     {
                         RotationConfigWindow.DrawLinkDescription(tooltip, wholeWidth, false);
                     }
@@ -279,7 +316,7 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
     {
         ImGui.SameLine();
 
-        if (IconSet.GetTexture(IconSet.GetJobIcon(DataCenter.Job, IconType.Framed), out var texture))
+        if (IconSet.GetTexture(IconSet.GetJobIcon(DataCenter.Job, IconType.Framed), out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture))
         {
             ImGui.Image(texture.ImGuiHandle, Vector2.One * 24 * ImGuiHelpers.GlobalScale);
             ImguiTooltips.HoveredTooltip(UiString.JobConfigTip.GetDescription());
@@ -288,7 +325,7 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
 
     public virtual void ResetToDefault()
     {
-        var v = _property.GetValue(Service.ConfigDefault);
+        object? v = _property.GetValue(Service.ConfigDefault);
         if (v != null)
         {
             _property.SetValue(Service.Config, v);

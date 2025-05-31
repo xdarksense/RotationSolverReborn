@@ -1,6 +1,6 @@
 namespace RebornRotations.Magical;
 
-[Rotation("Basic BLU", CombatType.PvE, GameVersion = "7.2")]
+[Rotation("Basic BLU", CombatType.PvE, GameVersion = "7.21")]
 [SourceCode(Path = "main/BasicRotations/Limited Jobs/BLU_Basic.cs")]
 [Api(4)]
 public sealed class Blue_Basic : BlueMageRotation
@@ -42,8 +42,6 @@ public sealed class Blue_Basic : BlueMageRotation
     // Determines emergency actions to take based on the next planned GCD action.
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
-
         return base.EmergencyAbility(nextGCD, out act);
     }
 
@@ -53,25 +51,16 @@ public sealed class Blue_Basic : BlueMageRotation
 
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
-
-
         return base.MoveForwardAbility(nextGCD, out act);
     }
 
     protected override bool MoveBackAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
-
-
         return base.MoveBackAbility(nextGCD, out act);
     }
 
     protected override bool SpeedAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
-
-
         return base.SpeedAbility(nextGCD, out act);
     }
 
@@ -81,25 +70,16 @@ public sealed class Blue_Basic : BlueMageRotation
 
     protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
-
-
         return base.HealSingleAbility(nextGCD, out act);
     }
 
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
-
-
         return base.DefenseAreaAbility(nextGCD, out act);
     }
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
-
-
         return base.DefenseSingleAbility(nextGCD, out act);
     }
 
@@ -109,15 +89,15 @@ public sealed class Blue_Basic : BlueMageRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
-
         return base.AttackAbility(nextGCD, out act);
     }
 
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
-        if (Player.CurrentMp < 6000 && InCombat && LucidDreamingPvE.CanUse(out act)) return true;
+        if (Player.CurrentMp < 6000 && InCombat && LucidDreamingPvE.CanUse(out act))
+        {
+            return true;
+        }
         //if (AethericMimicryPvE_19239.CanUse(out act)) return true;
         return base.GeneralAbility(nextGCD, out act);
     }
@@ -152,8 +132,7 @@ public sealed class Blue_Basic : BlueMageRotation
 
     protected override bool MyInterruptGCD(out IAction? act)
     {
-        if (FlyingSardinePvE.CanUse(out act)) return true;
-        return base.MyInterruptGCD(out act);
+        return FlyingSardinePvE.CanUse(out act) || base.MyInterruptGCD(out act);
     }
 
     protected override bool DefenseAreaGCD(out IAction? act)
@@ -169,14 +148,12 @@ public sealed class Blue_Basic : BlueMageRotation
 
     protected override bool HealAreaGCD(out IAction? act)
     {
-        if (BluHealSpellActions[HealSpell].CanUse(out act)) return true;
-        return base.HealAreaGCD(out act);
+        return BluHealSpellActions[HealSpell].CanUse(out act) || base.HealAreaGCD(out act);
     }
 
     protected override bool HealSingleGCD(out IAction? act)
     {
-        if (BluHealSpellActions[HealSpell].CanUse(out act)) return true;
-        return base.HealSingleGCD(out act);
+        return BluHealSpellActions[HealSpell].CanUse(out act) || base.HealSingleGCD(out act);
     }
 
     protected override bool MoveForwardGCD(out IAction? act)
@@ -191,18 +168,45 @@ public sealed class Blue_Basic : BlueMageRotation
 
     protected override bool RaiseGCD(out IAction? act)
     {
-        if (AngelWhisperPvE.CanUse(out act)) return true;
+        if (AngelWhisperPvE.CanUse(out act))
+        {
+            return true;
+        }
         return base.RaiseGCD(out act);
     }
 
     protected override bool GeneralGCD(out IAction? act)
     {
-        if (AethericMimicryPvE.CanUse(out act)) return true;
-        if (UseMightyGuard && MightyGuardPvE.CanUse(out act)) return true;
-        if (UseBasicInstinct && BasicInstinctPvE.CanUse(out act)) return true;
-        if (BluAOESpellActions[AoeSpell].CanUse(out act)) return true;
-        if (BluDPSSpellActions[SingleTargetDPSSpell].CanUse(out act)) return true;
-        if (FlyingSardinePvE.CanUse(out act)) return true;
+        if (AethericMimicryPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (UseMightyGuard && MightyGuardPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (UseBasicInstinct && BasicInstinctPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (BluAOESpellActions[AoeSpell].CanUse(out act))
+        {
+            return true;
+        }
+
+        if (BluDPSSpellActions[SingleTargetDPSSpell].CanUse(out act))
+        {
+            return true;
+        }
+
+        if (FlyingSardinePvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.GeneralGCD(out act);
     }
 

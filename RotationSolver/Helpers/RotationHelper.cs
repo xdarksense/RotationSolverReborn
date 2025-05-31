@@ -6,21 +6,21 @@ namespace RotationSolver.Helpers;
 
 internal static class RotationHelper
 {
-    private static readonly Dictionary<Assembly, AssemblyInfo> _assemblyInfos = new();
+    private static readonly Dictionary<Assembly, AssemblyInfo> _assemblyInfos = [];
 
-    public static List<LoadedAssembly> LoadedCustomRotations { get; } = new List<LoadedAssembly>();
+    public static List<LoadedAssembly> LoadedCustomRotations { get; } = [];
 
     public static AssemblyInfo GetInfo(this Assembly assembly)
     {
-        if (_assemblyInfos.TryGetValue(assembly, out var info))
+        if (_assemblyInfos.TryGetValue(assembly, out AssemblyInfo? info))
         {
             return info;
         }
 
-        var name = assembly.GetName().Name;
-        var location = assembly.Location;
-        var company = assembly.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company;
-        var assemblyInfo = new AssemblyInfo(name, company, location, string.Empty, company, name, DateTime.Now);
+        string? name = assembly.GetName().Name;
+        string location = assembly.Location;
+        string? company = assembly.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company;
+        AssemblyInfo assemblyInfo = new(name, company, location, string.Empty, company, name, DateTime.Now);
 
         _assemblyInfos[assembly] = assemblyInfo;
 
@@ -39,31 +39,26 @@ internal static class RotationHelper
             return ImGuiColors.DPSRed;
         }
 
-        if (rotation.IsBeta())
-        {
-            return ImGuiColors.DalamudOrange;
-        }
-
-        return ImGuiColors.DalamudWhite;
+        return rotation.IsBeta() ? ImGuiColors.DalamudOrange : ImGuiColors.DalamudWhite;
     }
 
     public static bool IsBeta(this ICustomRotation rotation)
     {
-        var betaAttribute = rotation.GetType().GetCustomAttribute<BetaRotationAttribute>();
+        BetaRotationAttribute? betaAttribute = rotation.GetType().GetCustomAttribute<BetaRotationAttribute>();
         return betaAttribute != null;
     }
 
     public static Assembly LoadCustomRotationAssembly(string filePath)
     {
-        var directoryInfo = new FileInfo(filePath).Directory;
-        var loadContext = new RotationLoadContext(directoryInfo);
-        var assembly = loadContext.LoadFromFile(filePath);
+        DirectoryInfo? directoryInfo = new FileInfo(filePath).Directory;
+        RotationLoadContext loadContext = new(directoryInfo);
+        Assembly assembly = loadContext.LoadFromFile(filePath);
 
-        var assemblyName = assembly.GetName().Name;
-        var author = GetAuthor(filePath, assemblyName);
+        string? assemblyName = assembly.GetName().Name;
+        string author = GetAuthor(filePath, assemblyName);
 
-        var link = assembly.GetCustomAttribute<AssemblyLinkAttribute>();
-        var assemblyInfo = new AssemblyInfo(
+        AssemblyLinkAttribute? link = assembly.GetCustomAttribute<AssemblyLinkAttribute>();
+        AssemblyInfo assemblyInfo = new(
             assemblyName,
             author,
             filePath,
@@ -72,19 +67,19 @@ internal static class RotationHelper
             link?.Repository,
             DateTime.Now);
 
-        var existingAssembly = GetAssemblyFromPath(filePath);
+        Assembly? existingAssembly = GetAssemblyFromPath(filePath);
         if (existingAssembly != null)
         {
-            _assemblyInfos.Remove(existingAssembly);
+            _ = _assemblyInfos.Remove(existingAssembly);
         }
 
         _assemblyInfos[assembly] = assemblyInfo;
 
-        var loadedAssembly = new LoadedAssembly(
+        LoadedAssembly loadedAssembly = new(
             filePath,
             File.GetLastWriteTimeUtc(filePath).ToString());
 
-        LoadedCustomRotations.RemoveAll(item => item.FilePath == loadedAssembly.FilePath);
+        _ = LoadedCustomRotations.RemoveAll(item => item.FilePath == loadedAssembly.FilePath);
         LoadedCustomRotations.Add(loadedAssembly);
 
         return assembly;
@@ -92,7 +87,7 @@ internal static class RotationHelper
 
     private static Assembly? GetAssemblyFromPath(string filePath)
     {
-        foreach (var asm in _assemblyInfos)
+        foreach (KeyValuePair<Assembly, AssemblyInfo> asm in _assemblyInfos)
         {
             if (asm.Value.FilePath == filePath)
             {
@@ -104,7 +99,7 @@ internal static class RotationHelper
 
     private static string GetAuthor(string filePath, string? assemblyName)
     {
-        var fileVersionInfo = FileVersionInfo.GetVersionInfo(filePath);
+        FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(filePath);
         return string.IsNullOrWhiteSpace(fileVersionInfo.CompanyName) ? assemblyName ?? string.Empty : fileVersionInfo.CompanyName;
     }
 }

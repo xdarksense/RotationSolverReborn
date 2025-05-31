@@ -8,9 +8,9 @@ namespace RotationSolver.Basic.Data;
 /// <typeparam name="T">The type of objects in the list.</typeparam>
 public class ObjectListDelay<T> : IEnumerable<T> where T : IGameObject
 {
-    private IEnumerable<T> _list = new List<T>();
+    private IEnumerable<T> _list = [];
     private readonly Func<(float min, float max)> _getRange;
-    private Dictionary<ulong, DateTime> _revealTime = new();
+    private Dictionary<ulong, DateTime> _revealTime = [];
     private readonly Random _ran = new();
 
     /// <summary>
@@ -29,7 +29,7 @@ public class ObjectListDelay<T> : IEnumerable<T> where T : IGameObject
     public ObjectListDelay(Func<Vector2> getRange)
         : this(() =>
         {
-            var vec = getRange();
+            Vector2 vec = getRange();
             return (vec.X, vec.Y);
         })
     {
@@ -41,16 +41,16 @@ public class ObjectListDelay<T> : IEnumerable<T> where T : IGameObject
     /// <param name="originData">The original list of objects.</param>
     public void Delay(IEnumerable<T> originData)
     {
-        var outList = new List<T>();
-        var revealTime = new Dictionary<ulong, DateTime>();
-        var now = DateTime.Now;
+        List<T> outList = [];
+        Dictionary<ulong, DateTime> revealTime = [];
+        DateTime now = DateTime.Now;
 
-        foreach (var item in originData)
+        foreach (T item in originData)
         {
-            if (!_revealTime.TryGetValue(item.GameObjectId, out var time))
+            if (!_revealTime.TryGetValue(item.GameObjectId, out DateTime time))
             {
-                var (min, max) = _getRange();
-                var delaySecond = min + (float)_ran.NextDouble() * (max - min);
+                (float min, float max) = _getRange();
+                float delaySecond = min + ((float)_ran.NextDouble() * (max - min));
                 time = now + TimeSpan.FromMilliseconds(delaySecond * 1000);
             }
             revealTime[item.GameObjectId] = time;
@@ -69,7 +69,13 @@ public class ObjectListDelay<T> : IEnumerable<T> where T : IGameObject
     /// Returns an enumerator that iterates through the collection.
     /// </summary>
     /// <returns>An enumerator that can be used to iterate through the collection.</returns>
-    public IEnumerator<T> GetEnumerator() => _list.GetEnumerator();
+    public IEnumerator<T> GetEnumerator()
+    {
+        return _list.GetEnumerator();
+    }
 
-    IEnumerator IEnumerable.GetEnumerator() => _list.GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return _list.GetEnumerator();
+    }
 }

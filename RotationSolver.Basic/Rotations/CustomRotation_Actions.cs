@@ -2,23 +2,12 @@
 
 namespace RotationSolver.Basic.Rotations;
 
-partial class CustomRotation
+public partial class CustomRotation
 {
     internal static void LoadActionSetting(ref IBaseAction action)
     {
-        var a = action.Action;
-        if (a.CanTargetAlly || a.CanTargetParty)
-        {
-            action.Setting.IsFriendly = true;
-        }
-        else if (a.CanTargetHostile)
-        {
-            action.Setting.IsFriendly = false;
-        }
-        else
-        {
-            action.Setting.IsFriendly = action.TargetInfo.EffectRange > 5;
-        }
+        Lumina.Excel.Sheets.Action a = action.Action;
+        action.Setting.IsFriendly = a.CanTargetAlly || a.CanTargetParty || (!a.CanTargetHostile && action.TargetInfo.EffectRange > 5);
         // TODO: better target type check. (NoNeed?)
     }
 
@@ -81,12 +70,7 @@ partial class CustomRotation
     {
         setting.CanTarget = o =>
         {
-            if (o is not IBattleChara b) return false;
-
-            if (b.IsBossFromIcon() || IsMoving || b.CastActionId == 0) return false;
-
-            if (!b.IsCastInterruptible || ActionID.InterjectPvE.IsCoolingDown()) return true;
-            return false;
+            return o is IBattleChara b && !b.IsBossFromIcon() && !IsMoving && b.CastActionId != 0 && (!b.IsCastInterruptible || ActionID.InterjectPvE.IsCoolingDown());
         };
     }
 
@@ -94,10 +78,25 @@ partial class CustomRotation
     {
         setting.ActionCheck = () =>
         {
-            if (!NotInCombatDelay) return false;
-            var players = PartyMembers.GetObjectInRadius(20);
-            if (players.Any(ObjectHelper.InCombat)) return false;
-            return players.Any(p => p.WillStatusEnd(3, false, StatusID.Peloton));
+            if (!NotInCombatDelay)
+            {
+                return false;
+            }
+
+            IEnumerable<IBattleChara> players = PartyMembers.GetObjectInRadius(20);
+
+            bool anyInCombat = false;
+            bool anyWillStatusEnd = false;
+            foreach (var p in players)
+            {
+                if (ObjectHelper.InCombat(p))
+                    anyInCombat = true;
+                if (p.WillStatusEnd(3, false, StatusID.Peloton))
+                    anyWillStatusEnd = true;
+                if (anyInCombat && anyWillStatusEnd)
+                    break;
+            }
+            return !anyInCombat && anyWillStatusEnd;
         };
     }
 
@@ -263,14 +262,40 @@ partial class CustomRotation
     /// <summary>
     /// All actions of this rotation.
     /// </summary>
-    public virtual IAction[] AllActions =>
-    [
-        .. AllBaseActions.Where(i => i.Action.IsInJob()),
-        .. Medicines.Where(i => i.HasIt),
-        .. MpPotions.Where(i => i.HasIt),
-        .. HpPotions.Where(i => i.HasIt),
-        .. AllItems.Where(i => i.HasIt),
-    ];
+    public virtual IAction[] AllActions
+    {
+        get
+        {
+            var list = new List<IAction>();
+
+            foreach (var i in AllBaseActions)
+            {
+                if (i.Action.IsInJob())
+                    list.Add(i);
+            }
+            foreach (var i in Medicines)
+            {
+                if (i.HasIt)
+                    list.Add(i);
+            }
+            foreach (var i in MpPotions)
+            {
+                if (i.HasIt)
+                    list.Add(i);
+            }
+            foreach (var i in HpPotions)
+            {
+                if (i.HasIt)
+                    list.Add(i);
+            }
+            foreach (var i in AllItems)
+            {
+                if (i.HasIt)
+                    list.Add(i);
+            }
+            return list.ToArray();
+        }
+    }
 
     /// <summary>
     /// All traits of this action.
@@ -289,7 +314,24 @@ partial class CustomRotation
     /// <summary>
     /// All bytes or integers of this rotation.
     /// </summary>
-    public PropertyInfo[] AllBytesOrInt => _allBytes ??= GetType().GetStaticProperties<byte>().Union(GetType().GetStaticProperties<int>()).ToArray();
+    public PropertyInfo[] AllBytesOrInt
+    {
+        get
+        {
+            if (_allBytes != null)
+                return _allBytes;
+
+            var bytes = GetType().GetStaticProperties<byte>();
+            var ints = GetType().GetStaticProperties<int>();
+
+            var result = new PropertyInfo[bytes.Length + ints.Length];
+            Array.Copy(bytes, 0, result, 0, bytes.Length);
+            Array.Copy(ints, 0, result, bytes.Length, ints.Length);
+
+            _allBytes = result;
+            return _allBytes;
+        }
+    }
 
     private PropertyInfo[]? _allFloats;
 

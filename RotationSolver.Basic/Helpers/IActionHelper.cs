@@ -136,11 +136,16 @@ public static class IActionHelper
     private static bool IsActionID(ActionID id, params ActionID[] ids)
     {
         if (ids == null)
+        {
             return false;
+        }
+
         for (int i = 0; i < ids.Length; i++)
         {
             if (ids[i].Equals(id))
+            {
                 return true;
+            }
         }
         return false;
     }
@@ -153,8 +158,12 @@ public static class IActionHelper
     /// <returns>An array of action IDs.</returns>
     private static ActionID[] GetIDFromActions(bool isAdjust, params IAction[] actions)
     {
-        if (actions == null) return Array.Empty<ActionID>();
-        var result = new ActionID[actions.Length];
+        if (actions == null)
+        {
+            return Array.Empty<ActionID>();
+        }
+
+        ActionID[] result = new ActionID[actions.Length];
         for (int i = 0; i < actions.Length; i++)
         {
             result[i] = isAdjust ? (ActionID)actions[i].AdjustedID : (ActionID)actions[i].ID;

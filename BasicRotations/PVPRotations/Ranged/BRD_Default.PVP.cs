@@ -12,26 +12,27 @@ public sealed class BRD_DefaultPvP : BardRotation
 
     [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
     public bool RespectGuard { get; set; } = true;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Warden's Paean on other players")]
+    public bool BRDEsuna { get; set; } = true;
     #endregion
 
     #region Standard PVP Utilities
     private bool DoPurify(out IAction? action)
     {
         action = null;
-        if (!UsePurifyPvP) return false;
+        if (!UsePurifyPvP)
+        {
+            return false;
+        }
 
-        var purifiableStatusesIDs = new List<int>
+        List<int> purifiableStatusesIDs = new()
         {
             // Stun, DeepFreeze, HalfAsleep, Sleep, Bind, Heavy, Silence
             1343, 3219, 3022, 1348, 1345, 1344, 1347
         };
 
-        if (purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)))
-        {
-            return PurifyPvP.CanUse(out action);
-        }
-
-        return false;
+        return purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)) && PurifyPvP.CanUse(out action);
     }
     #endregion
 
@@ -39,30 +40,85 @@ public sealed class BRD_DefaultPvP : BardRotation
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
-        if (DoPurify(out action)) return true;
-        if (InCombat && BraveryPvP.CanUse(out action)) return true;
-        if (InCombat && DervishPvP.CanUse(out action)) return true;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
+
+        if (DoPurify(out action))
+        {
+            return true;
+        }
+
+        if (BraveryPvP.CanUse(out action))
+        {
+            if (InCombat)
+            {
+                return true;
+            }
+        }
+
+        if (DervishPvP.CanUse(out action))
+        {
+            if (InCombat)
+            {
+                return true;
+            }
+        }
 
         return base.EmergencyAbility(nextGCD, out action);
     }
 
     [RotationDesc(ActionID.TheWardensPaeanPvP)]
-    protected override bool DispelGCD(out IAction? act)
+    protected override bool DispelAbility(IAction nextGCD, out IAction? action)
     {
-        if (TheWardensPaeanPvP.CanUse(out act)) return true;
-        return base.DispelGCD(out act);
+        action = null;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
+
+        if (BRDEsuna && TheWardensPaeanPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        return base.DispelAbility(nextGCD, out action);
     }
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (RepellingShotPvP.CanUse(out action) && !Player.HasStatus(true, StatusID.Repertoire)) return true;
-        if (SilentNocturnePvP.CanUse(out action) && !Player.HasStatus(true, StatusID.Repertoire)) return true;
-        if (EagleEyeShotPvP.CanUse(out action)) return true;
-        if (EncoreOfLightPvP.CanUse(out action, skipAoeCheck: true)) return true;
+        if (RepellingShotPvP.CanUse(out action))
+        {
+            if (!Player.HasStatus(true, StatusID.Repertoire))
+            {
+                return true;
+            }
+        }
+
+        if (SilentNocturnePvP.CanUse(out action))
+        {
+            if (!Player.HasStatus(true, StatusID.Repertoire))
+            {
+                return true;
+            }
+        }
+
+        if (EagleEyeShotPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (EncoreOfLightPvP.CanUse(out action, skipAoeCheck: true))
+        {
+            return true;
+        }
 
         return base.AttackAbility(nextGCD, out action);
     }
@@ -72,19 +128,37 @@ public sealed class BRD_DefaultPvP : BardRotation
     protected override bool GeneralGCD(out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (HarmonicArrowPvP_41964.CanUse(out action)) return true;
+        if (HarmonicArrowPvP_41964.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (PitchPerfectPvP.CanUse(out action)) return true;
+        if (PitchPerfectPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (BlastArrowPvP.CanUse(out action)) return true;
-        if (ApexArrowPvP.CanUse(out action)) return true;
+        if (BlastArrowPvP.CanUse(out action))
+        {
+            return true;
+        }
 
-        if (PowerfulShotPvP.CanUse(out action)) return true;
+        if (ApexArrowPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (PowerfulShotPvP.CanUse(out action))
+        {
+            return true;
+        }
 
         return base.GeneralGCD(out action);
-
     }
     #endregion
 }

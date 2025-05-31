@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents a 2D vector with integer components.
 /// </summary>
-internal struct Vector2Int
+internal readonly struct Vector2Int
 {
     /// <summary>
     /// Gets the X component of the vector.
@@ -31,12 +31,18 @@ internal struct Vector2Int
     /// </summary>
     /// <param name="x">The new X component.</param>
     /// <returns>A new <see cref="Vector2Int"/> instance.</returns>
-    public Vector2Int WithX(int x) => new Vector2Int(x, Y);
+    public Vector2Int WithX(int x)
+    {
+        return new Vector2Int(x, Y);
+    }
 
     /// <summary>
     /// Creates a new instance of <see cref="Vector2Int"/> with a modified Y component.
     /// </summary>
     /// <param name="y">The new Y component.</param>
     /// <returns>A new <see cref="Vector2Int"/> instance.</returns>
-    public Vector2Int WithY(int y) => new Vector2Int(X, y);
+    public Vector2Int WithY(int y)
+    {
+        return new Vector2Int(X, y);
+    }
 }

@@ -1,5 +1,4 @@
-﻿using Dalamud.Game.ClientState.Conditions;
-using ECommons.DalamudServices;
+﻿using ECommons.Logging;
 using RotationSolver.UI.HighlightTeachingMode.ElementSpecial;
 using RotationSolver.Updaters;
 
@@ -18,7 +17,11 @@ internal static class HotbarHighlightManager
         get => _highLight?.Color ?? Vector4.One;
         set
         {
-            if (_highLight == null) return;
+            if (_highLight == null)
+            {
+                return;
+            }
+
             _highLight.Color = value;
         }
     }
@@ -32,17 +35,17 @@ internal static class HotbarHighlightManager
     public static void UpdateSettings()
     {
         //UseTaskToAccelerate = Service.Config.UseTasksForOverlay;
-        Enable = !Svc.Condition[ConditionFlag.OccupiedInCutSceneEvent] && Service.Config.TeachingMode && MajorUpdater.IsValid;
+        Enable = Service.Config.TeachingMode && MajorUpdater.IsValid;
         HighlightColor = Service.Config.TeachingModeColor;
     }
 
     public static void Dispose()
     {
-        foreach (var item in new List<DrawingHighlightHotbarBase>(RotationSolverPlugin._drawingElements))
+        foreach (DrawingHighlightHotbarBase item in new List<DrawingHighlightHotbarBase>(RotationSolverPlugin._drawingElements))
         {
             item.Dispose();
 #if DEBUG
-            Svc.Log.Debug($"Item: {item} from '_drawingElements' was disposed");
+            PluginLog.Debug($"Item: {item} from '_drawingElements' was disposed");
 #endif
         }
         _highLight?.Dispose();
@@ -55,13 +58,28 @@ internal static class HotbarHighlightManager
 
         if (RotationSolverPlugin._drawingElements != null)
         {
-            drawing2Ds.AddRange(RotationSolverPlugin._drawingElements.Select(item => System.Threading.Tasks.Task.Run(() =>
+            foreach (var item in RotationSolverPlugin._drawingElements)
             {
-                return item.To2DMain();
-            })));
+                drawing2Ds.Add(Task.Run(() =>
+                {
+                    return item.To2DMain();
+                }));
+            }
         }
 
-        await System.Threading.Tasks.Task.WhenAll([.. drawing2Ds]);
-        return drawing2Ds.SelectMany(i => i.Result).ToArray();
+        _ = await Task.WhenAll(drawing2Ds);
+
+        List<IDrawing2D> result = [];
+        foreach (var task in drawing2Ds)
+        {
+            if (task.Result != null)
+            {
+                foreach (var drawing in task.Result)
+                {
+                    result.Add(drawing);
+                }
+            }
+        }
+        return [.. result];
     }
 }

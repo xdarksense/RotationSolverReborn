@@ -1,4 +1,4 @@
-﻿using ECommons.DalamudServices;
+﻿using ECommons.Logging;
 
 namespace RotationSolver.Basic.Configuration.RotationConfig;
 
@@ -35,11 +35,7 @@ internal abstract class RotationConfigBase : IRotationConfig
     /// </summary>
     public string Value
     {
-        get
-        {
-            if (!Service.Config.RotationConfigurations.TryGetValue(Name, out var config)) return DefaultValue;
-            return config;
-        }
+        get => !Service.Config.RotationConfigurations.TryGetValue(Name, out string? config) ? DefaultValue : config;
         set
         {
             Service.Config.RotationConfigurations[Name] = value;
@@ -59,7 +55,7 @@ internal abstract class RotationConfigBase : IRotationConfig
 
         Name = property.Name;
         DefaultValue = property.GetValue(rotation)?.ToString() ?? string.Empty;
-        var attr = property.GetCustomAttribute<RotationConfigAttribute>();
+        RotationConfigAttribute? attr = property.GetCustomAttribute<RotationConfigAttribute>();
         if (attr != null)
         {
             DisplayName = attr.Name;
@@ -72,7 +68,7 @@ internal abstract class RotationConfigBase : IRotationConfig
         }
 
         // Set up initial value
-        if (Service.Config.RotationConfigurations.TryGetValue(Name, out var value))
+        if (Service.Config.RotationConfigurations.TryGetValue(Name, out string? value))
         {
             SetValue(value);
         }
@@ -84,8 +80,11 @@ internal abstract class RotationConfigBase : IRotationConfig
     /// <param name="value">The value to set.</param>
     private void SetValue(string value)
     {
-        var type = _property.PropertyType;
-        if (type == null) return;
+        Type type = _property.PropertyType;
+        if (type == null)
+        {
+            return;
+        }
 
         try
         {
@@ -93,7 +92,7 @@ internal abstract class RotationConfigBase : IRotationConfig
         }
         catch (Exception ex)
         {
-            Svc.Log.Error(ex, "Failed to convert type.");
+            PluginLog.Error($"Failed to convert type: {ex.Message}");
             _property.SetValue(_rotation, ChangeType(DefaultValue, type));
         }
     }
@@ -115,9 +114,9 @@ internal abstract class RotationConfigBase : IRotationConfig
             }
 
             // Attempt to match the value with the Description attribute
-            foreach (var field in type.GetFields())
+            foreach (FieldInfo field in type.GetFields())
             {
-                var descriptionAttribute = field.GetCustomAttribute<DescriptionAttribute>();
+                DescriptionAttribute? descriptionAttribute = field.GetCustomAttribute<DescriptionAttribute>();
                 if (descriptionAttribute != null && descriptionAttribute.Description == value)
                 {
                     return Enum.Parse(type, field.Name);
@@ -125,7 +124,7 @@ internal abstract class RotationConfigBase : IRotationConfig
             }
 
             // Log a warning and return the default value if no match is found
-            Svc.Log.Warning($"Invalid enum value '{value}' for type '{type.Name}'. Using default value.");
+            PluginLog.Warning($"Invalid enum value '{value}' for type '{type.Name}'. Using default value.");
             return Enum.GetValues(type).GetValue(0) ?? throw new InvalidOperationException($"No default value available for enum type '{type.Name}'.");
         }
         else if (type == typeof(bool))
@@ -142,11 +141,17 @@ internal abstract class RotationConfigBase : IRotationConfig
     /// <param name="set">The rotation config set.</param>
     /// <param name="str">The command string.</param>
     /// <returns><c>true</c> if the command was executed; otherwise, <c>false</c>.</returns>
-    public virtual bool DoCommand(IRotationConfigSet set, string str) => str.StartsWith(Name);
+    public virtual bool DoCommand(IRotationConfigSet set, string str)
+    {
+        return str.StartsWith(Name);
+    }
 
     /// <summary>
     /// Returns a string that represents the current object.
     /// </summary>
     /// <returns>A string that represents the current object.</returns>
-    public override string ToString() => Value;
+    public override string ToString()
+    {
+        return Value;
+    }
 }

@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.Basic.Rotations.Basic;
 
-partial class RedMageRotation
+public partial class RedMageRotation
 {
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Intelligence;
@@ -189,25 +189,21 @@ partial class RedMageRotation
     [RotationDesc(ActionID.VercurePvE)]
     protected override bool HealSingleGCD(out IAction? act)
     {
-        if (VercurePvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-        return base.HealSingleGCD(out act);
+        return VercurePvE.CanUse(out act, skipStatusProvideCheck: true) || base.HealSingleGCD(out act);
     }
 
     /// <inheritdoc/>
     [RotationDesc(ActionID.CorpsacorpsPvE)]
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
-        if (CorpsacorpsPvE.CanUse(out act)) return true;
-        return base.MoveForwardAbility(nextGCD, out act);
+        return CorpsacorpsPvE.CanUse(out act) || base.MoveForwardAbility(nextGCD, out act);
     }
 
     /// <inheritdoc/>
     [RotationDesc(ActionID.AddlePvE, ActionID.MagickBarrierPvE)]
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (AddlePvE.CanUse(out act)) return true;
-        if (MagickBarrierPvE.CanUse(out act, skipAoeCheck: true)) return true;
-        return base.DefenseAreaAbility(nextGCD, out act);
+        return AddlePvE.CanUse(out act) || MagickBarrierPvE.CanUse(out act, skipAoeCheck: true) || base.DefenseAreaAbility(nextGCD, out act);
     }
 
     static partial void ModifyViceOfThornsPvE(ref ActionSetting setting)

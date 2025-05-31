@@ -8,7 +8,6 @@ public struct OffsetDelay
     private bool _lastValue;
     private bool _nowValue;
     private readonly Queue<DateTime> _changeTimes;
-    private readonly Func<float> _getDelay;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OffsetDelay"/> struct.
@@ -19,13 +18,13 @@ public struct OffsetDelay
         _lastValue = false;
         _nowValue = false;
         _changeTimes = new Queue<DateTime>();
-        _getDelay = getDelay ?? throw new ArgumentNullException(nameof(getDelay));
+        GetDelay = getDelay ?? throw new ArgumentNullException(nameof(getDelay));
     }
 
     /// <summary>
     /// Gets the function that returns the delay in seconds.
     /// </summary>
-    public Func<float> GetDelay => _getDelay;
+    public Func<float> GetDelay { get; }
 
     /// <summary>
     /// Delays the change of the boolean value.
@@ -40,9 +39,9 @@ public struct OffsetDelay
             _changeTimes.Enqueue(DateTime.Now + TimeSpan.FromSeconds(GetDelay()));
         }
 
-        if (_changeTimes.TryPeek(out var time) && time < DateTime.Now)
+        if (_changeTimes.TryPeek(out DateTime time) && time < DateTime.Now)
         {
-            _changeTimes.Dequeue();
+            _ = _changeTimes.Dequeue();
             _nowValue = !_nowValue;
         }
 

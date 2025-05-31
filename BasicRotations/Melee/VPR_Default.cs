@@ -45,20 +45,44 @@ public sealed class VPR_Default : ViperRotation
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
         // Uncoiled Fury Combo
-        if (UncoiledTwinfangPvE.CanUse(out act)) return true;
-        if (UncoiledTwinbloodPvE.CanUse(out act)) return true;
+        if (UncoiledTwinfangPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (UncoiledTwinbloodPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         //AOE Dread Combo
-        if (TwinfangThreshPvE.CanUse(out act, skipAoeCheck: true)) return true;
-        if (TwinbloodThreshPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (TwinfangThreshPvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return true;
+        }
+
+        if (TwinbloodThreshPvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return true;
+        }
 
         //Single Target Dread Combo
-        if (TwinfangBitePvE.CanUse(out act)) return true;
-        if (TwinbloodBitePvE.CanUse(out act)) return true;
+        if (TwinfangBitePvE.CanUse(out act))
+        {
+            return true;
+        }
 
-        // Use burst medicine if cooldown for Technical Step has elapsed sufficiently
+        if (TwinbloodBitePvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        // Use burst medicine if cooldown for Serpents Ire has elapsed sufficiently
         if (SerpentCombo == SerpentCombo.None && BurstMed && SerpentsIrePvE.EnoughLevel && SerpentsIrePvE.Cooldown.ElapsedAfter(115)
-            && UseBurstMedicine(out act)) return true;
+            && UseBurstMedicine(out act))
+        {
+            return true;
+        }
 
         return base.EmergencyAbility(nextGCD, out act);
     }
@@ -66,36 +90,59 @@ public sealed class VPR_Default : ViperRotation
     [RotationDesc]
     protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
-        if (SlitherPvE.CanUse(out act)) return true;
+        if (SlitherPvE.CanUse(out act))
+        {
+            return true;
+        }
         return base.AttackAbility(nextGCD, out act);
     }
 
     [RotationDesc]
     protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
-        if (SerpentCombo == SerpentCombo.None && SecondWindPvE.CanUse(out act)) return true;
-        if (SerpentCombo == SerpentCombo.None && BloodbathPvE.CanUse(out act)) return true;
+        if (SerpentCombo == SerpentCombo.None && SecondWindPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (SerpentCombo == SerpentCombo.None && BloodbathPvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.HealSingleAbility(nextGCD, out act);
     }
 
     [RotationDesc]
     protected sealed override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (SerpentCombo == SerpentCombo.None && FeintPvE.CanUse(out act)) return true;
+        if (SerpentCombo == SerpentCombo.None && FeintPvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.DefenseAreaAbility(nextGCD, out act);
     }
 
     [RotationDesc]
     protected sealed override bool AntiKnockbackAbility(IAction nextGCD, out IAction? act)
     {
-        if (SerpentCombo == SerpentCombo.None && ArmsLengthPvE.CanUse(out act)) return true;
+        if (SerpentCombo == SerpentCombo.None && ArmsLengthPvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.AntiKnockbackAbility(nextGCD, out act);
     }
 
     [RotationDesc]
     protected sealed override bool InterruptAbility(IAction nextGCD, out IAction? act)
     {
-        if (SerpentCombo == SerpentCombo.None && LegSweepPvE.CanUse(out act)) return true;
+        if (SerpentCombo == SerpentCombo.None && LegSweepPvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.InterruptAbility(nextGCD, out act);
     }
     #endregion
@@ -105,15 +152,41 @@ public sealed class VPR_Default : ViperRotation
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
         ////Reawaken Combo
-        if (FirstLegacyPvE.CanUse(out act)) return true;
-        if (SecondLegacyPvE.CanUse(out act)) return true;
-        if (ThirdLegacyPvE.CanUse(out act)) return true;
-        if (FourthLegacyPvE.CanUse(out act)) return true;
-        if (SerpentsIrePvE.CanUse(out act)) return true;
+        if (FirstLegacyPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (SecondLegacyPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (ThirdLegacyPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (FourthLegacyPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (SerpentsIrePvE.CanUse(out act))
+        {
+            return true;
+        }
 
         ////Serpent Combo oGCDs
-        if (LastLashPvE.CanUse(out act)) return true;
-        if (DeathRattlePvE.CanUse(out act)) return true;
+        if (LastLashPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (DeathRattlePvE.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.AttackAbility(nextGCD, out act);
     }
@@ -123,42 +196,73 @@ public sealed class VPR_Default : ViperRotation
     protected override bool GeneralGCD(out IAction? act)
     {
         act = null;
-        if (AbilityPrio && 
+        if (AbilityPrio &&
             (SerpentsTailPvE.AdjustedID != SerpentsTailPvE.ID
             || TwinfangBitePvE.AdjustedID != TwinfangBitePvE.ID
-            || TwinbloodBitePvE.AdjustedID != TwinbloodBitePvE.ID)) return false;
+            || TwinbloodBitePvE.AdjustedID != TwinbloodBitePvE.ID))
+        {
+            return false;
+        }
 
 
         ////Reawaken Combo
-        if (OuroborosPvE.CanUse(out act)) return true;
-        if (FourthGenerationPvE.CanUse(out act)) return true;
-        if (ThirdGenerationPvE.CanUse(out act)) return true;
-        if (SecondGenerationPvE.CanUse(out act)) return true;
-        if (FirstGenerationPvE.CanUse(out act)) return true;
-
-        if (SwiftTime > SwiftTimer &&
-            HuntersTime > HuntersTimer &&
-            !HasHunterVenom && !HasSwiftVenom &&
-            !HasPoisedBlood && !HasPoisedFang && SerpentsIrePvE.EnoughLevel && (!SerpentsIrePvE.Cooldown.ElapsedAfter(ReawakenDelayTimer) || SerpentOffering == 100) ||
-            SwiftTime > SwiftTimer &&
-            HuntersTime > HuntersTimer &&
-            !HasHunterVenom && !HasSwiftVenom &&
-            !HasPoisedBlood && !HasPoisedFang && !SerpentsIrePvE.EnoughLevel)
+        if (OuroborosPvE.CanUse(out act))
         {
-            if (ReawakenPvE.CanUse(out act, skipComboCheck: true)) return true;
+            return true;
+        }
+
+        if (FourthGenerationPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (ThirdGenerationPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (SecondGenerationPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (FirstGenerationPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if ((SwiftTime > SwiftTimer &&
+            HuntersTime > HuntersTimer &&
+            !HasHunterVenom && !HasSwiftVenom &&
+            !HasPoisedBlood && !HasPoisedFang && SerpentsIrePvE.EnoughLevel && (!SerpentsIrePvE.Cooldown.ElapsedAfter(ReawakenDelayTimer) || SerpentOffering == 100)) ||
+            (SwiftTime > SwiftTimer &&
+            HuntersTime > HuntersTimer &&
+            !HasHunterVenom && !HasSwiftVenom &&
+            !HasPoisedBlood && !HasPoisedFang && !SerpentsIrePvE.EnoughLevel))
+        {
+            if (ReawakenPvE.CanUse(out act, skipComboCheck: true))
+            {
+                return true;
+            }
         }
 
         // Uncoiled Fury Overcap protection
-        var isTargetBoss = CurrentTarget?.IsBossFromTTK() ?? false;
-        var isTargetDying = CurrentTarget?.IsDying() ?? false;
-        if ((MaxRattling == RattlingCoilStacks || RattlingCoilStacks >= MaxUncoiledStacksUser || isTargetBoss && isTargetDying && RattlingCoilStacks > 0) && !Player.HasStatus(true, StatusID.ReadyToReawaken) && SerpentCombo == SerpentCombo.None)
+        bool isTargetBoss = CurrentTarget?.IsBossFromTTK() ?? false;
+        bool isTargetDying = CurrentTarget?.IsDying() ?? false;
+        if ((MaxRattling == RattlingCoilStacks || RattlingCoilStacks >= MaxUncoiledStacksUser || (isTargetBoss && isTargetDying && RattlingCoilStacks > 0)) && !Player.HasStatus(true, StatusID.ReadyToReawaken) && SerpentCombo == SerpentCombo.None)
         {
-            if (UncoiledFuryPvE.CanUse(out act, usedUp: true)) return true;
+            if (UncoiledFuryPvE.CanUse(out act, usedUp: true))
+            {
+                return true;
+            }
         }
 
         if (MedicineUncoiledFury && Player.HasStatus(true, StatusID.Medicated) && !Player.HasStatus(true, StatusID.ReadyToReawaken) && SerpentCombo == SerpentCombo.None)
         {
-            if (UncoiledFuryPvE.CanUse(out act, usedUp: true)) return true;
+            if (UncoiledFuryPvE.CanUse(out act, usedUp: true))
+            {
+                return true;
+            }
         }
 
         if ((RattlingCoilStacks > 1
@@ -167,58 +271,150 @@ public sealed class VPR_Default : ViperRotation
             && !Player.HasStatus(true, StatusID.ReadyToReawaken)
             && SerpentCombo == SerpentCombo.None)
         {
-            if (UncoiledFuryPvE.CanUse(out act, usedUp: true)) return true;
+            if (UncoiledFuryPvE.CanUse(out act, usedUp: true))
+            {
+                return true;
+            }
         }
 
         ////AOE Dread Combo
-        if (SwiftskinsDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true)) return true;
-        if (HuntersDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true)) return true;
+        if (SwiftskinsDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
+        {
+            return true;
+        }
+
+        if (HuntersDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
+        {
+            return true;
+        }
 
         if (VicepitPvE.Cooldown.CurrentCharges == 1 && VicepitPvE.Cooldown.RecastTimeRemainOneCharge < 10)
         {
-            if (VicepitPvE.CanUse(out act, usedUp: true)) return true;
+            if (VicepitPvE.CanUse(out act, usedUp: true))
+            {
+                return true;
+            }
         }
-        if (VicepitPvE.CanUse(out act, usedUp: true)) return true;
+        if (VicepitPvE.CanUse(out act, usedUp: true))
+        {
+            return true;
+        }
 
         ////Single Target Dread Combo
         // Try using Coil that player is in position for extra damage first
-        if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true) && HuntersCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, HuntersCoilPvE.Target.Target)) return true;
-        if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true) && SwiftskinsCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, SwiftskinsCoilPvE.Target.Target)) return true;
+        if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true) && HuntersCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, HuntersCoilPvE.Target.Target))
+        {
+            return true;
+        }
 
-        if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true)) return true;
-        if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true)) return true;
+        if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true) && SwiftskinsCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, SwiftskinsCoilPvE.Target.Target))
+        {
+            return true;
+        }
 
+        if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true))
+        {
+            return true;
+        }
+
+        if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true))
+        {
+            return true;
+        }
 
         if (VicewinderPvE.Cooldown.CurrentCharges == 1 && VicewinderPvE.Cooldown.RecastTimeRemainOneCharge < 10)
         {
-            if (VicewinderPvE.CanUse(out act, usedUp: true)) return true;
+            if (VicewinderPvE.CanUse(out act, usedUp: true))
+            {
+                return true;
+            }
         }
-        if (VicewinderPvE.CanUse(out act, usedUp: true)) return true;
+        if (VicewinderPvE.CanUse(out act, usedUp: true))
+        {
+            return true;
+        }
         //AOE Serpent Combo
-        if (JaggedMawPvE.CanUse(out act, skipAoeCheck: true)) return true;
-        if (BloodiedMawPvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (JaggedMawPvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return true;
+        }
 
-        if (HuntersBitePvE.CanUse(out act, skipAoeCheck: true)) return true;
-        if (SwiftskinsBitePvE.CanUse(out act, skipAoeCheck: true)) return true;
+        if (BloodiedMawPvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return true;
+        }
 
-        if (ReavingMawPvE.CanUse(out act)) return true;
-        if (SteelMawPvE.CanUse(out act)) return true;
+        if (HuntersBitePvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return true;
+        }
+
+        if (SwiftskinsBitePvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return true;
+        }
+
+        if (ReavingMawPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (SteelMawPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         //Single Target Serpent Combo
-        if (FlankstingStrikePvE.CanUse(out act)) return true;
-        if (FlanksbaneFangPvE.CanUse(out act)) return true;
-        if (HindstingStrikePvE.CanUse(out act)) return true;
-        if (HindsbaneFangPvE.CanUse(out act)) return true;
+        if (FlankstingStrikePvE.CanUse(out act))
+        {
+            return true;
+        }
 
-        if (HuntersStingPvE.CanUse(out act)) return true;
-        if (SwiftskinsStingPvE.CanUse(out act)) return true;
+        if (FlanksbaneFangPvE.CanUse(out act))
+        {
+            return true;
+        }
 
-        if (ReavingFangsPvE.CanUse(out act)) return true;
-        if (SteelFangsPvE.CanUse(out act)) return true;
+        if (HindstingStrikePvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (HindsbaneFangPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (HuntersStingPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (SwiftskinsStingPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (ReavingFangsPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (SteelFangsPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         //Ranged
-        if ((UFGhosting || (!UFGhosting && SerpentCombo == SerpentCombo.None)) && UncoiledFuryPvE.CanUse(out act, usedUp: true)) return true;
-        if ((UFGhosting || (!UFGhosting && SerpentCombo == SerpentCombo.None)) && WrithingSnapPvE.CanUse(out act)) return true;
+        if ((UFGhosting || (!UFGhosting && SerpentCombo == SerpentCombo.None)) && UncoiledFuryPvE.CanUse(out act, usedUp: true))
+        {
+            return true;
+        }
+
+        if ((UFGhosting || (!UFGhosting && SerpentCombo == SerpentCombo.None)) && WrithingSnapPvE.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.GeneralGCD(out act);
     }

@@ -1,11 +1,12 @@
 ﻿using ECommons.DalamudServices;
 using ECommons.ExcelServices;
+using ECommons.Logging;
 
 namespace RotationSolver.Basic.Configuration.Conditions;
 
 internal class MajorConditionValue(string name = MajorConditionValue.conditionName)
 {
-    const string conditionName = "Unnamed";
+    private const string conditionName = "Unnamed";
 
     [JsonIgnore]
     public bool IsUnnamed => Name == conditionName;
@@ -20,7 +21,7 @@ internal class MajorConditionValue(string name = MajorConditionValue.conditionNa
     {
         get
         {
-            if (!Conditions.TryGetValue(DataCenter.Job, out var dict))
+            if (!Conditions.TryGetValue(DataCenter.Job, out Dictionary<uint, ConditionSet>? dict))
             {
                 dict = Conditions[DataCenter.Job] = [];
             }
@@ -35,7 +36,7 @@ internal class MajorConditionValue(string name = MajorConditionValue.conditionNa
     {
         get
         {
-            if (!DisabledConditions.TryGetValue(DataCenter.Job, out var dict))
+            if (!DisabledConditions.TryGetValue(DataCenter.Job, out Dictionary<uint, ConditionSet>? dict))
             {
                 dict = DisabledConditions[DataCenter.Job] = [];
             }
@@ -71,7 +72,7 @@ internal class MajorConditionValue(string name = MajorConditionValue.conditionNa
 
     public ConditionSet GetCondition(uint id)
     {
-        if (!ConditionDict.TryGetValue(id, out var conditionSet))
+        if (!ConditionDict.TryGetValue(id, out ConditionSet? conditionSet))
         {
             conditionSet = ConditionDict[id] = new ConditionSet();
         }
@@ -80,7 +81,7 @@ internal class MajorConditionValue(string name = MajorConditionValue.conditionNa
 
     public ConditionSet GetDisabledCondition(uint id)
     {
-        if (!DisableConditionDict.TryGetValue(id, out var conditionSet))
+        if (!DisableConditionDict.TryGetValue(id, out ConditionSet? conditionSet))
         {
             conditionSet = DisableConditionDict[id] = new ConditionSet();
         }
@@ -89,7 +90,7 @@ internal class MajorConditionValue(string name = MajorConditionValue.conditionNa
 
     public ConditionSet GetEnableCondition(string config)
     {
-        if (!ForceEnableConditions.TryGetValue(config, out var conditionSet))
+        if (!ForceEnableConditions.TryGetValue(config, out ConditionSet? conditionSet))
         {
             conditionSet = ForceEnableConditions[config] = new ConditionSet();
         }
@@ -98,7 +99,7 @@ internal class MajorConditionValue(string name = MajorConditionValue.conditionNa
 
     public ConditionSet GetDisableCondition(string config)
     {
-        if (!ForceDisableConditions.TryGetValue(config, out var conditionSet))
+        if (!ForceDisableConditions.TryGetValue(config, out ConditionSet? conditionSet))
         {
             conditionSet = ForceDisableConditions[config] = new ConditionSet();
         }
@@ -107,31 +108,46 @@ internal class MajorConditionValue(string name = MajorConditionValue.conditionNa
 
     public void Save(string folder)
     {
-        if (!Directory.Exists(folder)) return;
-        var path = Path.Combine(folder, Name + ".json");
+        if (!Directory.Exists(folder))
+        {
+            return;
+        }
 
-        var str = JsonConvert.SerializeObject(this, Formatting.Indented);
+        string path = Path.Combine(folder, Name + ".json");
+
+        string str = JsonConvert.SerializeObject(this, Formatting.Indented);
         File.WriteAllText(path, str);
     }
 
     public static MajorConditionValue[] Read(string folder)
     {
-        if (!Directory.Exists(folder)) return [];
-
-        return Directory.EnumerateFiles(folder, "*.json").Select(p =>
+        if (!Directory.Exists(folder))
         {
-            var str = File.ReadAllText(p);
+            return [];
+        }
+
+        List<MajorConditionValue> result = [];
+
+        string[] files = Directory.GetFiles(folder, "*.json");
+        foreach (string p in files)
+        {
+            string str = File.ReadAllText(p);
 
             try
             {
-                return JsonConvert.DeserializeObject<MajorConditionValue>(str, new IConditionConverter());
+                var obj = JsonConvert.DeserializeObject<MajorConditionValue>(str, new IConditionConverter());
+                if (obj != null && !string.IsNullOrEmpty(obj.Name))
+                {
+                    result.Add(obj);
+                }
             }
             catch (Exception ex)
             {
-                Svc.Log.Warning(ex, $"Failed to load the ConditionSet from {p}");
+                PluginLog.Warning($"Failed to load the types from {p}: {ex.Message}");
                 Svc.Chat.Print($"Failed to load the ConditionSet from {p}");
-                return null;
             }
-        }).OfType<MajorConditionValue>().Where(set => !string.IsNullOrEmpty(set.Name)).ToArray();
+        }
+
+        return result.ToArray();
     }
 }

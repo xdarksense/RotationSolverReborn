@@ -1,5 +1,6 @@
 ﻿using ECommons.DalamudServices;
 using ECommons.GameHelpers;
+using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Action = Lumina.Excel.Sheets.Action;
 
@@ -89,7 +90,7 @@ public class BaseAction : IBaseAction
     {
         get
         {
-            if (!Service.Config.RotationActionConfig.TryGetValue(ID, out var value) || DataCenter.ResetActionConfigs)
+            if (!Service.Config.RotationActionConfig.TryGetValue(ID, out ActionConfig? value) || DataCenter.ResetActionConfigs)
             {
                 value = Setting.CreateConfig?.Invoke() ?? new ActionConfig();
                 Service.Config.RotationActionConfig[ID] = value;
@@ -97,11 +98,11 @@ public class BaseAction : IBaseAction
                 if (!Action.ClassJob.IsValid)
                 {
                     // Log the error for debugging purposes
-                    Svc.Log.Debug($"ClassJob is not valid for Action ID: {ID}");
+                    PluginLog.Debug($"ClassJob is not valid for Action ID: {ID}");
                     return value;
                 }
 
-                var classJob = Action.ClassJob.Value;
+                _ = Action.ClassJob.Value;
 
                 if (value.TimeToUntargetable == 0)
                 {
@@ -152,11 +153,20 @@ public class BaseAction : IBaseAction
             usedUp = true;
         }
 
-        if (!Info.BasicCheck(skipStatusProvideCheck, skipComboCheck, skipCastingCheck)) return false;
+        if (!Info.BasicCheck(skipStatusProvideCheck, skipComboCheck, skipCastingCheck))
+        {
+            return false;
+        }
 
-        if (!Cooldown.CooldownCheck(usedUp, gcdCountForAbility)) return false;
+        if (!Cooldown.CooldownCheck(usedUp, gcdCountForAbility))
+        {
+            return false;
+        }
 
-        if (Setting.SpecialType == SpecialActionType.MeleeRange && IActionHelper.IsLastAction(IActionHelper.MovingActions)) return false; // No range actions after moving.
+        if (Setting.SpecialType == SpecialActionType.MeleeRange && IActionHelper.IsLastAction(IActionHelper.MovingActions))
+        {
+            return false; // No range actions after moving.
+        }
 
         if (!skipTTKCheck)
         {
@@ -170,7 +180,10 @@ public class BaseAction : IBaseAction
         }
 
         PreviewTarget = TargetInfo.FindTarget(skipAoeCheck, skipStatusProvideCheck, skipTargetStatusNeedCheck);
-        if (PreviewTarget == null) return false;
+        if (PreviewTarget == null)
+        {
+            return false;
+        }
 
         if (!IBaseAction.ActionPreview)
         {
@@ -189,40 +202,35 @@ public class BaseAction : IBaseAction
     /// <inheritdoc/>
     public unsafe bool Use()
     {
-        var target = Target;
+        TargetResult target = Target;
 
-        var adjustId = AdjustedID;
+        uint adjustId = AdjustedID;
         if (TargetInfo.IsTargetArea)
         {
-            if (adjustId != ID) return false;
-            if (!target.Position.HasValue) return false;
-
-            var loc = target.Position.Value;
-
-            if (Player.Object == null || ActionManager.Instance() == null)
+            if (adjustId != ID)
             {
                 return false;
             }
 
-            return ActionManager.Instance()->UseActionLocation(ActionType.Action, ID, Player.Object.GameObjectId, &loc);
+            if (!target.Position.HasValue)
+            {
+                return false;
+            }
+
+            Vector3 loc = target.Position.Value;
+
+            return ActionManager.Instance() != null && ActionManager.Instance()->UseActionLocation(ActionType.Action, ID, Player.Object.GameObjectId, &loc);
         }
         else
         {
-            var targetId = target.Target?.GameObjectId ?? Player.Object?.GameObjectId ?? 0;
-            if (Svc.Objects.SearchById(targetId) == null)
-            {
-                return false;
-            }
-
-            if (ActionManager.Instance() == null)
-            {
-                return false;
-            }
-
-            return ActionManager.Instance()->UseAction(ActionType.Action, adjustId, targetId);
+            ulong targetId = target.Target?.GameObjectId ?? Player.Object?.GameObjectId ?? 0;
+            return Svc.Objects.SearchById(targetId) != null && ActionManager.Instance() != null && ActionManager.Instance()->UseAction(ActionType.Action, adjustId, targetId);
         }
     }
 
     /// <inheritdoc/>
-    public override string ToString() => Name;
+    public override string ToString()
+    {
+        return Name;
+    }
 }

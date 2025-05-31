@@ -54,13 +54,24 @@ internal class ConditionBoolean
     /// <param name="condition">The condition to convert.</param>
     public static implicit operator bool(ConditionBoolean condition)
     {
-        if (!Service.Config.UseAdditionalConditions) return condition.Value;
-        var rotation = DataCenter.CurrentRotation;
-        var set = DataCenter.CurrentConditionValue;
+        if (!Service.Config.UseAdditionalConditions)
+        {
+            return condition.Value;
+        }
+
+        ICustomRotation? rotation = DataCenter.CurrentRotation;
+        Conditions.MajorConditionValue set = DataCenter.CurrentConditionValue;
         if (rotation != null)
         {
-            if (condition.Enable && set.GetEnableCondition(condition.Key).IsTrue(rotation)) return true;
-            if (condition.Disable && set.GetDisableCondition(condition.Key).IsTrue(rotation)) return false;
+            if (condition.Enable && set.GetEnableCondition(condition.Key).IsTrue(rotation))
+            {
+                return true;
+            }
+
+            if (condition.Disable && set.GetDisableCondition(condition.Key).IsTrue(rotation))
+            {
+                return false;
+            }
         }
         return condition.Value;
     }
@@ -69,5 +80,8 @@ internal class ConditionBoolean
     /// Returns a string that represents the current object.
     /// </summary>
     /// <returns>A string that represents the current object.</returns>
-    public override string ToString() => Value.ToString();
+    public override string ToString()
+    {
+        return Value.ToString();
+    }
 }

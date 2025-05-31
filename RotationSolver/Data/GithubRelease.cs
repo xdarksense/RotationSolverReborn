@@ -14,7 +14,7 @@
                 TagName = string.Empty;
                 TargetCommitish = string.Empty;
                 Name = string.Empty;
-                Assets = new List<Asset>();
+                Assets = [];
                 TarballUrl = string.Empty;
                 ZipballUrl = string.Empty;
                 Body = string.Empty;

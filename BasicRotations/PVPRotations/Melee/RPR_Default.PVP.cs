@@ -26,20 +26,18 @@ public sealed class RPR_DefaultPvP : ReaperRotation
     private bool DoPurify(out IAction? action)
     {
         action = null;
-        if (!UsePurifyPvP) return false;
+        if (!UsePurifyPvP)
+        {
+            return false;
+        }
 
-        var purifiableStatusesIDs = new List<int>
+        List<int> purifiableStatusesIDs = new()
         {
             // Stun, DeepFreeze, HalfAsleep, Sleep, Bind, Heavy, Silence
             1343, 3219, 3022, 1348, 1345, 1344, 1347
         };
 
-        if (purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)))
-        {
-            return PurifyPvP.CanUse(out action);
-        }
-
-        return false;
+        return purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)) && PurifyPvP.CanUse(out action);
     }
     #endregion
 
@@ -47,12 +45,36 @@ public sealed class RPR_DefaultPvP : ReaperRotation
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
-        if (DoPurify(out action)) return true;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (Player.GetHealthRatio() < BloodBathPvPPercent && BloodbathPvP.CanUse(out action)) return true;
-        if (SwiftPvP.CanUse(out action)) return true;
-        if (CurrentTarget?.GetHealthRatio() <= SmitePvPPercent && SmitePvP.CanUse(out action)) return true;
+        if (DoPurify(out action))
+        {
+            return true;
+        }
+
+        if (BloodbathPvP.CanUse(out action))
+        {
+            if (Player.GetHealthRatio() < BloodBathPvPPercent)
+            {
+                return true;
+            }
+        }
+
+        if (SwiftPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (SmitePvP.CanUse(out action))
+        {
+            if (CurrentTarget?.GetHealthRatio() <= SmitePvPPercent)
+            {
+                return true;
+            }
+        }
 
         return base.EmergencyAbility(nextGCD, out action);
     }
@@ -60,9 +82,15 @@ public sealed class RPR_DefaultPvP : ReaperRotation
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (ArcaneCrestPvP.CanUse(out action)) return true;
+        if (ArcaneCrestPvP.CanUse(out action))
+        {
+            return true;
+        }
 
         return base.DefenseSingleAbility(nextGCD, out action);
     }
@@ -70,11 +98,28 @@ public sealed class RPR_DefaultPvP : ReaperRotation
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
+        {
+            return false;
+        }
 
-        if (HasEnshroudedPvP && LemuresSlicePvP.CanUse(out action)) return true;
-        if (DeathWarrantPvP.CanUse(out action)) return true;
-        if (!HasEnshroudedPvP && GrimSwathePvP.CanUse(out action)) return true;
+        if (LemuresSlicePvP.CanUse(out action))
+        {
+            if (HasEnshroudedPvP)
+            {
+                return true;
+            }
+        }
+
+        if (DeathWarrantPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (GrimSwathePvP.CanUse(out action) && !HasEnshroudedPvP)
+        {
+            return true;
+        }
 
         return base.AttackAbility(nextGCD, out action);
     }
@@ -84,27 +129,66 @@ public sealed class RPR_DefaultPvP : ReaperRotation
     protected override bool GeneralGCD(out IAction? action)
     {
         action = null;
-        if (RespectGuard && Player.HasStatus(true, StatusID.Guard)) return false;
-
-        if ((Player.StatusStack(true, StatusID.Enshrouded_2863) == 1 || Player.WillStatusEndGCD(1, 0, true, StatusID.Enshrouded_2863)) 
-            && CommunioPvP.CanUse(out action)) return true;
-
-        if (CrossReapingPvP.CanUse(out action)) return true;
-        if (VoidReapingPvP.CanUse(out action)) return true;
-
-        if (PerfectioPvP.CanUse(out action)) return true;
-
-        if (Player.StatusStack(true, StatusID.ImmortalSacrifice_3204) > 3)
+        if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
         {
-            if (PlentifulHarvestPvP.CanUse(out action)) return true;
+            return false;
         }
 
-        if (HarvestMoonPvP.CanUse(out action, usedUp: true)) return true;
-        if (ExecutionersGuillotinePvP.CanUse(out action)) return true;
+        if (CommunioPvP.CanUse(out action))
+        {
+            if (Player.StatusStack(true, StatusID.Enshrouded_2863) == 1 || Player.WillStatusEndGCD(1, 0, true, StatusID.Enshrouded_2863))
+            {
+                return true;
+            }
+        }
 
-        if (InfernalSlicePvP.CanUse(out action)) return true;
-        if (WaxingSlicePvP.CanUse(out action)) return true;
-        if (SlicePvP.CanUse(out action)) return true;
+        if (CrossReapingPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (VoidReapingPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (PerfectioPvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (PlentifulHarvestPvP.CanUse(out action))
+        {
+            if (Player.StatusStack(true, StatusID.ImmortalSacrifice_3204) > 3)
+            {
+                return true;
+            }
+        }
+
+        if (HarvestMoonPvP.CanUse(out action, usedUp: true))
+        {
+            return true;
+        }
+
+        if (ExecutionersGuillotinePvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (InfernalSlicePvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (WaxingSlicePvP.CanUse(out action))
+        {
+            return true;
+        }
+
+        if (SlicePvP.CanUse(out action))
+        {
+            return true;
+        }
 
         return base.GeneralGCD(out action);
     }

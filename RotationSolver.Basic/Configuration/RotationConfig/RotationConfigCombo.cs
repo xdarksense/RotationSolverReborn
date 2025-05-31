@@ -23,23 +23,23 @@ internal class RotationConfigCombo : RotationConfigBase
             throw new ArgumentException("Property type must be an enum", nameof(property));
         }
 
-        var names = new List<string>();
+        List<string> names = [];
         foreach (Enum v in Enum.GetValues(property.PropertyType))
         {
             // Retrieve the Description attribute if it exists
-            var fieldInfo = property.PropertyType.GetField(v.ToString());
-            var descriptionAttribute = fieldInfo?.GetCustomAttribute<DescriptionAttribute>();
+            FieldInfo? fieldInfo = property.PropertyType.GetField(v.ToString());
+            DescriptionAttribute? descriptionAttribute = fieldInfo?.GetCustomAttribute<DescriptionAttribute>();
             names.Add(descriptionAttribute?.Description ?? v.ToString());
         }
 
         DisplayValues = names.ToArray();
 
         // Set the Value to the description of the default enum value
-        var defaultEnumValue = property.GetValue(rotation);
+        object? defaultEnumValue = property.GetValue(rotation);
         if (defaultEnumValue is Enum defaultEnum)
         {
-            var defaultFieldInfo = property.PropertyType.GetField(defaultEnum.ToString());
-            var defaultDescriptionAttribute = defaultFieldInfo?.GetCustomAttribute<DescriptionAttribute>();
+            FieldInfo? defaultFieldInfo = property.PropertyType.GetField(defaultEnum.ToString());
+            DescriptionAttribute? defaultDescriptionAttribute = defaultFieldInfo?.GetCustomAttribute<DescriptionAttribute>();
             Value = defaultDescriptionAttribute?.Description ?? defaultEnum.ToString();
         }
         else
@@ -54,12 +54,8 @@ internal class RotationConfigCombo : RotationConfigBase
     /// <returns>A string that represents the current object.</returns>
     public override string ToString()
     {
-        var indexStr = base.ToString();
-        if (!int.TryParse(indexStr, out var index) || index < 0 || index >= DisplayValues.Length)
-        {
-            return DisplayValues[0];
-        }
-        return DisplayValues[index];
+        string indexStr = base.ToString();
+        return !int.TryParse(indexStr, out int index) || index < 0 || index >= DisplayValues.Length ? DisplayValues[0] : DisplayValues[index];
     }
 
     /// <summary>
@@ -70,10 +66,13 @@ internal class RotationConfigCombo : RotationConfigBase
     /// <returns><c>true</c> if the command was executed; otherwise, <c>false</c>.</returns>
     public override bool DoCommand(IRotationConfigSet set, string str)
     {
-        if (!base.DoCommand(set, str)) return false;
+        if (!base.DoCommand(set, str))
+        {
+            return false;
+        }
 
         string numStr = str[Name.Length..].Trim();
-        var length = DisplayValues.Length;
+        int length = DisplayValues.Length;
 
         int nextId = (int.Parse(Value) + 1) % length;
         if (int.TryParse(numStr, out int num))

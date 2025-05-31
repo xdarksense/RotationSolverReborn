@@ -1,4 +1,4 @@
-﻿using ECommons.DalamudServices;
+﻿using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 
 namespace RotationSolver.Basic.Configuration;
@@ -16,18 +16,21 @@ public class MacroInfo
 
     public unsafe bool AddMacro(IGameObject? tar = null)
     {
-        if (MacroIndex < 0 || MacroIndex > 99) return false;
+        if (MacroIndex is < 0 or > 99)
+        {
+            return false;
+        }
 
         try
         {
-            var macro = RaptureMacroModule.Instance()->GetMacro(IsShared ? 1u : 0u, (uint)MacroIndex);
+            RaptureMacroModule.Macro* macro = RaptureMacroModule.Instance()->GetMacro(IsShared ? 1u : 0u, (uint)MacroIndex);
 
             DataCenter.Macros.Enqueue(new MacroItem(tar, macro));
             return true;
         }
         catch (Exception ex)
         {
-            Svc.Log.Warning(ex, "Failed to add macro.");
+            PluginLog.Warning($"Failed to add macro: {ex.Message}");
             return false;
         }
     }

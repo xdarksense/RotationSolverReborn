@@ -2,7 +2,7 @@
 
 namespace RotationSolver.Basic.Rotations.Basic;
 
-partial class NinjaRotation
+public partial class NinjaRotation
 {
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Dexterity;
@@ -11,12 +11,12 @@ partial class NinjaRotation
     /// <summary>
     /// Gets the amount of Ninki available.
     /// </summary>
-    public static byte Ninki => (byte)JobGauge.Ninki;
+    public static byte Ninki => JobGauge.Ninki;
 
     /// <summary>
     /// Gets the current charges for Kazematoi.
     /// </summary>
-    public static byte Kazematoi => (byte)JobGauge.Kazematoi;
+    public static byte Kazematoi => JobGauge.Kazematoi;
 
     /// <summary>
     /// Is enough level for Jin
@@ -453,12 +453,12 @@ partial class NinjaRotation
         FumaShurikenPvE.Setting.Ninjutsu = [TenPvE];
         KatonPvE.Setting.Ninjutsu = [ChiPvE, TenPvE_18805];
         RaitonPvE.Setting.Ninjutsu = [TenPvE, ChiPvE_18806];
-        HyotonPvE.Setting.Ninjutsu = [TenPvE, JinPvE_18807];
-        HutonPvE.Setting.Ninjutsu = [JinPvE, ChiPvE_18806, TenPvE_18805];
-        DotonPvE.Setting.Ninjutsu = [JinPvE, TenPvE_18805, ChiPvE_18806];
+        HyotonPvE.Setting.Ninjutsu = [ChiPvE, JinPvE_18807];
+        HutonPvE.Setting.Ninjutsu = [ChiPvE, JinPvE_18807, TenPvE_18805];
+        DotonPvE.Setting.Ninjutsu = [TenPvE, JinPvE_18807, ChiPvE_18806];
         SuitonPvE.Setting.Ninjutsu = [TenPvE, ChiPvE_18806, JinPvE_18807];
         GokaMekkyakuPvE.Setting.Ninjutsu = [ChiPvE, TenPvE_18805];
-        HyoshoRanryuPvE.Setting.Ninjutsu = [TenPvE, JinPvE_18807];
+        HyoshoRanryuPvE.Setting.Ninjutsu = [ChiPvE, JinPvE_18807];
     }
 
     static partial void ModifyFumaShurikenPvE(ref ActionSetting setting)
@@ -488,11 +488,13 @@ partial class NinjaRotation
     static partial void ModifyHyotonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => HyotonPvEReady;
+        setting.UnlockedByQuestID = 68488;
     }
 
     static partial void ModifyHutonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => HutonPvEReady && !IsShadowWalking;
+        setting.UnlockedByQuestID = 68488;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -503,6 +505,7 @@ partial class NinjaRotation
     {
         setting.ActionCheck = () => DotonPvEReady;
         setting.StatusProvide = [StatusID.Doton];
+        setting.UnlockedByQuestID = 68488;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -512,6 +515,7 @@ partial class NinjaRotation
     static partial void ModifySuitonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => SuitonPvEReady;
+        setting.UnlockedByQuestID = 68488;
         setting.StatusProvide = [StatusID.ShadowWalker];
     }
 
@@ -637,23 +641,20 @@ partial class NinjaRotation
     [RotationDesc(ActionID.ShukuchiPvE)]
     protected sealed override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
-        if (ShukuchiPvE.CanUse(out act)) return true;
-        return base.MoveForwardAbility(nextGCD, out act);
+        return ShukuchiPvE.CanUse(out act) || base.MoveForwardAbility(nextGCD, out act);
     }
 
     /// <inheritdoc/>
     [RotationDesc(ActionID.FeintPvE)]
     protected sealed override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (FeintPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.Mudra)) return true;
-        return base.DefenseAreaAbility(nextGCD, out act);
+        return (FeintPvE.CanUse(out act) && !Player.HasStatus(true, StatusID.Mudra)) || base.DefenseAreaAbility(nextGCD, out act);
     }
 
     /// <inheritdoc/>
     [RotationDesc(ActionID.ShadeShiftPvE)]
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
-        if (ShadeShiftPvE.CanUse(out act)) return true;
-        return base.DefenseSingleAbility(nextGCD, out act);
+        return ShadeShiftPvE.CanUse(out act) || base.DefenseSingleAbility(nextGCD, out act);
     }
 }

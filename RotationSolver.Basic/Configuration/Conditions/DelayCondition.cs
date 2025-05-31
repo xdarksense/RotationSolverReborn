@@ -8,8 +8,8 @@ internal abstract class DelayCondition : ICondition
     public float DelayMax = 0;
     public float DelayOffset = 0;
 
-    RandomDelay _delay = default;
-    OffsetDelay _offsetDelay = default;
+    private RandomDelay _delay = default;
+    private OffsetDelay _offsetDelay = default;
 
     public bool Not = false;
 
@@ -18,7 +18,10 @@ internal abstract class DelayCondition : ICondition
 
     public bool IsTrue(ICustomRotation? rotation)
     {
-        if (rotation == null) return false;
+        if (rotation == null)
+        {
+            return false;
+        }
 
         _callingStack ??= new(64);
 
@@ -39,13 +42,13 @@ internal abstract class DelayCondition : ICondition
         }
 
         _callingStack.Push(this);
-        var value = CheckBefore(rotation) && IsTrueInside(rotation);
+        bool value = CheckBefore(rotation) && IsTrueInside(rotation);
         if (Not)
         {
             value = !value;
         }
-        var result = _delay.Delay(_offsetDelay.Delay(value));
-        _callingStack.Pop();
+        bool result = _delay.Delay(_offsetDelay.Delay(value));
+        _ = _callingStack.Pop();
 
         return result;
     }
@@ -54,33 +57,63 @@ internal abstract class DelayCondition : ICondition
 
     public virtual bool CheckBefore(ICustomRotation rotation)
     {
-        return Player.Available;
+        return Player.AvailableThreadSafe;
     }
 
     internal static bool CheckBaseAction(ICustomRotation rotation, ActionID id, ref IBaseAction? action)
     {
         if (id != ActionID.None && (action == null || (ActionID)action.ID != id))
         {
-            action = rotation.AllBaseActions.FirstOrDefault(a => (ActionID)a.ID == id);
+            IBaseAction? found = null;
+            var all = rotation.AllBaseActions;
+            for (int i = 0; i < all.Length; i++)
+            {
+                if ((ActionID)all[i].ID == id)
+                {
+                    found = all[i];
+                    break;
+                }
+            }
+            action = found;
         }
-        if (action == null) return false;
-        return true;
+        return action != null;
     }
 
     internal static bool CheckMemberInfo<T>(ICustomRotation? rotation, ref string name, ref T? value) where T : MemberInfo
     {
-        if (rotation == null) return false;
+        if (rotation == null)
+        {
+            return false;
+        }
 
         if (!string.IsNullOrEmpty(name) && (value == null || value.Name != name))
         {
-            var memberName = name;
+            string memberName = name;
             if (typeof(T).IsAssignableFrom(typeof(PropertyInfo)))
             {
-                value = (T?)GetAllMembers(rotation.GetType(), RuntimeReflectionExtensions.GetRuntimeProperties).FirstOrDefault(m => m.Name == memberName);
+                T? found = null;
+                foreach (var m in GetAllMembers(rotation.GetType(), RuntimeReflectionExtensions.GetRuntimeProperties))
+                {
+                    if (m.Name == memberName)
+                    {
+                        found = m as T;
+                        break;
+                    }
+                }
+                value = found;
             }
             else if (typeof(T).IsAssignableFrom(typeof(MethodInfo)))
             {
-                value = (T?)GetAllMembers(rotation.GetType(), RuntimeReflectionExtensions.GetRuntimeMethods).FirstOrDefault(m => m.Name == memberName);
+                T? found = null;
+                foreach (var m in GetAllMembers(rotation.GetType(), RuntimeReflectionExtensions.GetRuntimeMethods))
+                {
+                    if (m.Name == memberName)
+                    {
+                        found = m as T;
+                        break;
+                    }
+                }
+                value = found;
             }
         }
         return true;
@@ -88,9 +121,12 @@ internal abstract class DelayCondition : ICondition
 
     private static IEnumerable<MemberInfo> GetAllMembers(Type? type, Func<Type, IEnumerable<MemberInfo>> getFunc)
     {
-        if (type == null || getFunc == null) return Array.Empty<MemberInfo>();
+        if (type == null || getFunc == null)
+        {
+            return Array.Empty<MemberInfo>();
+        }
 
-        var methods = getFunc(type);
+        IEnumerable<MemberInfo> methods = getFunc(type);
         return methods.Union(GetAllMembers(type.BaseType, getFunc));
     }
 }

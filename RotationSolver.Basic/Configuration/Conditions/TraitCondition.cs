@@ -13,16 +13,28 @@ internal class TraitCondition : DelayCondition
     {
         if (TraitID != 0 && (_trait == null || _trait.ID != TraitID))
         {
-            _trait = rotation.AllTraits.FirstOrDefault(a => a.ID == TraitID);
+            _trait = null;
+            var traits = rotation.AllTraits;
+            for (int i = 0; i < traits.Length; i++)
+            {
+                if (traits[i].ID == TraitID)
+                {
+                    _trait = traits[i];
+                    break;
+                }
+            }
         }
         return base.CheckBefore(rotation);
     }
 
     protected override bool IsTrueInside(ICustomRotation rotation)
     {
-        if (_trait == null || !Player.Available) return false;
+        if (_trait == null || !Player.AvailableThreadSafe)
+        {
+            return false;
+        }
 
-        var result = _trait.EnoughLevel;
+        bool result = _trait.EnoughLevel;
         return result;
     }
 }

@@ -4,36 +4,46 @@ namespace RotationSolver.Updaters;
 
 internal class ActionSequencerUpdater
 {
-    static string? _actionSequencerFolder;
+    private static string? _actionSequencerFolder;
 
     public static void UpdateActionSequencerAction()
     {
-        if (DataCenter.ConditionSets == null) return;
-        var customRotation = DataCenter.CurrentRotation;
-        if (customRotation == null) return;
+        if (DataCenter.ConditionSets == null)
+        {
+            return;
+        }
 
-        var allActions = RotationUpdater.CurrentRotationActions;
+        ICustomRotation? customRotation = DataCenter.CurrentRotation;
+        if (customRotation == null)
+        {
+            return;
+        }
 
-        var set = DataCenter.CurrentConditionValue;
-        if (set == null) return;
+        IAction[] allActions = RotationUpdater.CurrentRotationActions;
 
-        var disabledActions = new HashSet<uint>();
-        foreach (var pair in set.DisableConditionDict)
+        MajorConditionValue set = DataCenter.CurrentConditionValue;
+        if (set == null)
+        {
+            return;
+        }
+
+        HashSet<uint> disabledActions = [];
+        foreach (KeyValuePair<uint, ConditionSet> pair in set.DisableConditionDict)
         {
             if (pair.Value.IsTrue(customRotation))
             {
-                disabledActions.Add(pair.Key);
+                _ = disabledActions.Add(pair.Key);
             }
         }
         DataCenter.DisabledActionSequencer = disabledActions;
 
-        var conditions = set.ConditionDict;
+        Dictionary<uint, ConditionSet> conditions = set.ConditionDict;
         if (conditions != null)
         {
-            foreach (var conditionPair in conditions)
+            foreach (KeyValuePair<uint, ConditionSet> conditionPair in conditions)
             {
                 object? nextAct = null;
-                foreach (var a in allActions)
+                foreach (IAction a in allActions)
                 {
                     if (a.ID == conditionPair.Key)
                     {
@@ -41,7 +51,10 @@ internal class ActionSequencerUpdater
                         break;
                     }
                 }
-                if (nextAct == null || !conditionPair.Value.IsTrue(customRotation)) continue;
+                if (nextAct == null || !conditionPair.Value.IsTrue(customRotation))
+                {
+                    continue;
+                }
 
                 DataCenter.ActionSequencerAction = nextAct as IAction;
                 return;
@@ -54,18 +67,25 @@ internal class ActionSequencerUpdater
     public static void Enable(string folder)
     {
         _actionSequencerFolder = folder;
-        if (!Directory.Exists(_actionSequencerFolder)) Directory.CreateDirectory(_actionSequencerFolder);
+        if (!Directory.Exists(_actionSequencerFolder))
+        {
+            _ = Directory.CreateDirectory(_actionSequencerFolder);
+        }
 
         LoadFiles();
     }
 
     public static void SaveFiles()
     {
-        if (_actionSequencerFolder == null) return;
+        if (_actionSequencerFolder == null)
+        {
+            return;
+        }
+
         try
         {
             Directory.Delete(_actionSequencerFolder, true);
-            Directory.CreateDirectory(_actionSequencerFolder);
+            _ = Directory.CreateDirectory(_actionSequencerFolder);
         }
         catch (Exception ex)
         {
@@ -73,7 +93,7 @@ internal class ActionSequencerUpdater
             Console.WriteLine($"Error deleting directory: {ex.Message}");
         }
 
-        foreach (var set in DataCenter.ConditionSets)
+        foreach (MajorConditionValue set in DataCenter.ConditionSets)
         {
             set.Save(_actionSequencerFolder);
         }
@@ -81,7 +101,10 @@ internal class ActionSequencerUpdater
 
     public static void LoadFiles()
     {
-        if (_actionSequencerFolder == null) return;
+        if (_actionSequencerFolder == null)
+        {
+            return;
+        }
 
         DataCenter.ConditionSets = MajorConditionValue.Read(_actionSequencerFolder);
     }
@@ -89,7 +112,7 @@ internal class ActionSequencerUpdater
     public static void AddNew()
     {
         bool hasUnnamed = false;
-        foreach (var conditionSet in DataCenter.ConditionSets)
+        foreach (MajorConditionValue conditionSet in DataCenter.ConditionSets)
         {
             if (conditionSet.IsUnnamed)
             {
@@ -100,27 +123,27 @@ internal class ActionSequencerUpdater
 
         if (!hasUnnamed)
         {
-            var newConditionSets = new List<MajorConditionValue>(DataCenter.ConditionSets)
-            {
-                new MajorConditionValue()
-            };
-            DataCenter.ConditionSets = newConditionSets.ToArray();
+            List<MajorConditionValue> newConditionSets =
+            [
+.. DataCenter.ConditionSets,                 new MajorConditionValue()
+            ];
+            DataCenter.ConditionSets = [.. newConditionSets];
         }
     }
 
     public static void Delete(string name)
     {
-        var newConditionSets = new List<MajorConditionValue>();
-        foreach (var conditionSet in DataCenter.ConditionSets)
+        List<MajorConditionValue> newConditionSets = [];
+        foreach (MajorConditionValue conditionSet in DataCenter.ConditionSets)
         {
             if (conditionSet.Name != name)
             {
                 newConditionSets.Add(conditionSet);
             }
         }
-        DataCenter.ConditionSets = newConditionSets.ToArray();
+        DataCenter.ConditionSets = [.. newConditionSets];
 
-        var filePath = Path.Combine(_actionSequencerFolder ?? string.Empty, $"{name}.json");
+        string filePath = Path.Combine(_actionSequencerFolder ?? string.Empty, $"{name}.json");
         File.Delete(filePath);
     }
 }

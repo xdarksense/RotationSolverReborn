@@ -10,23 +10,24 @@ using FFXIVClientStructs.FFXIV.Client.UI;
 using FFXIVClientStructs.FFXIV.Client.UI.Misc;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Commands;
+using RotationSolver.Helpers;
 
 namespace RotationSolver.Updaters;
 
-internal static class PreviewUpdater
+internal static class MiscUpdater
 {
-    internal static void UpdatePreview()
+    internal static void UpdateMisc()
     {
         UpdateEntry();
         UpdateCancelCast();
     }
 
-    static IDtrBarEntry? _dtrEntry;
+    private static IDtrBarEntry? _dtrEntry;
 
-    private static void UpdateEntry()
+    internal static void UpdateEntry()
     {
-        var showStr = RSCommands.EntryString;
-        var icon = GetJobIcon(Player.Job);
+        string showStr = RSCommands.EntryString;
+        BitmapFontIcon icon = GetJobIcon(Player.Job);
 
         if (Service.Config.ShowInfoOnDtr && !string.IsNullOrEmpty(showStr))
         {
@@ -36,12 +37,14 @@ internal static class PreviewUpdater
             }
             catch
             {
-#pragma warning disable 0436
                 WarningHelper.AddSystemWarning("Unable to add server bar entry");
                 return;
             }
 
-            if (_dtrEntry != null && !_dtrEntry.Shown) _dtrEntry.Shown = true;
+            if (_dtrEntry != null && !_dtrEntry.Shown)
+            {
+                _dtrEntry.Shown = true;
+            }
 
             if (_dtrEntry != null)
             {
@@ -108,19 +111,21 @@ internal static class PreviewUpdater
         };
     }
 
-    static RandomDelay _tarStopCastDelay = new(() => Service.Config.StopCastingDelay);
+    private static RandomDelay _tarStopCastDelay = new(() => Service.Config.StopCastingDelay);
 
     private static unsafe void UpdateCancelCast()
     {
-        if (Player.Object == null || !Player.Object.IsCasting) return;
+        if (!Player.Object.IsCasting)
+        {
+            return;
+        }
 
-        var tarDead = Service.Config.UseStopCasting
+        bool tarDead = Service.Config.UseStopCasting
             && Svc.Objects.SearchById(Player.Object.CastTargetObjectId) is IBattleChara b
             && b.IsEnemy() && b.CurrentHp == 0;
 
-        var statusTimes = GetStatusTimes();
+        float[] statusTimes = GetStatusTimes();
 
-        // Replace statusTimes.Min() with manual minimum calculation
         float minStatusTime = float.MaxValue;
         for (int i = 0; i < statusTimes.Length; i++)
         {
@@ -130,11 +135,11 @@ internal static class PreviewUpdater
             }
         }
 
-        var stopDueStatus = statusTimes.Length > 0 && minStatusTime > Player.Object.TotalCastTime - Player.Object.CurrentCastTime && minStatusTime < 5;
+        bool stopDueStatus = statusTimes.Length > 0 && minStatusTime > Player.Object.TotalCastTime - Player.Object.CurrentCastTime && minStatusTime < 5;
 
         if (_tarStopCastDelay.Delay(tarDead) || stopDueStatus)
         {
-            var uiState = UIState.Instance();
+            UIState* uiState = UIState.Instance();
             if (uiState != null)
             {
                 uiState->Hotbar.CancelCast();
@@ -144,19 +149,19 @@ internal static class PreviewUpdater
 
     private static float[] GetStatusTimes()
     {
-        var statusTimes = new List<float>();
+        List<float> statusTimes = [];
         if (Player.Object?.StatusList != null)
         {
-            foreach (var status in Player.Object.StatusList)
+            foreach (Dalamud.Game.ClientState.Statuses.Status status in Player.Object.StatusList)
             {
                 // No LINQ used here, Contains is a method on the collection
-                if (OtherConfiguration.NoCastingStatus.Contains((uint)status.StatusId))
+                if (OtherConfiguration.NoCastingStatus.Contains(status.StatusId))
                 {
                     statusTimes.Add(status.RemainingTime);
                 }
             }
         }
-        return statusTimes.ToArray();
+        return [.. statusTimes];
     }
 
     internal static unsafe void PulseActionBar(uint actionID)
@@ -167,48 +172,69 @@ internal static class PreviewUpdater
         });
     }
 
-    private unsafe static bool IsActionSlotRight(ActionBarSlot slot, RaptureHotbarModule.HotbarSlot? hot, uint actionID)
+    private static unsafe bool IsActionSlotRight(ActionBarSlot slot, RaptureHotbarModule.HotbarSlot? hot, uint actionID)
     {
         if (hot.HasValue)
         {
-            if (hot.Value.OriginalApparentSlotType != RaptureHotbarModule.HotbarSlotType.CraftAction && hot.Value.OriginalApparentSlotType != RaptureHotbarModule.HotbarSlotType.Action) return false;
-            if (hot.Value.ApparentSlotType != RaptureHotbarModule.HotbarSlotType.CraftAction && hot.Value.ApparentSlotType != RaptureHotbarModule.HotbarSlotType.Action) return false;
+            if (hot.Value.OriginalApparentSlotType is not RaptureHotbarModule.HotbarSlotType.CraftAction and not RaptureHotbarModule.HotbarSlotType.Action)
+            {
+                return false;
+            }
+
+            if (hot.Value.ApparentSlotType is not RaptureHotbarModule.HotbarSlotType.CraftAction and not RaptureHotbarModule.HotbarSlotType.Action)
+            {
+                return false;
+            }
         }
 
         return Service.GetAdjustedActionId((uint)slot.ActionId) == actionID;
     }
 
-    unsafe delegate bool ActionBarAction(ActionBarSlot bar, RaptureHotbarModule.HotbarSlot? hot, uint highLightID);
-    unsafe delegate bool ActionBarPredicate(ActionBarSlot bar, RaptureHotbarModule.HotbarSlot* hot);
+    private unsafe delegate bool ActionBarAction(ActionBarSlot bar, RaptureHotbarModule.HotbarSlot? hot, uint highLightID);
+    private unsafe delegate bool ActionBarPredicate(ActionBarSlot bar, RaptureHotbarModule.HotbarSlot* hot);
     private static unsafe void LoopAllSlotBar(ActionBarAction doingSomething)
     {
-        var index = 0;
-        var hotBarIndex = 0;
+        int index = 0;
+        int hotBarIndex = 0;
 
         // Replace .Union() LINQ with manual enumeration
-        var addonPtrs = new List<IntPtr>();
-        foreach (var ptr in Service.GetAddons<AddonActionBar>()) addonPtrs.Add(ptr);
-        foreach (var ptr in Service.GetAddons<AddonActionBarX>()) addonPtrs.Add(ptr);
-        foreach (var ptr in Service.GetAddons<AddonActionCross>()) addonPtrs.Add(ptr);
-        foreach (var ptr in Service.GetAddons<AddonActionDoubleCrossBase>()) addonPtrs.Add(ptr);
+        List<nint> addonPtrs =
+        [
+            .. Service.GetAddons<AddonActionBar>(),
+            .. Service.GetAddons<AddonActionBarX>(),
+            .. Service.GetAddons<AddonActionCross>(),
+            .. Service.GetAddons<AddonActionDoubleCrossBase>(),
+        ];
 
-        foreach (var intPtr in addonPtrs)
+        foreach (nint intPtr in addonPtrs)
         {
-            if (intPtr == IntPtr.Zero) continue;
-            var actionBar = (AddonActionBarBase*)intPtr;
-            var hotBar = Framework.Instance()->GetUIModule()->GetRaptureHotbarModule()->Hotbars[hotBarIndex];
-
-            var slotIndex = 0;
-
-            foreach (var slot in actionBar->ActionBarSlotVector.AsSpan())
+            if (intPtr == IntPtr.Zero)
             {
-                var highLightId = 0x53550000 + index;
+                continue;
+            }
+
+            AddonActionBarBase* actionBar = (AddonActionBarBase*)intPtr;
+            RaptureHotbarModule.Hotbar hotBar = Framework.Instance()->GetUIModule()->GetRaptureHotbarModule()->Hotbars[hotBarIndex];
+
+            int slotIndex = 0;
+
+            foreach (ActionBarSlot slot in actionBar->ActionBarSlotVector.AsSpan())
+            {
+                int highLightId = 0x53550000 + index;
 
                 if (doingSomething(slot, hotBarIndex > 9 ? null : hotBar.Slots[slotIndex], (uint)highLightId))
                 {
-                    var iconAddon = slot.Icon;
-                    if ((IntPtr)iconAddon == IntPtr.Zero) continue;
-                    if (!iconAddon->AtkResNode.IsVisible()) continue;
+                    FFXIVClientStructs.FFXIV.Component.GUI.AtkComponentNode* iconAddon = slot.Icon;
+                    if ((IntPtr)iconAddon == IntPtr.Zero)
+                    {
+                        continue;
+                    }
+
+                    if (!iconAddon->AtkResNode.IsVisible())
+                    {
+                        continue;
+                    }
+
                     actionBar->PulseActionBarSlot(slotIndex);
                     UIGlobals.PlaySoundEffect(12, 0, 0, 0);
                 }
@@ -219,7 +245,7 @@ internal static class PreviewUpdater
         }
     }
 
-    public unsafe static void Dispose()
+    public static unsafe void Dispose()
     {
 
     }

@@ -2,7 +2,7 @@
 
 namespace RotationSolver.Basic.Rotations.Basic;
 
-partial class BlackMageRotation
+public partial class BlackMageRotation
 {
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Intelligence;
@@ -58,7 +58,7 @@ partial class BlackMageRotation
     /// <summary>
     /// 
     /// </summary>
-    static float EnochianTimeRaw => JobGauge.EnochianTimer / 1000f;
+    private static float EnochianTimeRaw => JobGauge.EnochianTimer / 1000f;
 
     /// <summary>
     /// 
@@ -70,7 +70,10 @@ partial class BlackMageRotation
     /// </summary>
     /// <param name="time"></param>
     /// <returns></returns>
-    protected static bool EnochianEndAfter(float time) => EnochianTime <= time;
+    protected static bool EnochianEndAfter(float time)
+    {
+        return EnochianTime <= time;
+    }
 
     /// <summary>
     /// 
@@ -79,7 +82,9 @@ partial class BlackMageRotation
     /// <param name="offset"></param>
     /// <returns></returns>
     protected static bool EnochianEndAfterGCD(uint gcdCount = 0, float offset = 0)
-        => EnochianEndAfter(GCDTime(gcdCount, offset));
+    {
+        return EnochianEndAfter(GCDTime(gcdCount, offset));
+    }
 
     /// <summary>
     /// 
@@ -106,68 +111,19 @@ partial class BlackMageRotation
     /// <summary>
     /// A check with variable max stacks of Astral Fire stacks and Umbral Ice based on the trait level.
     /// </summary>
-    public static bool IsSoulStacksMaxed
-    {
-        get
-        {
-            if (Player.Level >= 35)
-            {
-                return SoulStackCount == 3;
-            }
-            else if (Player.Level >= 20)
-            {
-                return SoulStackCount == 2;
-            }
-            else
-            {
-                return SoulStackCount == 1;
-            }
-        }
-    }
+    public static bool IsSoulStacksMaxed => Player.Level >= 35 ? SoulStackCount == 3 : Player.Level >= 20 ? SoulStackCount == 2 : SoulStackCount == 1;
 
     /// <summary>
     /// A check with variable max stacks of Astral Fire stacks and Umbral Ice based on the trait level.
     /// </summary>
-    public static byte MaxSoulCount
-    {
-        get
-        {
-            if (Player.Level >= 35)
-            {
-                return 3;
-            }
-            else if (Player.Level >= 20)
-            {
-                return 2;
-            }
-            else
-            {
-                return 1;
-            }
-        }
-    }
+    public static byte MaxSoulCount => Player.Level >= 35 ? (byte)3 : Player.Level >= 20 ? (byte)2 : (byte)1;
 
     /// <summary>
     /// A check with variable max stacks of Polyglot based on the trait level.
     /// </summary>
-    public static bool IsPolyglotStacksMaxed
-    {
-        get
-        {
-            if (EnhancedPolyglotIiTrait.EnoughLevel)
-            {
-                return PolyglotStacks == 3;
-            }
-            else if (EnhancedPolyglotTrait.EnoughLevel)
-            {
-                return PolyglotStacks == 2;
-            }
-            else
-            {
-                return PolyglotStacks == 1;
-            }
-        }
-    }
+    public static bool IsPolyglotStacksMaxed => EnhancedPolyglotIiTrait.EnoughLevel
+                ? PolyglotStacks == 3
+                : EnhancedPolyglotTrait.EnoughLevel ? PolyglotStacks == 2 : PolyglotStacks == 1;
     #endregion
 
     #region Status Tracking
@@ -370,7 +326,7 @@ partial class BlackMageRotation
 
     static partial void ModifyFlarePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InAstralFire && AstralSoulStacks <= 3;
+        setting.ActionCheck = () => InAstralFire;
         setting.UnlockedByQuestID = 66614;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -561,7 +517,7 @@ partial class BlackMageRotation
 
     static partial void ModifyLethargyPvP(ref ActionSetting setting)
     {
-        setting.TargetStatusProvide = [StatusID.Lethargy_4333, StatusID.Heavy_1344];
+        setting.TargetStatusProvide = [StatusID.Lethargy, StatusID.Heavy_1344];
     }
 
     static partial void ModifyAetherialManipulationPvP(ref ActionSetting setting)
