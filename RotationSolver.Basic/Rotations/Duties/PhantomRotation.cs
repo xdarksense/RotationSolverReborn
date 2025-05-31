@@ -389,6 +389,7 @@ public partial class DutyRotation
     static partial void ModifyDarkCannonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => CannoneerLevel >= 3;
+        setting.TargetStatusProvide = [StatusID.Blind];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -402,6 +403,7 @@ public partial class DutyRotation
     static partial void ModifyShockCannonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => CannoneerLevel >= 4;
+        setting.TargetStatusProvide = [StatusID.Paralysis];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -415,6 +417,7 @@ public partial class DutyRotation
     static partial void ModifySilverCannonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => CannoneerLevel >= 6;
+        setting.TargetStatusProvide = [StatusID.SilverSickness];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

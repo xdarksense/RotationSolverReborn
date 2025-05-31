@@ -358,7 +358,7 @@ internal static class DataCenter
     internal static float CombatTimeRaw { get; set; }
     private static DateTime _startRaidTime = DateTime.MinValue;
 
-    internal static int RaidTimeRaw
+    internal static float RaidTimeRaw
     {
         get
         {
@@ -369,7 +369,7 @@ internal static class DataCenter
             }
 
             // Calculate and return the total seconds elapsed since the raid started.
-            return (int)(DateTime.Now - _startRaidTime).TotalSeconds;
+            return (float)(DateTime.Now - _startRaidTime).TotalSeconds;
         }
         set
         {
@@ -469,7 +469,7 @@ internal static class DataCenter
         }
     }
 
-    public static int NumberOfHostilesInRangeOf(int range)
+    public static int NumberOfHostilesInRangeOf(float range)
     {
         int count = 0;
         var targets = AllHostileTargets;
@@ -489,7 +489,7 @@ internal static class DataCenter
     {
         get
         {
-            int jobRange = JobRange;
+            float jobRange = JobRange;
             int count = 0;
             var targets = AllHostileTargets;
             for (int i = 0, n = targets.Count; i < n; i++)
@@ -519,17 +519,17 @@ internal static class DataCenter
         }
     }
 
-    public static int JobRange
+    public static float JobRange
     {
         get
         {
-            int radius = 25;
+            float radius = 25;
             if (!Player.AvailableThreadSafe)
             {
                 return radius;
             }
 
-            switch (Role)
+            switch (DataCenter.Role)
             {
                 case JobRole.Tank:
                 case JobRole.Melee:
@@ -541,16 +541,16 @@ internal static class DataCenter
         }
     }
 
-    public static int AverageTTK
+    public static float AverageTTK
     {
         get
         {
-            int total = 0;
+            float total = 0;
             int count = 0;
             var targets = AllHostileTargets;
             for (int i = 0, n = targets.Count; i < n; i++)
             {
-                int tTK = targets[i].GetTTK();
+                float tTK = targets[i].GetTTK();
                 if (!float.IsNaN(tTK))
                 {
                     total += tTK;
@@ -745,7 +745,7 @@ internal static class DataCenter
     private static float GetPartyMemberHPRatio(IBattleChara member)
     {
         if (member == null)
-    {
+        {
             throw new ArgumentNullException(nameof(member));
         }
 
@@ -858,7 +858,7 @@ internal static class DataCenter
     internal static Queue<MacroItem> Macros { get; } = new Queue<MacroItem>();
 
     #region Action Record
-    private const int QUEUECAPACITY = 200;
+    private const int QUEUECAPACITY = 48;
     private static readonly Queue<ActionRec> _actions = new(QUEUECAPACITY);
     private static readonly Queue<DamageRec> _damages = new(QUEUECAPACITY);
 

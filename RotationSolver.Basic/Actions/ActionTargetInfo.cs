@@ -411,8 +411,8 @@ public struct ActionTargetInfo(IBaseAction action)
             return false;
         }
 
-        int time = b.GetTTK();
-        return time >= 0 && time >= action.Config.TimeToKill;
+        float time = b.GetTTK();
+        return float.IsNaN(time) || time >= action.Config.TimeToKill;
     }
 
     #endregion
@@ -428,7 +428,7 @@ public struct ActionTargetInfo(IBaseAction action)
     /// <returns>
     /// A <see cref="TargetResult"/> containing the target and affected characters, or <c>null</c> if no target is found.
     /// </returns>
-    internal readonly TargetResult? FindTarget (bool skipAoeCheck, bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck)
+    internal readonly TargetResult? FindTarget(bool skipAoeCheck, bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck)
     {
         float range = Range;
 
@@ -502,7 +502,7 @@ public struct ActionTargetInfo(IBaseAction action)
     /// <returns>
     /// A <see cref="TargetResult"/> containing the target area and affected characters, or <c>null</c> if no target area is found.
     /// </returns>
-    private readonly TargetResult? FindTargetArea (IEnumerable<IBattleChara> canTargets, IEnumerable<IBattleChara> canAffects,
+    private readonly TargetResult? FindTargetArea(IEnumerable<IBattleChara> canTargets, IEnumerable<IBattleChara> canAffects,
         float range, IPlayerCharacter player)
     {
         if (player == null)
@@ -985,9 +985,6 @@ public struct ActionTargetInfo(IBaseAction action)
         Vector3 dir = target.Position - pPos;
         Vector3 tdir = subTarget.Position - pPos;
 
-        float dirLen = dir.Length();
-        _ = tdir.Length();
-
         switch (action.Action.CastType)
         {
             case 2: // Circle
@@ -998,23 +995,17 @@ public struct ActionTargetInfo(IBaseAction action)
                 {
                     return false;
                 }
-                if (dirLen == 0)
-                    return false;
-                tdir += dir / dirLen * target.HitboxRadius / (float)Math.Sin(_alpha);
-                dirLen = dir.Length();
-                float tdirLen = tdir.Length();
-                if (dirLen == 0 || tdirLen == 0)
-                    return false;
-                return Vector3.Dot(dir, tdir) / (dirLen * tdirLen) >= Math.Cos(_alpha);
+
+                tdir += dir / dir.Length() * target.HitboxRadius / (float)Math.Sin(_alpha);
+                return Vector3.Dot(dir, tdir) / (dir.Length() * tdir.Length()) >= Math.Cos(_alpha);
 
             case 4: // Line
                 if (subTarget.DistanceToPlayer() > EffectRange)
                 {
                     return false;
                 }
-                if (dirLen == 0)
-                    return false;
-                return Vector3.Cross(dir, tdir).Length() / dirLen <= 2 + target.HitboxRadius
+
+                return Vector3.Cross(dir, tdir).Length() / dir.Length() <= 2 + target.HitboxRadius
                     && Vector3.Dot(dir, tdir) >= 0;
 
             case 10: // Donut
@@ -1796,8 +1787,8 @@ public struct ActionTargetInfo(IBaseAction action)
                         {
                             int cmp = a.HitboxRadius.CompareTo(b.HitboxRadius);
                             if (cmp != 0) return cmp;
-                            int aHp = a is IBattleChara ba ? (int)ba.CurrentHp : int.MaxValue;
-                            int bHp = b is IBattleChara bb ? (int)bb.CurrentHp : int.MaxValue;
+                            float aHp = a is IBattleChara ba ? ba.CurrentHp : float.MaxValue;
+                            float bHp = b is IBattleChara bb ? bb.CurrentHp : float.MaxValue;
                             return aHp.CompareTo(bHp);
                         });
                     }
@@ -1809,8 +1800,8 @@ public struct ActionTargetInfo(IBaseAction action)
                         {
                             int cmp = a.HitboxRadius.CompareTo(b.HitboxRadius);
                             if (cmp != 0) return cmp;
-                            int aHp = a is IBattleChara ba ? (int)ba.CurrentHp : 0;
-                            int bHp = b is IBattleChara bb ? (int)bb.CurrentHp : 0;
+                            float aHp = a is IBattleChara ba ? ba.CurrentHp : 0;
+                            float bHp = b is IBattleChara bb ? bb.CurrentHp : 0;
                             return bHp.CompareTo(aHp);
                         });
                     }
@@ -1837,8 +1828,8 @@ public struct ActionTargetInfo(IBaseAction action)
                     filtered = [.. objects];
                     filtered.Sort((a, b) =>
                     {
-                        int aPct = a is IBattleChara ba && ba.MaxHp != 0 ? (int)ba.CurrentHp / (int)ba.MaxHp : 0;
-                        int bPct = b is IBattleChara bb && bb.MaxHp != 0 ? (int)bb.CurrentHp / (int)bb.MaxHp : 0;
+                        float aPct = a is IBattleChara ba && ba.MaxHp != 0 ? (float)ba.CurrentHp / ba.MaxHp : 0;
+                        float bPct = b is IBattleChara bb && bb.MaxHp != 0 ? (float)bb.CurrentHp / bb.MaxHp : 0;
                         return bPct.CompareTo(aPct);
                     });
                     break;
@@ -1846,8 +1837,8 @@ public struct ActionTargetInfo(IBaseAction action)
                     filtered = [.. objects];
                     filtered.Sort((a, b) =>
                     {
-                        int aPct = a is IBattleChara ba && ba.MaxHp != 0 ? (int)ba.CurrentHp / (int)ba.MaxHp : 0;
-                        int bPct = b is IBattleChara bb && bb.MaxHp != 0 ? (int)bb.CurrentHp / (int)bb.MaxHp : 0;
+                        float aPct = a is IBattleChara ba && ba.MaxHp != 0 ? (float)ba.CurrentHp / ba.MaxHp : 0;
+                        float bPct = b is IBattleChara bb && bb.MaxHp != 0 ? (float)bb.CurrentHp / bb.MaxHp : 0;
                         return aPct.CompareTo(bPct);
                     });
                     break;
@@ -2045,7 +2036,7 @@ public struct ActionTargetInfo(IBaseAction action)
             if (Service.Config.Priolowtank)
             {
                 IBattleChara? lowest = null;
-                float minHealth = int.MaxValue;
+                float minHealth = float.MaxValue;
                 foreach (var t in attachedT)
                 {
                     float health = ObjectHelper.GetHealthRatio(t);
@@ -2060,7 +2051,7 @@ public struct ActionTargetInfo(IBaseAction action)
             else
             {
                 IBattleChara? lowest = null;
-                float minHealth = int.MaxValue;
+                float minHealth = float.MaxValue;
                 foreach (var t in attachedT)
                 {
                     float health = ObjectHelper.GetHealthRatio(t);
