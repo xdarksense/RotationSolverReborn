@@ -403,6 +403,22 @@ public partial class CustomRotation
     public static bool IsInDuty => DataCenter.IsInDuty;
 
     /// <summary>
+    /// The current territory ID.
+    /// </summary>
+    public static ushort TerritoryID => Svc.ClientState.TerritoryType;
+
+    /// <summary>
+    /// Is in specified territory.
+    /// </summary>
+    /// <param name="territoryId"></param>
+    /// <returns></returns>
+    [Description("Is in specified territory")]
+    public static bool IsInTerritory(ushort territoryId)
+    {
+        return TerritoryID == territoryId;
+    }
+
+    /// <summary>
     /// Your ping.
     /// </summary>
     [Description("Your ping")]
