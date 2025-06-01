@@ -308,7 +308,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig, Section = 1)]
     private static readonly bool _targetHuntingRelicLevePriority = true;
 
-    [ConditionBool, UI("Target quest priority.",
+    [ConditionBool, UI("Target quest priority (Overrides engage setting).",
         Filter = TargetConfig, Section = 1)]
     private static readonly bool _targetQuestPriority = true;
 
@@ -899,5 +899,33 @@ internal partial class Configs : IPluginConfiguration
             return new Configs();
         }
         return oldConfigs;
+    }
+
+    public void Backup()
+    {
+        Save();
+        File.Copy(Svc.PluginInterface.ConfigFile.FullName, Svc.PluginInterface.ConfigFile.Directory+"\\RotationSolver_Backup.json", true);
+        Svc.Toasts.ShowNormal("Configs backed up.");
+    }
+
+    public void Restore()
+    {
+        File.Copy(Svc.PluginInterface.ConfigFile.FullName, Svc.PluginInterface.ConfigFile.Directory+"\\RotationSolver_SafetySave.json", true);
+        File.Copy(Svc.PluginInterface.ConfigFile.Directory+"\\RotationSolver_Backup.json", Svc.PluginInterface.ConfigFile.FullName, true);
+            
+        Configs restoredConfigs = JsonConvert.DeserializeObject<Configs>(
+                                      File.ReadAllText(Svc.PluginInterface.ConfigFile.FullName))
+                                  ?? new Configs();
+            
+        if (restoredConfigs.Version != CurrentVersion)
+        {
+            Svc.Toasts.ShowNormal("Backed up configs are not compatible with the current version.");
+            return;
+        }
+            
+        Service.Config = restoredConfigs;
+        Save();
+        Svc.Toasts.ShowNormal("Configs restored. Closing to set.");
+        DataCenter.HoldingRestore = true;
     }
 }

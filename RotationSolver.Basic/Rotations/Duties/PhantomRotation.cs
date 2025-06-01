@@ -1,4 +1,6 @@
-﻿namespace RotationSolver.Basic.Rotations.Duties;
+﻿using Dalamud.Interface.Colors;
+
+namespace RotationSolver.Basic.Rotations.Duties;
 
 /// <summary>
 /// Represents a rotation for phantom duties in the game.
@@ -10,6 +12,55 @@ public partial class PhantomRotation : DutyRotation
 
 public partial class DutyRotation
 {
+    /// <summary>
+    /// Displays the rotation status on the window.
+    /// </summary>
+    public virtual void DisplayStatus()
+    {
+        ImGui.Text("ActivePhantomJob: " + (ActivePhantomJob?.ToString() ?? "N/A"));
+        ImGui.Spacing();
+        ImGui.TextColored(ImGuiColors.DalamudRed, "Freelancer");
+        ImGui.TextColored(ImGuiColors.DalamudRed, "Freelancer");
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "Knight");
+        ImGui.TextColored(ImGuiColors.DalamudWhite, "Monk");
+        ImGui.TextColored(ImGuiColors.DalamudWhite2, "Bard");
+        ImGui.TextColored(ImGuiColors.DalamudYellow, "Chemist");
+        ImGui.TextColored(ImGuiColors.ParsedBlue, "Time Mage");
+        ImGui.TextColored(ImGuiColors.ParsedGold, "Cannoneer");
+        ImGui.TextColored(ImGuiColors.ParsedGreen, "Oracle");
+        ImGui.Text("HasCleansing: " + HasCleansing.ToString());
+        ImGui.Text("HasStarfall: " + HasStarfall.ToString());
+        ImGui.Text("HasPhantomJudgment: " + HasPhantomJudgment.ToString());
+        ImGui.Text("HasBlessing: " + HasBlessing.ToString());
+        ImGui.TextColored(ImGuiColors.ParsedOrange, "Berserker");
+        ImGui.TextColored(ImGuiColors.ParsedPink, "Ranger");
+        ImGui.TextColored(ImGuiColors.ParsedPurple, "Thief");
+        ImGui.TextColored(ImGuiColors.TankBlue, "Samurai");
+        ImGui.TextColored(ImGuiColors.DPSRed, "Geomancer");
+    }
+
+    #region Status Tracking
+    /// <summary>
+    /// Able to execute Cleansing.
+    /// </summary>
+    public static bool HasCleansing => !Player.WillStatusEnd(0, true, StatusID.PredictionOfCleansing) || !Player.WillStatusEnd(0, false, StatusID.PredictionOfCleansing);
+
+    /// <summary>
+    /// Able to execute Starfall.
+    /// </summary>
+    public static bool HasStarfall => (!Player.WillStatusEnd(0, true, StatusID.PredictionOfStarfall) || !Player.WillStatusEnd(0, false, StatusID.PredictionOfStarfall)) && (ObjectHelper.GetEffectiveHpPercent(Player) > 90 || HasTankInvuln);
+
+    /// <summary>
+    /// Able to execute Phantom Judgment.
+    /// </summary>
+    public static bool HasPhantomJudgment => !Player.WillStatusEnd(0, true, StatusID.PredictionOfJudgment) || !Player.WillStatusEnd(0, false, StatusID.PredictionOfJudgment);
+
+    /// <summary>
+    /// Able to execute Blessing.
+    /// </summary>
+    public static bool HasBlessing => !Player.WillStatusEnd(0, true, StatusID.PredictionOfBlessing) || !Player.WillStatusEnd(0, false, StatusID.PredictionOfBlessing);
+    #endregion
+
     #region Freelancer
     /// <summary>
     /// Modifies the settings for Occult Resuscitation.
@@ -18,6 +69,7 @@ public partial class DutyRotation
     static partial void ModifyOccultResuscitationPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => FreelancerLevel >= 5;
+        setting.TargetType = TargetType.Self;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -124,6 +176,7 @@ public partial class DutyRotation
     static partial void ModifyOccultChakraPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => MonkLevel >= 5;
+        setting.TargetType = TargetType.Self;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -248,6 +301,7 @@ public partial class DutyRotation
     static partial void ModifyOccultSlowgaPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => TimeMageLevel >= 1;
+        setting.TargetType = TargetType.PhantomMob;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -287,6 +341,7 @@ public partial class DutyRotation
     static partial void ModifyOccultDispelPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => TimeMageLevel >= 4;
+        setting.TargetType = TargetType.Dispel;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -341,6 +396,7 @@ public partial class DutyRotation
     static partial void ModifyDarkCannonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => CannoneerLevel >= 3;
+        setting.TargetStatusProvide = [StatusID.Blind];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -354,6 +410,7 @@ public partial class DutyRotation
     static partial void ModifyShockCannonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => CannoneerLevel >= 4;
+        setting.TargetStatusProvide = [StatusID.Paralysis];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -367,6 +424,7 @@ public partial class DutyRotation
     static partial void ModifySilverCannonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => CannoneerLevel >= 6;
+        setting.TargetStatusProvide = [StatusID.SilverSickness];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -389,12 +447,65 @@ public partial class DutyRotation
     }
 
     /// <summary>
+    /// Modifies the settings for Cleansing.
+    /// </summary>
+    /// <param name="setting">The action setting to modify.</param>
+    static partial void ModifyCleansingPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => OracleLevel >= 1 && HasCleansing;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    /// <summary>
+    /// Modifies the settings for Starfall.
+    /// </summary>
+    /// <param name="setting">The action setting to modify.</param>
+    static partial void ModifyStarfallPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => OracleLevel >= 1 && HasStarfall;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    /// <summary>
+    /// Modifies the settings for Phantom Judgment.
+    /// </summary>
+    /// <param name="setting">The action setting to modify.</param>
+    static partial void ModifyPhantomJudgmentPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => OracleLevel >= 1 && HasPhantomJudgment;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    /// <summary>
+    /// Modifies the settings for Blessing.
+    /// </summary>
+    /// <param name="setting">The action setting to modify.</param>
+    static partial void ModifyBlessingPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => OracleLevel >= 1 && HasBlessing;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    /// <summary>
     /// Modifies the settings for Recuperation.
     /// </summary>
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyRecuperationPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => OracleLevel >= 2;
+        setting.StatusProvide = [StatusID.Recuperation_4271, StatusID.FortifiedRecuperation];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -407,7 +518,9 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyPhantomDoomPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => OracleLevel >= 3;
+        setting.ActionCheck = () => OracleLevel >= 3 && InCombat;
+        setting.TargetType = TargetType.PhantomMob;
+        setting.TargetStatusProvide = [StatusID.PhantomDoom];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -421,6 +534,7 @@ public partial class DutyRotation
     static partial void ModifyPhantomRejuvenationPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => OracleLevel >= 4;
+        setting.StatusProvide = [StatusID.PhantomRejuvenation];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -434,6 +548,7 @@ public partial class DutyRotation
     static partial void ModifyInvulnerabilityPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => OracleLevel >= 6;
+        setting.TargetStatusProvide = [StatusID.Invulnerability];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -546,6 +661,7 @@ public partial class DutyRotation
     static partial void ModifyStealPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => ThiefLevel >= 2;
+        setting.TargetType = TargetType.PhantomMob;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -558,7 +674,7 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyVigilancePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ThiefLevel >= 3;
+        setting.ActionCheck = () => ThiefLevel >= 3 && !InCombat;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -571,7 +687,7 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyTrapDetectionPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ThiefLevel >= 4;
+        setting.ActionCheck = () => ThiefLevel >= 4 && DataCenter.IsInForkedTower;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -600,6 +716,7 @@ public partial class DutyRotation
     static partial void ModifyMineuchiPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => SamuraiLevel >= 1;
+        setting.TargetType = TargetType.Interrupt;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -613,6 +730,7 @@ public partial class DutyRotation
     static partial void ModifyShirahadoriPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => SamuraiLevel >= 2;
+        setting.TargetType = TargetType.Self;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -654,6 +772,7 @@ public partial class DutyRotation
     static partial void ModifyBattleBellPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => GeomancerLevel >= 1;
+        setting.TargetType = TargetType.Self;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -666,6 +785,7 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyWeatherPvE(ref ActionSetting setting)
     {
+        //TODO: Implement Weather logic, will need bespoke targeting
         setting.ActionCheck = () => GeomancerLevel >= 2;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -693,6 +813,7 @@ public partial class DutyRotation
     static partial void ModifySuspendPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => GeomancerLevel >= 4;
+        setting.TargetStatusProvide = [StatusID.Suspend];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

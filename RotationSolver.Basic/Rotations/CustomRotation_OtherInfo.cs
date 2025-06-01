@@ -26,6 +26,12 @@ public partial class CustomRotation
     public static bool HasTankStance => Player?.HasStatus(true, StatusHelper.TankStanceStatus) ?? false;
 
     /// <summary>
+    /// 
+    /// </summary>
+    [Description("Has tank stance")]
+    public static bool HasTankInvuln => Player?.HasStatus(true, StatusHelper.NoNeedHealingStatus) ?? false;
+
+    /// <summary>
     /// Check the player is moving, such as running, walking or jumping.
     /// </summary>
     [Description("Is Moving or Jumping")]
@@ -407,7 +413,12 @@ public partial class CustomRotation
     /// Time from next ability to next GCD
     /// </summary>
     [Description("Time from next ability to next GCD")]
-    public static float NextAbilityToNextGCD => DataCenter.DefaultGCDRemain - ActionManagerHelper.GetCurrentAnimationLock();
+    public static float NextAbilityToNextGCD => DataCenter.DefaultGCDRemain - ActionManagerHelper.AnimationLock;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static float AnimationLock => ActionManagerHelper.AnimationLock;
 
     /// <summary>
     /// Treats one action as another.
@@ -667,7 +678,6 @@ public partial class CustomRotation
     /// </summary>
     [Description("Stop moving time")]
     public static float StopMovingTime => IsMoving ? 0 : DataCenter.StopMovingRaw + DataCenter.DefaultGCDRemain;
-
 
     /// <summary>
     /// How long the player has been moving.

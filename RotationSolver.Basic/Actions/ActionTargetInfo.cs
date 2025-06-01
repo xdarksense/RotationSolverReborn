@@ -244,7 +244,6 @@ public struct ActionTargetInfo(IBaseAction action)
             return false;
         }
 
-        // Defensive: check that the underlying struct is valid before accessing StatusList
         unsafe
         {
             if (battleChara.Struct() == null)
@@ -253,7 +252,6 @@ public struct ActionTargetInfo(IBaseAction action)
             }
         }
 
-        // Optionally, check for IsDead or other validity flags if available
         if (!battleChara.IsTargetable)
         {
             return false;
@@ -269,11 +267,6 @@ public struct ActionTargetInfo(IBaseAction action)
         catch (Exception ex)
         {
             PluginLog.Error($"Exception accessing StatusList for {battleChara?.NameId}: {ex.Message}");
-            return false;
-        }
-
-        if (Service.Config.RaiseType == RaiseType.PartyOnly && battleChara.IsAllianceMember() && !battleChara.IsParty())
-        {
             return false;
         }
 
@@ -435,7 +428,7 @@ public struct ActionTargetInfo(IBaseAction action)
     /// <returns>
     /// A <see cref="TargetResult"/> containing the target and affected characters, or <c>null</c> if no target is found.
     /// </returns>
-    internal readonly TargetResult? FindTarget (bool skipAoeCheck, bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck)
+    internal readonly TargetResult? FindTarget(bool skipAoeCheck, bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck)
     {
         float range = Range;
 
@@ -509,7 +502,7 @@ public struct ActionTargetInfo(IBaseAction action)
     /// <returns>
     /// A <see cref="TargetResult"/> containing the target area and affected characters, or <c>null</c> if no target area is found.
     /// </returns>
-    private readonly TargetResult? FindTargetArea (IEnumerable<IBattleChara> canTargets, IEnumerable<IBattleChara> canAffects,
+    private readonly TargetResult? FindTargetArea(IEnumerable<IBattleChara> canTargets, IEnumerable<IBattleChara> canAffects,
         float range, IPlayerCharacter player)
     {
         if (player == null)
@@ -1136,6 +1129,7 @@ public struct ActionTargetInfo(IBaseAction action)
             TargetType.Range => battleChara != null ? RandomRangeTarget(battleChara) : null,
             TargetType.Magical => battleChara != null ? RandomMagicalTarget(battleChara) : null,
             TargetType.Physical => battleChara != null ? RandomPhysicalTarget(battleChara) : null,
+            TargetType.PhantomMob => FindPhantomMob(),
             TargetType.DancePartner => FindDancePartner(),
             TargetType.MimicryTarget => FindMimicryTarget(),
             TargetType.TheSpear => FindTheSpear(),
@@ -1144,6 +1138,25 @@ public struct ActionTargetInfo(IBaseAction action)
             TargetType.Deployment => FindDeploymentTacticsTarget(),
             _ => FindHostile(),
         };
+
+        IBattleChara? FindPhantomMob()
+        {
+            if (DataCenter.AllHostileTargets.Count < 1)
+            {
+                return null;
+            }
+
+            foreach (IBattleChara battlechara in DataCenter.AllHostileTargets)
+            {
+                if (!battlechara.IsBossFromIcon() && ObjectHelper.DistanceToPlayer(battlechara) < 30)
+                {
+                    PluginLog.Debug($"FindPhantomDoom: {battlechara.Name} selected target.");
+                    return battlechara;
+                }
+            }
+
+            return null;
+        }
 
         IBattleChara? FindDancePartner()
         {
@@ -2157,7 +2170,7 @@ public struct ActionTargetInfo(IBaseAction action)
         }
 
         CombatRole? neededRole = DataCenter.BluRole;
-        return neededRole != null && neededRole != CombatRole.None && (int)neededRole == (int)player.GetRole();
+        return neededRole != null && neededRole != CombatRole.NonCombat && (int)neededRole == (int)player.GetRole();
     }
 
     internal static IBattleChara? RandomPhysicalTarget(IEnumerable<IBattleChara> tars)
@@ -2254,6 +2267,7 @@ public enum TargetType : byte
     TheSpear,
     Kardia,
     Deployment,
+    PhantomMob,
 }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 

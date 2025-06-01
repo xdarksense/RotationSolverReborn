@@ -157,12 +157,89 @@ public partial class DutyRotation : IDisposable
     /// </summary>
     protected static IPlayerCharacter Player => ECommons.GameHelpers.Player.Object;
 
+    /// <summary>
+    /// Does player have swift cast, dual cast or triple cast.
+    /// </summary>
+    [Description("Has Swift")]
+    public static bool HasSwift => Player?.HasStatus(true, StatusHelper.SwiftcastStatus) ?? false;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [Description("Has tank stance")]
+    public static bool HasTankStance => Player?.HasStatus(true, StatusHelper.TankStanceStatus) ?? false;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    [Description("Has tank stance")]
+    public static bool HasTankInvuln => Player?.HasStatus(true, StatusHelper.NoNeedHealingStatus) ?? false;
+
+    /// <summary>
+    /// In the burst status.
+    /// </summary>
+    [Description("Is burst")]
+    public static bool IsBurst => MergedStatus.HasFlag(AutoStatus.Burst);
+
+    /// <summary>
+    /// Is RSR enabled.
+    /// </summary>
+    [Description("The state of auto. True for on.")]
+    public static bool AutoState => DataCenter.State;
+
+    /// <summary>
+    /// Is RSR in manual mode.
+    /// </summary>
+    [Description("The state of manual. True for manual.")]
+    public static bool IsManual => DataCenter.IsManual;
+
+    /// <summary>
+    /// The merged status, which contains <see cref="AutoState"/> and <see cref="CommandStatus"/>.
+    /// </summary>
+    public static AutoStatus MergedStatus => DataCenter.MergedStatus;
+
+    /// <summary>
+    /// The automatic status, which is checked from RS.
+    /// </summary>
+    public static AutoStatus AutoStatus => DataCenter.AutoStatus;
+
+    /// <summary>
+    /// The CMD status, which is checked from the player.
+    /// </summary>
+    public static AutoStatus CommandStatus => DataCenter.CommandStatus;
+
+    #region Phantom Levels
+
+    /// <summary>
+    /// Gets the name of the current active Phantom Job, or null if none are active.
+    /// </summary>
+    public static string? ActivePhantomJob
+    {
+        get
+        {
+            if (FreelancerLevel > 0) return "Freelancer";
+            if (KnightLevel > 0) return "Knight";
+            if (MonkLevel > 0) return "Monk";
+            if (BardLevel > 0) return "Bard";
+            if (ChemistLevel > 0) return "Chemist";
+            if (TimeMageLevel > 0) return "Time Mage";
+            if (CannoneerLevel > 0) return "Cannoneer";
+            if (OracleLevel > 0) return "Oracle";
+            if (BerserkerLevel > 0) return "Berserker";
+            if (RangerLevel > 0) return "Ranger";
+            if (ThiefLevel > 0) return "Thief";
+            if (SamuraiLevel > 0) return "Samurai";
+            if (GeomancerLevel > 0) return "Geomancer";
+            return null;
+        }
+    }
+
     public static byte FreelancerLevel
     {
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomFreelancer);
-            return stacks == byte.MaxValue ? (byte)12 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -171,7 +248,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomKnight);
-            return stacks == byte.MaxValue ? (byte)12 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -180,7 +257,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomMonk);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -189,7 +266,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomBard);
-            return stacks == byte.MaxValue ? (byte)4 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -198,7 +275,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomChemist);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -207,7 +284,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomTimeMage);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -216,7 +293,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomCannoneer);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -225,7 +302,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomOracle);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -234,7 +311,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomBerserker);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -243,7 +320,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomRanger);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -252,7 +329,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomThief);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -261,7 +338,7 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomSamurai);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
@@ -270,10 +347,11 @@ public partial class DutyRotation : IDisposable
         get
         {
             byte stacks = Player.StatusStack(true, StatusID.PhantomGeomancer);
-            return stacks == byte.MaxValue ? (byte)6 : stacks;
+            return stacks == byte.MaxValue ? (byte)0 : stacks;
         }
     }
 
+    #endregion
     /// <summary>
     /// Gets all actions available in the duty rotation.
     /// </summary>

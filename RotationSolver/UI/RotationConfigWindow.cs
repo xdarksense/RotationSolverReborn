@@ -19,6 +19,7 @@ using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
+using RotationSolver.Basic.Rotations.Duties;
 using RotationSolver.Data;
 using RotationSolver.Helpers;
 using RotationSolver.UI.SearchableConfigs;
@@ -62,6 +63,11 @@ public partial class RotationConfigWindow : Window
 
     public override void Draw()
     {
+        if (DataCenter.HoldingRestore)
+        {
+            IsOpen = false;
+            DataCenter.HoldingRestore = false;
+        }
         using ImRaii.Style style = ImRaii.PushStyle(ImGuiStyleVar.SelectableTextAlign, new Vector2(0.5f, 0.5f));
         try
         {
@@ -103,7 +109,7 @@ public partial class RotationConfigWindow : Window
 
     private static void DrawDutyRotation()
     {
-        Basic.Rotations.Duties.DutyRotation? dutyRotation = DataCenter.CurrentDutyRotation;
+        DutyRotation? dutyRotation = DataCenter.CurrentDutyRotation;
         if (dutyRotation == null)
         {
             return;
@@ -125,35 +131,11 @@ public partial class RotationConfigWindow : Window
             return;
         }
 
-        const string popUpId = "Right Duty Rotation Popup";
         if (ImGui.Selectable(rot.Name, false, ImGuiSelectableFlags.None, new Vector2(0, 20)))
         {
-            ImGui.OpenPopup(popUpId);
+           
         }
         ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_DutyRotationDesc.GetDescription());
-
-        using ImRaii.IEndObject popup = ImRaii.Popup(popUpId);
-        if (popup)
-        {
-            foreach (Type type in rotations)
-            {
-                RotationAttribute? r = type.GetCustomAttribute<RotationAttribute>();
-                if (r == null)
-                {
-                    continue;
-                }
-
-                if (ImGui.Selectable("None"))
-                {
-                    Service.Config.DutyRotationChoice[Svc.ClientState.TerritoryType] = string.Empty;
-                }
-
-                if (ImGui.Selectable(r.Name) && !string.IsNullOrEmpty(type.FullName))
-                {
-                    Service.Config.DutyRotationChoice[Svc.ClientState.TerritoryType] = type.FullName;
-                }
-            }
-        }
     }
 
     private bool CheckErrors()
@@ -543,7 +525,7 @@ public partial class RotationConfigWindow : Window
             return;
         }
 
-        Type[] rotations = Array.Empty<Type>();
+        Type[] rotations = [];
         foreach (RotationUpdater.CustomRotationGroup customRotation in RotationUpdater.CustomRotations)
         {
             if (customRotation.ClassJobIds.Contains((Job)(Player.Object?.ClassJob.RowId ?? 0)))
@@ -563,8 +545,8 @@ public partial class RotationConfigWindow : Window
             }
 
             rotations = DataCenter.IsPvP
-                ? rotations.Where(r => r.GetCustomAttribute<RotationAttribute>()?.Type.HasFlag(CombatType.PvP) ?? false).ToArray()
-                : rotations.Where(r => r.GetCustomAttribute<RotationAttribute>()?.Type.HasFlag(CombatType.PvE) ?? false).ToArray();
+                ? [.. rotations.Where(r => r.GetCustomAttribute<RotationAttribute>()?.Type.HasFlag(CombatType.PvP) ?? false)]
+                : [.. rotations.Where(r => r.GetCustomAttribute<RotationAttribute>()?.Type.HasFlag(CombatType.PvE) ?? false)];
 
             float iconSize = Math.Max(Scale * MIN_COLUMN_WIDTH, Math.Min(wholeWidth, Scale * JOB_ICON_WIDTH));
             float comboSize = ImGui.CalcTextSize(rot.Name).X;
@@ -580,6 +562,8 @@ public partial class RotationConfigWindow : Window
             }
         }
     }
+    private static readonly string[] pairsArray = new[] { "Delete" };
+    private static readonly string[] pairs = new[] { "Delete" };
 
     private void DrawRotationIcon(ICustomRotation rotation, float iconSize)
     {
@@ -1351,6 +1335,8 @@ public partial class RotationConfigWindow : Window
         { UiString.ConfigWindow_Rotation_Description.GetDescription, DrawRotationDescription },
 
         { GetRotationStatusHead,  DrawRotationStatus },
+        
+        { GetDutyRotationStatusHead,  DrawDutyRotationStatus },
 
         { UiString.ConfigWindow_Rotation_Configuration.GetDescription, DrawRotationConfiguration },
 
@@ -1510,6 +1496,22 @@ public partial class RotationConfigWindow : Window
     private static void DrawRotationStatus()
     {
         DataCenter.CurrentRotation?.DisplayStatus();
+    }
+
+    private static string GetDutyRotationStatusHead()
+    {
+        DutyRotation? rotation = DataCenter.CurrentDutyRotation;
+        string status = UiString.ConfigWindow_DutyRotation_Status.GetDescription();
+        return rotation == null ? string.Empty : status;
+    }
+
+    private static void DrawDutyRotationStatus()
+    {
+        if (DataCenter.CurrentDutyRotation == null)
+        {
+            return;
+        }
+        DataCenter.CurrentDutyRotation?.DisplayStatus();
     }
 
     private static string ToCommandStr(OtherCommandType type, string str, string extra = "")
@@ -2063,9 +2065,9 @@ public partial class RotationConfigWindow : Window
 
                 ImGui.Separator();
 
-                float ttk = config.TimeToKill;
+                int ttk = config.TimeToKill;
                 ImGui.SetNextItemWidth(Scale * 150);
-                if (ImGui.DragFloat($"{UiString.ConfigWindow_Actions_TTK.GetDescription()}##{a}",
+                if (ImGui.DragInt($"{UiString.ConfigWindow_Actions_TTK.GetDescription()}##{a}",
                     ref ttk, 0.1f, 0, 120, $"{ttk:F2}{ConfigUnitType.Seconds.ToSymbol()}"))
                 {
                     config.TimeToKill = ttk;
@@ -2585,7 +2587,7 @@ public partial class RotationConfigWindow : Window
     {
         var sheet = Service.GetSheet<Status>();
         if (sheet == null)
-            return Array.Empty<Status>();
+            return [];
         var list = new List<Status>();
         foreach (var s in sheet)
         {
@@ -2607,12 +2609,17 @@ public partial class RotationConfigWindow : Window
         foreach (var a in sheet)
         {
             if (!string.IsNullOrEmpty(a.ToString()) && !a.IsPvP && !a.IsPlayerAction
-                && a.ClassJob.RowId == 0 && a.Cast100ms > 0)
+                && a.Cast100ms > 0)
             {
                 list.Add(a);
             }
         }
-        return [.. list];
+        GAction[] result = new GAction[list.Count];
+        for (int i = 0; i < list.Count; i++)
+        {
+            result[i] = list[i];
+        }
+        return result;
     });
 
     internal static GAction[] AllActions => _allActions.Value;
@@ -2650,7 +2657,7 @@ public partial class RotationConfigWindow : Window
     private static void DrawListStatuses()
     {
         ImGui.SetNextItemWidth(ImGui.GetWindowWidth());
-        _ = ImGui.InputTextWithHint("##Searching the action", UiString.ConfigWindow_List_StatusNameOrId.GetDescription(), ref _statusSearching, 128);
+        _ = ImGui.InputTextWithHint("##Searching the action", UiString.ConfigWindow_List_StatusNameOrId.GetDescription(), ref _statusSearching, 50);
 
         using ImRaii.IEndObject table = ImRaii.Table("Rotation Solver List Statuses", 4, ImGuiTableFlags.BordersInner | ImGuiTableFlags.Resizable | ImGuiTableFlags.SizingStretchSame);
         if (table)
@@ -2760,7 +2767,7 @@ public partial class RotationConfigWindow : Window
         ImGui.PushID(name);
         FromClipBoardButton(statuses);
 
-        uint removeId = 0;
+        uint removeStatusId = 0; // Renamed variable to avoid conflict
         uint notLoadId = DefaultNotLoadId;
 
         string popupId = $"Rotation Solver Popup{name}";
@@ -2797,12 +2804,12 @@ public partial class RotationConfigWindow : Window
 
             void Delete()
             {
-                removeId = status.RowId;
+                removeStatusId = status.RowId; // Updated variable name
             }
 
             string key = $"Status{status.RowId}";
 
-            ImGuiHelper.DrawHotKeysPopup(key, string.Empty, (UiString.ConfigWindow_List_Remove.GetDescription(), Delete, new[] { "Delete" }));
+            ImGuiHelper.DrawHotKeysPopup(key, string.Empty, (UiString.ConfigWindow_List_Remove.GetDescription(), Delete, pairsArray));
 
             if (IconSet.GetTexture(status.Icon, out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture, notLoadId))
             {
@@ -2817,9 +2824,9 @@ public partial class RotationConfigWindow : Window
             }
         }
 
-        if (removeId != 0)
+        if (removeStatusId != 0) // Updated variable name
         {
-            _ = statuses.Remove(removeId);
+            _ = statuses.Remove(removeStatusId); // Updated variable name
             _ = OtherConfiguration.Save();
         }
         ImGui.PopID();
@@ -2908,7 +2915,7 @@ public partial class RotationConfigWindow : Window
     private static void DrawListActions()
     {
         ImGui.SetNextItemWidth(ImGui.GetWindowWidth());
-        _ = ImGui.InputTextWithHint("##Searching the action", UiString.ConfigWindow_List_ActionNameOrId.GetDescription(), ref _actionSearching, 128);
+        _ = ImGui.InputTextWithHint("##Searching the action", UiString.ConfigWindow_List_ActionNameOrId.GetDescription(), ref _actionSearching, 50);
 
         using ImRaii.IEndObject table = ImRaii.Table("Rotation Solver List Actions", 4, ImGuiTableFlags.BordersInner | ImGuiTableFlags.Resizable | ImGuiTableFlags.SizingStretchSame);
         if (table)
@@ -2968,18 +2975,14 @@ public partial class RotationConfigWindow : Window
     }
 
     private static string _actionSearching = string.Empty;
+    private static string _actionPopupSearching = string.Empty;
 
     private static void DrawActionsList(string name, HashSet<uint> actions)
     {
-        // Initialize actions to an empty HashSet if it is null
         actions ??= [];
-
-        const float InputWidth = 200f;
-        const float ChildHeight = 400f;
 
         ImGui.PushID(name);
         uint removeId = 0;
-
         string popupId = $"Rotation Solver Reborn Action Popup{name}";
 
         if (ImGui.Button($"{UiString.ConfigWindow_List_AddAction.GetDescription()}##{name}"))
@@ -3006,32 +3009,33 @@ public partial class RotationConfigWindow : Window
             }
         }
 
-        // Sort the list by similarity descending
-        for (int i = 0; i < actionList.Count - 1; i++)
+        // Efficient search and sort
+        if (!string.IsNullOrEmpty(_actionSearching))
         {
-            for (int j = i + 1; j < actionList.Count; j++)
+            // Precompute similarity scores
+            var scored = new List<(GAction action, float score)>(actionList.Count);
+            foreach (var action in actionList)
             {
-                float simI = SearchableCollection.Similarity($"{actionList[i].Name} {actionList[i].RowId}", _actionSearching);
-                float simJ = SearchableCollection.Similarity($"{actionList[j].Name} {actionList[j].RowId}", _actionSearching);
-                if (simJ > simI)
-                {
-                    var temp = actionList[i];
-                    actionList[i] = actionList[j];
-                    actionList[j] = temp;
-                }
+                float sim = SearchableCollection.Similarity($"{action.Name} {action.RowId}", _actionSearching);
+                scored.Add((action, sim));
+            }
+            // Sort descending by score
+            scored.Sort((a, b) => b.score.CompareTo(a.score));
+            // Overwrite actionList with sorted results
+            actionList.Clear();
+            foreach (var (action, score) in scored)
+            {
+                actionList.Add(action);
             }
         }
 
-        foreach (GAction action in actionList)
+        for (int idx = 0; idx < actionList.Count; idx++)
         {
-            void Reset()
-            {
-                removeId = action.RowId;
-            }
-
+            GAction action = actionList[idx];
+            void Reset() => removeId = action.RowId;
             string key = $"Action{action.RowId}";
 
-            ImGuiHelper.DrawHotKeysPopup(key, string.Empty, (UiString.ConfigWindow_List_Remove.GetDescription(), Reset, new[] { "Delete" }));
+            ImGuiHelper.DrawHotKeysPopup(key, string.Empty, (UiString.ConfigWindow_List_Remove.GetDescription(), Reset, pairs));
 
             _ = ImGui.Selectable($"{action.Name} ({action.RowId})");
 
@@ -3044,34 +3048,100 @@ public partial class RotationConfigWindow : Window
             _ = OtherConfiguration.Save();
         }
 
+        ActionPopup(popupId, actions);
+
+        ImGui.PopID();
+    }
+
+    private static void ActionPopup(string popupId, HashSet<uint> actions)
+    {
+        const float InputWidth = 200f;
+        const float ChildHeight = 400f;
+        const int MaxDisplayCount = 50;
+
         using ImRaii.IEndObject popup = ImRaii.Popup(popupId);
         if (popup)
         {
             ImGui.SetNextItemWidth(InputWidth * Scale);
-            _ = ImGui.InputTextWithHint("##Searching the action pop up", UiString.ConfigWindow_List_ActionNameOrId.GetDescription(), ref _actionSearching, 128);
+            _ = ImGui.InputTextWithHint("##Searching the action pop up", UiString.ConfigWindow_List_ActionNameOrId.GetDescription(), ref _actionPopupSearching, 50);
 
             ImGui.Spacing();
 
             using ImRaii.IEndObject child = ImRaii.Child("Rotation Solver Add action", new Vector2(-1, ChildHeight * Scale));
             if (child)
             {
-                foreach (GAction action in AllActions.OrderByDescending(s => SearchableCollection.Similarity($"{s.Name} {s.RowId}", _actionSearching)))
+                if (string.IsNullOrWhiteSpace(_actionPopupSearching))
                 {
-                    bool selected = ImGui.Selectable($"{action.Name} ({action.RowId})");
-                    if (ImGui.IsItemHovered())
+                    ImGui.TextColored(ImGuiColors.DalamudYellow, "Enter a search term to filter actions.");
+                }
+                else
+                {
+                    // Manual filtering and sorting (no LINQ)
+                    var filtered = new List<(GAction action, float sim)>();
+                    string searchLower = _actionPopupSearching.Trim().ToLowerInvariant();
+
+                    for (int i = 0; i < AllActions.Length; i++)
                     {
-                        ImguiTooltips.ShowTooltip($"{action.Name} ({action.RowId})");
-                        if (selected)
+                        GAction a = AllActions[i];
+
+                        // Skip actions already in the list
+                        if (actions.Contains(a.RowId))
+                            continue;
+
+                        string nameLower = a.Name.ToString().ToLowerInvariant();
+                        string idStr = a.RowId.ToString();
+
+                        // Direct substring or ID match gets highest score
+                        if (nameLower.Contains(searchLower) || idStr == searchLower)
                         {
-                            _ = actions.Add(action.RowId);
-                            _ = OtherConfiguration.Save();
-                            ImGui.CloseCurrentPopup();
+                            filtered.Add((a, 1000f)); // Arbitrary high score for direct match
                         }
+                        else
+                        {
+                            float sim = SearchableCollection.Similarity($"{a.Name} {a.RowId}", _actionPopupSearching);
+                            if (sim > 0)
+                                filtered.Add((a, sim));
+                        }
+                    }
+
+                    // Sort descending by score (manual, no LINQ)
+                    int n = filtered.Count;
+                    for (int i = 0; i < n - 1; i++)
+                    {
+                        for (int j = i + 1; j < n; j++)
+                        {
+                            if (filtered[j].sim > filtered[i].sim)
+                            {
+                                (filtered[j], filtered[i]) = (filtered[i], filtered[j]);
+                            }
+                        }
+                    }
+
+                    int shown = 0;
+                    for (int i = 0; i < filtered.Count && shown < MaxDisplayCount; i++)
+                    {
+                        GAction action = filtered[i].action;
+                        bool selected = ImGui.Selectable($"{action.Name} ({action.RowId})");
+                        if (ImGui.IsItemHovered())
+                        {
+                            ImguiTooltips.ShowTooltip($"{action.Name} ({action.RowId})");
+                            if (selected)
+                            {
+                                _ = actions.Add(action.RowId);
+                                _ = OtherConfiguration.Save();
+                                ImGui.CloseCurrentPopup();
+                            }
+                        }
+                        shown++;
+                    }
+
+                    if (shown == 0)
+                    {
+                        ImGui.TextColored(ImGuiColors.DalamudRed, "No matching actions found.");
                     }
                 }
             }
         }
-        ImGui.PopID();
     }
 
     public static Vector3 HoveredPosition { get; private set; } = Vector3.Zero;
@@ -3354,6 +3424,8 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"    {condition}");
         }
         ImGui.Text($"OnlineStatus: {Player.OnlineStatus}");
+        ImGui.Text($"Effective Hp: {ObjectHelper.GetEffectiveHp(Player.Object)}");
+        ImGui.Text($"Effective Hp Percent: {ObjectHelper.GetEffectiveHpPercent(Player.Object)}");
         ImGui.Text($"IsDead: {Player.Object.IsDead}");
         ImGui.Text($"DoomNeedHealing: {Player.Object.DoomNeedHealing()}");
         ImGui.Text($"Dead Time: {DataCenter.DeadTimeRaw}");
@@ -3372,7 +3444,23 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"IsInDelubrumSavage: {DataCenter.IsInDelubrumSavage}");
         ImGui.Text($"IsInBozja: {DataCenter.IsInBozja}");
         ImGui.Spacing();
-        ImGui.Text($"AttackedTargets: {DataCenter.AttackedTargets?.Count() ?? 0}");
+        ImGui.Text($"In Occult Crescent: {DataCenter.IsInOccultCrescentOp}");
+        ImGui.Text($"Is In ForkedTower: {DataCenter.IsInForkedTower}");
+        ImGui.Text($"FreelancerLevel: {DutyRotation.FreelancerLevel}");
+        ImGui.Text($"KnightLevel: {DutyRotation.KnightLevel}");
+        ImGui.Text($"MonkLevel: {DutyRotation.MonkLevel}");
+        ImGui.Text($"BardLevel: {DutyRotation.BardLevel}");
+        ImGui.Text($"ChemistLevel: {DutyRotation.ChemistLevel}");
+        ImGui.Text($"TimeMageLevel: {DutyRotation.TimeMageLevel}");
+        ImGui.Text($"CannoneerLevel: {DutyRotation.CannoneerLevel}");
+        ImGui.Text($"OracleLevel: {DutyRotation.OracleLevel}");
+        ImGui.Text($"BerserkerLevel: {DutyRotation.BerserkerLevel}");
+        ImGui.Text($"RangerLevel: {DutyRotation.RangerLevel}");
+        ImGui.Text($"ThiefLevel: {DutyRotation.ThiefLevel}");
+        ImGui.Text($"SamuraiLevel: {DutyRotation.SamuraiLevel}");
+        ImGui.Text($"GeomancerLevel: {DutyRotation.GeomancerLevel}");
+        ImGui.Spacing();
+        ImGui.Text($"AttackedTargets: {DataCenter.AttackedTargets?.Count ?? 0}");
         if (DataCenter.AttackedTargets != null)
         {
             foreach ((ulong id, DateTime time) in DataCenter.AttackedTargets)
@@ -3546,11 +3634,22 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"Name Id: {battleChara.NameId}");
             ImGui.Text($"Data Id: {battleChara.DataId}");
             ImGui.Text($"HP: {battleChara.CurrentHp} / {battleChara.MaxHp}");
-            ImGui.Text($"Is Enemy Action Check: {battleChara.IsEnemy()}");
+            ImGui.Spacing();
             ImGui.Text($"Is Attackable: {battleChara.IsAttackable()}");
+            ImGui.Text($"Is Others Players Mob: {battleChara.IsOthersPlayersMob()}");
+            ImGui.Text($"Is Alliance: {battleChara.IsAllianceMember()}");
+            ImGui.Text($"Is Enemy Action Check: {battleChara.IsEnemy()}");
+            ImGui.Text($"IsSpecialExecptionImmune: {battleChara.IsSpecialExecptionImmune()}");
+            ImGui.Text($"IsSpecialImmune: {battleChara.IsSpecialImmune()}");
+            ImGui.Text($"IsTopPriorityNamedHostile: {battleChara.IsTopPriorityNamedHostile()}");
+            ImGui.Text($"IsTopPriorityHostile: {battleChara.IsTopPriorityHostile()}");
+            ImGui.Spacing();
             ImGui.Text($"FateID: {battleChara.FateId().ToString() ?? string.Empty}");
             ImGui.Text($"EventType: {battleChara.GetEventType().ToString() ?? string.Empty}");
+            ImGui.Text($"IsOccultCEMob: {battleChara.IsOccultCEMob()}");
+            ImGui.Text($"IsOccultFateMob: {battleChara.IsOccultFateMob()}");
             ImGui.Text($"IsBozjanCEFateMob: {battleChara.IsBozjanCEFateMob()}");
+            ImGui.Spacing();
             ImGui.Text($"Is Current Focus Target: {battleChara.IsFocusTarget()}");
             ImGui.Text($"TTK: {battleChara.GetTTK()}");
             ImGui.Text($"Is Boss TTK: {battleChara.IsBossFromTTK()}");
@@ -3569,14 +3668,12 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"Is Alliance: {battleChara.IsAllianceMember()}");
             ImGui.Text($"Distance To Player: {battleChara.DistanceToPlayer()}");
             ImGui.Text($"CanProvoke: {battleChara.CanProvoke()}");
-            ImGui.Text($"NamePlate: {battleChara.GetNamePlateIcon()}");
             ImGui.Text($"StatusFlags: {battleChara.StatusFlags}");
             ImGui.Text($"InView: {Svc.GameGui.WorldToScreen(battleChara.Position, out _)}");
             ImGui.Text($"Enemy Positional: {battleChara.FindEnemyPositional()}");
             ImGui.Text($"NameplateKind: {battleChara.GetNameplateKind()}");
             ImGui.Text($"BattleNPCSubKind: {battleChara.GetBattleNPCSubKind()}");
             ImGui.Text($"Is Top Priority Hostile: {battleChara.IsTopPriorityHostile()}");
-            ImGui.Text($"Is Others Players Mob: {battleChara.IsOthersPlayersMob()}");
             ImGui.Text($"Targetable: {battleChara.Struct()->Character.GameObject.TargetableStatus}");
             ImGui.Spacing();
             ImGui.Text($"Statuses:");
@@ -3598,7 +3695,7 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"GCD Remain: {DataCenter.DefaultGCDRemain}");
         ImGui.Text($"GCD Elapsed: {DataCenter.DefaultGCDElapsed}");
         ImGui.Text($"Calculated Action Ahead: {DataCenter.CalculatedActionAhead}");
-        ImGui.Text($"Animation Lock Delay: {ActionManagerHelper.GetCurrentAnimationLock()}");
+        ImGui.Text($"Animation Lock Delay: {DataCenter.AnimationLock}");
     }
 
     private static void DrawLastAction()

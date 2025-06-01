@@ -101,6 +101,7 @@ public static class StatusHelper
         StatusID.LivingDead,
         //StatusID.WalkingDead,
         StatusID.Superbolide,
+        StatusID.Invulnerability,
     };
 
     /// <summary>
@@ -160,6 +161,17 @@ public static class StatusHelper
     {
         StatusID.Doom_1769,
     };
+
+    /// <summary>
+    /// Statuses for the Phantom Oracle spell PredictPvE.
+    /// </summary>
+    public static StatusID[] OracleStatuses { get; } =
+    [
+        StatusID.PredictionOfCleansing,
+        StatusID.PredictionOfStarfall,
+        StatusID.PredictionOfJudgment,
+        StatusID.PredictionOfBlessing
+    ];
 
     /// <summary>
     /// Check whether the target needs to be healing.

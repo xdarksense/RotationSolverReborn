@@ -74,6 +74,7 @@ internal static class DataCenter
     public static DutyRotation? CurrentDutyRotation { get; internal set; }
 
     public static Dictionary<string, DateTime> SystemWarnings { get; set; } = [];
+    public static bool HoldingRestore = false;
 
     internal static bool NoPoslock => Svc.Condition[ConditionFlag.OccupiedInEvent]
                                       || !Service.Config.PoslockCasting
@@ -138,6 +139,20 @@ internal static class DataCenter
     /// </summary>
     public static bool IsInBozja => IsInBozjanFieldOp || IsInDelubrumNormal || IsInDelubrumSavage;
 
+    #endregion
+
+    #region Occult Crescent
+
+    /// <summary>
+    /// Determines if the current content is Bozjan Southern Front or Zadnor.
+    /// </summary>
+    public static bool IsInOccultCrescentOp => Territory?.ContentType == TerritoryContentType.OccultCrescent;
+
+    /// <summary>
+    /// Determines if the current content is Forked Tower.
+    /// </summary>
+    public static bool IsInForkedTower => Territory?.ContentType == TerritoryContentType.OccultCrescent 
+        && Player.Object.HasStatus(false, StatusID.DutiesAsAssigned_4228);
     #endregion
 
     public static ushort TerritoryID => Svc.ClientState.TerritoryType;
@@ -271,10 +286,16 @@ internal static class DataCenter
     }
 
     #region GCD
+
     /// <summary>
     /// Returns the time remaining until the next GCD (Global Cooldown) after considering the current animation lock.
     /// </summary>
-    public static float NextAbilityToNextGCD => DefaultGCDRemain - ActionManagerHelper.GetCurrentAnimationLock();
+    public static float AnimationLock => Player.AnimationLock;
+
+    /// <summary>
+    /// Returns the time remaining until the next GCD (Global Cooldown) after considering the current animation lock.
+    /// </summary>
+    public static float NextAbilityToNextGCD => DefaultGCDRemain - Player.AnimationLock;
 
     /// <summary>
     /// Returns the total duration of the default GCD.
@@ -844,9 +865,7 @@ internal static class DataCenter
     internal static Queue<MacroItem> Macros { get; } = new Queue<MacroItem>();
 
     #region Action Record
-    //public const float MinAnimationLock = 0.6f;
-
-    private const int QUEUECAPACITY = 32;
+    private const int QUEUECAPACITY = 48;
     private static readonly Queue<ActionRec> _actions = new(QUEUECAPACITY);
     private static readonly Queue<DamageRec> _damages = new(QUEUECAPACITY);
 

@@ -30,7 +30,11 @@ public partial class CustomRotation
             return false;
         }
 
-        if (EmergencyAbility(nextGCD, out act))
+        if (!DataCenter.MergedStatus.HasFlag(AutoStatus.NoCasting) && DataCenter.CurrentDutyRotation?.EmergencyAbility(nextGCD, out act) == true)
+        {
+            return true;
+        }
+        if (!DataCenter.MergedStatus.HasFlag(AutoStatus.NoCasting) && EmergencyAbility(nextGCD, out act))
         {
             return true;
         }
@@ -38,16 +42,29 @@ public partial class CustomRotation
         JobRole role = DataCenter.Role;
 
         IBaseAction.TargetOverride = TargetType.Interrupt;
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.Interrupt) && !Player.HasStatus(true, StatusID.Mudra) && MyInterruptAbility(role, nextGCD, out act))
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.Interrupt) && !Player.HasStatus(true, StatusID.Mudra))
         {
-            return true;
+            if (DataCenter.CurrentDutyRotation?.InterruptAbility(nextGCD, out act) == true)
+            {
+                return true;
+            }
+            if (MyInterruptAbility(role, nextGCD, out act))
+            {
+                return true;
+            }
         }
 
         IBaseAction.TargetOverride = TargetType.Dispel;
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.Dispel)
-            && DispelAbility(nextGCD, out act))
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.Dispel))
         {
-            return true;
+            if (DataCenter.CurrentDutyRotation?.DispelAbility(nextGCD, out act) == true)
+            {
+                return true;
+            }
+            if (DispelAbility(nextGCD, out act))
+            {
+                return true;
+            }
         }
 
         IBaseAction.TargetOverride = TargetType.Tank;
@@ -76,9 +93,16 @@ public partial class CustomRotation
         {
             IBaseAction.ShouldEndSpecial = true;
         }
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.AntiKnockback) && !Player.HasStatus(true, StatusID.Mudra) && AntiKnockback(role, nextGCD, out act))
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.AntiKnockback) && !Player.HasStatus(true, StatusID.Mudra))
         {
-            return true;
+            if (DataCenter.CurrentDutyRotation?.AntiKnockbackAbility(nextGCD, out act) == true)
+            {
+                return true;
+            }
+            if (AntiKnockback(role, nextGCD, out act))
+            {
+                return true;
+            }
         }
         IBaseAction.ShouldEndSpecial = false;
 
@@ -98,6 +122,10 @@ public partial class CustomRotation
         {
             IBaseAction.AllEmpty = true;
             IBaseAction.ShouldEndSpecial = true;
+            if (DataCenter.CurrentDutyRotation?.HealAreaAbility(nextGCD, out act) == true)
+            {
+                return true;
+            }
             if (HealAreaAbility(nextGCD, out act))
             {
                 return true;
@@ -106,9 +134,13 @@ public partial class CustomRotation
             IBaseAction.ShouldEndSpecial = false;
         }
 
-        if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealAreaAbility) && CanHealAreaAbility)
+        if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealAreaAbility) && (CanHealAreaAbility || DataCenter.IsInOccultCrescentOp))
         {
             IBaseAction.AutoHealCheck = true;
+            if (DataCenter.CurrentDutyRotation?.HealAreaAbility(nextGCD, out act) == true)
+            {
+                return true;
+            }
             if (HealAreaAbility(nextGCD, out act))
             {
                 return true;
@@ -120,6 +152,10 @@ public partial class CustomRotation
         {
             IBaseAction.AllEmpty = true;
             IBaseAction.ShouldEndSpecial = true;
+            if (DataCenter.CurrentDutyRotation?.HealSingleAbility(nextGCD, out act) == true)
+            {
+                return true;
+            }
             if (HealSingleAbility(nextGCD, out act))
             {
                 return true;
@@ -128,9 +164,13 @@ public partial class CustomRotation
             IBaseAction.ShouldEndSpecial = false;
         }
 
-        if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealSingleAbility) && CanHealSingleAbility)
+        if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealSingleAbility) && (CanHealSingleAbility || DataCenter.IsInOccultCrescentOp))
         {
             IBaseAction.AutoHealCheck = true;
+            if (DataCenter.CurrentDutyRotation?.HealSingleAbility(nextGCD, out act) == true)
+            {
+                return true;
+            }
             if (HealSingleAbility(nextGCD, out act))
             {
                 return true;
@@ -144,9 +184,16 @@ public partial class CustomRotation
         {
             IBaseAction.ShouldEndSpecial = true;
         }
-        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Speed) && SpeedAbility(nextGCD, out act))
+        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Speed))
         {
-            return true;
+            if (DataCenter.CurrentDutyRotation?.SpeedAbility(nextGCD, out act) == true)
+            {
+                return true;
+            }
+            if (SpeedAbility(nextGCD, out act))
+            {
+                return true;
+            }
         }
         IBaseAction.ShouldEndSpecial = false;
 
@@ -177,6 +224,10 @@ public partial class CustomRotation
         }
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseArea))
         {
+            if (DataCenter.CurrentDutyRotation?.DefenseAreaAbility(nextGCD, out act) == true)
+            {
+                return true;
+            }
             if (DefenseAreaAbility(nextGCD, out act) || (role is JobRole.Melee or JobRole.RangedPhysical or JobRole.RangedMagical && DefenseSingleAbility(nextGCD, out act)))
             {
                 return true;
@@ -190,6 +241,10 @@ public partial class CustomRotation
         }
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseSingle))
         {
+            if (DataCenter.CurrentDutyRotation?.DefenseSingleAbility(nextGCD, out act) == true)
+            {
+                return true;
+            }
             if (DefenseSingleAbility(nextGCD, out act) || (!DataCenter.IsHostileCastingToTank && ArmsLengthPvE.CanUse(out act)))
             {
                 return true;
@@ -204,9 +259,16 @@ public partial class CustomRotation
             IBaseAction.ShouldEndSpecial = true;
         }
         IBaseAction.AllEmpty = true;
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.MoveForward) && Player != null && !Player.HasStatus(true, StatusID.Bind) && MoveForwardAbility(nextGCD, out act))
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.MoveForward) && Player != null && !Player.HasStatus(true, StatusID.Bind))
         {
-            return true;
+            if (DataCenter.CurrentDutyRotation?.MoveForwardAbility(nextGCD, out act) == true)
+            {
+                return true;
+            }
+            if (MoveForwardAbility(nextGCD, out act))
+            {
+                return true;
+            }
         }
         IBaseAction.ShouldEndSpecial = false;
 
@@ -216,7 +278,14 @@ public partial class CustomRotation
         }
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.MoveBack) && MoveBackAbility(nextGCD, out act))
         {
-            return true;
+            if (DataCenter.CurrentDutyRotation?.MoveBackAbility(nextGCD, out act) == true)
+            {
+                return true;
+            }
+            if (MoveBackAbility(nextGCD, out act))
+            {
+                return true;
+            }
         }
         IBaseAction.ShouldEndSpecial = false;
         IBaseAction.AllEmpty = false;
@@ -231,11 +300,19 @@ public partial class CustomRotation
         }
         IBaseAction.ShouldEndSpecial = false;
 
+        if (HasHostilesInRange && DataCenter.CurrentDutyRotation?.AttackAbility(nextGCD, out act) == true)
+        {
+            return true;
+        }
         if (HasHostilesInRange && AttackAbility(nextGCD, out act))
         {
             return true;
         }
 
+        if (DataCenter.CurrentDutyRotation?.GeneralAbility(nextGCD, out act) == true)
+        {
+            return true;
+        }
         if (GeneralAbility(nextGCD, out act))
         {
             return true;
@@ -294,11 +371,6 @@ public partial class CustomRotation
     /// <returns>True if the interrupt ability can be used; otherwise, false.</returns>
     protected virtual bool InterruptAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.CurrentDutyRotation?.InterruptAbility(nextGCD, out act) ?? false)
-        {
-            return true;
-        }
-
         act = null;
         return false;
     }
@@ -311,11 +383,6 @@ public partial class CustomRotation
     /// <returns>True if the interrupt ability can be used; otherwise, false.</returns>
     protected virtual bool DispelAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.CurrentDutyRotation?.DispelAbility(nextGCD, out act) ?? false)
-        {
-            return true;
-        }
-
         act = null;
         return false;
     }
@@ -376,10 +443,6 @@ public partial class CustomRotation
     /// <returns>True if the anti-knockback ability can be used; otherwise, false.</returns>
     protected virtual bool AntiKnockbackAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.CurrentDutyRotation?.AntiKnockbackAbility(nextGCD, out act) ?? false)
-        {
-            return true;
-        }
 
         act = null;
         return false;
@@ -393,10 +456,6 @@ public partial class CustomRotation
     /// <returns>True if the provoke ability can be used; otherwise, false.</returns>
     protected virtual bool ProvokeAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.CurrentDutyRotation?.ProvokeAbility(nextGCD, out act) ?? false)
-        {
-            return true;
-        }
 
         act = null;
         return false;
@@ -473,11 +532,6 @@ public partial class CustomRotation
     /// <returns>True if the emergency ability can be used; otherwise, false.</returns>
     protected virtual bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.NoCasting))
-        {
-            act = null;
-        }
-
         if (nextGCD is BaseAction action)
         {
             if (Role is JobRole.RangedMagical &&
@@ -493,11 +547,6 @@ public partial class CustomRotation
             {
                 return true;
             }
-        }
-
-        if (DataCenter.CurrentDutyRotation?.EmergencyAbility(nextGCD, out act) ?? false)
-        {
-            return true;
         }
 
         #region PvP
@@ -520,10 +569,6 @@ public partial class CustomRotation
     [RotationDesc(DescType.MoveForwardAbility)]
     protected virtual bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.CurrentDutyRotation?.MoveForwardAbility(nextGCD, out act) ?? false)
-        {
-            return true;
-        }
 
         act = null;
         return false;
@@ -538,10 +583,6 @@ public partial class CustomRotation
     [RotationDesc(DescType.MoveBackAbility)]
     protected virtual bool MoveBackAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.CurrentDutyRotation?.MoveBackAbility(nextGCD, out act) ?? false)
-        {
-            return true;
-        }
 
         act = null;
         return false;
@@ -561,11 +602,6 @@ public partial class CustomRotation
             return true;
         }
 
-        if (DataCenter.CurrentDutyRotation?.HealSingleAbility(nextGCD, out act) ?? false)
-        {
-            return true;
-        }
-
         act = null;
         return false;
     }
@@ -579,10 +615,6 @@ public partial class CustomRotation
     [RotationDesc(DescType.HealAreaAbility)]
     protected virtual bool HealAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.CurrentDutyRotation?.HealAreaAbility(nextGCD, out act) ?? false)
-        {
-            return true;
-        }
 
         act = null;
         return false;
@@ -597,10 +629,6 @@ public partial class CustomRotation
     [RotationDesc(DescType.DefenseSingleAbility)]
     protected virtual bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.CurrentDutyRotation?.DefenseSingleAbility(nextGCD, out act) ?? false)
-        {
-            return true;
-        }
 
         act = null;
         return false;
@@ -615,10 +643,6 @@ public partial class CustomRotation
     [RotationDesc(DescType.DefenseAreaAbility)]
     protected virtual bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if (DataCenter.CurrentDutyRotation?.DefenseAreaAbility(nextGCD, out act) ?? false)
-        {
-            return true;
-        }
 
         act = null;
         return false;
@@ -649,11 +673,6 @@ public partial class CustomRotation
             return true;
         }
 
-        if (DataCenter.CurrentDutyRotation?.SpeedAbility(nextGCD, out act) ?? false)
-        {
-            return true;
-        }
-
         act = null;
         return false;
     }
@@ -671,11 +690,6 @@ public partial class CustomRotation
             act = null;
         }
 
-        if (DataCenter.CurrentDutyRotation?.GeneralAbility(nextGCD, out act) ?? false)
-        {
-            return true;
-        }
-
         act = null;
         return false;
     }
@@ -691,11 +705,6 @@ public partial class CustomRotation
         if (DataCenter.MergedStatus.HasFlag(AutoStatus.NoCasting))
         {
             act = null;
-        }
-
-        if (DataCenter.CurrentDutyRotation?.AttackAbility(nextGCD, out act) ?? false)
-        {
-            return true;
         }
 
         act = null;

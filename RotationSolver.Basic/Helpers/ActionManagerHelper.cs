@@ -1,4 +1,5 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game;
+﻿using ECommons.GameHelpers;
+using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace RotationSolver.Basic.Helpers
 {
@@ -8,8 +9,6 @@ namespace RotationSolver.Basic.Helpers
     internal static class ActionManagerHelper
     {
         private const uint DefaultActionId = 11;
-        private const float DefaultAnimationLock = 0.6f;
-        private const int AnimationLockOffset = 8;
 
         /// <summary>
         /// Gets the instance of the ActionManager.
@@ -20,15 +19,7 @@ namespace RotationSolver.Basic.Helpers
             return ActionManager.Instance();
         }
 
-        /// <summary>
-        /// Gets the current animation lock duration.
-        /// </summary>
-        /// <returns>The current animation lock duration.</returns>
-        public static unsafe float GetCurrentAnimationLock()
-        {
-            ActionManager* actionManager = GetActionManager();
-            return actionManager == null ? DefaultAnimationLock : *(float*)((byte*)actionManager + AnimationLockOffset);
-        }
+        public static unsafe float AnimationLock => Player.AnimationLock;
 
         /// <summary>
         /// Gets the recast time for a specific action.

@@ -113,11 +113,6 @@ public class BaseItem : IBaseItem
     public uint SortKey { get; }
 
     /// <summary>
-    /// Items' animation lock time.
-    /// </summary>
-    public float AnimationLockTime => 0.6f;
-
-    /// <summary>
     /// Is this action in action sequencer.
     /// </summary>
     public virtual bool IsActionSequencer => false;

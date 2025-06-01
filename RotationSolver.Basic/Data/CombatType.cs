@@ -35,7 +35,7 @@ public enum CombatRole
     /// <summary>
     /// 
     /// </summary>
-    None,
+    NonCombat,
 
     /// <summary>
     /// 

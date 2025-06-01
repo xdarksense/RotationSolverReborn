@@ -267,16 +267,31 @@ public sealed class WAR_Default : WarriorRotation
 
         if (!Player.WillStatusEndGCD(3, 0, true, StatusID.SurgingTempest) && InnerReleaseStacks == 0)
         {
-            if ((YEET || (!YEET && !IsMoving)) && PrimalRendPvE.CanUse(out act, skipAoeCheck: true))
+            if (PrimalRendPvE.CanUse(out act, skipAoeCheck: true))
             {
-                if (!YEETBeta && PrimalRendPvE.Target.Target?.DistanceToPlayer() < PrimalRendDistance2)
+                if (YEET || (!YEET && !IsMoving))
                 {
                     return true;
                 }
-
-                if (YEETBeta && PrimalRendPvE.Target.Target?.DistanceToPlayer() - PrimalRendPvE.Target.Target?.HitboxRadius < PrimalRendDistance2)
+                var target = PrimalRendPvE.Target.Target;
+                if (target != null)
                 {
-                    return true;
+                    float distance = target.DistanceToPlayer();
+                    if (!YEETBeta)
+                    {
+                        if (distance < PrimalRendDistance2)
+                        {
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        float hitboxRadius = target.HitboxRadius;
+                        if ((distance - hitboxRadius) < PrimalRendDistance2)
+                        {
+                            return true;
+                        }
+                    }
                 }
             }
             if (PrimalRuinationPvE.CanUse(out act))

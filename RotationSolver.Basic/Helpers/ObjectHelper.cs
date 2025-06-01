@@ -12,9 +12,9 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
+using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using System.Collections.Concurrent;
-using System.Drawing;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -31,7 +31,7 @@ public static class ObjectHelper
         EventHandlerContent.Quest,
     };
 
-    internal static Lumina.Excel.Sheets.BNpcBase? GetObjectNPC(this IBattleChara battleChara)
+    internal static BNpcBase? GetObjectNPC(this IBattleChara battleChara)
     {
         return battleChara == null ? null : Service.GetSheet<Lumina.Excel.Sheets.BNpcBase>().GetRow(battleChara.DataId);
     }
@@ -76,7 +76,17 @@ public static class ObjectHelper
 
     internal static bool HasPositional(this IBattleChara battleChara)
     {
-        return battleChara != null && (!(battleChara.GetObjectNPC()?.IsOmnidirectional ?? false));
+        if (battleChara == null)
+        {
+            return false;
+        }
+
+        if (battleChara.HasStatus(false, StatusID.DirectionalDisregard))
+        {
+            return false;
+        }
+
+        return Svc.Data.GetExcelSheet<BNpcBase>().TryGetRow(battleChara.DataId, out var dataRow) && !dataRow.IsOmnidirectional;
     }
 
     internal static unsafe bool IsOthersPlayersMob(this IBattleChara battleChara)
@@ -87,11 +97,6 @@ public static class ObjectHelper
 
     internal static bool IsAttackable(this IBattleChara battleChara)
     {
-        if (Svc.ClientState == null)
-        {
-            return false;
-        }
-
         if (battleChara.IsAllianceMember())
         {
             return false;
@@ -188,6 +193,12 @@ public static class ObjectHelper
             return true;
         }
 
+        //Special cases for Black Star and Mythic Idol, which do not have valid target objects but are still attackable.
+        if (battleChara.NameId == 13726 || battleChara.NameId == 13636)
+        {
+            return true;
+        }
+
         // Tar on me
         return battleChara.TargetObject == Player.Object
             || battleChara.TargetObject?.OwnerId == Player.Object.GameObjectId || DataCenter.CurrentTargetToHostileType switch
@@ -220,6 +231,48 @@ public static class ObjectHelper
 
         // Get the EventId of the mob
         return battleChara.GetEventType() == EventHandlerContent.PublicContentDirector;
+    }
+
+    internal static bool IsOccultCEMob(this IBattleChara battleChara)
+    {
+        if (battleChara == null)
+        {
+            return false;
+        }
+
+        if (battleChara.IsEnemy() == false)
+        {
+            return false;
+        }
+
+        if (!DataCenter.IsInOccultCrescentOp)
+        {
+            return false;
+        }
+
+        // Get the EventId of the mob
+        return battleChara.GetEventType() == EventHandlerContent.PublicContentDirector;
+    }
+
+    internal static bool IsOccultFateMob(this IBattleChara battleChara)
+    {
+        if (battleChara == null)
+        {
+            return false;
+        }
+
+        if (battleChara.IsEnemy() == false)
+        {
+            return false;
+        }
+
+        if (!DataCenter.IsInOccultCrescentOp)
+        {
+            return false;
+        }
+
+        // Get the EventId of the mob
+        return battleChara.GetEventType() == EventHandlerContent.FateDirector;
     }
 
     internal static bool IsSpecialExecptionImmune(this IBattleChara battleChara)
@@ -266,8 +319,8 @@ public static class ObjectHelper
     internal static unsafe bool IsAllianceMember(this ICharacter obj)
     {
         return obj.GameObjectId is not 0
-            && !DataCenter.IsPvP && DataCenter.IsInAllianceRaid && obj is IPlayerCharacter 
-            && (ActionManager.CanUseActionOnTarget((uint)ActionID.RaisePvE, (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)obj.Struct()) 
+            && !DataCenter.IsPvP && DataCenter.IsInAllianceRaid && obj is IPlayerCharacter
+            && (ActionManager.CanUseActionOnTarget((uint)ActionID.RaisePvE, (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)obj.Struct())
             || ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)obj.Struct()));
     }
 
@@ -440,35 +493,26 @@ public static class ObjectHelper
             return false;
         }
 
-        if (battleChara is IBattleChara b)
+        // Check IBattleChara bespoke IsSpecialInclusionPriority method
+        if (battleChara.IsSpecialInclusionPriority())
         {
-            // Check IBattleChara bespoke IsSpecialInclusionPriority method
-            if (b.IsSpecialInclusionPriority())
-            {
-                return true;
-            }
+            return true;
+        }
 
-            // Check IBattleChara against the priority target list of OIDs
-            if (PriorityTargetHelper.IsPriorityTarget(b.DataId))
-            {
-                return true;
-            }
+        // MCH prio targeting for Wildfire
+        if (Player.Job == Job.MCH && (battleChara.HasStatus(true, StatusID.Wildfire) || battleChara.HasStatus(true, StatusID.Wildfire_1323)))
+        {
+            return true;
+        }
 
-            // MCH prio targeting for Wildfire
-            if (Player.Job == Job.MCH && battleChara.HasStatus(true, StatusID.Wildfire) || battleChara.HasStatus(true, StatusID.Wildfire_1323))
+        // Ensure StatusList is not null before iterating
+        if (battleChara.StatusList != null)
+        {
+            foreach (Dalamud.Game.ClientState.Statuses.Status status in battleChara.StatusList)
             {
-                return true;
-            }
-
-            // Ensure StatusList is not null before iterating
-            if (b.StatusList != null)
-            {
-                foreach (Dalamud.Game.ClientState.Statuses.Status status in b.StatusList)
+                if (StatusHelper.IsPriority(status))
                 {
-                    if (StatusHelper.IsPriority(status))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
         }
@@ -515,19 +559,32 @@ public static class ObjectHelper
         //71344 Major Quest
 
         // Check if the object is a BattleNpcPart
-        return Service.Config.PrioEnemyParts && battleChara.GetBattleNPCSubKind() == BattleNpcSubKind.BattleNpcPart;
+        if (Service.Config.PrioEnemyParts && battleChara.GetBattleNPCSubKind() == BattleNpcSubKind.BattleNpcPart)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     internal static bool IsSpecialInclusionPriority(this IBattleChara battleChara)
     {
-        if (battleChara.NameId == 10259 || battleChara.NameId == 8145 || battleChara.NameId == 12704 || battleChara.NameId == 13668)
+        if (battleChara.NameId == 6737
+            || battleChara.NameId == 6738
+            || battleChara.NameId == 8145
+            || battleChara.NameId == 10259
+            || battleChara.NameId == 12704
+            || battleChara.NameId == 13668)
         {
             return true;
         }
-        //10259 Cinduruva in The Tower of Zot
+        //6737 forlorn maiden
+        //6738 forlorn maiden
         //8145 Root in Dohn Meg boss 2
+        //10259 Cinduruva in The Tower of Zot
         //12704 Crystalline Debris
         //13668 Mob in Calamity Unbound CE
+
 
         return false;
     }
@@ -960,9 +1017,7 @@ public static class ObjectHelper
             return true;
         }
 
-        //Icon
-        Lumina.Excel.Sheets.BNpcBase? npc = battleChara.GetObjectNPC();
-        return npc?.Rank is 1 or 2 or 6;
+        return Svc.Data.GetExcelSheet<BNpcBase>().TryGetRow(battleChara.DataId, out var dataRow) && dataRow.Rank is 2 or 6;
     }
 
     /// <summary>
@@ -975,6 +1030,32 @@ public static class ObjectHelper
         return battleChara is ICharacter character && character.MaxHp > 0 && character.ShieldPercentage > 0
             ? character.MaxHp * character.ShieldPercentage / 100
             : 0;
+    }
+
+    /// <summary>
+    /// Returns object's calculated effective HP.
+    /// </summary>
+    /// <param name="battleChara"></param>
+    /// <returns></returns>
+    public static uint GetEffectiveHp(this IBattleChara battleChara)
+    {
+        return battleChara is ICharacter
+            ? battleChara.CurrentHp + GetObjectShield(battleChara)
+            : 0;
+    }
+
+    /// <summary>
+    /// Returns object's calculated effective HP as a percentage of Max HP, rounded down to the nearest whole number.
+    /// </summary>
+    /// <param name="battleChara"></param>
+    /// <returns>Effective HP percentage (0-100). Returns 0 if MaxHp is 0 or not an ICharacter.</returns>
+    public static int GetEffectiveHpPercent(this IBattleChara battleChara)
+    {
+        if (battleChara is not ICharacter character || character.MaxHp == 0)
+            return 0;
+
+        uint effectiveHp = character.CurrentHp + ObjectHelper.GetObjectShield(battleChara);
+        return (int)Math.Floor((float)effectiveHp / character.MaxHp * 100f);
     }
 
     /// <summary>
@@ -1271,11 +1352,6 @@ public static class ObjectHelper
     public static EnemyPositional FindEnemyPositional(this IBattleChara enemy)
     {
         if (enemy == null)
-        {
-            return EnemyPositional.None;
-        }
-
-        if (enemy is not IBattleChara)
         {
             return EnemyPositional.None;
         }

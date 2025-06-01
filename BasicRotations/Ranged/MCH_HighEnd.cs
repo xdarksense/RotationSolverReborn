@@ -94,6 +94,14 @@ public sealed class MCH_HighEnd : MachinistRotation
                 return true;
             }
         }
+
+        if (AutomatonQueenPvE.CanUse(out act))
+        {
+            if (CombatTime < 12 && Battery == 60)
+            {
+                return true;
+            }
+        }
         return base.EmergencyAbility(nextGCD, out act);
     }
 

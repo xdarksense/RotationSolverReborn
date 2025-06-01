@@ -269,7 +269,11 @@ internal static class StateUpdater
 
         if (DataCenter.Role == JobRole.Tank)
         {
-            bool movingHere = (float)DataCenter.NumberOfHostilesInRange / DataCenter.NumberOfHostilesInMaxRange > 0.3f;
+            bool movingHere = false;
+            if (DataCenter.NumberOfHostilesInMaxRange != 0)
+            {
+                movingHere = DataCenter.NumberOfHostilesInRange / DataCenter.NumberOfHostilesInMaxRange > 0.3f;
+            }
 
             int tarOnMeCount = 0;
             int attackedCount = 0;
@@ -285,7 +289,11 @@ internal static class StateUpdater
                 }
             }
 
-            bool attacked = (float)attackedCount / tarOnMeCount > 0.7f;
+            bool attacked = false;
+            if (tarOnMeCount != 0)
+            {
+                attacked = attackedCount / tarOnMeCount > 0.7f;
+            }
 
             if (tarOnMeCount >= Service.Config.AutoDefenseNumber
                 && Player.Object.GetHealthRatio() <= Service.Config.HealthForAutoDefense
