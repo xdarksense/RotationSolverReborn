@@ -27,7 +27,7 @@ internal class CooldownWindow() : CtrlWindow(nameof(CooldownWindow))
         foreach (IGrouping<string, IAction> pair in allGroupedActions)
         {
             // Manual filtering
-            List<IAction> showItems = new();
+            List<IAction> showItems = [];
             foreach (IAction a in pair)
             {
                 if (!a.IsInCooldown)
