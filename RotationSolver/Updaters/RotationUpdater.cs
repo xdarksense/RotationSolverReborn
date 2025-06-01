@@ -745,31 +745,39 @@ internal static class RotationUpdater
     {
         foreach (CustomRotationGroup customRotationGroup in CustomRotations)
         {
-            if (customRotationGroup.JobId != currentJob)
+            if (!customRotationGroup.ClassJobIds.Contains(currentJob))
             {
                 continue;
             }
 
-            if (!CustomRotationsLookup.TryGetValue(customRotationGroup.JobId, out Dictionary<CombatType, List<ICustomRotation>>? rotationsListByType))
+            // Add this group for every job in ClassJobIds
+            foreach (var job in customRotationGroup.ClassJobIds)
             {
-                rotationsListByType = new Dictionary<CombatType, List<ICustomRotation>> { { CombatType.PvE, new List<ICustomRotation>() }, { CombatType.PvP, new List<ICustomRotation>() } };
-                CustomRotationsLookup[customRotationGroup.JobId] = rotationsListByType;
-            }
-
-            foreach (Type rotationType in customRotationGroup.Rotations)
-            {
-                CombatType? comType = rotationType.GetCustomAttribute<RotationAttribute>()?.Type;
-                if (comType == null)
+                if (!CustomRotationsLookup.TryGetValue(job, out var rotationsListByType))
                 {
-                    continue;
-                }
-                var possibleRotation = GetRotation(rotationType);
-                if (possibleRotation == null)
+                    rotationsListByType = new Dictionary<CombatType, List<ICustomRotation>>
                 {
-                    continue;
+                    { CombatType.PvE, new List<ICustomRotation>() },
+                    { CombatType.PvP, new List<ICustomRotation>() }
+                };
+                    CustomRotationsLookup[job] = rotationsListByType;
                 }
 
-                rotationsListByType[(CombatType)comType].Add(possibleRotation);
+                foreach (Type rotationType in customRotationGroup.Rotations)
+                {
+                    CombatType? comType = rotationType.GetCustomAttribute<RotationAttribute>()?.Type;
+                    if (comType == null)
+                    {
+                        continue;
+                    }
+                    var possibleRotation = GetRotation(rotationType);
+                    if (possibleRotation == null)
+                    {
+                        continue;
+                    }
+
+                    rotationsListByType[(CombatType)comType].Add(possibleRotation);
+                }
             }
         }
     }

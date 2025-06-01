@@ -153,6 +153,11 @@ public partial class DutyRotation : IDisposable
     public static bool InCombat => DataCenter.InCombat;
 
     /// <summary>
+    /// Check if in combat.
+    /// </summary>
+    public static bool IsMoving => DataCenter.IsMoving;
+
+    /// <summary>
     /// This is the player.
     /// </summary>
     protected static IPlayerCharacter Player => ECommons.GameHelpers.Player.Object;

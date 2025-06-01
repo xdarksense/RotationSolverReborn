@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RebornRotations.Melee;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.21", Description = "Uses Lunar Solar Opener from The Balance")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.25", Description = "Uses Lunar Solar Opener from The Balance")]
 [SourceCode(Path = "main/BasicRotations/Melee/MNK_Default.cs")]
 [Api(4)]
 

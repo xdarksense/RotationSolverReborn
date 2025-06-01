@@ -590,6 +590,121 @@ public static class ObjectHelper
         return false;
     }
 
+    /// <summary>
+    /// List of NameIds that are immune to OC Slowga.
+    /// </summary>
+    public static uint[] IsOCSlowgaImmuneList { get; } =
+    {
+        13933,
+        13893,
+        13894,
+        13918,
+        13905,
+        13888,
+    };
+
+    /// <summary>
+    /// Check to see if target is immune to Slowga.
+    /// </summary>
+    public static bool IsOCSlowgaImmuneTarget(this IBattleChara battleChara)
+    {
+        return IsOCSlowgaImmuneList.Contains(battleChara.NameId);
+    }
+
+    /// <summary>
+    /// List of NameIds that are immune to OC Doom.
+    /// </summary>
+    public static uint[] IsOCDoomImmuneList { get; } =
+    {
+        13917,
+    };
+
+    /// <summary>
+    /// Check to see if target is immune to Phantom Doom.
+    /// </summary>
+    public static bool IsOCDoomImmuneTarget(this IBattleChara battleChara)
+    {
+        return IsOCDoomImmuneList.Contains(battleChara.NameId);
+    }
+
+    /// <summary>
+    /// List of NameIds that are immune to OC Stun.
+    /// </summary>
+    public static uint[] IsOCStunImmuneList { get; } =
+    {
+        13873,
+        13891,
+        13916,
+    };
+
+    /// <summary>
+    /// Check to see if target is immune to Stun.
+    /// </summary>
+    public static bool IsOCStunImmuneTarget(this IBattleChara battleChara)
+    {
+        return IsOCStunImmuneList.Contains(battleChara.NameId);
+    }
+
+    /// <summary>
+    /// List of NameIds that are immune to OC Freeze.
+    /// </summary>
+    public static uint[] IsOCFreezeImmuneList { get; } =
+    {
+        13876,
+        13917,
+        13916,
+    };
+
+    /// <summary>
+    /// Check to see if target is immune to Freeze.
+    /// </summary>
+    public static bool IsOCFreezeImmuneTarget(this IBattleChara battleChara)
+    {
+        return IsOCFreezeImmuneList.Contains(battleChara.NameId);
+    }
+
+    /// <summary>
+    /// List of NameIds that are immune to OC Blind.
+    /// </summary>
+    public static uint[] IsOCBlindImmuneList { get; } =
+    {
+        13931,
+        13874,
+        13932,
+        13933,
+        13893,
+        13894,
+    };
+
+    /// <summary>
+    /// Check to see if target is immune to Blind.
+    /// </summary>
+    public static bool IsOCBlindImmuneTarget(this IBattleChara battleChara)
+    {
+        return IsOCBlindImmuneList.Contains(battleChara.NameId);
+    }
+
+    /// <summary>
+    /// List of NameIds that are immune to OC Paralysis.
+    /// </summary>
+    public static uint[] IsOCParalysisImmuneList { get; } =
+    {
+        13931,
+        13874,
+        13932,
+        13933,
+        13917,
+        13916,
+    };
+
+    /// <summary>
+    /// Check to see if target is immune to Paralysis.
+    /// </summary>
+    public static bool IsOCParalysisImmuneTarget(this IBattleChara battleChara)
+    {
+        return IsOCParalysisImmuneList.Contains(battleChara.NameId);
+    }
+
     internal static unsafe uint GetNamePlateIcon(this IBattleChara battleChara)
     {
         return battleChara.Struct()->NamePlateIconId;

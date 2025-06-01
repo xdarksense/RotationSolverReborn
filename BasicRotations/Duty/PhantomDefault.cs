@@ -18,6 +18,11 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
+        if (VigilancePvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.EmergencyAbility(nextGCD, out act);
     }
 
@@ -81,12 +86,7 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
-        if (VigilancePvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (OccultSprintPvE.CanUse(out act))
+        if (!IsMoving && OccultSprintPvE.CanUse(out act))
         {
             return true;
         }
@@ -95,6 +95,12 @@ public sealed class PhantomDefault : PhantomRotation
         {
             return true;
         }
+
+        if (RingingRespitePvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.GeneralAbility(nextGCD, out act);
     }
 
@@ -132,6 +138,11 @@ public sealed class PhantomDefault : PhantomRotation
         //}
 
         if (BattleBellPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (StealPvE.CanUse(out act))
         {
             return true;
         }
@@ -365,18 +376,13 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
-        if (RingingRespitePvE.CanUse(out act))
-        {
-            return true;
-        }
-
         return base.DefenseSingleGCD(out act);
     }
 
     public override bool GeneralGCD(out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated))
+        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
         {
             return false;
         }
