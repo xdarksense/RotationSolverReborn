@@ -29,7 +29,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool InterruptAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated))
+        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
         {
             return false;
         }
@@ -50,7 +50,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool DispelAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated))
+        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
         {
             return false;
         }
@@ -66,7 +66,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated))
+        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
         {
             return false;
         }
@@ -96,18 +96,13 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
-        if (RingingRespitePvE.CanUse(out act))
-        {
-            return true;
-        }
-
         return base.GeneralAbility(nextGCD, out act);
     }
 
     public override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated))
+        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
         {
             return false;
         }
@@ -146,13 +141,19 @@ public sealed class PhantomDefault : PhantomRotation
         {
             return true;
         }
+
+        if (RingingRespitePvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.AttackAbility(nextGCD, out act);
     }
 
     public override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated))
+        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
         {
             return false;
         }
@@ -183,7 +184,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated))
+        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
         {
             return false;
         }
@@ -239,7 +240,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated))
+        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
         {
             return false;
         }
@@ -265,7 +266,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool HealAreaAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated))
+        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
         {
             return false;
         }
@@ -286,7 +287,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated))
+        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
         {
             return false;
         }
@@ -302,7 +303,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool MyInterruptGCD(out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated))
+        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
         {
             return false;
         }
@@ -318,7 +319,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool RaiseGCD(out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated))
+        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
         {
             return false;
         }
@@ -334,7 +335,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool DispelGCD(out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated))
+        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
         {
             return false;
         }
@@ -350,7 +351,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool HealSingleGCD(out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated))
+        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
         {
             return false;
         }
@@ -363,10 +364,31 @@ public sealed class PhantomDefault : PhantomRotation
         return base.HealSingleGCD(out act);
     }
 
+    public override bool HealAreaGCD(out IAction? act)
+    {
+        act = null;
+        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
+        {
+            return false;
+        }
+
+        if (SunbathPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (CloudyCaressPvE.CanUse(out act))
+        {
+            return true;
+        }   
+
+        return base.HealAreaGCD(out act);
+    }
+
     public override bool DefenseSingleGCD(out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated))
+        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
         {
             return false;
         }
@@ -377,6 +399,27 @@ public sealed class PhantomDefault : PhantomRotation
         }
 
         return base.DefenseSingleGCD(out act);
+    }
+
+    public override bool DefenseAreaGCD(out IAction? act)
+    {
+        act = null;
+        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
+        {
+            return false;
+        }
+
+        if (CloudyCaressPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (BlessedRainPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.DefenseAreaGCD(out act);
     }
 
     public override bool GeneralGCD(out IAction? act)
@@ -444,6 +487,17 @@ public sealed class PhantomDefault : PhantomRotation
         {
             return true;
         }
+
+        if (InCombat && AetherialGainPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (!InCombat && HastyMiragePvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.GeneralGCD(out act);
     }
 }

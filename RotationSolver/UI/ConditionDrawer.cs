@@ -85,18 +85,18 @@ internal static class ConditionDrawer
         }
     }
 
-    private static IEnumerable<MemberInfo> GetAllMethods(this Type? type, Func<Type, IEnumerable<MemberInfo>> getFunc)
+    private static HashSet<MemberInfo> GetAllMethods(this Type? type, Func<Type, HashSet<MemberInfo>> getFunc)
     {
         if (type == null || getFunc == null)
         {
-            return Array.Empty<MemberInfo>();
+            return [];
         }
 
         IEnumerable<MemberInfo> methods = getFunc(type);
         IEnumerable<MemberInfo> baseMethods = type.BaseType.GetAllMethods(getFunc);
 
         // Union without LINQ
-        HashSet<MemberInfo> set = new(methods);
+        HashSet<MemberInfo> set = [.. methods];
         foreach (MemberInfo m in baseMethods)
         {
             _ = set.Add(m);
@@ -107,31 +107,47 @@ internal static class ConditionDrawer
 
     public static bool DrawByteEnum<T>(string name, ref T value) where T : struct, Enum
     {
-        T[] allValues = Enum.GetValues<T>();
-        List<T> tempList = new();
-        foreach (T i in allValues)
-        {
-            if (i.GetAttribute<ObsoleteAttribute>() == null)
-            {
-                tempList.Add(i);
-            }
-        }
-        T[] values = tempList.ToArray();
+        // Use static cache for each enum type
+        var cache = EnumCache<T>.Instance;
+        int index = Array.IndexOf(cache.Values, value);
 
-        int index = Array.IndexOf(values, value);
-
-        string[] names = new string[values.Length];
-        for (int i = 0; i < values.Length; i++)
+        if (ImGuiHelper.SelectableCombo(name, cache.Names, ref index))
         {
-            names[i] = values[i].GetDescription();
-        }
-
-        if (ImGuiHelper.SelectableCombo(name, names, ref index))
-        {
-            value = values[index];
+            value = cache.Values[index];
             return true;
         }
         return false;
+    }
+
+    // Static cache for enum values and descriptions
+    private static class EnumCache<T> where T : struct, Enum
+    {
+        public static readonly EnumCacheData Instance = new();
+
+        public class EnumCacheData
+        {
+            public readonly T[] Values;
+            public readonly string[] Names;
+
+            public EnumCacheData()
+            {
+                var allValues = Enum.GetValues<T>();
+                var tempList = new List<T>(allValues.Length);
+                var nameList = new List<string>(allValues.Length);
+
+                foreach (var i in allValues)
+                {
+                    if (i.GetAttribute<ObsoleteAttribute>() == null)
+                    {
+                        tempList.Add(i);
+                        nameList.Add(i.GetDescription());
+                    }
+                }
+
+                Values = [.. tempList];
+                Names = [.. nameList];
+            }
+        }
     }
 
     public static bool DrawDragFloat2(ConfigUnitType type, string name, ref Vector2 value, string id, string name1, string name2)

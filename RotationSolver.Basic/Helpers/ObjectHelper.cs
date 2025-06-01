@@ -591,16 +591,50 @@ public static class ObjectHelper
     }
 
     /// <summary>
+    /// List of NameIds that Undead enemies in Occult Crecent.
+    /// </summary>
+    public static uint[] IsOCUndeadList { get; } =
+    {
+        13741, //Lifereaper
+        13924, //Armor
+        13922, //Ghost
+        13921, //Caoineag
+        13926, //Gourmand
+        13925, //Troubadour
+        13923, //Geshunpest
+        13927, //Dullahan
+
+    };
+
+    /// <summary>
+    /// Check to see if Occult Crecent target is Undead.
+    /// </summary>
+    public static bool IsOCUndeadTarget(this IBattleChara battleChara)
+    {
+        return IsOCSlowgaImmuneList.Contains(battleChara.NameId);
+    }
+
+    /// <summary>
     /// List of NameIds that are immune to OC Slowga.
     /// </summary>
     public static uint[] IsOCSlowgaImmuneList { get; } =
     {
-        13933,
-        13893,
-        13894,
-        13918,
-        13905,
-        13888,
+        13933, //Marolith
+        13893, //AnimatedDoll
+        13894, //AnimatedDoll
+        13905, //Meraevis
+        13888, //Triceratops
+
+        13918, //Diplocaulus
+
+        13936, //Zaratan
+        13902, //Cetus
+        13879, //Monk
+        13911, //Panther
+
+        13666, //Cloister Demon
+        13668, //Cloister Torch
+        13729, //Megaloknight
     };
 
     /// <summary>
@@ -616,7 +650,28 @@ public static class ObjectHelper
     /// </summary>
     public static uint[] IsOCDoomImmuneList { get; } =
     {
-        13917,
+        13893, //AnimatedDoll
+        13894, //AnimatedDoll
+        13917, //Sculpture
+        13888, //Triceratops
+        13887, //Rosebear
+        13935, //Harpuia
+        13886, //Aetherscab
+        13912, //Havoc
+
+        13937, //Apa
+        13743, //Goobbue
+        13878, //Goobbue
+        13892, //Dirty Eye
+        13898, //Blackguard
+        13901, //Demon Pawn
+        13745, //Headstone
+        13881, //Headstone
+        13908, //Blood Demon
+
+        13666, //Cloister Demon
+        13668, //Cloister Torch
+        13729, //Megaloknight
     };
 
     /// <summary>
@@ -632,9 +687,22 @@ public static class ObjectHelper
     /// </summary>
     public static uint[] IsOCStunImmuneList { get; } =
     {
-        13873,
-        13891,
-        13916,
+        13873, //Tormentor
+        13891, //LionStatant
+        13916, //Brachiosaur
+        13887, //Rosebear
+        13895, //Byblos
+        13912, //Havoc
+
+        13937, //Apa
+        13928, //Crecent Golem
+        13745, //Headstone
+        13881, //Headstone
+        13879, //Monk
+
+        13666, //Cloister Demon
+        13668, //Cloister Torch
+        13729, //Megaloknight
     };
 
     /// <summary>
@@ -650,9 +718,24 @@ public static class ObjectHelper
     /// </summary>
     public static uint[] IsOCFreezeImmuneList { get; } =
     {
-        13876,
-        13917,
-        13916,
+        13876, //Fan
+        13917, //Sculpture
+        13916, //Brachiosaur
+        13887, //Rosebear
+        13744, //Taurus
+        13880, //Taurus
+        13909, //Dahak
+
+        13919, //Zaghnal
+        13934, //Uragnite
+        13898, //Blackguard
+        13901, //Demon Pawn
+        13745, //Headstone
+        13881, //Headstone
+
+        13666, //Cloister Demon
+        13668, //Cloister Torch
+        13729, //Megaloknight
     };
 
     /// <summary>
@@ -668,12 +751,22 @@ public static class ObjectHelper
     /// </summary>
     public static uint[] IsOCBlindImmuneList { get; } =
     {
-        13931,
-        13874,
-        13932,
-        13933,
-        13893,
-        13894,
+        13931, //Chaochu
+        13874, //Snapweed
+        13932, //Leshy
+        13933, //Marolith
+        13893, //AnimatedDoll
+        13894, //AnimatedDoll
+        13887, //Rosebear
+
+        13930, //Flame
+        13928, //Crecent Golem
+        13745, //Headstone
+        13881, //Headstone
+
+        13666, //Cloister Demon
+        13668, //Cloister Torch
+        13729, //Megaloknight
     };
 
     /// <summary>
@@ -689,12 +782,28 @@ public static class ObjectHelper
     /// </summary>
     public static uint[] IsOCParalysisImmuneList { get; } =
     {
-        13931,
-        13874,
-        13932,
-        13933,
-        13917,
-        13916,
+        13931, //Chaochu
+        13874, //Snapweed
+        13932, //Leshy
+        13933, //Marolith
+        13917, //Sculpture
+        13916, //Brachiosaur
+        13871, //Foper
+        13909, //Dahak
+
+        13930, //Flame
+        13919, //Zaghnal
+        13928, //Crecent Golem
+        13904, //Bachelor
+        13898, //Blackguard
+        13745, //Headstone
+        13881, //Headstone
+        13879, //Monk
+        13911, //Panther
+
+        13666, //Cloister Demon
+        13668, //Cloister Torch
+        13729, //Megaloknight
     };
 
     /// <summary>
@@ -741,21 +850,16 @@ public static class ObjectHelper
             return false;
         }
 
-        if (battleChara is not IBattleChara b)
-        {
-            return false;
-        }
-
         // Ensure the IBattleChara object is valid before accessing its properties
         unsafe
         {
-            if (b.Struct() == null)
+            if (battleChara.Struct() == null)
             {
                 return false;
             }
         }
 
-        bool baseCheck = b.IsCasting && b.IsCastInterruptible && b.TotalCastTime >= 2;
+        bool baseCheck = battleChara.IsCasting && battleChara.IsCastInterruptible && battleChara.TotalCastTime >= 2;
         if (!baseCheck)
         {
             return false;
@@ -766,17 +870,17 @@ public static class ObjectHelper
             return false;
         }
 
-        if (_effectRangeCheck.TryGetValue(b.CastActionId, out bool check))
+        if (_effectRangeCheck.TryGetValue(battleChara.CastActionId, out bool check))
         {
             return check;
         }
 
-        Lumina.Excel.Sheets.Action act = Service.GetSheet<Lumina.Excel.Sheets.Action>().GetRow(b.CastActionId);
+        Lumina.Excel.Sheets.Action act = Service.GetSheet<Lumina.Excel.Sheets.Action>().GetRow(battleChara.CastActionId);
         return act.RowId == 0
-            ? (_effectRangeCheck[b.CastActionId] = false)
+            ? (_effectRangeCheck[battleChara.CastActionId] = false)
             : act.CastType == 3 || act.CastType == 4 || (act.EffectRange > 0 && act.EffectRange < 8)
-            ? (_effectRangeCheck[b.CastActionId] = false)
-            : (_effectRangeCheck[b.CastActionId] = true);
+            ? (_effectRangeCheck[battleChara.CastActionId] = false)
+            : (_effectRangeCheck[battleChara.CastActionId] = true);
     }
 
     internal static bool IsDummy(this IBattleChara battleChara)
@@ -914,7 +1018,7 @@ public static class ObjectHelper
     }
 
     /// <summary>
-    /// Is target COD Boss immune.
+    /// Is target Cinder Drift Boss immune.
     /// </summary>
     /// <param name="battleChara">the object.</param>
     /// <returns></returns>
@@ -949,7 +1053,7 @@ public static class ObjectHelper
     }
 
     /// <summary>
-    /// Is target COD Boss immune.
+    /// Is target Resistance immune.
     /// </summary>
     /// <param name="battleChara">the object.</param>
     /// <returns></returns>
@@ -985,7 +1089,7 @@ public static class ObjectHelper
     }
 
     /// <summary>
-    /// Is target COD Boss immune.
+    /// Is target Omega Boss immune.
     /// </summary>
     /// <param name="battleChara">the object.</param>
     /// <returns></returns>
@@ -1024,7 +1128,7 @@ public static class ObjectHelper
     }
 
     /// <summary>
-    /// Is target COD Boss immune.
+    /// Is target Limitless Blue immune.
     /// </summary>
     /// <param name="battleChara">the object.</param>
     /// <returns></returns>
@@ -1440,22 +1544,17 @@ public static class ObjectHelper
             return 0;
         }
 
-        if (battleChara is not IBattleChara b)
-        {
-            return 0;
-        }
-
-        if (DataCenter.RefinedHP.TryGetValue(b.GameObjectId, out float hp))
+        if (DataCenter.RefinedHP.TryGetValue(battleChara.GameObjectId, out float hp))
         {
             return hp;
         }
 
-        if (b.MaxHp == 0)
+        if (battleChara.MaxHp == 0)
         {
             return 0; // Avoid division by zero
         }
 
-        return (float)b.CurrentHp / b.MaxHp;
+        return (float)battleChara.CurrentHp / battleChara.MaxHp;
     }
 
     /// <summary>
@@ -1512,11 +1611,6 @@ public static class ObjectHelper
             return Vector3.Zero;
         }
 
-        if (battleChara is not IBattleChara)
-        {
-            return Vector3.Zero;
-        }
-
         float rotation = battleChara.Rotation;
         return new Vector3((float)Math.Sin(rotation), 0, (float)Math.Cos(rotation));
     }
@@ -1549,11 +1643,6 @@ public static class ObjectHelper
     public static float DistanceToPlayer(this IBattleChara battleChara)
     {
         if (battleChara == null)
-        {
-            return float.MaxValue;
-        }
-
-        if (battleChara is not IBattleChara)
         {
             return float.MaxValue;
         }

@@ -732,6 +732,7 @@ public partial class DutyRotation
     {
         setting.ActionCheck = () => SamuraiLevel >= 2;
         setting.TargetType = TargetType.Self;
+        setting.StatusNeed = [StatusID.Shirahadori];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -773,7 +774,7 @@ public partial class DutyRotation
     static partial void ModifyBattleBellPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => GeomancerLevel >= 1;
-        setting.TargetType = TargetType.Self;
+        setting.TargetType = TargetType.BeAttacked;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -787,7 +788,92 @@ public partial class DutyRotation
     static partial void ModifyWeatherPvE(ref ActionSetting setting)
     {
         //TODO: Implement Weather logic, will need bespoke targeting
+        //this isn't a real action
+    }
+
+    /// <summary>
+    /// Modifies the settings for Weather.
+    /// </summary>
+    /// <param name="setting">The action setting to modify.</param>
+    static partial void ModifySunbathPvE(ref ActionSetting setting)
+    {
+        //TODO: Implement Weather logic, will need bespoke targeting
         setting.ActionCheck = () => GeomancerLevel >= 2;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    /// <summary>
+    /// Modifies the settings for Weather.
+    /// </summary>
+    /// <param name="setting">The action setting to modify.</param>
+    static partial void ModifyCloudyCaressPvE(ref ActionSetting setting)
+    {
+        //TODO: Implement Weather logic, will need bespoke targeting
+        setting.ActionCheck = () => GeomancerLevel >= 2;
+        setting.StatusProvide = [StatusID.CloudyCaress];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    /// <summary>
+    /// Modifies the settings for Weather.
+    /// </summary>
+    /// <param name="setting">The action setting to modify.</param>
+    static partial void ModifyBlessedRainPvE(ref ActionSetting setting)
+    {
+        //TODO: Implement Weather logic, will need bespoke targeting
+        setting.ActionCheck = () => GeomancerLevel >= 2;
+        setting.StatusProvide = [StatusID.BlessedRain];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    /// <summary>
+    /// Modifies the settings for Weather.
+    /// </summary>
+    /// <param name="setting">The action setting to modify.</param>
+    static partial void ModifyMistyMiragePvE(ref ActionSetting setting)
+    {
+        //TODO: Implement Weather logic, will need bespoke targeting
+        setting.ActionCheck = () => GeomancerLevel >= 2;
+        setting.StatusProvide = [StatusID.MistyMirage];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    /// <summary>
+    /// Modifies the settings for Weather.
+    /// </summary>
+    /// <param name="setting">The action setting to modify.</param>
+    static partial void ModifyHastyMiragePvE(ref ActionSetting setting)
+    {
+        //TODO: Implement Weather logic, will need bespoke targeting
+        setting.ActionCheck = () => GeomancerLevel >= 2;
+        setting.StatusProvide = [StatusID.HastyMirage];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    /// <summary>
+    /// Modifies the settings for Weather.
+    /// </summary>
+    /// <param name="setting">The action setting to modify.</param>
+    static partial void ModifyAetherialGainPvE(ref ActionSetting setting)
+    {
+        //TODO: Implement Weather logic, will need bespoke targeting
+        setting.ActionCheck = () => GeomancerLevel >= 2;
+        setting.StatusProvide = [StatusID.AetherialGain];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
