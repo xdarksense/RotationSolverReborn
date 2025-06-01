@@ -1,4 +1,5 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
@@ -95,10 +96,15 @@ internal static class DataCenter
     internal static Dictionary<ulong, uint> ApplyStatus { get; set; } = [];
     internal static uint MPGain { get; set; }
 
+    #region Territory Info Tracking
+
     public static TerritoryInfo? Territory { get; set; }
+    public static ushort TerritoryID => Svc.ClientState.TerritoryType;
 
     public static bool IsPvP => Territory?.IsPvP ?? false;
+
     public static bool IsInDuty => Svc.Condition[ConditionFlag.BoundByDuty] || Svc.Condition[ConditionFlag.BoundByDuty56];
+
     public static bool IsInAllianceRaid
     {
         get
@@ -110,6 +116,22 @@ internal static class DataCenter
             return allianceTerritoryIds.Contains(TerritoryID);
         }
     }
+
+    public static bool IsInUCoB => TerritoryID == 733;
+    public static bool IsInUwU => TerritoryID == 777;
+    public static bool IsInTEA => TerritoryID == 887;
+    public static bool IsInDSR => TerritoryID == 968;
+    public static bool IsInTOP => TerritoryID == 1122;
+    public static bool IsInFRU => TerritoryID == 1238;
+    public static bool IsInCOD => TerritoryID == 1241;
+
+    public static bool IsInTerritory(ushort territoryId)
+    {
+        return TerritoryID == territoryId;
+    }
+
+    #endregion
+
     #region Bozja
 
     /// <summary>
@@ -154,15 +176,6 @@ internal static class DataCenter
     public static bool IsInForkedTower => Territory?.ContentType == TerritoryContentType.OccultCrescent 
         && Player.Object.HasStatus(false, StatusID.DutiesAsAssigned_4228);
     #endregion
-
-    public static ushort TerritoryID => Svc.ClientState.TerritoryType;
-    public static bool IsInUCoB => TerritoryID == 733;
-    public static bool IsInUwU => TerritoryID == 777;
-    public static bool IsInTEA => TerritoryID == 887;
-    public static bool IsInDSR => TerritoryID == 968;
-    public static bool IsInTOP => TerritoryID == 1122;
-    public static bool IsInFRU => TerritoryID == 1238;
-    public static bool IsInCOD => TerritoryID == 1241;
 
 
     public static AutoStatus MergedStatus => AutoStatus | CommandStatus;
@@ -295,7 +308,7 @@ internal static class DataCenter
     /// <summary>
     /// Returns the time remaining until the next GCD (Global Cooldown) after considering the current animation lock.
     /// </summary>
-    public static float NextAbilityToNextGCD => DefaultGCDRemain - Player.AnimationLock;
+    public static float NextAbilityToNextGCD => DefaultGCDRemain - AnimationLock;
 
     /// <summary>
     /// Returns the total duration of the default GCD.

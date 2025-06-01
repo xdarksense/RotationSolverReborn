@@ -349,9 +349,6 @@ namespace RotationSolver.Data
         [Description("Others")]
         ConfigWindow_Basic_Others,
 
-        [Description("The ping time.\nIn RSR, this means the time from sending the action request to receiving the success message from the server.")]
-        ConfigWindow_Basic_Ping,
-
         [Description("The animation lock time for individual actions. For example, 0.6s.")]
         ConfigWindow_Basic_AnimationLockTime,
 
