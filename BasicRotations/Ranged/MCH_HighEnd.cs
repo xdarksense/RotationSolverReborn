@@ -1,6 +1,6 @@
 namespace RebornRotations.Ranged;
 
-[Rotation("High End", CombatType.PvE, GameVersion = "7.21")]
+[Rotation("High End", CombatType.PvE, GameVersion = "7.25")]
 [SourceCode(Path = "main/BasicRotations/Ranged/MCH_HighEnd.cs")]
 [Api(4)]
 public sealed class MCH_HighEnd : MachinistRotation

@@ -12,6 +12,7 @@ namespace RotationSolver.Updaters;
 
 internal static class MajorUpdater
 {
+    private static TimeSpan _timeSinceUpdate = TimeSpan.Zero;
     public static bool IsValid
     {
         get
@@ -52,6 +53,16 @@ internal static class MajorUpdater
     }
     private static void RSRUpdate(IFramework framework)
     {
+        _timeSinceUpdate += framework.UpdateDelta;
+        if (_timeSinceUpdate < TimeSpan.FromSeconds(Service.Config.MinUpdatingTime))
+        {
+            return;
+        }
+        else
+        {
+            _timeSinceUpdate = TimeSpan.Zero;
+        }
+
         if (Service.Config.TeachingMode)
         {
             try

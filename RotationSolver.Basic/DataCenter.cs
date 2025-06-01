@@ -47,7 +47,7 @@ internal static class DataCenter
         {
             if (ConditionSets == null || ConditionSets.Length == 0)
             {
-                ConditionSets = new[] { new MajorConditionValue() };
+                ConditionSets = [new MajorConditionValue()];
             }
 
             int index = Service.Config.ActionSequencerIndex;

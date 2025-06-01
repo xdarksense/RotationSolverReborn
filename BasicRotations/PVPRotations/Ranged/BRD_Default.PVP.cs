@@ -1,6 +1,6 @@
 ﻿namespace RebornRotations.PVPRotations.Ranged;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.21")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.25")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Ranged/BRD_Default.PvP.cs")]
 [Api(4)]
 public sealed class BRD_DefaultPvP : BardRotation
@@ -13,7 +13,7 @@ public sealed class BRD_DefaultPvP : BardRotation
     [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
     public bool RespectGuard { get; set; } = true;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Warden's Paean on other players")]
+    [RotationConfig(CombatType.PvP, Name = "Use Warden's Paean on other players")]
     public bool BRDEsuna { get; set; } = true;
     #endregion
 

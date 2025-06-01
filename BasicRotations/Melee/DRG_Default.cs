@@ -1,6 +1,6 @@
 namespace RebornRotations.Melee;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.21")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.25")]
 [SourceCode(Path = "main/BasicRotations/Melee/DRG_Default.cs")]
 [Api(4)]
 
@@ -54,42 +54,55 @@ public sealed class DRG_Default : DragoonRotation
     {
         if (IsBurst && InCombat)
         {
-            bool lifeSurgeReady = ((Player.HasStatus(true, StatusID.BattleLitany) || Player.HasStatus(true, StatusID.LanceCharge)
-            || LOTDEndAfter(1000)) && nextGCD.IsTheSameTo(true, HeavensThrustPvE, DrakesbanePvE))
-            || (Player.HasStatus(true, StatusID.BattleLitany) && Player.HasStatus(true, StatusID.LanceCharge) && LOTDEndAfter(1000) && nextGCD.IsTheSameTo(true, ChaoticSpringPvE, LanceBarragePvE, WheelingThrustPvE, FangAndClawPvE))
-            || (nextGCD.IsTheSameTo(true, HeavensThrustPvE, DrakesbanePvE) && (LanceChargePvE.IsInCooldown || BattleLitanyPvE.IsInCooldown));
+            bool lifeSurgeReady =
+                ((Player.HasStatus(true, StatusID.BattleLitany) || Player.HasStatus(true, StatusID.LanceCharge) || LOTDEndAfter(1000))
+                    && nextGCD.IsTheSameTo(true, HeavensThrustPvE, DrakesbanePvE))
+                || (Player.HasStatus(true, StatusID.BattleLitany)
+                    && Player.HasStatus(true, StatusID.LanceCharge)
+                    && LOTDEndAfter(1000)
+                    && nextGCD.IsTheSameTo(true, ChaoticSpringPvE, LanceBarragePvE, WheelingThrustPvE, FangAndClawPvE))
+                || (nextGCD.IsTheSameTo(true, HeavensThrustPvE, DrakesbanePvE)
+                    && (LanceChargePvE.IsInCooldown || BattleLitanyPvE.IsInCooldown));
 
-            if ((!BattleLitanyPvE.Cooldown.ElapsedAfter(60) || !BattleLitanyPvE.EnoughLevel) && LanceChargePvE.CanUse(out act))
-            {
-                return true;
-            }
-
-            if (Player.HasStatus(true, StatusID.LanceCharge) && BattleLitanyPvE.CanUse(out act))
-            {
-                return true;
-            }
-
-            if (((Player.HasStatus(true, StatusID.BattleLitany) || Player.HasStatus(true, StatusID.LanceCharge) || LOTDEndAfter(1000)) && nextGCD.IsTheSameTo(true, HeavensThrustPvE, DrakesbanePvE))
-            || (Player.HasStatus(true, StatusID.BattleLitany) && Player.HasStatus(true, StatusID.LanceCharge) && LOTDEndAfter(1000) && !HeavensThrustPvE.EnoughLevel && !DrakesbanePvE.EnoughLevel && nextGCD.IsTheSameTo(true, ChaoticSpringPvE, LanceBarragePvE, WheelingThrustPvE, FangAndClawPvE))
-            || (nextGCD.IsTheSameTo(true, HeavensThrustPvE, DrakesbanePvE) && (LanceChargePvE.IsInCooldown || BattleLitanyPvE.IsInCooldown)))
-            {
-                if (LifeSurgePvE.CanUse(out act, usedUp: true))
+            if ((!BattleLitanyPvE.Cooldown.ElapsedAfter(60) || !BattleLitanyPvE.EnoughLevel) 
+                && LanceChargePvE.CanUse(out act))
                 {
                     return true;
                 }
-            }
+
+            if (Player.HasStatus(true, StatusID.LanceCharge) && BattleLitanyPvE.CanUse(out act))
+                {
+                    return true;
+                }
+
+            if (((Player.HasStatus(true, StatusID.BattleLitany) || Player.HasStatus(true, StatusID.LanceCharge) || LOTDEndAfter(1000)) 
+                && nextGCD.IsTheSameTo(true, HeavensThrustPvE, DrakesbanePvE))
+                || (Player.HasStatus(true, StatusID.BattleLitany) 
+                    && Player.HasStatus(true, StatusID.LanceCharge)
+                    && LOTDEndAfter(1000)
+                    && !HeavensThrustPvE.EnoughLevel
+                    && !DrakesbanePvE.EnoughLevel
+                    && nextGCD.IsTheSameTo(true, ChaoticSpringPvE, LanceBarragePvE, WheelingThrustPvE, FangAndClawPvE))
+                || (nextGCD.IsTheSameTo(true, HeavensThrustPvE, DrakesbanePvE)
+                    && (LanceChargePvE.IsInCooldown || BattleLitanyPvE.IsInCooldown)))
+                    {
+                        if (LifeSurgePvE.CanUse(out act, usedUp: true))
+                        {
+                            return true;
+                        }
+                    }
 
             if (lifeSurgeReady
                 || (!DisembowelPvE.EnoughLevel && nextGCD.IsTheSameTo(true, VorpalThrustPvE))
                 || (!FullThrustPvE.EnoughLevel && nextGCD.IsTheSameTo(true, VorpalThrustPvE, DisembowelPvE))
                 || (!LanceChargePvE.EnoughLevel && nextGCD.IsTheSameTo(true, DisembowelPvE, FullThrustPvE))
                 || (!BattleLitanyPvE.EnoughLevel && nextGCD.IsTheSameTo(true, ChaosThrustPvE, FullThrustPvE)))
-            {
-                if (LifeSurgePvE.CanUse(out act, usedUp: true))
-                {
-                    return true;
-                }
-            }
+                    {
+                        if (LifeSurgePvE.CanUse(out act, usedUp: true))
+                        {
+                            return true;
+                        }
+                    }
         }
 
         return base.EmergencyAbility(nextGCD, out act);
