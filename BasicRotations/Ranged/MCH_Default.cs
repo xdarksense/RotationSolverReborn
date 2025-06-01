@@ -1,6 +1,6 @@
 namespace RebornRotations.Ranged;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.21")]
+[Rotation("Default", CombatType.PvE, GameVersion = "7.25")]
 [SourceCode(Path = "main/BasicRotations/Ranged/MCH_Default.cs")]
 [Api(4)]
 public sealed class MCH_Default : MachinistRotation

@@ -301,6 +301,7 @@ public partial class DutyRotation
     static partial void ModifyOccultSlowgaPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => TimeMageLevel >= 1;
+        setting.TargetStatusProvide = [StatusID.Slow_3493];
         setting.TargetType = TargetType.PhantomMob;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -800,6 +801,7 @@ public partial class DutyRotation
     static partial void ModifyRingingRespitePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => GeomancerLevel >= 3;
+        setting.TargetType = TargetType.BeAttacked;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

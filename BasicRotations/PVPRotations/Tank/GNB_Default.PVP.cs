@@ -1,6 +1,6 @@
 ﻿namespace RebornRotations.PVPRotations.Tank;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.21")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.25")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Tank/GNB_Default.PvP.cs")]
 [Api(4)]
 public sealed class GNB_DefaultPvP : GunbreakerRotation
