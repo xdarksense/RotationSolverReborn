@@ -16,7 +16,7 @@ namespace RotationSolver.IPC
         /// </summary>
         /// <param name="param">The parameter for the test.</param>
         [EzIPC]
-        public void Test(string param)
+        public static void Test(string param)
         {
             PluginLog.Debug($"IPC Test! Param:{param}");
         }
@@ -26,7 +26,7 @@ namespace RotationSolver.IPC
         /// </summary>
         /// <param name="nameId">The name ID to add.</param>
         [EzIPC]
-        public void AddPriorityNameID(uint nameId)
+        public static void AddPriorityNameID(uint nameId)
         {
             if (DataCenter.PrioritizedNameIds != null)
             {
@@ -44,7 +44,7 @@ namespace RotationSolver.IPC
         /// </summary>
         /// <param name="nameId">The name ID to remove.</param>
         [EzIPC]
-        public void RemovePriorityNameID(uint nameId)
+        public static void RemovePriorityNameID(uint nameId)
         {
             if (DataCenter.PrioritizedNameIds != null)
             {
@@ -69,7 +69,7 @@ namespace RotationSolver.IPC
         /// </summary>
         /// <param name="nameId">The name ID to add.</param>
         [EzIPC]
-        public void AddBlacklistNameID(uint nameId)
+        public static void AddBlacklistNameID(uint nameId)
         {
             if (DataCenter.BlacklistedNameIds != null)
             {
@@ -87,7 +87,7 @@ namespace RotationSolver.IPC
         /// </summary>
         /// <param name="nameId">The name ID to remove.</param>
         [EzIPC]
-        public void RemoveBlacklistNameID(uint nameId)
+        public static void RemoveBlacklistNameID(uint nameId)
         {
             if (DataCenter.BlacklistedNameIds != null)
             {
@@ -112,7 +112,7 @@ namespace RotationSolver.IPC
         /// </summary>
         /// <param name="stateCommand">The state command to change the operating mode.</param>
         [EzIPC]
-        public void ChangeOperatingMode(StateCommandType stateCommand)
+        public static void ChangeOperatingMode(StateCommandType stateCommand)
         {
             RSCommands.UpdateState(stateCommand, (JobRole)DataCenter.Job);
             PluginLog.Debug($"IPC ChangeOperatingMode was called. StateCommand:{stateCommand}");
@@ -123,7 +123,7 @@ namespace RotationSolver.IPC
         /// </summary>
         /// <param name="specialCommand">The special command to trigger the special state.</param>
         [EzIPC]
-        public void TriggerSpecialState(SpecialCommandType specialCommand)
+        public static void TriggerSpecialState(SpecialCommandType specialCommand)
         {
             DataCenter.SpecialType = specialCommand;
             PluginLog.Debug($"IPC TriggerSpecialState was called. SpecialCommand:{specialCommand}");

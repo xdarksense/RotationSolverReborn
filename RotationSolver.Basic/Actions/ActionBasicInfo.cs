@@ -172,7 +172,7 @@ public readonly struct ActionBasicInfo
             return false;
         }
 
-        if (IsLimitBreak)
+        if (IsLimitBreak && !DataCenter.IsPvP)
         {
             return true;
         }

@@ -233,6 +233,7 @@ public static class ObjectHelper
         return battleChara.GetEventType() == EventHandlerContent.PublicContentDirector;
     }
 
+    // This exists because OC CEs can often have a large amount of players in them, and if you are not on AllTargetsCanAttack the mobs target may despawn due to object limit
     internal static bool IsOccultCEMob(this IBattleChara battleChara)
     {
         if (battleChara == null)
@@ -499,6 +500,11 @@ public static class ObjectHelper
             return true;
         }
 
+        if (battleChara.IsOccultCEMob())
+        {
+            return true;
+        }
+
         // MCH prio targeting for Wildfire
         if (Player.Job == Job.MCH && (battleChara.HasStatus(true, StatusID.Wildfire) || battleChara.HasStatus(true, StatusID.Wildfire_1323)))
         {
@@ -573,9 +579,7 @@ public static class ObjectHelper
             || battleChara.NameId == 6738
             || battleChara.NameId == 8145
             || battleChara.NameId == 10259
-            || battleChara.NameId == 12704
-            || battleChara.NameId == 13668
-            || battleChara.NameId == 13815)
+            || battleChara.NameId == 12704)
         {
             return true;
         }
@@ -584,8 +588,6 @@ public static class ObjectHelper
         //8145 Root in Dohn Meg boss 2
         //10259 Cinduruva in The Tower of Zot
         //12704 Crystalline Debris
-        //13668 Mob in Calamity Unbound CE
-        //13668 Mob in With Extreme Prejudice CE
 
         return false;
     }
