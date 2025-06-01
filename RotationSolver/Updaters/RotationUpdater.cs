@@ -2,7 +2,6 @@
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
 using ECommons.Logging;
-using ExCSS;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Rotations.Duties;
 using RotationSolver.Data;
@@ -15,6 +14,8 @@ internal static class RotationUpdater
 {
     internal record CustomRotationGroup(Job JobId, Job[] ClassJobIds, Type[] Rotations);
     internal static SortedList<JobRole, CustomRotationGroup[]> CustomRotationsDict { get; private set; } = [];
+
+    internal static Dictionary<Job, Dictionary<CombatType, List<ICustomRotation>>> CustomRotationsLookup { get; private set; } = [];
 
     internal static CustomRotationGroup[] CustomRotations { get; set; } = [];
     internal static SortedList<uint, Type[]> DutyRotations { get; set; } = [];
@@ -334,6 +335,7 @@ internal static class RotationUpdater
                 rotations));
         }
 
+        CustomRotationsLookup = []; // CustomRotations aren't disposed or we'd want to loop through and dispose them
         return [.. result];
     }
 
@@ -667,86 +669,108 @@ internal static class RotationUpdater
 
     private static void UpdateCustomRotation()
     {
-        if (Player.Object == null)
+        if (Player.Object == null || CustomRotations.Length < 22) // If we haven't loaded rotations, don't bother calling this and ultimately clearing everything; wait for it to load and try again
         {
             return;
         }
 
-        Job nowJob = (Job)Player.Object.ClassJob.RowId;
-        foreach (CustomRotationGroup group in CustomRotations)
+        Job nowJob = Player.Job;
+
+        if (!CustomRotationsLookup.TryGetValue(nowJob, out Dictionary<CombatType, List<ICustomRotation>>? validCustomRotations))
         {
-            if (!group.ClassJobIds.Contains(nowJob))
+            InitReferenceDict(nowJob);
+        }
+        if (CustomRotationsLookup.TryGetValue(nowJob, out validCustomRotations)) // Because default rotations exist, this *should* always have something; if not, no rotations
+        {
+            if (validCustomRotations.Count == 0) // We'll still check
             {
-                continue;
+                PluginLog.Warning($"No valid rotations found for {nowJob}");
+                return;
             }
 
-            Type? rotation = GetChosenRotation(group);
-
-            if (rotation != DataCenter.CurrentRotation?.GetType())
+            CombatType curCombatType = DataCenter.IsPvP ? CombatType.PvP : CombatType.PvE;
+            if (validCustomRotations.TryGetValue(curCombatType, out List<ICustomRotation>? validCustomRotationsList))
             {
-                ICustomRotation? instance = GetRotation(rotation);
-                if (instance == null)
+                string desiredRotationName = DataCenter.IsPvP ? Service.Config.PvPRotationChoice : Service.Config.RotationChoice;
+
+                // Check if we have a matching rotation for the config, or use the first rotation which should be our default
+                ICustomRotation rotation = validCustomRotationsList[0];
+                foreach (var possibleRotation in validCustomRotationsList)
                 {
-#if DEBUG
-                    PluginLog.Error($"Failed to create instance for rotation: {rotation?.Name}");
-#endif
-                    continue;
+                    if (possibleRotation.GetType().FullName == desiredRotationName)
+                    {
+                        rotation = possibleRotation;
+                        break;
+                    }
                 }
 
-                instance.OnTerritoryChanged();
-                DataCenter.CurrentRotation = instance;
-            }
+                //If the rotation has changed, perform a clear
+                if (rotation != DataCenter.CurrentRotation)
+                {
+                    rotation.OnTerritoryChanged();
+                    DataCenter.CurrentRotation = rotation;
+                    CurrentRotationActions = DataCenter.CurrentRotation?.AllActions ?? [];
+                }
 
-            CurrentRotationActions = DataCenter.CurrentRotation?.AllActions ?? Array.Empty<IAction>();
-            return;
+                return;
+            }
         }
 
         CustomRotation.MoveTarget = null;
         DataCenter.CurrentRotation = null;
         CurrentRotationActions = [];
+    }
 
-        static ICustomRotation? GetRotation(Type? t)
+    private static ICustomRotation? GetRotation(Type? t)
+    {
+        if (t == null)
         {
-            if (t == null)
-            {
-                return null;
-            }
-
-            try
-            {
-                return (ICustomRotation?)Activator.CreateInstance(t);
-            }
-            catch (Exception)
-            {
-#if DEBUG
-                PluginLog.Error($"Failed to create the rotation: {t.Name}");
-#endif
-                return null;
-            }
+            return null;
         }
 
-        static Type? GetChosenRotation(CustomRotationGroup group)
+        try
         {
-            bool isPvP = DataCenter.IsPvP;
+            return (ICustomRotation?)Activator.CreateInstance(t);
+        }
+        catch (Exception)
+        {
+#if DEBUG
+            PluginLog.Error($"Failed to create the rotation: {t.Name}");
+#endif
+            return null;
+        }
+    }
 
-            List<Type> filteredRotations = [];
-            foreach (var r in group.Rotations)
+    private static void InitReferenceDict(Job currentJob)
+    {
+        foreach (CustomRotationGroup customRotationGroup in CustomRotations)
+        {
+            if (customRotationGroup.JobId != currentJob)
             {
-                RotationAttribute? rot = r.GetCustomAttribute<RotationAttribute>();
-                if (rot == null)
+                continue;
+            }
+
+            if (!CustomRotationsLookup.TryGetValue(customRotationGroup.JobId, out Dictionary<CombatType, List<ICustomRotation>>? rotationsListByType))
+            {
+                rotationsListByType = new Dictionary<CombatType, List<ICustomRotation>> { { CombatType.PvE, new List<ICustomRotation>() }, { CombatType.PvP, new List<ICustomRotation>() } };
+                CustomRotationsLookup[customRotationGroup.JobId] = rotationsListByType;
+            }
+
+            foreach (Type rotationType in customRotationGroup.Rotations)
+            {
+                CombatType? comType = rotationType.GetCustomAttribute<RotationAttribute>()?.Type;
+                if (comType == null)
+                {
+                    continue;
+                }
+                var possibleRotation = GetRotation(rotationType);
+                if (possibleRotation == null)
                 {
                     continue;
                 }
 
-                CombatType type = rot.Type;
-                if (isPvP ? type.HasFlag(CombatType.PvP) : type.HasFlag(CombatType.PvE))
-                {
-                    filteredRotations.Add(r);
-                }
+                rotationsListByType[(CombatType)comType].Add(possibleRotation);
             }
-
-            string name = isPvP ? Service.Config.PvPRotationChoice : Service.Config.RotationChoice;
-            return GetChosenType(filteredRotations, name);
         }
     }
 
