@@ -314,6 +314,27 @@ public partial class CustomRotation
     [Description("The state of manual. True for manual.")]
     public static bool IsManual => DataCenter.IsManual;
 
+    /// <summary>
+    /// In the burst status.
+    /// </summary>
+    [Description("Is burst")]
+    public static bool IsBurst => MergedStatus.HasFlag(AutoStatus.Burst);
+
+    /// <summary>
+    /// The merged status, which contains <see cref="AutoState"/> and <see cref="CommandStatus"/>.
+    /// </summary>
+    public static AutoStatus MergedStatus => DataCenter.MergedStatus;
+
+    /// <summary>
+    /// The automatic status, which is checked from RS.
+    /// </summary>
+    public static AutoStatus AutoStatus => DataCenter.AutoStatus;
+
+    /// <summary>
+    /// The CMD status, which is checked from the player.
+    /// </summary>
+    public static AutoStatus CommandStatus => DataCenter.CommandStatus;
+
     #region GCD
 
     /// <summary>
@@ -330,12 +351,45 @@ public partial class CustomRotation
     /// 
     /// </summary>
     protected static float WeaponElapsed => DataCenter.DefaultGCDElapsed;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static float AnimationLock => DataCenter.AnimationLock;
+
+    /// <summary>
+    /// Time from next ability to next GCD
+    /// </summary>
+    [Description("Time from next ability to next GCD")]
+    public static float NextAbilityToNextGCD => DataCenter.NextAbilityToNextGCD;
+
+    /// <summary>
+    /// Treats one action as another.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    public static uint AdjustId(uint id)
+    {
+        return Service.GetAdjustedActionId(id);
+    }
+
+    /// <summary>
+    /// Treats one action as another.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    public static ActionID AdjustId(ActionID id)
+    {
+        return Service.GetAdjustedActionId(id);
+    }
     #endregion
 
     /// <summary>
     /// Client Language.
     /// </summary>
     protected static ClientLanguage Language => Svc.ClientState.ClientLanguage;
+
+    #region Territory Info
 
     /// <summary>
     /// Type of the content player is in.
@@ -403,58 +457,14 @@ public partial class CustomRotation
     public static bool IsInDuty => DataCenter.IsInDuty;
 
     /// <summary>
-    /// The current territory ID.
-    /// </summary>
-    public static ushort TerritoryID => Svc.ClientState.TerritoryType;
-
-    /// <summary>
     /// Is in specified territory.
     /// </summary>
-    /// <param name="territoryId"></param>
-    /// <returns></returns>
+    /// <param name="territoryId">The ID of the territory to check.</param>
+    /// <returns>True if the player is in the specified territory; otherwise, false.</returns>
     [Description("Is in specified territory")]
-    public static bool IsInTerritory(ushort territoryId)
-    {
-        return TerritoryID == territoryId;
-    }
+    public static bool IsInTerritory(ushort territoryId) => DataCenter.IsInTerritory(territoryId);
 
-    /// <summary>
-    /// Your ping.
-    /// </summary>
-    [Description("Your ping")]
-    [Obsolete("No longer tracked or calculated")]
-    public static float Ping => 0f;
-
-    /// <summary>
-    /// Time from next ability to next GCD
-    /// </summary>
-    [Description("Time from next ability to next GCD")]
-    public static float NextAbilityToNextGCD => DataCenter.DefaultGCDRemain - ActionManagerHelper.AnimationLock;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static float AnimationLock => ActionManagerHelper.AnimationLock;
-
-    /// <summary>
-    /// Treats one action as another.
-    /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
-    public static uint AdjustId(uint id)
-    {
-        return Service.GetAdjustedActionId(id);
-    }
-
-    /// <summary>
-    /// Treats one action as another.
-    /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
-    public static ActionID AdjustId(ActionID id)
-    {
-        return Service.GetAdjustedActionId(id);
-    }
+    #endregion
 
     /// <summary>
     /// Average amount of times a rotation calls IsLastGCD, IsLastAbility, or IsLastAction.
@@ -794,25 +804,4 @@ public partial class CustomRotation
     [Description("Whether or not Invincibility should be ignored for a PvP action.")]
     public static bool IgnorePvPInvincibility => Service.Config.IgnorePvPInvincibility;
     #endregion
-
-    /// <summary>
-    /// In the burst status.
-    /// </summary>
-    [Description("Is burst")]
-    public static bool IsBurst => MergedStatus.HasFlag(AutoStatus.Burst);
-
-    /// <summary>
-    /// The merged status, which contains <see cref="AutoState"/> and <see cref="CommandStatus"/>.
-    /// </summary>
-    public static AutoStatus MergedStatus => DataCenter.MergedStatus;
-
-    /// <summary>
-    /// The automatic status, which is checked from RS.
-    /// </summary>
-    public static AutoStatus AutoStatus => DataCenter.AutoStatus;
-
-    /// <summary>
-    /// The CMD status, which is checked from the player.
-    /// </summary>
-    public static AutoStatus CommandStatus => DataCenter.CommandStatus;
 }
