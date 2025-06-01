@@ -5,6 +5,7 @@ using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using RotationSolver.Basic.Configuration;
@@ -1148,7 +1149,10 @@ public struct ActionTargetInfo(IBaseAction action)
 
             foreach (IBattleChara battlechara in DataCenter.AllHostileTargets)
             {
-                if (!battlechara.IsBossFromIcon() && ObjectHelper.DistanceToPlayer(battlechara) < 30)
+                if (!battlechara.IsBossFromIcon() 
+                    && battlechara.IsAttackable() 
+                    && battlechara.GetEventType() != EventHandlerContent.PublicContentDirector 
+                    && ObjectHelper.DistanceToPlayer(battlechara) < 30)
                 {
                     PluginLog.Debug($"FindPhantomDoom: {battlechara.Name} selected target.");
                     return battlechara;

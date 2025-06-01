@@ -13,7 +13,7 @@ public sealed class BRD_DefaultPvP : BardRotation
     [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
     public bool RespectGuard { get; set; } = true;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Warden's Paean on other players")]
+    [RotationConfig(CombatType.PvP, Name = "Use Warden's Paean on other players")]
     public bool BRDEsuna { get; set; } = true;
     #endregion
 

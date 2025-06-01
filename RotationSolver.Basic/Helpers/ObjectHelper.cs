@@ -574,7 +574,8 @@ public static class ObjectHelper
             || battleChara.NameId == 8145
             || battleChara.NameId == 10259
             || battleChara.NameId == 12704
-            || battleChara.NameId == 13668)
+            || battleChara.NameId == 13668
+            || battleChara.NameId == 13815)
         {
             return true;
         }
@@ -584,7 +585,7 @@ public static class ObjectHelper
         //10259 Cinduruva in The Tower of Zot
         //12704 Crystalline Debris
         //13668 Mob in Calamity Unbound CE
-
+        //13668 Mob in With Extreme Prejudice CE
 
         return false;
     }

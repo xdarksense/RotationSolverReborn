@@ -177,6 +177,17 @@ public sealed class WAR_Default : WarriorRotation
         return base.GeneralAbility(nextGCD, out act);
     }
 
+    [RotationDesc(ActionID.ShakeItOffPvE, ActionID.ReprisalPvE)]
+    protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
+    {
+        if (ShakeItOffPvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return false;
+        }
+
+        return base.HealSingleAbility(nextGCD, out act);
+    }
+
     [RotationDesc(ActionID.RawIntuitionPvE, ActionID.VengeancePvE, ActionID.RampartPvE, ActionID.RawIntuitionPvE, ActionID.ReprisalPvE)]
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
@@ -220,12 +231,6 @@ public sealed class WAR_Default : WarriorRotation
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-
-        if ((ShakeItOffPvE.Cooldown.IsCoolingDown && !ShakeItOffPvE.Cooldown.WillHaveOneCharge(60))
-            || (ReprisalPvE.Cooldown.IsCoolingDown && !ReprisalPvE.Cooldown.WillHaveOneCharge(50)))
-        {
-            return false;
-        }
 
         if (ShakeItOffPvE.CanUse(out act, skipAoeCheck: true))
         {
