@@ -697,7 +697,7 @@ internal partial class Configs : IPluginConfiguration
     [UI("The minimum time between updating RSR information. (Setting too low will negatively affect framerate, setting too high will lead to poor performance)",
     Filter = BasicTimer)]
     [JobConfig, Range(0, 0.3f, ConfigUnitType.Seconds, 0.002f)]
-    public float MinUpdatingTime { get; set; } = 0.01f;
+    public float MinUpdatingTime { get; set; } = 0.00f;
 
     /// <markdown file="Basic" name="Action Ahead">
     /// Percent of your GCD time remaining on a GCD cycle before RSR will try to queue the next GCD.
