@@ -1500,38 +1500,37 @@ public static class ObjectHelper
     /// Determines if the player can see the specified game object.
     /// </summary>
     /// <param name="battleChara">The game object to check visibility for.</param>
+    /// <param name="yOffset"></param>
     /// <returns>
     /// <c>true</c> if the player can see the specified game object; otherwise, <c>false</c>.
     /// </returns>
-    internal static unsafe bool CanSee(this IBattleChara battleChara)
+    internal static unsafe bool CanSee(this IBattleChara battleChara, float yOffset = 2.0f)
     {
-        if (battleChara == null)
-        {
+        if (battleChara == null || Player.Object == null)
             return false;
-        }
 
-        if (battleChara.Struct() == null)
-        {
+        var targetStruct = battleChara.Struct();
+        if (targetStruct == null)
             return false;
-        }
 
-        const uint specificEnemyId = 3830; // Bioculture Node in Aetherial Chemical Research Facility
-        if (battleChara.GameObjectId == specificEnemyId)
-        {
-            return true;
-        }
+        Vector3 playerPos = Player.Object.Position;
+        Vector3 targetPos = battleChara.Position;
 
-        Vector3 point = Player.Object.Position + (Vector3.UnitY * Player.GameObject->Height);
-        Vector3 tarPt = battleChara.Position + (Vector3.UnitY * battleChara.Struct()->Height);
-        Vector3 direction = tarPt - point;
+        playerPos.Y += yOffset;
+        targetPos.Y += yOffset;
 
-        int* unknown = stackalloc int[] { 0x4000, 0, 0x4000, 0 };
+        Vector3 offset = targetPos - playerPos;
+        float maxDist = offset.Length();
+        if (maxDist < 0.01f)
+            return true; // Same position, assume visible
+
+        Vector3 direction = offset / maxDist;
 
         RaycastHit hit;
-        Ray ray = new(point, direction);
+        int* materialFilter = stackalloc int[] { 0x4000, 0, 0x4000, 0 };
 
         return !FFXIVClientStructs.FFXIV.Client.System.Framework.Framework.Instance()->BGCollisionModule
-            ->RaycastMaterialFilter(&hit, &point, &direction, direction.Length(), 1, unknown);
+            ->RaycastMaterialFilter(&hit, &playerPos, &direction, maxDist, 1, materialFilter);
     }
 
     /// <summary>
