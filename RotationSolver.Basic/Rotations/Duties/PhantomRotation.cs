@@ -40,6 +40,23 @@ public partial class DutyRotation
     }
 
     #region Status Tracking
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static StatusID[] RotationLockoutStatus { get; } =
+    {
+        StatusID.Reawakened,
+        StatusID.Overheated,
+        StatusID.InnerRelease,
+        StatusID.Kardia,
+    };
+
+    /// <summary>
+    /// Has a status that is important to the main rotation and should prevent Duty Actions from being executed.
+    /// </summary>
+    public static bool HasLockoutStatus => !Player.WillStatusEnd(0, true, RotationLockoutStatus);
+
     /// <summary>
     /// Able to execute Cleansing.
     /// </summary>

@@ -140,7 +140,7 @@ public partial class RotationConfigWindow : Window
 
     private bool CheckErrors()
     {
-        IncompatiblePlugin[] incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
+        IncompatiblePlugin[] incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? [];
         IncompatiblePlugin? installedIncompatiblePlugin = null;
         foreach (IncompatiblePlugin p in incompatiblePlugins)
         {
@@ -175,52 +175,6 @@ public partial class RotationConfigWindow : Window
         Player.Job == Job.MIN || Player.Job == Job.FSH || Player.Job == Job.BTN);
     }
 
-    public static string DalamudBranch()
-    {
-        const string stg = "stg";
-        const string release = "release";
-        const string other = "other";
-
-        if (DalamudReflector.TryGetDalamudStartInfo(out Dalamud.Common.DalamudStartInfo? startinfo, Svc.PluginInterface))
-        {
-            if (File.Exists(startinfo.ConfigurationPath))
-            {
-                try
-                {
-                    string file = File.ReadAllText(startinfo.ConfigurationPath);
-                    dynamic? ob = JsonConvert.DeserializeObject<dynamic>(file);
-                    string? type = ob?.DalamudBetaKind;
-                    if (type is not null && !string.IsNullOrEmpty(type))
-                    {
-                        return type switch
-                        {
-                            "stg" => stg,
-                            "release" => release,
-                            _ => other,
-                        };
-                    }
-                    else
-                    {
-                        PluginLog.Information("Dalamud release is not a string or null.");
-                        return other;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    PluginLog.Information($"Failed to read or deserialize configuration file: {ex.Message}");
-                    return other;
-                }
-            }
-            else
-            {
-                PluginLog.Information("Configuration file does not exist.");
-                return other;
-            }
-        }
-        PluginLog.Information("Failed to get Dalamud start info.");
-        return other;
-    }
-
     private void DrawDiagnosticInfoCube()
     {
         StringBuilder diagInfo = new();
@@ -231,15 +185,16 @@ public partial class RotationConfigWindow : Window
         {
             _ = diagInfo.AppendLine($"FFXIV Version: {startinfo.GameVersion}");
             _ = diagInfo.AppendLine($"OS Type: {startinfo.Platform.ToString()}");
-            _ = diagInfo.AppendLine($"Dalamud Branch: {DalamudBranch()}");
+            _ = diagInfo.AppendLine($"Dalamud Branch: {Watcher.DalamudBranch()}");
             _ = diagInfo.AppendLine($"Game Language: {startinfo.Language}");
+            _ = diagInfo.AppendLine($"Update Frequency: {Service.Config.MinUpdatingTime}");
         }
         else
         {
             _ = diagInfo.AppendLine("Failed to get Dalamud start info.");
         }
 
-        IncompatiblePlugin[] incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
+        IncompatiblePlugin[] incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? [];
         IncompatiblePlugin installedIncompatiblePlugin = default;
         for (int i = 0; i < incompatiblePlugins.Length; i++)
         {
@@ -265,7 +220,22 @@ public partial class RotationConfigWindow : Window
 
         ImGui.SetCursorPosY(ImGui.GetWindowSize().Y - 20);
         ImGui.SetCursorPosX(0);
+
+        // Create an invisible button over the area where the InfoMarker will be drawn
+        Vector2 markerSize = ImGui.CalcTextSize(FontAwesomeIcon.Cube.ToIconString());
+        markerSize.Y = Math.Max(markerSize.Y, ImGui.GetTextLineHeight()); // Ensure height is at least one line
+
+        ImGui.InvisibleButton("##DiagInfoMarkerBtn", new Vector2(ImGui.GetWindowWidth(), markerSize.Y));
+        bool clicked = ImGui.IsItemClicked();
+
+        ImGui.SetCursorPosY(ImGui.GetWindowSize().Y - 20);
+        ImGui.SetCursorPosX(0);
         ImGuiEx.InfoMarker(diagInfo.ToString(), diagColor, FontAwesomeIcon.Cube.ToIconString(), false);
+
+        if (clicked)
+        {
+            ImGui.SetClipboardText(diagInfo.ToString());
+        }
     }
 
     private void DrawErrorZone()
@@ -274,7 +244,7 @@ public partial class RotationConfigWindow : Window
         float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
 
         // Dalamud branch warning
-        string branch = DalamudBranch();
+        string branch = Watcher.DalamudBranch();
         if (!string.Equals(branch, "release", StringComparison.OrdinalIgnoreCase))
         {
             ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth);
@@ -285,7 +255,7 @@ public partial class RotationConfigWindow : Window
             ImGui.Spacing();
         }
 
-        IncompatiblePlugin[] incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
+        IncompatiblePlugin[] incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? [];
         IncompatiblePlugin enabledIncompatiblePlugin = default;
         for (int i = 0; i < incompatiblePlugins.Length; i++)
         {
@@ -308,9 +278,9 @@ public partial class RotationConfigWindow : Window
             errorText = $"You are on an unsupported class: {Player.Job}";
         }
 
-        if (DataCenter.SystemWarnings != null && DataCenter.SystemWarnings.Any())
+        if (DataCenter.SystemWarnings != null && DataCenter.SystemWarnings.Count != 0)
         {
-            List<string> warningsToRemove = new();
+            List<string> warningsToRemove = [];
 
             foreach (string warning in DataCenter.SystemWarnings.Keys)
             {
@@ -382,7 +352,7 @@ public partial class RotationConfigWindow : Window
 
             foreach (RotationConfigWindowTab item in Enum.GetValues<RotationConfigWindowTab>())
             {
-                IncompatiblePlugin[] incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
+                IncompatiblePlugin[] incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? [];
 
                 // Skip the tab if it has the TabSkipAttribute
                 if (item.GetAttribute<TabSkipAttribute>() != null)
@@ -544,9 +514,26 @@ public partial class RotationConfigWindow : Window
                 return;
             }
 
-            rotations = DataCenter.IsPvP
-                ? [.. rotations.Where(r => r.GetCustomAttribute<RotationAttribute>()?.Type.HasFlag(CombatType.PvP) ?? false)]
-                : [.. rotations.Where(r => r.GetCustomAttribute<RotationAttribute>()?.Type.HasFlag(CombatType.PvE) ?? false)];
+            List<Type> filteredRotations = [];
+            if (DataCenter.IsPvP)
+            {
+                for (int i = 0; i < rotations.Length; i++)
+                {
+                    var attr = rotations[i].GetCustomAttribute<RotationAttribute>();
+                    if (attr != null && attr.Type.HasFlag(CombatType.PvP))
+                        filteredRotations.Add(rotations[i]);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < rotations.Length; i++)
+                {
+                    var attr = rotations[i].GetCustomAttribute<RotationAttribute>();
+                    if (attr != null && attr.Type.HasFlag(CombatType.PvE))
+                        filteredRotations.Add(rotations[i]);
+                }
+            }
+            rotations = [.. filteredRotations];
 
             float iconSize = Math.Max(Scale * MIN_COLUMN_WIDTH, Math.Min(wholeWidth, Scale * JOB_ICON_WIDTH));
             float comboSize = ImGui.CalcTextSize(rot.Name).X;
@@ -562,8 +549,8 @@ public partial class RotationConfigWindow : Window
             }
         }
     }
-    private static readonly string[] pairsArray = new[] { "Delete" };
-    private static readonly string[] pairs = new[] { "Delete" };
+    private static readonly string[] pairsArray = ["Delete"];
+    private static readonly string[] pairs = ["Delete"];
 
     private void DrawRotationIcon(ICustomRotation rotation, float iconSize)
     {
@@ -1594,7 +1581,13 @@ public partial class RotationConfigWindow : Window
                     index = 0; // Fallback to the first item if no match is found
                 }
 
-                ImGui.SetNextItemWidth(ImGui.CalcTextSize(c.DisplayValues.OrderByDescending(v => v.Length).First()).X + (50 * Scale));
+                string longest = "";
+                for (int i = 0; i < c.DisplayValues.Length; i++)
+                {
+                    if (c.DisplayValues[i].Length > longest.Length)
+                        longest = c.DisplayValues[i];
+                }
+                ImGui.SetNextItemWidth(ImGui.CalcTextSize(longest).X + (50 * Scale));
                 if (ImGui.Combo(name, ref index, names, names.Length))
                 {
                     c.Value = names[index];
@@ -1686,7 +1679,7 @@ public partial class RotationConfigWindow : Window
             }
             ImGui.Spacing();
 
-            List<Job> workingCopy = OtherConfiguration.DancePartnerPriority.ToList();
+            List<Job> workingCopy = [.. OtherConfiguration.DancePartnerPriority];
             bool orderChanged = false;
 
             _ = ImGui.BeginChild("DancePartnerPriorityList", new Vector2(0, 200 * Scale), true);
@@ -1975,12 +1968,14 @@ public partial class RotationConfigWindow : Window
                 {
                     float size = 30 * Scale;
                     int count = Math.Max(1, (int)MathF.Floor(ImGui.GetColumnWidth() / ((size * 1.1f) + ImGui.GetStyle().ItemSpacing.X)));
-                    foreach (IGrouping<string, IAction> pair in RotationUpdater.AllGroupedActions)
+                    foreach (var pair in RotationUpdater.AllGroupedActions)
                     {
                         _actionsList.AddCollapsingHeader(() => pair.Key, () =>
                         {
                             int index = 0;
-                            foreach (IAction? item in pair.OrderBy(t => t.ID))
+                            List<IAction> sorted = [.. pair];
+                            sorted.Sort((a, b) => a.ID.CompareTo(b.ID));
+                            foreach (IAction? item in sorted)
                             {
                                 if (!item.GetTexture(out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon))
                                 {
@@ -2536,9 +2531,21 @@ public partial class RotationConfigWindow : Window
 
     private static void DrawRotationsLibraries()
     {
-        if (!Service.Config.RotationLibs.Any(string.IsNullOrEmpty))
+        bool hasEmpty = false;
+        for (int i = 0; i < Service.Config.RotationLibs.Length; i++)
         {
-            Service.Config.RotationLibs = [.. Service.Config.RotationLibs, string.Empty];
+            if (string.IsNullOrEmpty(Service.Config.RotationLibs[i]))
+            {
+                hasEmpty = true;
+                break;
+            }
+        }
+        if (!hasEmpty)
+        {
+            var newLibs = new string[Service.Config.RotationLibs.Length + 1];
+            Array.Copy(Service.Config.RotationLibs, newLibs, Service.Config.RotationLibs.Length);
+            newLibs[^1] = string.Empty;
+            Service.Config.RotationLibs = newLibs;
         }
 
         ImGui.Spacing();
@@ -3085,7 +3092,16 @@ public partial class RotationConfigWindow : Window
                         GAction a = AllActions[i];
 
                         // Skip actions already in the list
-                        if (actions.Contains(a.RowId))
+                        bool found = false;
+                        foreach (var id in actions)
+                        {
+                            if (id == a.RowId)
+                            {
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (found)
                             continue;
 
                         string nameLower = a.Name.ToString().ToLowerInvariant();
@@ -3484,8 +3500,14 @@ public partial class RotationConfigWindow : Window
 
         // Check and display VFX casting status
         ImGui.Text("Casting Vfx:");
-        IEnumerable<VfxNewData> filteredVfx = DataCenter.VfxDataQueue
-            .Where(s => s.Path.StartsWith("vfx/lockon/eff/") && s.TimeDuration.TotalSeconds is > 0 and < 6);
+        List<VfxNewData> filteredVfx = [];
+        foreach (VfxNewData s in DataCenter.VfxDataQueue)
+        {
+            if (s.Path.StartsWith("vfx/lockon/eff/") && s.TimeDuration.TotalSeconds > 0 && s.TimeDuration.TotalSeconds < 6)
+            {
+                filteredVfx.Add(s);
+            }
+        }
         foreach (VfxNewData vfx in filteredVfx)
         {
             ImGui.Text($"Path: {vfx.Path}");
@@ -3521,7 +3543,12 @@ public partial class RotationConfigWindow : Window
             ImGui.Text("Party Members: None");
         }
 
-        List<IBattleChara> tankPartyMembers = DataCenter.PartyMembers.Where(member => member.IsJobCategory(JobRole.Tank)).ToList();
+        List<IBattleChara> tankPartyMembers = [];
+        foreach (var member in DataCenter.PartyMembers)
+        {
+            if (member.IsJobCategory(JobRole.Tank))
+                tankPartyMembers.Add(member);
+        }
         if (tankPartyMembers.Count != 0)
         {
             ImGui.Text("Tank Party Members:");

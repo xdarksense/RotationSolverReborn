@@ -210,6 +210,14 @@ public class BLM_Default : BlackMageRotation
             return true;
         }
 
+        if (TriplecastPvE.CanUse(out act))
+        {
+            if (nextGCD.Equals(ActionID.OccultCometPvE))
+            {
+                return true;
+            }
+        }
+
         return base.AttackAbility(nextGCD, out act);
     }
     #endregion
