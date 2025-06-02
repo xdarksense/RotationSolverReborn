@@ -1,6 +1,4 @@
-﻿using Dalamud.Game.Addon.Lifecycle;
-using Dalamud.Game.Gui;
-using Dalamud.Game.Gui.ContextMenu;
+﻿using Dalamud.Game.Gui.ContextMenu;
 using Dalamud.Plugin.Services;
 using ECommons.DalamudServices;
 
