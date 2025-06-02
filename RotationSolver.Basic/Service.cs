@@ -72,7 +72,7 @@ internal class Service : IDisposable
             string path = Dalamud.Memory.MemoryHelper.ReadString(new nint(a1), Encoding.ASCII, 256);
             if (Svc.Objects.CreateObjectReference(a2) is not IBattleChara battleChara || string.IsNullOrEmpty(path) || !battleChara.IsEnemy())
             {
-                throw new Exception("Failed to create object reference during VfxCreateDetour");
+                return actorVfxCreateHook!.Original(a1, a2, a3, a4, a5, a6, a7);
             }
 
             VfxNewData newVfx = new(battleChara.GameObjectId, path);
