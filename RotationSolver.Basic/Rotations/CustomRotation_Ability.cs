@@ -541,9 +541,17 @@ public partial class CustomRotation
             }
         }
 
-        if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
+        if (Role is JobRole.RangedMagical && !HasSwift && IActionHelper.IsLastActionGCD() && nextGCD.IsTheSameTo(true, ActionID.OccultCometPvE))
         {
-            if (Role is JobRole.Healer && IActionHelper.IsLastActionGCD() && (DataCenter.DefaultGCDRemain > Service.Config.SwiftcastBuffer) && nextGCD.IsTheSameTo(true, ActionID.RaisePvE, ActionID.EgeiroPvE, ActionID.ResurrectionPvE, ActionID.AscendPvE) && SwiftcastPvE.CanUse(out act))
+            if (SwiftcastPvE.CanUse(out act))
+            {
+                return true;
+            }
+        }
+
+        if (Role is JobRole.Healer && IActionHelper.IsLastActionGCD() && nextGCD.IsTheSameTo(true, ActionID.RaisePvE, ActionID.EgeiroPvE, ActionID.ResurrectionPvE, ActionID.AscendPvE))
+        {
+            if (SwiftcastPvE.CanUse(out act))
             {
                 return true;
             }

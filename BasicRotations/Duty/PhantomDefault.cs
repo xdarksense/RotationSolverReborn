@@ -29,7 +29,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool InterruptAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
+        if (HasLockoutStatus)
         {
             return false;
         }
@@ -50,7 +50,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool DispelAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
+        if (HasLockoutStatus)
         {
             return false;
         }
@@ -66,7 +66,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
+        if (HasLockoutStatus)
         {
             return false;
         }
@@ -102,7 +102,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
+        if (HasLockoutStatus)
         {
             return false;
         }
@@ -153,7 +153,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
+        if (HasLockoutStatus)
         {
             return false;
         }
@@ -184,7 +184,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
+        if (HasLockoutStatus)
         {
             return false;
         }
@@ -240,7 +240,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
+        if (HasLockoutStatus)
         {
             return false;
         }
@@ -266,7 +266,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool HealAreaAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
+        if (HasLockoutStatus)
         {
             return false;
         }
@@ -287,7 +287,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
+        if (HasLockoutStatus)
         {
             return false;
         }
@@ -303,7 +303,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool MyInterruptGCD(out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
+        if (HasLockoutStatus)
         {
             return false;
         }
@@ -319,7 +319,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool RaiseGCD(out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
+        if (HasLockoutStatus)
         {
             return false;
         }
@@ -335,7 +335,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool DispelGCD(out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
+        if (HasLockoutStatus)
         {
             return false;
         }
@@ -351,7 +351,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool HealSingleGCD(out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
+        if (HasLockoutStatus)
         {
             return false;
         }
@@ -367,7 +367,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool HealAreaGCD(out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
+        if (HasLockoutStatus)
         {
             return false;
         }
@@ -388,7 +388,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool DefenseSingleGCD(out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
+        if (HasLockoutStatus)
         {
             return false;
         }
@@ -404,7 +404,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool DefenseAreaGCD(out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
+        if (HasLockoutStatus)
         {
             return false;
         }
@@ -425,7 +425,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool GeneralGCD(out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.Reawakened, StatusID.Overheated, StatusID.InnerRelease))
+        if (HasLockoutStatus)
         {
             return false;
         }
@@ -478,7 +478,12 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
-        if (OccultCometPvE.CanUse(out act))
+        if (IsRDM && HasSwift && OccultCometPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (!IsRDM && OccultCometPvE.CanUse(out act))
         {
             return true;
         }

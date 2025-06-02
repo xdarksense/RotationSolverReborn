@@ -4,6 +4,7 @@ using ECommons.GameHelpers;
 using ECommons.Hooks;
 using ECommons.Hooks.ActionEffectTypes;
 using ECommons.Logging;
+using ECommons.Reflection;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
@@ -28,73 +29,90 @@ public static class Watcher
     public static string ShowStrSelf { get; private set; } = string.Empty;
     public static string ShowStrEnemy { get; private set; } = string.Empty;
 
+    public static string DalamudBranch()
+    {
+        const string stg = "stg";
+        const string release = "release";
+        const string other = "other";
+
+        if (DalamudReflector.TryGetDalamudStartInfo(out Dalamud.Common.DalamudStartInfo? startinfo, Svc.PluginInterface))
+        {
+            if (File.Exists(startinfo.ConfigurationPath))
+            {
+                try
+                {
+                    string file = File.ReadAllText(startinfo.ConfigurationPath);
+                    dynamic? ob = JsonConvert.DeserializeObject<dynamic>(file);
+                    string? type = ob?.DalamudBetaKind;
+                    if (type is not null && !string.IsNullOrEmpty(type))
+                    {
+                        return type switch
+                        {
+                            "stg" => stg,
+                            "release" => release,
+                            _ => other,
+                        };
+                    }
+                    else
+                    {
+                        PluginLog.Information("Dalamud release is not a string or null.");
+                        return other;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    PluginLog.Information($"Failed to read or deserialize configuration file: {ex.Message}");
+                    return other;
+                }
+            }
+            else
+            {
+                PluginLog.Information("Configuration file does not exist.");
+                return other;
+            }
+        }
+        PluginLog.Information("Failed to get Dalamud start info.");
+        return other;
+    }
+
     private static void ActionFromEnemy(ActionEffectSet set)
     {
         try
         {
-            // Check Source.
-            if (set.Source is not IBattleChara battle)
-            {
+            if (set.Source is not IBattleChara battle || !set.Source.IsEnemy())
                 return;
-            }
-
-            if (battle is IPlayerCharacter)
-            {
-                return;
-            }
-
-            const int FriendSubKind = 9;
-            if (battle.SubKind == FriendSubKind)
-            {
-                return; // Friend!
-            }
-
-            if (Svc.Objects.SearchById(battle.GameObjectId) is not IBattleChara obj)
-            {
-                return;
-            }
-
-            if (obj is IPlayerCharacter)
-            {
-                return;
-            }
 
             IPlayerCharacter playerObject = Player.Object;
             if (playerObject == null)
-            {
                 return;
-            }
 
             float damageRatio = 0;
-            foreach (TargetEffect effect in set.TargetEffects)
+            ulong playerId = playerObject.GameObjectId;
+            uint maxHp = playerObject.MaxHp;
+
+            foreach (var effect in set.TargetEffects)
             {
-                if (effect.TargetID == playerObject.GameObjectId)
+                if (effect.TargetID == playerId)
                 {
-                    for (int i = 0; i < 8; i++)
+                    effect.ForEach(entry =>
                     {
-                        EffectEntry entry = effect[i];
                         if (entry.type == ActionEffectType.Damage)
-                        {
-                            damageRatio += (float)entry.value / playerObject.MaxHp;
-                        }
-                    }
+                            damageRatio += (float)entry.value / maxHp;
+                    });
                 }
             }
 
             DataCenter.AddDamageRec(damageRatio);
-
             ShowStrEnemy = $"Damage Ratio: {damageRatio}\n{set}";
 
-            foreach (TargetEffect effect in set.TargetEffects)
+            foreach (var effect in set.TargetEffects)
             {
-                if (effect.TargetID != playerObject.GameObjectId)
-                {
+                if (effect.TargetID != playerId)
                     continue;
-                }
 
-                if (effect.GetSpecificTypeEffect(ActionEffectType.Knockback, out EffectEntry entry))
+                if (effect.GetSpecificTypeEffect(ActionEffectType.Knockback, out var entry))
                 {
-                    Knockback? knock = Svc.Data.GetExcelSheet<Knockback>()?.GetRow(entry.value);
+                    var knock = Svc.Data.GetExcelSheet<Knockback>()?.GetRow(entry.value);
                     if (knock != null)
                     {
                         DataCenter.KnockbackStart = DateTime.Now;
@@ -112,36 +130,36 @@ public static class Watcher
                 }
             }
 
-            if (set.Header.ActionType == ActionType.Action && DataCenter.PartyMembers.Count >= 4 && set.Action?.Cast100ms > 0)
-            {
-                ActionCate? type = set.Action?.GetActionCate();
+            var partyMembers = DataCenter.PartyMembers;
+            int partyMemberCount = partyMembers.Count;
 
+            if (set.Header.ActionType == ActionType.Action && partyMemberCount >= 4 && set.Action?.Cast100ms > 0)
+            {
+                var type = set.Action?.GetActionCate();
                 if (type is ActionCate.Spell or ActionCate.Weaponskill or ActionCate.Ability)
                 {
-                    int partyMemberCount = DataCenter.PartyMembers.Count;
                     int damageEffectCount = 0;
 
-                    foreach (TargetEffect effect in set.TargetEffects)
+                    var partyIds = new HashSet<ulong>();
+                    foreach (var pm in partyMembers)
                     {
-                        foreach (IBattleChara partyMember in DataCenter.PartyMembers)
+                        partyIds.Add(pm.GameObjectId);
+                    }
+
+                    foreach (var effect in set.TargetEffects)
+                    {
+                        if (partyIds.Contains(effect.TargetID) &&
+                            effect.GetSpecificTypeEffect(ActionEffectType.Damage, out var damageEffect) &&
+                            (damageEffect.value > 0 || (damageEffect.param0 & 6) == 6))
                         {
-                            if (partyMember.GameObjectId == effect.TargetID &&
-                                effect.GetSpecificTypeEffect(ActionEffectType.Damage, out EffectEntry damageEffect) &&
-                                (damageEffect.value > 0 || (damageEffect.param0 & 6) == 6))
-                            {
-                                damageEffectCount++;
-                                break;
-                            }
+                            damageEffectCount++;
                         }
                     }
 
-                    if (damageEffectCount == partyMemberCount)
+                    if (damageEffectCount == partyMemberCount && Service.Config.RecordCastingArea)
                     {
-                        if (Service.Config.RecordCastingArea)
-                        {
-                            _ = OtherConfiguration.HostileCastingArea.Add(set.Action!.Value.RowId);
-                            _ = OtherConfiguration.SaveHostileCastingArea();
-                        }
+                        _ = OtherConfiguration.HostileCastingArea.Add(set.Action!.Value.RowId);
+                        _ = OtherConfiguration.SaveHostileCastingArea();
                     }
                 }
             }
@@ -238,9 +256,9 @@ public static class Watcher
 
                 // Check if the target is already in the attacked targets list
                 bool targetExists = false;
-                foreach ((ulong id, DateTime time) target in attackedTargets)
+                foreach ((ulong id, DateTime time) in attackedTargets)
                 {
-                    if (target.id == effect.TargetID)
+                    if (id == effect.TargetID)
                     {
                         targetExists = true;
                         break;
@@ -254,8 +272,8 @@ public static class Watcher
                 // Ensure the current target is not dequeued
                 while (attackedTargets.Count >= attackedTargetsCount)
                 {
-                    (ulong id, DateTime time) oldestTarget = attackedTargets.Peek();
-                    if (oldestTarget.id == effect.TargetID)
+                    (ulong id, DateTime time) = attackedTargets.Peek();
+                    if (id == effect.TargetID)
                     {
                         // If the oldest target is the current target, break the loop to avoid dequeuing it
                         break;

@@ -1,5 +1,4 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
-using Dalamud.Game.ClientState.Objects.SubKinds;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
@@ -459,8 +458,8 @@ internal static class DataCenter
         get
         {
             float jobRange = JobRange;
-            int count = 0;
             var targets = AllHostileTargets;
+            int count = 0;
             for (int i = 0, n = targets.Count; i < n; i++)
             {
                 if (targets[i].DistanceToPlayer() < jobRange)
@@ -476,8 +475,8 @@ internal static class DataCenter
     {
         get
         {
-            int count = 0;
             var targets = AllHostileTargets;
+            int count = 0;
             for (int i = 0, n = targets.Count; i < n; i++)
             {
                 if (targets[i].DistanceToPlayer() < 25)
@@ -491,8 +490,8 @@ internal static class DataCenter
 
     public static int NumberOfHostilesInRangeOf(float range)
     {
-        int count = 0;
         var targets = AllHostileTargets;
+        int count = 0;
         for (int i = 0, n = targets.Count; i < n; i++)
         {
             if (targets[i].DistanceToPlayer() < range)
@@ -791,82 +790,105 @@ internal static class DataCenter
         return (float)currentHp / member.MaxHp;
     }
 
-    public static IEnumerable<float> PartyMembersHP
+    private static int _partyHpCacheFrame = -1;
+    private static float _partyMinHp = 0;
+    private static float _partyAvgHp = 0;
+    private static float _partyStdDevHp = 0;
+    private static int _partyHpCount = 0;
+
+    private static void UpdatePartyHpCache()
     {
-        get
+        int currentFrame = Environment.TickCount;
+        if (_partyHpCacheFrame == currentFrame)
+            return;
+
+        var hps = new List<float>();
+        foreach (var member in PartyMembers)
         {
-            foreach (float hp in RefinedHP.Values)
+            try
             {
-                if (hp > 0)
-                {
-                    yield return hp;
-                }
+                if (member == null || member.GameObjectId == 0) continue;
+                float hp = GetPartyMemberHPRatio(member);
+                if (hp > 0) hps.Add(hp);
+            }
+            catch (AccessViolationException ex)
+            {
+                PluginLog.Error($"AccessViolationException in Party HP cache: {ex.Message}");
             }
         }
+
+        _partyHpCount = hps.Count;
+        if (_partyHpCount == 0)
+        {
+            _partyMinHp = 0;
+            _partyAvgHp = 0;
+            _partyStdDevHp = 0;
+        }
+        else
+        {
+            float sum = 0;
+            float min = float.MaxValue;
+            foreach (var hp in hps)
+            {
+                sum += hp;
+                if (hp < min) min = hp;
+            }
+            float avg = sum / _partyHpCount;
+            float variance = 0;
+            foreach (var hp in hps)
+            {
+                float diff = hp - avg;
+                variance += diff * diff;
+            }
+            _partyMinHp = min;
+            _partyAvgHp = avg;
+            _partyStdDevHp = (float)Math.Sqrt(variance / _partyHpCount);
+        }
+        _partyHpCacheFrame = currentFrame;
     }
 
     public static float PartyMembersMinHP
     {
-        get
-        {
-            float minHP = float.MaxValue;
-            bool hasMembers = false;
-
-            foreach (float hp in PartyMembersHP)
-            {
-                if (hp < minHP)
-                {
-                    minHP = hp;
-                }
-                hasMembers = true;
-            }
-
-            return hasMembers ? minHP : 0;
-        }
+        get { UpdatePartyHpCache(); return _partyMinHp; }
     }
 
     public static float PartyMembersAverHP
     {
-        get
-        {
-            float totalHP = 0;
-            int count = 0;
-
-            foreach (float hp in PartyMembersHP)
-            {
-                totalHP += hp;
-                count++;
-            }
-
-            return count > 0 ? totalHP / count : 0;
-        }
+        get { UpdatePartyHpCache(); return _partyAvgHp; }
     }
 
     public static float PartyMembersDifferHP
     {
+        get { UpdatePartyHpCache(); return _partyStdDevHp; }
+    }
+
+    public static IEnumerable<float> PartyMembersHP
+    {
         get
         {
-            List<float> partyMembersHP = [.. PartyMembersHP];
-            if (partyMembersHP.Count == 0)
+            UpdatePartyHpCache();
+            // Return a snapshot of the current frame's HPs
+            if (_partyHpCount == 0) yield break;
+
+            var hpList = new List<float>();
+            foreach (var member in PartyMembers)
             {
-                return 0;
+                try
+                {
+                    if (member == null || member.GameObjectId == 0) continue;
+                    float hp = GetPartyMemberHPRatio(member);
+                    if (hp > 0) hpList.Add(hp);
+                }
+                catch (AccessViolationException ex)
+                {
+                    PluginLog.Error($"AccessViolationException in PartyMembersHP: {ex.Message}");
+                }
             }
 
-            float sum = 0;
-            for (int i = 0; i < partyMembersHP.Count; i++)
+            foreach (var hp in hpList)
             {
-                sum += partyMembersHP[i];
+                yield return hp;
             }
-            float averageHP = sum / partyMembersHP.Count;
-            float variance = 0f;
-
-            for (int i = 0; i < partyMembersHP.Count; i++)
-            {
-                float diff = partyMembersHP[i] - averageHP;
-                variance += diff * diff;
-            }
-
-            return (float)Math.Sqrt(variance / partyMembersHP.Count);
         }
     }
 
@@ -1006,8 +1028,23 @@ internal static class DataCenter
     internal static DateTime KnockbackStart { get; set; } = DateTime.MinValue;
 
     #endregion
+    public static bool IsCastingVfx(List<VfxNewData> vfxDataQueueCopy, Func<VfxNewData, bool> isVfx)
+    {
+        // If thread safety is not a concern, avoid copying the list
+        if (vfxDataQueueCopy.Count == 0)
+        {
+            return false;
+        }
 
-    internal static SortedList<string, string> AuthorHashes { get; set; } = [];
+        for (int i = 0, n = vfxDataQueueCopy.Count; i < n; i++)
+        {
+            if (isVfx(vfxDataQueueCopy[i]))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public static bool IsCastingTankVfx()
     {
@@ -1026,24 +1063,6 @@ internal static class DataCenter
             || s.Path.StartsWith("vfx/lockon/eff/share_laser")
             || s.Path.StartsWith("vfx/lockon/eff/com_share"));
         });
-    }
-
-    public static bool IsCastingVfx(List<VfxNewData> vfxDataQueueCopy, Func<VfxNewData, bool> isVfx)
-    {
-        // If thread safety is not a concern, avoid copying the list
-        if (vfxDataQueueCopy.Count == 0)
-        {
-            return false;
-        }
-
-        for (int i = 0, n = vfxDataQueueCopy.Count; i < n; i++)
-        {
-            if (isVfx(vfxDataQueueCopy[i]))
-            {
-                return true;
-            }
-        }
-        return false;
     }
 
     public static bool IsHostileCastingTank(IBattleChara h)
@@ -1066,27 +1085,15 @@ internal static class DataCenter
             (act) => act.RowId != 0 && OtherConfiguration.HostileCastingKnockback.Contains(act.RowId));
     }
 
-    public static bool IsHostileCastingBase(IBattleChara? h, Func<Action, bool> check)
+    public static bool IsHostileCastingBase(IBattleChara h, Func<Action, bool> check)
     {
-        // Check if h is null
-        if (h == null)
+        if (!h.IsEnemy())
         {
-            PluginLog.Error("IsHostileCastingBase: Hostile character is null.");
             return false;
         }
 
-        try
+        if (!h.IsCasting)
         {
-            // Check if the hostile character is casting
-            if (!h.IsCasting)
-            {
-                return false;
-            }
-        }
-        catch (Exception ex)
-        {
-            // Log the exception and return false
-            PluginLog.Error($"IsHostileCastingBase: Exception while checking IsCasting - {ex.Message}");
             return false;
         }
 
@@ -1098,10 +1105,10 @@ internal static class DataCenter
 
         // Calculate the time since the cast started
         float last = h.TotalCastTime - h.CurrentCastTime;
-        float t = last - DataCenter.DefaultGCDTotal;
+        float t = last - DefaultGCDTotal;
 
         // Check if the total cast time is greater than the minimum cast time and if the calculated time is within a valid range
-        if (!(h.TotalCastTime > DataCenter.DefaultGCDTotal && t > 0 && t < DataCenter.GCDTime(1)))
+        if (!(h.TotalCastTime > DefaultGCDTotal && t > 0 && t < GCDTime(1)))
         {
             return false;
         }

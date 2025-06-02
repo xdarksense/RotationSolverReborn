@@ -1,4 +1,5 @@
 ﻿using Dalamud.Game.ClientState.Objects.SubKinds;
+using ECommons.ExcelServices;
 
 namespace RotationSolver.Basic.Rotations.Duties;
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
@@ -161,6 +162,10 @@ public partial class DutyRotation : IDisposable
     /// This is the player.
     /// </summary>
     protected static IPlayerCharacter Player => ECommons.GameHelpers.Player.Object;
+
+    public static bool IsRDM => DataCenter.Job == Job.RDM;
+
+    public static bool IsBLM => DataCenter.Job == Job.BLM;
 
     /// <summary>
     /// Does player have swift cast, dual cast or triple cast.

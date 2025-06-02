@@ -70,13 +70,12 @@ internal class Service : IDisposable
         try
         {
             string path = Dalamud.Memory.MemoryHelper.ReadString(new nint(a1), Encoding.ASCII, 256);
-            IGameObject? obj = Svc.Objects.CreateObjectReference(a2);
-            if (obj == null || string.IsNullOrEmpty(path))
+            if (Svc.Objects.CreateObjectReference(a2) is not IBattleChara battleChara || string.IsNullOrEmpty(path) || !battleChara.IsEnemy())
             {
                 throw new Exception("Failed to create object reference during VfxCreateDetour");
             }
 
-            VfxNewData newVfx = new(obj.GameObjectId, path);
+            VfxNewData newVfx = new(battleChara.GameObjectId, path);
             DataCenter.VfxDataQueue.Add(newVfx);
         }
         catch (Exception ex)
