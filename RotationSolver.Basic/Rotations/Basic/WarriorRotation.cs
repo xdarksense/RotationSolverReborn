@@ -254,6 +254,7 @@ public partial class WarriorRotation
     static partial void ModifyShakeItOffPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.ShakeItOff, StatusID.ShakeItOffOverTime];
+        setting.TargetType = TargetType.Self;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

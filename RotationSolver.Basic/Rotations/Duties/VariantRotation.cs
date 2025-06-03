@@ -14,9 +14,10 @@ public partial class DutyRotation
     /// Modifies the settings for Variant Cure PvE.
     /// </summary>
     /// <param name="setting">The action setting to modify.</param>
-    static partial void ModifyVariantCurePvE(ref ActionSetting setting)
+    static partial void ModifyVariantRaisePvE(ref ActionSetting setting)
     {
-        setting.TargetStatusProvide = new[] { StatusID.VariantCureSet };
+        setting.StatusNeed = [StatusID.VariantRaiseSet];
+        setting.TargetType = TargetType.Death;
     }
 
     /// <summary>
@@ -25,6 +26,47 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyVariantCurePvE_33862(ref ActionSetting setting)
     {
-        setting.TargetStatusProvide = new[] { StatusID.VariantCureSet };
+        setting.StatusNeed = [StatusID.VariantCureSet];
+        setting.StatusProvide = [StatusID.Rehabilitation_3367];
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="setting">The action setting to modify.</param>
+    static partial void ModifyVariantUltimatumPvE(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.VariantUltimatumSet];
+        setting.TargetType = TargetType.Provoke;
+        setting.StatusProvide = [StatusID.EnmityUp];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="setting">The action setting to modify.</param>
+    static partial void ModifyVariantRampartPvE_33864(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.VariantRampartSet];
+        setting.TargetType = TargetType.Self;
+        setting.StatusProvide = [StatusID.VulnerabilityDown_3360];
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="setting">The action setting to modify.</param>
+    static partial void ModifyVariantSpiritDartPvE_33863(ref ActionSetting setting)
+    {
+        setting.StatusNeed = [StatusID.VariantSpiritDartSet];
+        setting.TargetStatusProvide = [StatusID.SustainedDamage_3359];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 }

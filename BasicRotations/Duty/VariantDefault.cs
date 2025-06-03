@@ -8,37 +8,42 @@ internal class VariantDefault : VariantRotation
 {
     public override bool ProvokeAbility(IAction nextGCD, out IAction? act)
     {
-        return VariantUltimatumPvE.CanUse(out act) || base.ProvokeAbility(nextGCD, out act);
-    }
-
-    public override bool AttackAbility(IAction nextGCD, out IAction? act)
-    {
-        if (VariantSpiritDartPvE.CanUse(out act, skipAoeCheck: true))
+        if (VariantUltimatumPvE.CanUse(out act))
         {
             return true;
         }
 
+        return base.ProvokeAbility(nextGCD, out act);
+    }
+
+    public override bool AttackAbility(IAction nextGCD, out IAction? act)
+    {
         if (VariantSpiritDartPvE_33863.CanUse(out act, skipAoeCheck: true))
         {
             return true;
         }
 
-        if (VariantRampartPvE.CanUse(out act))
+        return base.AttackAbility(nextGCD, out act);
+    }
+
+    public override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
+    {
+        if (VariantRampartPvE_33864.CanUse(out act))
         {
             return true;
         }
 
-        return VariantRampartPvE_33864.CanUse(out act) || base.AttackAbility(nextGCD, out act);
+        return base.AttackAbility(nextGCD, out act);
     }
 
     public override bool HealSingleGCD(out IAction? act)
     {
-        if (VariantCurePvE.CanUse(out act, skipStatusProvideCheck: true))
+        if (VariantCurePvE_33862.CanUse(out act, skipStatusProvideCheck: true))
         {
             return true;
         }
 
-        return VariantCurePvE_33862.CanUse(out act, skipStatusProvideCheck: true) || base.HealSingleGCD(out act);
+        return base.HealSingleGCD(out act);
     }
 
     public override bool RaiseGCD(out IAction? act)
@@ -48,6 +53,6 @@ internal class VariantDefault : VariantRotation
             return true;
         }
 
-        return VariantRaiseIiPvE.CanUse(out act) || base.RaiseGCD(out act);
+        return base.RaiseGCD(out act);
     }
 }

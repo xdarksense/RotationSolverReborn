@@ -177,16 +177,20 @@ internal static partial class TargetUpdater
                 {
                     foreach (IBattleChara target in DataCenter.PartyMembers.GetDeath())
                     {
-                        if (!target.IsEnemy() && !target.IsTargetMoving())
+                        if (!target.IsEnemy() && !target.IsTargetMoving() && !target.HasStatus(false, StatusHelper.CanNotRaise) && target.StatusStack(false, StatusID.ResurrectionRestricted_4262) > 0)
                         {
-                            deathParty.Add(target);
+                            // Only add if not already in deathParty
+                            if (!deathParty.Contains(target))
+                            {
+                                deathParty.Add(target);
+                            }
                         }
                     }
                 }
                 List<IBattleChara> deathAll = [];
                 foreach (IBattleChara target in DataCenter.AllTargets.GetDeath())
                 {
-                    if (!target.IsEnemy() && !target.IsTargetMoving())
+                    if (!target.IsEnemy() && !target.IsTargetMoving() && !target.HasStatus(false, StatusHelper.CanNotRaise) && target.StatusStack(false, StatusID.ResurrectionRestricted_4262) > 0)
                     {
                         deathAll.Add(target);
                     }
@@ -196,7 +200,7 @@ internal static partial class TargetUpdater
                 {
                     foreach (IBattleChara target in DataCenter.AllianceMembers.GetDeath())
                     {
-                        if (!target.IsEnemy() && !target.IsTargetMoving())
+                        if (!target.IsEnemy() && !target.IsTargetMoving() && !target.HasStatus(false, StatusHelper.CanNotRaise) && target.StatusStack(false, StatusID.ResurrectionRestricted_4262) > 0)
                         {
                             deathAllianceMembers.Add(target);
                         }
@@ -209,11 +213,11 @@ internal static partial class TargetUpdater
                 {
                     foreach (IBattleChara member in DataCenter.AllianceMembers)
                     {
-                        if (member.IsJobCategory(JobRole.Healer) && !member.IsTargetMoving())
+                        if (member.IsJobCategory(JobRole.Healer) && !member.IsTargetMoving() && !member.HasStatus(false, StatusHelper.CanNotRaise) && member.StatusStack(false, StatusID.ResurrectionRestricted_4262) > 0)
                         {
                             deathAllianceHealers.Add(member);
                         }
-                        if ((member.IsJobCategory(JobRole.Healer) || member.IsJobCategory(JobRole.Tank)) && !member.IsTargetMoving())
+                        if ((member.IsJobCategory(JobRole.Healer) || member.IsJobCategory(JobRole.Tank)) && !member.IsTargetMoving() && !member.HasStatus(false, StatusHelper.CanNotRaise) && member.StatusStack(false, StatusID.ResurrectionRestricted_4262) > 0)
                         {
                             deathAllianceSupports.Add(member);
                         }

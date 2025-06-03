@@ -230,11 +230,9 @@ public sealed class WAR_Default : WarriorRotation
     [RotationDesc(ActionID.ShakeItOffPvE, ActionID.ReprisalPvE)]
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
-
         if (ShakeItOffPvE.CanUse(out act, skipAoeCheck: true))
         {
-            return false;
+            return true;
         }
 
         return base.DefenseAreaAbility(nextGCD, out act);
