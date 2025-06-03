@@ -1132,6 +1132,7 @@ public struct ActionTargetInfo(IBaseAction action)
             TargetType.Physical => battleChara != null ? RandomPhysicalTarget(battleChara) : null,
             TargetType.PhantomMob => FindPhantomMob(),
             TargetType.PhantomBell => FindPhantomBell(),
+            TargetType.PhantomRespite => FindPhantomRespite(),
             //TargetType.PhantomDispel => FindPhantomDispel(),
             TargetType.DancePartner => FindDancePartner(),
             TargetType.MimicryTarget => FindMimicryTarget(),
@@ -1144,14 +1145,66 @@ public struct ActionTargetInfo(IBaseAction action)
 
         //IBattleChara? FindPhantomDispel()
         //{
-            //TODO: Need to figure out StatusIDs that can be dispelled first
+        //TODO: Need to figure out StatusIDs that can be dispelled first
         //}
 
         IBattleChara? FindPhantomBell()
         {
-            // Try to find a BeAttacked target among party members
             var partyMembers = DataCenter.PartyMembers;
-            var allMembers = DataCenter.AllTargets.Where(x => x != null && !x.IsEnemy()).ToList();
+            var allMembers = new List<IBattleChara>();
+            if (DataCenter.AllTargets != null)
+            {
+                foreach (var x in DataCenter.AllTargets)
+                {
+                    if (x != null && !x.IsEnemy())
+                    {
+                        allMembers.Add(x);
+                    }
+                }
+            }
+            if (partyMembers != null && partyMembers.Count > 0)
+            {
+                var bePartyAttackedTarget = FindTargetByType(partyMembers, TargetType.BeAttacked, 0, SpecialActionType.None);
+                var beAllAttackedTarget = FindTargetByType(allMembers, TargetType.BeAttacked, 0, SpecialActionType.None);
+                // Compare by reference or GameObjectId (safer for IBattleChara)
+                if (bePartyAttackedTarget != null && beAllAttackedTarget != null &&
+                    bePartyAttackedTarget.GameObjectId == beAllAttackedTarget.GameObjectId)
+                {
+                    return bePartyAttackedTarget;
+                }
+            }
+
+            // Fallback: return self
+            return Player.Object;
+        }
+
+        IBattleChara? FindPhantomRespite()
+        {
+            List<IBattleChara> partyMembers = [];
+            if (DataCenter.PartyMembers != null)
+            {
+                partyMembers = [];
+                foreach (var x in DataCenter.PartyMembers)
+                {
+                    if (x != null && !x.HasStatus(false, StatusID.RingingRespite))
+                    {
+                        partyMembers.Add(x);
+                    }
+                }
+            }
+
+            var allMembers = new List<IBattleChara>();
+            if (DataCenter.AllTargets != null)
+            {
+                foreach (var x in DataCenter.AllTargets)
+                {
+                    if (x != null && !x.IsEnemy() && !x.HasStatus(false, StatusID.RingingRespite))
+                    {
+                        allMembers.Add(x);
+                    }
+                }
+            }
+
             if (partyMembers != null && partyMembers.Count > 0)
             {
                 // Use FindTargetByType to get the BeAttacked target from party members
@@ -2302,7 +2355,8 @@ public enum TargetType : byte
     Deployment,
     PhantomMob,
     PhantomBell,
-    PhantomDispel,
+    PhantomRespite,
+    PhantomDispel
 }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 

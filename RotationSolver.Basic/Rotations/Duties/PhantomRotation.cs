@@ -900,7 +900,8 @@ public partial class DutyRotation
     static partial void ModifyRingingRespitePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => GeomancerLevel >= 3;
-        setting.TargetType = TargetType.PhantomBell;
+        setting.StatusProvide = [StatusID.RingingRespite];
+        setting.TargetType = TargetType.PhantomRespite;
     }
 
     /// <summary>
