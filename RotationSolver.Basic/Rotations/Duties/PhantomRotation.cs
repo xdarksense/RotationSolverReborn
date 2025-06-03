@@ -65,7 +65,7 @@ public partial class DutyRotation
     /// <summary>
     /// Able to execute Starfall.
     /// </summary>
-    public static bool HasStarfall => (!Player.WillStatusEnd(0, true, StatusID.PredictionOfStarfall) || !Player.WillStatusEnd(0, false, StatusID.PredictionOfStarfall)) && (ObjectHelper.GetEffectiveHpPercent(Player) > 90 || HasTankInvuln);
+    public static bool HasStarfall => !Player.WillStatusEnd(0, true, StatusID.PredictionOfStarfall) || !Player.WillStatusEnd(0, false, StatusID.PredictionOfStarfall);
 
     /// <summary>
     /// Able to execute Phantom Judgment.

@@ -164,8 +164,36 @@ public partial class DutyRotation : IDisposable
     protected static IPlayerCharacter Player => ECommons.GameHelpers.Player.Object;
 
     public static bool IsRDM => DataCenter.Job == Job.RDM;
+    public static bool IsPLD => DataCenter.Job == Job.PLD;
 
-    public static bool IsBLM => DataCenter.Job == Job.BLM;
+    public static float PartyMembersAverHP => DataCenter.PartyMembersAverHP;
+
+    public static bool InBurstWindow()
+    {
+        // TODO: What other jobs have burst windows that affect Phantom Jobs?
+        if (DataCenter.Job == Job.BLM)
+        {
+            return Player.HasStatus(true, StatusID.LeyLines); // Should also check enochian but don't want to get their gauge from here; they should have it by the time they use leylines
+        }
+        if (DataCenter.Job == Job.GNB)
+        {
+            return Player.HasStatus(true, StatusID.NoMercy);
+        }
+        if (IsPLD)
+        {
+            return Player.HasStatus(true, StatusID.FightOrFlight);
+        }
+        if (DataCenter.Job == Job.SAM)
+        {
+            return Player.HasStatus(true, StatusID.Fugetsu) && Player.HasStatus(true, StatusID.Fuka);
+        }
+        if (DataCenter.Job == Job.WHM)
+        {
+            return Player.HasStatus(true, StatusID.PresenceOfMind);
+        }
+
+        return true; // We haven't added other jobs yet, so assume we are in burst window.
+    }
 
     /// <summary>
     /// Does player have swift cast, dual cast or triple cast.
