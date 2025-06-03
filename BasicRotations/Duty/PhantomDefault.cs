@@ -13,6 +13,9 @@ public sealed class PhantomDefault : PhantomRotation
     [RotationConfig(CombatType.PvE, Name = "Save Phantom Attacks for class specific damage bonus?")]
     public bool SaveForBurstWindow { get; set; } = true;
 
+    [RotationConfig(CombatType.PvE, Name = "Use Dark over Shock")]
+    public bool PreferDarkCannon { get; set; }
+
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Average party HP percent to predict to heal with judgement instead of damage things")]
     public float PredictJudgementThreshold { get; set; } = 0.7f;
@@ -95,7 +98,7 @@ public sealed class PhantomDefault : PhantomRotation
             return false;
         }
 
-        if (BattleBellPvE.CanUse(out act))
+        if (BattleBellPvE.CanUse(out act) && !BattleBellPvE.Target.Target.HasStatus(false, StatusID.BattleBell) && !BattleBellPvE.Target.Target.HasStatus(true, StatusID.BattleBell))
         {
             return true;
         }
@@ -501,8 +504,8 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
-        // Only one of shock or dark can be used, prioritize Shock
-        if (ShockCannonPvE.CanUse(out act))
+        // Only one of shock or dark can be used, prioritize Shock unless PreferDarkCannon is set
+        if (ShockCannonPvE.CanUse(out act) && !PreferDarkCannon)
         {
             return true;
         }

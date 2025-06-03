@@ -791,6 +791,7 @@ public partial class DutyRotation
     static partial void ModifyBattleBellPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => GeomancerLevel >= 1;
+        setting.TargetStatusProvide = [StatusID.BattleBell]; // This doesn't actually do anything with the custom targeting
         setting.TargetType = TargetType.PhantomBell;
     }
 
