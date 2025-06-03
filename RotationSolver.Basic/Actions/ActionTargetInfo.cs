@@ -1131,6 +1131,8 @@ public struct ActionTargetInfo(IBaseAction action)
             TargetType.Magical => battleChara != null ? RandomMagicalTarget(battleChara) : null,
             TargetType.Physical => battleChara != null ? RandomPhysicalTarget(battleChara) : null,
             TargetType.PhantomMob => FindPhantomMob(),
+            TargetType.PhantomBell => FindPhantomBell(),
+            //TargetType.PhantomDispel => FindPhantomDispel(),
             TargetType.DancePartner => FindDancePartner(),
             TargetType.MimicryTarget => FindMimicryTarget(),
             TargetType.TheSpear => FindTheSpear(),
@@ -1139,6 +1141,33 @@ public struct ActionTargetInfo(IBaseAction action)
             TargetType.Deployment => FindDeploymentTacticsTarget(),
             _ => FindHostile(),
         };
+
+        //IBattleChara? FindPhantomDispel()
+        //{
+            //TODO: Need to figure out StatusIDs that can be dispelled first
+        //}
+
+        IBattleChara? FindPhantomBell()
+        {
+            // Try to find a BeAttacked target among party members
+            var partyMembers = DataCenter.PartyMembers;
+            var allMembers = DataCenter.AllTargets.Where(x => x != null && !x.IsEnemy()).ToList();
+            if (partyMembers != null && partyMembers.Count > 0)
+            {
+                // Use FindTargetByType to get the BeAttacked target from party members
+                var bePartyAttackedTarget = FindTargetByType(partyMembers, TargetType.BeAttacked, 0, SpecialActionType.None);
+                var beAllAttackedTarget = FindTargetByType(allMembers, TargetType.BeAttacked, 0, SpecialActionType.None);
+                // Compare by reference or GameObjectId (safer for IBattleChara)
+                if (bePartyAttackedTarget != null && beAllAttackedTarget != null &&
+                    bePartyAttackedTarget.GameObjectId == beAllAttackedTarget.GameObjectId)
+                {
+                    return bePartyAttackedTarget;
+                }
+            }
+
+            // Fallback: return self
+            return Player.Object;
+        }
 
         IBattleChara? FindPhantomMob()
         {
@@ -2272,6 +2301,8 @@ public enum TargetType : byte
     Kardia,
     Deployment,
     PhantomMob,
+    PhantomBell,
+    PhantomDispel,
 }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 

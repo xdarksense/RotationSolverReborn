@@ -156,7 +156,6 @@ public partial class PaladinRotation
 
     static partial void ModifyShieldBashPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ActionID.LowBlowPvE.IsCoolingDown();
         setting.TargetStatusProvide = [StatusID.Stun];
         setting.TargetType = TargetType.Interrupt;
         //setting.CanTarget = o =>

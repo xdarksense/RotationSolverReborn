@@ -374,8 +374,7 @@ public sealed class SGE_Default : SageRotation
     [RotationDesc(ActionID.KardiaPvE, ActionID.RhizomataPvE, ActionID.SoteriaPvE)]
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
-        // If lacking the Kardia status, attempt to use KardiaPvE
-        if (!HasKardia && KardiaPvE.CanUse(out act))
+        if (KardiaPvE.CanUse(out act))
         {
             return true;
         }

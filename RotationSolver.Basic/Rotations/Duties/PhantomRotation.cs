@@ -49,13 +49,13 @@ public partial class DutyRotation
         StatusID.Reawakened,
         StatusID.Overheated,
         StatusID.InnerRelease,
-        StatusID.Kardia,
+        StatusID.Eukrasia,
     };
 
     /// <summary>
     /// Has a status that is important to the main rotation and should prevent Duty Actions from being executed.
     /// </summary>
-    public static bool HasLockoutStatus => !Player.WillStatusEnd(0, true, RotationLockoutStatus);
+    public static bool HasLockoutStatus => !Player.WillStatusEnd(0, true, RotationLockoutStatus) && InCombat;
 
     /// <summary>
     /// Able to execute Cleansing.
@@ -358,8 +358,8 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyOccultDispelPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => TimeMageLevel >= 4;
-        setting.TargetType = TargetType.Dispel;
+        setting.ActionCheck = () => TimeMageLevel >= 10; //locking action for now, set back to 4 when fixed
+        setting.TargetType = TargetType.PhantomDispel;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -791,11 +791,7 @@ public partial class DutyRotation
     static partial void ModifyBattleBellPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => GeomancerLevel >= 1;
-        setting.TargetType = TargetType.BeAttacked;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
+        setting.TargetType = TargetType.PhantomBell;
     }
 
     /// <summary>
@@ -904,11 +900,7 @@ public partial class DutyRotation
     static partial void ModifyRingingRespitePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => GeomancerLevel >= 3;
-        setting.TargetType = TargetType.BeAttacked;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
+        setting.TargetType = TargetType.PhantomBell;
     }
 
     /// <summary>
@@ -919,10 +911,7 @@ public partial class DutyRotation
     {
         setting.ActionCheck = () => GeomancerLevel >= 4;
         setting.TargetStatusProvide = [StatusID.Suspend];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
+        setting.IsFriendly = true;
     }
     #endregion
 }

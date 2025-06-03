@@ -349,6 +349,15 @@ public partial class CustomRotation
     /// <returns>True if the action can be used; otherwise, false.</returns>
     protected virtual bool RaiseGCD(out IAction? act)
     {
+        act = null;
+        if (Player.HasStatus(true, StatusID.PhantomChemist))
+        {
+            if (Player.StatusStack(true, StatusID.PhantomChemist) > 2)
+            {
+                return false;
+            }
+        }
+
         if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
         {
             IBaseAction.ShouldEndSpecial = true;

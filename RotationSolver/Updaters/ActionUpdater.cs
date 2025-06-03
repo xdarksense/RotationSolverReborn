@@ -256,6 +256,7 @@ internal static class ActionUpdater
             || Svc.Condition[ConditionFlag.Diving]
             || Svc.Condition[ConditionFlag.Swimming]
             || Svc.Condition[ConditionFlag.Unconscious]
+            || Svc.Condition[ConditionFlag.InThisState89] // frog state in Tower of Babil
             || Svc.Condition[ConditionFlag.MeldingMateria])
         {
             return true;

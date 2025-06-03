@@ -694,7 +694,7 @@ internal partial class Configs : IPluginConfiguration
     [Range(0, 30, ConfigUnitType.Seconds, 0.02f)]
     public float AutoHealTimeToKill { get; set; } = 8f;
 
-    [UI("The minimum time between updating RSR information. (Setting too low will negatively affect framerate, setting too high will lead to poor performance)",
+    [UI("The minimum time between updating RSR information. (Raising this will help with framerate issues but can cause issues with rotation performance)",
     Filter = BasicTimer)]
     [JobConfig, Range(0, 0.3f, ConfigUnitType.Seconds, 0.002f)]
     public float MinUpdatingTime { get; set; } = 0.00f;

@@ -38,6 +38,8 @@ public sealed class VPR_Default : ViperRotation
     [RotationConfig(CombatType.PvE, Name = "Restrict GCD use if oGCDs can be used (Experimental)")]
     public bool AbilityPrio { get; set; } = false;
 
+    [RotationConfig(CombatType.PvE, Name = "Attempt to prevent regular combo from dropping (Experimental)")]
+    public bool PreserveCombo { get; set; } = false;
     #endregion
 
     #region Additional oGCD Logic
@@ -203,7 +205,7 @@ public sealed class VPR_Default : ViperRotation
         {
             return false;
         }
-
+            
 
         ////Reawaken Combo
         if (OuroborosPvE.CanUse(out act))
@@ -246,34 +248,37 @@ public sealed class VPR_Default : ViperRotation
             }
         }
 
-        // Uncoiled Fury Overcap protection
-        bool isTargetBoss = CurrentTarget?.IsBossFromTTK() ?? false;
-        bool isTargetDying = CurrentTarget?.IsDying() ?? false;
-        if ((MaxRattling == RattlingCoilStacks || RattlingCoilStacks >= MaxUncoiledStacksUser || (isTargetBoss && isTargetDying && RattlingCoilStacks > 0)) && !Player.HasStatus(true, StatusID.ReadyToReawaken) && SerpentCombo == SerpentCombo.None)
+        if ((PreserveCombo && LiveComboTime > GCDTime(1)) || !PreserveCombo)
         {
-            if (UncoiledFuryPvE.CanUse(out act, usedUp: true))
+            // Uncoiled Fury Overcap protection
+            bool isTargetBoss = CurrentTarget?.IsBossFromTTK() ?? false;
+            bool isTargetDying = CurrentTarget?.IsDying() ?? false;
+            if ((MaxRattling == RattlingCoilStacks || RattlingCoilStacks >= MaxUncoiledStacksUser || (isTargetBoss && isTargetDying && RattlingCoilStacks > 0)) && !Player.HasStatus(true, StatusID.ReadyToReawaken) && SerpentCombo == SerpentCombo.None)
             {
-                return true;
+                if (UncoiledFuryPvE.CanUse(out act, usedUp: true))
+                {
+                    return true;
+                }
             }
-        }
 
-        if (MedicineUncoiledFury && Player.HasStatus(true, StatusID.Medicated) && !Player.HasStatus(true, StatusID.ReadyToReawaken) && SerpentCombo == SerpentCombo.None)
-        {
-            if (UncoiledFuryPvE.CanUse(out act, usedUp: true))
+            if (MedicineUncoiledFury && Player.HasStatus(true, StatusID.Medicated) && !Player.HasStatus(true, StatusID.ReadyToReawaken) && SerpentCombo == SerpentCombo.None)
             {
-                return true;
+                if (UncoiledFuryPvE.CanUse(out act, usedUp: true))
+                {
+                    return true;
+                }
             }
-        }
 
-        if ((RattlingCoilStacks > 1
-            || !BurstUncoiledFuryHold)
-            && SerpentsIrePvE.Cooldown.JustUsedAfter(30)
-            && !Player.HasStatus(true, StatusID.ReadyToReawaken)
-            && SerpentCombo == SerpentCombo.None)
-        {
-            if (UncoiledFuryPvE.CanUse(out act, usedUp: true))
+            if ((RattlingCoilStacks > 1
+                || !BurstUncoiledFuryHold)
+                && SerpentsIrePvE.Cooldown.JustUsedAfter(30)
+                && !Player.HasStatus(true, StatusID.ReadyToReawaken)
+                && SerpentCombo == SerpentCombo.None)
             {
-                return true;
+                if (UncoiledFuryPvE.CanUse(out act, usedUp: true))
+                {
+                    return true;
+                }
             }
         }
 
@@ -288,16 +293,19 @@ public sealed class VPR_Default : ViperRotation
             return true;
         }
 
-        if (VicepitPvE.Cooldown.CurrentCharges == 1 && VicepitPvE.Cooldown.RecastTimeRemainOneCharge < 10)
+        if ((PreserveCombo && LiveComboTime > GCDTime(3)) || !PreserveCombo)
         {
+            if (VicepitPvE.Cooldown.CurrentCharges == 1 && VicepitPvE.Cooldown.RecastTimeRemainOneCharge < 10)
+            {
+                if (VicepitPvE.CanUse(out act, usedUp: true))
+                {
+                    return true;
+                }
+            }
             if (VicepitPvE.CanUse(out act, usedUp: true))
             {
                 return true;
             }
-        }
-        if (VicepitPvE.CanUse(out act, usedUp: true))
-        {
-            return true;
         }
 
         ////Single Target Dread Combo
@@ -322,16 +330,19 @@ public sealed class VPR_Default : ViperRotation
             return true;
         }
 
-        if (VicewinderPvE.Cooldown.CurrentCharges == 1 && VicewinderPvE.Cooldown.RecastTimeRemainOneCharge < 10)
+        if ((PreserveCombo && LiveComboTime > GCDTime(3)) || !PreserveCombo)
         {
+            if (VicewinderPvE.Cooldown.CurrentCharges == 1 && VicewinderPvE.Cooldown.RecastTimeRemainOneCharge < 10)
+            {
+                if (VicewinderPvE.CanUse(out act, usedUp: true))
+                {
+                    return true;
+                }
+            }
             if (VicewinderPvE.CanUse(out act, usedUp: true))
             {
                 return true;
             }
-        }
-        if (VicewinderPvE.CanUse(out act, usedUp: true))
-        {
-            return true;
         }
         //AOE Serpent Combo
         if (JaggedMawPvE.CanUse(out act, skipAoeCheck: true))
