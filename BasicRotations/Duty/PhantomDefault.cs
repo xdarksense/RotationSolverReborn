@@ -505,7 +505,7 @@ public sealed class PhantomDefault : PhantomRotation
         }
 
         // Only one of shock or dark can be used, prioritize Shock unless PreferDarkCannon is set
-        if (ShockCannonPvE.CanUse(out act) && !PreferDarkCannon)
+        if (!PreferDarkCannon && ShockCannonPvE.CanUse(out act))
         {
             return true;
         }
@@ -544,6 +544,18 @@ public sealed class PhantomDefault : PhantomRotation
     {
         act = null;
 
+        if (OracleLevel == 0)
+        {
+            return false; // Not an oracle, don't bother doing all of this
+        }
+
+        if (nextGCD == PredictPvE)
+        {
+            // New prediction used by RSR, clear the deck
+            ResetDeck();
+            return false;
+        }
+
         _currentCard ??= PredictPvE;
 
         // Track the current card we're seeing and discard the previous card if it's changed
@@ -581,9 +593,7 @@ public sealed class PhantomDefault : PhantomRotation
         }
         else
         {
-            // No predictions, clear the deck for next time
-            ResetDeck();
-            return false;
+            return false; // We have no active cards, so we don't need to do anything
         }
 
         // Desired Card Actions before we get into forced actions
@@ -599,7 +609,8 @@ public sealed class PhantomDefault : PhantomRotation
             {
                 return true;
             }
-            if (Player.GetEffectiveHpPercent() > 90 && (!HasTankStance || Player.GetEffectiveHpPercent() > 120) && (!SaveInvulnForStarfall || OracleLevel < 6)) // Not the tank or won't kill ourselves (directly) and either can't or won't be invuln'ing self for this
+            if (Player.GetEffectiveHpPercent() > 90 && (!HasTankStance || Player.GetEffectiveHpPercent() > 120) && (!SaveInvulnForStarfall || OracleLevel < 6)// Not the tank or won't kill ourselves (directly) and either can't or won't be invuln'ing self for this
+                && !MergedStatus.HasFlag(AutoStatus.DefenseArea)) // And not getting hit with a raidwide
             {
                 return true;
             }
@@ -630,14 +641,17 @@ public sealed class PhantomDefault : PhantomRotation
         // Otherwise we need to go through our cards
         if (_remainingCards.Count == 1) // Last card! Play literally anything; if we screwed up starfall at least we go out with a bang
         {
-            return _remainingCards.First().CanUse(out act); // If we can't use this for some reason, we're probably dead anyway
+            foreach (var card in _remainingCards)
+            {
+                return card.CanUse(out act); // If we can't use this for some reason, we're probably dead anyway
+            }
         }
 
         if (_remainingCards.Count == 2) // We have a little time but need to think it through
         {
             if (_remainingCards.Contains(StarfallPvE)) // We still have a starfall in the deck
             {
-                if (_currentCard == StarfallPvE && InCombat) // We've opted not to use it above, so either we're below health threshold, or are tanking and not invuln
+                if (_currentCard == StarfallPvE) // We've opted not to use it above, so either we're below health threshold, or are tanking and not invuln
                 {
                     // Let's just wait it out, maybe we'll get enough health to use it. We've got a card left in case.
                     return false;
@@ -649,7 +663,8 @@ public sealed class PhantomDefault : PhantomRotation
                     return false;
                 }
 
-                if ((HasTankStance && Player.GetEffectiveHpPercent() < 120) // If we're tanking and got here we can't invuln and we don't seem safe enough to try this gimmick
+                if (!InCombat //If we're not in combat and don't have starfall, use the current card
+                    || (HasTankStance && Player.GetEffectiveHpPercent() < 120) // If we're tanking and got here we can't invuln and we don't seem safe enough to try this gimmick
                     || (Player.StatusTime(false, GetStatusForAction(_currentCard)) < 3f && Player.GetEffectiveHpPercent() <= 90)) // Or we don't have a lot of time and probably can't survive starfall
                 {
                     // We must need to use our current card

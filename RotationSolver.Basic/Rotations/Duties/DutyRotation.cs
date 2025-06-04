@@ -175,22 +175,22 @@ public partial class DutyRotation : IDisposable
         {
             return Player.HasStatus(true, StatusID.LeyLines); // Should also check enochian but don't want to get their gauge from here; they should have it by the time they use leylines
         }
-        if (DataCenter.Job == Job.GNB)
-        {
-            return Player.HasStatus(true, StatusID.NoMercy);
-        }
-        if (IsPLD)
-        {
-            return Player.HasStatus(true, StatusID.FightOrFlight);
-        }
+        //if (DataCenter.Job == Job.GNB)
+        //{
+        //    return Player.HasStatus(true, StatusID.NoMercy);
+        //}
+        //if (IsPLD)
+        //{
+        //    return Player.HasStatus(true, StatusID.FightOrFlight);
+        //}
         if (DataCenter.Job == Job.SAM)
         {
             return Player.HasStatus(true, StatusID.Fugetsu) && Player.HasStatus(true, StatusID.Fuka);
         }
-        if (DataCenter.Job == Job.WHM)
-        {
-            return Player.HasStatus(true, StatusID.PresenceOfMind);
-        }
+        //if (DataCenter.Job == Job.WHM)
+        //{
+        //    return Player.HasStatus(true, StatusID.PresenceOfMind);
+        //}
 
         return true; // We haven't added other jobs yet, so assume we are in burst window.
     }
