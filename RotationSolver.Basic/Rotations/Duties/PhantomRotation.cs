@@ -17,27 +17,19 @@ public partial class DutyRotation
     /// </summary>
     public virtual void DisplayStatus()
     {
-        if (DataCenter.IsInOccultCrescentOp)
+        if (!DataCenter.IsInOccultCrescentOp)
+            return;
+
+        ImGui.Text($"ActivePhantomJob: {ActivePhantomJob ?? "N/A"}");
+        ImGui.Spacing();
+
+        // Use string comparison since ActivePhantomJob is a string, not a type
+        if (string.Equals(ActivePhantomJob, "Oracle", StringComparison.OrdinalIgnoreCase))
         {
-            ImGui.Text("ActivePhantomJob: " + (ActivePhantomJob?.ToString() ?? "N/A"));
-            ImGui.Spacing();
-            ImGui.TextColored(ImGuiColors.DalamudRed, "Freelancer");
-            ImGui.TextColored(ImGuiColors.DalamudViolet, "Knight");
-            ImGui.TextColored(ImGuiColors.DalamudWhite, "Monk");
-            ImGui.TextColored(ImGuiColors.DalamudWhite2, "Bard");
-            ImGui.TextColored(ImGuiColors.DalamudYellow, "Chemist");
-            ImGui.TextColored(ImGuiColors.ParsedBlue, "Time Mage");
-            ImGui.TextColored(ImGuiColors.ParsedGold, "Cannoneer");
-            ImGui.TextColored(ImGuiColors.ParsedGreen, "Oracle");
-            ImGui.Text("HasCleansing: " + HasCleansing.ToString());
-            ImGui.Text("HasStarfall: " + HasStarfall.ToString());
-            ImGui.Text("HasPhantomJudgment: " + HasPhantomJudgment.ToString());
-            ImGui.Text("HasBlessing: " + HasBlessing.ToString());
-            ImGui.TextColored(ImGuiColors.ParsedOrange, "Berserker");
-            ImGui.TextColored(ImGuiColors.ParsedPink, "Ranger");
-            ImGui.TextColored(ImGuiColors.ParsedPurple, "Thief");
-            ImGui.TextColored(ImGuiColors.TankBlue, "Samurai");
-            ImGui.TextColored(ImGuiColors.DPSRed, "Geomancer");
+            ImGui.Text($"HasCleansing: {HasCleansing}");
+            ImGui.Text($"HasStarfall: {HasStarfall}");
+            ImGui.Text($"HasPhantomJudgment: {HasPhantomJudgment}");
+            ImGui.Text($"HasBlessing: {HasBlessing}");
         }
     }
 
