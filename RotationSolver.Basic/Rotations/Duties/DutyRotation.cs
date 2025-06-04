@@ -1,5 +1,6 @@
 ﻿using Dalamud.Game.ClientState.Objects.SubKinds;
 using ECommons.ExcelServices;
+using RotationSolver.Basic.Configuration;
 
 namespace RotationSolver.Basic.Rotations.Duties;
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
@@ -135,6 +136,11 @@ public partial class DutyRotation : IDisposable
 
     #endregion
 
+    public DutyRotation()
+    {
+        Configs = new RotationConfigSet(this);
+    }
+
     /// <summary>
     /// Releases all resources used by the <see cref="DutyRotation"/> class.
     /// </summary>
@@ -142,6 +148,11 @@ public partial class DutyRotation : IDisposable
     {
         GC.SuppressFinalize(this);
     }
+
+    /// <summary>
+    /// Rotation config set for display
+    /// </summary>
+    internal IRotationConfigSet Configs { get; }
 
     /// <summary>
     /// Gets the hostile target.
@@ -193,6 +204,42 @@ public partial class DutyRotation : IDisposable
         //}
 
         return true; // We haven't added other jobs yet, so assume we are in burst window.
+    }
+
+    public enum PhantomJob : byte
+    {
+        None,
+        Freelancer,
+        Knight,
+        Monk,
+        Bard,
+        Chemist,
+        TimeMage,
+        Cannoneer,
+        Oracle,
+        Berserker,
+        Ranger,
+        Thief,
+        Samurai,
+        Geomancer
+    }
+
+    public static PhantomJob GetPhantomJob()
+    {
+        if (FreelancerLevel > 0) return PhantomJob.Freelancer;
+        if (KnightLevel > 0) return PhantomJob.Knight;
+        if (MonkLevel > 0) return PhantomJob.Monk;
+        if (BardLevel > 0) return PhantomJob.Bard;
+        if (ChemistLevel > 0) return PhantomJob.Chemist;
+        if (TimeMageLevel > 0) return PhantomJob.TimeMage;
+        if (CannoneerLevel > 0) return PhantomJob.Cannoneer;
+        if (OracleLevel > 0) return PhantomJob.Oracle;
+        if (BerserkerLevel > 0) return PhantomJob.Berserker;
+        if (RangerLevel > 0) return PhantomJob.Ranger;
+        if (ThiefLevel > 0) return PhantomJob.Thief;
+        if (SamuraiLevel > 0) return PhantomJob.Samurai;
+        if (GeomancerLevel > 0) return PhantomJob.Geomancer;
+        return PhantomJob.None;
     }
 
     /// <summary>
@@ -249,28 +296,9 @@ public partial class DutyRotation : IDisposable
     #region Phantom Levels
 
     /// <summary>
-    /// Gets the name of the current active Phantom Job, or null if none are active.
+    /// Gets the name of the current active Phantom Job, or None if none are active.
     /// </summary>
-    public static string? ActivePhantomJob
-    {
-        get
-        {
-            if (FreelancerLevel > 0) return "Freelancer";
-            if (KnightLevel > 0) return "Knight";
-            if (MonkLevel > 0) return "Monk";
-            if (BardLevel > 0) return "Bard";
-            if (ChemistLevel > 0) return "Chemist";
-            if (TimeMageLevel > 0) return "Time Mage";
-            if (CannoneerLevel > 0) return "Cannoneer";
-            if (OracleLevel > 0) return "Oracle";
-            if (BerserkerLevel > 0) return "Berserker";
-            if (RangerLevel > 0) return "Ranger";
-            if (ThiefLevel > 0) return "Thief";
-            if (SamuraiLevel > 0) return "Samurai";
-            if (GeomancerLevel > 0) return "Geomancer";
-            return null;
-        }
-    }
+    public static string? ActivePhantomJob => GetPhantomJob().ToString();
 
     public static byte FreelancerLevel
     {

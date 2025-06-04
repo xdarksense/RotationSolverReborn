@@ -1,4 +1,6 @@
-﻿namespace RotationSolver.Basic.Attributes;
+﻿using static RotationSolver.Basic.Rotations.Duties.DutyRotation;
+
+namespace RotationSolver.Basic.Attributes;
 
 /// <summary>
 /// 
@@ -16,4 +18,9 @@ public class RotationConfigAttribute(CombatType type) : Attribute
     /// The display name for this config.
     /// </summary>
     public string Name { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Phantom Job for this config.
+    /// </summary>
+    public PhantomJob PhantomJob { get; set; } = PhantomJob.None;
 }

@@ -1,4 +1,6 @@
-﻿namespace RotationSolver.Basic.Configuration.RotationConfig;
+﻿using RotationSolver.Basic.Rotations.Duties;
+
+namespace RotationSolver.Basic.Configuration.RotationConfig;
 
 /// <summary>
 /// Represents a combo box rotation configuration.
@@ -16,6 +18,44 @@ internal class RotationConfigCombo : RotationConfigBase
     /// <param name="rotation">The custom rotation instance.</param>
     /// <param name="property">The property information.</param>
     public RotationConfigCombo(ICustomRotation rotation, PropertyInfo property)
+    : base(rotation, property)
+    {
+        if (!property.PropertyType.IsEnum)
+        {
+            throw new ArgumentException("Property type must be an enum", nameof(property));
+        }
+
+        List<string> names = [];
+        foreach (Enum v in Enum.GetValues(property.PropertyType))
+        {
+            // Retrieve the Description attribute if it exists
+            FieldInfo? fieldInfo = property.PropertyType.GetField(v.ToString());
+            DescriptionAttribute? descriptionAttribute = fieldInfo?.GetCustomAttribute<DescriptionAttribute>();
+            names.Add(descriptionAttribute?.Description ?? v.ToString());
+        }
+
+        DisplayValues = names.ToArray();
+
+        // Set the Value to the description of the default enum value
+        object? defaultEnumValue = property.GetValue(rotation);
+        if (defaultEnumValue is Enum defaultEnum)
+        {
+            FieldInfo? defaultFieldInfo = property.PropertyType.GetField(defaultEnum.ToString());
+            DescriptionAttribute? defaultDescriptionAttribute = defaultFieldInfo?.GetCustomAttribute<DescriptionAttribute>();
+            Value = defaultDescriptionAttribute?.Description ?? defaultEnum.ToString();
+        }
+        else
+        {
+            Value = DisplayValues[0]; // Fallback to the first item if no default is found
+        }
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RotationConfigCombo"/> class.
+    /// </summary>
+    /// <param name="rotation">The custom rotation instance.</param>
+    /// <param name="property">The property information.</param>
+    public RotationConfigCombo(DutyRotation rotation, PropertyInfo property)
     : base(rotation, property)
     {
         if (!property.PropertyType.IsEnum)

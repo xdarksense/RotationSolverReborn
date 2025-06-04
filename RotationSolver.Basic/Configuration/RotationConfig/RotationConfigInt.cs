@@ -1,4 +1,6 @@
-﻿namespace RotationSolver.Basic.Configuration.RotationConfig;
+﻿using RotationSolver.Basic.Rotations.Duties;
+
+namespace RotationSolver.Basic.Configuration.RotationConfig;
 
 /// <summary>
 /// Represents an integer rotation configuration.
@@ -26,6 +28,29 @@ internal class RotationConfigInt : RotationConfigBase
     /// <param name="rotation">The custom rotation instance.</param>
     /// <param name="property">The property information.</param>
     public RotationConfigInt(ICustomRotation rotation, PropertyInfo property)
+        : base(rotation, property)
+    {
+        RangeAttribute? attr = property.GetCustomAttribute<RangeAttribute>();
+        if (attr != null)
+        {
+            Min = (int)attr.MinValue;
+            Max = (int)attr.MaxValue;
+            Speed = (int)attr.Speed;
+        }
+        else
+        {
+            Min = 0;
+            Max = 10;
+            Speed = 1;
+        }
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RotationConfigInt"/> class.
+    /// </summary>
+    /// <param name="rotation">The custom rotation instance.</param>
+    /// <param name="property">The property information.</param>
+    public RotationConfigInt(DutyRotation rotation, PropertyInfo property)
         : base(rotation, property)
     {
         RangeAttribute? attr = property.GetCustomAttribute<RangeAttribute>();

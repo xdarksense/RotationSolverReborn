@@ -1,4 +1,5 @@
 ﻿using ECommons.Logging;
+using RotationSolver.Basic.Rotations.Duties;
 
 namespace RotationSolver.Basic.Configuration.RotationConfig;
 
@@ -13,6 +14,16 @@ internal class RotationConfigBoolean : RotationConfigBase
     /// <param name="rotation">The custom rotation instance.</param>
     /// <param name="property">The property information.</param>
     public RotationConfigBoolean(ICustomRotation rotation, PropertyInfo property)
+        : base(rotation, property)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RotationConfigBoolean"/> class.
+    /// </summary>
+    /// <param name="rotation">The custom rotation instance.</param>
+    /// <param name="property">The property information.</param>
+    public RotationConfigBoolean(DutyRotation rotation, PropertyInfo property)
         : base(rotation, property)
     {
     }

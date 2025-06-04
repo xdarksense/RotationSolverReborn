@@ -53,32 +53,7 @@ public partial class DutyRotation
         StatusID.InnerRelease,
         StatusID.Eukrasia,
     };
-    #region Configs
-    /// <summary>
-    /// Phantom Oracle - Use Invulnerability for Starfall.
-    /// </summary>
-    public static bool SaveInvulnForStarfall => Service.Config.SaveInvulnForStarfall;
 
-    /// <summary>
-    /// Save Phantom Attacks for class specific damage bonus?
-    /// </summary>
-    public static bool SaveForBurstWindow => Service.Config.SaveForBurstWindow;
-
-    /// <summary>
-    /// Phantom Cannoneer - Use Dark over Shock.
-    /// </summary>
-    public static bool PreferDarkCannon => Service.Config.PreferDarkCannon;
-
-    /// <summary>
-    /// Average party HP percent to predict to heal with judgement instead of damage things.
-    /// </summary>
-    public static float PredictJudgementThreshold => Service.Config.PredictJudgementThreshold;
-
-    /// <summary>
-    /// Average party HP percent to predict to heal instead of damage things.
-    /// </summary>
-    public static float PredictBlessingThreshold => Service.Config.PredictBlessingThreshold;
-    #endregion
     /// <summary>
     /// Has a status that is important to the main rotation and should prevent Duty Actions from being executed.
     /// </summary>

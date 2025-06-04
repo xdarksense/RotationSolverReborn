@@ -1,6 +1,7 @@
 ﻿using ECommons.DalamudServices;
 using ECommons.Logging;
 using RotationSolver.Basic.Configuration;
+using RotationSolver.Basic.Rotations.Duties;
 using RotationSolver.Data;
 using RotationSolver.Updaters;
 
@@ -14,6 +15,10 @@ public static partial class RSCommands
         {
             case OtherCommandType.Rotations:
                 ExecuteRotationCommand(str);
+                break;
+
+            case OtherCommandType.DutyRotations:
+                ExecuteDutyRotationCommand(str);
                 break;
 
             case OtherCommandType.DoActions:
@@ -43,6 +48,17 @@ public static partial class RSCommands
         }
 
         DoRotationCommand(customCombo, str);
+    }
+
+    private static void ExecuteDutyRotationCommand(string str)
+    {
+        DutyRotation? dutyRotation = DataCenter.CurrentDutyRotation;
+        if (dutyRotation == null)
+        {
+            return;
+        }
+
+        DoDutyRotationCommand(dutyRotation, str);
     }
 
     private static void DoSettingCommand(string str)
@@ -346,6 +362,25 @@ public static partial class RSCommands
     private static void DoRotationCommand(ICustomRotation customCombo, string str)
     {
         IRotationConfigSet configs = customCombo.Configs;
+        foreach (IRotationConfig config in configs)
+        {
+            if (config.DoCommand(configs, str))
+            {
+                if (Service.Config.ShowToggledSettingInChat)
+                {
+                    Svc.Chat.Print($"Changed setting {config.DisplayName} to {config.Value}");
+                }
+                return;
+            }
+        }
+
+        // Only log if all commands failed
+        PluginLog.Debug(UiString.CommandsInsertActionFailure.GetDescription());
+    }
+
+    private static void DoDutyRotationCommand(DutyRotation dutyRotation, string str)
+    {
+        IRotationConfigSet configs = dutyRotation.Configs;
         foreach (IRotationConfig config in configs)
         {
             if (config.DoCommand(configs, str))
