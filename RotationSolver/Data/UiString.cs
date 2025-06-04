@@ -112,7 +112,7 @@ namespace RotationSolver.Data
         [Description("Configuration")]
         ConfigWindow_Rotation_Configuration,
 
-        [Description("Duty Configuration (Coming soon)")]
+        [Description("Duty Configuration")]
         ConfigWindow_DutyRotation_Configuration,
 
         [Description("Information")]

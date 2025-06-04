@@ -3,7 +3,6 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using ECommons;
 using ECommons.DalamudServices;
@@ -816,142 +815,23 @@ public partial class RotationConfigWindow : Window
         DataCenter.CurrentDutyRotation?.DisplayStatus();
     }
 
+    private static DutyRotation? PhantomDefault => DataCenter.CurrentDutyRotation;
     private static void DrawDutyRotationConfiguration()
     {
         if (!Player.AvailableThreadSafe)
         {
+            ImGui.Text("Player not available.");
             return;
         }
 
-        DutyRotation? rotation = DataCenter.CurrentDutyRotation;
-        if (rotation == null)
+        if (DataCenter.IsInOccultCrescentOp)
         {
-            return;
-        }
-
-        if (rotation.DutyConfig?.Configs != null)
-        {
-            foreach (IRotationConfig config in rotation.DutyConfig.Configs)
+            if (PhantomDefault == null)
             {
-                if (DataCenter.IsPvP)
-                {
-                    if (!config.Type.HasFlag(CombatType.PvP))
-                    {
-                        continue;
-                    }
-                }
-                else
-                {
-                    if (!config.Type.HasFlag(CombatType.PvE))
-                    {
-                        continue;
-                    }
-                }
-
-                string key = rotation.GetType().FullName ?? rotation.GetType().Name + "." + config.Name;
-                string name = $"##{config.GetHashCode()}_{key}.Name";
-                string command = ToCommandStr(OtherCommandType.Rotations, config.Name, config.DefaultValue);
-                void Reset()
-                {
-                    config.Value = config.DefaultValue;
-                }
-
-                ImGuiHelper.PrepareGroup(key, command, Reset);
-
-                if (config is RotationConfigCombo c)
-                {
-                    string[] names = c.DisplayValues;
-                    string selectedValue = c.Value;
-
-                    // Ensure the selected value matches the description, not the enum name
-                    int index = names.IndexOf(n => n.Equals(selectedValue, StringComparison.OrdinalIgnoreCase));
-                    if (index == -1)
-                    {
-                        index = 0; // Fallback to the first item if no match is found
-                    }
-
-                    string longest = "";
-                    for (int i = 0; i < c.DisplayValues.Length; i++)
-                    {
-                        if (c.DisplayValues[i].Length > longest.Length)
-                            longest = c.DisplayValues[i];
-                    }
-                    ImGui.SetNextItemWidth(ImGui.CalcTextSize(longest).X + (50 * Scale));
-                    if (ImGui.Combo(name, ref index, names, names.Length))
-                    {
-                        c.Value = names[index];
-                    }
-                }
-                else if (config is RotationConfigBoolean b)
-                {
-                    if (bool.TryParse(config.Value, out bool val))
-                    {
-                        if (ImGui.Checkbox(name, ref val))
-                        {
-                            config.Value = val.ToString();
-                        }
-                        ImGuiHelper.ReactPopup(key, command, Reset);
-                    }
-                }
-                else if (config is RotationConfigFloat f)
-                {
-                    if (float.TryParse(config.Value, out float val))
-                    {
-                        ImGui.SetNextItemWidth(Scale * Searchable.DRAG_WIDTH);
-
-                        if (f.UnitType == ConfigUnitType.Percent)
-                        {
-                            float displayValue = val * 100;
-                            if (ImGui.SliderFloat(name, ref displayValue, f.Min * 100, f.Max * 100, $"{displayValue:F1}{f.UnitType.ToSymbol()}"))
-                            {
-                                config.Value = (displayValue / 100).ToString();
-                            }
-                        }
-                        else
-                        {
-                            if (ImGui.DragFloat(name, ref val, f.Speed, f.Min, f.Max, $"{val:F2}{f.UnitType.ToSymbol()}"))
-                            {
-                                config.Value = val.ToString();
-                            }
-                        }
-                        ImguiTooltips.HoveredTooltip(f.UnitType.GetDescription());
-
-                        ImGuiHelper.ReactPopup(key, command, Reset);
-                    }
-                }
-                else if (config is RotationConfigString s)
-                {
-                    string val = config.Value;
-
-                    ImGui.SetNextItemWidth(ImGui.GetWindowWidth());
-                    if (ImGui.InputTextWithHint(name, config.DisplayName, ref val, 128))
-                    {
-                        config.Value = val;
-                    }
-                    ImGuiHelper.ReactPopup(key, command, Reset);
-                    continue;
-                }
-                else if (config is RotationConfigInt i)
-                {
-                    if (int.TryParse(config.Value, out int val))
-                    {
-                        ImGui.SetNextItemWidth(Scale * Searchable.DRAG_WIDTH);
-                        if (ImGui.DragInt(name, ref val, i.Speed, i.Min, i.Max))
-                        {
-                            config.Value = val.ToString();
-                        }
-                        ImGuiHelper.ReactPopup(key, command, Reset);
-                    }
-                }
-                else
-                {
-                    continue;
-                }
-
-                ImGui.SameLine();
-                ImGui.TextWrapped($"{config.DisplayName}");
-                ImGuiHelper.ReactPopup(key, command, Reset, false);
+                ImGui.Text("No current duty rotation.");
+                return;
             }
+            _allSearchable.DrawItems(Configs.PhantomDutyRotationConfiguration);
         }
     }
 
