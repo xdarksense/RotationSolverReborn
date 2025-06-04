@@ -17,26 +17,28 @@ public partial class DutyRotation
     /// </summary>
     public virtual void DisplayStatus()
     {
-        ImGui.Text("ActivePhantomJob: " + (ActivePhantomJob?.ToString() ?? "N/A"));
-        ImGui.Spacing();
-        ImGui.TextColored(ImGuiColors.DalamudRed, "Freelancer");
-        ImGui.TextColored(ImGuiColors.DalamudRed, "Freelancer");
-        ImGui.TextColored(ImGuiColors.DalamudViolet, "Knight");
-        ImGui.TextColored(ImGuiColors.DalamudWhite, "Monk");
-        ImGui.TextColored(ImGuiColors.DalamudWhite2, "Bard");
-        ImGui.TextColored(ImGuiColors.DalamudYellow, "Chemist");
-        ImGui.TextColored(ImGuiColors.ParsedBlue, "Time Mage");
-        ImGui.TextColored(ImGuiColors.ParsedGold, "Cannoneer");
-        ImGui.TextColored(ImGuiColors.ParsedGreen, "Oracle");
-        ImGui.Text("HasCleansing: " + HasCleansing.ToString());
-        ImGui.Text("HasStarfall: " + HasStarfall.ToString());
-        ImGui.Text("HasPhantomJudgment: " + HasPhantomJudgment.ToString());
-        ImGui.Text("HasBlessing: " + HasBlessing.ToString());
-        ImGui.TextColored(ImGuiColors.ParsedOrange, "Berserker");
-        ImGui.TextColored(ImGuiColors.ParsedPink, "Ranger");
-        ImGui.TextColored(ImGuiColors.ParsedPurple, "Thief");
-        ImGui.TextColored(ImGuiColors.TankBlue, "Samurai");
-        ImGui.TextColored(ImGuiColors.DPSRed, "Geomancer");
+        if (DataCenter.IsInOccultCrescentOp)
+        {
+            ImGui.Text("ActivePhantomJob: " + (ActivePhantomJob?.ToString() ?? "N/A"));
+            ImGui.Spacing();
+            ImGui.TextColored(ImGuiColors.DalamudRed, "Freelancer");
+            ImGui.TextColored(ImGuiColors.DalamudViolet, "Knight");
+            ImGui.TextColored(ImGuiColors.DalamudWhite, "Monk");
+            ImGui.TextColored(ImGuiColors.DalamudWhite2, "Bard");
+            ImGui.TextColored(ImGuiColors.DalamudYellow, "Chemist");
+            ImGui.TextColored(ImGuiColors.ParsedBlue, "Time Mage");
+            ImGui.TextColored(ImGuiColors.ParsedGold, "Cannoneer");
+            ImGui.TextColored(ImGuiColors.ParsedGreen, "Oracle");
+            ImGui.Text("HasCleansing: " + HasCleansing.ToString());
+            ImGui.Text("HasStarfall: " + HasStarfall.ToString());
+            ImGui.Text("HasPhantomJudgment: " + HasPhantomJudgment.ToString());
+            ImGui.Text("HasBlessing: " + HasBlessing.ToString());
+            ImGui.TextColored(ImGuiColors.ParsedOrange, "Berserker");
+            ImGui.TextColored(ImGuiColors.ParsedPink, "Ranger");
+            ImGui.TextColored(ImGuiColors.ParsedPurple, "Thief");
+            ImGui.TextColored(ImGuiColors.TankBlue, "Samurai");
+            ImGui.TextColored(ImGuiColors.DPSRed, "Geomancer");
+        }
     }
 
     #region Status Tracking
@@ -157,6 +159,7 @@ public partial class DutyRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
+            IsEnabled = false,
         };
     }
 
@@ -170,6 +173,7 @@ public partial class DutyRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
+            IsEnabled = false,
         };
     }
 
@@ -358,7 +362,7 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyOccultDispelPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => TimeMageLevel >= 10; //locking action for now, set back to 4 when fixed
+        setting.ActionCheck = () => TimeMageLevel >= 4;
         setting.TargetType = TargetType.PhantomDispel;
         setting.CreateConfig = () => new ActionConfig()
         {

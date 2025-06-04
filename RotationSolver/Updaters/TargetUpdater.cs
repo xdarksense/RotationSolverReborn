@@ -172,6 +172,8 @@ internal static partial class TargetUpdater
         {
             try
             {
+                RaiseType raisetype = Service.Config.RaiseType;
+
                 List<IBattleChara> deathParty = [];
                 if (DataCenter.PartyMembers != null)
                 {
@@ -187,14 +189,19 @@ internal static partial class TargetUpdater
                         }
                     }
                 }
+
                 List<IBattleChara> deathAll = [];
-                foreach (IBattleChara target in DataCenter.AllTargets.GetDeath())
+                if (raisetype == RaiseType.PartyAndAllianceSupports)
                 {
-                    if (!target.IsEnemy() && !target.IsTargetMoving())
+                    foreach (IBattleChara target in DataCenter.AllTargets.GetDeath())
                     {
-                        deathAll.Add(target);
+                        if (!target.IsEnemy() && !target.IsTargetMoving())
+                        {
+                            deathAll.Add(target);
+                        }
                     }
                 }
+
                 List<IBattleChara> deathAllianceMembers = [];
                 if (DataCenter.AllianceMembers != null)
                 {
@@ -206,9 +213,9 @@ internal static partial class TargetUpdater
                         }
                     }
                 }
+
                 List<IBattleChara> deathAllianceHealers = [];
                 List<IBattleChara> deathAllianceSupports = [];
-
                 if (DataCenter.AllianceMembers != null)
                 {
                     foreach (IBattleChara member in DataCenter.AllianceMembers)
@@ -223,8 +230,6 @@ internal static partial class TargetUpdater
                         }
                     }
                 }
-
-                RaiseType raisetype = Service.Config.RaiseType;
 
                 List<IBattleChara> validRaiseTargets = [.. deathParty];
 
@@ -424,7 +429,7 @@ internal static partial class TargetUpdater
         }
 
         SortedList<ulong, float> currentHPs = [];
-        foreach (IBattleChara target in DataCenter.AllTargets)
+        foreach (IBattleChara target in DataCenter.AllHostileTargets)
         {
             if (target.CurrentHp != 0)
             {

@@ -31,6 +31,11 @@ public interface IRotationConfig
     string Value { get; set; }
 
     /// <summary>
+    /// Gets or sets the collection of sub-configurations associated with this configuration.
+    /// </summary>
+    IEnumerable<IRotationConfig>? Configs { get; set; }
+
+    /// <summary>
     /// Executes a command to update the configuration.
     /// </summary>
     /// <param name="set">The rotation config set.</param>

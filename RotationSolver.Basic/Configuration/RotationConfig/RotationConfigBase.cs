@@ -44,6 +44,11 @@ internal abstract class RotationConfigBase : IRotationConfig
     }
 
     /// <summary>
+    /// Gets or sets the collection of rotation configurations.
+    /// </summary>
+    public IEnumerable<IRotationConfig>? Configs { get; set; }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="RotationConfigBase"/> class.
     /// </summary>
     /// <param name="rotation">The custom rotation instance.</param>

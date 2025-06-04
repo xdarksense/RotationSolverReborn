@@ -1500,11 +1500,12 @@ public static class ObjectHelper
     /// Determines if the player can see the specified game object.
     /// </summary>
     /// <param name="battleChara">The game object to check visibility for.</param>
-    /// <param name="yOffset"></param>
+    /// <param name="playerYOffset"></param>
+    /// /// <param name="targetYOffset"></param>
     /// <returns>
     /// <c>true</c> if the player can see the specified game object; otherwise, <c>false</c>.
     /// </returns>
-    internal static unsafe bool CanSee(this IBattleChara battleChara, float yOffset = 2.0f)
+    internal static unsafe bool CanSee(this IBattleChara battleChara, float playerYOffset = 2.0f, float targetYOffset = 0.5f)
     {
         if (battleChara == null || Player.Object == null)
             return false;
@@ -1516,8 +1517,8 @@ public static class ObjectHelper
         Vector3 playerPos = Player.Object.Position;
         Vector3 targetPos = battleChara.Position;
 
-        playerPos.Y += yOffset;
-        targetPos.Y += yOffset;
+        playerPos.Y += playerYOffset;      // Simulate player's eye level
+        targetPos.Y += targetYOffset;      // Aim for target's center or head
 
         Vector3 offset = targetPos - playerPos;
         float maxDist = offset.Length();
