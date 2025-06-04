@@ -29,7 +29,10 @@ public sealed class PhantomDefault : PhantomRotation
     public override void DisplayStatus()
     {
         base.DisplayStatus();
-        ImGui.Text($"Remaining Cards: {_remainingCards.Count}");
+        if (string.Equals(ActivePhantomJob, "Oracle", StringComparison.OrdinalIgnoreCase))
+        {
+            ImGui.Text($"Remaining Cards: {_remainingCards.Count}");
+        }
     }
 
     public override bool EmergencyAbility(IAction nextGCD, out IAction? act)
