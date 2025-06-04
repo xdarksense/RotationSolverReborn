@@ -54,9 +54,9 @@ public struct ActionTargetInfo(IBaseAction action)
     /// <param name="skipTargetStatusNeedCheck">If set to <c>true</c>, skips the target status need check.</param>
     /// <param name="type">The type of target to filter (e.g., Heal).</param>
     /// <returns>
-    /// An <see cref="IEnumerable{IBattleChara}"/> containing the valid targets.
+    /// A <see cref="List{IBattleChara}"/> containing the valid targets.
     /// </returns>
-    private readonly IEnumerable<IBattleChara> GetCanTargets(bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck, TargetType type)
+    private readonly List<IBattleChara> GetCanTargets(bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck, TargetType type)
     {
         if (DataCenter.AllTargets == null)
         {
@@ -468,7 +468,7 @@ public struct ActionTargetInfo(IBaseAction action)
         }
         else
         {
-            target = FindTargetByType(Array.Empty<IBattleChara>(), type, action.Config.AutoHealRatio, action.Setting.SpecialType);
+            target = FindTargetByType([], type, action.Config.AutoHealRatio, action.Setting.SpecialType);
         }
 
         IBattleChara[] affectedTargets;
@@ -1671,7 +1671,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 return null;
             }
 
-            List<IBattleChara> filteredGameObjects = new();
+            List<IBattleChara> filteredGameObjects = [];
             foreach (var o in battleChara)
             {
                 if (!IBaseAction.AutoHealCheck || o.GetHealthRatio() < healRatio)
@@ -1680,7 +1680,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 }
             }
 
-            List<IBattleChara> partyMembers = new();
+            List<IBattleChara> partyMembers = [];
             foreach (var o in filteredGameObjects)
             {
                 if (ObjectHelper.IsParty(o))

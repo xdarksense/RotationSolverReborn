@@ -40,7 +40,7 @@ internal static partial class TargetUpdater
         {
             if (obj is IBattleChara battleChara)
             {
-                if ((skipDummyCheck || !battleChara.IsDummy()) && battleChara.StatusList != null)
+                if ((skipDummyCheck || !battleChara.IsDummy()) && battleChara.StatusList != null && battleChara.IsTargetable && !battleChara.IsPet())
                 {
                     allTargets.Add(battleChara);
                 }
@@ -51,111 +51,95 @@ internal static partial class TargetUpdater
 
     private static unsafe List<IBattleChara> GetPartyMembers()
     {
-        List<IBattleChara> partyMembers = [];
-        try
-        {
-            foreach (IBattleChara member in DataCenter.AllTargets)
-            {
-                if (!member.IsParty())
-                {
-                    continue;
-                }
-
-                FFXIVClientStructs.FFXIV.Client.Game.Character.Character* character = member.Character();
-                if (character == null)
-                {
-                    continue;
-                }
-
-                byte status = character->CharacterData.OnlineStatus;
-                if (status != 15 && status != 5 && member.IsTargetable)
-                {
-                    partyMembers.Add(member);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            PluginLog.Error($"Error in GetPartyMembers: {ex.Message}");
-        }
-        return partyMembers;
+        return GetMembers(DataCenter.AllTargets, isParty: true);
     }
 
     private static unsafe List<IBattleChara> GetAllianceMembers()
     {
-        List<IBattleChara> allianceMembers = [];
         RaiseType raisetype = Service.Config.RaiseType;
-        if (raisetype != RaiseType.PartyOnly)
+        if (raisetype == RaiseType.PartyOnly)
+        {
+            return [];
+        }
+        return GetMembers(DataCenter.AllTargets, isParty: false, isAlliance: true);
+    }
+
+    private static unsafe List<IBattleChara> GetMembers(List<IBattleChara> source, bool isParty, bool isAlliance = false)
+    {
+        List<IBattleChara> members = [];
+        if (source == null) return members;
+
+        foreach (IBattleChara member in source)
         {
             try
             {
-                foreach (IBattleChara target in DataCenter.AllTargets)
+                if (isParty && !member.IsParty()) continue;
+                if (isAlliance && (!ObjectHelper.IsAllianceMember(member) || member.IsParty())) continue;
+
+                FFXIVClientStructs.FFXIV.Client.Game.Character.Character* character = member.Character();
+                if (character == null) continue;
+
+                byte status = character->CharacterData.OnlineStatus;
+                if (status != 15 && status != 5 && member.IsTargetable)
                 {
-                    if (ObjectHelper.IsAllianceMember(target) && !target.IsParty() && target.Character() != null &&
-                        target.Character()->CharacterData.OnlineStatus != 15 &&
-                        target.Character()->CharacterData.OnlineStatus != 5 && target.IsTargetable)
-                    {
-                        allianceMembers.Add(target);
-                    }
+                    members.Add(member);
                 }
             }
             catch (Exception ex)
             {
-                PluginLog.Error($"Error in GetAllianceMembers: {ex.Message}");
+                PluginLog.Error($"Error in GetMembers: {ex.Message}");
             }
         }
-        return allianceMembers;
+        return members;
     }
 
     private static List<IBattleChara> GetAllHostileTargets()
     {
         List<IBattleChara> hostileTargets = [];
-        try
-        {
-            foreach (IBattleChara target in DataCenter.AllTargets)
-            {
-                if (!target.IsEnemy() || !target.IsTargetable)
-                {
-                    continue;
-                }
+        var allTargets = DataCenter.AllTargets;
+        if (allTargets == null) return hostileTargets;
 
-                bool hasInvincible = false;
-                Dalamud.Game.ClientState.Statuses.StatusList statusList = target.StatusList;
+        foreach (IBattleChara target in allTargets)
+        {
+            if (!target.IsEnemy() || !target.IsTargetable)
+                continue;
+
+            bool hasInvincible = false;
+            var statusList = target.StatusList;
+            if (statusList != null)
+            {
                 for (int i = 0; i < statusList.Length; i++)
                 {
-                    Dalamud.Game.ClientState.Statuses.Status? status = statusList[i];
+                    var status = statusList[i];
                     if (status != null && StatusHelper.IsInvincible(status))
                     {
                         hasInvincible = true;
                         break;
                     }
                 }
-                if (hasInvincible &&
-                    ((DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility) || !DataCenter.IsPvP))
-                {
-                    continue;
-                }
-
-                hostileTargets.Add(target);
             }
-        }
-        catch (Exception ex)
-        {
-            PluginLog.Error($"Error in GetAllHostileTargets: {ex.Message}");
+            if (hasInvincible &&
+                ((DataCenter.IsPvP && !Service.Config.IgnorePvPInvincibility) || !DataCenter.IsPvP))
+            {
+                continue;
+            }
+
+            hostileTargets.Add(target);
         }
         return hostileTargets;
     }
 
     private static IBattleChara? GetFirstHostileTarget(Func<IBattleChara, bool> predicate)
     {
-        foreach (IBattleChara target in DataCenter.AllHostileTargets)
+        var hostileTargets = DataCenter.AllHostileTargets;
+        if (hostileTargets == null) return null;
+
+        foreach (IBattleChara target in hostileTargets)
         {
             try
             {
                 if (predicate(target))
-                {
                     return target;
-                }
             }
             catch (Exception ex)
             {
@@ -167,101 +151,56 @@ internal static partial class TargetUpdater
 
     private static IBattleChara? GetDeathTarget()
     {
-        if ((Player.Job is Job.WHM or Job.SCH or Job.AST or Job.SGE or
-            Job.SMN or Job.RDM) || (DutyRotation.ChemistLevel >= 3))
+        if ((Player.Job is Job.WHM or Job.SCH or Job.AST or Job.SGE or Job.SMN or Job.RDM) || (DutyRotation.ChemistLevel >= 3))
         {
             try
             {
                 RaiseType raisetype = Service.Config.RaiseType;
 
-                List<IBattleChara> deathParty = [];
+                // Use HashSet for fast lookup
+                var deathParty = new HashSet<IBattleChara>();
                 if (DataCenter.PartyMembers != null)
                 {
-                    foreach (IBattleChara target in DataCenter.PartyMembers.GetDeath())
+                    foreach (var target in DataCenter.PartyMembers.GetDeath())
                     {
-                        if (!target.IsEnemy() && !target.IsTargetMoving())
+                        if (!target.IsTargetMoving())
                         {
-                            // Only add if not already in deathParty
-                            if (!deathParty.Contains(target))
+                            deathParty.Add(target);
+                        }
+                    }
+                }
+
+                var validRaiseTargets = new List<IBattleChara>(deathParty);
+
+                if (raisetype == RaiseType.PartyAndAllianceSupports || raisetype == RaiseType.PartyAndAllianceHealers)
+                {
+                    if (DataCenter.AllianceMembers != null)
+                    {
+                        foreach (var member in DataCenter.AllianceMembers)
+                        {
+                            if (!member.IsTargetMoving())
                             {
-                                deathParty.Add(target);
+                                if (raisetype == RaiseType.PartyAndAllianceHealers && member.IsJobCategory(JobRole.Healer))
+                                    validRaiseTargets.Add(member);
+                                else if (raisetype == RaiseType.PartyAndAllianceSupports && (member.IsJobCategory(JobRole.Healer) || member.IsJobCategory(JobRole.Tank)))
+                                    validRaiseTargets.Add(member);
                             }
                         }
                     }
                 }
-
-                List<IBattleChara> deathAll = [];
-                if (raisetype == RaiseType.PartyAndAllianceSupports)
+                else if (raisetype == RaiseType.All && DataCenter.AllTargets != null)
                 {
-                    foreach (IBattleChara target in DataCenter.AllTargets.GetDeath())
+                    foreach (var target in DataCenter.AllTargets.GetDeath())
                     {
-                        if (!target.IsEnemy() && !target.IsTargetMoving())
-                        {
-                            deathAll.Add(target);
-                        }
-                    }
-                }
-
-                List<IBattleChara> deathAllianceMembers = [];
-                if (DataCenter.AllianceMembers != null)
-                {
-                    foreach (IBattleChara target in DataCenter.AllianceMembers.GetDeath())
-                    {
-                        if (!target.IsEnemy() && !target.IsTargetMoving())
-                        {
-                            deathAllianceMembers.Add(target);
-                        }
-                    }
-                }
-
-                List<IBattleChara> deathAllianceHealers = [];
-                List<IBattleChara> deathAllianceSupports = [];
-                if (DataCenter.AllianceMembers != null)
-                {
-                    foreach (IBattleChara member in DataCenter.AllianceMembers)
-                    {
-                        if (member.IsJobCategory(JobRole.Healer) && !member.IsTargetMoving())
-                        {
-                            deathAllianceHealers.Add(member);
-                        }
-                        if ((member.IsJobCategory(JobRole.Healer) || member.IsJobCategory(JobRole.Tank)) && !member.IsTargetMoving())
-                        {
-                            deathAllianceSupports.Add(member);
-                        }
-                    }
-                }
-
-                List<IBattleChara> validRaiseTargets = [.. deathParty];
-
-                if (raisetype == RaiseType.PartyAndAllianceSupports)
-                {
-                    validRaiseTargets.AddRange(deathAllianceSupports);
-                }
-                else if (raisetype == RaiseType.PartyAndAllianceHealers)
-                {
-                    validRaiseTargets.AddRange(deathAllianceHealers);
-                }
-                else if (raisetype == RaiseType.All)
-                {
-                    // Add all non-party deaths except those already in party
-                    foreach (var target in deathAll)
-                    {
-                        if (!deathParty.Contains(target))
+                        if (!target.IsEnemy() && !target.IsTargetMoving() && !deathParty.Contains(target))
                         {
                             validRaiseTargets.Add(target);
                         }
                     }
                 }
-                // For PartyOnly, validRaiseTargets is just deathParty
 
-                foreach (RaiseType type in Enum.GetValues<RaiseType>())
-                {
-                    IBattleChara? deathTarget = GetPriorityDeathTarget(validRaiseTargets, type);
-                    if (deathTarget != null)
-                    {
-                        return deathTarget;
-                    }
-                }
+                // Only use the current RaiseType
+                return GetPriorityDeathTarget(validRaiseTargets, raisetype);
             }
             catch (Exception ex)
             {

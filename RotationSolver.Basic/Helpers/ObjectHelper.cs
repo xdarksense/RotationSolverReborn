@@ -339,10 +339,20 @@ public static class ObjectHelper
 
         foreach (Dalamud.Game.ClientState.Party.IPartyMember p in Svc.Party)
         {
-            if (p.GameObject?.GameObjectId == battleChara.GameObjectId)
+            if (p.GameObject?.GameObjectId == battleChara.GameObjectId && battleChara.IsTargetable)
             {
                 return true;
             }
+        }
+
+        if (!battleChara.IsTargetable)
+        {
+            return false;
+        }
+
+        if (battleChara.IsPet())
+        {
+            return false;
         }
 
         if (Service.Config.FriendlyPartyNpcHealRaise3 && battleChara.IsNpcPartyMember())
@@ -366,6 +376,16 @@ public static class ObjectHelper
         }
 
         return false;
+    }
+
+    internal static bool IsPet(this IBattleChara battleChara)
+    {
+        if (battleChara == null || Svc.Buddies.PetBuddy == null)
+        {
+            return false;
+        }
+
+        return battleChara.GameObjectId == Svc.Buddies.PetBuddy.GameObject?.GameObjectId;
     }
 
     internal static bool IsNpcPartyMember(this IBattleChara battleChara)
