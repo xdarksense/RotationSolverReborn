@@ -324,6 +324,7 @@ public partial class AstrologianRotation
     static partial void ModifyEarthlyStarPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.EarthlyDominance, StatusID.GiantDominance];
+        setting.IsFriendly = true;
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,

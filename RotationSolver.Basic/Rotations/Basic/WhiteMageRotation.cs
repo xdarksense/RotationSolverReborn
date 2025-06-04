@@ -217,6 +217,7 @@ public partial class WhiteMageRotation
     static partial void ModifyAsylumPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 67256;
+        setting.IsFriendly = true;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

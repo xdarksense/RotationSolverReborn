@@ -504,7 +504,7 @@ public struct ActionTargetInfo(IBaseAction action)
     /// A <see cref="TargetResult"/> containing the target area and affected characters, or <c>null</c> if no target area is found.
     /// </returns>
     private readonly TargetResult? FindTargetArea(IEnumerable<IBattleChara> canTargets, IEnumerable<IBattleChara> canAffects,
-        float range, IPlayerCharacter player)
+    float range, IPlayerCharacter player)
     {
         if (player == null)
         {
@@ -527,13 +527,28 @@ public struct ActionTargetInfo(IBaseAction action)
         }
         else
         {
-            return action.Setting.IsFriendly
-                ? !Service.Config.UseGroundBeneficialAbility
-                            ? null
-                            : !Service.Config.UseGroundBeneficialAbilityWhenMoving && DataCenter.IsMoving
-                            ? null
-                            : FindTargetAreaFriend(range, canAffects, player)
-                : FindTargetAreaHostile(canTargets, canAffects, action.Config.AoeCount);
+            if (action.Setting.IsFriendly)
+            {
+                if (!Service.Config.UseGroundBeneficialAbility)
+                {
+                    return null;
+                }
+                else
+                {
+                    if (!Service.Config.UseGroundBeneficialAbilityWhenMoving && DataCenter.IsMoving)
+                    {
+                        return null;
+                    }
+                    else
+                    {
+                        return FindTargetAreaFriend(range, canAffects, player);
+                    }
+                }
+            }
+            else
+            {
+                return FindTargetAreaHostile(canTargets, canAffects, action.Config.AoeCount);
+            }
         }
     }
 
@@ -670,7 +685,7 @@ public struct ActionTargetInfo(IBaseAction action)
         }
 
         // If range is zero, always target self
-        if (range == 0)
+        if (range == 0 || Service.Config.UseGroundBeneficialAbilityOnlySelf)
         {
             return new TargetResult(player, [.. GetAffectsVector(player.Position, canAffects)], player.Position);
         }
