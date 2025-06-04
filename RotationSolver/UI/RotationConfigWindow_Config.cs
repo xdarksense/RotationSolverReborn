@@ -15,7 +15,7 @@ namespace RotationSolver.UI;
 public partial class RotationConfigWindow
 {
     private string _searchText = string.Empty;
-    private ISearchable[] _searchResults = new ISearchable[0];
+    private ISearchable[] _searchResults = [];
 
     internal static SearchableCollection _allSearchable = new();
 

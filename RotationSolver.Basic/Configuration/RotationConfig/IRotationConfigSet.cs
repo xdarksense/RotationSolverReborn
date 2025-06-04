@@ -9,9 +9,4 @@ public interface IRotationConfigSet : IEnumerable<IRotationConfig>
     /// Gets the collection of rotation configurations.
     /// </summary>
     HashSet<IRotationConfig> Configs { get; }
-
-    /// <summary>
-    /// Gets the collection of duty rotation configurations.
-    /// </summary>
-    HashSet<IRotationConfig> DutyConfigs { get; }
 }

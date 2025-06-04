@@ -70,7 +70,7 @@ internal class Service : IDisposable
         try
         {
             string path = Dalamud.Memory.MemoryHelper.ReadString(new nint(a1), Encoding.ASCII, 256);
-            if (Svc.Objects.CreateObjectReference(a2) is not IBattleChara battleChara || string.IsNullOrEmpty(path) || !battleChara.IsEnemy())
+            if (Svc.Objects.CreateObjectReference(a2) is not IBattleChara battleChara || string.IsNullOrEmpty(path))
             {
                 return actorVfxCreateHook!.Original(a1, a2, a3, a4, a5, a6, a7);
             }

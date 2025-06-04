@@ -6,17 +6,12 @@ namespace RotationSolver.Basic.Configuration.RotationConfig;
 /// <summary>
 /// Represents a set of rotation configurations.
 /// </summary>
-internal class RotationConfigSet : IRotationConfigSet
+public class RotationConfigSet : IRotationConfigSet
 {
     /// <summary>
     /// Gets the collection of rotation configurations.
     /// </summary>
     public HashSet<IRotationConfig> Configs { get; } = new HashSet<IRotationConfig>(new RotationConfigComparer());
-
-    /// <summary>
-    /// Gets the collection of duty-specific rotation configurations.
-    /// </summary>
-    public HashSet<IRotationConfig> DutyConfigs { get; } = [];
 
     /// <summary>
     /// Initializes a new instance of the <see cref="RotationConfigSet"/> class.

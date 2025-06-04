@@ -6,24 +6,6 @@ namespace RebornRotations.Duty;
 
 public sealed class PhantomDefault : PhantomRotation
 {
-    //TODO: Add support for changing these in the UI
-    [RotationConfig(CombatType.PvE, Name = "Phantom Oracle - Use Invulnerability for Starfall")]
-    public bool SaveInvulnForStarfall { get; set; } = true;
-
-    [RotationConfig(CombatType.PvE, Name = "Save Phantom Attacks for class specific damage bonus?")]
-    public bool SaveForBurstWindow { get; set; } = true;
-
-    [RotationConfig(CombatType.PvE, Name = "Use Dark over Shock")]
-    public bool PreferDarkCannon { get; set; }
-
-    [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Average party HP percent to predict to heal with judgement instead of damage things")]
-    public float PredictJudgementThreshold { get; set; } = 0.7f;
-
-    [Range(0, 1, ConfigUnitType.Percent)]
-    [RotationConfig(CombatType.PvE, Name = "Average party HP percent to predict to heal instead of damage things")]
-    public float PredictBlessingThreshold { get; set; } = 0.5f;
-
     readonly HashSet<IBaseAction> _remainingCards = new(4);
     private IBaseAction? _currentCard = null;
 

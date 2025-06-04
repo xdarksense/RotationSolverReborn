@@ -19,6 +19,7 @@ internal partial class Configs : IPluginConfiguration
         PvPSpecificControls = "PvPSpecificControls",
         AutoActionUsage = "AutoActionUsage",
         HealingActionCondition = "HealingActionCondition",
+        PhantomDutyRotationConfiguration = "PhantomDutyRotationConfiguration",
         TargetConfig = "TargetConfig",
         Extra = "Extra",
         Rotations = "Rotations",
@@ -424,6 +425,28 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Show toggled setting and new value in chat.",
         Filter = UiInformation)]
     private static readonly bool _ShowToggledSettingInChat = false;
+
+    #region Phantom Duty Rotation Configuration
+    [ConditionBool, UI("Phantom Oracle - Use Invulnerability for Starfall",
+        Filter = PhantomDutyRotationConfiguration)]
+    private static readonly bool _saveInvulnForStarfall = true;
+
+    [ConditionBool, UI("Save Phantom Attacks for class specific damage bonus?", Filter = PhantomDutyRotationConfiguration)]
+    private static readonly bool _saveForBurstWindow = true;
+
+    [ConditionBool, UI("Phantom Cannoneer - Use Dark over Shock", Filter = PhantomDutyRotationConfiguration)]
+    private static readonly bool _preferDarkCannon = true;
+
+    [UI("Average party HP percent to predict to heal with judgement instead of damage things",
+        Filter = PhantomDutyRotationConfiguration)]
+    [Range(0, 1, ConfigUnitType.Percent)]
+    public float PredictJudgementThreshold { get; set; } = 0.7f;
+
+    [UI("Average party HP percent to predict to heal instead of damage things",
+        Filter = PhantomDutyRotationConfiguration)]
+    [Range(0, 1, ConfigUnitType.Percent)]
+    public float PredictBlessingThreshold { get; set; } = 0.5f;
+    #endregion
 
     [ConditionBool, UI("Record knockback actions", Filter = List2)]
     private static readonly bool _recordKnockbackies = false;
