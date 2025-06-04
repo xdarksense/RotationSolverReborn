@@ -16,32 +16,18 @@ public static class TargetFilter
     /// <returns>The dead characters.</returns>
     public static IEnumerable<IBattleChara> GetDeath(this IEnumerable<IBattleChara> charas)
     {
-        if (charas == null)
-        {
-            return [];
-        }
+        if (charas == null) yield break;
 
-        List<IBattleChara> result = [];
         foreach (IBattleChara item in charas)
         {
             if (item == null || !item.IsDead || item.CurrentHp != 0 || !item.IsTargetable)
-            {
                 continue;
-            }
-
             if (item.HasStatus(false, StatusID.Raise))
-            {
                 continue;
-            }
-
             if (!Service.Config.RaiseBrinkOfDeath && item.HasStatus(false, StatusID.BrinkOfDeath))
-            {
                 continue;
-            }
-
-            result.Add(item);
+            yield return item;
         }
-        return result;
     }
 
     /// <summary>
@@ -54,14 +40,14 @@ public static class TargetFilter
     {
         if (objects == null || roles == null || roles.Length == 0)
         {
-            return Enumerable.Empty<IBattleChara>();
+            return [];
         }
 
         HashSet<byte> validJobs = [];
         Lumina.Excel.ExcelSheet<ClassJob> classJobs = Service.GetSheet<ClassJob>();
         if (classJobs == null)
         {
-            return Enumerable.Empty<IBattleChara>();
+            return [];
         }
 
         foreach (JobRole role in roles)
@@ -155,19 +141,12 @@ public static class TargetFilter
     /// <returns>The objects within the radius.</returns>
     public static IEnumerable<T> GetObjectInRadius<T>(this IEnumerable<T> objects, float radius) where T : IBattleChara
     {
-        if (objects == null)
-        {
-            return [];
-        }
+        if (objects == null) yield break;
 
-        List<T> result = [];
         foreach (T obj in objects)
         {
             if (obj.DistanceToPlayer() <= radius)
-            {
-                result.Add(obj);
-            }
+                yield return obj;
         }
-        return result;
     }
 }

@@ -650,7 +650,7 @@ public sealed class SGE_Default : SageRotation
             return true;
         }
 
-        if (PhlegmaPvE.CanUse(out act, usedUp: IsMoving))
+        if (PhlegmaPvE.CanUse(out act, usedUp: IsMoving || PhlegmaPvE.Cooldown.WillHaveXChargesGCD(2, 1)))
         {
             return true;
         }
