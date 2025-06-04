@@ -15,7 +15,7 @@ public partial class CustomRotation
 
     static partial void ModifyTrueNorthPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = new[] { StatusID.TrueNorth };
+        setting.StatusProvide = [StatusID.TrueNorth];
         setting.ActionCheck = () => !IsLastAbility(ActionID.TrueNorthPvE);
     }
 
@@ -26,7 +26,7 @@ public partial class CustomRotation
 
     static partial void ModifyAddlePvE(ref ActionSetting setting)
     {
-        setting.TargetStatusProvide = new[] { StatusID.Addle };
+        setting.TargetStatusProvide = [StatusID.Addle];
         setting.StatusFromSelf = false;
     }
 
@@ -63,7 +63,7 @@ public partial class CustomRotation
     static partial void ModifyFeintPvE(ref ActionSetting setting)
     {
         setting.StatusFromSelf = false;
-        setting.TargetStatusProvide = new[] { StatusID.Feint };
+        setting.TargetStatusProvide = [StatusID.Feint];
     }
 
     static partial void ModifyLowBlowPvE(ref ActionSetting setting)
@@ -102,12 +102,12 @@ public partial class CustomRotation
 
     static partial void ModifySprintPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = new[] { StatusID.SprintPenalty, StatusID.Dualcast };
+        setting.StatusProvide = [StatusID.SprintPenalty, StatusID.Dualcast];
     }
 
     static partial void ModifyIsleSprintPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = new[] { StatusID.Dualcast };
+        setting.StatusProvide = [StatusID.Dualcast];
     }
 
     #endregion
@@ -143,7 +143,7 @@ public partial class CustomRotation
 
     static partial void ModifySprintPvP(ref ActionSetting setting)
     {
-        setting.StatusProvide = new[] { StatusID.Sprint_1342 };
+        setting.StatusProvide = [StatusID.Sprint_1342];
         setting.IsFriendly = true;
     }
 
@@ -300,7 +300,7 @@ public partial class CustomRotation
     /// <summary>
     /// All traits of this action.
     /// </summary>
-    public virtual IBaseTrait[] AllTraits { get; } = Array.Empty<IBaseTrait>();
+    public virtual IBaseTrait[] AllTraits { get; } = [];
 
     private PropertyInfo[]? _allBools;
 

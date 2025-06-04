@@ -3,6 +3,7 @@ using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
+using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using ECommons;
 using ECommons.DalamudServices;
@@ -105,37 +106,6 @@ public partial class RotationConfigWindow : Window
         {
             PluginLog.Warning($"Something wrong with config window: {ex.Message}");
         }
-    }
-
-    private static void DrawDutyRotation()
-    {
-        DutyRotation? dutyRotation = DataCenter.CurrentDutyRotation;
-        if (dutyRotation == null)
-        {
-            return;
-        }
-
-        RotationAttribute? rot = dutyRotation.GetType().GetCustomAttribute<RotationAttribute>();
-        if (rot == null)
-        {
-            return;
-        }
-
-        if (!RotationUpdater.DutyRotations.TryGetValue(Svc.ClientState.TerritoryType, out Type[]? rotations))
-        {
-            return;
-        }
-
-        if (rotations == null)
-        {
-            return;
-        }
-
-        if (ImGui.Selectable(rot.Name, false, ImGuiSelectableFlags.None, new Vector2(0, 20)))
-        {
-           
-        }
-        ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_DutyRotationDesc.GetDescription());
     }
 
     private bool CheckErrors()
@@ -335,7 +305,7 @@ public partial class RotationConfigWindow : Window
 
             if (wholeWidth > JOB_ICON_WIDTH * Scale)
             {
-                DrawDutyRotation();
+                DrawDutyRotationSidebar();
                 if (CheckErrors())
                 {
                     DrawErrorZone();
@@ -354,8 +324,8 @@ public partial class RotationConfigWindow : Window
             {
                 IncompatiblePlugin[] incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? [];
 
-                // Skip the tab if it has the TabSkipAttribute
-                if (item.GetAttribute<TabSkipAttribute>() != null)
+                // Skip the tab if it has the TabSkipAttribute or is Duty (handled by DrawDutyRotationSidebar)
+                if (item == RotationConfigWindowTab.Duty || item.GetAttribute<TabSkipAttribute>() != null)
                 {
                     continue;
                 }
@@ -560,7 +530,7 @@ public partial class RotationConfigWindow : Window
         if (rotation.GetTexture(out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? jobIcon) && ImGuiHelper.SilenceImageButton(jobIcon.ImGuiHandle, Vector2.One * iconSize, _activeTab == RotationConfigWindowTab.Rotation))
         {
             _activeTab = RotationConfigWindowTab.Rotation;
-            _searchResults = Array.Empty<ISearchable>(); // Corrected type
+            _searchResults = [];
         }
 
         // Show tooltip if the item is hovered
@@ -714,6 +684,10 @@ public partial class RotationConfigWindow : Window
                         DrawAbout();
                         break;
 
+                    case RotationConfigWindowTab.Duty:
+                        DrawDutyRotationBody();
+                        break;
+
                     case RotationConfigWindowTab.Job:
                         DrawRotation();
                         break;
@@ -774,6 +748,214 @@ public partial class RotationConfigWindow : Window
             }
         }
     }
+
+    #region DutyRotation
+    private void DrawDutyRotationSidebar()
+    {
+        // Get all available duty rotations for the current territory
+        if (!RotationUpdater.DutyRotations.TryGetValue(Svc.ClientState.TerritoryType, out Type[]? rotations) || rotations == null || rotations.Length == 0)
+            return;
+
+        DutyRotation? currentRotation = DataCenter.CurrentDutyRotation;
+        Type? currentType = currentRotation?.GetType();
+
+        for (int i = 0; i < rotations.Length; i++)
+        {
+            Type rotationType = rotations[i];
+            RotationAttribute? rotAttr = rotationType.GetCustomAttribute<RotationAttribute>();
+            if (rotAttr == null)
+                continue;
+
+            string displayName = (Player.Object != null && DataCenter.IsInOccultCrescentOp && rotationType == currentType)
+                ? (DutyRotation.ActivePhantomJob ?? rotAttr.Name)
+                : rotAttr.Name;
+
+            bool isSelected = currentType == rotationType;
+
+            if (ImGui.Selectable(displayName, isSelected, ImGuiSelectableFlags.None, new Vector2(0, 20)))
+            {
+                // Switch the current duty rotation
+                DataCenter.CurrentDutyRotation = Activator.CreateInstance(rotationType) as DutyRotation;
+                // Switch to the Duty tab so the body is shown
+                _activeTab = RotationConfigWindowTab.Duty;
+                _searchResults = [];
+            }
+            ImguiTooltips.HoveredTooltip(rotAttr.Description ?? UiString.ConfigWindow_DutyRotationDesc.GetDescription());
+        }
+    }
+
+    private static void DrawDutyRotationBody()
+    {
+        DutyRotation? rotation = DataCenter.CurrentDutyRotation;
+        if (rotation == null)
+            return;
+
+        _dutyRotationHeader.Draw();
+    }
+
+    private static readonly CollapsingHeaderGroup _dutyRotationHeader = new(new()
+    {
+        { GetDutyRotationStatusHead,  DrawDutyRotationStatus },
+
+        { UiString.ConfigWindow_DutyRotation_Configuration.GetDescription, DrawDutyRotationConfiguration }
+    });
+
+    private static string GetDutyRotationStatusHead()
+    {
+        DutyRotation? rotation = DataCenter.CurrentDutyRotation;
+        string status = UiString.ConfigWindow_DutyRotation_Status.GetDescription();
+        return rotation == null ? string.Empty : status;
+    }
+
+    private static void DrawDutyRotationStatus()
+    {
+        if (DataCenter.CurrentDutyRotation == null)
+        {
+            return;
+        }
+        DataCenter.CurrentDutyRotation?.DisplayStatus();
+    }
+
+    private static void DrawDutyRotationConfiguration()
+    {
+        if (!Player.AvailableThreadSafe)
+        {
+            return;
+        }
+
+        DutyRotation? rotation = DataCenter.CurrentDutyRotation;
+        if (rotation == null)
+        {
+            return;
+        }
+
+        if (rotation.DutyConfig?.Configs != null)
+        {
+            foreach (IRotationConfig config in rotation.DutyConfig.Configs)
+            {
+                if (DataCenter.IsPvP)
+                {
+                    if (!config.Type.HasFlag(CombatType.PvP))
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    if (!config.Type.HasFlag(CombatType.PvE))
+                    {
+                        continue;
+                    }
+                }
+
+                string key = rotation.GetType().FullName ?? rotation.GetType().Name + "." + config.Name;
+                string name = $"##{config.GetHashCode()}_{key}.Name";
+                string command = ToCommandStr(OtherCommandType.Rotations, config.Name, config.DefaultValue);
+                void Reset()
+                {
+                    config.Value = config.DefaultValue;
+                }
+
+                ImGuiHelper.PrepareGroup(key, command, Reset);
+
+                if (config is RotationConfigCombo c)
+                {
+                    string[] names = c.DisplayValues;
+                    string selectedValue = c.Value;
+
+                    // Ensure the selected value matches the description, not the enum name
+                    int index = names.IndexOf(n => n.Equals(selectedValue, StringComparison.OrdinalIgnoreCase));
+                    if (index == -1)
+                    {
+                        index = 0; // Fallback to the first item if no match is found
+                    }
+
+                    string longest = "";
+                    for (int i = 0; i < c.DisplayValues.Length; i++)
+                    {
+                        if (c.DisplayValues[i].Length > longest.Length)
+                            longest = c.DisplayValues[i];
+                    }
+                    ImGui.SetNextItemWidth(ImGui.CalcTextSize(longest).X + (50 * Scale));
+                    if (ImGui.Combo(name, ref index, names, names.Length))
+                    {
+                        c.Value = names[index];
+                    }
+                }
+                else if (config is RotationConfigBoolean b)
+                {
+                    if (bool.TryParse(config.Value, out bool val))
+                    {
+                        if (ImGui.Checkbox(name, ref val))
+                        {
+                            config.Value = val.ToString();
+                        }
+                        ImGuiHelper.ReactPopup(key, command, Reset);
+                    }
+                }
+                else if (config is RotationConfigFloat f)
+                {
+                    if (float.TryParse(config.Value, out float val))
+                    {
+                        ImGui.SetNextItemWidth(Scale * Searchable.DRAG_WIDTH);
+
+                        if (f.UnitType == ConfigUnitType.Percent)
+                        {
+                            float displayValue = val * 100;
+                            if (ImGui.SliderFloat(name, ref displayValue, f.Min * 100, f.Max * 100, $"{displayValue:F1}{f.UnitType.ToSymbol()}"))
+                            {
+                                config.Value = (displayValue / 100).ToString();
+                            }
+                        }
+                        else
+                        {
+                            if (ImGui.DragFloat(name, ref val, f.Speed, f.Min, f.Max, $"{val:F2}{f.UnitType.ToSymbol()}"))
+                            {
+                                config.Value = val.ToString();
+                            }
+                        }
+                        ImguiTooltips.HoveredTooltip(f.UnitType.GetDescription());
+
+                        ImGuiHelper.ReactPopup(key, command, Reset);
+                    }
+                }
+                else if (config is RotationConfigString s)
+                {
+                    string val = config.Value;
+
+                    ImGui.SetNextItemWidth(ImGui.GetWindowWidth());
+                    if (ImGui.InputTextWithHint(name, config.DisplayName, ref val, 128))
+                    {
+                        config.Value = val;
+                    }
+                    ImGuiHelper.ReactPopup(key, command, Reset);
+                    continue;
+                }
+                else if (config is RotationConfigInt i)
+                {
+                    if (int.TryParse(config.Value, out int val))
+                    {
+                        ImGui.SetNextItemWidth(Scale * Searchable.DRAG_WIDTH);
+                        if (ImGui.DragInt(name, ref val, i.Speed, i.Min, i.Max))
+                        {
+                            config.Value = val.ToString();
+                        }
+                        ImGuiHelper.ReactPopup(key, command, Reset);
+                    }
+                }
+                else
+                {
+                    continue;
+                }
+
+                ImGui.SameLine();
+                ImGui.TextWrapped($"{config.DisplayName}");
+                ImGuiHelper.ReactPopup(key, command, Reset, false);
+            }
+        }
+    }
+
+    #endregion
 
     #region About
     private static void DrawAbout()
@@ -1320,11 +1502,9 @@ public partial class RotationConfigWindow : Window
     private static readonly CollapsingHeaderGroup _rotationHeader = new(new()
     {
         { UiString.ConfigWindow_Rotation_Description.GetDescription, DrawRotationDescription },
-
+        
         { GetRotationStatusHead,  DrawRotationStatus },
         
-        { GetDutyRotationStatusHead,  DrawDutyRotationStatus },
-
         { UiString.ConfigWindow_Rotation_Configuration.GetDescription, DrawRotationConfiguration },
 
         { UiString.ConfigWindow_Rotation_Information.GetDescription, DrawRotationInformation },
@@ -1483,22 +1663,6 @@ public partial class RotationConfigWindow : Window
     private static void DrawRotationStatus()
     {
         DataCenter.CurrentRotation?.DisplayStatus();
-    }
-
-    private static string GetDutyRotationStatusHead()
-    {
-        DutyRotation? rotation = DataCenter.CurrentDutyRotation;
-        string status = UiString.ConfigWindow_DutyRotation_Status.GetDescription();
-        return rotation == null ? string.Empty : status;
-    }
-
-    private static void DrawDutyRotationStatus()
-    {
-        if (DataCenter.CurrentDutyRotation == null)
-        {
-            return;
-        }
-        DataCenter.CurrentDutyRotation?.DisplayStatus();
     }
 
     private static string ToCommandStr(OtherCommandType type, string str, string extra = "")
@@ -3658,6 +3822,7 @@ public partial class RotationConfigWindow : Window
         if (target is IBattleChara battleChara)
         {
             ImGui.Text($"NamePlate: {battleChara.GetNamePlateIcon()}");
+            ImGui.Text($"CanSee: {battleChara.CanSee()}");
             ImGui.Text($"Name Id: {battleChara.NameId}");
             ImGui.Text($"Data Id: {battleChara.DataId}");
             ImGui.Text($"HP: {battleChara.CurrentHp} / {battleChara.MaxHp}");

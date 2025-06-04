@@ -24,7 +24,7 @@ public sealed class PhantomDefault : PhantomRotation
     [RotationConfig(CombatType.PvE, Name = "Average party HP percent to predict to heal instead of damage things")]
     public float PredictBlessingThreshold { get; set; } = 0.5f;
 
-    HashSet<IBaseAction> _remainingCards = new HashSet<IBaseAction>(4);
+    readonly HashSet<IBaseAction> _remainingCards = new(4);
     private IBaseAction? _currentCard = null;
 
     public override void DisplayStatus()
@@ -98,7 +98,7 @@ public sealed class PhantomDefault : PhantomRotation
             return false;
         }
 
-        if (BattleBellPvE.CanUse(out act) && !BattleBellPvE.Target.Target.HasStatus(false, StatusID.BattleBell) && !BattleBellPvE.Target.Target.HasStatus(true, StatusID.BattleBell))
+        if (BattleBellPvE.CanUse(out act))
         {
             return true;
         }
@@ -374,22 +374,6 @@ public sealed class PhantomDefault : PhantomRotation
         return base.RaiseGCD(out act);
     }
 
-    public override bool DispelGCD(out IAction? act)
-    {
-        act = null;
-        if (HasLockoutStatus)
-        {
-            return false;
-        }
-
-        if (OccultDispelPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.DispelGCD(out act);
-    }
-
     public override bool HealSingleGCD(out IAction? act)
     {
         act = null;
@@ -478,6 +462,11 @@ public sealed class PhantomDefault : PhantomRotation
         }
 
         if (!InCombat && HastyMiragePvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (InCombat && OccultDispelPvE.CanUse(out act))
         {
             return true;
         }

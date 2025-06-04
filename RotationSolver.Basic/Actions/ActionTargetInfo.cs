@@ -1133,7 +1133,7 @@ public struct ActionTargetInfo(IBaseAction action)
             TargetType.PhantomMob => FindPhantomMob(),
             TargetType.PhantomBell => FindPhantomBell(),
             TargetType.PhantomRespite => FindPhantomRespite(),
-            //TargetType.PhantomDispel => FindPhantomDispel(),
+            TargetType.PhantomDispel => FindPhantomDispel(),
             TargetType.DancePartner => FindDancePartner(),
             TargetType.MimicryTarget => FindMimicryTarget(),
             TargetType.TheSpear => FindTheSpear(),
@@ -1143,10 +1143,20 @@ public struct ActionTargetInfo(IBaseAction action)
             _ => FindHostile(),
         };
 
-        //IBattleChara? FindPhantomDispel()
-        //{
-        //TODO: Need to figure out StatusIDs that can be dispelled first
-        //}
+        IBattleChara? FindPhantomDispel()
+        {
+            if (DataCenter.AllHostileTargets != null)
+            {
+                foreach (var hostile in DataCenter.AllHostileTargets)
+                {
+                    if (hostile != null && hostile.HasStatus(false, StatusHelper.PhantomDispellable))
+                    {
+                        return hostile;
+                    }
+                }
+            }
+            return null;
+        }
 
         IBattleChara? FindPhantomBell()
         {
@@ -1156,7 +1166,7 @@ public struct ActionTargetInfo(IBaseAction action)
             {
                 foreach (var x in DataCenter.AllTargets)
                 {
-                    if (x != null && !x.IsEnemy())
+                    if (x != null && !x.IsEnemy() && (!x.HasStatus(true, StatusID.BattleBell) || !x.HasStatus(false, StatusID.BattleBell)))
                     {
                         allMembers.Add(x);
                     }
@@ -1174,8 +1184,12 @@ public struct ActionTargetInfo(IBaseAction action)
                 }
             }
 
-            // Fallback: return self
-            return Player.Object;
+            // Fallback: only return self if self does NOT have BattleBell
+            if (!Player.Object.HasStatus(true, StatusID.BattleBell) || !Player.Object.HasStatus(false, StatusID.BattleBell))
+            {
+                return Player.Object;
+            }
+            return null;
         }
 
         IBattleChara? FindPhantomRespite()

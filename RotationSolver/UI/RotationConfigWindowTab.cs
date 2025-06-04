@@ -52,6 +52,9 @@ internal enum RotationConfigWindowTab : byte
     [Description("Configure general action usage and control settings.")]
     [TabIcon(Icon = 29)] Auto,
 
+    [Description("Configure Duty Rotation.")]
+    [TabIcon(Icon = 4)] Duty,
+
     [Description("Configure targeting settings.")]
     [TabIcon(Icon = 16)] Target,
 

@@ -148,6 +148,8 @@ public partial class DutyRotation : IDisposable
     /// </summary>
     public static IBattleChara? HostileTarget => DataCenter.HostileTarget;
 
+    internal IRotationConfigSet? DutyConfig { get; set; }
+
     /// <summary>
     /// Check if in combat.
     /// </summary>

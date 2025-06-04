@@ -187,7 +187,9 @@ public static class StatusHelper
     /// </summary>
     public static StatusID[] PhantomDispellable { get; } =
     [
-        //TODO: Add more statuses that can be dispelled by Occult Dispel.
+        StatusID.DamageUp_1161,
+        StatusID.DamageUp,
+        StatusID.DarkDefenses
     ];
 
     /// <summary>

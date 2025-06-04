@@ -14,6 +14,11 @@ internal class RotationConfigSet : IRotationConfigSet
     public HashSet<IRotationConfig> Configs { get; } = new HashSet<IRotationConfig>(new RotationConfigComparer());
 
     /// <summary>
+    /// Gets the collection of duty-specific rotation configurations.
+    /// </summary>
+    public HashSet<IRotationConfig> DutyConfigs { get; } = [];
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="RotationConfigSet"/> class.
     /// </summary>
     /// <param name="rotation">The custom rotation instance.</param>
