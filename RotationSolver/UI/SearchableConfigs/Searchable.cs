@@ -229,7 +229,7 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
         if (!filter.CanDraw)
         {
             // If no jobs are available in the filter, return early
-            if (!filter.AllJobs.Any())
+            if (filter.AllJobs.Length == 0)
             {
                 return;
             }
@@ -291,7 +291,7 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
             {
                 if (showDesc)
                 {
-                    ImGui.TextWrapped(Description);
+                    ImGui.BulletText(Description);
                 }
                 if (showDesc && Tooltips != null && Tooltips.Length > 0)
                 {

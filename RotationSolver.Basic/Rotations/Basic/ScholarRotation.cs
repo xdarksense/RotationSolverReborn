@@ -208,6 +208,7 @@ public partial class ScholarRotation
     {
         setting.ActionCheck = () => HasAetherflow;
         setting.UnlockedByQuestID = 66638;
+        setting.IsFriendly = true;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

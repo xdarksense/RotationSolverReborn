@@ -3,22 +3,18 @@
 /// <summary>
 /// The attribute for the UI configs.
 /// </summary>
+/// <remarks>
+/// Initializes a new instance of the <see cref="UIAttribute"/> class.
+/// </remarks>
+/// <param name="name">The name of this config.</param>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-public class UIAttribute : Attribute
+public class UIAttribute(string name) : Attribute
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="UIAttribute"/> class.
-    /// </summary>
-    /// <param name="name">The name of this config.</param>
-    public UIAttribute(string name)
-    {
-        Name = name;
-    }
 
     /// <summary>
     /// Gets the name of this config.
     /// </summary>
-    public string Name { get; }
+    public string Name { get; } = name;
 
     /// <summary>
     /// Gets or sets the description about this UI item.
