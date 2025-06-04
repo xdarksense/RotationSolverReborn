@@ -1,4 +1,6 @@
 ﻿using ECommons.Logging;
+using RotationSolver.Basic.Rotations.Duties;
+using static RotationSolver.Basic.Rotations.Duties.DutyRotation;
 
 namespace RotationSolver.Basic.Configuration.RotationConfig;
 
@@ -8,7 +10,8 @@ namespace RotationSolver.Basic.Configuration.RotationConfig;
 internal abstract class RotationConfigBase : IRotationConfig
 {
     private readonly PropertyInfo _property;
-    private readonly ICustomRotation _rotation;
+    private readonly ICustomRotation? _rotation;
+    private readonly DutyRotation? _dutyRotation;
 
     /// <summary>
     /// Gets the name of the configuration.
@@ -29,6 +32,11 @@ internal abstract class RotationConfigBase : IRotationConfig
     /// Gets the combat type of the configuration.
     /// </summary>
     public CombatType Type { get; }
+
+    /// <summary>
+    /// Gets the Phantom Job for the configuration.
+    /// </summary>
+    public PhantomJob PhantomJob { get; }
 
     /// <summary>
     /// Gets or sets the value of the configuration.
@@ -80,6 +88,39 @@ internal abstract class RotationConfigBase : IRotationConfig
     }
 
     /// <summary>
+    /// Initializes a new instance of the <see cref="RotationConfigBase"/> class.
+    /// </summary>
+    /// <param name="rotation">The custom rotation instance.</param>
+    /// <param name="property">The property information.</param>
+    protected RotationConfigBase(DutyRotation rotation, PropertyInfo property)
+    {
+        _property = property ?? throw new ArgumentNullException(nameof(property));
+        _dutyRotation = rotation ?? throw new ArgumentNullException(nameof(rotation));
+
+        Name = property.Name;
+        DefaultValue = property.GetValue(rotation)?.ToString() ?? string.Empty;
+        RotationConfigAttribute? attr = property.GetCustomAttribute<RotationConfigAttribute>();
+        if (attr != null)
+        {
+            DisplayName = attr.Name;
+            Type = attr.Type;
+            PhantomJob = attr.PhantomJob;
+
+        }
+        else
+        {
+            DisplayName = Name;
+            Type = CombatType.None;
+        }
+
+        // Set up initial value
+        if (Service.Config.RotationConfigurations.TryGetValue(Name, out string? value))
+        {
+            SetValue(value);
+        }
+    }
+
+    /// <summary>
     /// Sets the value of the property.
     /// </summary>
     /// <param name="value">The value to set.</param>
@@ -91,14 +132,20 @@ internal abstract class RotationConfigBase : IRotationConfig
             return;
         }
 
+        object? currentRotation = _rotation == null ? _dutyRotation : _rotation;
+        if (currentRotation == null)
+        {
+            return; // can't possible update a null rotation
+        }
+
         try
         {
-            _property.SetValue(_rotation, ChangeType(value, type));
+            _property.SetValue(currentRotation, ChangeType(value, type));
         }
         catch (Exception ex)
         {
             PluginLog.Error($"Failed to convert type: {ex.Message}");
-            _property.SetValue(_rotation, ChangeType(DefaultValue, type));
+            _property.SetValue(currentRotation, ChangeType(DefaultValue, type));
         }
     }
 

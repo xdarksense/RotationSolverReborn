@@ -1,4 +1,6 @@
-﻿namespace RotationSolver.Basic.Configuration.RotationConfig;
+﻿using RotationSolver.Basic.Rotations.Duties;
+
+namespace RotationSolver.Basic.Configuration.RotationConfig;
 
 /// <summary>
 /// Represents a string rotation configuration.
@@ -11,6 +13,16 @@ internal class RotationConfigString : RotationConfigBase
     /// <param name="rotation">The custom rotation instance.</param>
     /// <param name="property">The property information.</param>
     public RotationConfigString(ICustomRotation rotation, PropertyInfo property)
+        : base(rotation, property)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RotationConfigString"/> class.
+    /// </summary>
+    /// <param name="rotation">The custom rotation instance.</param>
+    /// <param name="property">The property information.</param>
+    public RotationConfigString(DutyRotation rotation, PropertyInfo property)
         : base(rotation, property)
     {
     }
