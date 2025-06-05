@@ -49,6 +49,7 @@ public partial class DutyRotation
     private static readonly BaseItem OccultElixirItem = new(47743);
     private static readonly BaseItem OccultPotionItem = new(47741);
     #endregion
+
     #region Status Tracking
 
     /// <summary>
@@ -177,7 +178,6 @@ public partial class DutyRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
-            IsEnabled = false,
         };
     }
 

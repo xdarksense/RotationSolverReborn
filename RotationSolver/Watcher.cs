@@ -29,11 +29,17 @@ public static class Watcher
     public static string ShowStrSelf { get; private set; } = string.Empty;
     public static string ShowStrEnemy { get; private set; } = string.Empty;
 
+    private static string? _cachedBranch = null;
+
     public static string DalamudBranch()
     {
+        if (_cachedBranch != null)
+            return _cachedBranch;
+
         const string stg = "stg";
         const string release = "release";
         const string other = "other";
+        string result = other;
 
         if (DalamudReflector.TryGetDalamudStartInfo(out Dalamud.Common.DalamudStartInfo? startinfo, Svc.PluginInterface))
         {
@@ -41,38 +47,28 @@ public static class Watcher
             {
                 try
                 {
-                    string file = File.ReadAllText(startinfo.ConfigurationPath);
-                    dynamic? ob = JsonConvert.DeserializeObject<dynamic>(file);
-                    string? type = ob?.DalamudBetaKind;
-                    if (type is not null && !string.IsNullOrEmpty(type))
+                    using var fs = File.OpenRead(startinfo.ConfigurationPath);
+                    using var doc = System.Text.Json.JsonDocument.Parse(fs);
+                    if (doc.RootElement.TryGetProperty("DalamudBetaKind", out var kindProp))
                     {
-                        return type switch
+                        string? type = kindProp.GetString();
+                        result = type switch
                         {
                             "stg" => stg,
                             "release" => release,
                             _ => other,
                         };
                     }
-                    else
-                    {
-                        PluginLog.Information("Dalamud release is not a string or null.");
-                        return other;
-                    }
                 }
-                catch (Exception ex)
+                catch
                 {
-                    PluginLog.Information($"Failed to read or deserialize configuration file: {ex.Message}");
-                    return other;
+                    result = other;
                 }
-            }
-            else
-            {
-                PluginLog.Information("Configuration file does not exist.");
-                return other;
             }
         }
-        PluginLog.Information("Failed to get Dalamud start info.");
-        return other;
+
+        _cachedBranch = result;
+        return result;
     }
 
     private static void ActionFromEnemy(ActionEffectSet set)
