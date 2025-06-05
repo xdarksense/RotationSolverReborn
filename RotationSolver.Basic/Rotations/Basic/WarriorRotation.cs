@@ -448,4 +448,10 @@ public partial class WarriorRotation
     {
         return PrimalRendPvE.CanUse(out act, skipAoeCheck: true) || base.MoveForwardGCD(out act);
     }
+
+    /// <inheritdoc/>
+    public override bool IsBursting()
+    {
+        return Player.HasStatus(true, StatusID.SurgingTempest);
+    }
 }

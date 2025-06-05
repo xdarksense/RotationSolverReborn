@@ -57,6 +57,9 @@ public partial class CustomRotation : ICustomRotation
     IRotationConfigSet ICustomRotation.Configs => _configs;
 
     /// <inheritdoc/>
+    bool ICustomRotation.IsInBurstWindow => IsBursting();
+
+    /// <inheritdoc/>
     public static Vector3? MoveTarget { get; internal set; }
 
     /// <inheritdoc/>
@@ -134,6 +137,14 @@ public partial class CustomRotation : ICustomRotation
     public override string ToString()
     {
         return GetType().GetCustomAttribute<RotationAttribute>()?.Name ?? GetType().Name;
+    }
+
+    /// <summary>
+    /// Gets whether this rotation is in burst window
+    /// </summary>
+    public virtual bool IsBursting()
+    {
+        return true;
     }
 
     /// <summary>

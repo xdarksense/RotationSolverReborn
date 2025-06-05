@@ -15,6 +15,16 @@ public partial class PaladinRotation
     /// </summary>
     public override bool CanHealAreaAbility => false;
 
+    /// <inheritdoc/>
+    public override bool IsBursting()
+    {
+        if (Player.HasStatus(true, StatusID.FightOrFlight) || FightOrFlightPvE.Cooldown.RecastTimeRemainOneCharge > 15f)
+        {
+            return true; // Either have Fight or Flight or more than 15 seconds until we can use it
+        }
+        return false;
+    }
+
     /// <summary>
     /// Holds the remaining amount of Requiescat stacks
     /// </summary>

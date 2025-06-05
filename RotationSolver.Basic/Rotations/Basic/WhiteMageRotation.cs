@@ -7,6 +7,16 @@ public partial class WhiteMageRotation
 
     private protected sealed override IBaseAction Raise => RaisePvE;
 
+    /// <inheritdoc/>
+    public override bool IsBursting()
+    {
+        if (Player.HasStatus(true, StatusID.PresenceOfMind) || PresenceOfMindPvE.Cooldown.RecastTimeRemainOneCharge > 15f)
+        {
+            return true; // Either have presence of mind or more than 15 seconds until we can presence of mind, use burst skills
+        }
+        return false;
+    }
+
     #region Job Gauge
     /// <summary>
     /// Represents the number of Lily stacks.
