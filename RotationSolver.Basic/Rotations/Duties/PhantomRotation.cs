@@ -631,7 +631,7 @@ public partial class DutyRotation
     static partial void ModifyStealPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => ThiefLevel >= 2;
-        setting.TargetType = TargetType.PhantomMob;
+        setting.TargetType = TargetType.LowHP;
     }
 
     /// <summary>
