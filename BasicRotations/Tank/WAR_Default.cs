@@ -182,7 +182,7 @@ public sealed class WAR_Default : WarriorRotation
     {
         if (ShakeItOffPvE.CanUse(out act, skipAoeCheck: true))
         {
-            return false;
+            return true;
         }
 
         return base.HealSingleAbility(nextGCD, out act);
