@@ -6,11 +6,28 @@ namespace RebornRotations.Duty;
 
 public sealed class PhantomDefault : PhantomRotation
 {
+    #region Configs
+    [RotationConfig(CombatType.PvE, Name = "Save Phantom Attacks for class specific damage bonus?")]
+    public bool SaveForBurstWindow { get; set; } = true;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Player HP percent needed to use Occult Resuscitation", PhantomJob = PhantomJob.Freelancer)]
+    public float OccultResuscitationThreshold { get; set; } = 0.7f;
+
     [RotationConfig(CombatType.PvE, Name = "Phantom Oracle - Use Invulnerability for Starfall", PhantomJob = PhantomJob.Oracle)]
     public bool SaveInvulnForStarfall { get; set; } = true;
 
-    [RotationConfig(CombatType.PvE, Name = "Save Phantom Attacks for class specific damage bonus?")]
-    public bool SaveForBurstWindow { get; set; } = true;
+    [Range(1, 15, ConfigUnitType.Yalms)]
+    [RotationConfig(CombatType.PvE, Name = "Max distance you can be from target for Phantom Kick use (Danger, you will die)", PhantomJob = PhantomJob.Monk)]
+    public float PhantomKickDistance { get; set; } = 5f;
+
+    [Range(0, 10000, ConfigUnitType.None, 1)]
+    [RotationConfig(CombatType.PvE, Name = "Your MP needed to use Occult Chakra", PhantomJob = PhantomJob.Monk)]
+    public int OccultChakraMPThreshold { get; set; } = 3000;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Your HP percentage needed to use Occult Chakra", PhantomJob = PhantomJob.Monk)]
+    public float OccultChakraHPThreshold { get; set; } = 0.3f;
 
     [RotationConfig(CombatType.PvE, Name = "Use Dark Cannon instead of Shock Cannon", PhantomJob = PhantomJob.Cannoneer)]
     public bool PreferDarkCannon { get; set; }
@@ -22,6 +39,32 @@ public sealed class PhantomDefault : PhantomRotation
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Average party HP percent to predict to heal instead of damage things", PhantomJob =PhantomJob.Oracle)]
     public float PredictBlessingThreshold { get; set; } = 0.5f;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Average party HP percent needed to use Occult Elixir", PhantomJob = PhantomJob.Chemist)]
+    public float OccultElixirThreshold { get; set; } = 0.3f;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Target HP percent needed to use Occult Potion", PhantomJob = PhantomJob.Chemist)]
+    public float OccultPotionThreshold { get; set; } = 0.5f;
+
+    [RotationConfig(CombatType.PvE, Name = "Only use Occult Potion on self", PhantomJob = PhantomJob.Chemist)]
+    public bool OccultPotionSelf { get; set; } = true;
+
+    [Range(0, 10000, ConfigUnitType.None, 1)]
+    [RotationConfig(CombatType.PvE, Name = "Target MP needed to use Occult Ether", PhantomJob = PhantomJob.Chemist)]
+    public int OccultEtherThreshold { get; set; } = 2000;
+
+    [RotationConfig(CombatType.PvE, Name = "Only use Occult Ether on self", PhantomJob = PhantomJob.Chemist)]
+    public bool OccultEtherSelf { get; set; } = true;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Suspend out of combat", PhantomJob = PhantomJob.Geomancer)]
+    public bool SuspendOut { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Suspend in combat", PhantomJob = PhantomJob.Geomancer)]
+    public bool SuspendIn { get; set; } = false;
+
+    #endregion
 
     readonly HashSet<IBaseAction> _remainingCards = new(4);
     private IBaseAction? _currentCard = null;
@@ -110,12 +153,12 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
-        if (InCombat && OffensiveAriaPvE.CanUse(out act))
+        if (InCombat && HerosRimePvE.CanUse(out act))
         {
             return true;
         }
 
-        if (InCombat && HerosRimePvE.CanUse(out act))
+        if (InCombat && OffensiveAriaPvE.CanUse(out act))
         {
             return true;
         }
@@ -130,9 +173,36 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
-        if (!InCombat && SuspendPvE.CanUse(out act))
+        if (SuspendPvE.CanUse(out act))
         {
-            return true;
+            if (!InCombat && SuspendOut)
+            {
+                return true;
+            }
+            if (InCombat && SuspendIn)
+            {
+                return true;
+            }
+        }
+
+        if (OccultEtherPvE.CanUse(out act) && InCombat)
+        {
+            if (!OccultEtherSelf)
+            {
+                if (OccultEtherPvE.Target.Target.CurrentMp < OccultEtherThreshold)
+                    return true;
+            }
+            else
+            {
+                if (OccultEtherPvE.Target.Target == Player && (Player.CurrentMp < OccultEtherThreshold))
+                    return true;
+            }
+        }
+
+        if (OccultChakraPvE.CanUse(out act) && InCombat)
+        {
+            if (Player.CurrentMp < OccultChakraMPThreshold)
+                return true;
         }
 
         return base.GeneralAbility(nextGCD, out act);
@@ -151,7 +221,7 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
-        if (OccultQuickPvE.CanUse(out act))
+        if (InCombat && OccultQuickPvE.CanUse(out act))
         {
             return true;
         }
@@ -184,8 +254,16 @@ public sealed class PhantomDefault : PhantomRotation
         {
             return true;
         }
-        
+
         if (PhantomKickPvE.CanUse(out act))
+        {
+            if (PhantomKickPvE.Target.Target.DistanceToPlayer() <= PhantomKickDistance)
+            {
+                return true;
+            }
+        }
+
+        if (PilferWeaponPvE.CanUse(out act))
         {
             return true;
         }
@@ -222,11 +300,6 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
-        if (CounterstancePvE.CanUse(out act))
-        {
-            return true;
-        }
-
         return base.DefenseSingleAbility(nextGCD, out act);
     }
 
@@ -254,11 +327,6 @@ public sealed class PhantomDefault : PhantomRotation
         }
 
         if (OccultMageMasherPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (PilferWeaponPvE.CanUse(out act))
         {
             return true;
         }
@@ -304,6 +372,26 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
+        if (OccultPotionPvE.CanUse(out act) && InCombat)
+        {
+            if (!OccultPotionSelf)
+            {
+                if (OccultPotionPvE.Target.Target.GetHealthRatio() < OccultPotionThreshold)
+                    return true;
+            }
+            else
+            {
+                if (OccultPotionPvE.Target.Target == Player && Player.GetHealthRatio() < OccultPotionThreshold)
+                    return true;
+            }
+        }
+
+        if (OccultChakraPvE.CanUse(out act) && InCombat)
+        {
+            if (Player.GetHealthRatio() < OccultChakraHPThreshold)
+                return true;
+        }
+
         return base.HealSingleAbility(nextGCD, out act);
     }
 
@@ -323,6 +411,14 @@ public sealed class PhantomDefault : PhantomRotation
         if ((PartyMembersAverHP < PredictJudgementThreshold || Player.GetHealthRatio() < PredictJudgementThreshold) && PhantomJudgmentPvE.CanUse(out act)) // Heal the party or self if we're below the heal + damage threshold
         {
             return true;
+        }
+
+        if (OccultElixirPvE.CanUse(out act))
+        {
+            if (InCombat && (PartyMembersAverHP < OccultElixirThreshold))
+            {
+                return true;
+            }
         }
 
         return base.HealAreaAbility(nextGCD, out act);
@@ -386,7 +482,10 @@ public sealed class PhantomDefault : PhantomRotation
 
         if (OccultResuscitationPvE.CanUse(out act))
         {
-            return true;
+            if (Player.GetHealthRatio() < OccultResuscitationThreshold)
+            {
+                return true;
+            }
         }
 
         return base.HealSingleGCD(out act);
@@ -526,6 +625,14 @@ public sealed class PhantomDefault : PhantomRotation
         if (IainukiPvE.CanUse(out act))
         {
             return true;
+        }
+
+        if (InCombat && CounterstancePvE.CanUse(out act))
+        {
+            if (CounterstancePvE.Target.Target == Player && CounterstancePvE.Setting.TargetType == TargetType.BeAttacked)
+            {
+                return true;
+            }
         }
 
         return base.GeneralGCD(out act);

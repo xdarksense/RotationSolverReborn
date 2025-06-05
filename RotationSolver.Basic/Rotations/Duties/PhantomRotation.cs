@@ -23,7 +23,6 @@ public partial class DutyRotation
         ImGui.Text($"ActivePhantomJob: {ActivePhantomJob ?? "N/A"}");
         ImGui.Spacing();
 
-        // Use string comparison since ActivePhantomJob is a string, not a type
         if (string.Equals(ActivePhantomJob, "Oracle", StringComparison.OrdinalIgnoreCase))
         {
             ImGui.Text($"HasCleansing: {HasCleansing}");
@@ -31,8 +30,25 @@ public partial class DutyRotation
             ImGui.Text($"HasPhantomJudgment: {HasPhantomJudgment}");
             ImGui.Text($"HasBlessing: {HasBlessing}");
         }
+
+        if (string.Equals(ActivePhantomJob, "Samurai", StringComparison.OrdinalIgnoreCase))
+        {
+            ImGui.Text($"Has item for Zeninage: {ZeninageItem.HasIt}");
+        }
+
+        if (string.Equals(ActivePhantomJob, "Chemist", StringComparison.OrdinalIgnoreCase))
+        {
+            ImGui.Text($"Has item for Occult Potion: {OccultPotionItem.HasIt}");
+            ImGui.Text($"Has item for Occult Ether: {OccultPotionItem.HasIt}");
+            ImGui.Text($"Has item for Occult Elixir: {OccultElixirItem.HasIt}");
+        }
     }
 
+    #region Item Tracking
+    private static readonly BaseItem ZeninageItem = new(47740);
+    private static readonly BaseItem OccultElixirItem = new(47743);
+    private static readonly BaseItem OccultPotionItem = new(47741);
+    #endregion
     #region Status Tracking
 
     /// <summary>
@@ -81,10 +97,6 @@ public partial class DutyRotation
     {
         setting.ActionCheck = () => FreelancerLevel >= 5;
         setting.TargetType = TargetType.Self;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
     }
 
     /// <summary>
@@ -96,7 +108,7 @@ public partial class DutyRotation
         setting.ActionCheck = () => FreelancerLevel >= 10;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 1,
+            IsEnabled = false,
         };
     }
     #endregion
@@ -176,10 +188,8 @@ public partial class DutyRotation
     static partial void ModifyCounterstancePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => MonkLevel >= 3;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
+        setting.StatusProvide = [StatusID.Counterstance];
+        setting.TargetType = TargetType.Self;
     }
 
     /// <summary>
@@ -190,10 +200,6 @@ public partial class DutyRotation
     {
         setting.ActionCheck = () => MonkLevel >= 5;
         setting.TargetType = TargetType.Self;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
     }
     #endregion
 
@@ -232,6 +238,7 @@ public partial class DutyRotation
     static partial void ModifyMightyMarchPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => BardLevel >= 3;
+        setting.StatusProvide = [StatusID.MightyMarch];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -245,6 +252,7 @@ public partial class DutyRotation
     static partial void ModifyHerosRimePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => BardLevel >= 4;
+        setting.StatusProvide = [StatusID.HerosRime];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -259,11 +267,9 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyOccultPotionPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ChemistLevel >= 1;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
+        setting.ActionCheck = () => ChemistLevel >= 1 && OccultPotionItem.HasIt;
+        setting.IsFriendly = true;
+        setting.MPOverride = () => 0;
     }
 
     /// <summary>
@@ -272,11 +278,9 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyOccultEtherPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ChemistLevel >= 2;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
+        setting.ActionCheck = () => ChemistLevel >= 2 && OccultPotionItem.HasIt;
+        setting.IsFriendly = true;
+        setting.MPOverride = () => 0;
     }
 
     /// <summary>
@@ -286,10 +290,7 @@ public partial class DutyRotation
     static partial void ModifyRevivePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => ChemistLevel >= 3;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
+        setting.IsFriendly = true;
     }
 
     /// <summary>
@@ -298,7 +299,9 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyOccultElixirPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ChemistLevel >= 4;
+        setting.ActionCheck = () => ChemistLevel >= 4 && OccultElixirItem.HasIt;
+        setting.IsFriendly = true;
+        setting.MPOverride = () => 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -342,10 +345,6 @@ public partial class DutyRotation
     static partial void ModifyOccultMageMasherPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => TimeMageLevel >= 3;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
     }
 
     /// <summary>
@@ -356,10 +355,6 @@ public partial class DutyRotation
     {
         setting.ActionCheck = () => TimeMageLevel >= 4;
         setting.TargetType = TargetType.PhantomDispel;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
     }
 
     /// <summary>
@@ -369,10 +364,7 @@ public partial class DutyRotation
     static partial void ModifyOccultQuickPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => TimeMageLevel >= 5;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
+        setting.StatusProvide = [StatusID.OccultQuick, StatusID.OccultSwift];
     }
     #endregion
 
@@ -454,10 +446,6 @@ public partial class DutyRotation
     static partial void ModifyPredictPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => OracleLevel >= 1;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
     }
 
     /// <summary>
@@ -520,10 +508,6 @@ public partial class DutyRotation
     {
         setting.ActionCheck = () => OracleLevel >= 2;
         setting.StatusProvide = [StatusID.Recuperation_4271, StatusID.FortifiedRecuperation];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
     }
 
     /// <summary>
@@ -535,10 +519,6 @@ public partial class DutyRotation
         setting.ActionCheck = () => OracleLevel >= 3 && InCombat;
         setting.TargetType = TargetType.PhantomMob;
         setting.TargetStatusProvide = [StatusID.PhantomDoom];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
     }
 
     /// <summary>
@@ -549,10 +529,6 @@ public partial class DutyRotation
     {
         setting.ActionCheck = () => OracleLevel >= 4;
         setting.StatusProvide = [StatusID.PhantomRejuvenation];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
     }
 
     /// <summary>
@@ -563,10 +539,6 @@ public partial class DutyRotation
     {
         setting.ActionCheck = () => OracleLevel >= 6;
         setting.TargetStatusProvide = [StatusID.Invulnerability];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
     }
     #endregion
 
@@ -578,10 +550,6 @@ public partial class DutyRotation
     static partial void ModifyRagePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => BerserkerLevel >= 1;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
     }
 
     /// <summary>
@@ -591,10 +559,6 @@ public partial class DutyRotation
     static partial void ModifyDeadlyBlowPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => BerserkerLevel >= 2;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
     }
     #endregion
 
@@ -606,10 +570,7 @@ public partial class DutyRotation
     static partial void ModifyPhantomAimPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => RangerLevel >= 1;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
+        setting.StatusProvide = [StatusID.DeadlyPhantomAim];
     }
 
     /// <summary>
@@ -620,10 +581,6 @@ public partial class DutyRotation
     {
         setting.TargetType = TargetType.Move;
         setting.ActionCheck = () => RangerLevel >= 2;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
     }
 
     /// <summary>
@@ -647,6 +604,7 @@ public partial class DutyRotation
     static partial void ModifyOccultUnicornPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => RangerLevel >= 6;
+        setting.StatusProvide = [StatusID.OccultUnicorn];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -662,10 +620,7 @@ public partial class DutyRotation
     static partial void ModifyOccultSprintPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => ThiefLevel >= 1;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
+        setting.StatusProvide = [StatusID.OccultSprint];
     }
 
     /// <summary>
@@ -676,10 +631,6 @@ public partial class DutyRotation
     {
         setting.ActionCheck = () => ThiefLevel >= 2;
         setting.TargetType = TargetType.PhantomMob;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
     }
 
     /// <summary>
@@ -689,10 +640,7 @@ public partial class DutyRotation
     static partial void ModifyVigilancePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => ThiefLevel >= 3 && !InCombat;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
+        setting.StatusProvide = [StatusID.Vigilance];
     }
 
     /// <summary>
@@ -715,10 +663,7 @@ public partial class DutyRotation
     static partial void ModifyPilferWeaponPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => ThiefLevel >= 5;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
+        setting.TargetStatusProvide = [StatusID.WeaponPilfered];
     }
     #endregion
 
@@ -731,10 +676,6 @@ public partial class DutyRotation
     {
         setting.ActionCheck = () => SamuraiLevel >= 1;
         setting.TargetType = TargetType.Interrupt;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
     }
 
     /// <summary>
@@ -746,10 +687,6 @@ public partial class DutyRotation
         setting.ActionCheck = () => SamuraiLevel >= 2;
         setting.TargetType = TargetType.Self;
         setting.StatusNeed = [StatusID.Shirahadori];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
     }
 
     /// <summary>
@@ -771,11 +708,8 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyZeninagePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => SamuraiLevel >= 4;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            AoeCount = 1,
-        };
+        setting.ActionCheck = () => SamuraiLevel >= 4 && ZeninageItem.HasIt;
+        setting.MPOverride = () => 0;
     }
     #endregion
 
@@ -787,7 +721,7 @@ public partial class DutyRotation
     static partial void ModifyBattleBellPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => GeomancerLevel >= 1;
-        setting.TargetStatusProvide = [StatusID.BattleBell]; // This doesn't actually do anything with the custom targeting
+        setting.TargetStatusProvide = [StatusID.BattleBell]; 
         setting.TargetType = TargetType.PhantomBell;
     }
 
@@ -797,7 +731,6 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyWeatherPvE(ref ActionSetting setting)
     {
-        //TODO: Implement Weather logic, will need bespoke targeting
         //this isn't a real action
     }
 
@@ -807,7 +740,6 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifySunbathPvE(ref ActionSetting setting)
     {
-        //TODO: Implement Weather logic, will need bespoke targeting
         setting.ActionCheck = () => GeomancerLevel >= 2;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -821,7 +753,6 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyCloudyCaressPvE(ref ActionSetting setting)
     {
-        //TODO: Implement Weather logic, will need bespoke targeting
         setting.ActionCheck = () => GeomancerLevel >= 2;
         setting.StatusProvide = [StatusID.CloudyCaress];
         setting.CreateConfig = () => new ActionConfig()
@@ -836,7 +767,6 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyBlessedRainPvE(ref ActionSetting setting)
     {
-        //TODO: Implement Weather logic, will need bespoke targeting
         setting.ActionCheck = () => GeomancerLevel >= 2;
         setting.StatusProvide = [StatusID.BlessedRain];
         setting.CreateConfig = () => new ActionConfig()
@@ -851,7 +781,6 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyMistyMiragePvE(ref ActionSetting setting)
     {
-        //TODO: Implement Weather logic, will need bespoke targeting
         setting.ActionCheck = () => GeomancerLevel >= 2;
         setting.StatusProvide = [StatusID.MistyMirage];
         setting.CreateConfig = () => new ActionConfig()
@@ -866,7 +795,6 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyHastyMiragePvE(ref ActionSetting setting)
     {
-        //TODO: Implement Weather logic, will need bespoke targeting
         setting.ActionCheck = () => GeomancerLevel >= 2;
         setting.StatusProvide = [StatusID.HastyMirage];
         setting.CreateConfig = () => new ActionConfig()
@@ -881,7 +809,6 @@ public partial class DutyRotation
     /// <param name="setting">The action setting to modify.</param>
     static partial void ModifyAetherialGainPvE(ref ActionSetting setting)
     {
-        //TODO: Implement Weather logic, will need bespoke targeting
         setting.ActionCheck = () => GeomancerLevel >= 2;
         setting.StatusProvide = [StatusID.AetherialGain];
         setting.CreateConfig = () => new ActionConfig()
