@@ -604,7 +604,7 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
-        if (SilverCannonPvE.CanUse(out act, skipStatusProvideCheck: SilverCannonPvE.Target.Target.WillStatusEnd(11, true, StatusID.SilverSickness)))
+        if (SilverCannonPvE.CanUse(out act))
         {
             return true;
         }
