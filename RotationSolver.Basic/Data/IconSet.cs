@@ -2,6 +2,7 @@
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.ImGuiMethods;
+using ECommons.Throttlers;
 using Lumina.Excel.Sheets;
 using Svg;
 using System.Collections.Concurrent;
@@ -362,12 +363,49 @@ public static class IconSet
     /// <returns>The icon ID for the job.</returns>
     public static uint GetJobIcon(Job job, IconType type)
     {
-        const uint ADV_ICON_ID = 62143;
+        const uint AdvIconId = 62143;
 
-        return job == Job.ADV
-            ? ADV_ICON_ID
-            : !_icons.ContainsKey(type) || (uint)job - 1 >= _icons[type].Length
-            ? throw new ArgumentOutOfRangeException(nameof(job), "Invalid job or icon type.")
-            : _icons[type][(uint)job - 1];
+        if (job == Job.ADV)
+        {
+            return AdvIconId;
+        }
+
+        if (!_icons.TryGetValue(type, out var iconsForType))
+        {
+            throw new ArgumentOutOfRangeException(nameof(type), "Invalid icon type.");
+        }
+
+        int jobIndex = (int)job - 1;
+        if (jobIndex < 0 || jobIndex >= iconsForType.Length)
+        {
+            throw new ArgumentOutOfRangeException(nameof(job), "Invalid job for icon type.");
+        }
+
+        return iconsForType[jobIndex];
+    }
+
+    private static readonly IDalamudTextureWrap?[] OccultIcons = new IDalamudTextureWrap?[26];
+
+    /// <summary>
+    /// Gets the occult icon texture.
+    /// </summary>
+    public static IDalamudTextureWrap? GetOccultIcon()
+    {
+        if (DataCenter.IsInOccultCrescentOp)
+        {
+            var uld = Svc.PluginInterface.UiBuilder.LoadUld("ui/uld/MKDSupportJob.uld");
+            for (int i = 0; i < 26; i++)
+            {
+                OccultIcons[i] = uld.LoadTexturePart("ui/uld/MKDSupportJob_hr1.tex", i);
+            }
+
+            var job = (int)Rotations.Duties.DutyRotation.GetPhantomJob();
+            if (job >= 0 && job < 26)
+            {
+                return OccultIcons[job];
+            }
+        }
+
+        return null;
     }
 }

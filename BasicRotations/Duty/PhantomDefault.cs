@@ -250,11 +250,6 @@ public sealed class PhantomDefault : PhantomRotation
             return false;
         }
 
-        if (ZeninagePvE.CanUse(out act))
-        {
-            return true;
-        }
-
         if (PhantomKickPvE.CanUse(out act))
         {
             if (PhantomKickPvE.Target.Target.DistanceToPlayer() <= PhantomKickDistance)
@@ -552,7 +547,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool GeneralGCD(out IAction? act)
     {
         act = null;
-        if (HasLockoutStatus)
+        if (HasLockoutStatus || !Player.WillStatusEnd(0, true, StatusID.Reassembled))
         {
             return false;
         }
@@ -575,6 +570,11 @@ public sealed class PhantomDefault : PhantomRotation
         if (ShouldHoldBurst())
         {
             return false;
+        }
+
+        if (ZeninagePvE.CanUse(out act, skipComboCheck: true))
+        {
+            return true;
         }
 
         if (InCombat && PredictPvE.CanUse(out act))
