@@ -130,7 +130,7 @@ public class BaseAction : IBaseAction
 
     /// <inheritdoc/>
     public bool CanUse(out IAction act, bool isLastAbility = false, bool isFirstAbility = false, bool skipStatusProvideCheck = false, bool skipTargetStatusNeedCheck = false, bool skipComboCheck = false, bool skipCastingCheck = false,
-    bool usedUp = false, bool skipAoeCheck = false, bool skipTTKCheck = false, byte gcdCountForAbility = 0)
+    bool usedUp = false, bool skipAoeCheck = false, bool skipTTKCheck = false, byte gcdCountForAbility = 0, bool checkActionManagerDirectly = false)
     {
         act = this;
 
@@ -148,7 +148,7 @@ public class BaseAction : IBaseAction
             usedUp = true;
         }
 
-        if (!Info.BasicCheck(skipStatusProvideCheck, skipComboCheck, skipCastingCheck))
+        if (!Info.BasicCheck(skipStatusProvideCheck, skipComboCheck, skipCastingCheck, checkActionManagerDirectly))
         {
             return false;
         }

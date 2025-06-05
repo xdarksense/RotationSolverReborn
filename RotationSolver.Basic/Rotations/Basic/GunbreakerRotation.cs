@@ -584,4 +584,14 @@ public partial class GunbreakerRotation
         return (SuperbolidePvE.CanUse(out act)
             && Player.GetHealthRatio() <= Service.Config.HealthForDyingTanks) || base.EmergencyAbility(nextGCD, out act);
     }
+
+    /// <inheritdoc/>
+    public override bool IsBursting()
+    {
+        if (Player.HasStatus(true, StatusID.NoMercy) || NoMercyPvE.Cooldown.RecastTimeRemainOneCharge > 15f)
+        {
+            return true; // Either have No Mercy or more than 15 seconds until we can use it
+        }
+        return false;
+    }
 }

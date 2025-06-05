@@ -285,10 +285,10 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
-        //if (OccultCounterPvE.CanUse(out act))
-        //{
-        //    return true;
-        //}
+        if (OccultCounterPvE.CanUse(out act, checkActionManager: true))
+        {
+            return true;
+        }
         #endregion Burst abilities
 
         return base.AttackAbility(nextGCD, out act);
@@ -643,15 +643,19 @@ public sealed class PhantomDefault : PhantomRotation
             // logic if neither cannons effects can be used on target
             if (CannoneerLevel < 4 || DarkShockCannonImmuneUsage == DarkShockCannonImmuneStrategy.DarkCannon)
             {
-                if (DarkCannonPvE.Setting.TargetType == TargetType.HighHP && DarkCannonPvE.CanUse(out act))
+                DarkCannonPvE.Setting.TargetType = TargetType.HighHP; // Set the target type to HighHP so we can use it on targets that are immune to both blind and paralysis
+                if (DarkCannonPvE.CanUse(out act))
                 {
+                    DarkCannonPvE.Setting.TargetType = TargetType.DarkCannon; // Reset the target type to DarkCannon for next time
                     return true;
                 }
             }
             if (DarkShockCannonImmuneUsage == DarkShockCannonImmuneStrategy.ShockCannon)
             {
-                if (ShockCannonPvE.Setting.TargetType == TargetType.HighHP && ShockCannonPvE.CanUse(out act))
+                ShockCannonPvE.Setting.TargetType = TargetType.HighHP; // Set the target type to HighHP so we can use it on targets that are immune to both blind and paralysis
+                if (ShockCannonPvE.CanUse(out act))
                 {
+                    ShockCannonPvE.Setting.TargetType = TargetType.ShockCannon; // Reset the target type to ShockCannon for next time
                     return true;
                 }
             }
@@ -681,10 +685,7 @@ public sealed class PhantomDefault : PhantomRotation
 
         if (InCombat && CounterstancePvE.CanUse(out act))
         {
-            if (CounterstancePvE.Target.Target == Player && CounterstancePvE.Setting.TargetType == TargetType.BeAttacked)
-            {
-                return true;
-            }
+            return true; // Even if you're not directly being attacked this second, it's 1 GCD / minute for 15% less damage taken
         }
 
         return base.GeneralGCD(out act);

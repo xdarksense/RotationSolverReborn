@@ -180,34 +180,7 @@ public partial class DutyRotation : IDisposable
 
     public static bool InBurstWindow()
     {
-        // TODO: What other jobs have burst windows that affect Phantom Jobs?
-        if (DataCenter.Job == Job.BLM)
-        {
-            return Player.HasStatus(true, StatusID.LeyLines); // Should also check enochian but don't want to get their gauge from here; they should have it by the time they use leylines
-        }
-        //if (DataCenter.Job == Job.GNB)
-        //{
-        //    return Player.HasStatus(true, StatusID.NoMercy);
-        //}
-        //if (IsPLD)
-        //{
-        //    return Player.HasStatus(true, StatusID.FightOrFlight);
-        //}
-        if (DataCenter.Job == Job.SAM)
-        {
-            return Player.HasStatus(true, StatusID.Fugetsu) && Player.HasStatus(true, StatusID.Fuka);
-        }
-
-        if (DataCenter.Job == Job.WAR)
-        {
-            return Player.HasStatus(true, StatusID.SurgingTempest);
-        }
-        //if (DataCenter.Job == Job.WHM)
-        //{
-        //    return Player.HasStatus(true, StatusID.PresenceOfMind);
-        //}
-
-        return true; // We haven't added other jobs yet, so assume we are in burst window.
+        return DataCenter.CurrentRotation?.IsInBurstWindow == true;
     }
 
     public enum PhantomJob : byte

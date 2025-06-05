@@ -7,6 +7,16 @@ public partial class BlackMageRotation
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Intelligence;
 
+    /// <inheritdoc/>
+    public override bool IsBursting()
+    {
+        if (IsEnochianActive && (Player.HasStatus(true, StatusID.LeyLines) || LeyLinesPvE.Cooldown.RecastTimeRemainOneCharge > 15f))
+        {
+            return true; // Enochian is active and Ley Lines is available or has a long enough recast time remaining that we'll skip waiting
+        }
+        return false;
+    }
+
     // Umbral Soul level 35 now
     #region Job Gauge
 

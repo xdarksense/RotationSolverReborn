@@ -1,4 +1,4 @@
-﻿using Dalamud.Interface.Colors;
+﻿using FFXIVClientStructs.FFXIV.Client.Game.Event;
 
 namespace RotationSolver.Basic.Rotations.Duties;
 
@@ -318,11 +318,11 @@ public partial class DutyRotation
     {
         setting.ActionCheck = () => TimeMageLevel >= 1;
         setting.TargetStatusProvide = [StatusID.Slow_3493];
-        setting.TargetType = TargetType.PhantomMob;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
         };
+        setting.CanTarget = (tar) => !tar.IsBossFromIcon() && tar.IsAttackable() && tar.GetEventType() != EventHandlerContent.PublicContentDirector;
     }
 
     /// <summary>
@@ -354,7 +354,7 @@ public partial class DutyRotation
     static partial void ModifyOccultDispelPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => TimeMageLevel >= 4;
-        setting.TargetType = TargetType.PhantomDispel;
+        setting.CanTarget = tar => tar.HasStatus(false, StatusHelper.PhantomDispellable);
     }
 
     /// <summary>
@@ -518,8 +518,8 @@ public partial class DutyRotation
     static partial void ModifyPhantomDoomPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => OracleLevel >= 3 && InCombat;
-        setting.TargetType = TargetType.PhantomMob;
         setting.TargetStatusProvide = [StatusID.PhantomDoom];
+        setting.CanTarget = tar => !tar.IsBossFromIcon() && tar.IsAttackable() && tar.GetEventType() != EventHandlerContent.PublicContentDirector && tar.InCombat();
     }
 
     /// <summary>
@@ -631,7 +631,7 @@ public partial class DutyRotation
     static partial void ModifyStealPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => ThiefLevel >= 2;
-        setting.TargetType = TargetType.PhantomMob;
+        setting.TargetType = TargetType.LowHP;
     }
 
     /// <summary>

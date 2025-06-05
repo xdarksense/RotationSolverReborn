@@ -69,7 +69,8 @@ public interface IBaseAction : IAction
     /// <param name="skipAoeCheck">Skip aoe Check</param>
     /// <param name="skipTTKCheck">skip IsTimeToKillValid check in BaseAction</param>
     /// <param name="gcdCountForAbility">the gcd count for the ability.</param>
+    /// <param name="checkActionManager">Whether to check the in-game action manager in addition to our own internal logic.</param>
     /// <returns>can I use it</returns>
     bool CanUse(out IAction act, bool isLastAbility = false, bool isFirstAbility = false, bool skipStatusProvideCheck = false, bool skipTargetStatusNeedCheck = false, bool skipComboCheck = false, bool skipCastingCheck = false,
-        bool usedUp = false, bool skipAoeCheck = false, bool skipTTKCheck = false, byte gcdCountForAbility = 0);
+        bool usedUp = false, bool skipAoeCheck = false, bool skipTTKCheck = false, byte gcdCountForAbility = 0, bool checkActionManager = false);
 }

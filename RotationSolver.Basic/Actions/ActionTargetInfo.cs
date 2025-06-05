@@ -1149,10 +1149,8 @@ public struct ActionTargetInfo(IBaseAction action)
             TargetType.DarkCannon => FindDarkCannonTarget(),
             TargetType.ShockCannon => FindShockCannonTarget(),
             TargetType.HolyCannon => FindHolyCannon(),
-            TargetType.PhantomMob => FindPhantomMob(),
             TargetType.PhantomBell => FindPhantomBell(),
             TargetType.PhantomRespite => FindPhantomRespite(),
-            TargetType.PhantomDispel => FindPhantomDispel(),
             TargetType.DancePartner => FindDancePartner(),
             TargetType.MimicryTarget => FindMimicryTarget(),
             TargetType.TheSpear => FindTheSpear(),
@@ -1215,21 +1213,6 @@ public struct ActionTargetInfo(IBaseAction action)
                         {
                             return hostile;
                         }
-                    }
-                }
-            }
-            return null;
-        }
-
-        IBattleChara? FindPhantomDispel()
-        {
-            if (DataCenter.AllHostileTargets != null)
-            {
-                foreach (var hostile in DataCenter.AllHostileTargets)
-                {
-                    if (hostile != null && hostile.HasStatus(false, StatusHelper.PhantomDispellable))
-                    {
-                        return hostile;
                     }
                 }
             }
@@ -1312,28 +1295,6 @@ public struct ActionTargetInfo(IBaseAction action)
 
             // Fallback: return self
             return Player.Object;
-        }
-
-        IBattleChara? FindPhantomMob()
-        {
-            if (DataCenter.AllHostileTargets.Count < 1)
-            {
-                return null;
-            }
-
-            foreach (IBattleChara battlechara in DataCenter.AllHostileTargets)
-            {
-                if (!battlechara.IsBossFromIcon() 
-                    && battlechara.IsAttackable() 
-                    && battlechara.GetEventType() != EventHandlerContent.PublicContentDirector 
-                    && ObjectHelper.DistanceToPlayer(battlechara) < 30)
-                {
-                    PluginLog.Debug($"FindPhantomDoom: {battlechara.Name} selected target.");
-                    return battlechara;
-                }
-            }
-
-            return null;
         }
 
         IBattleChara? FindDancePartner()
@@ -2445,10 +2406,8 @@ public enum TargetType : byte
     TheSpear,
     Kardia,
     Deployment,
-    PhantomMob,
     PhantomBell,
     PhantomRespite,
-    PhantomDispel,
     HolyCannon,
     DarkCannon,
     ShockCannon

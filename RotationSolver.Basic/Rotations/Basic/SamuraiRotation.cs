@@ -560,4 +560,10 @@ public partial class SamuraiRotation
         };
     }
     #endregion
+
+    /// <inheritdoc/>
+    public override bool IsBursting()
+    {
+        return Player.HasStatus(true, StatusID.Fugetsu) && Player.HasStatus(true, StatusID.Fuka);
+    }
 }

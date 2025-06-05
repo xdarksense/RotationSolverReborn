@@ -33,6 +33,11 @@ public interface ICustomRotation : ITexture
     bool ShowStatus { get; }
 
     /// <summary>
+    /// Gets a value indicating whether this rotation has burst damage skills up.
+    /// </summary>
+    bool IsInBurstWindow { get; }
+
+    /// <summary>
     /// Gets a value indicating whether this rotation is valid.
     /// </summary>
     bool IsValid { get; }
