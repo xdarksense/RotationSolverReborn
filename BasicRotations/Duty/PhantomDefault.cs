@@ -604,12 +604,12 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
-        if (HolyCannonPvE.CanUse(out act))
+        if (SilverCannonPvE.CanUse(out act))
         {
             return true;
         }
 
-        if (SilverCannonPvE.CanUse(out act))
+        if (HolyCannonPvE.CanUse(out act))
         {
             return true;
         }
