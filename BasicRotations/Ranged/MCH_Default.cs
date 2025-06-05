@@ -213,23 +213,27 @@ public sealed class MCH_Default : MachinistRotation
         if (!SpreadShotPvE.CanUse(out _))
         {
             // use AirAnchor if possible
-            if (HotShotMasteryTrait.EnoughLevel && AirAnchorPvE.CanUse(out act))
+            if (HotShotMasteryTrait.EnoughLevel 
+                && AirAnchorPvE.CanUse(out act))
             {
                 return true;
             }
 
             // for opener: only use the first charge of Drill after AirAnchor when there are two
-            if (EnhancedMultiweaponTrait.EnoughLevel && DrillPvE.CanUse(out act, usedUp: false))
+            if (EnhancedMultiweaponTrait.EnoughLevel 
+                && DrillPvE.CanUse(out act, usedUp: false || (DrillPvE.Cooldown.CurrentCharges == 1 && DrillPvE.Cooldown.WillHaveXChargesGCD(2, 1, 0))))
             {
                 return true;
             }
 
-            if (!EnhancedMultiweaponTrait.EnoughLevel && DrillPvE.CanUse(out act, usedUp: true))
+            if (!EnhancedMultiweaponTrait.EnoughLevel 
+                && DrillPvE.CanUse(out act, usedUp: true))
             {
                 return true;
             }
 
-            if (!AirAnchorPvE.EnoughLevel && HotShotPvE.CanUse(out act))
+            if (!AirAnchorPvE.EnoughLevel 
+                && HotShotPvE.CanUse(out act))
             {
                 return true;
             }
