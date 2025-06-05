@@ -389,6 +389,7 @@ public partial class DutyRotation
     static partial void ModifyHolyCannonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => CannoneerLevel >= 2;
+        setting.TargetType = TargetType.HolyCannon;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -402,7 +403,7 @@ public partial class DutyRotation
     static partial void ModifyDarkCannonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => CannoneerLevel >= 3;
-        setting.TargetStatusProvide = [StatusID.Blind];
+        setting.TargetType = TargetType.DarkCannon;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -416,7 +417,7 @@ public partial class DutyRotation
     static partial void ModifyShockCannonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => CannoneerLevel >= 4;
-        setting.TargetStatusProvide = [StatusID.Paralysis];
+        setting.TargetType = TargetType.ShockCannon;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

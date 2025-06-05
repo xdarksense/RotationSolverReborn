@@ -3839,9 +3839,17 @@ public partial class RotationConfigWindow : Window
             ImGui.Spacing();
             ImGui.Text($"FateID: {battleChara.FateId().ToString() ?? string.Empty}");
             ImGui.Text($"EventType: {battleChara.GetEventType().ToString() ?? string.Empty}");
+            ImGui.Text($"IsBozjanCEFateMob: {battleChara.IsBozjanCEFateMob()}");
+            ImGui.Spacing();
             ImGui.Text($"IsOccultCEMob: {battleChara.IsOccultCEMob()}");
             ImGui.Text($"IsOccultFateMob: {battleChara.IsOccultFateMob()}");
-            ImGui.Text($"IsBozjanCEFateMob: {battleChara.IsBozjanCEFateMob()}");
+            ImGui.Text($"IsOCUndeadTarget: {battleChara.IsOCUndeadTarget()}");
+            ImGui.Text($"IsOCSlowgaImmuneTarget: {battleChara.IsOCSlowgaImmuneTarget()}");
+            ImGui.Text($"IsOCDoomImmuneTarget: {battleChara.IsOCDoomImmuneTarget()}");
+            ImGui.Text($"IsOCStunImmuneTarget: {battleChara.IsOCStunImmuneTarget()}");
+            ImGui.Text($"IsOCFreezeImmuneTarget: {battleChara.IsOCFreezeImmuneTarget()}");
+            ImGui.Text($"IsOCBlindImmuneTarget: {battleChara.IsOCBlindImmuneTarget()}");
+            ImGui.Text($"IsOCParalysisImmuneTarget: {battleChara.IsOCParalysisImmuneTarget()}");
             ImGui.Spacing();
             ImGui.Text($"Is Current Focus Target: {battleChara.IsFocusTarget()}");
             ImGui.Text($"TTK: {battleChara.GetTTK()}");

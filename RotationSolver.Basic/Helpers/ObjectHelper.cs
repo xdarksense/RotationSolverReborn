@@ -625,7 +625,6 @@ public static class ObjectHelper
         13925, //Troubadour
         13923, //Geshunpest
         13927, //Dullahan
-
     };
 
     /// <summary>
@@ -633,7 +632,7 @@ public static class ObjectHelper
     /// </summary>
     public static bool IsOCUndeadTarget(this IBattleChara battleChara)
     {
-        return IsOCSlowgaImmuneList.Contains(battleChara.NameId);
+        return IsOCUndeadList.Contains(battleChara.NameId);
     }
 
     /// <summary>

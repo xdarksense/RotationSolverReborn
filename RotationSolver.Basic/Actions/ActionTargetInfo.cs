@@ -9,6 +9,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using RotationSolver.Basic.Configuration;
+using RotationSolver.Basic.Rotations.Duties;
 using static RotationSolver.Basic.Configuration.ConfigTypes;
 using AttackType = RotationSolver.Basic.Data.AttackType;
 using CombatRole = RotationSolver.Basic.Data.CombatRole;
@@ -440,7 +441,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
         if (range == 0 && EffectRange == 0)
         {
-            return new TargetResult(Player.Object, Array.Empty<IBattleChara>(), Player.Object.Position);
+            return new TargetResult(Player.Object, [], Player.Object.Position);
         }
 
         TargetType type = action.Setting.TargetType;
@@ -1145,6 +1146,9 @@ public struct ActionTargetInfo(IBaseAction action)
             TargetType.Range => battleChara != null ? RandomRangeTarget(battleChara) : null,
             TargetType.Magical => battleChara != null ? RandomMagicalTarget(battleChara) : null,
             TargetType.Physical => battleChara != null ? RandomPhysicalTarget(battleChara) : null,
+            TargetType.DarkCannon => FindDarkCannonTarget(),
+            TargetType.ShockCannon => FindShockCannonTarget(),
+            TargetType.HolyCannon => FindHolyCannon(),
             TargetType.PhantomMob => FindPhantomMob(),
             TargetType.PhantomBell => FindPhantomBell(),
             TargetType.PhantomRespite => FindPhantomRespite(),
@@ -1157,6 +1161,65 @@ public struct ActionTargetInfo(IBaseAction action)
             TargetType.Deployment => FindDeploymentTacticsTarget(),
             _ => FindHostile(),
         };
+
+        IBattleChara? FindDarkCannonTarget()
+        {
+            if (DataCenter.AllHostileTargets != null)
+            {
+                if (PhantomRotation.CannoneerLevel < 4)
+                {
+                    return FindHostile();
+                }
+                else
+                {
+                    foreach (var hostile in DataCenter.AllHostileTargets)
+                    {
+                        if (!hostile.IsOCBlindImmuneTarget() && hostile.InCombat())
+                        {
+                            return hostile;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        IBattleChara? FindShockCannonTarget()
+        {
+            if (DataCenter.AllHostileTargets != null)
+            {
+                foreach (var hostile in DataCenter.AllHostileTargets)
+                {
+                    if (!hostile.IsOCParalysisImmuneTarget() && hostile.InCombat())
+                    {
+                        return hostile;
+                    }
+                }
+            }
+            return null;
+        }
+
+        IBattleChara? FindHolyCannon()
+        {
+            if (DataCenter.AllHostileTargets != null)
+            {
+                if (PhantomRotation.CannoneerLevel < 6)
+                {
+                    return FindHostile();
+                }
+                else
+                {
+                    foreach (var hostile in DataCenter.AllHostileTargets)
+                    {
+                        if (hostile != null && hostile.IsOCUndeadTarget() && hostile.InCombat())
+                        {
+                            return hostile;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
 
         IBattleChara? FindPhantomDispel()
         {
@@ -2331,7 +2394,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
     private static IBattleChara? RandomPickByJobs(IEnumerable<IBattleChara> tars, params Job[] jobs)
     {
-        List<IBattleChara> targets = new();
+        List<IBattleChara> targets = [];
         foreach (var t in tars)
         {
             if (t.IsJobs(jobs))
@@ -2385,7 +2448,10 @@ public enum TargetType : byte
     PhantomMob,
     PhantomBell,
     PhantomRespite,
-    PhantomDispel
+    PhantomDispel,
+    HolyCannon,
+    DarkCannon,
+    ShockCannon
 }
 #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 

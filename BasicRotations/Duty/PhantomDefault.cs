@@ -1,4 +1,5 @@
 ﻿using RotationSolver.Basic.Rotations.Duties;
+using System.ComponentModel;
 
 namespace RebornRotations.Duty;
 
@@ -29,8 +30,29 @@ public sealed class PhantomDefault : PhantomRotation
     [RotationConfig(CombatType.PvE, Name = "Your HP percentage needed to use Occult Chakra", PhantomJob = PhantomJob.Monk)]
     public float OccultChakraHPThreshold { get; set; } = 0.3f;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Dark Cannon instead of Shock Cannon", PhantomJob = PhantomJob.Cannoneer)]
-    public bool PreferDarkCannon { get; set; }
+    [RotationConfig(CombatType.PvE, Name = "Use Dark Cannon or Shock Cannon in cases where the mob is immune to both blind and paralysis", PhantomJob = PhantomJob.Cannoneer)]
+    public DarkShockCannonImmuneStrategy DarkShockCannonImmuneUsage { get; set; } = DarkShockCannonImmuneStrategy.DarkCannon;
+
+    public enum DarkShockCannonImmuneStrategy : byte
+    {
+        [Description("Dark Cannon")]
+        DarkCannon,
+
+        [Description("Shock Cannon")]
+        ShockCannon,
+    }
+
+    [RotationConfig(CombatType.PvE, Name = "Use Dark Cannon or Shock Cannon in cases where the mob is susceptible to both blind and paralysis", PhantomJob = PhantomJob.Cannoneer)]
+    public DarkShockCannonStrategy DarkShockCannonUsage { get; set; } = DarkShockCannonStrategy.DarkCannon;
+
+    public enum DarkShockCannonStrategy : byte
+    {
+        [Description("Dark Cannon")]
+        DarkCannon,
+
+        [Description("Shock Cannon")]
+        ShockCannon,
+    }
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Average party HP percent to predict to heal with judgement instead of damage things", PhantomJob = PhantomJob.Oracle)]
@@ -582,27 +604,57 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
-        if (SilverCannonPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        //TODO: If enemy is undead should we prioritize this over SilverCannon?
-        //TODO2: Figure out a way to identify target is undead
         if (HolyCannonPvE.CanUse(out act))
         {
             return true;
         }
 
-        // Only one of shock or dark can be used, prioritize Shock unless PreferDarkCannon is set
-        if (!PreferDarkCannon && ShockCannonPvE.CanUse(out act))
+        if (SilverCannonPvE.CanUse(out act))
         {
             return true;
         }
 
-        if (DarkCannonPvE.CanUse(out act))
+        if (InCombat)
         {
-            return true;
+            // logic if both cannons effects can be used on target
+            if (ShockCannonPvE.CanUse(out _) && DarkCannonPvE.CanUse(out _))
+            {
+                if (DarkShockCannonUsage == DarkShockCannonStrategy.DarkCannon && DarkCannonPvE.CanUse(out act))
+                {
+                    return true;
+                }
+                if (DarkShockCannonUsage == DarkShockCannonStrategy.ShockCannon && ShockCannonPvE.CanUse(out act))
+                {
+                    return true;
+                }
+            }
+
+            // logic for each cannon effect seperately
+            if (DarkCannonPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (ShockCannonPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            // logic if neither cannons effects can be used on target
+            if (CannoneerLevel < 4 || DarkShockCannonImmuneUsage == DarkShockCannonImmuneStrategy.DarkCannon)
+            {
+                if (DarkCannonPvE.Setting.TargetType == TargetType.HighHP && DarkCannonPvE.CanUse(out act))
+                {
+                    return true;
+                }
+            }
+            if (DarkShockCannonImmuneUsage == DarkShockCannonImmuneStrategy.ShockCannon)
+            {
+                if (ShockCannonPvE.Setting.TargetType == TargetType.HighHP && ShockCannonPvE.CanUse(out act))
+                {
+                    return true;
+                }
+            }
         }
 
         if (PhantomFirePvE.CanUse(out act))
