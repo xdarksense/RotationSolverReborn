@@ -124,6 +124,13 @@ internal static class MiscUpdater
             && Svc.Objects.SearchById(Player.Object.CastTargetObjectId) is IBattleChara b
             && b.IsEnemy() && b.CurrentHp == 0;
 
+        // Cancel raise cast if target already has Raise status
+        bool tarHasRaise = false;
+        if (Svc.Objects.SearchById(Player.Object.CastTargetObjectId) is IBattleChara battleChara)
+        {
+            tarHasRaise = battleChara.HasStatus(false, StatusID.Raise);
+        }
+
         float[] statusTimes = GetStatusTimes();
 
         float minStatusTime = float.MaxValue;
@@ -137,7 +144,7 @@ internal static class MiscUpdater
 
         bool stopDueStatus = statusTimes.Length > 0 && minStatusTime > Player.Object.TotalCastTime - Player.Object.CurrentCastTime && minStatusTime < 5;
 
-        if (_tarStopCastDelay.Delay(tarDead) || stopDueStatus)
+        if (_tarStopCastDelay.Delay(tarDead) || stopDueStatus || tarHasRaise)
         {
             UIState* uiState = UIState.Instance();
             if (uiState != null)
