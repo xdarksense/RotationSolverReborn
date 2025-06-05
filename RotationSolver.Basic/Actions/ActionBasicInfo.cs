@@ -110,6 +110,15 @@ public readonly struct ActionBasicInfo
         }
     }
 
+
+    /// <summary>
+    /// Whether the action manager says the current ability is ready and valid.
+    /// </summary>
+    public unsafe bool ActionManagerStatusValid()
+    {
+        return ActionManager.Instance() != null && ActionManager.Instance()->GetActionStatus(ActionType.Action, ID) == 0;
+    }
+
     /// <summary>
     /// Determines whether the action is on the player's hotbar or slot.
     /// </summary>
@@ -159,8 +168,9 @@ public readonly struct ActionBasicInfo
     /// <param name="skipStatusProvideCheck">Whether to skip the status provide check.</param>
     /// <param name="skipComboCheck">Whether to skip the combo check.</param>
     /// <param name="skipCastingCheck">Whether to skip the casting check.</param>
+    /// /// <param name="checkActionManager">Whether to check the action manager directly for skills being usable.</param>
     /// <returns>True if the action passes the basic check; otherwise, false.</returns>
-    internal readonly bool BasicCheck(bool skipStatusProvideCheck, bool skipComboCheck, bool skipCastingCheck)
+    internal readonly bool BasicCheck(bool skipStatusProvideCheck, bool skipComboCheck, bool skipCastingCheck, bool checkActionManager = false)
     {
         if (Player.Object.StatusList == null)
         {
@@ -188,6 +198,13 @@ public readonly struct ActionBasicInfo
         }
 
         if (IsLimitBreakLevelLow() || !IsComboValid(skipComboCheck) || !IsRoleActionValid())
+        {
+            return false;
+        }
+
+        // In terms of "whether we can cast something" this check functionally negates everything else as we're asking the game directly if this is usable
+        // That *said* there is a lot of logic elsewhere here for prioritizing things, so we're simply going to add this as an optional check for handling abilities we want to verify are usable
+        if (checkActionManager && !ActionManagerStatusValid())
         {
             return false;
         }
