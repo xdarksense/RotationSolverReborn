@@ -6,10 +6,9 @@ namespace RotationSolver.Commands
 {
     public static partial class RSCommands
     {
-        public static string StateString { get; private set; } = "Off";
-        public static string SpecialString { get; private set; } = string.Empty;
+        public static string _stateString = "Off", _specialString = string.Empty;
 
-        internal static string EntryString => $"{StateString}{(DataCenter.SpecialTimeLeft < 0 ? string.Empty : $" - {SpecialString}: {DataCenter.SpecialTimeLeft:F2}s")}";
+        internal static string EntryString => $"{_stateString}{(DataCenter.SpecialTimeLeft < 0 ? string.Empty : $" - {_specialString}: {DataCenter.SpecialTimeLeft:F2}s")}";
 
         private static string _lastToastMessage = string.Empty;
 
@@ -37,14 +36,14 @@ namespace RotationSolver.Commands
         public static unsafe void DoStateCommandType(StateCommandType stateType, int index = -1)
         {
             DoOneCommandType((type, role) => type.ToStateString(role), role =>
-        {
-            if (DataCenter.State)
             {
-                stateType = AdjustStateType(stateType, ref index);
-            }
-            UpdateState(stateType, role);
-            return stateType;
-        });
+                if (DataCenter.State)
+                {
+                    stateType = AdjustStateType(stateType, ref index);
+                }
+                UpdateState(stateType, role);
+                return stateType;
+            });
         }
 
         private static StateCommandType AdjustStateType(StateCommandType stateType, ref int index)
@@ -106,23 +105,23 @@ namespace RotationSolver.Commands
                     break;
             }
 
-            StateString = stateType.ToStateString(role);
+            _stateString = stateType.ToStateString(role);
             UpdateToast();
         }
 
         private static void DoSpecialCommandType(SpecialCommandType specialType, bool sayout = true)
         {
             DoOneCommandType((type, role) => type.ToSpecialString(role), role =>
-        {
-            SpecialString = specialType.ToSpecialString(role);
-            DataCenter.SpecialType = specialType;
-            if (sayout)
             {
-                UpdateToast();
-            }
+                _specialString = specialType.ToSpecialString(role);
+                DataCenter.SpecialType = specialType;
+                if (sayout)
+                {
+                    UpdateToast();
+                }
 
-            return specialType;
-        });
+                return specialType;
+            });
         }
 
         private static void DoOneCommandType<T>(Func<T, JobRole, string> sayout, Func<JobRole, T> doingSomething)
