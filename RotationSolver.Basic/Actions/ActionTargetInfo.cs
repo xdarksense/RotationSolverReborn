@@ -1147,7 +1147,6 @@ public struct ActionTargetInfo(IBaseAction action)
             TargetType.Physical => battleChara != null ? RandomPhysicalTarget(battleChara) : null,
             TargetType.DarkCannon => FindDarkCannonTarget(),
             TargetType.ShockCannon => FindShockCannonTarget(),
-            TargetType.HolyCannon => FindHolyCannon(),
             TargetType.PhantomBell => FindPhantomBell(),
             TargetType.PhantomRespite => FindPhantomRespite(),
             TargetType.DancePartner => FindDancePartner(),
@@ -1190,28 +1189,6 @@ public struct ActionTargetInfo(IBaseAction action)
                     if (!hostile.IsOCParalysisImmuneTarget() && hostile.InCombat())
                     {
                         return hostile;
-                    }
-                }
-            }
-            return null;
-        }
-
-        IBattleChara? FindHolyCannon()
-        {
-            if (DataCenter.AllHostileTargets != null)
-            {
-                if (PhantomRotation.CannoneerLevel < 6)
-                {
-                    return FindHostile();
-                }
-                else
-                {
-                    foreach (var hostile in DataCenter.AllHostileTargets)
-                    {
-                        if (hostile != null && hostile.IsOCUndeadTarget() && hostile.InCombat())
-                        {
-                            return hostile;
-                        }
                     }
                 }
             }
@@ -2407,7 +2384,6 @@ public enum TargetType : byte
     Deployment,
     PhantomBell,
     PhantomRespite,
-    HolyCannon,
     DarkCannon,
     ShockCannon
 }

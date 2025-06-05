@@ -273,7 +273,22 @@ public partial class CustomRotation
         if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
         {
             IBaseAction.ShouldEndSpecial = true;
-            if (DataCenter.CurrentDutyRotation?.RaiseGCD(out act) == true || RaiseGCD(out act) || RaiseAction(out act, false))
+            if (DataCenter.CurrentDutyRotation?.RaiseGCD(out act) == true)
+            {
+                return true;
+            }
+            if (Player.HasStatus(true, StatusID.PhantomChemist))
+            {
+                if (Player.StatusStack(true, StatusID.PhantomChemist) > 2)
+                {
+                    return false;
+                }
+            }
+            if (RaiseGCD(out act))
+            {
+                return true;
+            }
+            if (RaiseAction(out act, false))
             {
                 return true;
             }
@@ -289,6 +304,14 @@ public partial class CustomRotation
         {
             return true;
         }
+        if (Player.HasStatus(true, StatusID.PhantomChemist))
+        {
+            if (Player.StatusStack(true, StatusID.PhantomChemist) > 2)
+            {
+                return false;
+            }
+        }
+
         if (RaiseGCD(out act))
         {
             return true;
@@ -350,13 +373,6 @@ public partial class CustomRotation
     protected virtual bool RaiseGCD(out IAction? act)
     {
         act = null;
-        if (Player.HasStatus(true, StatusID.PhantomChemist))
-        {
-            if (Player.StatusStack(true, StatusID.PhantomChemist) > 2)
-            {
-                return false;
-            }
-        }
 
         if (DataCenter.CommandStatus.HasFlag(AutoStatus.Raise))
         {

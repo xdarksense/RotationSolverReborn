@@ -61,6 +61,8 @@ public partial class DutyRotation
         StatusID.Overheated,
         StatusID.InnerRelease,
         StatusID.Eukrasia,
+        StatusID.Mudra,
+        StatusID.TenChiJin
     };
 
     /// <summary>
@@ -389,7 +391,6 @@ public partial class DutyRotation
     static partial void ModifyHolyCannonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => CannoneerLevel >= 2;
-        setting.TargetType = TargetType.HolyCannon;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

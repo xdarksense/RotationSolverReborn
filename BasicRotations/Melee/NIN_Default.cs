@@ -339,7 +339,7 @@ public sealed class NIN_Default : NinjaRotation
                 return false;
             }
         }
-        else if (TenPvE.CanUse(out _, usedUp: InTrickAttack))
+        else if (TenPvE.CanUse(out _, usedUp: InTrickAttack || (TenPvE.Cooldown.CurrentCharges == 1 && TenPvE.Cooldown.WillHaveXChargesGCD(2, 1, 0))))
         {
             // Chooses buffs or AoE actions based on combat conditions and cooldowns.
             // For instance, setting Huton for speed buff or choosing AoE Ninjutsu like Katon or Doton based on enemy positioning.
@@ -1357,4 +1357,14 @@ public sealed class NIN_Default : NinjaRotation
         return base.GeneralGCD(out act);
     }
     #endregion
+
+    /// <inheritdoc/>
+    public override bool IsBursting()
+    {
+        if (InTrickAttack)
+        {
+            return true;
+        }
+        return false;
+    }
 }
