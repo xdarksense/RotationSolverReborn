@@ -530,7 +530,6 @@ public partial class RotationConfigWindow : Window
     {
         Vector2 cursor = ImGui.GetCursorPos();
 
-        // Check if the rotation texture is available
         if (rotation.GetTexture(out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? jobIcon) && ImGuiHelper.SilenceImageButton(jobIcon.ImGuiHandle, Vector2.One * iconSize, _activeTab == RotationConfigWindowTab.Rotation))
         {
             _activeTab = RotationConfigWindowTab.Rotation;
@@ -558,12 +557,24 @@ public partial class RotationConfigWindow : Window
             });
         }
 
-        // Check if the icon texture is available
-        RotationAttribute? rotationTypeAttribute = rotation.GetType().GetCustomAttribute<RotationAttribute>();
-        if (rotationTypeAttribute != null && IconSet.GetTexture(rotationTypeAttribute.Type.GetIcon(), out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture))
+        if (!DataCenter.IsInOccultCrescentOp)
         {
-            ImGui.SetCursorPos(cursor + (Vector2.One * iconSize / 2));
-            ImGui.Image(texture.ImGuiHandle, Vector2.One * iconSize / 2);
+            RotationAttribute? rotationTypeAttribute = rotation.GetType().GetCustomAttribute<RotationAttribute>();
+            if (rotationTypeAttribute != null && IconSet.GetTexture(rotationTypeAttribute.Type.GetIcon(), out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture))
+            {
+                ImGui.SetCursorPos(cursor + (Vector2.One * iconSize / 2));
+                ImGui.Image(texture.ImGuiHandle, Vector2.One * iconSize / 2);
+            }
+        }
+
+        if (DataCenter.IsInOccultCrescentOp && DutyRotation.GetPhantomJob() != DutyRotation.PhantomJob.None)
+        {
+            var occultIcon = IconSet.GetOccultIcon();
+            if (occultIcon != null)
+            {
+                ImGui.SetCursorPos(cursor + (Vector2.One * iconSize / 2));
+                ImGui.Image(occultIcon.ImGuiHandle, Vector2.One * iconSize / 2);
+            }
         }
     }
 
@@ -784,6 +795,166 @@ public partial class RotationConfigWindow : Window
             return;
         }
         DataCenter.CurrentDutyRotation?.DisplayStatus();
+    }
+
+    private static void DrawDutyRotationConfiguration()
+    {
+        DutyRotation? rotation = DataCenter.CurrentDutyRotation;
+        if (rotation == null)
+        {
+            return;
+        }
+
+        if (!Player.AvailableThreadSafe)
+        {
+            return;
+        }
+
+        if (!DataCenter.IsInOccultCrescentOp) // Can be theoretically extended for other duty actions if needed
+        {
+            return;
+        }
+
+        IRotationConfigSet set = rotation.Configs;
+
+        if (set.Any())
+        {
+            ImGui.Separator();
+        }
+
+        foreach (IRotationConfig config in set.Configs)
+        {
+            if (!config.Type.HasFlag(CombatType.PvE))
+            {
+                continue;
+            }
+
+            string key = rotation.GetType().FullName ?? rotation.GetType().Name + "." + config.Name;
+            string name = $"##{config.GetHashCode()}_{key}.Name";
+            string command = ToCommandStr(OtherCommandType.DutyRotations, config.Name, config.DefaultValue);
+            void Reset()
+            {
+                config.Value = config.DefaultValue;
+            }
+
+            ImGuiHelper.PrepareGroup(key, command, Reset);
+
+            DutyRotation.PhantomJob phantomJob = DutyRotation.GetPhantomJob();
+
+            if (config is RotationConfigCombo c)
+            {
+                if (c.PhantomJob != DutyRotation.PhantomJob.None && c.PhantomJob != phantomJob)
+                {
+                    continue;
+                }
+                string[] names = c.DisplayValues;
+                string selectedValue = c.Value;
+
+                // Ensure the selected value matches the description, not the enum name
+                int index = names.IndexOf(n => n.Equals(selectedValue, StringComparison.OrdinalIgnoreCase));
+                if (index == -1)
+                {
+                    index = 0; // Fallback to the first item if no match is found
+                }
+
+                string longest = "";
+                for (int i = 0; i < c.DisplayValues.Length; i++)
+                {
+                    if (c.DisplayValues[i].Length > longest.Length)
+                        longest = c.DisplayValues[i];
+                }
+                ImGui.SetNextItemWidth(ImGui.CalcTextSize(longest).X + (50 * Scale));
+                if (ImGui.Combo(name, ref index, names, names.Length))
+                {
+                    c.Value = names[index];
+                }
+            }
+            else if (config is RotationConfigBoolean b)
+            {
+                if (b.PhantomJob != DutyRotation.PhantomJob.None && b.PhantomJob != phantomJob)
+                {
+                    continue;
+                }
+                if (bool.TryParse(config.Value, out bool val))
+                {
+                    if (ImGui.Checkbox(name, ref val))
+                    {
+                        config.Value = val.ToString();
+                    }
+                    ImGuiHelper.ReactPopup(key, command, Reset);
+                }
+            }
+            else if (config is RotationConfigFloat f)
+            {
+                if (f.PhantomJob != DutyRotation.PhantomJob.None && f.PhantomJob != phantomJob)
+                {
+                    continue;
+                }
+                if (float.TryParse(config.Value, out float val))
+                {
+                    ImGui.SetNextItemWidth(Scale * Searchable.DRAG_WIDTH);
+
+                    if (f.UnitType == ConfigUnitType.Percent)
+                    {
+                        float displayValue = val * 100;
+                        if (ImGui.SliderFloat(name, ref displayValue, f.Min * 100, f.Max * 100, $"{displayValue:F1}{f.UnitType.ToSymbol()}"))
+                        {
+                            config.Value = (displayValue / 100).ToString();
+                        }
+                    }
+                    else
+                    {
+                        if (ImGui.DragFloat(name, ref val, f.Speed, f.Min, f.Max, $"{val:F2}{f.UnitType.ToSymbol()}"))
+                        {
+                            config.Value = val.ToString();
+                        }
+                    }
+                    ImguiTooltips.HoveredTooltip(f.UnitType.GetDescription());
+
+                    ImGuiHelper.ReactPopup(key, command, Reset);
+                }
+            }
+            else if (config is RotationConfigString s)
+            {
+                if (s.PhantomJob != DutyRotation.PhantomJob.None && s.PhantomJob != phantomJob)
+                {
+                    continue;
+                }
+                string val = config.Value;
+
+                ImGui.SetNextItemWidth(ImGui.GetWindowWidth());
+                if (ImGui.InputTextWithHint(name, config.DisplayName, ref val, 128))
+                {
+                    config.Value = val;
+                }
+                ImGuiHelper.ReactPopup(key, command, Reset);
+                continue;
+            }
+            else if (config is RotationConfigInt i)
+            {
+                if (i.PhantomJob != DutyRotation.PhantomJob.None && i.PhantomJob != phantomJob)
+                {
+                    continue;
+                }
+                if (int.TryParse(config.Value, out int val))
+                {
+                    ImGui.SetNextItemWidth(Scale * Searchable.DRAG_WIDTH);
+                    if (ImGui.DragInt(name, ref val, i.Speed, i.Min, i.Max))
+                    {
+                        config.Value = val.ToString();
+                    }
+                    ImGuiHelper.ReactPopup(key, command, Reset);
+                }
+            }
+            else
+            {
+                continue;
+            }
+
+            ImGui.SameLine();
+            ImGui.TextWrapped($"{config.DisplayName}");
+            ImGuiHelper.ReactPopup(key, command, Reset, false);
+        }
     }
     #endregion
 
@@ -1337,8 +1508,6 @@ public partial class RotationConfigWindow : Window
         
         { UiString.ConfigWindow_Rotation_Configuration.GetDescription, DrawRotationConfiguration },
 
-        { UiString.ConfigWindow_DutyRotation_Configuration.GetDescription, DrawDutyRotationConfiguration },
-
         { UiString.ConfigWindow_Rotation_Information.GetDescription, DrawRotationInformation },
     });
 
@@ -1874,166 +2043,6 @@ public partial class RotationConfigWindow : Window
 
                 ImGui.EndTable();
             }
-        }
-    }
-
-    private static void DrawDutyRotationConfiguration()
-    {
-        DutyRotation? rotation = DataCenter.CurrentDutyRotation;
-        if (rotation == null)
-        {
-            return;
-        }
-
-        if (!Player.AvailableThreadSafe)
-        {
-            return;
-        }
-
-        if (!DataCenter.IsInOccultCrescentOp) // Can be theoretically extended for other duty actions if needed
-        {
-            return;
-        }
-
-        IRotationConfigSet set = rotation.Configs;
-
-        if (set.Any())
-        {
-            ImGui.Separator();
-        }
-
-        foreach (IRotationConfig config in set.Configs)
-        {
-            if (!config.Type.HasFlag(CombatType.PvE))
-            {
-                continue;
-            }
-
-            string key = rotation.GetType().FullName ?? rotation.GetType().Name + "." + config.Name;
-            string name = $"##{config.GetHashCode()}_{key}.Name";
-            string command = ToCommandStr(OtherCommandType.DutyRotations, config.Name, config.DefaultValue);
-            void Reset()
-            {
-                config.Value = config.DefaultValue;
-            }
-
-            ImGuiHelper.PrepareGroup(key, command, Reset);
-
-            DutyRotation.PhantomJob phantomJob = DutyRotation.GetPhantomJob();
-
-            if (config is RotationConfigCombo c)
-            {
-                if (c.PhantomJob != DutyRotation.PhantomJob.None && c.PhantomJob != phantomJob)
-                {
-                    continue;
-                }
-                string[] names = c.DisplayValues;
-                string selectedValue = c.Value;
-
-                // Ensure the selected value matches the description, not the enum name
-                int index = names.IndexOf(n => n.Equals(selectedValue, StringComparison.OrdinalIgnoreCase));
-                if (index == -1)
-                {
-                    index = 0; // Fallback to the first item if no match is found
-                }
-
-                string longest = "";
-                for (int i = 0; i < c.DisplayValues.Length; i++)
-                {
-                    if (c.DisplayValues[i].Length > longest.Length)
-                        longest = c.DisplayValues[i];
-                }
-                ImGui.SetNextItemWidth(ImGui.CalcTextSize(longest).X + (50 * Scale));
-                if (ImGui.Combo(name, ref index, names, names.Length))
-                {
-                    c.Value = names[index];
-                }
-            }
-            else if (config is RotationConfigBoolean b)
-            {
-                if (b.PhantomJob != DutyRotation.PhantomJob.None && b.PhantomJob != phantomJob)
-                {
-                    continue;
-                }
-                if (bool.TryParse(config.Value, out bool val))
-                {
-                    if (ImGui.Checkbox(name, ref val))
-                    {
-                        config.Value = val.ToString();
-                    }
-                    ImGuiHelper.ReactPopup(key, command, Reset);
-                }
-            }
-            else if (config is RotationConfigFloat f)
-            {
-                if (f.PhantomJob != DutyRotation.PhantomJob.None && f.PhantomJob != phantomJob)
-                {
-                    continue;
-                }
-                if (float.TryParse(config.Value, out float val))
-                {
-                    ImGui.SetNextItemWidth(Scale * Searchable.DRAG_WIDTH);
-
-                    if (f.UnitType == ConfigUnitType.Percent)
-                    {
-                        float displayValue = val * 100;
-                        if (ImGui.SliderFloat(name, ref displayValue, f.Min * 100, f.Max * 100, $"{displayValue:F1}{f.UnitType.ToSymbol()}"))
-                        {
-                            config.Value = (displayValue / 100).ToString();
-                        }
-                    }
-                    else
-                    {
-                        if (ImGui.DragFloat(name, ref val, f.Speed, f.Min, f.Max, $"{val:F2}{f.UnitType.ToSymbol()}"))
-                        {
-                            config.Value = val.ToString();
-                        }
-                    }
-                    ImguiTooltips.HoveredTooltip(f.UnitType.GetDescription());
-
-                    ImGuiHelper.ReactPopup(key, command, Reset);
-                }
-            }
-            else if (config is RotationConfigString s)
-            {
-                if (s.PhantomJob != DutyRotation.PhantomJob.None && s.PhantomJob != phantomJob)
-                {
-                    continue;
-                }
-                string val = config.Value;
-
-                ImGui.SetNextItemWidth(ImGui.GetWindowWidth());
-                if (ImGui.InputTextWithHint(name, config.DisplayName, ref val, 128))
-                {
-                    config.Value = val;
-                }
-                ImGuiHelper.ReactPopup(key, command, Reset);
-                continue;
-            }
-            else if (config is RotationConfigInt i)
-            {
-                if (i.PhantomJob != DutyRotation.PhantomJob.None && i.PhantomJob != phantomJob)
-                {
-                    continue;
-                }
-                if (int.TryParse(config.Value, out int val))
-                {
-                    ImGui.SetNextItemWidth(Scale * Searchable.DRAG_WIDTH);
-                    if (ImGui.DragInt(name, ref val, i.Speed, i.Min, i.Max))
-                    {
-                        config.Value = val.ToString();
-                    }
-                    ImGuiHelper.ReactPopup(key, command, Reset);
-                }
-            }
-            else
-            {
-                continue;
-            }
-
-            ImGui.SameLine();
-            ImGui.TextWrapped($"{config.DisplayName}");
-            ImGuiHelper.ReactPopup(key, command, Reset, false);
         }
     }
 

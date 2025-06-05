@@ -6,9 +6,10 @@ namespace RotationSolver.Commands
 {
     public static partial class RSCommands
     {
-        public static string _stateString = "Off", _specialString = string.Empty;
+        public static string StateString { get; private set; } = "Off";
+        public static string SpecialString { get; private set; } = string.Empty;
 
-        internal static string EntryString => $"{_stateString}{(DataCenter.SpecialTimeLeft < 0 ? string.Empty : $" - {_specialString}: {DataCenter.SpecialTimeLeft:F2}s")}";
+        internal static string EntryString => $"{StateString}{(DataCenter.SpecialTimeLeft < 0 ? string.Empty : $" - {SpecialString}: {DataCenter.SpecialTimeLeft:F2}s")}";
 
         private static string _lastToastMessage = string.Empty;
 
@@ -105,7 +106,7 @@ namespace RotationSolver.Commands
                     break;
             }
 
-            _stateString = stateType.ToStateString(role);
+            StateString = stateType.ToStateString(role);
             UpdateToast();
         }
 
@@ -113,7 +114,7 @@ namespace RotationSolver.Commands
         {
             DoOneCommandType((type, role) => type.ToSpecialString(role), role =>
         {
-            _specialString = specialType.ToSpecialString(role);
+            SpecialString = specialType.ToSpecialString(role);
             DataCenter.SpecialType = specialType;
             if (sayout)
             {

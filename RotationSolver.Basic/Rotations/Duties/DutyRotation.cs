@@ -1,6 +1,5 @@
 ﻿using Dalamud.Game.ClientState.Objects.SubKinds;
 using ECommons.ExcelServices;
-using RotationSolver.Basic.Configuration;
 
 namespace RotationSolver.Basic.Rotations.Duties;
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
@@ -198,6 +197,11 @@ public partial class DutyRotation : IDisposable
         {
             return Player.HasStatus(true, StatusID.Fugetsu) && Player.HasStatus(true, StatusID.Fuka);
         }
+
+        if (DataCenter.Job == Job.WAR)
+        {
+            return Player.HasStatus(true, StatusID.SurgingTempest);
+        }
         //if (DataCenter.Job == Job.WHM)
         //{
         //    return Player.HasStatus(true, StatusID.PresenceOfMind);
@@ -208,20 +212,20 @@ public partial class DutyRotation : IDisposable
 
     public enum PhantomJob : byte
     {
-        None,
         Freelancer,
         Knight,
+        Berserker,
         Monk,
+        Ranger,
+        Samurai,
         Bard,
-        Chemist,
+        Geomancer,
         TimeMage,
         Cannoneer,
+        Chemist,
         Oracle,
-        Berserker,
-        Ranger,
         Thief,
-        Samurai,
-        Geomancer
+        None
     }
 
     public static PhantomJob GetPhantomJob()
