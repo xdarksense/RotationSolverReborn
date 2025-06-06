@@ -255,7 +255,7 @@ public sealed class BRD_Default : BardRotation
             return true;
         }
 
-        if (PitchPerfectPvE.CanUse(out act, skipCastingCheck: true, skipAoeCheck: true, skipComboCheck: true))
+        if (PitchPerfectPvE.CanUse(out act, skipAoeCheck: true, skipComboCheck: true))
         {
             if (SongEndAfter(3) && Repertoire > 0)
             {
