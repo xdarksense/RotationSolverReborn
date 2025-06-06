@@ -103,6 +103,10 @@ internal partial class Configs : IPluginConfiguration
     Filter = Extra)]
     private static readonly bool _poslockCasting = false;
 
+    [ConditionBool, UI("(Experimental) Attempt to mitigate cast cancelling with movement tech in BMR).",
+    Filter = Extra)]
+    private static readonly bool _bmrLock = false;
+
     [UI("", Action = ActionID.PassageOfArmsPvE, Parent = nameof(PoslockCasting))]
     public bool PosPassageOfArms { get; set; } = false;
 

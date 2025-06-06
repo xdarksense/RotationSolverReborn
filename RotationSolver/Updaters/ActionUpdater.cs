@@ -134,17 +134,16 @@ internal static class ActionUpdater
         }
     }
 
+    private static bool _lastIsMoving = false;
     private static DateTime _startMovingTime = DateTime.MinValue;
     private static DateTime _stopMovingTime = DateTime.MinValue;
     private static void UpdateMoving(DateTime now)
     {
-        bool last = DataCenter.IsMoving;
-        DataCenter.IsMoving = Player.IsMoving;
-        if (last && !DataCenter.IsMoving)
+        if (_lastIsMoving && !DataCenter.IsMoving)
         {
             _stopMovingTime = now;
         }
-        else if (DataCenter.IsMoving && !last)
+        else if (DataCenter.IsMoving && !_lastIsMoving)
         {
             _startMovingTime = now;
         }
@@ -156,6 +155,8 @@ internal static class ActionUpdater
         DataCenter.MovingRaw = DataCenter.IsMoving
             ? Math.Min(10, (float)(now - _startMovingTime).TotalSeconds)
             : 0;
+
+        _lastIsMoving = DataCenter.IsMoving;
     }
 
     private static DateTime _startDeadTime = DateTime.MinValue;

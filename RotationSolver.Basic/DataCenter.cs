@@ -267,7 +267,7 @@ internal static class DataCenter
         }
     }
 
-    public static bool IsMoving { get; internal set; }
+    public static bool IsMoving => Player.IsMoving;
 
     internal static float StopMovingRaw { get; set; }
 

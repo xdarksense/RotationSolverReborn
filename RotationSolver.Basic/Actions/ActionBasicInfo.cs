@@ -177,6 +177,11 @@ public readonly struct ActionBasicInfo
             return false;
         }
 
+        if (NeedsCasting(!skipCastingCheck) && DataCenter.IsMoving && Service.Config.BmrLock)
+        {
+            return false;
+        }
+
         if (!IsActionEnabled() || !IsOnSlot)
         {
             return false;
@@ -264,9 +269,25 @@ public readonly struct ActionBasicInfo
 
     private bool NeedsCasting(bool skipCastingCheck)
     {
-        return CastTime > 0 && !Player.Object.HasStatus(true, [StatusID.Swiftcast, StatusID.Triplecast, StatusID.Dualcast]) && !ActionsNoNeedCasting.Contains(ID) &&
-               (DataCenter.SpecialType == SpecialCommandType.NoCasting || (DateTime.Now > DataCenter.KnockbackStart && DateTime.Now < DataCenter.KnockbackFinished) ||
-                (DataCenter.NoPoslock && DataCenter.IsMoving && !skipCastingCheck));
+        // Must have a cast time
+        if (CastTime <= 0)
+            return false;
+
+        // Must not have a instant cast status
+        if (!Player.Object.WillStatusEnd(0, true, StatusHelper.SwiftcastStatus))
+            return false;
+
+        // Must not be in the no-cast list
+        if (ActionsNoNeedCasting.Contains(ID))
+            return false;
+
+        // Must be in a state where casting is not possible
+        if (DataCenter.SpecialType == SpecialCommandType.NoCasting ||
+            (DateTime.Now > DataCenter.KnockbackStart && DateTime.Now < DataCenter.KnockbackFinished) ||
+            (DataCenter.NoPoslock && DataCenter.IsMoving && !skipCastingCheck))
+            return true;
+
+        return false;
     }
 
     private bool IsStatusProvidedDuringGCD()
