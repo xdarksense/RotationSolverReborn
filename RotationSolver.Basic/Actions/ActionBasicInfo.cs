@@ -172,41 +172,36 @@ public readonly struct ActionBasicInfo
     /// <returns>True if the action passes the basic check; otherwise, false.</returns>
     internal readonly bool BasicCheck(bool skipStatusProvideCheck, bool skipComboCheck, bool skipCastingCheck, bool checkActionManager = false)
     {
+
+        // 1. Player and action slot checks
         if (Player.Object.StatusList == null)
         {
             return false;
         }
-
-        if (NeedsCasting(!skipCastingCheck) && DataCenter.IsMoving && Service.Config.BmrLock)
-        {
-            return false;
-        }
-
         if (!IsActionEnabled() || !IsOnSlot)
         {
             return false;
         }
 
-        if (IsLimitBreak && !DataCenter.IsPvP)
-        {
-            return true;
-        }
-
+        // 2. Basic requirements: not disabled, enough level, enough MP, spell unlocked
         if (IsActionDisabled() || !EnoughLevel || !HasEnoughMP() || !SpellUnlocked)
         {
             return false;
         }
 
+        // 3. Status checks: need or provide
         if (IsStatusNeeded() || IsStatusProvided(skipStatusProvideCheck))
         {
             return false;
         }
 
-        if (IsLimitBreakLevelLow() || !IsComboValid(skipComboCheck) || !IsRoleActionValid())
+        // 4. Combo and role checks
+        if (!IsComboValid(skipComboCheck) || !IsRoleActionValid())
         {
             return false;
         }
 
+        // 5. Optional: ask the game directly if the action is usable
         // In terms of "whether we can cast something" this check functionally negates everything else as we're asking the game directly if this is usable
         // That *said* there is a lot of logic elsewhere here for prioritizing things, so we're simply going to add this as an optional check for handling abilities we want to verify are usable
         if (checkActionManager && !ActionManagerStatusValid())
@@ -215,6 +210,29 @@ public readonly struct ActionBasicInfo
         }
 
         return !NeedsCasting(skipCastingCheck) && (!IsGeneralGCD || !IsStatusProvidedDuringGCD()) && IsActionCheckValid() && IsRotationCheckValid();
+    }
+
+    private bool NeedsCasting(bool skipCastingCheck)
+    {
+        // Must have a cast time
+        if (CastTime <= 0f)
+            return false;
+
+        // Must not have a instant cast status
+        if (!Player.Object.WillStatusEnd(0, true, StatusHelper.SwiftcastStatus))
+            return false;
+
+        // Must not be in the no-cast list
+        if (ActionsNoNeedCasting.Contains(ID))
+            return false;
+
+        // Must be in a state where casting is not possible
+        if (DataCenter.SpecialType == SpecialCommandType.NoCasting ||
+            (DateTime.Now > DataCenter.KnockbackStart && DateTime.Now < DataCenter.KnockbackFinished) ||
+            (DataCenter.NoPoslock && DataCenter.IsMoving && !skipCastingCheck))
+            return true;
+
+        return false;
     }
 
     /// <summary>
@@ -247,11 +265,6 @@ public readonly struct ActionBasicInfo
         return Player.Object.StatusList != null && !skipStatusProvideCheck && _action.Setting.StatusProvide != null && !Player.Object.WillStatusEndGCD(_action.Config.StatusGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusProvide);
     }
 
-    private bool IsLimitBreakLevelLow()
-    {
-        return _action.Action.ActionCategory.RowId == 15 && CustomRotation.LimitBreakLevel <= 1;
-    }
-
     private bool IsComboValid(bool skipComboCheck)
     {
         return skipComboCheck || !IsGeneralGCD || CheckForCombo();
@@ -265,29 +278,6 @@ public readonly struct ActionBasicInfo
     private bool IsRotationCheckValid()
     {
         return IBaseAction.ForceEnable || (_action.Setting.RotationCheck?.Invoke() ?? true);
-    }
-
-    private bool NeedsCasting(bool skipCastingCheck)
-    {
-        // Must have a cast time
-        if (CastTime <= 0)
-            return false;
-
-        // Must not have a instant cast status
-        if (!Player.Object.WillStatusEnd(0, true, StatusHelper.SwiftcastStatus))
-            return false;
-
-        // Must not be in the no-cast list
-        if (ActionsNoNeedCasting.Contains(ID))
-            return false;
-
-        // Must be in a state where casting is not possible
-        if (DataCenter.SpecialType == SpecialCommandType.NoCasting ||
-            (DateTime.Now > DataCenter.KnockbackStart && DateTime.Now < DataCenter.KnockbackFinished) ||
-            (DataCenter.NoPoslock && DataCenter.IsMoving && !skipCastingCheck))
-            return true;
-
-        return false;
     }
 
     private bool IsStatusProvidedDuringGCD()
