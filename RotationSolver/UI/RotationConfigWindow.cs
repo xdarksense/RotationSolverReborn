@@ -47,6 +47,9 @@ public partial class RotationConfigWindow : Window
     private List<IncompatiblePlugin> _crashPlugins = [];
     private List<IncompatiblePlugin> _enabledIncompatiblePlugins = [];
     private DiagInfo? _cachedDiagInfo;
+    private RotationAttribute _curRotationAttribute = new("Unknown", CombatType.PvE);
+    private ICustomRotation? _currentRotation;
+    private Dictionary<RotationConfigWindowTab, (bool, uint)> _configWindowTabProperties = [];
 
     public RotationConfigWindow()
     : base("###rsrConfigWindow", ImGuiWindowFlags.NoScrollbar, false)
@@ -85,6 +88,20 @@ public partial class RotationConfigWindow : Window
         else
         {
             PluginLog.Error("Failed to get Dalamud start info.");
+        }
+
+        if (_configWindowTabProperties.Count == 0)
+        {
+            foreach (RotationConfigWindowTab tab in Enum.GetValues<RotationConfigWindowTab>())
+            {
+                bool shouldSkip = false;
+                if (tab.GetAttribute<TabSkipAttribute>() != null)
+                {
+                    shouldSkip = true;
+                }
+
+                _configWindowTabProperties[tab] = (shouldSkip, tab.GetAttribute<TabIconAttribute>()?.Icon ?? 0);
+            }
         }
 
         base.OnOpen();
@@ -325,7 +342,7 @@ public partial class RotationConfigWindow : Window
             foreach (RotationConfigWindowTab item in Enum.GetValues<RotationConfigWindowTab>())
             {
                 // Skip the tab if it has the TabSkipAttribute
-                if (item.GetAttribute<TabSkipAttribute>() != null)
+                if (_configWindowTabProperties[item].Item1)
                 {
                     continue;
                 }
@@ -345,7 +362,7 @@ public partial class RotationConfigWindow : Window
                 }
 
                 // Reverse the order of these to do the non-interop check first
-                if (wholeWidth <= JOB_ICON_WIDTH * Scale && IconSet.GetTexture(item.GetAttribute<TabIconAttribute>()?.Icon ?? 0, out IDalamudTextureWrap? icon))
+                if (wholeWidth <= JOB_ICON_WIDTH * Scale && IconSet.GetTexture(_configWindowTabProperties[item].Item2, out IDalamudTextureWrap? icon))
                 {
                     ImGuiHelper.DrawItemMiddle(() =>
                     {
@@ -411,7 +428,6 @@ public partial class RotationConfigWindow : Window
     private void DrawHeader(float wholeWidth)
     {
         float size = MathF.Max(MathF.Min(wholeWidth, Scale * 128), Scale * MIN_COLUMN_WIDTH);
-
         if (IconSet.GetTexture((uint)0, out IDalamudTextureWrap? overlay))
         {
             ImGuiHelper.DrawItemMiddle(() =>
@@ -433,7 +449,6 @@ public partial class RotationConfigWindow : Window
             }, wholeWidth, size);
             ImGui.Spacing();
         }
-
         ICustomRotation? rotation = DataCenter.CurrentRotation;
 
         if (rotation == null)
@@ -470,18 +485,23 @@ public partial class RotationConfigWindow : Window
             return;
         }
 
-        var playerJob = (Job)(Player.Object?.ClassJob.RowId ?? 0);
+        var playerJob = Player.Job;
 
-        Type[] rotations = RotationUpdater.GetRotations(playerJob, DataCenter.IsPvP ? CombatType.PvP : CombatType.PvE);
+        ICustomRotation[] rotations = RotationUpdater.GetRotations(playerJob, DataCenter.IsPvP ? CombatType.PvP : CombatType.PvE);
 
-        RotationAttribute? rot = rotation.GetType().GetCustomAttribute<RotationAttribute>();
-        if (rot == null)
+        if (_currentRotation != rotation)
         {
-            return;
+            RotationAttribute? rot = rotation.GetAttributes();
+            if (rot == null)
+            {
+                return;
+            }
+            _currentRotation = rotation;
+            _curRotationAttribute = rot;
         }
 
         float iconSize = Math.Max(Scale * MIN_COLUMN_WIDTH, Math.Min(wholeWidth, Scale * JOB_ICON_WIDTH));
-        float comboSize = ImGui.CalcTextSize(rot.Name).X;
+        float comboSize = ImGui.CalcTextSize(_curRotationAttribute.Name).X;
 
         ImGuiHelper.DrawItemMiddle(() =>
         {
@@ -511,18 +531,12 @@ public partial class RotationConfigWindow : Window
         {
             ImguiTooltips.ShowTooltip(() =>
             {
-                Type rotationType = rotation.GetType();
-                RotationAttribute? rotationAttribute = rotationType.GetCustomAttribute<RotationAttribute>();
+                ImGui.Text($"{rotation.Name} ({_curRotationAttribute.Name})");
+                _curRotationAttribute.Type.Draw();
 
-                if (rotationAttribute != null)
+                if (!string.IsNullOrEmpty(rotation.Description))
                 {
-                    ImGui.Text($"{rotation.Name} ({rotationAttribute.Name})");
-                    rotationAttribute.Type.Draw();
-
-                    if (!string.IsNullOrEmpty(rotation.Description))
-                    {
-                        ImGui.Text(rotation.Description);
-                    }
+                    ImGui.Text(rotation.Description);
                 }
             });
         }
@@ -545,22 +559,14 @@ public partial class RotationConfigWindow : Window
         }
     }
 
-    private static void DrawRotationCombo(float comboSize, Type[] rotations, ICustomRotation rotation)
+    private void DrawRotationCombo(float comboSize, ICustomRotation[] rotations, ICustomRotation rotation)
     {
         ImGui.SetNextItemWidth(comboSize);
         const string popUp = "Rotation Solver Select Rotation";
-
-        RotationAttribute? rot = rotation.GetType().GetCustomAttribute<RotationAttribute>();
-        if (rot == null)
+        var rotationColor = rotation.GetColor();
+        using (ImRaii.Color color = ImRaii.PushColor(ImGuiCol.Text, rotationColor))
         {
-            // Handle the case where the attribute is not found
-            ImGui.Text("Rotation attribute not found.");
-            return;
-        }
-
-        using (ImRaii.Color color = ImRaii.PushColor(ImGuiCol.Text, rotation.GetColor()))
-        {
-            if (ImGui.Selectable(rot.Name + "##RotationName:" + rotation.Name))
+            if (ImGui.Selectable(_curRotationAttribute.Name + "##RotationName:" + rotation.Name))
             {
                 if (!ImGui.IsPopupOpen(popUp))
                 {
@@ -568,14 +574,13 @@ public partial class RotationConfigWindow : Window
                 }
             }
         }
-
         using (ImRaii.IEndObject popup = ImRaii.Popup(popUp))
         {
             if (popup)
             {
-                foreach (Type r in rotations)
+                foreach (ICustomRotation r in rotations)
                 {
-                    RotationAttribute? rAttr = r.GetCustomAttribute<RotationAttribute>();
+                    RotationAttribute? rAttr = r.GetAttributes();
                     if (rAttr == null)
                     {
                         continue;
@@ -593,17 +598,17 @@ public partial class RotationConfigWindow : Window
                         }
                     }
                     ImGui.SameLine();
-                    ImGui.PushStyleColor(ImGuiCol.Text, r.GetCustomAttribute<BetaRotationAttribute>() == null
+                    ImGui.PushStyleColor(ImGuiCol.Text, r.IsBeta()
                         ? ImGuiColors.DalamudWhite : ImGuiColors.DalamudOrange);
                     if (ImGui.Selectable(rAttr.Name))
                     {
                         if (DataCenter.IsPvP)
                         {
-                            Service.Config.PvPRotationChoice = r.FullName;
+                            Service.Config.PvPRotationChoice = r.GetType().FullName;
                         }
                         else
                         {
-                            Service.Config.RotationChoice = r.FullName;
+                            Service.Config.RotationChoice = r.GetType().FullName;
                         }
                         Service.Config.Save();
                     }
@@ -613,18 +618,16 @@ public partial class RotationConfigWindow : Window
             }
         }
 
-        string warning = "Game version: " + rot.GameVersion;
+        string warning = "Game version: " + _curRotationAttribute.GameVersion;
         if (!rotation.IsValid)
         {
             warning += "\n" + string.Format(UiString.ConfigWindow_Rotation_InvalidRotation.GetDescription(),
                 rotation.GetType().Assembly.GetInfo().Author);
         }
-
         if (rotation.IsBeta())
         {
-            warning += "\n" + UiString.ConfigWindow_Rotation_BetaRotation.ToString();
+            warning += "\n" + UiString.ConfigWindow_Rotation_BetaRotation.GetDescription();
         }
-
         warning += "\n \n" + UiString.ConfigWindow_Helper_SwitchRotation.GetDescription();
         ImguiTooltips.HoveredTooltip(warning);
     }

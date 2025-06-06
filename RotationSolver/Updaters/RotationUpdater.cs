@@ -608,7 +608,7 @@ internal static class RotationUpdater
         return result;
     }
 
-    public static Type[] GetRotations(Job playerJob, CombatType combatType)
+    public static ICustomRotation[] GetRotations(Job playerJob, CombatType combatType)
     {
         if (Player.Object == null || CustomRotations.Length < 22) // If we haven't loaded rotations, we don't have anything to return
         {
@@ -630,16 +630,7 @@ internal static class RotationUpdater
 
             if (validCustomRotations.TryGetValue(combatType, out List<ICustomRotation>? validCustomRotationsList))
             {
-                List<Type> rotations = [];
-                foreach (ICustomRotation rotation in validCustomRotationsList)
-                {
-                    Type? type = rotation.GetType();
-                    if (type != null && !rotations.Contains(type))
-                    {
-                        rotations.Add(type);
-                    }
-                }
-                return [.. rotations];
+                return [.. validCustomRotationsList];
             }
         }
 

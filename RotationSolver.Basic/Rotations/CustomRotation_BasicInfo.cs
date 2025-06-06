@@ -12,6 +12,7 @@ public partial class CustomRotation : ICustomRotation
     private Job? _job = null;
     private JobRole? _role = null;
     private string? _name = null;
+    private string? _description = null;
     private readonly IRotationConfigSet _configs;
 
     /// <summary>
@@ -63,7 +64,7 @@ public partial class CustomRotation : ICustomRotation
     public static Vector3? MoveTarget { get; internal set; }
 
     /// <inheritdoc/>
-    public string Description => GetType().GetCustomAttribute<RotationAttribute>()?.Description ?? string.Empty;
+    public string Description => _description ??= GetType().GetCustomAttribute<RotationAttribute>()?.Description ?? string.Empty;
 
     /// <inheritdoc/>
     public IAction? ActionHealAreaGCD { get; private set; }
