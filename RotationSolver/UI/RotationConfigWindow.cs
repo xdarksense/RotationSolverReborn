@@ -1117,7 +1117,6 @@ public partial class RotationConfigWindow : Window
         DisplayCommandHelp(SpecialCommandType.RaiseShirk);
         DisplayCommandHelp(SpecialCommandType.AntiKnockback);
         DisplayCommandHelp(SpecialCommandType.Burst);
-        DisplayCommandHelp(SpecialCommandType.LimitBreak);
         DisplayCommandHelp(SpecialCommandType.NoCasting);
     }
 
