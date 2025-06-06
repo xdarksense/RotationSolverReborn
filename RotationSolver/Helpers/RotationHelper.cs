@@ -7,6 +7,8 @@ namespace RotationSolver.Helpers;
 internal static class RotationHelper
 {
     private static readonly Dictionary<Assembly, AssemblyInfo> _assemblyInfos = [];
+    private static readonly Dictionary<ICustomRotation, bool> _betaInfo = [];
+    private static readonly Dictionary<ICustomRotation, RotationAttribute> _rotationAttributes = [];
 
     public static List<LoadedAssembly> LoadedCustomRotations { get; } = [];
 
@@ -44,8 +46,29 @@ internal static class RotationHelper
 
     public static bool IsBeta(this ICustomRotation rotation)
     {
+        if (_betaInfo.TryGetValue(rotation, out bool isBeta))
+        {
+            return isBeta;
+        }
+
         BetaRotationAttribute? betaAttribute = rotation.GetType().GetCustomAttribute<BetaRotationAttribute>();
-        return betaAttribute != null;
+        _betaInfo[rotation] = betaAttribute != null;
+        return _betaInfo[rotation];
+    }
+
+    public static RotationAttribute? GetAttributes(this ICustomRotation rotation)
+    {
+        if (_rotationAttributes.TryGetValue(rotation, out RotationAttribute? attributes))
+        {
+            return attributes;
+        }
+        attributes = rotation.GetType().GetCustomAttribute<RotationAttribute>();
+        if (attributes != null)
+        {
+            _rotationAttributes[rotation] = attributes;
+        }
+
+        return attributes;
     }
 
     public static Assembly LoadCustomRotationAssembly(string filePath)

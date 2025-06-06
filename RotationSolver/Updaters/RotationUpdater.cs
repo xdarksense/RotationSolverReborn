@@ -608,6 +608,35 @@ internal static class RotationUpdater
         return result;
     }
 
+    public static ICustomRotation[] GetRotations(Job playerJob, CombatType combatType)
+    {
+        if (Player.Object == null || CustomRotations.Length < 22) // If we haven't loaded rotations, we don't have anything to return
+        {
+            return [];
+        }
+
+        if (!CustomRotationsLookup.TryGetValue(playerJob, out Dictionary<CombatType, List<ICustomRotation>>? validCustomRotations))
+        {
+            InitReferenceDict(playerJob);
+        }
+
+        if (CustomRotationsLookup.TryGetValue(playerJob, out validCustomRotations))
+        {
+            if (validCustomRotations.Count == 0)
+            {
+                PluginLog.Warning($"No valid rotations found for {playerJob}");
+                return [];
+            }
+
+            if (validCustomRotations.TryGetValue(combatType, out List<ICustomRotation>? validCustomRotationsList))
+            {
+                return [.. validCustomRotationsList];
+            }
+        }
+
+        return [];
+    }
+
     // Helper class for grouping (since LINQ's Grouping is not available)
     private class SimpleGrouping<TKey, TElement>(TKey key, IEnumerable<TElement> elements) : IGrouping<TKey, TElement>
     {
