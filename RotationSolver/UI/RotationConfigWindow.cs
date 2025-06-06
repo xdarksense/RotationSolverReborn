@@ -3858,7 +3858,7 @@ public partial class RotationConfigWindow : Window
 
     private static void DrawNextAction()
     {
-        ImGui.Text(DataCenter.CurrentRotation?.GetType().GetCustomAttribute<RotationAttribute>()!.Name);
+        ImGui.Text(DataCenter.CurrentRotation?.GetAttributes()?.Name);
         ImGui.Text(DataCenter.SpecialType.ToString());
 
         ImGui.Text(ActionUpdater.NextAction?.Name ?? "null");
