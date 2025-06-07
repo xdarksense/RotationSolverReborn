@@ -40,11 +40,36 @@ namespace RotationSolver.Commands
 
             if (TryGetOneEnum<StateCommandType>(command, out StateCommandType stateType))
             {
-                string? indexStr = command.Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
-                if (!int.TryParse(indexStr, out int index))
+                // Split command into parts
+                var parts = command.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                int index = -1;
+
+                // Try to parse the second argument as TargetingType if present
+                if (parts.Length > 1)
                 {
-                    index = -1;
+                    string value = parts[1];
+                    if (Enum.TryParse(typeof(TargetingType), value, true, out object? parsedEnumSet))
+                    {
+                        TargetingType targetingTypeSet = (TargetingType)parsedEnumSet;
+                        int idx = Service.Config.TargetingTypes.IndexOf(targetingTypeSet);
+                        if (idx >= 0)
+                        {
+                            Service.Config.TargetingIndex = idx;
+                            Svc.Chat.Print($"Set current TargetingType to {targetingTypeSet}.");
+                            index = idx;
+                        }
+                        else
+                        {
+                            Svc.Chat.PrintError($"{targetingTypeSet} is not in TargetingTypes list.");
+                            return;
+                        }
+                    }
+                    else if (!int.TryParse(value, out index))
+                    {
+                        index = -1;
+                    }
                 }
+
                 DoStateCommandType(stateType, index);
             }
             else if (TryGetOneEnum<SpecialCommandType>(command, out SpecialCommandType specialType))

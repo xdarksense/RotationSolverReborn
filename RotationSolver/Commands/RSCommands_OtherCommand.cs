@@ -205,7 +205,14 @@ public static partial class RSCommands
 
             case "removeall":
                 Service.Config.TargetingTypes.Clear();
-                Svc.Chat.Print("Removed all TargetingTypes.");
+                if (DataCenter.IsActivated())
+                {
+                    Svc.Chat.Print("Removed all TargetingTypes and reset to default list.");
+                }
+                else
+                {
+                    Svc.Chat.Print("Removed all TargetingTypes.");
+                }
                 break;
 
             default:
