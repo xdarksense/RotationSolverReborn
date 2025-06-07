@@ -622,6 +622,16 @@ public partial class CustomRotation
     }
 
     /// <summary>
+    /// Have you already weaved an oGCD.
+    /// </summary>
+    public static bool HasWeaved()
+    {
+        // Returns true if the last action and last ability are the same (i.e., an oGCD was weaved).
+        // Returns false otherwise.
+        return IsLastAction() == IsLastAbility();
+    }
+
+    /// <summary>
     /// <br>WARNING: Do Not make this method the main of your rotation.</br>
     /// </summary>
     /// <param name="GCD"></param>
