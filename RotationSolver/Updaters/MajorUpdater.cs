@@ -43,23 +43,14 @@ internal static class MajorUpdater
             bool anyCondition = false;
             foreach (var conditionFlag in Svc.Condition.AsReadOnlySet())
             {
-                if (Svc.Condition.AsReadOnlySet().Contains(conditionFlag))
+                if (conditionFlag == ConditionFlag.BetweenAreas || conditionFlag == ConditionFlag.BetweenAreas51 || conditionFlag == ConditionFlag.LoggingOut)
                 {
-                    anyCondition = true;
-                    break;
+                    return false;
                 }
+                anyCondition = true; // foreach doesn't execute on an empty enumerable, so this will only be true if there are conditions
             }
-            if (!anyCondition)
-                return false;
 
-            if (Svc.Condition[ConditionFlag.BetweenAreas])
-                return false;
-            if (Svc.Condition[ConditionFlag.BetweenAreas51])
-                return false;
-            if (Svc.Condition[ConditionFlag.LoggingOut])
-                return false;
-
-            return true;
+            return anyCondition;
         }
     }
 
