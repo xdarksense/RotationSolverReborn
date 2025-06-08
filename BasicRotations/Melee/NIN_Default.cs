@@ -311,26 +311,26 @@ public sealed class NIN_Default : NinjaRotation
         {
             // Attempts to set high-damage AoE Ninjutsu if available under Kassatsu's effect.
             // These are prioritized due to Kassatsu's enhancement of Ninjutsu abilities.
-            if ((DeathBlossomPvE.CanUse(out _) || HakkeMujinsatsuPvE.CanUse(out _)) && GokaMekkyakuPvE.EnoughLevel && !IsLastAction(false, GokaMekkyakuPvE))
+            if ((DeathBlossomPvE.CanUse(out _) || HakkeMujinsatsuPvE.CanUse(out _)) && GokaMekkyakuPvE.EnoughLevel && !IsLastAction(false, GokaMekkyakuPvE) && GokaMekkyakuPvE.IsEnabled)
             {
                 SetNinjutsu(GokaMekkyakuPvE);
             }
-            if (!DeathBlossomPvE.CanUse(out _) && !HakkeMujinsatsuPvE.CanUse(out _) && HyoshoRanryuPvE.EnoughLevel && !IsLastAction(false, HyoshoRanryuPvE))
+            if (!DeathBlossomPvE.CanUse(out _) && !HakkeMujinsatsuPvE.CanUse(out _) && HyoshoRanryuPvE.EnoughLevel && !IsLastAction(false, HyoshoRanryuPvE) && HyoshoRanryuPvE.IsEnabled)
             {
                 SetNinjutsu(HyoshoRanryuPvE);
             }
 
-            if (!IsShadowWalking && ShadowWalkerNeeded && !HyoshoRanryuPvE.EnoughLevel && HutonPvE.EnoughLevel)
+            if (!IsShadowWalking && ShadowWalkerNeeded && !HyoshoRanryuPvE.EnoughLevel && HutonPvE.EnoughLevel && HutonPvE.IsEnabled)
             {
                 SetNinjutsu(HutonPvE);
             }
 
-            if ((DeathBlossomPvE.CanUse(out _) || HakkeMujinsatsuPvE.CanUse(out _)) && !HyoshoRanryuPvE.EnoughLevel && KatonPvE.EnoughLevel)
+            if ((DeathBlossomPvE.CanUse(out _) || HakkeMujinsatsuPvE.CanUse(out _)) && !HyoshoRanryuPvE.EnoughLevel && KatonPvE.EnoughLevel && KatonPvE.IsEnabled)
             {
                 SetNinjutsu(KatonPvE);
             }
 
-            if (!DeathBlossomPvE.CanUse(out _) && !HakkeMujinsatsuPvE.CanUse(out _) && !HyoshoRanryuPvE.EnoughLevel && RaitonPvE.EnoughLevel)
+            if (!DeathBlossomPvE.CanUse(out _) && !HakkeMujinsatsuPvE.CanUse(out _) && !HyoshoRanryuPvE.EnoughLevel && RaitonPvE.EnoughLevel && RaitonPvE.IsEnabled)
             {
                 SetNinjutsu(RaitonPvE);
             }
@@ -348,11 +348,11 @@ public sealed class NIN_Default : NinjaRotation
             //Vulnerable
             if (ShadowWalkerNeeded && (!MeisuiPvE.Cooldown.IsCoolingDown || !TrickAttackPvE.Cooldown.IsCoolingDown || KunaisBanePvE.Cooldown.IsCoolingDown) && !IsShadowWalking && !HasTenChiJin && SuitonPvE.EnoughLevel && TenPvE.Cooldown.HasOneCharge)
             {
-                if (DeathBlossomPvE.CanUse(out _) && JinPvE.CanUse(out _))
+                if (DeathBlossomPvE.CanUse(out _) && JinPvE.CanUse(out _) && HutonPvE.IsEnabled)
                 {
                     SetNinjutsu(HutonPvE);
                 }
-                else if (JinPvE.CanUse(out _))
+                else if (JinPvE.CanUse(out _) && SuitonPvE.IsEnabled)
                 {
                     SetNinjutsu(SuitonPvE);
                 }
@@ -364,14 +364,14 @@ public sealed class NIN_Default : NinjaRotation
             if ((DeathBlossomPvE.CanUse(out _) || HakkeMujinsatsuPvE.CanUse(out _)) && TenPvE.CanUse(out _))
             {
                 if ((!HasDoton && !IsMoving && !IsLastGCD(true, DotonPvE) && (!TenChiJinPvE.Cooldown.WillHaveOneCharge(6)) && DotonPvE.EnoughLevel)
-                    || (!HasDoton && !TenChiJinPvE.Cooldown.IsCoolingDown && DotonPvE.EnoughLevel))
+                    || (!HasDoton && !IsLastGCD(true, DotonPvE) && !TenChiJinPvE.Cooldown.IsCoolingDown && DotonPvE.EnoughLevel))
                 {
-                    if (JinPvE.CanUse(out _))
+                    if (JinPvE.CanUse(out _) && DotonPvE.IsEnabled)
                     {
                         SetNinjutsu(DotonPvE);
                     }
                 }
-                else if (KatonPvE.EnoughLevel)
+                else if (KatonPvE.EnoughLevel && KatonPvE.IsEnabled)
                 {
                     SetNinjutsu(KatonPvE);
                 }
@@ -380,13 +380,13 @@ public sealed class NIN_Default : NinjaRotation
             //Single
             if (!DeathBlossomPvE.CanUse(out _) && !HakkeMujinsatsuPvE.CanUse(out _) && !ShadowWalkerNeeded && TenPvE.CanUse(out _, usedUp: InTrickAttack && !HasRaijuReady))
             {
-                if (RaitonPvE.EnoughLevel && TenPvE.Cooldown.HasOneCharge)
+                if (RaitonPvE.EnoughLevel && TenPvE.Cooldown.HasOneCharge && RaitonPvE.IsEnabled)
                 {
                     SetNinjutsu(RaitonPvE);
                     return false;
                 }
 
-                if (FumaShurikenPvE.EnoughLevel && TenPvE.Cooldown.HasOneCharge)
+                if (FumaShurikenPvE.EnoughLevel && TenPvE.Cooldown.HasOneCharge && FumaShurikenPvE.IsEnabled)
                 {
                     SetNinjutsu(FumaShurikenPvE);
                     return false;
