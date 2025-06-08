@@ -163,6 +163,14 @@ public sealed class AST_Default : AstrologianRotation
             return true;
         }
 
+        if (Player.WillStatusEndGCD(2, 0, true, StatusID.Suntouched))
+        {
+            if (SunSignPvE.CanUse(out act))
+            {
+                return true;
+            }
+        }
+
         return base.EmergencyAbility(nextGCD, out act);
     }
 
