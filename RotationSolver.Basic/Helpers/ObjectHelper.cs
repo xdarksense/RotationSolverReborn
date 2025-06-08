@@ -81,8 +81,16 @@ public static class ObjectHelper
             return false;
         }
 
-        if (battleChara.StatusList == null)
+        try
         {
+            if (battleChara.StatusList == null)
+            {
+                return false;
+            }
+        }
+        catch
+        {
+            // StatusList threw, treat as unavailable
             return false;
         }
 
