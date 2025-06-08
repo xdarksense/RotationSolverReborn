@@ -300,7 +300,9 @@ public sealed class VPR_Default : ViperRotation
                 || !BurstUncoiledFuryHold)
                 && SerpentsIrePvE.Cooldown.JustUsedAfter(30)
                 && !HasReadyToReawaken
-                && NoAbilityReady)
+                && NoAbilityReady
+                && !WillSwiftEnd
+                && !WillHunterEnd)
             {
                 if (UncoiledFuryPvE.CanUse(out act, usedUp: true))
                 {
@@ -312,13 +314,13 @@ public sealed class VPR_Default : ViperRotation
         ////AOE Dread Combo
         if (PitActive)
         {
-            if (IsSwift && Player.WillStatusEndGCD(2, 0, true, StatusID.Swiftscaled))
+            if (WillSwiftEnd)
             {
                 if (SwiftskinsDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
                     return true;
             }
 
-            if (IsHunter && Player.WillStatusEndGCD(2, 0, true, StatusID.HuntersInstinct))
+            if (WillHunterEnd)
             {
                 if (HuntersDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
                     return true;
