@@ -392,16 +392,12 @@ public sealed class VPR_Default : ViperRotation
                     return true;
             }
 
-            var Htarget = HuntersCoilPvE.Target.Target;
-            if (Htarget != null && CanHitPositional(EnemyPositional.Flank, HuntersCoilPvE.Target.Target) &&
-                HuntersCoilPvE.CanUse(out act, skipComboCheck: true))
+            if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true) && HuntersCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, HuntersCoilPvE.Target.Target))
             {
                 return true;
             }
 
-            var Starget = SwiftskinsCoilPvE.Target.Target;
-            if (Starget != null && CanHitPositional(EnemyPositional.Rear, SwiftskinsCoilPvE.Target.Target) &&
-                SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true))
+            if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true) && SwiftskinsCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, SwiftskinsCoilPvE.Target.Target))
             {
                 return true;
             }
