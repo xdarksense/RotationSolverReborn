@@ -63,36 +63,40 @@ public struct ActionTargetInfo(IBaseAction action)
             return [];
         }
 
-        List<IBattleChara> validTargets = new(TargetFilter.GetObjectInRadius(DataCenter.AllTargets, Range).Count());
-
-        foreach (IBattleChara target in TargetFilter.GetObjectInRadius(DataCenter.AllTargets, Range))
+        List<IBattleChara> validTargets = [];
+        foreach (IBattleChara target in TargetHelper.GetTargetsByRange(Range))
         {
             if (type == TargetType.Heal && target.GetHealthRatio() == 1)
             {
                 continue;
             }
 
-            if (!GeneralCheck(target, skipStatusProvideCheck, skipTargetStatusNeedCheck))
-            {
-                continue;
-            }
+            var statusCheck = CheckStatus(target, skipStatusProvideCheck, skipTargetStatusNeedCheck);
+            var ttkCheck = CheckTimeToKill(target);
+            var resistanceCheck = CheckResistance(target);
 
-            validTargets.Add(target);
-        }
-
-        List<IBattleChara> result = [];
-        foreach (IBattleChara b in validTargets)
-        {
-            if (!DataCenter.IsManual || IsTargetFriendly || b.GameObjectId == Svc.Targets.Target?.GameObjectId || b.GameObjectId == Player.Object?.GameObjectId)
+            if (statusCheck && ttkCheck && resistanceCheck)
             {
-                if (InViewTarget(b) && CanUseTo(b) && action.Setting.CanTarget(b))
+                // If auto targeting is enabled
+                // or the skill is friendly
+                // or the target is the currently selected hard-target
+                // or the target is ourselves
+                // then => Check target is in the view && ActionManager.CanUse on target && CanSee Target && action.setting predicate is true of target
+                if (!DataCenter.IsManual || IsTargetFriendly || target.GameObjectId == Svc.Targets.Target?.GameObjectId || target.GameObjectId == Player.Object?.GameObjectId)
                 {
-                    result.Add(b);
+                    var view = InViewTarget(target);
+                    var canUse = CanUseTo(target);
+                    var asCanTarget = action.Setting.CanTarget(target);
+
+                    if (view && canUse && asCanTarget)
+                    {
+                        validTargets.Add(target);
+                    }
                 }
             }
         }
 
-        return result;
+        return validTargets;
     }
 
     /// <summary>
@@ -118,35 +122,21 @@ public struct ActionTargetInfo(IBaseAction action)
             return [];
         }
 
-        IEnumerable<IBattleChara> items = TargetFilter.GetObjectInRadius(action.Setting.IsFriendly
-            ? DataCenter.PartyMembers
-            : DataCenter.AllHostileTargets, Range + EffectRange);
-
-        if (type == TargetType.Heal)
-        {
-            List<IBattleChara> filteredItems = [];
-            foreach (IBattleChara i in items)
-            {
-                if (i.GetHealthRatio() < 1)
-                {
-                    filteredItems.Add(i);
-                }
-            }
-            items = filteredItems;
-        }
+        IEnumerable<IBattleChara> items = TargetHelper.GetTargetsByRange(Range + EffectRange, action.Setting.IsFriendly);
 
         List<IBattleChara> validTargets = new(items.Count());
-
-        foreach (IBattleChara obj in items)
+        foreach (IBattleChara tar in items)
         {
-            if (!GeneralCheck(obj, skipStatusProvideCheck, skipTargetStatusNeedCheck))
+            if (type == TargetType.Heal && tar.GetHealthRatio() >= 1)
             {
                 continue;
             }
 
-            validTargets.Add(obj);
+            if (CheckStatus(tar, skipStatusProvideCheck, skipTargetStatusNeedCheck) && CheckTimeToKill(tar) && CheckResistance(tar))
+            {
+                validTargets.Add(tar);
+            }
         }
-
         return validTargets;
     }
 
@@ -206,10 +196,26 @@ public struct ActionTargetInfo(IBaseAction action)
             return false;
         }
 
-        return tar.GameObjectId != 0 && tar.Struct() != null &&
-               (IsSpecialAbility(action.Info.ID) ||
-                ActionManager.CanUseActionOnTarget(action.Info.AdjustedID, (GameObject*)tar.Struct())) &&
-               tar.CanSee();
+        if (!(tar.GameObjectId != 0 && tar.Struct() != null))
+        {
+            return false;
+        }
+
+        var specialAbilityCheck = IsSpecialAbility(action.Info.ID);
+        var actionmanagerCheck = ActionManager.CanUseActionOnTarget(action.Info.AdjustedID, (GameObject*)tar.Struct());
+
+        if (!(specialAbilityCheck || actionmanagerCheck))
+        {
+            return false;
+        }
+        if (!IsTargetFriendly) // canSee check is already done as part of finding hostile targets
+        {
+            return DataCenter.AllHostileTargets.Contains(tar);
+        }
+        else // For friendly targets we still need to check CanSee
+        {
+            return tar.CanSee();
+        }
     }
 
     private readonly List<ActionID> _specialActions =
@@ -227,82 +233,6 @@ public struct ActionTargetInfo(IBaseAction action)
     private readonly bool IsSpecialAbility(uint iD)
     {
         return _specialActions.Contains((ActionID)iD);
-    }
-
-    /// <summary>
-    /// Performs a general check on the specified battle character to determine if it meets the criteria for targeting.
-    /// </summary>
-    /// <param name="battleChara">The battle character to check.</param>
-    /// <param name="skipStatusProvideCheck">If set to <c>true</c>, skips the status provide check.</param>
-    /// <param name="skipTargetStatusNeedCheck">If set to <c>true</c>, skips the target status need check.</param>
-    /// <returns>
-    /// <c>true</c> if the battle character meets the criteria for targeting; otherwise, <c>false</c>.
-    /// </returns>
-    public readonly bool GeneralCheck(IBattleChara battleChara, bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck)
-    {
-        if (battleChara == null)
-        {
-            return false;
-        }
-
-        unsafe
-        {
-            if (battleChara.Struct() == null)
-            {
-                return false;
-            }
-        }
-
-        if (!battleChara.IsTargetable)
-        {
-            return false;
-        }
-
-        try
-        {
-            if (battleChara.StatusList == null)
-            {
-                return false;
-            }
-        }
-        catch (Exception ex)
-        {
-            PluginLog.Error($"Exception accessing StatusList for {battleChara?.NameId}: {ex.Message}");
-            return false;
-        }
-
-        bool isBlacklisted = false;
-        foreach (uint id in DataCenter.BlacklistedNameIds)
-        {
-            if (id == battleChara.NameId)
-            {
-                isBlacklisted = true;
-                break;
-            }
-        }
-        if (isBlacklisted)
-        {
-            return false;
-        }
-
-        if (battleChara.IsEnemy() && !battleChara.IsAttackable())
-        {
-            return false;
-        }
-
-        bool isStopTarget = false;
-        long[] stopTargets = MarkingHelper.GetStopTargets();
-        foreach (long stopId in stopTargets)
-        {
-            if (stopId == (long)battleChara.GameObjectId)
-            {
-                isStopTarget = true;
-                break;
-            }
-        }
-        return (!isStopTarget || !Service.Config.FilterStopMark) && CheckStatus(battleChara, skipStatusProvideCheck, skipTargetStatusNeedCheck)
-            && CheckTimeToKill(battleChara)
-            && CheckResistance(battleChara);
     }
 
     /// <summary>
@@ -431,14 +361,12 @@ public struct ActionTargetInfo(IBaseAction action)
     /// </returns>
     internal readonly TargetResult? FindTarget(bool skipAoeCheck, bool skipStatusProvideCheck, bool skipTargetStatusNeedCheck)
     {
-        float range = Range;
-
         if (action == null || action.Setting == null || action.Config == null)
         {
             return null;
         }
 
-        if (range == 0 && EffectRange == 0)
+        if (Range == 0 && EffectRange == 0)
         {
             return new TargetResult(Player.Object, [], Player.Object.Position);
         }
@@ -455,7 +383,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
         if (IsTargetArea)
         {
-            return FindTargetArea(canTargets, canAffects, range, Player.Object);
+            return FindTargetArea(canTargets, canAffects, Range, Player.Object);
         }
 
         List<IBattleChara> targetsList = [.. GetMostCanTargetObjects(canTargets, canAffects, skipAoeCheck ? 0 : action.Config.AoeCount)];
@@ -478,10 +406,7 @@ public struct ActionTargetInfo(IBaseAction action)
             List<IBattleChara> affectsList = [];
             if (affectsEnum != null)
             {
-                foreach (var a in affectsEnum)
-                {
-                    affectsList.Add(a);
-                }
+                affectsList.AddRange(affectsEnum);
             }
             affectedTargets = [.. affectsList];
         }
@@ -1160,7 +1085,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
         IBattleChara? FindDarkCannonTarget()
         {
-            if (DataCenter.AllHostileTargets != null)
+            if (battleChara != null)
             {
                 if (PhantomRotation.CannoneerLevel < 4)
                 {
@@ -1168,7 +1093,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 }
                 else
                 {
-                    foreach (var hostile in DataCenter.AllHostileTargets)
+                    foreach (var hostile in battleChara)
                     {
                         if (!hostile.IsOCBlindImmuneTarget() && hostile.InCombat())
                         {
@@ -1182,9 +1107,9 @@ public struct ActionTargetInfo(IBaseAction action)
 
         IBattleChara? FindShockCannonTarget()
         {
-            if (DataCenter.AllHostileTargets != null)
+            if (battleChara != null)
             {
-                foreach (var hostile in DataCenter.AllHostileTargets)
+                foreach (var hostile in battleChara)
                 {
                     if (!hostile.IsOCParalysisImmuneTarget() && hostile.InCombat())
                     {

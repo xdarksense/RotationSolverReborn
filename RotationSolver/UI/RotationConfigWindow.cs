@@ -3552,7 +3552,6 @@ public partial class RotationConfigWindow : Window
                 ImGui.Separator();
                 ImGui.Text(DataCenter.Role.ToString());
             } },
-        {() => "Performance", DrawPerf },
     });
 
     private static void DrawDebugRotationStatus()
@@ -3867,29 +3866,6 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"GCD Elapsed: {DataCenter.DefaultGCDElapsed}");
         ImGui.Text($"Calculated Action Ahead: {DataCenter.CalculatedActionAhead}");
         ImGui.Text($"Animation Lock Delay: {DataCenter.AnimationLock}");
-    }
-
-    private static void DrawPerf()
-    {
-        for (int i = 0; i < MajorUpdater.Ticks.Count; i++)
-        {
-            if (MajorUpdater.Ticks[i].Count == 0)
-            {
-                ImGui.Text($"{MajorUpdater.Ticknames[i]}: No data");
-                continue;
-            }
-            ImGui.Text($"{MajorUpdater.Ticknames[i]}: {Math.Round(MajorUpdater.Ticks[i].Average(), 0)}");
-        }
-
-        if (ImGui.Button("Reset Perf Timers"))
-        {
-            foreach (List<long> tick in MajorUpdater.Ticks)
-            {
-                tick.Clear();
-            }
-        }
-        ImGui.Separator();
-        ImGui.Spacing();
     }
 
     private static void DrawLastAction()

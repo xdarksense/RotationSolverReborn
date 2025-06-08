@@ -1348,7 +1348,7 @@ public static class ObjectHelper
     private static readonly TimeSpan CheckSpan = TimeSpan.FromSeconds(2.5);
 
     /// <summary>
-    /// Calculates the estimated time to kill the specified battle character.
+    /// Calculates the estimated time to kill the specified battle character. Only applicable after the first 2.5 seconds, and uses a moving average of the last 15 seconds of health ratios
     /// </summary>
     /// <param name="battleChara">The battle character to calculate the time to kill for.</param>
     /// <param name="wholeTime">If set to <c>true</c>, calculates the total time to kill; otherwise, calculates the remaining time to kill.</param>
@@ -1371,33 +1371,45 @@ public static class ObjectHelper
         float initialHpRatio = 0;
 
         // Use a snapshot of the RecordedHP collection to avoid modification during enumeration
-        (DateTime time, SortedList<ulong, float> hpRatios)[] recordedHPCopy = [.. DataCenter.RecordedHP];
+        (DateTime time, Dictionary<ulong, float> hpRatios)[] recordedHPCopy = [.. DataCenter.RecordedHP];
 
         // Calculate a moving average of HP ratios
-        const int movingAverageWindow = 5;
-        Queue<float> hpRatios = new();
+        const int movingAverageWindow = 5; // TODO: Possibly this should be configurable?
+        if (recordedHPCopy.Length == 0)
+        {
+            return float.NaN; // No recorded HP data available
+        }
 
-        foreach ((DateTime time, SortedList<ulong, float> hpRatiosDict) in recordedHPCopy)
+        List<float> hpRatios = new(movingAverageWindow);
+
+        // We just need the first injured entry and last movingAverageWindow entries
+        foreach ((DateTime time, Dictionary<ulong, float> hpRatiosDict) in recordedHPCopy)
         {
             if (hpRatiosDict != null && hpRatiosDict.TryGetValue(battleChara.GameObjectId, out float ratio) && ratio != 1)
             {
-                if (startTime == DateTime.MinValue)
-                {
-                    startTime = time;
-                    initialHpRatio = ratio;
-                }
-
-                hpRatios.Enqueue(ratio);
-                if (hpRatios.Count > movingAverageWindow)
-                {
-                    _ = hpRatios.Dequeue();
-                }
+                startTime = time;
+                initialHpRatio = ratio;
+                break;
             }
         }
 
         if (startTime == DateTime.MinValue || (DateTime.Now - startTime) < CheckSpan)
         {
             return float.NaN;
+        }
+
+        // Skip to just the last movingAverageWindow entries
+        if (recordedHPCopy.Length > movingAverageWindow)
+        {
+            recordedHPCopy = recordedHPCopy[^movingAverageWindow..];
+        }
+
+        foreach ((_, Dictionary<ulong, float> hpRatiosDict) in recordedHPCopy)
+        {
+            if (hpRatiosDict != null && hpRatiosDict.TryGetValue(battleChara.GameObjectId, out float ratio) && ratio != 1)
+            {
+                hpRatios.Add(ratio);
+            }
         }
 
         float currentHealthRatio = battleChara.GetHealthRatio();

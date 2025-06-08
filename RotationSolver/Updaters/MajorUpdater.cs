@@ -6,7 +6,6 @@ using ECommons.Logging;
 using Lumina.Excel.Sheets;
 using RotationSolver.Commands;
 using RotationSolver.UI.HighlightTeachingMode;
-using System.Diagnostics;
 using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule;
 
 namespace RotationSolver.Updaters;
@@ -14,23 +13,6 @@ namespace RotationSolver.Updaters;
 internal static class MajorUpdater
 {
     private static TimeSpan _timeSinceUpdate = TimeSpan.Zero;
-    private static List<long> curTicks = [];
-    public static List<List<long>> Ticks = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []];
-    public static List<string> Ticknames = [ "teaching mode", "isValid check", "UpdateRotationState", "AU ClearNextAction", "MU Update1", "DC Active", "AU CanDo", "Update Can Move", "RS DoAction", "Update Macro",
-                                              "Update Targets", "Update State", "Update Sequencer", "AU Update Next Action", "Update Combat Info", "Update Display Windows", "Handle Warnings", "Clear VFX",
-                                              "Check Local Rotations", "Update Rotations", "Update Rotation State", "MU Update2"];
-    private static void UpdateCounter(long entry, int index, bool end = false)
-    {
-        long toAdd = entry - curTicks.LastOrDefault(0);
-        curTicks.Add(entry);
-
-        Ticks[index].Add(toAdd);
-
-        if (end)
-        {
-            curTicks.Clear();
-        }
-    }
 
     public static bool IsValid
     {
@@ -73,9 +55,6 @@ internal static class MajorUpdater
             _timeSinceUpdate = TimeSpan.Zero;
         }
 
-        var _sw = new Stopwatch();
-        _sw.Start();
-
         if (Service.Config.TeachingMode)
         {
             try
@@ -95,21 +74,15 @@ internal static class MajorUpdater
                 }
             }
         }
-        UpdateCounter(_sw.ElapsedTicks, 0);
 
         // Transistion safe commands
         if (!IsValid)
         {
             try
             {
-                UpdateCounter(_sw.ElapsedTicks, 1);
                 RSCommands.UpdateRotationState();
-                UpdateCounter(_sw.ElapsedTicks, 2);
                 ActionUpdater.ClearNextAction();
-                UpdateCounter(_sw.ElapsedTicks, 3);
                 MiscUpdater.UpdateEntry();
-                UpdateCounter(_sw.ElapsedTicks, 4);
-                CustomRotation.MoveTarget = null;
                 ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
                 return;
             }
@@ -126,34 +99,24 @@ internal static class MajorUpdater
                 }
             }
         }
-        UpdateCounter(_sw.ElapsedTicks, 1);
 
         if (DataCenter.IsActivated())
         {
-            UpdateCounter(_sw.ElapsedTicks, 5);
             try
             {
                 bool canDoAction = ActionUpdater.CanDoAction();
-                UpdateCounter(_sw.ElapsedTicks, 6);
                 MovingUpdater.UpdateCanMove(canDoAction);
-                UpdateCounter(_sw.ElapsedTicks, 7);
 
                 if (canDoAction)
                 {
                     RSCommands.DoAction();
-                    UpdateCounter(_sw.ElapsedTicks, 8);
                 }
 
                 MacroUpdater.UpdateMacro();
-                UpdateCounter(_sw.ElapsedTicks, 9);
                 TargetUpdater.UpdateTargets();
-                UpdateCounter(_sw.ElapsedTicks, 10);
                 StateUpdater.UpdateState();
-                UpdateCounter(_sw.ElapsedTicks, 11);
                 ActionSequencerUpdater.UpdateActionSequencerAction();
-                UpdateCounter(_sw.ElapsedTicks, 12);
                 ActionUpdater.UpdateNextAction();
-                UpdateCounter(_sw.ElapsedTicks, 13);
             }
             catch (Exception ex)
             {
@@ -211,11 +174,9 @@ internal static class MajorUpdater
             // Update various combat tracking perameters,
             // combat time, blue mage/dutyaction slot info, player movement time, player dead status and MP timer.
             ActionUpdater.UpdateCombatInfo();
-            UpdateCounter(_sw.ElapsedTicks, 14);
 
             // Update displaying the additional UI windows
             RotationSolverPlugin.UpdateDisplayWindow();
-            UpdateCounter(_sw.ElapsedTicks, 15);
 
             // Handle system warnings
             if (DataCenter.SystemWarnings.Count > 0)
@@ -236,29 +197,24 @@ internal static class MajorUpdater
                     _ = DataCenter.SystemWarnings.Remove(key);
                 }
             }
-            UpdateCounter(_sw.ElapsedTicks, 16);
 
             // Clear old VFX data
             if (DataCenter.VfxDataQueue.Count > 0)
             {
                 _ = DataCenter.VfxDataQueue.RemoveAll(vfx => vfx.TimeDuration > TimeSpan.FromSeconds(6));
             }
-            UpdateCounter(_sw.ElapsedTicks, 17);
 
             // Check local rotation files
             if (Service.Config.AutoReloadRotations)
             {
                 RotationUpdater.LocalRotationWatcher();
             }
-            UpdateCounter(_sw.ElapsedTicks, 18);
 
             // Change loaded rotation based on job
             RotationUpdater.UpdateRotation();
-            UpdateCounter(_sw.ElapsedTicks, 19);
 
             // Change RS state
             RSCommands.UpdateRotationState();
-            UpdateCounter(_sw.ElapsedTicks, 20);
 
             if (Service.Config.TeachingMode)
             {
@@ -281,8 +237,6 @@ internal static class MajorUpdater
             }
 
             MiscUpdater.UpdateMisc();
-            _sw.Stop();
-            UpdateCounter(_sw.ElapsedTicks, 21, true);
         }
         catch (Exception ex)
         {

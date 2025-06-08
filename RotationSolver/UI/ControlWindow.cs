@@ -13,12 +13,28 @@ namespace RotationSolver.UI;
 internal class ControlWindow : CtrlWindow
 {
     public static DateTime DidTime { get; set; }
+    private static bool _isOpen = false;
+    public static bool Opened { get => _isOpen; }
 
     public ControlWindow()
         : base(nameof(ControlWindow))
     {
         Size = new Vector2(570f, 300f);
         SizeCondition = ImGuiCond.FirstUseEver;
+    }
+
+    public override void OnOpen()
+    {
+        _isOpen = true;
+        DataCenter.DrawingActions = true;
+        base.OnOpen();
+    }
+
+    public override void OnClose()
+    {
+        _isOpen = false;
+        DataCenter.DrawingActions = false;
+        base.OnClose();
     }
 
     public override unsafe void Draw()

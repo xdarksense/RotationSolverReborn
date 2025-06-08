@@ -165,15 +165,14 @@ public class BaseAction : IBaseAction
 
         if (!skipTTKCheck)
         {
-            switch (DataCenter.IsPvP)
+            if (!DataCenter.IsPvP || !Service.Config.IgnorePvPttk)
             {
-                case true when Service.Config.IgnorePvPttk:
-                    break;
-                case false when !IsTimeToKillValid():
+                if (!IsTimeToKillValid())
+                {
                     return false;
+                }
             }
         }
-
         PreviewTarget = TargetInfo.FindTarget(skipAoeCheck, skipStatusProvideCheck, skipTargetStatusNeedCheck);
         if (PreviewTarget == null)
         {

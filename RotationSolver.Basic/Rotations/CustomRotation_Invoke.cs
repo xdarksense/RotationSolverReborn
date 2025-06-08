@@ -15,10 +15,12 @@ public partial class CustomRotation
 
         try
         {
-            UpdateInfo();
-
+            UpdateInfo(); // Rotation specific info updates
             IBaseAction.ActionPreview = true;
-            UpdateActions(Role);
+            if (DataCenter.DrawingActions)
+            {
+                UpdateActions(Role);
+            }
             IBaseAction.ActionPreview = false;
 
             CountingOfLastUsing = CountingOfCombatTimeUsing = 0;
@@ -177,48 +179,8 @@ public partial class CustomRotation
         IBaseAction.TargetOverride = null;
         ActionMoveForwardAbility = movingTarget ? act : null;
 
-        if (movingTarget && act is IBaseAction a)
-        {
-            UpdateMoveTarget(a);
-        }
-        else
-        {
-            MoveTarget = null;
-        }
-
         ActionMoveBackAbility = MoveBackAbility(AddlePvE, out act) ? act : null;
         ActionSpeedAbility = SpeedAbility(AddlePvE, out act) ? act : null;
-    }
-
-    private static void UpdateMoveTarget(IBaseAction a)
-    {
-        if (a.PreviewTarget.HasValue && a.PreviewTarget.Value.Target != Player
-            && a.PreviewTarget.Value.Target != null)
-        {
-            Vector3? dir = Player.Position - a.PreviewTarget.Value.Position;
-            float length = dir?.Length() ?? 0;
-            if (length != 0 && dir.HasValue)
-            {
-                Vector3 d = dir.Value / length;
-                MoveTarget = a.PreviewTarget.Value.Position + (d * MathF.Min(length, Player.HitboxRadius + a.PreviewTarget.Value.Target.HitboxRadius));
-            }
-            else
-            {
-                MoveTarget = a.PreviewTarget.Value.Position;
-            }
-        }
-        else
-        {
-            if ((ActionID)a.ID == ActionID.EnAvantPvE)
-            {
-                Vector3 dir = new(MathF.Sin(Player.Rotation), 0, MathF.Cos(Player.Rotation));
-                MoveTarget = Player.Position + (dir * 10); // Consider defining 10 as a constant
-            }
-            else
-            {
-                MoveTarget = a.PreviewTarget?.Position == a.PreviewTarget?.Target?.Position ? null : a.PreviewTarget?.Position;
-            }
-        }
     }
 
     private IAction? Invoke(out IAction? gcdAction)
