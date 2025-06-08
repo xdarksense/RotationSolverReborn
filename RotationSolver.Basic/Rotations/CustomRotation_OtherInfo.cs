@@ -508,7 +508,7 @@ public partial class CustomRotation
     /// How much time has passed since the last action was used.
     /// <br>WARNING: Do Not make this method the main of your rotation.</br>
     /// </summary>
-    protected static TimeSpan TimeSinceLastAction
+    public static TimeSpan TimeSinceLastAction
     {
         get
         {
