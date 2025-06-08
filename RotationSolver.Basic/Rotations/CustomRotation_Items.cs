@@ -50,7 +50,7 @@ public partial class CustomRotation
     /// <param name="act">The action to be performed.</param>
     /// <param name="clippingCheck">Indicates whether to perform a clipping check.</param>
     /// <returns>True if a burst medicine was used; otherwise, false.</returns>
-    protected bool UseBurstMedicine(out IAction? act, bool clippingCheck = true)
+    public bool UseBurstMedicine(out IAction? act, bool clippingCheck = true)
     {
         act = null;
 

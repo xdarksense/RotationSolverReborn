@@ -119,7 +119,10 @@ public sealed class MCH_Rework : MachinistRotation
         {
             if ((Heat >= 50 || HasHypercharged) && !LowLevelHyperCheck)
             {
-                if (WeaponRemain < GCDTime(1) / 2 && nextGCD.IsTheSameTo(false, FullMetalFieldPvE) && WildfirePvE.CanUse(out act))
+                if (WeaponRemain < GCDTime(1) / 2 
+                    && (nextGCD.IsTheSameTo(false, FullMetalFieldPvE)
+                    || (nextGCD.IsTheSameTo(false, DrillPvE, ChainSawPvE, AirAnchorPvE, ExcavatorPvE) && !HasFullMetalMachinist)) 
+                    && WildfirePvE.CanUse(out act))
                 {
                     return true;
                 }
