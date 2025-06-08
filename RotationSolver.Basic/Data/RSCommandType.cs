@@ -104,7 +104,8 @@ public enum StateCommandType : byte
     /// <summary>
     /// Start the addon in Auto mode. When out of combat or when combat starts, switches the target according to the set condition.
     /// </summary>
-    [Description("Start the addon in Auto mode. When out of combat or when combat starts, switches the target according to the set condition.")]
+    [Description("Start the addon in Auto mode. When out of combat or when combat starts, switches the target according to the set condition. " +
+        "\r\n Optionally: You can add the target type to the end of the command you want RSR to do. For example: /rotation Auto Big")]
     Auto,
 
     /// <summary>

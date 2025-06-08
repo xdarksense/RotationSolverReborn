@@ -81,6 +81,38 @@ public partial class MachinistRotation
     }
     #endregion
 
+    #region Status Tracking
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasWildfire => !Player.WillStatusEnd(0, true, StatusID.Wildfire_1946);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasHypercharged => !Player.WillStatusEnd(0, true, StatusID.Hypercharged);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasReassembled => !Player.WillStatusEnd(0, true, StatusID.Reassembled);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasOverheated => !Player.WillStatusEnd(0, true, StatusID.Overheated);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasExcavatorReady => !Player.WillStatusEnd(0, true, StatusID.ExcavatorReady);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasFullMetalMachinist => !Player.WillStatusEnd(0, true, StatusID.FullMetalMachinist);
+    #endregion
+
     #region PvE Actions Unassignable
 
     /// <summary>
@@ -133,7 +165,7 @@ public partial class MachinistRotation
     static partial void ModifyReassemblePvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Reassembled];
-        setting.ActionCheck = () => HasHostilesInRange && !Player.HasStatus(true, StatusID.Reassembled);
+        setting.ActionCheck = () => HasHostilesInRange && !HasReassembled;
     }
 
     static partial void ModifyGaussRoundPvE(ref ActionSetting setting)
@@ -163,7 +195,7 @@ public partial class MachinistRotation
 
     static partial void ModifyHyperchargePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => !IsOverheated && (Heat >= 50 || Player.HasStatus(true, StatusID.Hypercharged));
+        setting.ActionCheck = () => !IsOverheated && (Heat >= 50 || HasHypercharged);
         setting.StatusProvide = [StatusID.Overheated];
         setting.UnlockedByQuestID = 67233;
         setting.CreateConfig = () => new ActionConfig()
@@ -210,7 +242,7 @@ public partial class MachinistRotation
     {
         setting.TargetStatusProvide = [StatusID.Wildfire];
         setting.StatusProvide = [StatusID.Wildfire_1946];
-        setting.ActionCheck = () => Heat >= 50 || Player.HasStatus(true, StatusID.Hypercharged) || OverheatedStacks == 5;
+        setting.ActionCheck = () => Heat >= 50 || HasHypercharged || OverheatedStacks == 5;
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
@@ -419,7 +451,7 @@ public partial class MachinistRotation
 
     static partial void ModifyFullMetalFieldPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => !Player.HasStatus(true, StatusID.Reassembled) && Player.HasStatus(true, StatusID.FullMetalMachinist);
+        setting.ActionCheck = () => !HasReassembled && HasFullMetalMachinist;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
