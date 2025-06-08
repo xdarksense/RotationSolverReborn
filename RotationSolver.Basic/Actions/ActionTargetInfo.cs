@@ -1668,7 +1668,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 List<IBattleChara> healingNeededObjs = [];
                 foreach (var o in objs)
                 {
-                    if (StatusHelper.NoNeedHealingInvuln(o))
+                    if (!o.NoNeedHealingInvuln())
                     {
                         healingNeededObjs.Add(o);
                     }
