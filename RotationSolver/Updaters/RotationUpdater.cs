@@ -25,6 +25,7 @@ internal static class RotationUpdater
     private static DateTime LastRunTime;
 
     private static bool _isLoading = false;
+    private static string _curDutyRotationName = string.Empty;
 
     public static Task ResetToDefaults()
     {
@@ -669,11 +670,17 @@ internal static class RotationUpdater
 
         _ = Service.Config.DutyRotationChoice.TryGetValue(Svc.ClientState.TerritoryType, out string? value);
         string name = value ?? string.Empty;
+        if (name == _curDutyRotationName && DataCenter.CurrentDutyRotation != null)
+        {
+            return; // No change, so we don't need to update
+        }
+
         Type? type = GetChosenType(rotations, name);
         if (type != DataCenter.CurrentDutyRotation?.GetType())
         {
             DataCenter.CurrentDutyRotation?.Dispose();
             DataCenter.CurrentDutyRotation = GetRotation(type);
+            _curDutyRotationName = name;
         }
 
         static DutyRotation? GetRotation(Type? t)
