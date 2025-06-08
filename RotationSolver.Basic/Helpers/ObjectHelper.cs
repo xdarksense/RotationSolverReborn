@@ -81,6 +81,11 @@ public static class ObjectHelper
             return false;
         }
 
+        if (battleChara.StatusList == null)
+        {
+            return false;
+        }
+
         if (battleChara.HasStatus(false, StatusID.DirectionalDisregard))
         {
             return false;

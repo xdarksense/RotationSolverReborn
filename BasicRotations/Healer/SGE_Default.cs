@@ -447,23 +447,23 @@ public sealed class SGE_Default : SageRotation
 
         // Checks for Eukrasia status.
         // Attempts to set correct Eurkrasia action based on availability and MergedStatus.
-        if (EukrasianPrognosisIiPvE.CanUse(out _) 
-            && EukrasianPrognosisIiPvE.EnoughLevel && MergedStatus.HasFlag(AutoStatus.DefenseArea) && EukrasianPrognosisIiPvE.IsEnabled)
+        if (EukrasianPrognosisIiPvE.EnoughLevel && EukrasianPrognosisIiPvE.IsEnabled && MergedStatus.HasFlag(AutoStatus.DefenseArea)
+            && EukrasianPrognosisIiPvE.CanUse(out _))
         {
             SetEukrasia(EukrasianPrognosisIiPvE);
         }
-        else if (EukrasianPrognosisPvE.CanUse(out _) 
-            && EukrasianPrognosisPvE.EnoughLevel && MergedStatus.HasFlag(AutoStatus.DefenseArea) && EukrasianPrognosisPvE.IsEnabled)
+        else if (!EukrasianPrognosisIiPvE.EnoughLevel && EukrasianPrognosisPvE.EnoughLevel && EukrasianPrognosisPvE.IsEnabled && MergedStatus.HasFlag(AutoStatus.DefenseArea)
+            && EukrasianPrognosisPvE.CanUse(out _))
         {
             SetEukrasia(EukrasianPrognosisPvE);
         }
-        else if (EukrasianDiagnosisPvE.CanUse(out _) 
-            && EukrasianDiagnosisPvE.EnoughLevel && MergedStatus.HasFlag(AutoStatus.DefenseSingle) && EukrasianDiagnosisPvE.IsEnabled)
+        else if (EukrasianDiagnosisPvE.EnoughLevel && EukrasianDiagnosisPvE.IsEnabled && MergedStatus.HasFlag(AutoStatus.DefenseSingle)
+            && EukrasianDiagnosisPvE.CanUse(out _))
         {
             SetEukrasia(EukrasianDiagnosisPvE);
         }
-        else if (EukrasianDyskrasiaPvE.CanUse(out _) 
-            && EukrasianDyskrasiaPvE.EnoughLevel && (!MergedStatus.HasFlag(AutoStatus.DefenseSingle) || !MergedStatus.HasFlag(AutoStatus.DefenseArea)) && EukrasianDyskrasiaPvE.IsEnabled)
+        else if (EukrasianDyskrasiaPvE.EnoughLevel && EukrasianDyskrasiaPvE.IsEnabled && (!MergedStatus.HasFlag(AutoStatus.DefenseSingle) || !MergedStatus.HasFlag(AutoStatus.DefenseArea))
+            && EukrasianDyskrasiaPvE.CanUse(out _))
         {
             SetEukrasia(EukrasianDyskrasiaPvE);
         }
