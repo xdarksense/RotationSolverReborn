@@ -158,6 +158,8 @@ public partial class ViperRotation
         ImGui.Text("UncoiledAbilityReady: " + UncoiledAbilityReady.ToString());
         ImGui.Spacing();
         ImGui.Text("HasHunterAndSwift: " + HasHunterAndSwift.ToString());
+        ImGui.Text("WillSwiftEnd: " + WillSwiftEnd.ToString());
+        ImGui.Text("WillHunterEnd: " + WillHunterEnd.ToString());
         ImGui.Text("IsSwift: " + IsSwift.ToString());
         ImGui.Text("SwiftTime: " + SwiftTime.ToString());
         ImGui.Text("IsHunter: " + IsHunter.ToString());
@@ -191,6 +193,16 @@ public partial class ViperRotation
     /// Indicates if both Hunters Instinct and Swiftscaled are active.
     /// </summary>
     public static bool HasHunterAndSwift => IsHunter && IsSwift;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool WillSwiftEnd => IsSwift && Player.WillStatusEndGCD(2, 0, true, StatusID.Swiftscaled);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool WillHunterEnd => IsHunter && Player.WillStatusEndGCD(2, 0, true, StatusID.HuntersInstinct);
 
     /// <summary>
     /// Indicates if the player has Swiftscaled.
