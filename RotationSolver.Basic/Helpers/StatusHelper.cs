@@ -336,6 +336,19 @@ public static class StatusHelper
     /// <returns></returns>
     public static bool HasStatus(this IBattleChara battleChara, bool isFromSelf, params StatusID[] statusIDs)
     {
+        try
+        {
+            if (battleChara.StatusList == null)
+            {
+                return false;
+            }
+        }
+        catch
+        {
+            // StatusList threw, treat as unavailable
+            return false;
+        }
+
         if (HasApplyStatus(battleChara, statusIDs))
         {
             return true;
@@ -417,9 +430,27 @@ public static class StatusHelper
     /// <param name="isFromSelf">Whether the statuses are from self.</param>
     /// <param name="statusIDs">The status IDs to look for.</param>
     /// <returns>An enumerable of statuses.</returns>
-    private static IEnumerable<Status> GetStatus(this IBattleChara battleChara, bool isFromSelf, params StatusID[] statusIDs)
+    private static List<Status> GetStatus(this IBattleChara battleChara, bool isFromSelf, params StatusID[] statusIDs)
     {
-        IEnumerable<Status> allStatuses = battleChara.GetAllStatus(isFromSelf);
+        if (battleChara == null)
+        {
+            return [];
+        }
+
+        try
+        {
+            if (battleChara.StatusList == null)
+            {
+                return [];
+            }
+        }
+        catch
+        {
+            // StatusList threw, treat as unavailable
+            return [];
+        }
+
+        List<Status> allStatuses = battleChara.GetAllStatus(isFromSelf);
         if (allStatuses == null)
         {
             return [];
@@ -458,10 +489,23 @@ public static class StatusHelper
     /// <param name="battleChara">The object to get the statuses from.</param>
     /// <param name="isFromSelf">Whether the statuses are from self.</param>
     /// <returns>An enumerable of all statuses.</returns>
-    private static IEnumerable<Status> GetAllStatus(this IBattleChara battleChara, bool isFromSelf)
+    private static List<Status> GetAllStatus(this IBattleChara battleChara, bool isFromSelf)
     {
         if (battleChara == null)
         {
+            return [];
+        }
+
+        try
+        {
+            if (battleChara.StatusList == null)
+            {
+                return [];
+            }
+        }
+        catch
+        {
+            // StatusList threw, treat as unavailable
             return [];
         }
 
