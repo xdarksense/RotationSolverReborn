@@ -18,6 +18,7 @@ internal static partial class TargetUpdater
 
     internal static void UpdateTargets()
     {
+        DataCenter.TargetsByRange.Clear();
         DataCenter.AllTargets = GetAllTargets();
         if (DataCenter.AllTargets != null)
         {
@@ -26,8 +27,8 @@ internal static partial class TargetUpdater
             DataCenter.AllHostileTargets = GetAllHostileTargets();
             DataCenter.DeathTarget = GetDeathTarget();
             DataCenter.DispelTarget = GetDispelTarget();
-            DataCenter.ProvokeTarget = GetFirstHostileTarget(ObjectHelper.CanProvoke);
-            DataCenter.InterruptTarget = GetFirstHostileTarget(ObjectHelper.CanInterrupt);
+            DataCenter.ProvokeTarget = DataCenter.Role == JobRole.Tank ? GetFirstHostileTarget(ObjectHelper.CanProvoke) : null; // Calculating this per frame rather than on-demand is actually a fair amount worse
+            DataCenter.InterruptTarget = GetFirstHostileTarget(ObjectHelper.CanInterrupt); // Tanks, Melee, RDM, and various phantom and duty actions can interrupt so just deal with it
         }
         UpdateTimeToKill();
     }
@@ -352,6 +353,8 @@ internal static partial class TargetUpdater
         return closestTarget;
     }
 
+    // Recording new entries at 1/second and dequeuing old values to keep only the last DataCenter.HP_RECORD_TIME worth of combat time
+    // Has performance implications for keeping too much data for too many targets as they're also all evaluated multiple times a frame for expected TTK
     private static void UpdateTimeToKill()
     {
         DateTime now = DateTime.Now;
@@ -367,7 +370,7 @@ internal static partial class TargetUpdater
             _ = DataCenter.RecordedHP.Dequeue();
         }
 
-        SortedList<ulong, float> currentHPs = [];
+        Dictionary<ulong, float> currentHPs = [];
         foreach (IBattleChara target in DataCenter.AllHostileTargets)
         {
             if (target.CurrentHp != 0)

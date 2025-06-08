@@ -25,6 +25,7 @@ internal static class RotationUpdater
     private static DateTime LastRunTime;
 
     private static bool _isLoading = false;
+    private static string _curDutyRotationName = string.Empty;
 
     public static Task ResetToDefaults()
     {
@@ -669,11 +670,17 @@ internal static class RotationUpdater
 
         _ = Service.Config.DutyRotationChoice.TryGetValue(Svc.ClientState.TerritoryType, out string? value);
         string name = value ?? string.Empty;
+        if (name == _curDutyRotationName && DataCenter.CurrentDutyRotation != null)
+        {
+            return; // No change, so we don't need to update
+        }
+
         Type? type = GetChosenType(rotations, name);
         if (type != DataCenter.CurrentDutyRotation?.GetType())
         {
             DataCenter.CurrentDutyRotation?.Dispose();
             DataCenter.CurrentDutyRotation = GetRotation(type);
+            _curDutyRotationName = name;
         }
 
         static DutyRotation? GetRotation(Type? t)
@@ -704,20 +711,26 @@ internal static class RotationUpdater
         }
 
         Job nowJob = Player.Job;
+        CombatType curCombatType = DataCenter.IsPvP ? CombatType.PvP : CombatType.PvE;
 
-        if (!CustomRotationsLookup.TryGetValue(nowJob, out Dictionary<CombatType, List<ICustomRotation>>? validCustomRotations))
+        if (DataCenter.CurrentRotation?.Job == nowJob && DataCenter.CurrentRotation?.GetAttributes()?.Type == curCombatType)
+        {
+            return; // Nothing has changed, so we don't need to try and find a new rotation
+        }
+
+        if (!CustomRotationsLookup.TryGetValue(nowJob, out _))
         {
             InitReferenceDict(nowJob);
         }
-        if (CustomRotationsLookup.TryGetValue(nowJob, out validCustomRotations)) // Because default rotations exist, this *should* always have something; if not, no rotations
+
+        if (CustomRotationsLookup.TryGetValue(nowJob, out Dictionary<CombatType, List<ICustomRotation>>? validCustomRotations)) // Because default rotations exist, this *should* always have something; if not, no rotations
         {
-            if (validCustomRotations.Count == 0) // We'll still check
+            if (validCustomRotations.Count == 0) // We successfully got something, but we'll still check if there are any valid rotations
             {
                 PluginLog.Warning($"No valid rotations found for {nowJob}");
                 return;
             }
 
-            CombatType curCombatType = DataCenter.IsPvP ? CombatType.PvP : CombatType.PvE;
             if (validCustomRotations.TryGetValue(curCombatType, out List<ICustomRotation>? validCustomRotationsList))
             {
                 string desiredRotationName = DataCenter.IsPvP ? Service.Config.PvPRotationChoice : Service.Config.RotationChoice;
@@ -745,7 +758,6 @@ internal static class RotationUpdater
             }
         }
 
-        CustomRotation.MoveTarget = null;
         DataCenter.CurrentRotation = null;
         CurrentRotationActions = [];
     }

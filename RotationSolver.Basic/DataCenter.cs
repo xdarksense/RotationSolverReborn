@@ -67,7 +67,7 @@ internal static class DataCenter
     /// </summary>
     public const int HP_RECORD_TIME = 240;
 
-    internal static Queue<(DateTime time, SortedList<ulong, float> hpRatios)> RecordedHP { get; } =
+    internal static Queue<(DateTime time, Dictionary<ulong, float> hpRatios)> RecordedHP { get; } =
         new(HP_RECORD_TIME + 1);
 
     public static ICustomRotation? CurrentRotation { get; internal set; }
@@ -367,6 +367,8 @@ internal static class DataCenter
 
     public static bool InCombat { get; set; } = false;
 
+    public static bool DrawingActions { get; set; } = false;
+
     private static RandomDelay _notInCombatDelay = new(() => Service.Config.NotInCombatDelay);
 
     /// <summary>
@@ -420,6 +422,7 @@ internal static class DataCenter
     public static IBattleChara? DispelTarget { get; set; }
 
     public static List<IBattleChara> AllTargets { get; set; } = [];
+    public static Dictionary<float, List<IBattleChara>> TargetsByRange { get; set; } = [];
 
     public static ulong[] TreasureCharas
     {
@@ -560,10 +563,15 @@ internal static class DataCenter
         }
     }
 
+    private static float _avgTTK = 0f;
     public static float AverageTTK
     {
         get
         {
+            if (_avgTTK > 0)
+            {
+                return _avgTTK;
+            }
             float total = 0;
             int count = 0;
             var targets = AllHostileTargets;
@@ -576,7 +584,7 @@ internal static class DataCenter
                     count++;
                 }
             }
-            return count > 0 ? total / count : 0;
+            return _avgTTK = count > 0 ? total / count : 0;
         }
     }
 
@@ -1003,6 +1011,7 @@ internal static class DataCenter
         LastAction = 0;
         LastGCD = 0;
         LastAbility = 0;
+        _avgTTK = 0;
         _timeLastActionUsed = DateTime.Now;
         _actions.Clear();
 
@@ -1012,6 +1021,7 @@ internal static class DataCenter
         AllianceMembers.Clear();
         PartyMembers.Clear();
         AllTargets.Clear();
+        TargetsByRange.Clear();
     }
 
     internal static void AddDamageRec(float damageRatio)
