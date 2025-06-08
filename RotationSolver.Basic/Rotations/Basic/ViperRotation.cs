@@ -197,22 +197,22 @@ public partial class ViperRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool WillSwiftEnd => IsSwift && Player.WillStatusEndGCD(2, 0, true, StatusID.Swiftscaled);
+    public static bool WillSwiftEnd => Player.WillStatusEnd(5, true, StatusID.Swiftscaled);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool WillHunterEnd => IsHunter && Player.WillStatusEndGCD(2, 0, true, StatusID.HuntersInstinct);
+    public static bool WillHunterEnd => Player.WillStatusEnd(5, true, StatusID.HuntersInstinct);
 
     /// <summary>
     /// Indicates if the player has Swiftscaled.
     /// </summary>
-    public static bool IsSwift => !Player.WillStatusEnd(0, true, StatusID.Swiftscaled);
+    public static bool IsSwift => Player.HasStatus(true, StatusID.Swiftscaled);
 
     /// <summary>
     /// Indicates if the player has Hunters Instinct.
     /// </summary>
-    public static bool IsHunter => !Player.WillStatusEnd(0, true, StatusID.HuntersInstinct);
+    public static bool IsHunter => Player.HasStatus(true, StatusID.HuntersInstinct);
 
     /// <summary>
     /// Time left on Swiftscaled.
@@ -247,12 +247,12 @@ public partial class ViperRotation
     /// <summary>
     /// Indicates if the player has Honed Steel.
     /// </summary>
-    public static bool HasSteel => !Player.WillStatusEnd(0, true, StatusID.HonedSteel);
+    public static bool HasSteel => Player.HasStatus(true, StatusID.HonedSteel);
 
     /// <summary>
     /// Indicates if the player has Honed Reavers.
     /// </summary>
-    public static bool HasReavers => !Player.WillStatusEnd(0, true, StatusID.HonedReavers);
+    public static bool HasReavers => Player.HasStatus(true, StatusID.HonedReavers);
 
     /// <summary>
     /// Indicates if the player does not have Honed Reavers or Honed Steel.
@@ -262,22 +262,22 @@ public partial class ViperRotation
     /// <summary>
     /// Indicates if the player has upcoming Hind attack.
     /// </summary>
-    public static bool HasHind => !Player.WillStatusEnd(0, true, StatusID.HindsbaneVenom) || !Player.WillStatusEnd(0, true, StatusID.HindstungVenom);
+    public static bool HasHind => Player.HasStatus(true, StatusID.HindsbaneVenom) || Player.HasStatus(true, StatusID.HindstungVenom);
 
     /// <summary>
     /// Indicates if the player has upcoming Flanks attack.
     /// </summary>
-    public static bool HasFlank => !Player.WillStatusEnd(0, true, StatusID.FlanksbaneVenom) || !Player.WillStatusEnd(0, true, StatusID.FlankstungVenom);
+    public static bool HasFlank => Player.HasStatus(true, StatusID.FlanksbaneVenom) || Player.HasStatus(true, StatusID.FlankstungVenom);
 
     /// <summary>
     /// Indicates if the player has upcoming Bane attack.
     /// </summary>
-    public static bool HasBane => !Player.WillStatusEnd(0, true, StatusID.HindsbaneVenom) || !Player.WillStatusEnd(0, true, StatusID.FlanksbaneVenom);
+    public static bool HasBane => Player.HasStatus(true, StatusID.HindsbaneVenom) || Player.HasStatus(true, StatusID.FlanksbaneVenom);
 
     /// <summary>
     /// Indicates if the player has upcoming Bane attack.
     /// </summary>
-    public static bool HasSting => !Player.WillStatusEnd(0, true, StatusID.HindstungVenom) || !Player.WillStatusEnd(0, true, StatusID.FlankstungVenom);
+    public static bool HasSting => Player.HasStatus(true, StatusID.HindstungVenom) || Player.HasStatus(true, StatusID.FlankstungVenom);
 
     /// <summary>
     /// Indicates if the player has no venom prepped.
@@ -287,52 +287,52 @@ public partial class ViperRotation
     /// <summary>
     /// Indicates if the player can use Reawakened.
     /// </summary>
-    public static bool HasReadyToReawaken => !Player.WillStatusEnd(0, true, StatusID.ReadyToReawaken);
+    public static bool HasReadyToReawaken => Player.HasStatus(true, StatusID.ReadyToReawaken);
 
     /// <summary>
     /// Indicates if the player can use Reawakened.
     /// </summary>
-    public static bool HasReawakenedActive => !Player.WillStatusEnd(0, true, StatusID.Reawakened);
+    public static bool HasReawakenedActive => Player.HasStatus(true, StatusID.Reawakened);
 
     /// <summary>
     /// Indicates if the player has Hunters Venom.
     /// </summary>
-    public static bool HasHunterVenom => !Player.WillStatusEnd(0, true, StatusID.HuntersVenom);
+    public static bool HasHunterVenom => Player.HasStatus(true, StatusID.HuntersVenom);
 
     /// <summary>
     /// Indicates if the player has Hunters Venom.
     /// </summary>
-    public static bool HasSwiftVenom => !Player.WillStatusEnd(0, true, StatusID.SwiftskinsVenom);
+    public static bool HasSwiftVenom => Player.HasStatus(true, StatusID.SwiftskinsVenom);
 
     /// <summary>
     /// Indicates if the player has Fellhunters Venom.
     /// </summary>
-    public static bool HasFellHuntersVenom => !Player.WillStatusEnd(0, true, StatusID.FellhuntersVenom);
+    public static bool HasFellHuntersVenom => Player.HasStatus(true, StatusID.FellhuntersVenom);
 
     /// <summary>
     /// Indicates if the player has Fellskins Venom.
     /// </summary>
-    public static bool HasFellSkinsVenom => !Player.WillStatusEnd(0, true, StatusID.FellskinsVenom);
+    public static bool HasFellSkinsVenom => Player.HasStatus(true, StatusID.FellskinsVenom);
 
     /// <summary>
     /// Indicates if the player has Poised For Twinfang.
     /// </summary>
-    public static bool HasPoisedFang => !Player.WillStatusEnd(0, true, StatusID.PoisedForTwinfang);
+    public static bool HasPoisedFang => Player.HasStatus(true, StatusID.PoisedForTwinfang);
 
     /// <summary>
     /// Indicates if the player has Poised For Twinblood.
     /// </summary>
-    public static bool HasPoisedBlood => !Player.WillStatusEnd(0, true, StatusID.PoisedForTwinblood);
+    public static bool HasPoisedBlood => Player.HasStatus(true, StatusID.PoisedForTwinblood);
 
     /// <summary>
     /// Indicates if the player has Grimhunters Venom.
     /// </summary>
-    public static bool HasGrimHunter => !Player.WillStatusEnd(0, true, StatusID.GrimhuntersVenom);
+    public static bool HasGrimHunter => Player.HasStatus(true, StatusID.GrimhuntersVenom);
 
     /// <summary>
     /// Indicates if the player has Grimskins Venom.
     /// </summary>
-    public static bool HasGrimSkin => !Player.WillStatusEnd(0, true, StatusID.GrimskinsVenom);
+    public static bool HasGrimSkin => Player.HasStatus(true, StatusID.GrimskinsVenom);
     #endregion
 
     #region PvE Actions

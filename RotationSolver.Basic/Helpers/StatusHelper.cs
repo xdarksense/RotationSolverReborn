@@ -371,6 +371,19 @@ public static class StatusHelper
     /// </returns>
     public static bool HasApplyStatus(this IBattleChara battleChara, StatusID[] statusIDs)
     {
+        try
+        {
+            if (battleChara.StatusList == null)
+            {
+                return false;
+            }
+        }
+        catch
+        {
+            // StatusList threw, treat as unavailable
+            return false;
+        }
+
         if (DataCenter.InEffectTime && DataCenter.ApplyStatus.TryGetValue(battleChara.GameObjectId, out uint statusId))
         {
             foreach (StatusID s in statusIDs)

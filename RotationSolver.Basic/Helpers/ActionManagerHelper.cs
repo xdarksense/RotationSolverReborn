@@ -8,8 +8,6 @@ namespace RotationSolver.Basic.Helpers
     /// </summary>
     internal static class ActionManagerHelper
     {
-        private const uint DefaultActionId = 11;
-
         /// <summary>
         /// Gets the instance of the ActionManager.
         /// </summary>
@@ -39,7 +37,7 @@ namespace RotationSolver.Basic.Helpers
         /// <returns>The default recast time.</returns>
         public static unsafe float GetDefaultRecastTime()
         {
-            return GetRecastTime(ActionType.Action, DefaultActionId);
+            return GetRecastTime(ActionType.Action, (uint)ActionID.HeatedSplitShotPvE);
         }
 
         /// <summary>
@@ -60,7 +58,7 @@ namespace RotationSolver.Basic.Helpers
         /// <returns>The elapsed recast time for the default action.</returns>
         public static unsafe float GetDefaultRecastTimeElapsed()
         {
-            return GetRecastTimeElapsed(ActionType.Action, DefaultActionId);
+            return GetRecastTimeElapsed(ActionType.Action, (uint)ActionID.HeatedSplitShotPvE);
         }
     }
 }

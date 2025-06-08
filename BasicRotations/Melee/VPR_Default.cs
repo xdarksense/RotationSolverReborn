@@ -275,7 +275,7 @@ public sealed class VPR_Default : ViperRotation
             }
         }
 
-        if ((PreserveCombo && LiveComboTime > GCDTime(1)) || !PreserveCombo)
+        if (((PreserveCombo && LiveComboTime > GCDTime(1)) || !PreserveCombo) && !WillSwiftEnd && !WillHunterEnd)
         {
             // Uncoiled Fury Overcap protection
             bool isTargetBoss = CurrentTarget?.IsBossFromTTK() ?? false;
@@ -300,9 +300,7 @@ public sealed class VPR_Default : ViperRotation
                 || !BurstUncoiledFuryHold)
                 && SerpentsIrePvE.Cooldown.JustUsedAfter(30)
                 && !HasReadyToReawaken
-                && NoAbilityReady
-                && !WillSwiftEnd
-                && !WillHunterEnd)
+                && NoAbilityReady)
             {
                 if (UncoiledFuryPvE.CanUse(out act, usedUp: true))
                 {
@@ -314,35 +312,52 @@ public sealed class VPR_Default : ViperRotation
         ////AOE Dread Combo
         if (PitActive)
         {
-            if (WillSwiftEnd)
+            if (HasHunterAndSwift)
             {
-                if (SwiftskinsDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
-                    return true;
-            }
-
-            if (WillHunterEnd)
-            {
-                if (HuntersDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
-                    return true;
-            }
-
-            switch (HunterOrSwiftEndsFirst)
-            {
-                case "Hunter":
-                    if (HuntersDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
-                        return true;
-                    break;
-                case "Swift":
+                if (WillSwiftEnd)
+                {
                     if (SwiftskinsDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
                         return true;
-                    break;
-                case "Equal":
-                case null:
+                }
+
+                if (WillHunterEnd)
+                {
                     if (HuntersDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
                         return true;
+                }
+
+                switch (HunterOrSwiftEndsFirst)
+                {
+                    case "Hunter":
+                        if (HuntersDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
+                            return true;
+                        break;
+                    case "Swift":
+                        if (SwiftskinsDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
+                            return true;
+                        break;
+                    case "Equal":
+                    case null:
+                        if (HuntersDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
+                            return true;
+                        if (SwiftskinsDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
+                            return true;
+                        break;
+                }
+            }
+            if (!HasHunterAndSwift)
+            {
+                if (!IsSwift)
+                {
                     if (SwiftskinsDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
                         return true;
-                    break;
+                }
+
+                if (!IsHunter)
+                {
+                    if (HuntersDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
+                        return true;
+                }
             }
         }
 
@@ -380,45 +395,76 @@ public sealed class VPR_Default : ViperRotation
         // then try using Coil that will end first
         if (DreadActive)
         {
-            if (IsSwift && Player.WillStatusEndGCD(2, 0, true, StatusID.Swiftscaled))
+            if (HasHunterAndSwift)
             {
-                if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true))
-                    return true;
-            }
-
-            if (IsHunter && Player.WillStatusEndGCD(2, 0, true, StatusID.HuntersInstinct))
-            {
-                if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true))
-                    return true;
-            }
-
-            if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true) && HuntersCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, HuntersCoilPvE.Target.Target))
-            {
-                return true;
-            }
-
-            if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true) && SwiftskinsCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, SwiftskinsCoilPvE.Target.Target))
-            {
-                return true;
-            }
-
-            switch (HunterOrSwiftEndsFirst)
-            {
-                case "Hunter":
-                    if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true))
-                        return true;
-                    break;
-                case "Swift":
+                if (WillSwiftEnd)
+                {
                     if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true))
                         return true;
-                    break;
-                case "Equal":
-                case null:
+                }
+
+                if (WillHunterEnd)
+                {
                     if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true))
                         return true;
-                    if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true))
+                }
+
+                if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true) && HuntersCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, HuntersCoilPvE.Target.Target))
+                {
+                    return true;
+                }
+
+                if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true) && SwiftskinsCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, SwiftskinsCoilPvE.Target.Target))
+                {
+                    return true;
+                }
+
+                switch (HunterOrSwiftEndsFirst)
+                {
+                    case "Hunter":
+                        if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true))
+                            return true;
+                        break;
+                    case "Swift":
+                        if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true))
+                            return true;
+                        break;
+                    case "Equal":
+                    case null:
+                        if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true))
+                            return true;
+                        if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true))
+                            return true;
+                        break;
+                }
+            }
+
+            if (!HasHunterAndSwift)
+            {
+                if (!IsHunter && !IsSwift)
+                {
+                    if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true) && HuntersCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, HuntersCoilPvE.Target.Target))
+                    {
                         return true;
-                    break;
+                    }
+
+                    if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true) && SwiftskinsCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, SwiftskinsCoilPvE.Target.Target))
+                    {
+                        return true;
+                    }
+                }
+
+                if (!IsSwift)
+                {
+                    if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
+                        return true;
+                }
+
+                if (!IsHunter)
+                {
+                    if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
+                        return true;
+                }
             }
         }
 
@@ -456,7 +502,7 @@ public sealed class VPR_Default : ViperRotation
                 if (JaggedMawPvE.CanUse(out act, skipAoeCheck: true))
                     return true;
                 break;
-            case (false, true):
+            case (_, true):
                 if (BloodiedMawPvE.CanUse(out act, skipAoeCheck: true))
                     return true;
                 break;
