@@ -304,17 +304,17 @@ public sealed class PLD_Default : PaladinRotation
             return true;
         }
 
-        if (CircleOfScornPvE.CanUse(out act, skipAoeCheck: true, skipTTKCheck: true) && FightOrFlightPvE.Cooldown.IsCoolingDown && (ImperatorPvE.EnoughLevel && ImperatorPvE.IsInCooldown || !ImperatorPvE.EnoughLevel))
+        if (CircleOfScornPvE.CanUse(out act, skipAoeCheck: true, skipTTKCheck: true) && FightOrFlightPvE.Cooldown.IsCoolingDown && (ImperatorPvE.EnoughLevel && ImperatorPvE.Cooldown.IsCoolingDown || !ImperatorPvE.EnoughLevel))
         {
             return true;
         }
 
-        if (ExpiacionPvE.CanUse(out act, skipAoeCheck: true) && FightOrFlightPvE.Cooldown.IsCoolingDown && (ImperatorPvE.EnoughLevel && ImperatorPvE.IsInCooldown || !ImperatorPvE.EnoughLevel))
+        if (ExpiacionPvE.CanUse(out act, skipAoeCheck: true) && FightOrFlightPvE.Cooldown.IsCoolingDown && (ImperatorPvE.EnoughLevel && ImperatorPvE.Cooldown.IsCoolingDown || !ImperatorPvE.EnoughLevel))
         {
             return true;
         }
 
-        if (SpiritsWithinPvE.CanUse(out act, skipAoeCheck: true) && FightOrFlightPvE.Cooldown.IsCoolingDown && (ImperatorPvE.EnoughLevel && ImperatorPvE.IsInCooldown || !ImperatorPvE.EnoughLevel))
+        if (SpiritsWithinPvE.CanUse(out act, skipAoeCheck: true) && FightOrFlightPvE.Cooldown.IsCoolingDown && (ImperatorPvE.EnoughLevel && ImperatorPvE.Cooldown.IsCoolingDown || !ImperatorPvE.EnoughLevel))
         {
             return true;
         }

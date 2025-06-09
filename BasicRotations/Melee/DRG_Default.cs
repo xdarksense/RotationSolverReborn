@@ -62,7 +62,7 @@ public sealed class DRG_Default : DragoonRotation
                     && LOTDEndAfter(1000)
                     && nextGCD.IsTheSameTo(true, ChaoticSpringPvE, LanceBarragePvE, WheelingThrustPvE, FangAndClawPvE))
                 || (nextGCD.IsTheSameTo(true, HeavensThrustPvE, DrakesbanePvE)
-                    && (LanceChargePvE.IsInCooldown || BattleLitanyPvE.IsInCooldown));
+                    && (LanceChargePvE.Cooldown.IsCoolingDown || BattleLitanyPvE.Cooldown.IsCoolingDown));
 
             if ((!BattleLitanyPvE.Cooldown.ElapsedAfter(60) || !BattleLitanyPvE.EnoughLevel) 
                 && LanceChargePvE.CanUse(out act))
@@ -84,7 +84,7 @@ public sealed class DRG_Default : DragoonRotation
                     && !DrakesbanePvE.EnoughLevel
                     && nextGCD.IsTheSameTo(true, ChaoticSpringPvE, LanceBarragePvE, WheelingThrustPvE, FangAndClawPvE))
                 || (nextGCD.IsTheSameTo(true, HeavensThrustPvE, DrakesbanePvE)
-                    && (LanceChargePvE.IsInCooldown || BattleLitanyPvE.IsInCooldown)))
+                    && (LanceChargePvE.Cooldown.IsCoolingDown || BattleLitanyPvE.Cooldown.IsCoolingDown)))
                     {
                         if (LifeSurgePvE.CanUse(out act, usedUp: true))
                         {
