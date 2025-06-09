@@ -259,9 +259,12 @@ public sealed class MCH_Rework : MachinistRotation
         if (AirAnchorPvE.Cooldown.IsCoolingDown && DrillPvE.Cooldown.CurrentCharges < 2 && ChainSawPvE.Cooldown.IsCoolingDown
             && !HasExcavatorReady)
         {
-            if (FullMetalFieldPvE.CanUse(out act))
+            if (!WildfirePvE.Cooldown.IsCoolingDown || IsLastAbility(true, WildfirePvE))
             {
-                return true;
+                if (FullMetalFieldPvE.CanUse(out act))
+                {
+                    return true;
+                }
             }
         }
 
