@@ -148,12 +148,12 @@ public sealed class SMN_Default : SummonerRotation
                 return true;
             }
 
-            if (((inSolarUnique && Player.HasStatus(false, StatusID.SearingLight)) || !SearingLightPvE.EnoughLevel || (isTargetBoss && isTargetDying)) && EnergyDrainPvE.IsInCooldown && PainflarePvE.CanUse(out act))
+            if (((inSolarUnique && Player.HasStatus(false, StatusID.SearingLight)) || !SearingLightPvE.EnoughLevel || (isTargetBoss && isTargetDying)) && EnergyDrainPvE.Cooldown.IsCoolingDown && PainflarePvE.CanUse(out act))
             {
                 return true;
             }
 
-            if (((inSolarUnique && Player.HasStatus(false, StatusID.SearingLight)) || !SearingLightPvE.EnoughLevel || (isTargetBoss && isTargetDying)) && EnergyDrainPvE.IsInCooldown && FesterPvE.CanUse(out act))
+            if (((inSolarUnique && Player.HasStatus(false, StatusID.SearingLight)) || !SearingLightPvE.EnoughLevel || (isTargetBoss && isTargetDying)) && EnergyDrainPvE.Cooldown.IsCoolingDown && FesterPvE.CanUse(out act))
             {
                 return true;
             }
@@ -229,22 +229,22 @@ public sealed class SMN_Default : SummonerRotation
                 return true;
             }
 
-            if (((inSolarUnique && Player.HasStatus(false, StatusID.SearingLight) && elapsed2ChargeAfterInvocation && EnergyDrainPvE.Cooldown.WillHaveOneCharge(2)) || !SearingLightPvE.EnoughLevel || (isTargetBoss && isTargetDying)) && EnergyDrainPvE.IsInCooldown && PainflarePvE.CanUse(out act))
+            if (((inSolarUnique && Player.HasStatus(false, StatusID.SearingLight) && elapsed2ChargeAfterInvocation && EnergyDrainPvE.Cooldown.WillHaveOneCharge(2)) || !SearingLightPvE.EnoughLevel || (isTargetBoss && isTargetDying)) && EnergyDrainPvE.Cooldown.IsCoolingDown && PainflarePvE.CanUse(out act))
             {
                 return true;
             }
 
-            if (((inSolarUnique && Player.HasStatus(false, StatusID.SearingLight) && elapsed2ChargeAfterInvocation && EnergyDrainPvE.Cooldown.WillHaveOneCharge(2)) || !SearingLightPvE.EnoughLevel || (isTargetBoss && isTargetDying)) && EnergyDrainPvE.IsInCooldown && FesterPvE.CanUse(out act))
+            if (((inSolarUnique && Player.HasStatus(false, StatusID.SearingLight) && elapsed2ChargeAfterInvocation && EnergyDrainPvE.Cooldown.WillHaveOneCharge(2)) || !SearingLightPvE.EnoughLevel || (isTargetBoss && isTargetDying)) && EnergyDrainPvE.Cooldown.IsCoolingDown && FesterPvE.CanUse(out act))
             {
                 return true;
             }
 
-            if (((inSolarUnique && Player.HasStatus(false, StatusID.SearingLight) && elapsed2ChargeAfterInvocation) || !SearingLightPvE.EnoughLevel || (isTargetBoss && isTargetDying)) && EnergyDrainPvE.IsInCooldown && PainflarePvE.CanUse(out act))
+            if (((inSolarUnique && Player.HasStatus(false, StatusID.SearingLight) && elapsed2ChargeAfterInvocation) || !SearingLightPvE.EnoughLevel || (isTargetBoss && isTargetDying)) && EnergyDrainPvE.Cooldown.IsCoolingDown && PainflarePvE.CanUse(out act))
             {
                 return true;
             }
 
-            if (((inSolarUnique && Player.HasStatus(false, StatusID.SearingLight) && elapsed2ChargeAfterInvocation) || !SearingLightPvE.EnoughLevel || (isTargetBoss && isTargetDying)) && EnergyDrainPvE.IsInCooldown && FesterPvE.CanUse(out act))
+            if (((inSolarUnique && Player.HasStatus(false, StatusID.SearingLight) && elapsed2ChargeAfterInvocation) || !SearingLightPvE.EnoughLevel || (isTargetBoss && isTargetDying)) && EnergyDrainPvE.Cooldown.IsCoolingDown && FesterPvE.CanUse(out act))
             {
                 return true;
             }
@@ -443,7 +443,7 @@ public sealed class SMN_Default : SummonerRotation
             }
         }
 
-        if (SummonTimeEndAfterGCD() && AttunmentTimeEndAfterGCD() && !InBahamut && !InPhoenix && !InSolarBahamut && SummonEmeraldPvE.IsInCooldown && SummonTopazPvE.IsInCooldown && SummonRubyPvE.IsInCooldown &&
+        if (SummonTimeEndAfterGCD() && AttunmentTimeEndAfterGCD() && !InBahamut && !InPhoenix && !InSolarBahamut && SummonEmeraldPvE.Cooldown.IsCoolingDown && SummonTopazPvE.Cooldown.IsCoolingDown && SummonRubyPvE.Cooldown.IsCoolingDown &&
             RuinIvPvE.CanUse(out act, skipAoeCheck: true))
         {
             return true;

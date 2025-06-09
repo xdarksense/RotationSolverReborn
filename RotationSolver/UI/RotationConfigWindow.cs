@@ -2181,7 +2181,10 @@ public partial class RotationConfigWindow : Window
             ImGuiHelper.ExecuteHotKeysPopup(key, cmd, string.Empty, false);
 
             enable = _activeAction.IsInCooldown;
-            _activeAction.IsInCooldown = enable;
+            if (ImGui.Checkbox($"{UiString.ConfigWindow_Actions_ShowOnCDWindow.GetDescription()}##{_activeAction.Name}InCooldown", ref enable))
+            {
+                _activeAction.IsInCooldown = enable;
+            }
 
             if (_activeAction is IBaseAction a)
             {
