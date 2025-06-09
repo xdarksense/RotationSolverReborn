@@ -749,9 +749,7 @@ internal static class RotationUpdater
                 //If the rotation has changed, perform a clear
                 if (rotation != DataCenter.CurrentRotation)
                 {
-                    rotation.OnTerritoryChanged();
-                    DataCenter.CurrentRotation = rotation;
-                    CurrentRotationActions = DataCenter.CurrentRotation?.AllActions ?? [];
+                    ChangeRotation(rotation);
                 }
 
                 return;
@@ -760,6 +758,13 @@ internal static class RotationUpdater
 
         DataCenter.CurrentRotation = null;
         CurrentRotationActions = [];
+    }
+
+    public static void ChangeRotation(ICustomRotation rotation)
+    {
+        rotation.OnTerritoryChanged();
+        DataCenter.CurrentRotation = rotation;
+        CurrentRotationActions = DataCenter.CurrentRotation?.AllActions ?? [];
     }
 
     private static ICustomRotation? GetRotation(Type? t)
