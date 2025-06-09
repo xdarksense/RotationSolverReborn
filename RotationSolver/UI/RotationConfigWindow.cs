@@ -611,6 +611,7 @@ public partial class RotationConfigWindow : Window
                             Service.Config.RotationChoice = r.GetType().FullName;
                         }
                         Service.Config.Save();
+                        RotationUpdater.ChangeRotation(r);
                     }
                     ImguiTooltips.HoveredTooltip(rAttr.Description);
                     ImGui.PopStyleColor();
