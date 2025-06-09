@@ -68,27 +68,27 @@ public partial class DutyRotation
     /// <summary>
     /// Has a status that is important to the main rotation and should prevent Duty Actions from being executed.
     /// </summary>
-    public static bool HasLockoutStatus => !Player.WillStatusEnd(0, true, RotationLockoutStatus) && InCombat;
+    public static bool HasLockoutStatus => Player.HasStatus(true, RotationLockoutStatus) && InCombat;
 
     /// <summary>
     /// Able to execute Cleansing.
     /// </summary>
-    public static bool HasCleansing => !Player.WillStatusEnd(0, true, StatusID.PredictionOfCleansing) || !Player.WillStatusEnd(0, false, StatusID.PredictionOfCleansing);
+    public static bool HasCleansing => Player.HasStatus(true, StatusID.PredictionOfCleansing) || Player.HasStatus(false, StatusID.PredictionOfCleansing);
 
     /// <summary>
     /// Able to execute Starfall.
     /// </summary>
-    public static bool HasStarfall => !Player.WillStatusEnd(0, true, StatusID.PredictionOfStarfall) || !Player.WillStatusEnd(0, false, StatusID.PredictionOfStarfall);
+    public static bool HasStarfall => Player.HasStatus(true, StatusID.PredictionOfStarfall) || Player.HasStatus(false, StatusID.PredictionOfStarfall);
 
     /// <summary>
     /// Able to execute Phantom Judgment.
     /// </summary>
-    public static bool HasPhantomJudgment => !Player.WillStatusEnd(0, true, StatusID.PredictionOfJudgment) || !Player.WillStatusEnd(0, false, StatusID.PredictionOfJudgment);
+    public static bool HasPhantomJudgment => Player.HasStatus(true, StatusID.PredictionOfJudgment) || Player.HasStatus(false, StatusID.PredictionOfJudgment);
 
     /// <summary>
     /// Able to execute Blessing.
     /// </summary>
-    public static bool HasBlessing => !Player.WillStatusEnd(0, true, StatusID.PredictionOfBlessing) || !Player.WillStatusEnd(0, false, StatusID.PredictionOfBlessing);
+    public static bool HasBlessing => Player.HasStatus(true, StatusID.PredictionOfBlessing) || Player.HasStatus(false, StatusID.PredictionOfBlessing);
     #endregion
 
     #region Freelancer
@@ -378,6 +378,7 @@ public partial class DutyRotation
     static partial void ModifyPhantomFirePvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => CannoneerLevel >= 1;
+        setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -391,6 +392,7 @@ public partial class DutyRotation
     static partial void ModifyHolyCannonPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => CannoneerLevel >= 2;
+        setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -405,6 +407,7 @@ public partial class DutyRotation
     {
         setting.ActionCheck = () => CannoneerLevel >= 3;
         setting.TargetType = TargetType.DarkCannon;
+        setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -419,6 +422,7 @@ public partial class DutyRotation
     {
         setting.ActionCheck = () => CannoneerLevel >= 4;
         setting.TargetType = TargetType.ShockCannon;
+        setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -433,6 +437,7 @@ public partial class DutyRotation
     {
         setting.ActionCheck = () => CannoneerLevel >= 6;
         setting.TargetStatusProvide = [StatusID.SilverSickness];
+        setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

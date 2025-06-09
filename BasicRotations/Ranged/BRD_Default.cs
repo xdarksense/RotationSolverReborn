@@ -219,7 +219,7 @@ public sealed class BRD_Default : BardRotation
                 return true;
             }
 
-            if (!Player.WillStatusEnd(0, true, StatusID.BattleVoice) && RadiantFinalePvE.CanUse(out act))
+            if (Player.HasStatus(true, StatusID.BattleVoice) && RadiantFinalePvE.CanUse(out act))
             {
                 return true;
             }

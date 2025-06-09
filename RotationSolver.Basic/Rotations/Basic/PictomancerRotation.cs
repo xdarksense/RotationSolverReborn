@@ -311,52 +311,52 @@ public partial class PictomancerRotation
     /// <summary>
     /// Indicates if the player has Aetherhues.
     /// </summary>
-    public static bool HasAetherhues => !Player.WillStatusEnd(0, true, StatusID.Aetherhues);
+    public static bool HasAetherhues => Player.HasStatus(true, StatusID.Aetherhues);
 
     /// <summary>
     /// Indicates if the player has Aetherhues II.
     /// </summary>
-    public static bool HasAetherhues2 => !Player.WillStatusEnd(0, true, StatusID.AetherhuesIi);
+    public static bool HasAetherhues2 => Player.HasStatus(true, StatusID.AetherhuesIi);
 
     /// <summary>
     /// Indicates if the player has Subtractive Palette.
     /// </summary>
-    public static bool HasSubtractivePalette => !Player.WillStatusEnd(0, true, StatusID.SubtractivePalette);
+    public static bool HasSubtractivePalette => Player.HasStatus(true, StatusID.SubtractivePalette);
 
     /// <summary>
     /// Indicates if the player has Subtractive Spectrum.
     /// </summary>
-    public static bool HasSubtractiveSpectrum => !Player.WillStatusEnd(0, true, StatusID.SubtractiveSpectrum);
+    public static bool HasSubtractiveSpectrum => Player.HasStatus(true, StatusID.SubtractiveSpectrum);
 
     /// <summary>
     /// Indicates if the player has Hyperphantasia.
     /// </summary>
-    public static bool HasHyperphantasia => !Player.WillStatusEnd(0, true, StatusID.Hyperphantasia);
+    public static bool HasHyperphantasia => Player.HasStatus(true, StatusID.Hyperphantasia);
 
     /// <summary>
     /// Indicates if the player has Hammer Time.
     /// </summary>
-    public static bool HasHammerTime => !Player.WillStatusEnd(0, true, StatusID.HammerTime);
+    public static bool HasHammerTime => Player.HasStatus(true, StatusID.HammerTime);
 
     /// <summary>
     /// Indicates if the player has Monochrome Tones.
     /// </summary>
-    public static bool HasMonochromeTones => !Player.WillStatusEnd(0, true, StatusID.MonochromeTones);
+    public static bool HasMonochromeTones => Player.HasStatus(true, StatusID.MonochromeTones);
 
     /// <summary>
     /// Indicates if the player has Starry Muse.
     /// </summary>
-    public static bool HasStarryMuse => !Player.WillStatusEnd(0, true, StatusID.StarryMuse);
+    public static bool HasStarryMuse => Player.HasStatus(true, StatusID.StarryMuse);
 
     /// <summary>
     /// Indicates if the player has Rainbow Bright.
     /// </summary>
-    public static bool HasRainbowBright => !Player.WillStatusEnd(0, true, StatusID.RainbowBright);
+    public static bool HasRainbowBright => Player.HasStatus(true, StatusID.RainbowBright);
 
     /// <summary>
     /// Indicates if the player has Rainbow Bright.
     /// </summary>
-    public static bool HasStarstruck => !Player.WillStatusEnd(0, true, StatusID.Starstruck);
+    public static bool HasStarstruck => Player.HasStatus(true, StatusID.Starstruck);
 
     /// <summary>
     /// Holds the remaining amount of HammerTime stacks

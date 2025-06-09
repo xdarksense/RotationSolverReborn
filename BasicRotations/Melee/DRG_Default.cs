@@ -14,7 +14,7 @@ public sealed class DRG_Default : DragoonRotation
     public bool OGCDTimers { get; set; } = false;
     #endregion
 
-    private static bool InBurstStatus => !Player.WillStatusEnd(0, true, StatusID.BattleLitany);
+    private static bool InBurstStatus => Player.HasStatus(true, StatusID.BattleLitany);
 
     #region Additional oGCD Logic
 

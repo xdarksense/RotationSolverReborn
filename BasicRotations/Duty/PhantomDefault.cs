@@ -569,7 +569,7 @@ public sealed class PhantomDefault : PhantomRotation
     public override bool GeneralGCD(out IAction? act)
     {
         act = null;
-        if (HasLockoutStatus || !Player.WillStatusEnd(0, true, StatusID.Reassembled))
+        if (HasLockoutStatus || Player.HasStatus(true, StatusID.Reassembled))
         {
             return false;
         }

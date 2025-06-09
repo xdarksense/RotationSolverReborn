@@ -491,7 +491,7 @@ public partial class GunbreakerRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasTerminalTrigger => !Player.WillStatusEndGCD(0, 0, true, StatusID.RelentlessRush);
+    public static bool HasTerminalTrigger => Player.HasStatus(true, StatusID.RelentlessRush);
 
     #region PvP Actions
 

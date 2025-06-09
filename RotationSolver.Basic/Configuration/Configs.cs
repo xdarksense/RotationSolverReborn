@@ -53,6 +53,10 @@ internal partial class Configs : IPluginConfiguration
     Filter = AutoActionUsage, Section = 3)]
     public AoEType AoEType { get; set; } = AoEType.Full;
 
+    [ConditionBool, UI("Don't attack new mobs by AoE. (Dangerous)", Description = "Never use any AoE action when this may attack mobs that are not hostile targets.",
+        Filter = AutoActionUsage, Section = 3)]
+    private static readonly bool _noNewHostiles = false;
+
     [ConditionBool, UI("Disable automatically during area transitions.",
     Description = "Automatically turn off combat state when moving between different areas.",
     Filter = BasicAutoSwitch)]
@@ -196,10 +200,6 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Auto turn on manual mode when attacked.",
         Filter = BasicAutoSwitch, Section = 1)]
     private static readonly bool _startOnAttackedBySomeone = false;
-
-    [ConditionBool, UI("Don't attack new mobs by AoE. (Dangerous)", Description = "Never use any AoE action when this may attack mobs that are not hostile targets.",
-        Filter = BasicAutoSwitch)]
-    private static readonly bool _noNewHostiles = false;
 
     /// <markdown file="Auto" name="Use healing abilities when playing a non-healer role" section="Healing Usage and Control">
     /// Allow usage of healing abilities when not playing as a healer (such as Vercure, Bloodbath, etc.)

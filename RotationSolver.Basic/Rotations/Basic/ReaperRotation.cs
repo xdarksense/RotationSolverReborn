@@ -38,32 +38,32 @@ public partial class ReaperRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasEnshrouded => !Player.WillStatusEnd(0, true, StatusID.Enshrouded);
+    public static bool HasEnshrouded => Player.HasStatus(true, StatusID.Enshrouded);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasSoulReaver => !Player.WillStatusEnd(0, true, StatusID.SoulReaver);
+    public static bool HasSoulReaver => Player.HasStatus(true, StatusID.SoulReaver);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasSoulsow => !Player.WillStatusEnd(0, true, StatusID.Soulsow);
+    public static bool HasSoulsow => Player.HasStatus(true, StatusID.Soulsow);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasExecutioner => !Player.WillStatusEnd(0, true, StatusID.Executioner);
+    public static bool HasExecutioner => Player.HasStatus(true, StatusID.Executioner);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasIdealHost => !Player.WillStatusEnd(0, true, StatusID.IdealHost);
+    public static bool HasIdealHost => Player.HasStatus(true, StatusID.IdealHost);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasOblatio => !Player.WillStatusEnd(0, true, StatusID.Oblatio);
+    public static bool HasOblatio => Player.HasStatus(true, StatusID.Oblatio);
 
     /// <summary>
     /// 

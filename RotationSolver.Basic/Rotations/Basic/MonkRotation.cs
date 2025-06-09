@@ -50,7 +50,7 @@ public partial class MonkRotation
     /// <summary>Brotherhood
     /// Brotherhood
     /// </summary>
-    public static bool InBrotherhood => !Player.WillStatusEnd(0, true, StatusID.Brotherhood);
+    public static bool InBrotherhood => Player.HasStatus(true, StatusID.Brotherhood);
     #endregion
 
     #region PvE Actions Unassignable

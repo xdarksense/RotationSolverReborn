@@ -1,4 +1,5 @@
-﻿using Dalamud.Game.ClientState.Statuses;
+﻿using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.ClientState.Statuses;
 using ECommons.Automation;
 using ECommons.GameHelpers;
 using ECommons.Logging;
@@ -15,44 +16,44 @@ public static class StatusHelper
     /// 
     /// </summary>
     public static StatusID[] RangePhysicalDefense { get; } =
-    {
+    [
         StatusID.Troubadour,
         StatusID.Tactician_1951,
         StatusID.Tactician_2177,
         StatusID.ShieldSamba,
-    };
+    ];
 
     /// <summary>
     /// 
     /// </summary>
     public static StatusID[] PhysicalResistance { get; } =
-    {
+    [
         StatusID.IceSpikes_1720,
-    };
+    ];
 
     /// <summary>
     /// 
     /// </summary>
     public static StatusID[] PhysicalRangedResistance { get; } =
-    {
+    [
         StatusID.RangedResistance,
-    };
+    ];
 
     /// <summary>
     /// 
     /// </summary>
     public static StatusID[] MagicResistance { get; } =
-    {
+    [
         StatusID.MagicResistance,
         StatusID.RepellingSpray_556,
         StatusID.MagitekField_2166,
-    };
+    ];
 
     /// <summary>
     /// 
     /// </summary>
     public static StatusID[] AreaHots { get; } =
-    {
+    [
         StatusID.AspectedHelios,
         StatusID.MedicaIi,
         StatusID.TrueMedicaIi,
@@ -66,70 +67,70 @@ public static class StatusHelper
         StatusID.DivineAura,
         StatusID.MedicaIii_3986,
         StatusID.MedicaIii
-    };
+    ];
 
     /// <summary>
     /// 
     /// </summary>
     public static StatusID[] SingleHots { get; } =
-    {
+    [
         StatusID.AspectedBenefic,
         StatusID.Regen,
         StatusID.Regen_897,
         StatusID.Regen_1330,
         StatusID.TheEwer_3891,
-    };
+    ];
 
     /// <summary>
     /// 
     /// </summary>
     public static StatusID[] TankStanceStatus { get; } =
-    {
+    [
         StatusID.Grit,
         StatusID.RoyalGuard_1833,
         StatusID.IronWill,
         StatusID.Defiance,
         StatusID.Defiance_3124,
-    };
+    ];
 
     /// <summary>
     /// 
     /// </summary>
     public static StatusID[] NoNeedHealingStatus { get; } =
-    {
+    [
         StatusID.Holmgang_409,
         StatusID.LivingDead,
         //StatusID.WalkingDead,
         StatusID.Superbolide,
         StatusID.Invulnerability,
-    };
+    ];
 
     /// <summary>
     /// 
     /// </summary>
     public static StatusID[] SwiftcastStatus { get; } =
-    {
+    [
         StatusID.Swiftcast,
         StatusID.Triplecast,
         StatusID.Dualcast
-    };
+    ];
 
     /// <summary>
     /// 
     /// </summary>
     public static StatusID[] AstCardStatus { get; } =
-    {
+    [
         StatusID.TheBalance_3887,
         StatusID.TheSpear_3889,
         StatusID.Weakness,
         StatusID.BrinkOfDeath,
-    };
+    ];
 
     /// <summary>
     /// 
     /// </summary>
     public static StatusID[] RampartStatus { get; } =
-    {
+    [
         StatusID.Superbolide,
         StatusID.HallowedGround,
         StatusID.Rampart,
@@ -143,24 +144,24 @@ public static class StatusHelper
         StatusID.Holmgang_409,
         StatusID.LivingDead,
         StatusID.Superbolide,
-    };
+    ];
 
     /// <summary>
     /// 
     /// </summary>
     public static StatusID[] NoPositionalStatus { get; } =
-    {
+    [
         StatusID.TrueNorth,
         StatusID.RightEye,
-    };
+    ];
 
     /// <summary>
     /// 
     /// </summary>
     public static StatusID[] DoomHealStatus { get; } =
-    {
+    [
         StatusID.Doom_1769,
-    };
+    ];
 
     /// <summary>
     /// Statuses for the Phantom Oracle spell PredictPvE.
@@ -191,6 +192,37 @@ public static class StatusHelper
         StatusID.DamageUp,
         StatusID.DarkDefenses
     ];
+
+    /// <summary>
+    /// Determines if the specified battle character has reached the maximum number of status effects.
+    /// </summary>
+    /// <param name="battleChara">The battle character to check.</param>
+    /// <returns>
+    /// <c>true</c> if the character's status list is at the cap (30 for players, 60 for NPCs); otherwise, <c>false</c>.
+    /// </returns>
+    public static bool IsStatusCapped(IBattleChara battleChara)
+    {
+        if (battleChara == null)
+            return false;
+
+        try
+        {
+            if (battleChara.StatusList == null)
+                return false;
+        }
+        catch
+        {
+            // StatusList threw, treat as false
+            return false;
+        }
+
+        return battleChara switch
+        {
+            IPlayerCharacter player => player.StatusList.Length == 30,
+            IBattleNpc npc => npc.StatusList.Length == 60,
+            _ => false
+        };
+    }
 
     /// <summary>
     /// Check whether the target needs to be healing.
@@ -362,12 +394,13 @@ public static class StatusHelper
     }
 
     /// <summary>
-    /// Checks if the specified status needs to be applied to the given object.
+    /// Checks if the specified <paramref name="battleChara"/> currently has any of the statuses being applied,
+    /// as tracked by <c>DataCenter.ApplyStatus</c> during effect time.
     /// </summary>
-    /// <param name="battleChara"></param>
-    /// <param name="statusIDs">An array of <see cref="StatusID"/> to check against.</param>
+    /// <param name="battleChara">The battle character to check for applied statuses.</param>
+    /// <param name="statusIDs">An array of status IDs to check against the applied status.</param>
     /// <returns>
-    /// <c>true</c> if any of the specified statuses have to be applied to the object; otherwise, <c>false</c>.
+    /// <c>true</c> if any of the specified statuses are currently being applied to the character; otherwise, <c>false</c>.
     /// </returns>
     public static bool HasApplyStatus(this IBattleChara battleChara, StatusID[] statusIDs)
     {
