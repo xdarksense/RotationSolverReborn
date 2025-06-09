@@ -542,7 +542,8 @@ public partial class RotationConfigWindow : Window
         }
 
         IDalamudTextureWrap? texture = null;
-        if (!DataCenter.IsInOccultCrescentOp || DutyRotation.GetPhantomJob() == DutyRotation.PhantomJob.None)
+        //TODO: Optimize GetOccultIcon if intending to keep it
+        if (true)//!DataCenter.IsInOccultCrescentOp || DutyRotation.GetPhantomJob() == DutyRotation.PhantomJob.None)
         {
             var curCombatType = DataCenter.IsPvP ? CombatType.PvP : CombatType.PvE;
             IconSet.GetTexture(curCombatType.GetIcon(), out texture);
