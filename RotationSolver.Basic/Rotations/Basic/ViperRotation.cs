@@ -474,7 +474,7 @@ public partial class ViperRotation
         setting.ActionCheck = () => LastLashReady;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 1,
         };
     }
 
@@ -507,7 +507,7 @@ public partial class ViperRotation
         setting.ActionCheck = () => PitActive || HuntersDenOnly;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 1,
         };
     }
 
@@ -516,7 +516,7 @@ public partial class ViperRotation
         setting.ActionCheck = () => PitActive || SwiftskinsDenOnly;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 1,
         };
     }
 
@@ -545,7 +545,7 @@ public partial class ViperRotation
         setting.ActionCheck = () => ThreshAbilityReady;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 1,
         };
     }
 
@@ -554,7 +554,7 @@ public partial class ViperRotation
         setting.ActionCheck = () => ThreshAbilityReady;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 1,
         };
     }
 

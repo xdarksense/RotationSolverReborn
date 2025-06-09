@@ -1,4 +1,6 @@
-﻿namespace RebornRotations.Ranged;
+﻿using Dalamud.Interface.Colors;
+
+namespace RebornRotations.Ranged;
 
 [Rotation("Rework", CombatType.PvE, GameVersion = "7.25")]
 [SourceCode(Path = "main/BasicRotations/Ranged/MCH_Rework.cs")]
@@ -6,9 +8,6 @@
 public sealed class MCH_Rework : MachinistRotation
 {
     #region Config Options
-    [RotationConfig(CombatType.PvE, Name = "Use Automation Queen as soon as its available if you are about to overcap")]
-    private bool DumbQueen { get; set; } = false;
-
     [RotationConfig(CombatType.PvE, Name = "Use burst medicine in countdown (requires auto burst option on)")]
     private bool OpenerBurstMeds { get; set; } = false;
 
@@ -35,6 +34,17 @@ public sealed class MCH_Rework : MachinistRotation
         return base.CountDownAction(remainTime);
     }
     #endregion
+
+    protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
+    {
+        if (InCombat)
+        {
+            UpdateQueenStep();
+            UpdateFoundStepPair();
+        }
+
+        return base.EmergencyAbility(nextGCD, out act);
+    }
 
     #region oGCD Logic
     [RotationDesc(ActionID.TacticianPvE, ActionID.DismantlePvE)]
@@ -113,6 +123,11 @@ public sealed class MCH_Rework : MachinistRotation
             return true;
         }
 
+        if (UseQueen(out act, nextGCD))
+        {
+            return true;
+        }
+
         bool LowLevelHyperCheck = !AutoCrossbowPvE.EnoughLevel && SpreadShotPvE.CanUse(out _);
 
         if (FullMetalFieldPvE.EnoughLevel)
@@ -120,8 +135,7 @@ public sealed class MCH_Rework : MachinistRotation
             if ((Heat >= 50 || HasHypercharged) && !LowLevelHyperCheck)
             {
                 if (WeaponRemain < GCDTime(1) / 2 
-                    && (nextGCD.IsTheSameTo(false, FullMetalFieldPvE)
-                    || (nextGCD.IsTheSameTo(false, DrillPvE, ChainSawPvE, AirAnchorPvE, ExcavatorPvE) && !HasFullMetalMachinist)) 
+                    && nextGCD.IsTheSameTo(false, FullMetalFieldPvE)
                     && WildfirePvE.CanUse(out act))
                 {
                     return true;
@@ -169,20 +183,6 @@ public sealed class MCH_Rework : MachinistRotation
                 break;
         }
 
-        // Rook Autoturret/Queen Logic
-        if (RookAutoturretPvE.CanUse(out act, skipTTKCheck: true))
-        {
-            if (DumbQueen && InCombat && nextGCD.IsTheSameTo(true, HotShotPvE, AirAnchorPvE, ChainSawPvE, ExcavatorPvE) && Battery == 100)
-            {
-                return true;
-            }
-        }
-
-        if (UseQueen(out act, nextGCD))
-        {
-            return true;
-        }
-
         return base.AttackAbility(nextGCD, out act);
     }
     #endregion
@@ -191,7 +191,7 @@ public sealed class MCH_Rework : MachinistRotation
     protected override bool GeneralGCD(out IAction? act)
     {
         // ensure combo is not broken, okay to drop during overheat
-        if (IsLastComboAction(true, SlugShotPvE) &&LiveComboTime >= GCDTime(1) && LiveComboTime <= GCDTime(2) && !IsOverheated)
+        if (IsLastComboAction(true, SlugShotPvE) && LiveComboTime >= GCDTime(1) && LiveComboTime <= GCDTime(2) && !IsOverheated)
         {
             // 3
             if (CleanShotPvE.CanUse(out act))
@@ -232,30 +232,13 @@ public sealed class MCH_Rework : MachinistRotation
         if (!SpreadShotPvE.CanUse(out _))
         {
             // use AirAnchor if possible
-            if (HotShotMasteryTrait.EnoughLevel
-                && AirAnchorPvE.CanUse(out act))
+            if (AirAnchorPvE.CanUse(out act))
             {
                 return true;
             }
 
             // for opener: only use the first charge of Drill after AirAnchor when there are two
-            if (EnhancedMultiweaponTrait.EnoughLevel
-                && !CombatElapsedLessGCD(6)
-                && !ChainSawPvE.Cooldown.WillHaveOneCharge(6)
-                && !CleanShotPvE.CanUse(out _) && !SlugShotPvE.CanUse(out _)
-                && DrillPvE.CanUse(out act, usedUp: false || (DrillPvE.Cooldown.CurrentCharges == 1 && DrillPvE.Cooldown.WillHaveXChargesGCD(2, 1, 0))))
-            {
-                return true;
-            }
-
-            if (!EnhancedMultiweaponTrait.EnoughLevel
-                && DrillPvE.CanUse(out act))
-            {
-                return true;
-            }
-
-            if (!AirAnchorPvE.EnoughLevel
-                && HotShotPvE.CanUse(out act))
+            if (DrillPvE.CanUse(out act, usedUp: false))
             {
                 return true;
             }
@@ -273,26 +256,16 @@ public sealed class MCH_Rework : MachinistRotation
             return true;
         }
 
-        // use FMF after ChainSaw combo in 'alternative opener'
-        if (FullMetalFieldPvE.CanUse(out act))
+        if (AirAnchorPvE.Cooldown.IsCoolingDown && DrillPvE.Cooldown.CurrentCharges < 2 && ChainSawPvE.Cooldown.IsCoolingDown
+            && !HasExcavatorReady)
         {
-            //Ensure the FMF is used if FMF status will end soon
-            if (Player.WillStatusEndGCD(1, 0, true, StatusID.FullMetalMachinist))
-            {
-                return true;
-            }
-            if (!ChainSawPvE.Cooldown.WillHaveOneChargeGCD(2))
+            if (FullMetalFieldPvE.CanUse(out act))
             {
                 return true;
             }
         }
 
-        // dont use the second charge of Drill if it's in opener, also save Drill for burst  --- need to combine this with the logic above!!!
-        if (EnhancedMultiweaponTrait.EnoughLevel
-            && !CombatElapsedLessGCD(6)
-            && !ChainSawPvE.Cooldown.WillHaveOneCharge(6)
-            && !CleanShotPvE.CanUse(out _) && !SlugShotPvE.CanUse(out _)
-            && DrillPvE.CanUse(out act, usedUp: true))
+        if (DrillPvE.CanUse(out act, usedUp: true))
         {
             return true;
         }
@@ -320,6 +293,17 @@ public sealed class MCH_Rework : MachinistRotation
         }
 
         return base.GeneralGCD(out act);
+    }
+    #endregion
+
+    #region Tracking Properties
+    public override void DisplayStatus()
+    {
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "Rotation Tracking:");
+        ImGui.Text($"QueenStep: {_currentStep}");
+        ImGui.Text($"Step Pair Found: {foundStepPair}");
+        ImGui.TextColored(ImGuiColors.DalamudYellow, "Base Tracking:");
+        base.DisplayStatus();
     }
     #endregion
 
@@ -352,19 +336,93 @@ public sealed class MCH_Rework : MachinistRotation
         }
     }
 
+    private readonly (byte from, byte to, int step)[] _stepPairs =
+    [
+        (0, 60, 0),
+        (60, 90, 1),
+        (90, 100, 2),
+        (100, 50, 3),
+        (50, 60, 4),
+        (60, 100, 5),
+        (100, 50, 6),
+        (50, 70, 7),
+        (70, 100, 8),
+        (100, 50, 9),
+        (50, 80, 10),
+        (70, 100, 11),
+        (100, 50, 12),
+        (50, 60, 13)
+    ];
+
+    private int _currentStep = 0; // Track the current step
+    private bool foundStepPair = false;
+
+    /// <summary>
+    /// Checks if the current battery transition matches the current step only.
+    /// </summary>
+    private void UpdateFoundStepPair()
+    {
+        // Only check the current step
+        if (_currentStep < _stepPairs.Length)
+        {
+            var (from, to, _) = _stepPairs[_currentStep];
+            foundStepPair = (LastSummonBatteryPower == from && Battery == to);
+        }
+        else
+        {
+            foundStepPair = false;
+        }
+    }
+
+    private byte _lastTrackedSummonBatteryPower = 0;
+
+    public void UpdateQueenStep()
+    {
+        // If LastSummonBatteryPower has changed since last check, advance the step
+        if (_lastTrackedSummonBatteryPower != LastSummonBatteryPower)
+        {
+            _lastTrackedSummonBatteryPower = LastSummonBatteryPower;
+            AdvanceStep();
+        }
+    }
+
+    private void AdvanceStep()
+    {
+        _currentStep++;
+    }
     private bool UseQueen(out IAction? act, IAction nextGCD)
     {
-        if (WildfirePvE.Cooldown.WillHaveOneChargeGCD(4)
-            || !WildfirePvE.Cooldown.ElapsedAfter(10)
-            || (nextGCD.IsTheSameTo(true, CleanShotPvE) && Battery == 100)
-            || (nextGCD.IsTheSameTo(true, HotShotPvE, AirAnchorPvE, ChainSawPvE, ExcavatorPvE) && (Battery == 90 || Battery == 100)))
+        act = null;
+        if (!InCombat || IsRobotActive)
+            return false;
+
+        // Opener
+        if (Battery == 60 && IsLastGCD(false, ExcavatorPvE) && CombatTime < 15)
         {
-            if (InCombat && RookAutoturretPvE.CanUse(out act))
+            if (RookAutoturretPvE.CanUse(out act))
             {
                 return true;
             }
         }
-        act = null;
+
+        // Only allow battery usage if the current transition matches the expected step
+        if (foundStepPair)
+        {
+            if (RookAutoturretPvE.CanUse(out act))
+            {
+                return true;
+            }
+        }
+
+        // overcap protection
+        if ((nextGCD.IsTheSameTo(false, CleanShotPvE, HeatedCleanShotPvE) && Battery > 90)
+            || (nextGCD.IsTheSameTo(false, HotShotPvE, AirAnchorPvE, ChainSawPvE, ExcavatorPvE) && Battery > 80))
+        {
+            if (RookAutoturretPvE.CanUse(out act))
+            {
+                return true;
+            }
+        }
         return false;
     }
 }

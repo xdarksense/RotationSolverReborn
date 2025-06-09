@@ -49,22 +49,22 @@ public partial class PaladinRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasDivineMight => !Player.WillStatusEndGCD(0, 0, true, StatusID.DivineMight);
+    public static bool HasDivineMight => Player.HasStatus(true, StatusID.DivineMight);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasFightOrFlight => !Player.WillStatusEndGCD(0, 0, true, StatusID.FightOrFlight);
+    public static bool HasFightOrFlight => Player.HasStatus(true, StatusID.FightOrFlight);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasConfiteorReady => !Player.WillStatusEndGCD(0, 0, true, StatusID.ConfiteorReady);
+    public static bool HasConfiteorReady => Player.HasStatus(true, StatusID.ConfiteorReady);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasAtonementReady => !Player.WillStatusEndGCD(0, 0, true, StatusID.AtonementReady);
+    public static bool HasAtonementReady => Player.HasStatus(true, StatusID.AtonementReady);
     #endregion
 
     #region Actions Unassignable
@@ -421,6 +421,7 @@ public partial class PaladinRotation
         setting.StatusProvide = [StatusID.SepulchreReady];
     }
     #endregion
+
     #region PvP
     /// <summary>
     /// 

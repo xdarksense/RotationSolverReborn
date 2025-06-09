@@ -131,7 +131,7 @@ public sealed class NIN_Default : NinjaRotation
         }
 
         // First priority is given to Kassatsu if it's available, allowing for an immediate powerful Ninjutsu.
-        if (NoNinjutsu && KassatsuPvE.CanUse(out act))
+        if (NoNinjutsu && !nextGCD.IsTheSameTo(false, ActionID.TenPvE, ActionID.ChiPvE, ActionID.JinPvE) && KassatsuPvE.CanUse(out act))
         {
             return true;
         }

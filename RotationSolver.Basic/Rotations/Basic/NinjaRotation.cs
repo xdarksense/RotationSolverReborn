@@ -127,42 +127,42 @@ public partial class NinjaRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasKassatsu => !Player.WillStatusEnd(0, true, StatusID.Kassatsu);
+    public static bool HasKassatsu => Player.HasStatus(true, StatusID.Kassatsu);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasRaijuReady => !Player.WillStatusEnd(0, true, StatusID.RaijuReady);
+    public static bool HasRaijuReady => Player.HasStatus(true, StatusID.RaijuReady);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool IsExecutingMudra => !Player.WillStatusEnd(0, true, StatusID.Mudra) || !Player.WillStatusEnd(0, true, StatusID.TenChiJin);
+    public static bool IsExecutingMudra => Player.HasStatus(true, StatusID.Mudra) || Player.HasStatus(true, StatusID.TenChiJin);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasDoton => !Player.WillStatusEnd(0, true, StatusID.Doton);
+    public static bool HasDoton => Player.HasStatus(true, StatusID.Doton);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool IsShadowWalking => !Player.WillStatusEnd(0, true, StatusID.ShadowWalker);
+    public static bool IsShadowWalking => Player.HasStatus(true, StatusID.ShadowWalker);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasPhantomKamaitachi => !Player.WillStatusEnd(0, true, StatusID.PhantomKamaitachiReady);
+    public static bool HasPhantomKamaitachi => Player.HasStatus(true, StatusID.PhantomKamaitachiReady);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasTenChiJin => !Player.WillStatusEnd(0, true, StatusID.TenChiJin);
+    public static bool HasTenChiJin => Player.HasStatus(true, StatusID.TenChiJin);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool IsHidden => !Player.WillStatusEnd(0, true, StatusID.Hidden);
+    public static bool IsHidden => Player.HasStatus(true, StatusID.Hidden);
 
     #region Draw Debug
     /// <inheritdoc/>

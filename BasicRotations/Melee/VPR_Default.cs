@@ -133,13 +133,8 @@ public sealed class VPR_Default : ViperRotation
             }
         }
 
-        if (SerpentsIrePvE.CanUse(out act))
-        {
-            return true;
-        }
-
         ////Serpent Combo oGCDs
-        if (LastLashPvE.CanUse(out act))
+        if (LastLashPvE.CanUse(out act, skipAoeCheck: true))
         {
             return true;
         }
@@ -166,7 +161,7 @@ public sealed class VPR_Default : ViperRotation
         {
             return true;
         }
-        return base.AttackAbility(nextGCD, out act);
+        return base.MoveForwardAbility(nextGCD, out act);
     }
 
     [RotationDesc]
@@ -223,6 +218,11 @@ public sealed class VPR_Default : ViperRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
+        if (SerpentsIrePvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.AttackAbility(nextGCD, out act);
     }
     #endregion

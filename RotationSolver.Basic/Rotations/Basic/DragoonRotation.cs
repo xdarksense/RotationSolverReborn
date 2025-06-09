@@ -442,5 +442,4 @@ public partial class DragoonRotation
     }
     #endregion
 
-
 }

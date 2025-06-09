@@ -22,7 +22,7 @@ public sealed class DNC_Default : DancerRotation
     #endregion
     private bool shouldUseLastDance = true;
 
-    private static bool InBurstStatus => !Player.WillStatusEnd(0, true, StatusID.Devilment);
+    private static bool InBurstStatus => Player.HasStatus(true, StatusID.Devilment);
 
     #region Tracking Properties
     public override void DisplayStatus()

@@ -85,32 +85,32 @@ public partial class MachinistRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasWildfire => !Player.WillStatusEnd(0, true, StatusID.Wildfire_1946);
+    public static bool HasWildfire => Player.HasStatus(true, StatusID.Wildfire_1946);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasHypercharged => !Player.WillStatusEnd(0, true, StatusID.Hypercharged);
+    public static bool HasHypercharged => Player.HasStatus(true, StatusID.Hypercharged);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasReassembled => !Player.WillStatusEnd(0, true, StatusID.Reassembled);
+    public static bool HasReassembled => Player.HasStatus(true, StatusID.Reassembled);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasOverheated => !Player.WillStatusEnd(0, true, StatusID.Overheated);
+    public static bool HasOverheated => Player.HasStatus(true, StatusID.Overheated);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasExcavatorReady => !Player.WillStatusEnd(0, true, StatusID.ExcavatorReady);
+    public static bool HasExcavatorReady => Player.HasStatus(true, StatusID.ExcavatorReady);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasFullMetalMachinist => !Player.WillStatusEnd(0, true, StatusID.FullMetalMachinist);
+    public static bool HasFullMetalMachinist => Player.HasStatus(true, StatusID.FullMetalMachinist);
     #endregion
 
     #region PvE Actions Unassignable

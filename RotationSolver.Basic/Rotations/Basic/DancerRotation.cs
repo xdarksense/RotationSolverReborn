@@ -54,72 +54,72 @@ public partial class DancerRotation
     /// <summary>
     /// Able to execute Last Dance.
     /// </summary>
-    public static bool HasLastDance => !Player.WillStatusEnd(0, true, StatusID.LastDanceReady);
+    public static bool HasLastDance => Player.HasStatus(true, StatusID.LastDanceReady);
 
     /// <summary>
     /// Has Silken Symmetry status.
     /// </summary>
-    public static bool HasSilkenSymmetry => !Player.WillStatusEnd(0, true, StatusID.SilkenSymmetry);
+    public static bool HasSilkenSymmetry => Player.HasStatus(true, StatusID.SilkenSymmetry);
 
     /// <summary>
     /// Has Flourishing Symmetry status.
     /// </summary>
-    public static bool HasFlourishingSymmetry => !Player.WillStatusEnd(0, true, StatusID.FlourishingSymmetry);
+    public static bool HasFlourishingSymmetry => Player.HasStatus(true, StatusID.FlourishingSymmetry);
 
     /// <summary>
     /// Has Silken Flow status.
     /// </summary>
-    public static bool HasSilkenFlow => !Player.WillStatusEnd(0, true, StatusID.SilkenFlow);
+    public static bool HasSilkenFlow => Player.HasStatus(true, StatusID.SilkenFlow);
 
     /// <summary>
     /// Has Flourishing Flow status.
     /// </summary>
-    public static bool HasFlourishingFlow => !Player.WillStatusEnd(0, true, StatusID.FlourishingFlow);
+    public static bool HasFlourishingFlow => Player.HasStatus(true, StatusID.FlourishingFlow);
 
     /// <summary>
     /// Has Threefold Fan Dance status.
     /// </summary>
-    public static bool HasThreefoldFanDance => !Player.WillStatusEnd(0, true, StatusID.ThreefoldFanDance);
+    public static bool HasThreefoldFanDance => Player.HasStatus(true, StatusID.ThreefoldFanDance);
 
     /// <summary>
     /// Has Fourfold Fan Dance status.
     /// </summary>
-    public static bool HasFourfoldFanDance => !Player.WillStatusEnd(0, true, StatusID.FourfoldFanDance);
+    public static bool HasFourfoldFanDance => Player.HasStatus(true, StatusID.FourfoldFanDance);
 
     /// <summary>
     /// Has Flourishing Starfall status.
     /// </summary>
-    public static bool HasFlourishingStarfall => !Player.WillStatusEnd(0, true, StatusID.FlourishingStarfall);
+    public static bool HasFlourishingStarfall => Player.HasStatus(true, StatusID.FlourishingStarfall);
 
     /// <summary>
     /// Has Standard Finish status.
     /// </summary>
-    public static bool HasStandardFinish => !Player.WillStatusEnd(0, true, StatusID.StandardFinish);
+    public static bool HasStandardFinish => Player.HasStatus(true, StatusID.StandardFinish);
 
     /// <summary>
     /// Has Standard Step status.
     /// </summary>
-    public static bool HasStandardStep => !Player.WillStatusEnd(0, true, StatusID.StandardStep);
+    public static bool HasStandardStep => Player.HasStatus(true, StatusID.StandardStep);
 
     /// <summary>
     /// Has Technical Step status.
     /// </summary>
-    public static bool HasTechnicalStep => !Player.WillStatusEnd(0, true, StatusID.TechnicalStep);
+    public static bool HasTechnicalStep => Player.HasStatus(true, StatusID.TechnicalStep);
 
     /// <summary>
     /// Has Technical Finish status.
     /// </summary>
-    public static bool HasTechnicalFinish => !Player.WillStatusEnd(0, true, StatusID.TechnicalFinish);
+    public static bool HasTechnicalFinish => Player.HasStatus(true, StatusID.TechnicalFinish);
 
     /// <summary>
     /// Has Devilment status.
     /// </summary>
-    public static bool HasDevilment => !Player.WillStatusEnd(0, true, StatusID.Devilment);
+    public static bool HasDevilment => Player.HasStatus(true, StatusID.Devilment);
 
     /// <summary>
     /// Has Closed Position status.
     /// </summary>
-    public static bool HasClosedPosition => !Player.WillStatusEnd(0, true, StatusID.ClosedPosition);
+    public static bool HasClosedPosition => Player.HasStatus(true, StatusID.ClosedPosition);
     #endregion
 
     #region PvE Actions Unassignable

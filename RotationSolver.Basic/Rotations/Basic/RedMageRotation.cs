@@ -6,7 +6,7 @@ public partial class RedMageRotation
     public override MedicineType MedicineType => MedicineType.Intelligence;
 
     /// <inheritdoc/>
-    public override bool CanHealSingleSpell => DataCenter.PartyMembers.Count() == 1 && base.CanHealSingleSpell;
+    public override bool CanHealSingleSpell => DataCenter.PartyMembers.Count == 1 && base.CanHealSingleSpell;
 
     #region Job Gauge
     /// <summary>

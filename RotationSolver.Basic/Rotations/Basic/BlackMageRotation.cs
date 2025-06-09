@@ -160,7 +160,7 @@ public partial class BlackMageRotation
     /// <summary>
     /// Indicates whether the next GCD (Global Cooldown) action is instant.
     /// </summary>
-    protected bool NextGCDisInstant => Player.HasStatus(true, StatusID.Triplecast, StatusID.Swiftcast);
+    protected static bool NextGCDisInstant => Player.HasStatus(true, StatusID.Triplecast, StatusID.Swiftcast);
 
     /// <summary>
     /// Determines if the player can make the next action instant by checking the availability of Triplecast or Swiftcast.

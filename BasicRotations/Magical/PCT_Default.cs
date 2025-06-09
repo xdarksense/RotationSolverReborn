@@ -33,7 +33,7 @@ public sealed class PCT_Default : PictomancerRotation
 
     #endregion
 
-    private static bool InBurstStatus => !Player.WillStatusEnd(0, true, StatusID.StarryMuse);
+    private static bool InBurstStatus => Player.HasStatus(true, StatusID.StarryMuse);
 
     #region Countdown logic
     // Defines logic for actions to take during the countdown before combat starts.

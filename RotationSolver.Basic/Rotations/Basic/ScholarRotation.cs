@@ -39,17 +39,17 @@ public partial class ScholarRotation
     /// <summary>
     /// Has Impact Imminent.
     /// </summary>
-    public static bool HasImpactImminent => !Player.WillStatusEnd(0, true, StatusID.ImpactImminent);
+    public static bool HasImpactImminent => Player.HasStatus(true, StatusID.ImpactImminent);
 
     /// <summary>
     /// Has Dissipation.
     /// </summary>
-    public static bool HasDissipation => !Player.WillStatusEnd(0, true, StatusID.Dissipation);
+    public static bool HasDissipation => Player.HasStatus(true, StatusID.Dissipation);
 
     /// <summary>
     /// Has EmergencyTactics.
     /// </summary>
-    public static bool HasEmergencyTactics => !Player.WillStatusEnd(0, true, StatusID.EmergencyTactics);
+    public static bool HasEmergencyTactics => Player.HasStatus(true, StatusID.EmergencyTactics);
 
     /// <summary>
     /// Has Recitation.
