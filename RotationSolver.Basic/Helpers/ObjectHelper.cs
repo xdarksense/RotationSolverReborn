@@ -1549,7 +1549,7 @@ public static class ObjectHelper
     /// <returns>
     /// <c>true</c> if the player can see the specified game object; otherwise, <c>false</c>.
     /// </returns>
-    internal static unsafe bool CanSee(this IBattleChara battleChara, float playerYOffset = 2.0f, float targetYOffset = 0.5f)
+    internal static unsafe bool CanSee(this IBattleChara battleChara, float playerYOffset = 2.0f, float targetYOffset = 2.0f)
     {
         if (battleChara == null || Player.Object == null)
             return false;
