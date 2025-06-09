@@ -16,7 +16,7 @@ namespace RotationSolver.Basic.Helpers
         /// <returns>
         /// A <see cref="List{IBattleChara}"/> containing the valid targets.
         /// </returns>
-        public static List<IBattleChara> GetTargetsByRange(float range, bool? getFriendly = false)
+        public static List<IBattleChara> GetTargetsByRange(float range, bool? getFriendly = null)
         {
             if (DataCenter.AllTargets == null)
             {
