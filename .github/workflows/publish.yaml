@@ -51,7 +51,7 @@ jobs:
         run: Compress-Archive -Path .\build\* -DestinationPath .\build\RotationSolver.zip
 
       - name: Publish Plugin
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v2.3.0
         with:
           files: ./build/RotationSolver.zip
           token: ${{ secrets.GITHUB_TOKEN }}
