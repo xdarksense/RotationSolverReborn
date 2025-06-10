@@ -520,13 +520,15 @@ public partial class RotationConfigWindow : Window
     {
         Vector2 cursor = ImGui.GetCursorPos();
 
-        if (rotation.GetTexture(out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? jobIcon) && ImGuiHelper.SilenceImageButton(jobIcon.ImGuiHandle, Vector2.One * iconSize, _activeTab == RotationConfigWindowTab.Rotation))
+        if (!rotation.GetTexture(out IDalamudTextureWrap? jobIcon))
+            return;
+
+        if (ImGuiHelper.SilenceImageButton(jobIcon.ImGuiHandle, Vector2.One * iconSize, _activeTab == RotationConfigWindowTab.Rotation))
         {
             _activeTab = RotationConfigWindowTab.Rotation;
             _searchResults = [];
         }
 
-        // Show tooltip if the item is hovered
         if (ImGui.IsItemHovered())
         {
             ImguiTooltips.ShowTooltip(() =>
@@ -541,22 +543,21 @@ public partial class RotationConfigWindow : Window
             });
         }
 
-        IDalamudTextureWrap? texture = null;
-        //TODO: Optimize GetOccultIcon if intending to keep it
-        if (true)//!DataCenter.IsInOccultCrescentOp || DutyRotation.GetPhantomJob() == DutyRotation.PhantomJob.None)
+        IDalamudTextureWrap? overlayTexture = null;
+        if (!DataCenter.IsInOccultCrescentOp || DutyRotation.GetPhantomJob() == DutyRotation.PhantomJob.None)
         {
             var curCombatType = DataCenter.IsPvP ? CombatType.PvP : CombatType.PvE;
-            IconSet.GetTexture(curCombatType.GetIcon(), out texture);
+            IconSet.GetTexture(curCombatType.GetIcon(), out overlayTexture);
         }
         else
         {
-            texture = IconSet.GetOccultIcon();
+            overlayTexture = IconSet.GetOccultIcon();
         }
 
-        if (texture != null)
+        if (overlayTexture != null)
         {
             ImGui.SetCursorPos(cursor + (Vector2.One * iconSize / 2));
-            ImGui.Image(texture.ImGuiHandle, Vector2.One * iconSize / 2);
+            ImGui.Image(overlayTexture.ImGuiHandle, Vector2.One * iconSize / 2);
         }
     }
 

@@ -42,15 +42,44 @@ public partial class MonkRotation
     /// </summary>
     public static int RaptorFury => JobGauge.RaptorFury;
 
-    /// <summary>Brotherhood
+    /// <summary>
     /// Gets the amount of available Coeurl Fury stacks.
     /// </summary>
     public static int CoeurlFury => JobGauge.CoeurlFury;
+    #endregion
 
-    /// <summary>Brotherhood
-    /// Brotherhood
+    #region Status Tracking
+
+    /// <summary>
+    /// 
     /// </summary>
     public static bool InBrotherhood => Player.HasStatus(true, StatusID.Brotherhood);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasRiddleOfFire => Player.HasStatus(true, StatusID.RiddleOfFire);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasFormlessFist => Player.HasStatus(true, StatusID.FormlessFist);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasPerfectBalance => Player.HasStatus(true, StatusID.PerfectBalance);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasFiresRumination => Player.HasStatus(true, StatusID.FiresRumination);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasWindsRumination => Player.HasStatus(true, StatusID.WindsRumination);
+
     #endregion
 
     #region PvE Actions Unassignable
