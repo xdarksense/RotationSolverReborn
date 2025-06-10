@@ -9,6 +9,7 @@ using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Logging;
 using ExCSS;
+using FFXIVClientStructs;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
@@ -188,26 +189,26 @@ public static class ObjectHelper
             }
         }
 
-        if (DataCenter.IsInOccultCrescentOp)
-        {
-            bool isInCE = Player.Object.GetEventType() == EventHandlerContent.PublicContentDirector;
+        //if (DataCenter.IsInOccultCrescentOp)
+        //{
+        //    //bool isInCE = this needs to be fixed to sort out indiicator for in CE or not 
 
-            if (isInCE)
-            {
-                if (!battleChara.IsOccultCEMob())
-                {
-                    return false;
-                }
-            }
+        //    if (isInCE)
+        //    {
+        //        if (!battleChara.IsOccultCEMob())
+        //        {
+        //            return false;
+        //        }
+        //    }
 
-            if (!isInCE)
-            {
-                if (battleChara.IsOccultCEMob())
-                {
-                    return false;
-                }
-            }
-        }
+        //    if (!isInCE)
+        //    {
+        //        if (battleChara.IsOccultCEMob())
+        //        {
+        //            return false;
+        //        }
+        //    }
+        //}
 
         if (Service.Config.TargetQuestThings && battleChara.IsOthersPlayersMob())
         {
@@ -297,7 +298,7 @@ public static class ObjectHelper
             return false;
         }
 
-        if (battleChara.IsEnemy() == false)
+        if (!battleChara.IsEnemy())
         {
             return false;
         }
