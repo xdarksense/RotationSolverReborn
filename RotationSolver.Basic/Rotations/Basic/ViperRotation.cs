@@ -4,6 +4,17 @@ public partial class ViperRotation
 {
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Dexterity;
+
+    /// <inheritdoc/>
+    public override bool IsBursting()
+    {
+        if (HasHunterAndSwift)
+        {
+            return true;
+        }
+        return false;
+    }
+
     #region JobGauge
     /// <summary>
     /// Gets how many uses of uncoiled fury the player has.

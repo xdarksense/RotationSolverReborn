@@ -712,7 +712,7 @@ internal partial class Configs : IPluginConfiguration
     [JobConfig, Range(0.05f, 0.25f, ConfigUnitType.Percent)]
     [UI("Action Ahead (Percent of your GCD time remaining on a GCD cycle before RSR will try to queue the next GCD)", Filter = BasicTimer,
     Description = "This setting controls how many oGCDs RSR will try to fit in a single GCD window\nLower numbers mean more oGCDs, but potentially more GCD clipping")]
-    private readonly float _action5head = 0.20f;
+    private readonly float _action6head = 0.25f;
 
     [JobConfig, UI("The HP for using Guard.",
         Filter = PvPSpecificControls)]

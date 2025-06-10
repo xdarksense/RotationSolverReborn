@@ -2,6 +2,7 @@
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using ECommons;
+using ECommons.Automation.UIInput;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
@@ -166,23 +167,45 @@ public static class ObjectHelper
             }
         }
 
-        if (Service.Config.BozjaCEmobtargeting
-            && DataCenter.IsInBozjanFieldOp
-            && !DataCenter.IsInDelubrumNormal
-            && !DataCenter.IsInDelubrumSavage)
+        if (DataCenter.IsInBozjanFieldOp)
         {
             bool isInCE = DataCenter.IsInBozjanFieldOpCE;
 
-            // Prevent targeting mobs in Bozja CE if you are not in CE
-            if (battleChara.IsBozjanCEFateMob() && !isInCE)
+            if (isInCE)
             {
-                return false;
+                if (!battleChara.IsBozjanCEMob())
+                {
+                    return false;
+                }
             }
 
-            // Prevent targeting mobs out of Bozja CE if you are in CE
-            if (!battleChara.IsBozjanCEFateMob() && isInCE)
+            if (!isInCE)
             {
-                return false;
+                if (battleChara.IsBozjanCEMob())
+                {
+                    return false;
+                }
+            }
+        }
+
+        if (DataCenter.IsInOccultCrescentOp)
+        {
+            bool isInCE = Player.Object.GetEventType() == EventHandlerContent.PublicContentDirector;
+
+            if (isInCE)
+            {
+                if (!battleChara.IsOccultCEMob())
+                {
+                    return false;
+                }
+            }
+
+            if (!isInCE)
+            {
+                if (battleChara.IsOccultCEMob())
+                {
+                    return false;
+                }
             }
         }
 
@@ -225,14 +248,14 @@ public static class ObjectHelper
             };
     }
 
-    internal static bool IsBozjanCEFateMob(this IBattleChara battleChara)
+    internal static bool IsBozjanCEMob(this IBattleChara battleChara)
     {
         if (battleChara == null)
         {
             return false;
         }
 
-        if (battleChara.IsEnemy() == false)
+        if (!battleChara.IsEnemy())
         {
             return false;
         }
@@ -246,7 +269,6 @@ public static class ObjectHelper
         return battleChara.GetEventType() == EventHandlerContent.PublicContentDirector;
     }
 
-    // This exists because OC CEs can often have a large amount of players in them, and if you are not on AllTargetsCanAttack the mobs target may despawn due to object limit
     internal static bool IsOccultCEMob(this IBattleChara battleChara)
     {
         if (battleChara == null)
@@ -254,7 +276,7 @@ public static class ObjectHelper
             return false;
         }
 
-        if (battleChara.IsEnemy() == false)
+        if (!battleChara.IsEnemy())
         {
             return false;
         }
