@@ -127,7 +127,7 @@ public static class ObjectHelper
 
         if (battleChara.IsSpecialImmune())
         {
-            return false;
+            return false; // For conditionally immune mobs
         }
 
         // Dead.
@@ -217,10 +217,10 @@ public static class ObjectHelper
             || battleChara.TargetObject?.OwnerId == Player.Object.GameObjectId || DataCenter.CurrentTargetToHostileType switch
             {
                 TargetHostileType.AllTargetsCanAttack => true,
-                TargetHostileType.TargetsHaveTarget => battleChara.TargetObject is IBattleChara,
-                TargetHostileType.AllTargetsWhenSolo => DataCenter.PartyMembers.Count == 1 || battleChara.TargetObject is IBattleChara,
+                TargetHostileType.TargetsHaveTarget => battleChara.TargetObject is not null,
+                TargetHostileType.AllTargetsWhenSolo => DataCenter.PartyMembers.Count == 1 || battleChara.TargetObject is not null,
                 TargetHostileType.AllTargetsWhenSoloInDuty => (DataCenter.PartyMembers.Count == 1 && (Svc.Condition[ConditionFlag.BoundByDuty] || Svc.Condition[ConditionFlag.BoundByDuty56]))
-                                    || battleChara.TargetObject is IBattleChara,
+                                    || battleChara.TargetObject is not null,
                 _ => true,
             };
     }

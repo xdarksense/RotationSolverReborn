@@ -132,47 +132,48 @@ internal static class DataCenter
     #endregion
 
     #region Bozja
-
     /// <summary>
     /// Determines if the current content is Bozjan Southern Front or Zadnor.
     /// </summary>
-    public static bool IsInBozjanFieldOp => Content.ContentType == ECommons.GameHelpers.ContentType.FieldOperations;
+    public static bool IsInBozjanFieldOp => Content.ContentType == ECommons.GameHelpers.ContentType.FieldOperations 
+        && Territory?.ContentType == TerritoryContentType.SaveTheQueen;
 
     /// <summary>
     /// Determines if the current content is Bozjan Southern Front CE or Zadnor CE.
     /// </summary>
-    public static bool IsInBozjanFieldOpCE => Content.ContentType == ECommons.GameHelpers.ContentType.FieldOperations
+    public static bool IsInBozjanFieldOpCE => IsInBozjanFieldOp
         && Player.Object.HasStatus(false, StatusID.DutiesAsAssigned);
 
     /// <summary>
     /// Determines if the current content is Delubrum Reginae.
     /// </summary>
-    public static bool IsInDelubrumNormal => Content.ContentType == ECommons.GameHelpers.ContentType.FieldRaid;
+    public static bool IsInDelubrumNormal => Content.ContentType == ECommons.GameHelpers.ContentType.FieldRaid
+        && Territory?.ContentType == TerritoryContentType.SaveTheQueen;
 
     /// <summary>
     /// Determines if the current content is Delubrum Reginae (Savage).
     /// </summary>
     public static bool IsInDelubrumSavage => Content.ContentType == ECommons.GameHelpers.ContentType.FieldRaid
-        && Content.ContentDifficulty == ContentDifficulty.FieldRaidsSavage;
+        && Content.ContentDifficulty == ContentDifficulty.FieldRaidsSavage
+        && Territory?.ContentType == TerritoryContentType.SaveTheQueen;
 
     /// <summary>
     /// Determines if the current territory is Bozja and is either a field operation or field raid.
     /// </summary>
     public static bool IsInBozja => IsInBozjanFieldOp || IsInDelubrumNormal || IsInDelubrumSavage;
-
     #endregion
 
     #region Occult Crescent
-
     /// <summary>
     /// Determines if the current content is Bozjan Southern Front or Zadnor.
     /// </summary>
-    public static bool IsInOccultCrescentOp => Territory?.ContentType == TerritoryContentType.OccultCrescent;
+    public static bool IsInOccultCrescentOp => Content.ContentType == ECommons.GameHelpers.ContentType.FieldOperations
+        && Territory?.ContentType == TerritoryContentType.OccultCrescent;
 
     /// <summary>
     /// Determines if the current content is Forked Tower.
     /// </summary>
-    public static bool IsInForkedTower => Territory?.ContentType == TerritoryContentType.OccultCrescent 
+    public static bool IsInForkedTower => IsInOccultCrescentOp
         && Player.Object.HasStatus(false, StatusID.DutiesAsAssigned_4228);
     #endregion
 
