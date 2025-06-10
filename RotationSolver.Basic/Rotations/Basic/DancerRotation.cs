@@ -51,6 +51,16 @@ public partial class DancerRotation
     #endregion
 
     #region PvE Status Tracking
+    /// <inheritdoc/>
+    public override bool IsBursting()
+    {
+        if (Player.HasStatus(true, StatusID.StandardFinish)) // Devilment provides Crit/DH buffs, which phantom actions can't use
+        {
+            return true;
+        }
+        return false;
+    }
+
     /// <summary>
     /// Able to execute Last Dance.
     /// </summary>
