@@ -328,7 +328,7 @@ internal static class DataCenter
     /// <summary>
     /// Calculates the action ahead time based on the default GCD total and minimum animation lock.
     /// </summary>
-    public static float CalculatedActionAhead => DefaultGCDTotal * Service.Config.Action5Head;
+    public static float CalculatedActionAhead => DefaultGCDTotal * Service.Config.Action6Head;
 
     /// <summary>
     /// Calculates the total GCD time for a given number of GCDs and an optional offset.

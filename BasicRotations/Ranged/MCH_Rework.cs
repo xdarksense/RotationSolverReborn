@@ -92,19 +92,28 @@ public sealed class MCH_Rework : MachinistRotation
             }
         }
 
-        if (HyperchargePvE.CanUse(out act))
+        if (HyperchargePvE.EnoughLevel)
         {
             if (!WildfirePvE.EnoughLevel)
             {
-                return true;
+                if (HyperchargePvE.CanUse(out act))
+                {
+                    return true;
+                }
             }
-            if (HasWildfire && !FullMetalFieldPvE.EnoughLevel)
+            if ((HasWildfire || (WildfirePvE.Cooldown.IsCoolingDown && Battery == 100)) && !FullMetalFieldPvE.EnoughLevel)
             {
-                return true;
+                if (HyperchargePvE.CanUse(out act))
+                {
+                    return true;
+                }
             }
             if (HasWildfire && FullMetalFieldPvE.EnoughLevel && IsLastAction(false, FullMetalFieldPvE))
             {
-                return true;
+                if (HyperchargePvE.CanUse(out act))
+                {
+                    return true;
+                }
             }
         }
 
@@ -144,7 +153,7 @@ public sealed class MCH_Rework : MachinistRotation
         }
         if (!FullMetalFieldPvE.EnoughLevel)
         {
-            if (WildfirePvE.Cooldown.WillHaveOneChargeGCD(1) && (IsLastAbility(false, HyperchargePvE) || Heat >= 50 || HasHypercharged) && ToolChargeSoon(out _) && !LowLevelHyperCheck)
+            if ((Heat >= 50 || HasHypercharged) && ToolChargeSoon(out _) && !LowLevelHyperCheck)
             {
                 if (WeaponRemain < GCDTime(1) / 2 && WildfirePvE.CanUse(out act))
                 {
@@ -232,13 +241,18 @@ public sealed class MCH_Rework : MachinistRotation
         if (!SpreadShotPvE.CanUse(out _))
         {
             // use AirAnchor if possible
-            if (AirAnchorPvE.CanUse(out act))
+            if (HotShotMasteryTrait.EnoughLevel && AirAnchorPvE.CanUse(out act))
             {
                 return true;
             }
 
             // for opener: only use the first charge of Drill after AirAnchor when there are two
             if (DrillPvE.CanUse(out act, usedUp: false))
+            {
+                return true;
+            }
+
+            if (!HotShotMasteryTrait.EnoughLevel && HotShotPvE.CanUse(out act))
             {
                 return true;
             }

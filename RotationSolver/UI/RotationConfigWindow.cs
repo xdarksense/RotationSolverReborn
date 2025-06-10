@@ -3814,7 +3814,7 @@ public partial class RotationConfigWindow : Window
             ImGui.Spacing();
             ImGui.Text($"FateID: {battleChara.FateId().ToString() ?? string.Empty}");
             ImGui.Text($"EventType: {battleChara.GetEventType().ToString() ?? string.Empty}");
-            ImGui.Text($"IsBozjanCEFateMob: {battleChara.IsBozjanCEFateMob()}");
+            ImGui.Text($"IsBozjanCEFateMob: {battleChara.IsBozjanCEMob()}");
             ImGui.Spacing();
             ImGui.Text($"IsOccultCEMob: {battleChara.IsOccultCEMob()}");
             ImGui.Text($"IsOccultFateMob: {battleChara.IsOccultFateMob()}");
