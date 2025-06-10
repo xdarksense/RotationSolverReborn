@@ -385,25 +385,34 @@ public static class IconSet
     }
 
     private static readonly IDalamudTextureWrap?[] OccultIcons = new IDalamudTextureWrap?[26];
+    private static bool OccultIconsLoaded = false;
 
     /// <summary>
     /// Gets the occult icon texture.
     /// </summary>
     public static IDalamudTextureWrap? GetOccultIcon()
     {
-        if (DataCenter.IsInOccultCrescentOp)
+        if (!DataCenter.IsInOccultCrescentOp)
+        {
+            OccultIconsLoaded = false;
+            Array.Clear(OccultIcons, 0, OccultIcons.Length);
+            return null;
+        }
+
+        if (!OccultIconsLoaded)
         {
             var uld = Svc.PluginInterface.UiBuilder.LoadUld("ui/uld/MKDSupportJob.uld");
-            for (int i = 0; i < 26; i++)
+            for (int i = 0; i < OccultIcons.Length; i++)
             {
                 OccultIcons[i] = uld.LoadTexturePart("ui/uld/MKDSupportJob_hr1.tex", i);
             }
+            OccultIconsLoaded = true;
+        }
 
-            var job = (int)Rotations.Duties.DutyRotation.GetPhantomJob();
-            if (job >= 0 && job < 26)
-            {
-                return OccultIcons[job];
-            }
+        var job = (int)Rotations.Duties.DutyRotation.GetPhantomJob();
+        if (job >= 0 && job < OccultIcons.Length)
+        {
+            return OccultIcons[job];
         }
 
         return null;

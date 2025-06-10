@@ -240,9 +240,9 @@ public sealed class MNK_Default : MonkRotation
 
         // opener 2nd burst
         if (AutoPB_Boss
-            && Player.HasStatus(true, StatusID.RiddleOfFire) && Player.HasStatus(true, StatusID.Brotherhood)
+            && HasRiddleOfFire && InBrotherhood
             && IsLastGCD(true, DragonKickPvE, LeapingOpoPvE, BootshinePvE) // PB must follow an Opo
-            && !Player.HasStatus(true, StatusID.FormlessFist) && !Player.HasStatus(true, StatusID.FiresRumination) && !Player.HasStatus(true, StatusID.WindsRumination))
+            && !HasFormlessFist && !HasFiresRumination && !HasWindsRumination)
         {
             if (PerfectBalancePvE.CanUse(out act, usedUp: true))
             {
@@ -252,7 +252,7 @@ public sealed class MNK_Default : MonkRotation
 
         // odd min burst
         if (AutoPB_Boss
-            && Player.HasStatus(true, StatusID.RiddleOfFire)
+            && HasRiddleOfFire
             && !PerfectBalancePvE.Cooldown.JustUsedAfter(20)
             && IsLastGCD(true, DragonKickPvE, LeapingOpoPvE, BootshinePvE)) // PB must follow an Opo 
         {
@@ -264,7 +264,7 @@ public sealed class MNK_Default : MonkRotation
 
         // even min burst
         if (AutoPB_Boss
-            && !Player.HasStatus(true, StatusID.RiddleOfFire)
+            && !HasRiddleOfFire
             && RiddleOfFirePvE.Cooldown.WillHaveOneChargeGCD(3) && BrotherhoodPvE.Cooldown.WillHaveOneCharge(3)
             && IsLastGCD(true, DragonKickPvE, LeapingOpoPvE, BootshinePvE)) // PB must follow an Opo 
         {
@@ -276,7 +276,7 @@ public sealed class MNK_Default : MonkRotation
 
         // use bh when bh and rof are ready (opener) or ask bh to wait for rof's cd to be close and then use bh
         if (!CombatElapsedLessGCD(2)
-            && ((BrotherhoodPvE.Cooldown.IsCoolingDown && RiddleOfFirePvE.Cooldown.IsCoolingDown) || Math.Abs(BrotherhoodPvE.Cooldown.CoolDownGroup - RiddleOfFirePvE.Cooldown.CoolDownGroup) < 3)
+            && ((!BrotherhoodPvE.Cooldown.IsCoolingDown && !RiddleOfFirePvE.Cooldown.IsCoolingDown) || Math.Abs(BrotherhoodPvE.Cooldown.CoolDownGroup - RiddleOfFirePvE.Cooldown.CoolDownGroup) < 3)
             && BrotherhoodPvE.CanUse(out act))
         {
             return true;
@@ -441,7 +441,7 @@ public sealed class MNK_Default : MonkRotation
                     break;
 
                 case MasterfulBlitzUse.RiddleOfFireUse:
-                    if (Player.HasStatus(true, StatusID.RiddleOfFire) || RiddleOfFirePvE.Cooldown.JustUsedAfter(42))
+                    if (HasRiddleOfFire || RiddleOfFirePvE.Cooldown.JustUsedAfter(42))
                     {
                         // Both Nadi and 3 beasts
                         if (PhantomRushPvE.CanUse(out act))
@@ -488,25 +488,25 @@ public sealed class MNK_Default : MonkRotation
 
         // 'Because Fire¡¯s Reply grants formless, we have an imposed restriction that we prefer not to use it while under PB, or if we have a formless already.' + 'Cast Fire's Reply after an opo gcd'
         // need to test and see if IsLastGCD(false, ...) is better
-        if (((!Player.HasStatus(true, StatusID.PerfectBalance) && !Player.HasStatus(true, StatusID.FormlessFist) && IsLastGCD(true, DragonKickPvE, LeapingOpoPvE, BootshinePvE)) || Player.WillStatusEnd(5, true, StatusID.FiresRumination)) && FiresReplyPvE.CanUse(out act))
+        if (((!HasPerfectBalance && !HasFormlessFist && IsLastGCD(true, DragonKickPvE, LeapingOpoPvE, BootshinePvE)) || Player.WillStatusEnd(5, true, StatusID.FiresRumination)) && FiresReplyPvE.CanUse(out act))
         {
             return true; // Fires Reply
         }
         // 'Cast Wind's Reply literally anywhere in the window'
-        if ((!Player.HasStatus(true, StatusID.PerfectBalance) || Player.WillStatusEnd(5, true, StatusID.WindsRumination)) && WindsReplyPvE.CanUse(out act))
+        if ((!HasPerfectBalance || Player.WillStatusEnd(5, true, StatusID.WindsRumination)) && WindsReplyPvE.CanUse(out act))
         {
             return true; // Winds Reply
         }
 
         // Opo needs to follow each PB
         // 'This means ¡°bookending¡± any PB usage with opos and spending formless on opos.'
-        if (Player.HasStatus(true, StatusID.FormlessFist) && OpoOpoForm(out act))
+        if (HasFormlessFist && OpoOpoForm(out act))
         {
             return true;
         }
         //if (Player.StatusStack(true, StatusID.PerfectBalance) == 3 && OpoOpoForm(out act)) return true;
 
-        if (Player.HasStatus(true, StatusID.PerfectBalance) && !HasSolar)
+        if (HasPerfectBalance && !HasSolar)
         {
             // SolarNadi - fill the missing one - this order is needed for opener
             if (!BeastChakras.Contains(BeastChakra.Raptor) && RaptorForm(out act))
@@ -525,7 +525,7 @@ public sealed class MNK_Default : MonkRotation
             }
         }
 
-        if (Player.HasStatus(true, StatusID.PerfectBalance) && HasSolar)
+        if (HasPerfectBalance && HasSolar)
         {
             // 'we still want to prioritize pressing as many opo gcds as possible'
             // LunarNadi
@@ -558,7 +558,7 @@ public sealed class MNK_Default : MonkRotation
         }
 
         // out of range or nothing to do, refresh buff second, but dont keep refreshing or it draws too much attention
-        if (AutoFormShift && !Player.HasStatus(true, StatusID.PerfectBalance) && !Player.HasStatus(true, StatusID.FormlessFist) && FormShiftPvE.CanUse(out act))
+        if (AutoFormShift && !HasPerfectBalance && !HasFormlessFist && FormShiftPvE.CanUse(out act))
         {
             return true; // Form Shift GCD use
         }
