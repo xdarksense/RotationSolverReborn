@@ -62,7 +62,8 @@ public partial class DutyRotation
         StatusID.InnerRelease,
         StatusID.Eukrasia,
         StatusID.Mudra,
-        StatusID.TenChiJin
+        StatusID.TenChiJin,
+        StatusID.FullMetalMachinist
     };
 
     /// <summary>
