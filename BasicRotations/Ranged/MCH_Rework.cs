@@ -99,21 +99,21 @@ public sealed class MCH_Rework : MachinistRotation
         {
             if (!WildfirePvE.EnoughLevel)
             {
-                if (HyperchargePvE.CanUse(out act))
+                if (HyperchargePvE.CanUse(out act, skipTTKCheck: true))
                 {
                     return true;
                 }
             }
             if ((HasWildfire || (WildfirePvE.Cooldown.IsCoolingDown && Battery == 100)) && !FullMetalFieldPvE.EnoughLevel)
             {
-                if (HyperchargePvE.CanUse(out act))
+                if (HyperchargePvE.CanUse(out act, skipTTKCheck: true))
                 {
                     return true;
                 }
             }
             if (HasWildfire && FullMetalFieldPvE.EnoughLevel && IsLastAction(false, FullMetalFieldPvE))
             {
-                if (HyperchargePvE.CanUse(out act))
+                if (HyperchargePvE.CanUse(out act, skipTTKCheck: true))
                 {
                     return true;
                 }
@@ -352,7 +352,7 @@ public sealed class MCH_Rework : MachinistRotation
         }
         else
         {
-            return HyperchargePvE.CanUse(out act);
+            return HyperchargePvE.CanUse(out act, skipTTKCheck: true);
         }
     }
 
@@ -419,7 +419,7 @@ public sealed class MCH_Rework : MachinistRotation
         // Opener
         if (Battery == 60 && IsLastGCD(false, ExcavatorPvE) && CombatTime < 15)
         {
-            if (RookAutoturretPvE.CanUse(out act))
+            if (RookAutoturretPvE.CanUse(out act, skipTTKCheck: true))
             {
                 return true;
             }
@@ -428,7 +428,7 @@ public sealed class MCH_Rework : MachinistRotation
         // Only allow battery usage if the current transition matches the expected step
         if (foundStepPair)
         {
-            if (RookAutoturretPvE.CanUse(out act))
+            if (RookAutoturretPvE.CanUse(out act, skipTTKCheck: true))
             {
                 return true;
             }
@@ -438,7 +438,7 @@ public sealed class MCH_Rework : MachinistRotation
         if ((nextGCD.IsTheSameTo(false, CleanShotPvE, HeatedCleanShotPvE) && Battery > 90)
             || (nextGCD.IsTheSameTo(false, HotShotPvE, AirAnchorPvE, ChainSawPvE, ExcavatorPvE) && Battery > 80))
         {
-            if (RookAutoturretPvE.CanUse(out act))
+            if (RookAutoturretPvE.CanUse(out act, skipTTKCheck: true))
             {
                 return true;
             }

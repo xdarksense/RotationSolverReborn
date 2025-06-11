@@ -496,6 +496,7 @@ public sealed class VPR_Default : ViperRotation
             }
         }
         //AOE Serpent Combo
+        // aoe 3
         switch ((HasGrimHunter, HasGrimSkin))
         {
             case (true, _):
@@ -513,66 +514,113 @@ public sealed class VPR_Default : ViperRotation
                     return true;
                 break;
         }
-
-        if (HuntersBitePvE.CanUse(out act, skipAoeCheck: true))
+        // aoe 2
+        switch (HunterOrSwiftEndsFirst)
         {
-            return true;
+            case "Hunter":
+                if (HuntersBitePvE.CanUse(out act))
+                    return true;
+                break;
+            case "Swift":
+                if (SwiftskinsBitePvE.CanUse(out act))
+                    return true;
+                break;
+            case "Equal":
+            case null:
+                if (HuntersBitePvE.CanUse(out act))
+                    return true;
+                if (SwiftskinsBitePvE.CanUse(out act))
+                    return true;
+                break;
         }
-
-        if (SwiftskinsBitePvE.CanUse(out act, skipAoeCheck: true))
+        // aoe 1
+        switch ((HasSteel, HasReavers))
         {
-            return true;
-        }
-
-        if (ReavingMawPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (SteelMawPvE.CanUse(out act))
-        {
-            return true;
+            case (true, _):
+                if (SteelMawPvE.CanUse(out act))
+                    return true;
+                break;
+            case (_, true):
+                if (ReavingMawPvE.CanUse(out act))
+                    return true;
+                break;
+            case (false, false):
+                if (ReavingMawPvE.CanUse(out act))
+                    return true;
+                if (SteelMawPvE.CanUse(out act))
+                    return true;
+                break;
         }
 
         //Single Target Serpent Combo
-        if (FlankstingStrikePvE.CanUse(out act))
+        // st 3
+        switch ((HasFlankstung, HasFlanksbane, HasHindstung, HasHindsbane))
         {
-            return true;
+            case (true, _, _, _):
+                if (HindsbaneFangPvE.CanUse(out act))
+                    return true;
+                break;
+            case (_, true, _, _):
+                if (HindstingStrikePvE.CanUse(out act))
+                    return true;
+                break;
+            case (_, _, true, _):
+                if (FlanksbaneFangPvE.CanUse(out act))
+                    return true;
+                break;
+            case (_, _, _, true):
+                if (FlankstingStrikePvE.CanUse(out act))
+                    return true;
+                break;
+            case (false, false, false, false):
+                if (HindsbaneFangPvE.CanUse(out act))
+                    return true;
+                if (HindstingStrikePvE.CanUse(out act))
+                    return true;
+                if (FlanksbaneFangPvE.CanUse(out act))
+                    return true;
+                if (FlankstingStrikePvE.CanUse(out act))
+                    return true;
+                break;
         }
 
-        if (FlanksbaneFangPvE.CanUse(out act))
+        // st 2
+        switch (HunterOrSwiftEndsFirst)
         {
-            return true;
+            case "Hunter":
+                if (HuntersStingPvE.CanUse(out act))
+                    return true;
+                break;
+            case "Swift":
+                if (SwiftskinsStingPvE.CanUse(out act))
+                    return true;
+                break;
+            case "Equal":
+            case null:
+                if (HuntersStingPvE.CanUse(out act))
+                    return true;
+                if (SwiftskinsStingPvE.CanUse(out act))
+                    return true;
+                break;
         }
 
-        if (HindstingStrikePvE.CanUse(out act))
+        // st 1
+        switch ((HasSteel, HasReavers))
         {
-            return true;
-        }
-
-        if (HindsbaneFangPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (HuntersStingPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (SwiftskinsStingPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (ReavingFangsPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (SteelFangsPvE.CanUse(out act))
-        {
-            return true;
+            case (true, _):
+                if (SteelFangsPvE.CanUse(out act))
+                    return true;
+                break;
+            case (_, true):
+                if (ReavingFangsPvE.CanUse(out act))
+                    return true;
+                break;
+            case (false, false):
+                if (ReavingFangsPvE.CanUse(out act))
+                    return true;
+                if (SteelFangsPvE.CanUse(out act))
+                    return true;
+                break;
         }
 
         //Ranged

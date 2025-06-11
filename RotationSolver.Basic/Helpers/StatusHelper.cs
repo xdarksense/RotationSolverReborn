@@ -436,6 +436,11 @@ public static class StatusHelper
     /// <param name="status"></param>
     public static void StatusOff(StatusID status)
     {
+        if (!DataCenter.IsActivated())
+        {
+            return;
+        }
+
         if (!Player.Object.HasStatus(false, status))
         {
             return;

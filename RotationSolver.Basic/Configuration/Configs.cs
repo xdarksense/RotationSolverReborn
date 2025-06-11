@@ -53,6 +53,10 @@ internal partial class Configs : IPluginConfiguration
     Filter = AutoActionUsage, Section = 3)]
     public AoEType AoEType { get; set; } = AoEType.Full;
 
+    [ConditionBool, UI("Ignore status application against mobs that are status capped.",
+    Filter = AutoActionUsage, Section = 3)]
+    private static readonly bool _statuscap = false;
+
     [ConditionBool, UI("Don't attack new mobs by AoE. (Dangerous)", Description = "Never use any AoE action when this may attack mobs that are not hostile targets.",
         Filter = AutoActionUsage, Section = 3)]
     private static readonly bool _noNewHostiles = false;
