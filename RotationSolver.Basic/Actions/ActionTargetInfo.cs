@@ -251,6 +251,11 @@ public struct ActionTargetInfo(IBaseAction action)
             return false;
         }
 
+        if (Service.Config.Statuscap && battleChara != Player.Object && StatusHelper.IsStatusCapped(battleChara))
+        {
+            return false;
+        }
+
         if (!action.Config.ShouldCheckTargetStatus && !action.Config.ShouldCheckStatus)
         {
             return true;

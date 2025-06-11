@@ -276,9 +276,29 @@ public partial class ViperRotation
     public static bool HasHind => Player.HasStatus(true, StatusID.HindsbaneVenom) || Player.HasStatus(true, StatusID.HindstungVenom);
 
     /// <summary>
+    /// Indicates if the player has upcoming Hind attack.
+    /// </summary>
+    public static bool HasHindsbane => Player.HasStatus(true, StatusID.HindsbaneVenom);
+
+    /// <summary>
+    /// Indicates if the player has upcoming Hind attack.
+    /// </summary>
+    public static bool HasHindstung => Player.HasStatus(true, StatusID.HindstungVenom);
+
+    /// <summary>
     /// Indicates if the player has upcoming Flanks attack.
     /// </summary>
     public static bool HasFlank => Player.HasStatus(true, StatusID.FlanksbaneVenom) || Player.HasStatus(true, StatusID.FlankstungVenom);
+
+    /// <summary>
+    /// Indicates if the player has upcoming Hind attack.
+    /// </summary>
+    public static bool HasFlanksbane => Player.HasStatus(true, StatusID.FlanksbaneVenom);
+
+    /// <summary>
+    /// Indicates if the player has upcoming Hind attack.
+    /// </summary>
+    public static bool HasFlankstung => Player.HasStatus(true, StatusID.FlankstungVenom);
 
     /// <summary>
     /// Indicates if the player has upcoming Bane attack.
@@ -360,12 +380,12 @@ public partial class ViperRotation
 
     static partial void ModifySteelFangsPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && HasSteel;
+        setting.ActionCheck = () => NODREAD;
     }
 
     static partial void ModifyHuntersStingPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && HasFlank;
+        setting.ActionCheck = () => NODREAD;
         setting.StatusProvide = [StatusID.HuntersInstinct];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -375,43 +395,43 @@ public partial class ViperRotation
 
     static partial void ModifyFlankstingStrikePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && HasFlank && HasSting;
+        setting.ActionCheck = () => NODREAD;
         setting.StatusProvide = [StatusID.HindstungVenom];
     }
 
     static partial void ModifyFlanksbaneFangPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && HasFlank && HasBane;
+        setting.ActionCheck = () => NODREAD;
         setting.StatusProvide = [StatusID.HindsbaneVenom];
     }
 
     static partial void ModifyReavingFangsPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && (HasReavers || NoHone);
+        setting.ActionCheck = () => NODREAD;
         setting.StatusProvide = [StatusID.HonedSteel];
     }
 
     static partial void ModifySwiftskinsStingPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && (HasNoVenom || HasHind);
+        setting.ActionCheck = () => NODREAD;
         setting.StatusProvide = [StatusID.Swiftscaled];
     }
 
     static partial void ModifyHindstingStrikePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && (HasNoVenom || (HasHind && HasSting));
+        setting.ActionCheck = () => NODREAD;
         setting.StatusProvide = [StatusID.FlanksbaneVenom];
     }
 
     static partial void ModifyHindsbaneFangPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && (HasNoVenom || (HasHind && HasBane));
+        setting.ActionCheck = () => NODREAD;
         setting.StatusProvide = [StatusID.FlankstungVenom];
     }
 
     static partial void ModifySteelMawPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && (HasSteel || NoHone);
+        setting.ActionCheck = () => NODREAD;
         setting.StatusProvide = [StatusID.HonedReavers];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -421,7 +441,7 @@ public partial class ViperRotation
 
     static partial void ModifyHuntersBitePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && !HasGrimSkin;
+        setting.ActionCheck = () => NODREAD;
         setting.StatusProvide = [StatusID.HuntersInstinct];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -431,7 +451,7 @@ public partial class ViperRotation
 
     static partial void ModifyJaggedMawPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && !HasGrimSkin;
+        setting.ActionCheck = () => NODREAD;
         setting.StatusProvide = [StatusID.GrimskinsVenom];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -443,7 +463,6 @@ public partial class ViperRotation
     {
         setting.ActionCheck = () => NODREAD;
         setting.StatusProvide = [StatusID.HonedSteel];
-        setting.StatusNeed = [StatusID.HonedReavers];
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -452,7 +471,7 @@ public partial class ViperRotation
 
     static partial void ModifySwiftskinsBitePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && !HasGrimHunter;
+        setting.ActionCheck = () => NODREAD;
         setting.StatusProvide = [StatusID.Swiftscaled];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -462,7 +481,7 @@ public partial class ViperRotation
 
     static partial void ModifyBloodiedMawPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD && !HasGrimHunter;
+        setting.ActionCheck = () => NODREAD;
         setting.StatusProvide = [StatusID.GrimhuntersVenom];
         setting.CreateConfig = () => new ActionConfig()
         {

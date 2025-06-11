@@ -250,7 +250,7 @@ public sealed class DRG_Default : DragoonRotation
             return true;
         }
 
-        if (PiercingTalonPvE.CanUse(out act))
+        if (!IsLastAction(true, WingedGlidePvE) && PiercingTalonPvE.CanUse(out act))
         {
             return true;
         }
