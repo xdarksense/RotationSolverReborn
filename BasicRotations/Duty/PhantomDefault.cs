@@ -243,11 +243,6 @@ public sealed class PhantomDefault : PhantomRotation
             return true;
         }
 
-        if (InCombat && OccultQuickPvE.CanUse(out act))
-        {
-            return true;
-        }
-
         if (StealPvE.CanUse(out act))
         {
             return true;
@@ -587,6 +582,11 @@ public sealed class PhantomDefault : PhantomRotation
             {
                 return true;
             }
+        }
+
+        if (InCombat && OccultQuickPvE.CanUse(out act))
+        {
+            return true;
         }
 
         if (ShouldHoldBurst())
