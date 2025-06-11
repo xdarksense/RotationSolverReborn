@@ -254,18 +254,6 @@ public sealed class PhantomDefault : PhantomRotation
         }
         #endregion Utility/Non-scaling abilities that don't care about burst
 
-        if (DeadlyBlowPvE.CanUse(out act, skipComboCheck: true)) // Ideally we want to use this in burst windows, but 30 second cooldown means we can use it outside of burst windows too
-        {
-            if (BerserkerLevel == 2)
-            {
-                return true;
-            }
-            if (BerserkerLevel >= 3 && (!RagePvE.IsEnabled || Player.WillStatusEndGCD(1, 0, true, StatusID.PentupRage) || (RagePvE.Cooldown.IsCoolingDown && !Player.HasStatus(true, StatusID.PentupRage))))
-            {
-                return true;
-            }
-        }
-
         #region Burst abilities
         if (ShouldHoldBurst())
         {
@@ -587,6 +575,18 @@ public sealed class PhantomDefault : PhantomRotation
         if (InCombat && OccultDispelPvE.CanUse(out act))
         {
             return true;
+        }
+
+        if (DeadlyBlowPvE.CanUse(out act, skipComboCheck: true)) // Ideally we want to use this in burst windows, but 30 second cooldown means we can use it outside of burst windows too
+        {
+            if (BerserkerLevel == 2)
+            {
+                return true;
+            }
+            if (BerserkerLevel >= 3 && (!RagePvE.IsEnabled || Player.WillStatusEndGCD(1, 0, true, StatusID.PentupRage) || (RagePvE.Cooldown.IsCoolingDown && !Player.HasStatus(true, StatusID.PentupRage))))
+            {
+                return true;
+            }
         }
 
         if (ShouldHoldBurst())
