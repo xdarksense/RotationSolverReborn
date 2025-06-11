@@ -11,9 +11,6 @@ public sealed class MCH_Rework : MachinistRotation
     [RotationConfig(CombatType.PvE, Name = "Use burst medicine in countdown (requires auto burst option on)")]
     private bool OpenerBurstMeds { get; set; } = false;
 
-    [RotationConfig(CombatType.PvE, Name = "Prevent the use of defense abilties during hypercharge burst")]
-    private bool BurstDefense { get; set; } = false;
-
     [RotationConfig(CombatType.PvE, Name = "Use Bioblaster while moving")]
     private bool BioMove { get; set; } = true;
     #endregion
@@ -50,12 +47,18 @@ public sealed class MCH_Rework : MachinistRotation
     [RotationDesc(ActionID.TacticianPvE, ActionID.DismantlePvE)]
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if ((!BurstDefense || (BurstDefense && !IsOverheated)) && TacticianPvE.CanUse(out act))
+        act = null;
+        if (IsOverheated || HasWildfire || HasFullMetalMachinist)
+        {
+            return false;
+        }
+
+        if (TacticianPvE.CanUse(out act))
         {
             return true;
         }
 
-        if ((!BurstDefense || (BurstDefense && !IsOverheated)) && DismantlePvE.CanUse(out act))
+        if (DismantlePvE.CanUse(out act))
         {
             return true;
         }

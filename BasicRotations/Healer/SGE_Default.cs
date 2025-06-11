@@ -127,30 +127,6 @@ public sealed class SGE_Default : SageRotation
 
         //if (base.EmergencyAbility(nextGCD, out act)) return true;
 
-        if (nextGCD.IsTheSameTo(false, PneumaPvE, EukrasianPrognosisPvE, EukrasianPrognosisIiPvE))
-        {
-            if (ZoePvE.CanUse(out act))
-            {
-                return true;
-            }
-        }
-
-        if (nextGCD.IsTheSameTo(false, PneumaPvE, EukrasianDiagnosisPvE, DiagnosisPvE, PrognosisPvE))
-        {
-            if (KrasisPvE.CanUse(out act))
-            {
-                return true;
-            }
-        }
-
-        if (nextGCD.IsTheSameTo(false, PneumaPvE, EukrasianPrognosisPvE, EukrasianPrognosisIiPvE, DiagnosisPvE, PrognosisPvE))
-        {
-            if (PhilosophiaPvE.CanUse(out act))
-            {
-                return true;
-            }
-        }
-
         return base.EmergencyAbility(nextGCD, out act);
     }
 
@@ -199,14 +175,6 @@ public sealed class SGE_Default : SageRotation
     [RotationDesc(ActionID.HaimaPvE, ActionID.TaurocholePvE, ActionID.PanhaimaPvE, ActionID.KeracholePvE, ActionID.HolosPvE)]
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
-        if (!HaimaPvE.Cooldown.IsCoolingDown)
-        {
-            if (KrasisPvE.CanUse(out act))
-            {
-                return true;
-            }
-        }
-
         if (Addersgall <= 1)
         {
             if (HaimaPvE.CanUse(out act))
@@ -280,6 +248,58 @@ public sealed class SGE_Default : SageRotation
     [RotationDesc(ActionID.TaurocholePvE, ActionID.KeracholePvE, ActionID.DruocholePvE, ActionID.HolosPvE, ActionID.PhysisPvE, ActionID.PanhaimaPvE)]
     protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
+        IEnumerable<IBattleChara> tankEnum = PartyMembers.GetJobCategory(JobRole.Tank);
+        List<IBattleChara> tank = [.. tankEnum];
+
+        if (nextGCD.IsTheSameTo(false, PneumaPvE, EukrasianPrognosisPvE, EukrasianPrognosisIiPvE))
+        {
+            for (int i = 0; i < tank.Count; i++)
+            {
+                IBattleChara t = tank[i];
+                if (t.GetHealthRatio() < ZoeHeal)
+                {
+                    if (ZoePvE.CanUse(out act))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        if (nextGCD.IsTheSameTo(false, PneumaPvE, EukrasianDiagnosisPvE, DiagnosisPvE, PrognosisPvE))
+        {
+            for (int i = 0; i < tank.Count; i++)
+            {
+                IBattleChara t = tank[i];
+                if (t.GetHealthRatio() < KrasisTankHeal)
+                {
+                    if (KrasisPvE.CanUse(out act))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            foreach (IBattleChara member in PartyMembers)
+            {
+                if (member.GetHealthRatio() < KrasisHeal)
+                {
+                    if (KrasisPvE.CanUse(out act))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        if (nextGCD.IsTheSameTo(false, PneumaPvE, EukrasianPrognosisPvE, EukrasianPrognosisIiPvE, DiagnosisPvE, PrognosisPvE))
+        {
+            if (PhilosophiaPvE.CanUse(out act))
+            {
+                return true;
+            }
+        }
+
         if (TaurocholePvE.CanUse(out act))
         {
             return true;
@@ -297,9 +317,6 @@ public sealed class SGE_Default : SageRotation
                 return true;
             }
         }
-
-        IEnumerable<IBattleChara> tankEnum = PartyMembers.GetJobCategory(JobRole.Tank);
-        List<IBattleChara> tank = [.. tankEnum];
 
         for (int i = 0; i < tank.Count; i++)
         {
@@ -327,41 +344,6 @@ public sealed class SGE_Default : SageRotation
                 }
 
                 if ((!HaimaPvE.EnoughLevel || HaimaPvE.Cooldown.ElapsedAfter(20)) && PanhaimaPvE.CanUse(out act))
-                {
-                    return true;
-                }
-            }
-        }
-
-        for (int i = 0; i < tank.Count; i++)
-        {
-            IBattleChara t = tank[i];
-            if (t.GetHealthRatio() < ZoeHeal)
-            {
-                if (ZoePvE.CanUse(out act))
-                {
-                    return true;
-                }
-            }
-        }
-
-        for (int i = 0; i < tank.Count; i++)
-        {
-            IBattleChara t = tank[i];
-            if (t.GetHealthRatio() < KrasisTankHeal)
-            {
-                if (KrasisPvE.CanUse(out act))
-                {
-                    return true;
-                }
-            }
-        }
-
-        foreach (IBattleChara member in PartyMembers)
-        {
-            if (member.GetHealthRatio() < KrasisHeal)
-            {
-                if (KrasisPvE.CanUse(out act))
                 {
                     return true;
                 }
