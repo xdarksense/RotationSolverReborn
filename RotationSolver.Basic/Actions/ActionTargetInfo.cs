@@ -251,7 +251,7 @@ public struct ActionTargetInfo(IBaseAction action)
             return false;
         }
 
-        if (Service.Config.Statuscap && battleChara != Player.Object && StatusHelper.IsStatusCapped(battleChara))
+        if (Service.Config.Statuscap && battleChara.IsEnemy() && StatusHelper.IsStatusCapped(battleChara))
         {
             return false;
         }

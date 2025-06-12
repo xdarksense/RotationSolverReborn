@@ -216,12 +216,17 @@ public static class StatusHelper
             return false;
         }
 
-        return battleChara switch
+        //if (battleChara.IsParty() && battleChara.StatusList.Length == 30)
+        //{
+        //    return true;
+        //}
+
+        if (battleChara.IsEnemy() && battleChara.StatusList.Length == 60)
         {
-            IPlayerCharacter player => player.StatusList.Length == 30,
-            IBattleNpc npc => npc.StatusList.Length == 60,
-            _ => false
-        };
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>

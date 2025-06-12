@@ -237,7 +237,6 @@ public sealed class VPR_Default : ViperRotation
             return false;
         }
             
-
         ////Reawaken Combo
         if (OuroborosPvE.CanUse(out act))
         {
@@ -376,16 +375,19 @@ public sealed class VPR_Default : ViperRotation
 
         if ((PreserveCombo && LiveComboTime > GCDTime(3)) || !PreserveCombo)
         {
-            if (VicepitPvE.Cooldown.CurrentCharges == 1 && VicepitPvE.Cooldown.RecastTimeRemainOneCharge < 10)
+            if (IsSwift)
             {
+                if (VicepitPvE.Cooldown.CurrentCharges == 1 && VicepitPvE.Cooldown.RecastTimeRemainOneCharge < 10)
+                {
+                    if (VicepitPvE.CanUse(out act, usedUp: true))
+                    {
+                        return true;
+                    }
+                }
                 if (VicepitPvE.CanUse(out act, usedUp: true))
                 {
                     return true;
                 }
-            }
-            if (VicepitPvE.CanUse(out act, usedUp: true))
-            {
-                return true;
             }
         }
 
@@ -483,18 +485,22 @@ public sealed class VPR_Default : ViperRotation
 
         if ((PreserveCombo && LiveComboTime > GCDTime(3)) || !PreserveCombo)
         {
-            if (VicewinderPvE.Cooldown.CurrentCharges == 1 && VicewinderPvE.Cooldown.RecastTimeRemainOneCharge < 10)
+            if (IsSwift)
             {
+                if (VicewinderPvE.Cooldown.CurrentCharges == 1 && VicewinderPvE.Cooldown.RecastTimeRemainOneCharge < 10)
+                {
+                    if (VicewinderPvE.CanUse(out act, usedUp: true))
+                    {
+                        return true;
+                    }
+                }
                 if (VicewinderPvE.CanUse(out act, usedUp: true))
                 {
                     return true;
                 }
             }
-            if (VicewinderPvE.CanUse(out act, usedUp: true))
-            {
-                return true;
-            }
         }
+
         //AOE Serpent Combo
         // aoe 3
         switch ((HasGrimHunter, HasGrimSkin))
@@ -554,32 +560,32 @@ public sealed class VPR_Default : ViperRotation
 
         //Single Target Serpent Combo
         // st 3
-        switch ((HasFlankstung, HasFlanksbane, HasHindstung, HasHindsbane))
+        switch ((HasHindstung, HasHindsbane, HasFlankstung, HasFlanksbane))
         {
             case (true, _, _, _):
-                if (HindsbaneFangPvE.CanUse(out act))
+                if (HindstingStrikePvE.CanUse(out act))
                     return true;
                 break;
             case (_, true, _, _):
-                if (HindstingStrikePvE.CanUse(out act))
+                if (HindsbaneFangPvE.CanUse(out act))
                     return true;
                 break;
             case (_, _, true, _):
-                if (FlanksbaneFangPvE.CanUse(out act))
+                if (FlankstingStrikePvE.CanUse(out act))
                     return true;
                 break;
             case (_, _, _, true):
-                if (FlankstingStrikePvE.CanUse(out act))
+                if (FlanksbaneFangPvE.CanUse(out act))
                     return true;
                 break;
             case (false, false, false, false):
-                if (HindsbaneFangPvE.CanUse(out act))
-                    return true;
                 if (HindstingStrikePvE.CanUse(out act))
                     return true;
-                if (FlanksbaneFangPvE.CanUse(out act))
+                if (HindsbaneFangPvE.CanUse(out act))
                     return true;
                 if (FlankstingStrikePvE.CanUse(out act))
+                    return true;
+                if (FlanksbaneFangPvE.CanUse(out act))
                     return true;
                 break;
         }
@@ -597,9 +603,9 @@ public sealed class VPR_Default : ViperRotation
                 break;
             case "Equal":
             case null:
-                if (HuntersStingPvE.CanUse(out act))
-                    return true;
                 if (SwiftskinsStingPvE.CanUse(out act))
+                    return true;
+                if (HuntersStingPvE.CanUse(out act))
                     return true;
                 break;
         }
