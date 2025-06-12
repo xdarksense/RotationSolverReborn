@@ -52,7 +52,7 @@ public sealed class DRG_Default : DragoonRotation
     #region oGCD Logic
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        if (IsBurst && InCombat)
+        if (IsBurst && InCombat && HasHostilesInRange)
         {
             bool lifeSurgeReady =
                 ((Player.HasStatus(true, StatusID.BattleLitany) || Player.HasStatus(true, StatusID.LanceCharge) || LOTDEndAfter(1000))
