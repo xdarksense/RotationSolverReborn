@@ -17,7 +17,7 @@ public sealed class SGE_Default : SageRotation
     [RotationConfig(CombatType.PvE, Name = "Use Rhizomata when out of combat")]
     public bool OOCRhizomata { get; set; } = false;
 
-    [RotationConfig(CombatType.PvE, Name = "Use spells with cast times to heal. (Ignored if you are the only healer in party)")]
+    [RotationConfig(CombatType.PvE, Name = "Use GCDs to heal. (Ignored if you are the only healer in party)")]
     public bool GCDHeal { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Enable Swiftcast Restriction Logic to attempt to prevent actions other than Raise when you have swiftcast")]
@@ -125,7 +125,30 @@ public sealed class SGE_Default : SageRotation
             return true;
         }
 
-        //if (base.EmergencyAbility(nextGCD, out act)) return true;
+        if (ZoePvE.EnoughLevel && !ZoePvE.Cooldown.IsCoolingDown)
+        {
+            if (nextGCD.IsTheSameTo(false, PneumaPvE))
+            {
+                if (ZoePvE.CanUse(out act))
+                {
+                    return true;
+                }
+            }
+
+            if (nextGCD.IsTheSameTo(false, EukrasiaPvE))
+            {
+                if (_EukrasiaActionAim == EukrasianPrognosisPvE
+                    || _EukrasiaActionAim == EukrasianPrognosisIiPvE
+                    || _EukrasiaActionAim == EukrasianDiagnosisPvE)
+                {
+                    if (ZoePvE.CanUse(out act))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
 
         return base.EmergencyAbility(nextGCD, out act);
     }
@@ -250,21 +273,6 @@ public sealed class SGE_Default : SageRotation
     {
         IEnumerable<IBattleChara> tankEnum = PartyMembers.GetJobCategory(JobRole.Tank);
         List<IBattleChara> tank = [.. tankEnum];
-
-        if (nextGCD.IsTheSameTo(false, PneumaPvE, EukrasianPrognosisPvE, EukrasianPrognosisIiPvE))
-        {
-            for (int i = 0; i < tank.Count; i++)
-            {
-                IBattleChara t = tank[i];
-                if (t.GetHealthRatio() < ZoeHeal)
-                {
-                    if (ZoePvE.CanUse(out act))
-                    {
-                        return true;
-                    }
-                }
-            }
-        }
 
         if (nextGCD.IsTheSameTo(false, PneumaPvE, EukrasianDiagnosisPvE, DiagnosisPvE, PrognosisPvE))
         {

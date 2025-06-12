@@ -14,7 +14,7 @@ public sealed class AST_Default : AstrologianRotation
     [RotationConfig(CombatType.PvE, Name = "Use both stacks of Lightspeed while moving")]
     public bool LightspeedMove { get; set; } = true;
 
-    [RotationConfig(CombatType.PvE, Name = "Use spells with cast times to heal. (Ignored if you are the only healer in party)")]
+    [RotationConfig(CombatType.PvE, Name = "Use GCDs to heal. (Ignored if you are the only healer in party)")]
     public bool GCDHeal { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Prevent actions while you have the bubble mit up")]
