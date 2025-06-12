@@ -46,6 +46,76 @@ public partial class MonkRotation
     /// Gets the amount of available Coeurl Fury stacks.
     /// </summary>
     public static int CoeurlFury => JobGauge.CoeurlFury;
+
+    /// <summary>
+    /// Determines whether all elements in the <see cref="BeastChakras"/> array are the same.
+    /// </summary>
+    /// <returns>
+    /// <c>true</c> if all elements are equal; otherwise, <c>false</c>.
+    /// </returns>
+    public static bool BeastChakrasAllSame()
+    {
+        var first = BeastChakras[0];
+        for (int i = 1; i < BeastChakras.Length; i++)
+        {
+            if (!BeastChakras[i].Equals(first))
+                return false;
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// Determines whether all elements in the <see cref="BeastChakras"/> array are different from each other.
+    /// </summary>
+    /// <returns>
+    /// <c>true</c> if all elements are unique or the array is empty; otherwise, <c>false</c>.
+    /// </returns>
+    public static bool BeastChakrasAllDifferent()
+    {
+        for (int i = 0; i < BeastChakras.Length; i++)
+        {
+            for (int j = i + 1; j < BeastChakras.Length; j++)
+            {
+                if (BeastChakras[i].Equals(BeastChakras[j]))
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// Determines whether the specified <paramref name="value"/> exists in the <see cref="BeastChakras"/> array.
+    /// </summary>
+    /// <param name="value">The <see cref="BeastChakra"/> value to search for.</param>
+    /// <returns>
+    /// <c>true</c> if the value is found; otherwise, <c>false</c>.
+    /// </returns>
+    public static bool BeastChakrasContains(BeastChakra value)
+    {
+        for (int i = 0; i < BeastChakras.Length; i++)
+        {
+            if (BeastChakras[i].Equals(value))
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Determines whether all elements in the <see cref="BeastChakras"/> array do <b>not</b> equal the specified <paramref name="value"/>.
+    /// </summary>
+    /// <param name="value">The <see cref="BeastChakra"/> value to compare against each element.</param>
+    /// <returns>
+    /// <c>true</c> if none of the elements equal <paramref name="value"/>; otherwise, <c>false</c>.
+    /// </returns>
+    public static bool BeastChakrasAllNot(BeastChakra value)
+    {
+        for (int i = 0; i < BeastChakras.Length; i++)
+        {
+            if (BeastChakras[i].Equals(value))
+                return false;
+        }
+        return true;
+    }
     #endregion
 
     #region Status Tracking
@@ -58,12 +128,27 @@ public partial class MonkRotation
     /// <summary>
     /// 
     /// </summary>
-    public static bool HasRiddleOfFire => Player.HasStatus(true, StatusID.RiddleOfFire);
+    public static bool InOpoopoForm => Player.HasStatus(true, StatusID.OpoopoForm);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool InRaptorForm => Player.HasStatus(true, StatusID.RaptorForm);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool InCoeurlForm => Player.HasStatus(true, StatusID.CoeurlForm);
 
     /// <summary>
     /// 
     /// </summary>
     public static bool HasFormlessFist => Player.HasStatus(true, StatusID.FormlessFist);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasRiddleOfFire => Player.HasStatus(true, StatusID.RiddleOfFire);
 
     /// <summary>
     /// 
@@ -125,6 +210,9 @@ public partial class MonkRotation
     /// <inheritdoc/>
     public override void DisplayStatus()
     {
+        ImGui.Text($"BeastChakrasAllSame: {BeastChakrasAllSame()}");
+        ImGui.Text($"BeastChakrasContains(BeastChakra.None): {BeastChakrasContains(BeastChakra.None)}");
+        ImGui.Text($"All Beast Chakras filled: {BeastChakrasAllNot(BeastChakra.None)}");
         ImGui.Text($"CoeurlFury: {CoeurlFury}");
         ImGui.Text($"RaptorFury: {RaptorFury}");
         ImGui.Text($"OpoOpoFury: {OpoOpoFury}");
@@ -152,33 +240,32 @@ public partial class MonkRotation
 
     static partial void ModifyTrueStrikePvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.RaptorForm, StatusID.PerfectBalance];
+        setting.ActionCheck = () => InRaptorForm || HasFormlessFist || HasPerfectBalance;
         setting.StatusProvide = [StatusID.CoeurlForm];
     }
 
     static partial void ModifySnapPunchPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.CoeurlForm, StatusID.PerfectBalance];
+        setting.ActionCheck = () => InCoeurlForm || HasFormlessFist || HasPerfectBalance;
         setting.StatusProvide = [StatusID.OpoopoForm];
     }
 
     static partial void ModifySteeledMeditationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (!InBrotherhood && Chakra < 5) || (InBrotherhood && Chakra < 10);
+        setting.ActionCheck = () => Chakra < 5;
         setting.IsFriendly = true;
     }
 
     static partial void ModifySteelPeakPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InCombat && ((!InBrotherhood && Chakra == 5) || (InBrotherhood && Chakra >= 5));
+        setting.ActionCheck = () => InCombat && Chakra >= 5;
         setting.UnlockedByQuestID = 66094;
     }
 
     static partial void ModifyTwinSnakesPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.RaptorForm, StatusID.PerfectBalance];
+        setting.ActionCheck = () => InRaptorForm || HasFormlessFist || HasPerfectBalance;
         setting.StatusProvide = [StatusID.CoeurlForm];
-        setting.ActionCheck = () => RaptorFury == 0;
     }
 
     static partial void ModifyArmOfTheDestroyerPvE(ref ActionSetting setting)
@@ -192,16 +279,15 @@ public partial class MonkRotation
 
     static partial void ModifyDemolishPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.CoeurlForm, StatusID.PerfectBalance];
+        setting.ActionCheck = () => InCoeurlForm || HasFormlessFist || HasPerfectBalance;
         setting.StatusProvide = [StatusID.OpoopoForm];
-        setting.ActionCheck = () => CoeurlFury == 0;
     }
 
     static partial void ModifyRockbreakerPvE(ref ActionSetting setting)
     {
-        setting.UnlockedByQuestID = 66597;
-        setting.StatusNeed = [StatusID.CoeurlForm, StatusID.PerfectBalance];
+        setting.ActionCheck = () => InCoeurlForm || HasFormlessFist || HasPerfectBalance;
         setting.StatusProvide = [StatusID.OpoopoForm];
+        setting.UnlockedByQuestID = 66597;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -217,13 +303,13 @@ public partial class MonkRotation
 
     static partial void ModifyInspiritedMeditationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (!InBrotherhood && Chakra < 5) || (InBrotherhood && Chakra < 10);
+        setting.ActionCheck = () => Chakra < 5;
         setting.IsFriendly = true;
     }
 
     static partial void ModifyHowlingFistPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InCombat && ((!InBrotherhood && Chakra == 5) || (InBrotherhood && Chakra >= 5));
+        setting.ActionCheck = () => InCombat && Chakra >= 5;
         setting.UnlockedByQuestID = 66599;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -236,7 +322,6 @@ public partial class MonkRotation
         setting.StatusProvide = [StatusID.Mantra];
         setting.CreateConfig = () => new ActionConfig()
         {
-            TimeToKill = 10,
             AoeCount = 1,
         };
         setting.IsFriendly = true;
@@ -244,9 +329,9 @@ public partial class MonkRotation
 
     static partial void ModifyFourpointFuryPvE(ref ActionSetting setting)
     {
-        setting.UnlockedByQuestID = 66600;
-        setting.StatusNeed = [StatusID.RaptorForm, StatusID.PerfectBalance];
+        setting.ActionCheck = () => InRaptorForm || HasFormlessFist || HasPerfectBalance;
         setting.StatusProvide = [StatusID.CoeurlForm];
+        setting.UnlockedByQuestID = 66600;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -256,12 +341,11 @@ public partial class MonkRotation
     static partial void ModifyDragonKickPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.RaptorForm];
-        setting.ActionCheck = () => OpoOpoFury == 0;
     }
 
     static partial void ModifyPerfectBalancePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => BeastChakras.Distinct().Count() == 1 && BeastChakras.Any(chakra => chakra == BeastChakra.None);
+        setting.ActionCheck = () => InCombat && BeastChakrasAllSame() && BeastChakrasContains(BeastChakra.None);
         setting.UnlockedByQuestID = 66602;
         setting.StatusProvide = [StatusID.PerfectBalance];
         setting.IsFriendly = true;
@@ -276,13 +360,13 @@ public partial class MonkRotation
 
     static partial void ModifyForbiddenMeditationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (!InBrotherhood && Chakra < 5) || (InBrotherhood && Chakra < 10);
+        setting.ActionCheck = () => Chakra < 5;
         setting.IsFriendly = true;
     }
 
     static partial void ModifyTheForbiddenChakraPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InCombat && ((!InBrotherhood && Chakra == 5) || (InBrotherhood && Chakra >= 5));
+        setting.ActionCheck = () => InCombat && Chakra >= 5;
         setting.UnlockedByQuestID = 67564;
     }
 
@@ -293,7 +377,7 @@ public partial class MonkRotation
 
     static partial void ModifyTornadoKickPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => HasSolar && HasLunar && BeastChakras.Any(chakra => chakra != BeastChakra.None);
+        setting.ActionCheck = () => HasSolar && HasLunar && BeastChakrasAllNot(BeastChakra.None);
         setting.StatusProvide = [StatusID.FormlessFist];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -303,7 +387,7 @@ public partial class MonkRotation
 
     static partial void ModifyElixirFieldPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ElixirFieldPvEReady;
+        setting.ActionCheck = () => BeastChakrasAllSame() && !BeastChakrasContains(BeastChakra.None);
         setting.StatusProvide = [StatusID.FormlessFist];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -313,7 +397,7 @@ public partial class MonkRotation
 
     static partial void ModifyCelestialRevolutionPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => CelestialRevolutionPvEReady;
+        setting.ActionCheck = () => BeastChakrasAllNot(BeastChakra.None) && !HasSolar && !HasLunar;
         setting.StatusProvide = [StatusID.FormlessFist];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -323,7 +407,7 @@ public partial class MonkRotation
 
     static partial void ModifyFlintStrikePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => FlintStrikePvEReady;
+        setting.ActionCheck = () => BeastChakrasAllDifferent() && !BeastChakrasContains(BeastChakra.None);
         setting.StatusProvide = [StatusID.FormlessFist];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -384,7 +468,7 @@ public partial class MonkRotation
 
     static partial void ModifyEnlightenedMeditationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (!InBrotherhood && Chakra < 5) || (InBrotherhood && Chakra < 10);
+        setting.ActionCheck = () => Chakra < 5;
         setting.IsFriendly = true;
     }
 
@@ -410,7 +494,7 @@ public partial class MonkRotation
 
     static partial void ModifyRisingPhoenixPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => RisingPhoenixPvEReady;
+        setting.ActionCheck = () => BeastChakrasAllDifferent() && !BeastChakrasContains(BeastChakra.None);
         setting.StatusProvide = [StatusID.FormlessFist];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -420,7 +504,7 @@ public partial class MonkRotation
 
     static partial void ModifyPhantomRushPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => PhantomRushPvEReady;
+        setting.ActionCheck = () => HasSolar && HasLunar && BeastChakrasAllNot(BeastChakra.None);
         setting.StatusProvide = [StatusID.FormlessFist];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -431,26 +515,23 @@ public partial class MonkRotation
     static partial void ModifyLeapingOpoPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.RaptorForm];
-        setting.ActionCheck = () => OpoOpoFury >= 1;
     }
 
     static partial void ModifyRisingRaptorPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.RaptorForm, StatusID.PerfectBalance];
         setting.StatusProvide = [StatusID.CoeurlForm];
-        setting.ActionCheck = () => RaptorFury >= 1;
+        setting.ActionCheck = () => InRaptorForm || HasFormlessFist || HasPerfectBalance;
     }
 
     static partial void ModifyPouncingCoeurlPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.CoeurlForm, StatusID.PerfectBalance];
         setting.StatusProvide = [StatusID.OpoopoForm];
-        setting.ActionCheck = () => CoeurlFury >= 1;
+        setting.ActionCheck = () => InCoeurlForm || HasFormlessFist || HasPerfectBalance;
     }
 
     static partial void ModifyElixirBurstPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => ElixirBurstPvEReady;
+        setting.ActionCheck = () => BeastChakrasAllSame() && !BeastChakrasContains(BeastChakra.None);
         setting.StatusProvide = [StatusID.FormlessFist];
         setting.CreateConfig = () => new ActionConfig()
         {

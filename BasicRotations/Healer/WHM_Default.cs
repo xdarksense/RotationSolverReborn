@@ -15,8 +15,8 @@ public sealed class WHM_Default : WhiteMageRotation
     [RotationConfig(CombatType.PvE, Name = "Enable Swiftcast Restriction Logic to attempt to prevent actions other than Raise when you have swiftcast")]
     public bool SwiftLogic { get; set; } = true;
 
-    [RotationConfig(CombatType.PvE, Name = "Use spells with cast times to heal. (Ignored if you are the only healer in party)")]
-    public bool GCDHeal { get; set; } = false;
+    [RotationConfig(CombatType.PvE, Name = "Use GCDs to heal. (Ignored if you are the only healer in party)")]
+    public bool GCDHeal { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Use DOT while moving even if it does not need refresh (disabling is a damage down)")]
     public bool DOTUpkeep { get; set; } = true;

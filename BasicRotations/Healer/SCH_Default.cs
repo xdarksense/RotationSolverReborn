@@ -60,7 +60,7 @@ public sealed class SCH_Default : ScholarRotation
     [RotationConfig(CombatType.PvE, Name = "Enable Swiftcast restriction: only allow Raise while Swiftcast is active")]
     public bool SwiftLogic { get; set; } = true;
 
-    [RotationConfig(CombatType.PvE, Name = "Allow use of cast-time spells for healing (ignored if solo healer)")]
+    [RotationConfig(CombatType.PvE, Name = "Use GCDs to heal. (Ignored if you are the only healer in party)")]
     public bool GCDHeal { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Use Recitation during the countdown opener")]
