@@ -19,6 +19,7 @@ using RotationSolver.Basic.Configuration;
 using System.Collections.Concurrent;
 using System.Text;
 using System.Text.RegularExpressions;
+using static FFXIVClientStructs.FFXIV.Client.UI.Agent.AgentTryon.Delegates;
 
 namespace RotationSolver.Basic.Helpers;
 
@@ -969,31 +970,35 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsWolfImmune(this IBattleChara battleChara)
     {
-        // Numeric values used instead of name as Lumina does not provide name yet, and may update to change name
-        StatusID WindPack = (StatusID)4389; // Numeric value for "Rsv43891100S74Cfc3B0E74Cfc3B0", unable to hit Wolf of Wind
-        StatusID StonePack = (StatusID)4390; // Numeric value for "Rsv43901100S74Cfc3B0E74Cfc3B0", unable to hit Wolf of Wind
-
-        bool WolfOfWind = battleChara.NameId == 13846;
-        bool WolfOfStone = battleChara.NameId == 13847;
-
-        if (WolfOfWind &&
-                Player.Object.HasStatus(false, WindPack))
+        if (DataCenter.TerritoryID == 1263)
         {
-            if (Service.Config.InDebug)
-            {
-                PluginLog.Information("IsWolfImmune: WindPack status found");
-            }
-            return true;
-        }
+            // Numeric values used instead of name as Lumina does not provide name yet, and may update to change name
+            StatusID WindPack = (StatusID)4389; // Numeric value for "Rsv43891100S74Cfc3B0E74Cfc3B0", unable to hit Wolf of Wind
+            StatusID StonePack = (StatusID)4390; // Numeric value for "Rsv43901100S74Cfc3B0E74Cfc3B0", unable to hit Wolf of Stone
 
-        if (WolfOfStone &&
-            Player.Object.HasStatus(false, StonePack))
-        {
-            if (Service.Config.InDebug)
+            var WolfOfWind = battleChara.NameId == 13846;
+            var WolfOfStone = battleChara.NameId == 13847;
+
+            var WindPackPlayer = Player.Object.HasStatus(false, WindPack);
+            var StonePackPlayer = Player.Object.HasStatus(false, StonePack);
+
+            if (WolfOfWind && WindPackPlayer)
             {
-                PluginLog.Information("IsWolfImmune: StonePack status found");
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsWolfImmune: WindPack status found");
+                }
+                return true;
             }
-            return true;
+
+            if (WolfOfStone && StonePackPlayer)
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsWolfImmune: StonePack status found");
+                }
+                return true;
+            }
         }
 
         return false;
@@ -1006,34 +1011,90 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsJeunoBossImmune(this IBattleChara battleChara)
     {
-        if (battleChara.HasStatus(false, StatusID.EpicVillain) &&
-                (Player.Object.HasStatus(false, StatusID.VauntedHero) || Player.Object.HasStatus(false, StatusID.FatedHero)))
+        if (DataCenter.TerritoryID == 1248)
         {
-            if (Service.Config.InDebug)
+            var FatedVillain = battleChara.HasStatus(false, StatusID.FatedVillain);
+            var VauntedVillain = battleChara.HasStatus(false, StatusID.VauntedVillain);
+            var EpicVillain = battleChara.HasStatus(false, StatusID.EpicVillain);
+
+            var FatedHero = Player.Object.HasStatus(false, StatusID.VauntedHero);
+            var VauntedHero = Player.Object.HasStatus(false, StatusID.FatedHero);
+            var EpicHero = Player.Object.HasStatus(false, StatusID.EpicHero);
+
+            if (EpicVillain && (VauntedHero || FatedHero))
             {
-                PluginLog.Information("IsJeunoBossImmune: EpicVillain status found");
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsJeunoBossImmune: EpicVillain status found");
+                }
+                return true;
             }
-            return true;
+
+            if (VauntedVillain && (EpicHero || FatedHero))
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsJeunoBossImmune: VauntedVillain status found");
+                }
+                return true;
+            }
+
+            if (FatedVillain && (EpicHero || VauntedHero))
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsJeunoBossImmune: FatedVillain status found");
+                }
+                return true;
+            }
         }
 
-        if (battleChara.HasStatus(false, StatusID.VauntedVillain) &&
-            (Player.Object.HasStatus(false, StatusID.EpicHero) || Player.Object.HasStatus(false, StatusID.FatedHero)))
-        {
-            if (Service.Config.InDebug)
-            {
-                PluginLog.Information("IsJeunoBossImmune: VauntedVillain status found");
-            }
-            return true;
-        }
+        return false;
+    }
 
-        if (battleChara.HasStatus(false, StatusID.FatedVillain) &&
-            (Player.Object.HasStatus(false, StatusID.EpicHero) || Player.Object.HasStatus(false, StatusID.VauntedHero)))
+    /// <summary>
+    /// Is target Dead Star immune.
+    /// </summary>
+    /// <param name="battleChara">the object.</param>
+    /// <returns></returns>
+    public static bool IsDeadStarImmune(this IBattleChara battleChara)
+    {
+        if (DataCenter.IsInForkedTower)
         {
-            if (Service.Config.InDebug)
+            var Triton = battleChara.NameId == 13730;
+            var Nereid = battleChara.NameId == 13731;
+            var Phobos = battleChara.NameId == 13732;
+
+            var PhobosicGravity = Player.Object.HasStatus(false, StatusID.PhobosicGravity);
+            var TritonicGravity = Player.Object.HasStatus(false, StatusID.TritonicGravity);
+            var NereidicGravity = Player.Object.HasStatus(false, StatusID.NereidicGravity);
+
+            if (Triton && (NereidicGravity || PhobosicGravity))
             {
-                PluginLog.Information("IsJeunoBossImmune: FatedVillain status found");
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsDeadStarImmune: Triton immune");
+                }
+                return true;
             }
-            return true;
+
+            if (Nereid && (TritonicGravity || PhobosicGravity))
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsDeadStarImmune: Nereid immune");
+                }
+                return true;
+            }
+
+            if (Phobos && (TritonicGravity || NereidicGravity))
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsDeadStarImmune: Phobos immune");
+                }
+                return true;
+            }
         }
 
         return false;
@@ -1046,29 +1107,31 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsCODBossImmune(this IBattleChara battleChara)
     {
-        StatusID StygianStatus = StatusID.UnnamedStatus_4388;
-        StatusID CloudOfDarknessStatus = StatusID.VeilOfDarkness;
-        StatusID AntiCloudOfDarknessStatus = StatusID.OuterDarkness;
-        StatusID AntiStygianStatus = StatusID.InnerDarkness;
-
-        if (battleChara.HasStatus(false, CloudOfDarknessStatus) &&
-                Player.Object.HasStatus(false, AntiCloudOfDarknessStatus))
+        if (DataCenter.TerritoryID == 1241)
         {
-            if (Service.Config.InDebug)
-            {
-                PluginLog.Information("IsCODBossImmune: OuterDarkness status found, CloudOfDarkness immune");
-            }
-            return true;
-        }
+            var CloudOfDarknessStatus = battleChara.HasStatus(false, StatusID.VeilOfDarkness);
+            var StygianStatus = battleChara.HasStatus(false, StatusID.UnnamedStatus_4388);
 
-        if (battleChara.HasStatus(false, StygianStatus) &&
-            Player.Object.HasStatus(false, AntiStygianStatus))
-        {
-            if (Service.Config.InDebug)
+            var AntiCloudOfDarknessStatus = Player.Object.HasStatus(false, StatusID.OuterDarkness);
+            var AntiStygianStatus = Player.Object.HasStatus(false, StatusID.InnerDarkness);
+
+            if (CloudOfDarknessStatus && AntiCloudOfDarknessStatus)
             {
-                PluginLog.Information("IsCODBossImmune: InnerDarkness status found, Stygian immune");
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsCODBossImmune: OuterDarkness status found, CloudOfDarkness immune");
+                }
+                return true;
             }
-            return true;
+
+            if (StygianStatus && AntiStygianStatus)
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsCODBossImmune: InnerDarkness status found, Stygian immune");
+                }
+                return true;
+            }
         }
 
         return false;
@@ -1080,30 +1143,32 @@ public static class ObjectHelper
     /// <param name="battleChara">the object.</param>
     /// <returns></returns>
     public static bool IsCinderDriftImmune(this IBattleChara battleChara)
-    {
-        StatusID GriefAdd = StatusID.BlindToGrief;
-        StatusID RageAdd = StatusID.BlindToRage;
-        StatusID AntiGriefAdd = StatusID.PallOfGrief;
-        StatusID AntiRageAdd = StatusID.PallOfRage;
-
-        if (battleChara.HasStatus(false, GriefAdd) &&
-                Player.Object.HasStatus(false, AntiGriefAdd))
+    { 
+        if (DataCenter.TerritoryID == 912)
         {
-            if (Service.Config.InDebug)
-            {
-                PluginLog.Information("IsCinderDriftImmune: AntiGriefAdd status found, GriefAdd immune");
-            }
-            return true;
-        }
+            var GriefAdd = battleChara.HasStatus(false, StatusID.BlindToGrief);
+            var RageAdd = battleChara.HasStatus(false, StatusID.BlindToRage);
 
-        if (battleChara.HasStatus(false, RageAdd) &&
-            Player.Object.HasStatus(false, AntiRageAdd))
-        {
-            if (Service.Config.InDebug)
+            var AntiRageAdd = Player.Object.HasStatus(false, StatusID.PallOfRage);
+            var AntiGriefAdd = Player.Object.HasStatus(false, StatusID.PallOfGrief);
+
+            if (GriefAdd && AntiGriefAdd)
             {
-                PluginLog.Information("IsCinderDriftImmune: AntiRageAdd status found, RageAdd immune");
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsCinderDriftImmune: AntiGriefAdd status found, GriefAdd immune");
+                }
+                return true;
             }
-            return true;
+
+            if (RageAdd && AntiRageAdd)
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsCinderDriftImmune: AntiRageAdd status found, RageAdd immune");
+                }
+                return true;
+            }
         }
 
         return false;
@@ -1116,30 +1181,33 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsResistanceImmune(this IBattleChara battleChara)
     {
-        StatusID VoidArkMagicResistance = StatusID.MagicResistance;
-        StatusID VoidArkRangedResistance = StatusID.RangedResistance;
-        StatusID LeviMagicResistance = StatusID.MantleOfTheWhorl;
-        StatusID LeviRangedResistance = StatusID.VeilOfTheWhorl;
-        JobRole role = Player.Object?.ClassJob.Value.GetJobRole() ?? JobRole.None;
-
-        if (battleChara.HasStatus(false, VoidArkMagicResistance, LeviMagicResistance) &&
-                (role == JobRole.RangedMagical || role == JobRole.Healer))
+        if (DataCenter.TerritoryID == 508 || DataCenter.TerritoryID == 281 || DataCenter.TerritoryID == 359)
         {
-            if (Service.Config.InDebug)
-            {
-                PluginLog.Information("IsResistanceImmune: MagicResistance status found");
-            }
-            return true;
-        }
+            StatusID VoidArkMagicResistance = StatusID.MagicResistance;
+            StatusID VoidArkRangedResistance = StatusID.RangedResistance;
+            StatusID LeviMagicResistance = StatusID.MantleOfTheWhorl;
+            StatusID LeviRangedResistance = StatusID.VeilOfTheWhorl;
+            JobRole role = Player.Object?.ClassJob.Value.GetJobRole() ?? JobRole.None;
 
-        if (battleChara.HasStatus(false, VoidArkRangedResistance, LeviRangedResistance) &&
-            role == JobRole.RangedPhysical)
-        {
-            if (Service.Config.InDebug)
+            if (battleChara.HasStatus(false, VoidArkMagicResistance, LeviMagicResistance) &&
+                    (role == JobRole.RangedMagical || role == JobRole.Healer))
             {
-                PluginLog.Information("IsResistanceImmune: RangedResistance status found");
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsResistanceImmune: MagicResistance status found");
+                }
+                return true;
             }
-            return true;
+
+            if (battleChara.HasStatus(false, VoidArkRangedResistance, LeviRangedResistance) &&
+                role == JobRole.RangedPhysical)
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsResistanceImmune: RangedResistance status found");
+                }
+                return true;
+            }
         }
 
         return false;
@@ -1152,33 +1220,36 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsOmegaImmune(this IBattleChara battleChara)
     {
-        StatusID AntiOmegaF = StatusID.PacketFilterF;
-        StatusID AntiOmegaF_Extreme = StatusID.PacketFilterF_3500;
-        StatusID AntiOmegaM = StatusID.PacketFilterM;
-        StatusID AntiOmegaM_Extreme = StatusID.PacketFilterM_3499;
-
-        StatusID OmegaF = StatusID.OmegaF;
-        StatusID OmegaM = StatusID.OmegaM;
-        StatusID OmegaM2 = StatusID.OmegaM_3454;
-
-        if (battleChara.HasStatus(false, OmegaF) &&
-                Player.Object.HasStatus(false, AntiOmegaF, AntiOmegaF_Extreme))
+        if (DataCenter.TerritoryID == 801 || DataCenter.TerritoryID == 805)
         {
-            if (Service.Config.InDebug)
-            {
-                PluginLog.Information("IsOmegaImmune: PacketFilterF status found");
-            }
-            return true;
-        }
+            StatusID AntiOmegaF = StatusID.PacketFilterF;
+            StatusID AntiOmegaF_Extreme = StatusID.PacketFilterF_3500;
+            StatusID AntiOmegaM = StatusID.PacketFilterM;
+            StatusID AntiOmegaM_Extreme = StatusID.PacketFilterM_3499;
 
-        if (battleChara.HasStatus(false, OmegaM, OmegaM2) &&
-            Player.Object.HasStatus(false, AntiOmegaM, AntiOmegaM_Extreme))
-        {
-            if (Service.Config.InDebug)
+            StatusID OmegaF = StatusID.OmegaF;
+            StatusID OmegaM = StatusID.OmegaM;
+            StatusID OmegaM2 = StatusID.OmegaM_3454;
+
+            if (battleChara.HasStatus(false, OmegaF) &&
+                    Player.Object.HasStatus(false, AntiOmegaF, AntiOmegaF_Extreme))
             {
-                PluginLog.Information("IsOmegaImmune: PacketFilterM status found");
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsOmegaImmune: PacketFilterF status found");
+                }
+                return true;
             }
-            return true;
+
+            if (battleChara.HasStatus(false, OmegaM, OmegaM2) &&
+                Player.Object.HasStatus(false, AntiOmegaM, AntiOmegaM_Extreme))
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsOmegaImmune: PacketFilterM status found");
+                }
+                return true;
+            }
         }
 
         return false;
@@ -1191,43 +1262,46 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsLimitlessBlue(this IBattleChara battleChara)
     {
-        StatusID WillOfTheWater = StatusID.WillOfTheWater;
-        StatusID WillOfTheWind = StatusID.WillOfTheWind;
-        StatusID WhaleBack = StatusID.Whaleback;
-
-        bool Green = battleChara.NameId == 3654;
-        bool Blue = battleChara.NameId == 3655;
-        bool BismarkShell = battleChara.NameId == 3656;
-        bool BismarkCorona = battleChara.NameId == 3657;
-
-        if ((BismarkShell || BismarkCorona) &&
-                !Player.Object.HasStatus(false, WhaleBack))
+        if (DataCenter.TerritoryID == 436 || DataCenter.TerritoryID == 447)
         {
-            if (Service.Config.InDebug)
-            {
-                PluginLog.Information("IsLimitlessBlue: Bismark found, WhaleBack status not found");
-            }
-            return true;
-        }
+            StatusID WillOfTheWater = StatusID.WillOfTheWater;
+            StatusID WillOfTheWind = StatusID.WillOfTheWind;
+            StatusID WhaleBack = StatusID.Whaleback;
 
-        if (Blue &&
-            Player.Object.HasStatus(false, WillOfTheWater))
-        {
-            if (Service.Config.InDebug)
-            {
-                PluginLog.Information("IsLimitlessBlue: WillOfTheWater status found");
-            }
-            return true;
-        }
+            bool Green = battleChara.NameId == 3654;
+            bool Blue = battleChara.NameId == 3655;
+            bool BismarkShell = battleChara.NameId == 3656;
+            bool BismarkCorona = battleChara.NameId == 3657;
 
-        if (Green &&
-            Player.Object.HasStatus(false, WillOfTheWind))
-        {
-            if (Service.Config.InDebug)
+            if ((BismarkShell || BismarkCorona) &&
+                    !Player.Object.HasStatus(false, WhaleBack))
             {
-                PluginLog.Information("IsLimitlessBlue: WillOfTheWind status found");
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsLimitlessBlue: Bismark found, WhaleBack status not found");
+                }
+                return true;
             }
-            return true;
+
+            if (Blue &&
+                Player.Object.HasStatus(false, WillOfTheWater))
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsLimitlessBlue: WillOfTheWater status found");
+                }
+                return true;
+            }
+
+            if (Green &&
+                Player.Object.HasStatus(false, WillOfTheWind))
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsLimitlessBlue: WillOfTheWind status found");
+                }
+                return true;
+            }
         }
 
         return false;
@@ -1240,17 +1314,20 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsHanselorGretelShielded(this IBattleChara battleChara)
     {
-        EnemyPositional strongOfShieldPositional = EnemyPositional.Front;
-        StatusID strongOfShieldStatus = StatusID.StrongOfShield;
-
-        if (battleChara.HasStatus(false, strongOfShieldStatus) &&
-                strongOfShieldPositional != battleChara.FindEnemyPositional())
+        if (DataCenter.TerritoryID == 966)
         {
-            if (Service.Config.InDebug)
+            EnemyPositional strongOfShieldPositional = EnemyPositional.Front;
+            StatusID strongOfShieldStatus = StatusID.StrongOfShield;
+
+            if (battleChara.HasStatus(false, strongOfShieldStatus) &&
+                    strongOfShieldPositional != battleChara.FindEnemyPositional())
             {
-                PluginLog.Information("IsHanselorGretelShielded: StrongOfShield status found, ignoring status haver if player is out of position");
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsHanselorGretelShielded: StrongOfShield status found, ignoring status haver if player is out of position");
+                }
+                return true;
             }
-            return true;
         }
 
         return false;

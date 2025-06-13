@@ -441,6 +441,7 @@ public partial class DarkKnightRotation
         return (LivingDeadPvE.CanUse(out act)
             && Player.GetHealthRatio() <= Service.Config.HealthForDyingTanks) || base.EmergencyAbility(nextGCD, out act);
     }
+
     #region PvP Actions Unassignable
     /// <summary>
     /// 
@@ -462,6 +463,7 @@ public partial class DarkKnightRotation
     /// </summary>
     public static bool SaltAndDarknessPvPReady => Service.GetAdjustedActionId(ActionID.SaltedEarthPvP) == ActionID.SaltAndDarknessPvP;
     #endregion
+
     #region PvP Actions
     /// <summary>
     /// 
