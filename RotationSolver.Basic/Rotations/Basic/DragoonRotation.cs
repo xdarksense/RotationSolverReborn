@@ -50,6 +50,24 @@ public partial class DragoonRotation
     }
     #endregion
 
+    #region PvE Status Tracking
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasLanceCharge => Player.HasStatus(true, StatusID.LanceCharge);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasBattleLitany => Player.HasStatus(true, StatusID.BattleLitany);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasPowerSurge => Player.HasStatus(true, StatusID.PowerSurge_2720);
+
+    #endregion
+
     #region PvE Actions Unassignable
 
     /// <summary>
