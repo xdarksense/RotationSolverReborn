@@ -367,6 +367,7 @@ public partial class DutyRotation
     static partial void ModifyOccultQuickPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => TimeMageLevel >= 5;
+        setting.TargetType = TargetType.Self;
         setting.StatusProvide = [StatusID.OccultQuick, StatusID.OccultSwift];
     }
     #endregion

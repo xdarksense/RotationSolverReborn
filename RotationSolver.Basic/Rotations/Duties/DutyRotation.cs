@@ -175,6 +175,7 @@ public partial class DutyRotation : IDisposable
 
     public static bool IsRDM => DataCenter.Job == Job.RDM;
     public static bool IsPLD => DataCenter.Job == Job.PLD;
+    public static bool IsBLM => DataCenter.Job == Job.BLM;
 
     public static float PartyMembersAverHP => DataCenter.PartyMembersAverHP;
 

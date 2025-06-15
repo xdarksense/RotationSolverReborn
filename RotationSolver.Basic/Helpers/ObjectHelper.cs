@@ -2,24 +2,20 @@
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using ECommons;
-using ECommons.Automation.UIInput;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Logging;
 using ExCSS;
-using FFXIVClientStructs;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
-using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using System.Collections.Concurrent;
 using System.Text;
 using System.Text.RegularExpressions;
-using static FFXIVClientStructs.FFXIV.Client.UI.Agent.AgentTryon.Delegates;
 
 namespace RotationSolver.Basic.Helpers;
 
@@ -1017,8 +1013,8 @@ public static class ObjectHelper
             var VauntedVillain = battleChara.HasStatus(false, StatusID.VauntedVillain);
             var EpicVillain = battleChara.HasStatus(false, StatusID.EpicVillain);
 
-            var FatedHero = Player.Object.HasStatus(false, StatusID.VauntedHero);
-            var VauntedHero = Player.Object.HasStatus(false, StatusID.FatedHero);
+            var VauntedHero = Player.Object.HasStatus(false, StatusID.VauntedHero);
+            var FatedHero = Player.Object.HasStatus(false, StatusID.FatedHero);
             var EpicHero = Player.Object.HasStatus(false, StatusID.EpicHero);
 
             if (EpicVillain && (VauntedHero || FatedHero))

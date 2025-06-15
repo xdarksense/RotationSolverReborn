@@ -674,11 +674,11 @@ public sealed class PhantomDefault : PhantomRotation
 
         if (OccultCometPvE.CanUse(out act)) // Adding this to general swiftcast check is slightly more expensive for the many operations it will never be valid in
         {
-            if (!IsRDM && !IsPLD)
+            if (!IsRDM && !IsPLD && !IsBLM)
             {
                 return true;
             }
-            if ((IsRDM && HasSwift) || (IsPLD && Player.HasStatus(true, StatusID.Requiescat)))
+            if (((IsRDM || IsBLM) && HasSwift) || (IsPLD && Player.HasStatus(true, StatusID.Requiescat)))
             {
                 return true;
             }
