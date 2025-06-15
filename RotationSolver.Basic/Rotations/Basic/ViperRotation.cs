@@ -366,6 +366,80 @@ public partial class ViperRotation
     public static bool HasGrimSkin => Player.HasStatus(true, StatusID.GrimskinsVenom);
     #endregion
 
+    #region Actions Unassignable
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool SteelFangsPvEReady => Service.GetAdjustedActionId(ActionID.SteelFangsPvE) == ActionID.SteelFangsPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HuntersStingPvEReady => Service.GetAdjustedActionId(ActionID.SteelFangsPvE) == ActionID.HuntersStingPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool FlankstingStrikePvEReady => Service.GetAdjustedActionId(ActionID.SteelFangsPvE) == ActionID.FlankstingStrikePvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HindstingStrikePvEReady => Service.GetAdjustedActionId(ActionID.SteelFangsPvE) == ActionID.HindstingStrikePvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ReavingFangsPvEReady => Service.GetAdjustedActionId(ActionID.ReavingFangsPvE) == ActionID.ReavingFangsPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool SwiftskinsStingPvEReady => Service.GetAdjustedActionId(ActionID.ReavingFangsPvE) == ActionID.SwiftskinsStingPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool FlanksbaneFangPvEReady => Service.GetAdjustedActionId(ActionID.ReavingFangsPvE) == ActionID.FlanksbaneFangPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HindsbaneFangPvEReady => Service.GetAdjustedActionId(ActionID.ReavingFangsPvE) == ActionID.HindsbaneFangPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool SteelMawPvEReady => Service.GetAdjustedActionId(ActionID.SteelMawPvE) == ActionID.SteelMawPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HuntersBitePvEReady => Service.GetAdjustedActionId(ActionID.SteelMawPvE) == ActionID.HuntersBitePvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool JaggedMawPvEReady => Service.GetAdjustedActionId(ActionID.SteelMawPvE) == ActionID.JaggedMawPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ReavingMawPvEReady => Service.GetAdjustedActionId(ActionID.ReavingMawPvE) == ActionID.ReavingMawPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool SwiftskinsBitePvEReady => Service.GetAdjustedActionId(ActionID.ReavingMawPvE) == ActionID.SwiftskinsBitePvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool BloodiedMawPvEReady => Service.GetAdjustedActionId(ActionID.ReavingMawPvE) == ActionID.BloodiedMawPvE;
+
+    #endregion
+
     #region PvE Actions
 
     static partial void ModifyWrithingSnapPvE(ref ActionSetting setting)
@@ -380,12 +454,12 @@ public partial class ViperRotation
 
     static partial void ModifySteelFangsPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD;
+        setting.ActionCheck = () => NODREAD && SteelFangsPvEReady;
     }
 
     static partial void ModifyHuntersStingPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD;
+        setting.ActionCheck = () => NODREAD && HuntersStingPvEReady;
         setting.StatusProvide = [StatusID.HuntersInstinct];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -395,43 +469,43 @@ public partial class ViperRotation
 
     static partial void ModifyFlankstingStrikePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD;
+        setting.ActionCheck = () => NODREAD && FlankstingStrikePvEReady;
         setting.StatusProvide = [StatusID.HindstungVenom];
     }
 
     static partial void ModifyFlanksbaneFangPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD;
+        setting.ActionCheck = () => NODREAD && FlanksbaneFangPvEReady;
         setting.StatusProvide = [StatusID.HindsbaneVenom];
     }
 
     static partial void ModifyReavingFangsPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD;
+        setting.ActionCheck = () => NODREAD && ReavingFangsPvEReady;
         setting.StatusProvide = [StatusID.HonedSteel];
     }
 
     static partial void ModifySwiftskinsStingPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD;
+        setting.ActionCheck = () => NODREAD && SwiftskinsStingPvEReady;
         setting.StatusProvide = [StatusID.Swiftscaled];
     }
 
     static partial void ModifyHindstingStrikePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD;
+        setting.ActionCheck = () => NODREAD && HindstingStrikePvEReady;
         setting.StatusProvide = [StatusID.FlanksbaneVenom];
     }
 
     static partial void ModifyHindsbaneFangPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD;
+        setting.ActionCheck = () => NODREAD && HindsbaneFangPvEReady;
         setting.StatusProvide = [StatusID.FlankstungVenom];
     }
 
     static partial void ModifySteelMawPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD;
+        setting.ActionCheck = () => NODREAD && SteelMawPvEReady;
         setting.StatusProvide = [StatusID.HonedReavers];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -441,7 +515,7 @@ public partial class ViperRotation
 
     static partial void ModifyHuntersBitePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD;
+        setting.ActionCheck = () => NODREAD && HuntersBitePvEReady;
         setting.StatusProvide = [StatusID.HuntersInstinct];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -451,7 +525,7 @@ public partial class ViperRotation
 
     static partial void ModifyJaggedMawPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD;
+        setting.ActionCheck = () => NODREAD && JaggedMawPvEReady;
         setting.StatusProvide = [StatusID.GrimskinsVenom];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -461,7 +535,7 @@ public partial class ViperRotation
 
     static partial void ModifyReavingMawPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD;
+        setting.ActionCheck = () => NODREAD && ReavingMawPvEReady;
         setting.StatusProvide = [StatusID.HonedSteel];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -471,7 +545,7 @@ public partial class ViperRotation
 
     static partial void ModifySwiftskinsBitePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD;
+        setting.ActionCheck = () => NODREAD && SwiftskinsBitePvEReady;
         setting.StatusProvide = [StatusID.Swiftscaled];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -481,7 +555,7 @@ public partial class ViperRotation
 
     static partial void ModifyBloodiedMawPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => NODREAD;
+        setting.ActionCheck = () => NODREAD && BloodiedMawPvEReady;
         setting.StatusProvide = [StatusID.GrimhuntersVenom];
         setting.CreateConfig = () => new ActionConfig()
         {
