@@ -315,31 +315,31 @@ public sealed class VPR_Default : ViperRotation
             {
                 if (WillSwiftEnd)
                 {
-                    if (SwiftskinsDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
+                    if (SwiftskinsDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
                         return true;
                 }
 
                 if (WillHunterEnd)
                 {
-                    if (HuntersDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
+                    if (HuntersDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
                         return true;
                 }
 
                 switch (HunterOrSwiftEndsFirst)
                 {
                     case "Hunter":
-                        if (HuntersDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
+                        if (HuntersDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
                             return true;
                         break;
                     case "Swift":
-                        if (SwiftskinsDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
+                        if (SwiftskinsDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
                             return true;
                         break;
                     case "Equal":
                     case null:
-                        if (HuntersDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
+                        if (HuntersDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
                             return true;
-                        if (SwiftskinsDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
+                        if (SwiftskinsDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
                             return true;
                         break;
                 }
@@ -348,13 +348,13 @@ public sealed class VPR_Default : ViperRotation
             {
                 if (!IsSwift)
                 {
-                    if (SwiftskinsDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
+                    if (SwiftskinsDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
                         return true;
                 }
 
                 if (!IsHunter)
                 {
-                    if (HuntersDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
+                    if (HuntersDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
                         return true;
                 }
             }
@@ -362,12 +362,12 @@ public sealed class VPR_Default : ViperRotation
 
         if (!PitActive)
         {
-            if (SwiftskinsDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
+            if (SwiftskinsDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
             {
                 return true;
             }
 
-            if (HuntersDenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
+            if (HuntersDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
             {
                 return true;
             }
@@ -401,22 +401,22 @@ public sealed class VPR_Default : ViperRotation
             {
                 if (WillSwiftEnd)
                 {
-                    if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true))
+                    if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
                         return true;
                 }
 
                 if (WillHunterEnd)
                 {
-                    if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true))
+                    if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
                         return true;
                 }
 
-                if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true) && HuntersCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, HuntersCoilPvE.Target.Target))
+                if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true) && HuntersCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, HuntersCoilPvE.Target.Target))
                 {
                     return true;
                 }
 
-                if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true) && SwiftskinsCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, SwiftskinsCoilPvE.Target.Target))
+                if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true) && SwiftskinsCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, SwiftskinsCoilPvE.Target.Target))
                 {
                     return true;
                 }
@@ -424,18 +424,18 @@ public sealed class VPR_Default : ViperRotation
                 switch (HunterOrSwiftEndsFirst)
                 {
                     case "Hunter":
-                        if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true))
+                        if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
                             return true;
                         break;
                     case "Swift":
-                        if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true))
+                        if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
                             return true;
                         break;
                     case "Equal":
                     case null:
-                        if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true))
+                        if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
                             return true;
-                        if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true))
+                        if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
                             return true;
                         break;
                 }
@@ -445,12 +445,12 @@ public sealed class VPR_Default : ViperRotation
             {
                 if (!IsHunter && !IsSwift)
                 {
-                    if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true) && HuntersCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, HuntersCoilPvE.Target.Target))
+                    if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true) && HuntersCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, HuntersCoilPvE.Target.Target))
                     {
                         return true;
                     }
 
-                    if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true) && SwiftskinsCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, SwiftskinsCoilPvE.Target.Target))
+                    if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true) && SwiftskinsCoilPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, SwiftskinsCoilPvE.Target.Target))
                     {
                         return true;
                     }
@@ -458,13 +458,13 @@ public sealed class VPR_Default : ViperRotation
 
                 if (!IsSwift)
                 {
-                    if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
+                    if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
                         return true;
                 }
 
                 if (!IsHunter)
                 {
-                    if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
+                    if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
                         return true;
                 }
             }
@@ -472,12 +472,12 @@ public sealed class VPR_Default : ViperRotation
 
         if (!DreadActive)
         {
-            if (HuntersCoilPvE.CanUse(out act, skipComboCheck: true))
+            if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
             {
                 return true;
             }
 
-            if (SwiftskinsCoilPvE.CanUse(out act, skipComboCheck: true))
+            if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
             {
                 return true;
             }
@@ -524,18 +524,18 @@ public sealed class VPR_Default : ViperRotation
         switch (HunterOrSwiftEndsFirst)
         {
             case "Hunter":
-                if (HuntersBitePvE.CanUse(out act))
+                if (HuntersBitePvE.CanUse(out act, skipStatusProvideCheck: true))
                     return true;
                 break;
             case "Swift":
-                if (SwiftskinsBitePvE.CanUse(out act))
+                if (SwiftskinsBitePvE.CanUse(out act, skipStatusProvideCheck: true))
                     return true;
                 break;
             case "Equal":
             case null:
-                if (HuntersBitePvE.CanUse(out act))
+                if (HuntersBitePvE.CanUse(out act, skipStatusProvideCheck: true))
                     return true;
-                if (SwiftskinsBitePvE.CanUse(out act))
+                if (SwiftskinsBitePvE.CanUse(out act, skipStatusProvideCheck: true))
                     return true;
                 break;
         }
@@ -563,51 +563,120 @@ public sealed class VPR_Default : ViperRotation
         switch ((HasHindstung, HasHindsbane, HasFlankstung, HasFlanksbane))
         {
             case (true, _, _, _):
-                if (HindstingStrikePvE.CanUse(out act))
+                if (HindstingStrikePvE.CanUse(out act, skipStatusProvideCheck: true))
                     return true;
                 break;
             case (_, true, _, _):
-                if (HindsbaneFangPvE.CanUse(out act))
+                if (HindsbaneFangPvE.CanUse(out act, skipStatusProvideCheck: true))
                     return true;
                 break;
             case (_, _, true, _):
-                if (FlankstingStrikePvE.CanUse(out act))
+                if (FlankstingStrikePvE.CanUse(out act, skipStatusProvideCheck: true))
                     return true;
                 break;
             case (_, _, _, true):
-                if (FlanksbaneFangPvE.CanUse(out act))
+                if (FlanksbaneFangPvE.CanUse(out act, skipStatusProvideCheck: true))
                     return true;
                 break;
             case (false, false, false, false):
-                if (HindstingStrikePvE.CanUse(out act))
+                if (HindstingStrikePvE.CanUse(out act, skipStatusProvideCheck: true))
                     return true;
-                if (HindsbaneFangPvE.CanUse(out act))
+                if (HindsbaneFangPvE.CanUse(out act, skipStatusProvideCheck: true))
                     return true;
-                if (FlankstingStrikePvE.CanUse(out act))
+                if (FlankstingStrikePvE.CanUse(out act, skipStatusProvideCheck: true))
                     return true;
-                if (FlanksbaneFangPvE.CanUse(out act))
+                if (FlanksbaneFangPvE.CanUse(out act, skipStatusProvideCheck: true))
                     return true;
                 break;
         }
 
         // st 2
-        switch (HunterOrSwiftEndsFirst)
+        if (SwiftskinsStingPvE.EnoughLevel)
         {
-            case "Hunter":
-                if (HuntersStingPvE.CanUse(out act))
-                    return true;
-                break;
-            case "Swift":
-                if (SwiftskinsStingPvE.CanUse(out act))
-                    return true;
-                break;
-            case "Equal":
-            case null:
-                if (SwiftskinsStingPvE.CanUse(out act))
-                    return true;
-                if (HuntersStingPvE.CanUse(out act))
-                    return true;
-                break;
+            if (HasHunterAndSwift)
+            {
+                if (HasHind || HasFlank)
+                {
+                    if (HasHind)
+                    {
+                        if (SwiftskinsStingPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                            return true;
+                    }
+
+                    if (HasFlank)
+                    {
+                        if (HuntersStingPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                            return true;
+                    }
+                }
+
+                if (!HasHind && !HasFlank)
+                {
+                    switch (HunterOrSwiftEndsFirst)
+                    {
+                        case "Hunter":
+                            if (HuntersStingPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                                return true;
+                            break;
+                        case "Swift":
+                            if (SwiftskinsStingPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                                return true;
+                            break;
+                        case "Equal":
+                            if (SwiftskinsStingPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                                return true;
+                            break;
+                    }
+                }
+            }
+
+            if (!HasHunterAndSwift)
+            {
+                if (HasHind || HasFlank)
+                {
+                    if (HasHind)
+                    {
+                        if (SwiftskinsStingPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                            return true;
+                    }
+
+                    if (HasFlank)
+                    {
+                        if (HuntersStingPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                            return true;
+                    }
+                }
+
+                if (!HasHind && !HasFlank)
+                {
+                    if (!IsHunter && !IsSwift)
+                    {
+                        if (SwiftskinsStingPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                        {
+                            return true;
+                        }
+                    }
+
+                    if (!IsSwift)
+                    {
+                        if (SwiftskinsStingPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                        {
+                            return true;
+                        }
+                    }
+
+                    if (!IsHunter)
+                    {
+                        if (HuntersStingPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                            return true;
+                    }
+                }
+            }
+        }
+        if (!SwiftskinsStingPvE.EnoughLevel)
+        {
+            if (HuntersStingPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                return true;
         }
 
         // st 1
