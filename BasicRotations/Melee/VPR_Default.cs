@@ -391,6 +391,97 @@ public sealed class VPR_Default : ViperRotation
             }
         }
 
+        //AOE Serpent Combo
+        // aoe 3
+        switch ((HasGrimHunter, HasGrimSkin))
+        {
+            case (true, _):
+                if (JaggedMawPvE.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: true, skipComboCheck: true))
+                    return true;
+                break;
+            case (_, true):
+                if (BloodiedMawPvE.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: true, skipComboCheck: true))
+                    return true;
+                break;
+            case (false, false):
+                if (JaggedMawPvE.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: true, skipComboCheck: true))
+                    return true;
+                if (BloodiedMawPvE.CanUse(out act, skipAoeCheck: true, skipStatusProvideCheck: true, skipComboCheck: true))
+                    return true;
+                break;
+        }
+
+        // aoe 2
+        if (SwiftskinsBitePvE.EnoughLevel)
+        {
+            if (HasHunterAndSwift)
+            {
+                switch (HunterOrSwiftEndsFirst)
+                {
+                    case "Hunter":
+                        if (HuntersBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                            return true;
+                        break;
+                    case "Swift":
+                        if (SwiftskinsBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                            return true;
+                        break;
+                    case "Equal":
+                        if (SwiftskinsBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                            return true;
+                        break;
+                }
+            }
+
+            if (!HasHunterAndSwift)
+            {
+                if (!IsHunter && !IsSwift)
+                {
+                    if (SwiftskinsBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                    {
+                        return true;
+                    }
+                }
+
+                if (!IsSwift)
+                {
+                    if (SwiftskinsBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                    {
+                        return true;
+                    }
+                }
+
+                if (!IsHunter)
+                {
+                    if (HuntersBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                        return true;
+                }
+            }
+        }
+        if (!SwiftskinsBitePvE.EnoughLevel)
+        {
+            if (HuntersBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                return true;
+        }
+        // aoe 1
+        switch ((HasSteel, HasReavers))
+        {
+            case (true, _):
+                if (SteelMawPvE.CanUse(out act))
+                    return true;
+                break;
+            case (_, true):
+                if (ReavingMawPvE.CanUse(out act))
+                    return true;
+                break;
+            case (false, false):
+                if (ReavingMawPvE.CanUse(out act))
+                    return true;
+                if (SteelMawPvE.CanUse(out act))
+                    return true;
+                break;
+        }
+
         ////Single Target Dread Combo
         // Try using Coil thats buff provided will end soon
         // then try using Coil that you can hit positional on
@@ -499,63 +590,6 @@ public sealed class VPR_Default : ViperRotation
                     return true;
                 }
             }
-        }
-
-        //AOE Serpent Combo
-        // aoe 3
-        switch ((HasGrimHunter, HasGrimSkin))
-        {
-            case (true, _):
-                if (JaggedMawPvE.CanUse(out act, skipAoeCheck: true))
-                    return true;
-                break;
-            case (_, true):
-                if (BloodiedMawPvE.CanUse(out act, skipAoeCheck: true))
-                    return true;
-                break;
-            case (false, false):
-                if (JaggedMawPvE.CanUse(out act, skipAoeCheck: true))
-                    return true;
-                if (BloodiedMawPvE.CanUse(out act, skipAoeCheck: true))
-                    return true;
-                break;
-        }
-        // aoe 2
-        switch (HunterOrSwiftEndsFirst)
-        {
-            case "Hunter":
-                if (HuntersBitePvE.CanUse(out act, skipStatusProvideCheck: true))
-                    return true;
-                break;
-            case "Swift":
-                if (SwiftskinsBitePvE.CanUse(out act, skipStatusProvideCheck: true))
-                    return true;
-                break;
-            case "Equal":
-            case null:
-                if (HuntersBitePvE.CanUse(out act, skipStatusProvideCheck: true))
-                    return true;
-                if (SwiftskinsBitePvE.CanUse(out act, skipStatusProvideCheck: true))
-                    return true;
-                break;
-        }
-        // aoe 1
-        switch ((HasSteel, HasReavers))
-        {
-            case (true, _):
-                if (SteelMawPvE.CanUse(out act))
-                    return true;
-                break;
-            case (_, true):
-                if (ReavingMawPvE.CanUse(out act))
-                    return true;
-                break;
-            case (false, false):
-                if (ReavingMawPvE.CanUse(out act))
-                    return true;
-                if (SteelMawPvE.CanUse(out act))
-                    return true;
-                break;
         }
 
         //Single Target Serpent Combo
