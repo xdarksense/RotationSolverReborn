@@ -525,7 +525,7 @@ public sealed class MNK_Default : MonkRotation
         //if (Player.StatusStack(true, StatusID.PerfectBalance) == 3 && OpoOpoForm(out act)) return true;
 
         // Gain Solar Nadi through 3 different forms
-        if (HasPerfectBalance && !HasSolar)
+        if (HasPerfectBalance && !HasSolar && EnhancedPerfectBalanceTrait.EnoughLevel)
         {
             if (!BeastChakras.Contains(BeastChakra.Raptor) && RaptorForm(out act))
             {
@@ -544,7 +544,7 @@ public sealed class MNK_Default : MonkRotation
         }
 
         // Gain Lunar Nadi through 3 opopo form actions
-        if (HasPerfectBalance && HasSolar)
+        if (HasPerfectBalance && HasSolar && EnhancedPerfectBalanceTrait.EnoughLevel)
         {
             if (OpoOpoForm(out act))
             {
@@ -553,7 +553,7 @@ public sealed class MNK_Default : MonkRotation
         }
 
         // only allow free usage of forms if you dont have perfect balance/it was not the last ability used
-        if (!HasPerfectBalance && !IsLastAbility(true, PerfectBalancePvE))
+        if ((!HasPerfectBalance && !IsLastAbility(true, PerfectBalancePvE)) || !EnhancedPerfectBalanceTrait.EnoughLevel)
         {
             // whatever you have, press it from left to right
             if (CoerlForm(out act))
