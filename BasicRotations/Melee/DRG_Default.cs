@@ -9,9 +9,6 @@ public sealed class DRG_Default : DragoonRotation
     #region Config Options
     [RotationConfig(CombatType.PvE, Name = "Use Doom Spike for damage uptime if out of melee range even if it breaks combo")]
     public bool DoomSpikeWhenever { get; set; } = true;
-
-    [RotationConfig(CombatType.PvE, Name = "Attempt to assign Stardiver to the first ogcd slot (Experimental)")]
-    public bool OGCDTimers { get; set; } = false;
     #endregion
 
     private static bool InBurstStatus => Player.HasStatus(true, StatusID.BattleLitany);
@@ -179,7 +176,7 @@ public sealed class DRG_Default : DragoonRotation
             }
         }
 
-        if (GeirskogulPvE.Cooldown.IsCoolingDown)
+        if (GeirskogulPvE.Cooldown.IsCoolingDown || LOTDTime > 0)
         {
             if (HighJumpPvE.CanUse(out act))
             {
@@ -226,12 +223,32 @@ public sealed class DRG_Default : DragoonRotation
             return true;
         }
 
-        if (DoomSpikePvE.CanUse(out act, skipComboCheck: doomSpikeRightNow))
+        if (LanceMasteryTrait.EnoughLevel)
         {
-            return true;
+            if (HasDraconianFire)
+            {
+                if (DraconianFuryPvE.CanUse(out act, skipComboCheck: doomSpikeRightNow))
+                {
+                    return true;
+                }
+            }
+            if (!HasDraconianFire)
+            {
+                if (DoomSpikePvE.CanUse(out act, skipComboCheck: doomSpikeRightNow))
+                {
+                    return true;
+                }
+            }
+        }
+        if (!LanceMasteryTrait.EnoughLevel)
+        {
+            if (DoomSpikePvE.CanUse(out act, skipComboCheck: doomSpikeRightNow))
+            {
+                return true;
+            }
         }
 
-        if (DrakesbanePvE.CanUse(out act))
+        if (DrakesbanePvE.CanUse(out act, skipStatusProvideCheck: true))
         {
             return true;
         }
@@ -246,44 +263,89 @@ public sealed class DRG_Default : DragoonRotation
             return true;
         }
 
-        if (FullThrustPvE.CanUse(out act))
+        if (LanceMasteryIiTrait.EnoughLevel)
         {
-            return true;
+            if (HeavensThrustPvE.CanUse(out act))
+            {
+                return true;
+            }
+        }
+        if (!LanceMasteryIiTrait.EnoughLevel)
+        {
+            if (FullThrustPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
-        if (ChaosThrustPvE.CanUse(out act))
+        if (LanceMasteryIiTrait.EnoughLevel)
         {
-            return true;
+            if (ChaoticSpringPvE.CanUse(out act, skipStatusProvideCheck: true))
+            {
+                return true;
+            }
+        }
+        if (!LanceMasteryIiTrait.EnoughLevel)
+        {
+            if (ChaosThrustPvE.CanUse(out act, skipStatusProvideCheck: true))
+            {
+                return true;
+            }
         }
 
-        if (SpiralBlowPvE.CanUse(out act))
+        if (LanceMasteryIvTrait.EnoughLevel)
         {
-            return true;
+            if (SpiralBlowPvE.CanUse(out act))
+            {
+                return true;
+            }
+        }
+        if (!LanceMasteryIvTrait.EnoughLevel)
+        {
+            if (DisembowelPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
-        if (DisembowelPvE.CanUse(out act))
+        if (LanceMasteryIvTrait.EnoughLevel)
         {
-            return true;
+            if (LanceBarragePvE.CanUse(out act))
+            {
+                return true;
+            }
+        }
+        if (!LanceMasteryIvTrait.EnoughLevel)
+        {
+            if (VorpalThrustPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
-        if (LanceBarragePvE.CanUse(out act))
+        if (LanceMasteryTrait.EnoughLevel)
         {
-            return true;
+            if (HasDraconianFire)
+            {
+                if (RaidenThrustPvE.CanUse(out act))
+                {
+                    return true;
+                }
+            }
+            if (!HasDraconianFire)
+            {
+                if (TrueThrustPvE.CanUse(out act))
+                {
+                    return true;
+                }
+            }
         }
-
-        if (VorpalThrustPvE.CanUse(out act))
+        if (!LanceMasteryTrait.EnoughLevel)
         {
-            return true;
-        }
-
-        if (RaidenThrustPvE.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (TrueThrustPvE.CanUse(out act))
-        {
-            return true;
+            if (TrueThrustPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         if (!IsLastAction(true, WingedGlidePvE) && PiercingTalonPvE.CanUse(out act))

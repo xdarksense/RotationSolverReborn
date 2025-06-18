@@ -66,6 +66,11 @@ public partial class DragoonRotation
     /// </summary>
     public static bool HasPowerSurge => Player.HasStatus(true, StatusID.PowerSurge_2720);
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasDraconianFire => Player.HasStatus(true, StatusID.DraconianFire);
+
     #endregion
 
     #region PvE Actions Unassignable
@@ -139,7 +144,7 @@ public partial class DragoonRotation
         setting.StatusProvide = [StatusID.PowerSurge_2720];
         setting.CreateConfig = () => new ActionConfig()
         {
-            StatusGcdCount = 2,
+            StatusGcdCount = 6,
         };
     }
 
@@ -150,10 +155,6 @@ public partial class DragoonRotation
 
     static partial void ModifyLanceChargePvE(ref ActionSetting setting)
     {
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            TimeToKill = 10,
-        };
         setting.StatusProvide = [StatusID.LanceCharge];
         setting.UnlockedByQuestID = 65975;
         setting.IsFriendly = true;
@@ -193,7 +194,7 @@ public partial class DragoonRotation
         setting.TargetStatusProvide = [StatusID.ChaosThrust, StatusID.ChaoticSpring];
         setting.CreateConfig = () => new ActionConfig()
         {
-            StatusGcdCount = 3,
+            StatusGcdCount = 6,
         };
     }
 
@@ -255,13 +256,9 @@ public partial class DragoonRotation
 
     static partial void ModifyDrakesbanePvE(ref ActionSetting setting) //aka Kendrick Lamar
     {
-        setting.ActionCheck = () => DrakesbanePvEFangReady || DrakesbanePvEWheelingReady;
+        setting.ActionCheck = () => (DrakesbanePvEFangReady || DrakesbanePvEWheelingReady);
         setting.ComboIds = [ActionID.WheelingThrustPvE, ActionID.FangAndClawPvE];
         setting.StatusProvide = [StatusID.DraconianFire];
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            StatusGcdCount = 5,
-        };
     }
 
     static partial void ModifyMirageDivePvE(ref ActionSetting setting)
@@ -329,7 +326,7 @@ public partial class DragoonRotation
         setting.TargetStatusProvide = [StatusID.ChaoticSpring];
         setting.CreateConfig = () => new ActionConfig()
         {
-            StatusGcdCount = 3,
+            StatusGcdCount = 6,
         };
     }
 
@@ -363,7 +360,7 @@ public partial class DragoonRotation
         setting.StatusProvide = [StatusID.PowerSurge_2720];
         setting.CreateConfig = () => new ActionConfig()
         {
-            StatusGcdCount = 3,
+            StatusGcdCount = 6,
         };
     }
 
