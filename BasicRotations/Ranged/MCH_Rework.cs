@@ -13,6 +13,9 @@ public sealed class MCH_Rework : MachinistRotation
 
     [RotationConfig(CombatType.PvE, Name = "Use Bioblaster while moving")]
     private bool BioMove { get; set; } = true;
+
+    [RotationConfig(CombatType.PvE, Name = "Only use Wildfire on Boss targets")]
+    private bool WildfireBoss { get; set; } = false;
     #endregion
 
     #region Countdown logic
@@ -150,7 +153,11 @@ public sealed class MCH_Rework : MachinistRotation
                     && nextGCD.IsTheSameTo(false, FullMetalFieldPvE)
                     && WildfirePvE.CanUse(out act))
                 {
-                    return true;
+                    var IsTargetBoss = WildfirePvE.Target.Target?.IsBossFromIcon() ?? false;
+                    if ((IsTargetBoss && WildfireBoss) || !WildfireBoss)
+                    {
+                        return true;
+                    }
                 }
             }
         }
@@ -160,7 +167,11 @@ public sealed class MCH_Rework : MachinistRotation
             {
                 if (WeaponRemain < GCDTime(1) / 2 && WildfirePvE.CanUse(out act))
                 {
-                    return true;
+                    var IsTargetBoss = WildfirePvE.Target.Target?.IsBossFromIcon() ?? false;
+                    if ((IsTargetBoss && WildfireBoss) || !WildfireBoss)
+                    {
+                        return true;
+                    }
                 }
             }
         }
