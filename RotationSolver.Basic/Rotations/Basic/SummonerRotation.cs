@@ -137,6 +137,14 @@ public partial class SummonerRotation
     /// </summary>
     private static bool HasSummon => DataCenter.HasPet() && SummonTimeEndAfterGCD();
     #endregion
+    #region Status
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasSearingLight => Player.HasStatus(true, StatusID.SearingLight);
+
+    #endregion
 
     #region PvE Actions Unassignable Status
 
@@ -324,7 +332,7 @@ public partial class SummonerRotation
 
     static partial void ModifyFesterPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => HasAetherflowStacks;
+        setting.ActionCheck = () => SMNAetherflowStacks > 0;
     }
 
     static partial void ModifyEnergyDrainPvE(ref ActionSetting setting)
@@ -416,6 +424,10 @@ public partial class SummonerRotation
     static partial void ModifyRuinIvPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.FurtherRuin_2701];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifySearingLightPvE(ref ActionSetting setting)
@@ -461,7 +473,7 @@ public partial class SummonerRotation
 
     static partial void ModifyNecrotizePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => HasAetherflowStacks;
+        setting.ActionCheck = () => SMNAetherflowStacks > 0;
     }
 
     static partial void ModifySearingFlashPvE(ref ActionSetting setting)

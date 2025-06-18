@@ -43,6 +43,31 @@ public sealed class MCH_Rework : MachinistRotation
             UpdateFoundStepPair();
         }
 
+        if (HyperchargePvE.EnoughLevel)
+        {
+            if (!WildfirePvE.EnoughLevel)
+            {
+                if (HyperchargePvE.CanUse(out act, skipTTKCheck: true))
+                {
+                    return true;
+                }
+            }
+            if ((HasWildfire || (WildfirePvE.Cooldown.IsCoolingDown && Battery == 100)) && !FullMetalFieldPvE.EnoughLevel)
+            {
+                if (HyperchargePvE.CanUse(out act, skipTTKCheck: true))
+                {
+                    return true;
+                }
+            }
+            if (HasWildfire && FullMetalFieldPvE.EnoughLevel && IsLastAction(false, FullMetalFieldPvE))
+            {
+                if (HyperchargePvE.CanUse(out act, skipTTKCheck: true))
+                {
+                    return true;
+                }
+            }
+        }
+
         return base.EmergencyAbility(nextGCD, out act);
     }
 
@@ -95,31 +120,6 @@ public sealed class MCH_Rework : MachinistRotation
             if (ReassemblePvE.CanUse(out act, usedUp: true))
             {
                 return true;
-            }
-        }
-
-        if (HyperchargePvE.EnoughLevel)
-        {
-            if (!WildfirePvE.EnoughLevel)
-            {
-                if (HyperchargePvE.CanUse(out act, skipTTKCheck: true))
-                {
-                    return true;
-                }
-            }
-            if ((HasWildfire || (WildfirePvE.Cooldown.IsCoolingDown && Battery == 100)) && !FullMetalFieldPvE.EnoughLevel)
-            {
-                if (HyperchargePvE.CanUse(out act, skipTTKCheck: true))
-                {
-                    return true;
-                }
-            }
-            if (HasWildfire && FullMetalFieldPvE.EnoughLevel && IsLastAction(false, FullMetalFieldPvE))
-            {
-                if (HyperchargePvE.CanUse(out act, skipTTKCheck: true))
-                {
-                    return true;
-                }
             }
         }
 
@@ -243,6 +243,11 @@ public sealed class MCH_Rework : MachinistRotation
         if (HeatBlastPvE.CanUse(out act))
         {
             return true;
+        }
+
+        if (IsLastAction(false, HyperchargePvE))
+        {
+            return false;
         }
 
         // Drill AOE
