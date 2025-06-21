@@ -15,6 +15,9 @@ public sealed class PhantomDefault : PhantomRotation
     [RotationConfig(CombatType.PvE, Name = "Player HP percent needed to use Occult Resuscitation", PhantomJob = PhantomJob.Freelancer)]
     public float OccultResuscitationThreshold { get; set; } = 0.7f;
 
+    [RotationConfig(CombatType.PvE, Name = "Use Pray as a Heal", PhantomJob = PhantomJob.Knight)]
+    public bool PrayHeal { get; set; } = false;
+
     [RotationConfig(CombatType.PvE, Name = "Phantom Oracle - Use Invulnerability for Starfall", PhantomJob = PhantomJob.Oracle)]
     public bool SaveInvulnForStarfall { get; set; } = true;
 
@@ -486,6 +489,11 @@ public sealed class PhantomDefault : PhantomRotation
             {
                 return true;
             }
+        }
+
+        if (PrayPvE.CanUse(out act))
+        {
+            return true;
         }
 
         return base.HealSingleGCD(out act);

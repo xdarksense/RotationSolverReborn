@@ -133,9 +133,12 @@ public sealed class MCH_Reborn : MachinistRotation
             return true;
         }
 
-        if (BarrelStabilizerPvE.CanUse(out act))
+        if (IsBurst)
         {
-            return true;
+            if (BarrelStabilizerPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         if (UseQueen(out act, nextGCD))
@@ -145,32 +148,35 @@ public sealed class MCH_Reborn : MachinistRotation
 
         bool LowLevelHyperCheck = !AutoCrossbowPvE.EnoughLevel && SpreadShotPvE.CanUse(out _);
 
-        if (FullMetalFieldPvE.EnoughLevel)
+        if (IsBurst)
         {
-            if ((Heat >= 50 || HasHypercharged) && !LowLevelHyperCheck)
+            if (FullMetalFieldPvE.EnoughLevel)
             {
-                if (WeaponRemain < GCDTime(1) / 2 
-                    && nextGCD.IsTheSameTo(false, FullMetalFieldPvE)
-                    && WildfirePvE.CanUse(out act))
+                if ((Heat >= 50 || HasHypercharged) && !LowLevelHyperCheck)
                 {
-                    var IsTargetBoss = WildfirePvE.Target.Target?.IsBossFromIcon() ?? false;
-                    if ((IsTargetBoss && WildfireBoss) || !WildfireBoss)
+                    if (WeaponRemain < GCDTime(1) / 2
+                        && nextGCD.IsTheSameTo(false, FullMetalFieldPvE)
+                        && WildfirePvE.CanUse(out act))
                     {
-                        return true;
+                        var IsTargetBoss = WildfirePvE.Target.Target?.IsBossFromIcon() ?? false;
+                        if ((IsTargetBoss && WildfireBoss) || !WildfireBoss)
+                        {
+                            return true;
+                        }
                     }
                 }
             }
-        }
-        if (!FullMetalFieldPvE.EnoughLevel)
-        {
-            if ((Heat >= 50 || HasHypercharged) && ToolChargeSoon(out _) && !LowLevelHyperCheck)
+            if (!FullMetalFieldPvE.EnoughLevel)
             {
-                if (WeaponRemain < GCDTime(1) / 2 && WildfirePvE.CanUse(out act))
+                if ((Heat >= 50 || HasHypercharged) && ToolChargeSoon(out _) && !LowLevelHyperCheck)
                 {
-                    var IsTargetBoss = WildfirePvE.Target.Target?.IsBossFromIcon() ?? false;
-                    if ((IsTargetBoss && WildfireBoss) || !WildfireBoss)
+                    if (WeaponRemain < GCDTime(1) / 2 && WildfirePvE.CanUse(out act))
                     {
-                        return true;
+                        var IsTargetBoss = WildfirePvE.Target.Target?.IsBossFromIcon() ?? false;
+                        if ((IsTargetBoss && WildfireBoss) || !WildfireBoss)
+                        {
+                            return true;
+                        }
                     }
                 }
             }

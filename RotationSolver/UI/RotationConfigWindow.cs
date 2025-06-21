@@ -3799,6 +3799,7 @@ public partial class RotationConfigWindow : Window
         if (target is IBattleChara battleChara)
         {
             ImGui.Text($"NamePlate: {battleChara.GetNamePlateIcon()}");
+            ImGui.Text($"Is Status Capped: {StatusHelper.IsStatusCapped(battleChara)}");
             ImGui.Text($"CanSee: {battleChara.CanSee()}");
             ImGui.Text($"Name Id: {battleChara.NameId}");
             ImGui.Text($"Data Id: {battleChara.DataId}");
