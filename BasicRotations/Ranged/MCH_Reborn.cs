@@ -2,10 +2,10 @@
 
 namespace RebornRotations.Ranged;
 
-[Rotation("Rework", CombatType.PvE, GameVersion = "7.25")]
-[SourceCode(Path = "main/BasicRotations/Ranged/MCH_Rework.cs")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.25")]
+[SourceCode(Path = "main/BasicRotations/Ranged/MCH_Reborn.cs")]
 [Api(4)]
-public sealed class MCH_Rework : MachinistRotation
+public sealed class MCH_Reborn : MachinistRotation
 {
     #region Config Options
     [RotationConfig(CombatType.PvE, Name = "Use burst medicine in countdown (requires auto burst option on)")]

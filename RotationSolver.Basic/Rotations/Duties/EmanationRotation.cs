@@ -3,7 +3,7 @@
 /// <summary>
 /// The variant action.
 /// </summary>
-[DutyTerritory(263, 264)] // TODO: Verify the variant territory IDs.
+[DutyTerritory(263, 264)] // 263: Emanation, 264: Emanation Extreme
 public abstract class EmanationRotation : DutyRotation
 {
 }
@@ -17,7 +17,7 @@ public partial class DutyRotation
     static partial void ModifyVrilPvE(ref ActionSetting setting)
     {
         setting.StatusFromSelf = true;
-        setting.TargetStatusProvide = new[] { StatusID.Vril };
+        setting.TargetStatusProvide = [StatusID.Vril];
     }
 
     /// <summary>
@@ -27,6 +27,6 @@ public partial class DutyRotation
     static partial void ModifyVrilPvE_9345(ref ActionSetting setting)
     {
         setting.StatusFromSelf = true;
-        setting.TargetStatusProvide = new[] { StatusID.Vril };
+        setting.TargetStatusProvide = [StatusID.Vril];
     }
 }
