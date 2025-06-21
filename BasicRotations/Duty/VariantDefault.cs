@@ -23,12 +23,22 @@ internal class VariantDefault : VariantRotation
             return true;
         }
 
+        if (VariantSpiritDartPvE.CanUse(out act, skipAoeCheck: true))
+        {
+            return true;
+        }
+
         return base.AttackAbility(nextGCD, out act);
     }
 
     public override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
         if (VariantRampartPvE_33864.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (VariantRampartPvE.CanUse(out act))
         {
             return true;
         }
@@ -43,12 +53,22 @@ internal class VariantDefault : VariantRotation
             return true;
         }
 
+        if (VariantCurePvE.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.HealSingleGCD(out act);
     }
 
     public override bool RaiseGCD(out IAction? act)
     {
         if (VariantRaisePvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (VariantRaiseIiPvE.CanUse(out act))
         {
             return true;
         }
