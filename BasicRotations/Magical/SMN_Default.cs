@@ -365,7 +365,7 @@ public sealed class SMN_Default : SummonerRotation
             return true;
         }
 
-        if ((!IsMoving || AddCrimsonCycloneMoving) && (AddCrimsonCyclone || CrimsonCyclonePvE.Target.Target?.DistanceToPlayer() <= CrimsonCycloneDistance) && CrimsonCyclonePvE.CanUse(out act, skipAoeCheck: true))
+        if ((!IsMoving || AddCrimsonCycloneMoving) && CrimsonCyclonePvE.CanUse(out act, skipAoeCheck: true) && (AddCrimsonCyclone || CrimsonCyclonePvE.Target.Target?.DistanceToPlayer() <= CrimsonCycloneDistance))
         {
             return true;
         }

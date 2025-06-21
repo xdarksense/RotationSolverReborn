@@ -251,11 +251,6 @@ public struct ActionTargetInfo(IBaseAction action)
             return false;
         }
 
-        if (Service.Config.Statuscap && battleChara.IsEnemy() && StatusHelper.IsStatusCapped(battleChara))
-        {
-            return false;
-        }
-
         if (!action.Config.ShouldCheckTargetStatus && !action.Config.ShouldCheckStatus)
         {
             return true;
@@ -263,7 +258,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
         if (action.Setting.TargetStatusNeed != null && !skipTargetStatusNeedCheck)
         {
-            if (battleChara.WillStatusEndGCD(0, 0, action.Setting.StatusFromSelf, action.Setting.TargetStatusNeed))
+            if (battleChara.WillStatusEndGCD(action.Config.StatusGcdCount, 0, action.Setting.StatusFromSelf, action.Setting.TargetStatusNeed))
             {
                 return false;
             }
@@ -271,7 +266,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
         if (action.Setting.TargetStatusProvide != null && !skipStatusProvideCheck)
         {
-            if (!battleChara.WillStatusEndGCD(action.Config.StatusGcdCount, 0, action.Setting.StatusFromSelf, action.Setting.TargetStatusProvide))
+            if (!battleChara.WillStatusEndGCD(action.Config.StatusGcdCount, 0, action.Setting.StatusFromSelf, action.Setting.TargetStatusProvide) || (Service.Config.Statuscap && StatusHelper.IsStatusCapped(battleChara)))
             {
                 return false;
             }
