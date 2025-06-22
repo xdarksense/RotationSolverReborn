@@ -135,6 +135,7 @@ public partial class DutyRotation
     {
         setting.ActionCheck = () => KnightLevel >= 2;
         setting.StatusProvide = [StatusID.Pray];
+        setting.TargetType = TargetType.Self;
     }
 
     /// <summary>

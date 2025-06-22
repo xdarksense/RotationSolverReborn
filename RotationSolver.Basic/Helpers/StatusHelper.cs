@@ -1,7 +1,7 @@
-﻿using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Game.ClientState.Statuses;
+﻿using Dalamud.Game.ClientState.Statuses;
 using ECommons.Automation;
 using ECommons.GameHelpers;
+using ECommons.GameFunctions;
 using ECommons.Logging;
 using RotationSolver.Basic.Configuration;
 
@@ -200,7 +200,7 @@ public static class StatusHelper
     /// <returns>
     /// <c>true</c> if the character's status list is at the cap (30 for players, 60 for NPCs); otherwise, <c>false</c>.
     /// </returns>
-    public static bool IsStatusCapped(IBattleChara battleChara)
+    public unsafe static bool IsStatusCapped(IBattleChara battleChara)
     {
         if (battleChara == null)
             return false;
@@ -212,18 +212,23 @@ public static class StatusHelper
         }
         catch
         {
-            // StatusList threw, treat as false
             return false;
         }
 
-        //if (battleChara.IsParty() && battleChara.StatusList.Length == 30)
-        //{
-        //    return true;
-        //}
-
-        if (battleChara.IsEnemy() && battleChara.StatusList.Length == 60)
+        if (battleChara.IsValid())
         {
-            return true;
+            int count = 0;
+            foreach (var x in battleChara.StatusList)
+            {
+                if (x.StatusId != 0)
+                {
+                    count++;
+                }
+            }
+            if (count == battleChara.Struct()->StatusManager.NumValidStatuses)
+            {
+                return true;
+            }
         }
 
         return false;
