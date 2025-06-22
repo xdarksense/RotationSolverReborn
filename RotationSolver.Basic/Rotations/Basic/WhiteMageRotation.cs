@@ -72,28 +72,7 @@ public partial class WhiteMageRotation
     }
     #endregion
 
-    #region Actions Unassignable
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool ChaoticCyclonePvEReady => Service.GetAdjustedActionId(ActionID.DecimatePvE) == ActionID.ChaoticCyclonePvE;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool InnerChaosPvEeady => Service.GetAdjustedActionId(ActionID.FellCleavePvE) == ActionID.InnerChaosPvE;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool PrimalWrathPvEReady => Service.GetAdjustedActionId(ActionID.InnerReleasePvE) == ActionID.PrimalWrathPvE;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool PrimalRuinationPvEReady => Service.GetAdjustedActionId(ActionID.PrimalRendPvE) == ActionID.PrimalRuinationPvE;
-    #endregion
 
     #region Debug
     /// <inheritdoc/>
