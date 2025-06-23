@@ -53,12 +53,47 @@ public partial class ReaperRotation
     /// <summary>
     /// 
     /// </summary>
+    public static bool HasEnhancedGallows => Player.HasStatus(true, StatusID.EnhancedGallows);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasEnhancedGibbet => Player.HasStatus(true, StatusID.EnhancedGibbet);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasEnhancedVoidReaping => Player.HasStatus(true, StatusID.EnhancedVoidReaping);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasEnhancedCrossReaping => Player.HasStatus(true, StatusID.EnhancedCrossReaping);
+
+    /// <summary>
+    /// 
+    /// </summary>
     public static bool HasExecutioner => Player.HasStatus(true, StatusID.Executioner);
 
     /// <summary>
     /// 
     /// </summary>
     public static bool HasIdealHost => Player.HasStatus(true, StatusID.IdealHost);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasImmortalSacrifice => Player.HasStatus(true, StatusID.ImmortalSacrifice);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasBloodsownCircle => Player.HasStatus(true, StatusID.BloodsownCircle_2972);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasArcaneCircle => Player.HasStatus(true, StatusID.ArcaneCircle);
 
     /// <summary>
     /// 
@@ -523,32 +558,4 @@ public partial class ReaperRotation
         };
     }
     #endregion
-
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.HellsIngressPvE)]
-    protected sealed override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
-    {
-        return HellsIngressPvE.CanUse(out act) || base.MoveForwardAbility(nextGCD, out act);
-    }
-
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.FeintPvE)]
-    protected sealed override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
-    {
-        return (!HasSoulReaver && !HasEnshrouded && !HasExecutioner && FeintPvE.CanUse(out act)) || base.DefenseAreaAbility(nextGCD, out act);
-    }
-
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.ArcaneCrestPvE)]
-    protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
-    {
-        return (!HasSoulReaver && !HasEnshrouded && !HasExecutioner && ArcaneCrestPvE.CanUse(out act)) || base.DefenseSingleAbility(nextGCD, out act);
-    }
-
-    ///<inheritdoc/>
-    [RotationDesc(ActionID.HellsEgressPvE)]
-    protected override bool MoveBackAbility(IAction nextGCD, out IAction? act)
-    {
-        return HellsEgressPvE.CanUse(out act) || base.MoveBackAbility(nextGCD, out act);
-    }
 }
