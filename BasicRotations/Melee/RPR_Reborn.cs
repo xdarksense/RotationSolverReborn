@@ -156,11 +156,17 @@ public sealed class RPR_Reborn : ReaperRotation
 
                 switch ((HasEnhancedGallows, HasEnhancedGibbet))
                 {
-                    case (true, _):
+                    case (true, true):
+                        if (ExecutionersGallowsPvE.CanUse(out act, skipComboCheck: true) && ExecutionersGallowsPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, ExecutionersGallowsPvE.Target.Target))
+                            return true;
+                        if (ExecutionersGibbetPvE.CanUse(out act, skipComboCheck: true) && ExecutionersGibbetPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, ExecutionersGibbetPvE.Target.Target))
+                            return true;
+                        break;
+                    case (true, false):
                         if (ExecutionersGallowsPvE.CanUse(out act, skipComboCheck: true))
                             return true;
                         break;
-                    case (_, true):
+                    case (false, true):
                         if (ExecutionersGibbetPvE.CanUse(out act, skipComboCheck: true))
                             return true;
                         break;
@@ -305,12 +311,18 @@ public sealed class RPR_Reborn : ReaperRotation
 
             switch ((HasEnhancedGallows, HasEnhancedGibbet))
             {
+                case (true, true):
+                    if (GallowsPvE.CanUse(out act, skipComboCheck: true) && GallowsPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, GallowsPvE.Target.Target))
+                        return true;
+                    if (GibbetPvE.CanUse(out act, skipComboCheck: true) && GibbetPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, GibbetPvE.Target.Target))
+                        return true;
+                    break;
                 case (true, _):
-                    if (GallowsPvE.CanUse(out act))
+                    if (GallowsPvE.CanUse(out act, skipComboCheck: true))
                         return true;
                     break;
                 case (_, true):
-                    if (GibbetPvE.CanUse(out act))
+                    if (GibbetPvE.CanUse(out act, skipComboCheck: true))
                         return true;
                     break;
                 case (false, false):

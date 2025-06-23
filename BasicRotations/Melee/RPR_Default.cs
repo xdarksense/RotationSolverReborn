@@ -35,6 +35,46 @@ public sealed class RPR_Default : ReaperRotation
     #endregion
 
     #region oGCD Logic
+    [RotationDesc(ActionID.HellsIngressPvE)]
+    protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
+    {
+        if (HellsIngressPvE.CanUse(out act))
+        {
+            return true;
+        }
+        return base.MoveForwardAbility(nextGCD, out act);
+    }
+
+    [RotationDesc(ActionID.HellsEgressPvE)]
+    protected override bool MoveBackAbility(IAction nextGCD, out IAction? act)
+    {
+        if (HellsEgressPvE.CanUse(out act))
+        {
+            return true;
+        }
+        return base.MoveBackAbility(nextGCD, out act);
+    }
+
+    [RotationDesc(ActionID.FeintPvE)]
+    protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
+    {
+        if (!HasSoulReaver && !HasEnshrouded && !HasExecutioner && FeintPvE.CanUse(out act))
+        {
+            return true;
+        }
+        return base.DefenseAreaAbility(nextGCD, out act);
+    }
+
+    [RotationDesc(ActionID.ArcaneCrestPvE)]
+    protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
+    {
+        if (!HasSoulReaver && !HasEnshrouded && !HasExecutioner && ArcaneCrestPvE.CanUse(out act))
+        {
+            return true;
+        }
+        return base.DefenseSingleAbility(nextGCD, out act);
+    }
+
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
         bool IsTargetBoss = CurrentTarget?.IsBossFromTTK() ?? false;
