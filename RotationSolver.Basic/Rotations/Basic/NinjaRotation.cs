@@ -457,8 +457,8 @@ public partial class NinjaRotation
         HutonPvE.Setting.Ninjutsu = [ChiPvE, JinPvE_18807, TenPvE_18805];
         DotonPvE.Setting.Ninjutsu = [TenPvE, JinPvE_18807, ChiPvE_18806];
         SuitonPvE.Setting.Ninjutsu = [TenPvE, ChiPvE_18806, JinPvE_18807];
-        GokaMekkyakuPvE.Setting.Ninjutsu = [ChiPvE, TenPvE_18805];
-        HyoshoRanryuPvE.Setting.Ninjutsu = [ChiPvE, JinPvE_18807];
+        GokaMekkyakuPvE.Setting.Ninjutsu = [ChiPvE_18806, TenPvE_18805];
+        HyoshoRanryuPvE.Setting.Ninjutsu = [ChiPvE_18806, JinPvE_18807];
     }
 
     static partial void ModifyFumaShurikenPvE(ref ActionSetting setting)
@@ -506,6 +506,7 @@ public partial class NinjaRotation
         setting.ActionCheck = () => DotonPvEReady;
         setting.StatusProvide = [StatusID.Doton];
         setting.UnlockedByQuestID = 68488;
+        setting.TargetType = TargetType.Self;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -524,7 +525,7 @@ public partial class NinjaRotation
         setting.ActionCheck = () => HasKassatsu;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 3,
+            AoeCount = 1,
         };
     }
 
