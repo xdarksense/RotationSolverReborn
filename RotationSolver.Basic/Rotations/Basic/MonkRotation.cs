@@ -240,13 +240,14 @@ public partial class MonkRotation
 
     static partial void ModifyTrueStrikePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InRaptorForm || HasFormlessFist || HasPerfectBalance;
+        setting.ActionCheck = () => (InRaptorForm || HasFormlessFist || HasPerfectBalance) && RaptorFury > 0;
         setting.StatusProvide = [StatusID.CoeurlForm];
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifySnapPunchPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InCoeurlForm || HasFormlessFist || HasPerfectBalance;
+        setting.ActionCheck = () => (InCoeurlForm || HasFormlessFist || HasPerfectBalance) && CoeurlFury > 0;
         setting.StatusProvide = [StatusID.OpoopoForm];
     }
 
@@ -264,8 +265,9 @@ public partial class MonkRotation
 
     static partial void ModifyTwinSnakesPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InRaptorForm || HasFormlessFist || HasPerfectBalance;
+        setting.ActionCheck = () => (InRaptorForm || HasFormlessFist || HasPerfectBalance) && RaptorFury == 0;
         setting.StatusProvide = [StatusID.CoeurlForm];
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyArmOfTheDestroyerPvE(ref ActionSetting setting)
@@ -279,7 +281,7 @@ public partial class MonkRotation
 
     static partial void ModifyDemolishPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InCoeurlForm || HasFormlessFist || HasPerfectBalance;
+        setting.ActionCheck = () => (InCoeurlForm || HasFormlessFist || HasPerfectBalance) && CoeurlFury == 0;
         setting.StatusProvide = [StatusID.OpoopoForm];
     }
 
@@ -341,6 +343,7 @@ public partial class MonkRotation
     static partial void ModifyDragonKickPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.RaptorForm];
+        setting.ActionCheck = () => OpoOpoFury == 0;
     }
 
     static partial void ModifyPerfectBalancePvE(ref ActionSetting setting)
@@ -515,18 +518,19 @@ public partial class MonkRotation
     static partial void ModifyLeapingOpoPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.RaptorForm];
+        setting.ActionCheck = () => (InOpoopoForm || HasFormlessFist || HasPerfectBalance) && OpoOpoFury > 0;
     }
 
     static partial void ModifyRisingRaptorPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.CoeurlForm];
-        setting.ActionCheck = () => InRaptorForm || HasFormlessFist || HasPerfectBalance;
+        setting.ActionCheck = () => (InRaptorForm || HasFormlessFist || HasPerfectBalance) && RaptorFury > 0;
     }
 
     static partial void ModifyPouncingCoeurlPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.OpoopoForm];
-        setting.ActionCheck = () => InCoeurlForm || HasFormlessFist || HasPerfectBalance;
+        setting.ActionCheck = () => (InCoeurlForm || HasFormlessFist || HasPerfectBalance) && CoeurlFury > 0;
     }
 
     static partial void ModifyElixirBurstPvE(ref ActionSetting setting)

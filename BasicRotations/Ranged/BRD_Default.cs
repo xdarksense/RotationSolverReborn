@@ -273,21 +273,16 @@ public sealed class BRD_Default : BardRotation
             }
         }
 
-        if (SidewinderPvE.CanUse(out act))
+        if (SidewinderPvE.EnoughLevel)
         {
-            if (HasBattleVoice && ((HasRadiantFinale && RagingStrikesPvE.Cooldown.IsCoolingDown) || !RadiantFinalePvE.EnoughLevel))
+            if ((BattleVoicePvE.Cooldown.IsCoolingDown && !BattleVoicePvE.Cooldown.WillHaveOneCharge(10))
+            && (!RadiantFinalePvE.EnoughLevel || (RadiantFinalePvE.EnoughLevel && RadiantFinalePvE.Cooldown.IsCoolingDown && !RadiantFinalePvE.Cooldown.WillHaveOneCharge(10)))
+            && RagingStrikesPvE.Cooldown.IsCoolingDown)
             {
-                return true;
-            }
-
-            if (!BattleVoicePvE.Cooldown.WillHaveOneCharge(10) && !RadiantFinalePvE.Cooldown.WillHaveOneCharge(10) && RagingStrikesPvE.Cooldown.IsCoolingDown)
-            {
-                return true;
-            }
-
-            if (RagingStrikesPvE.Cooldown.IsCoolingDown && HasRagingStrikes)
-            {
-                return true;
+                if (SidewinderPvE.CanUse(out act))
+                {
+                    return true;
+                }
             }
         }
 
