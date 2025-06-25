@@ -1,3 +1,4 @@
+using Dalamud.Interface.Colors;
 using System.ComponentModel;
 
 namespace RebornRotations.Melee;
@@ -44,6 +45,15 @@ public sealed class MNK_Default : MonkRotation
 
     [RotationConfig(CombatType.PvE, Name = "Use Riddle of Fire after this ability")]
     public RiddleOfFireFirst ROFFirst { get; set; } = RiddleOfFireFirst.Brotherhood;
+    #endregion
+
+    #region Tracking Properties
+    public override void DisplayStatus()
+    {
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "Rotation Tracking:");
+        ImGui.TextColored(ImGuiColors.DalamudYellow, "Base Tracking:");
+        base.DisplayStatus();
+    }
     #endregion
 
     #region Countdown Logic
@@ -311,28 +321,25 @@ public sealed class MNK_Default : MonkRotation
     // 'More opos in the fight is better than... in lunar PBs'
     private bool OpoOpoForm(out IAction? act)
     {
-        if (ArmOfTheDestroyerPvE.CanUse(out act))
+        if (ArmOfTheDestroyerPvE.CanUse(out act, skipComboCheck: true))
         {
             return true; // Arm Of The Destoryer - aoe
         }
 
-        if (LeapingOpoPvE.EnoughLevel && OpoOpoFury >= 1)
+        if (LeapingOpoPvE.EnoughLevel)
         {
-            if (LeapingOpoPvE.EnoughLevel && LeapingOpoPvE.CanUse(out act))
+            if (LeapingOpoPvE.CanUse(out act, skipComboCheck: true))
             {
                 return true; // Leaping Opo
             }
         }
 
-        if (OpoOpoFury == 0)
+        if (DragonKickPvE.CanUse(out act, skipComboCheck: true))
         {
-            if (DragonKickPvE.CanUse(out act))
-            {
-                return true; // Dragon Kick
-            }
+            return true; // Dragon Kick
         }
 
-        if (!LeapingOpoPvE.EnoughLevel && BootshinePvE.CanUse(out act))
+        if (BootshinePvE.CanUse(out act, skipComboCheck: true))
         {
             return true; //Bootshine - low level
         }
@@ -342,28 +349,25 @@ public sealed class MNK_Default : MonkRotation
 
     private bool RaptorForm(out IAction? act)
     {
-        if (FourpointFuryPvE.CanUse(out act))
+        if (FourpointFuryPvE.CanUse(out act, skipComboCheck: true))
         {
             return true; //Fourpoint Fury - aoe
         }
 
-        if (RisingRaptorPvE.EnoughLevel && RaptorFury >= 1)
+        if (RisingRaptorPvE.EnoughLevel)
         {
-            if (RisingRaptorPvE.CanUse(out act))
+            if (RisingRaptorPvE.CanUse(out act, skipComboCheck: true))
             {
                 return true; //Rising Raptor
             }
         }
 
-        if (RaptorFury == 0)
+        if (TwinSnakesPvE.CanUse(out act, skipComboCheck: true))
         {
-            if (TwinSnakesPvE.CanUse(out act))
-            {
-                return true; //Twin Snakes
-            }
+            return true; //Twin Snakes
         }
 
-        if (!RisingRaptorPvE.EnoughLevel && TrueStrikePvE.CanUse(out act))
+        if (TrueStrikePvE.CanUse(out act, skipComboCheck: true))
         {
             return true; //True Strike - low level
         }
@@ -373,28 +377,25 @@ public sealed class MNK_Default : MonkRotation
 
     private bool CoerlForm(out IAction? act)
     {
-        if (RockbreakerPvE.CanUse(out act))
+        if (RockbreakerPvE.CanUse(out act, skipComboCheck: true))
         {
             return true; // Rockbreaker - aoe
         }
 
-        if (PouncingCoeurlPvE.EnoughLevel && CoeurlFury >= 1)
+        if (PouncingCoeurlPvE.EnoughLevel)
         {
-            if (PouncingCoeurlPvE.EnoughLevel && PouncingCoeurlPvE.CanUse(out act))
+            if (PouncingCoeurlPvE.CanUse(out act, skipComboCheck: true))
             {
                 return true; // Pouncing Coeurl
             }
         }
 
-        if (CoeurlFury == 0)
+        if (DemolishPvE.CanUse(out act, skipComboCheck: true))
         {
-            if (DemolishPvE.CanUse(out act))
-            {
-                return true; // Demolish
-            }
+            return true; // Demolish
         }
 
-        if (!PouncingCoeurlPvE.EnoughLevel && SnapPunchPvE.CanUse(out act))
+        if (SnapPunchPvE.CanUse(out act, skipComboCheck: true))
         {
             return true; // Snap Punch - low level
         }
@@ -553,7 +554,7 @@ public sealed class MNK_Default : MonkRotation
         }
 
         // only allow free usage of forms if you dont have perfect balance/it was not the last ability used
-        if ((!HasPerfectBalance && !IsLastAbility(true, PerfectBalancePvE)) || !EnhancedPerfectBalanceTrait.EnoughLevel)
+        if ((!HasPerfectBalance && !IsLastAction(true, PerfectBalancePvE) && EnhancedPerfectBalanceTrait.EnoughLevel) || !EnhancedPerfectBalanceTrait.EnoughLevel)
         {
             // whatever you have, press it from left to right
             if (CoerlForm(out act))
@@ -573,16 +574,30 @@ public sealed class MNK_Default : MonkRotation
         }
 
         // out of range or nothing to do, recharge chakra first
-        if (Chakra < 5 && (EnlightenedMeditationPvE.CanUse(out act) || ForbiddenMeditationPvE.CanUse(out act)))
+        if (!HasHostilesInRange)
         {
-            return true;
+            if (!EnlightenedMeditationPvE.EnoughLevel)
+            {
+                if (ForbiddenMeditationPvE.CanUse(out act))
+                {
+                    return true;
+                }
+            }
+
+            if (EnlightenedMeditationPvE.EnoughLevel)
+            {
+                if (EnlightenedMeditationPvE.CanUse(out act))
+                {
+                    return true;
+                }
+            }
         }
 
-        // out of range or nothing to do, refresh buff second, but dont keep refreshing or it draws too much attention
-        if (AutoFormShift && !HasPerfectBalance && !HasFormlessFist && FormShiftPvE.CanUse(out act))
-        {
-            return true; // Form Shift GCD use
-        }
+        //// out of range or nothing to do, refresh buff second, but dont keep refreshing or it draws too much attention
+        //if (AutoFormShift && !HasPerfectBalance && !HasFormlessFist && FormShiftPvE.CanUse(out act))
+        //{
+        //    return true; // Form Shift GCD use
+        //}
 
         return base.GeneralGCD(out act);
     }
