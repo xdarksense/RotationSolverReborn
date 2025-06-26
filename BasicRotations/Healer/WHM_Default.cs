@@ -402,33 +402,34 @@ public sealed class WHM_Default : WhiteMageRotation
     #endregion
 
     #region Extra Methods
-
     public override bool CanHealSingleSpell
     {
         get
         {
-            int healerCount = 0;
+            int aliveHealerCount = 0;
             IEnumerable<IBattleChara> healers = PartyMembers.GetJobCategory(JobRole.Healer);
             foreach (IBattleChara h in healers)
             {
-                healerCount++;
+                if (!h.IsDead)
+                    aliveHealerCount++;
             }
 
-            return base.CanHealSingleSpell && (GCDHeal || healerCount < 2);
+            return base.CanHealSingleSpell && (GCDHeal || aliveHealerCount == 1);
         }
     }
     public override bool CanHealAreaSpell
     {
         get
         {
-            int healerCount = 0;
+            int aliveHealerCount = 0;
             IEnumerable<IBattleChara> healers = PartyMembers.GetJobCategory(JobRole.Healer);
             foreach (IBattleChara h in healers)
             {
-                healerCount++;
+                if (!h.IsDead)
+                    aliveHealerCount++;
             }
 
-            return base.CanHealAreaSpell && (GCDHeal || healerCount < 2);
+            return base.CanHealAreaSpell && (GCDHeal || aliveHealerCount == 1);
         }
     }
 

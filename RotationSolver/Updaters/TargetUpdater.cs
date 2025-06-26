@@ -11,7 +11,8 @@ internal static partial class TargetUpdater
 {
     private static readonly ObjectListDelay<IBattleChara>
         _raisePartyTargets = new(() => Service.Config.RaiseDelay),
-        _raiseAllTargets = new(() => Service.Config.RaiseDelay);
+        _raiseAllTargets = new(() => Service.Config.RaiseDelay),
+        _dispelPartyTargets = new(() => Service.Config.EsunaDelay);
 
     private static DateTime _lastUpdateTimeToKill = DateTime.MinValue;
     private static readonly TimeSpan TimeToKillUpdateInterval = TimeSpan.FromSeconds(1);
@@ -197,6 +198,18 @@ internal static partial class TargetUpdater
                     }
                 }
 
+                // Apply raise delay
+                if (raisetype == RaiseType.PartyOnly)
+                {
+                    _raisePartyTargets.Delay(validRaiseTargets);
+                    validRaiseTargets = [.. _raisePartyTargets];
+                }
+                else
+                {
+                    _raiseAllTargets.Delay(validRaiseTargets);
+                    validRaiseTargets = [.. _raiseAllTargets];
+                }
+
                 // Only use the current RaiseType
                 return GetPriorityDeathTarget(validRaiseTargets, raisetype);
             }
@@ -267,15 +280,18 @@ internal static partial class TargetUpdater
 
     private static IBattleChara? GetDispelTarget()
     {
-        if (Player.Job is Job.WHM or Job.SCH or Job.AST or Job.SGE or
-            Job.BRD)
+        if (Player.Job is Job.WHM or Job.SCH or Job.AST or Job.SGE or Job.BRD)
         {
             List<IBattleChara> weakenPeople = [];
             List<IBattleChara> dyingPeople = [];
 
             AddDispelTargets(DataCenter.PartyMembers, weakenPeople);
 
-            foreach (IBattleChara person in weakenPeople)
+            // Apply dispel delay
+            _dispelPartyTargets.Delay(weakenPeople);
+            var delayedWeakenPeople = _dispelPartyTargets.ToList();
+
+            foreach (IBattleChara person in delayedWeakenPeople)
             {
                 bool hasDangerous = false;
                 if (person.StatusList != null)
@@ -296,7 +312,7 @@ internal static partial class TargetUpdater
                 }
             }
 
-            return GetClosestTarget(dyingPeople) ?? GetClosestTarget(weakenPeople);
+            return GetClosestTarget(dyingPeople) ?? GetClosestTarget(delayedWeakenPeople);
         }
         return null;
     }
