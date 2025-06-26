@@ -15,7 +15,7 @@
         {
             if (type == null)
             {
-                return Array.Empty<PropertyInfo>();
+                return [];
             }
 
             PropertyInfo[] allProperties = type.GetProperties(BindingFlags.Static | BindingFlags.Public);
@@ -29,7 +29,7 @@
                 }
             }
 
-            PropertyInfo[] baseProperties = type.BaseType?.GetStaticProperties<T>() ?? Array.Empty<PropertyInfo>();
+            PropertyInfo[] baseProperties = type.BaseType?.GetStaticProperties<T>() ?? [];
 
             // Combine filteredProperties and baseProperties
             PropertyInfo[] result = new PropertyInfo[filteredProperties.Count + baseProperties.Length];
@@ -51,7 +51,7 @@
         {
             if (type == null)
             {
-                return Array.Empty<MethodInfo>();
+                return [];
             }
 
             MethodInfo[] allMethods = type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
@@ -64,7 +64,7 @@
                 }
             }
 
-            IEnumerable<MethodInfo> baseMethods = type.BaseType?.GetAllMethodInfo() ?? Array.Empty<MethodInfo>();
+            IEnumerable<MethodInfo> baseMethods = type.BaseType?.GetAllMethodInfo() ?? [];
 
             // Combine filteredMethods and baseMethods
             MethodInfo[] result = new MethodInfo[filteredMethods.Count + baseMethods.Count()];
@@ -85,10 +85,7 @@
         /// <returns>The property information if found, otherwise null.</returns>
         internal static PropertyInfo? GetPropertyInfo(this Type type, string name)
         {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
+            ArgumentNullException.ThrowIfNull(type);
 
             if (string.IsNullOrEmpty(name))
             {

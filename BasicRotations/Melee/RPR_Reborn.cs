@@ -6,10 +6,10 @@
 public sealed class RPR_Reborn : ReaperRotation
 {
     #region Config Options
-    [RotationConfig(CombatType.PvE, Name = "[Beta Option] Pool Shroud for Arcane Circle.")]
+    [RotationConfig(CombatType.PvE, Name = "Pool Shroud for Arcane Circle.")]
     public bool EnshroudPooling { get; set; } = false;
 
-    [RotationConfig(CombatType.PvE, Name = "Use custom timing to refresh Death's Design")]
+    [RotationConfig(CombatType.PvE, Name = "Use custom timing (below) to refresh Death's Design")]
     public bool UseCustomDDTiming { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Refresh Death's Design with this many seconds remaining")]

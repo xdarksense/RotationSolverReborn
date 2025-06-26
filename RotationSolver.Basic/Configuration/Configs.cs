@@ -57,7 +57,7 @@ internal partial class Configs : IPluginConfiguration
     Filter = AutoActionUsage, Section = 3)]
     private static readonly bool _statuscap2 = true;
 
-    [ConditionBool, UI("Don't attack new mobs by AoE. (Dangerous)", Description = "Never use any AoE action when this may attack mobs that are not hostile targets.",
+    [ConditionBool, UI("Don't attack new mobs by AoE.", Description = "Never use any AoE action when this may attack mobs that are not hostile targets.",
         Filter = AutoActionUsage, Section = 3)]
     private static readonly bool _noNewHostiles = false;
 
@@ -541,7 +541,13 @@ internal partial class Configs : IPluginConfiguration
         Filter = HealingActionCondition, Section = 2,
         PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
     [Range(0, 10, ConfigUnitType.Seconds, 0.002f)]
-    public Vector2 RaiseDelay { get; set; } = new(.25f, .75f);
+    public Vector2 RaiseDelay { get; set; } = new(0f, 0f);
+
+    [UI("Random delay range for dispelling statuses.",
+        Filter = HealingActionCondition, Section = 2,
+        PvEFilter = JobFilterType.Dispel, PvPFilter = JobFilterType.NoJob)]
+    [Range(0, 10, ConfigUnitType.Seconds, 0.002f)]
+    public Vector2 EsunaDelay { get; set; } = new(0f, 0f);
 
     [Range(0, 10000, ConfigUnitType.None, 200)]
     [UI("Never raise player if MP is less than this",
