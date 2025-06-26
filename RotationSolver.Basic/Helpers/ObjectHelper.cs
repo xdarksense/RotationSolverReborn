@@ -353,7 +353,7 @@ public static class ObjectHelper
     internal static unsafe bool IsAllianceMember(this ICharacter obj)
     {
         return obj.GameObjectId is not 0
-            && !DataCenter.IsPvP && DataCenter.IsInAllianceRaid && obj is IPlayerCharacter
+            && !DataCenter.IsPvP && (DataCenter.IsInAllianceRaid || DataCenter.IsInBozjanFieldOpCE || DataCenter.IsInOccultCrescentOp) && obj is IPlayerCharacter
             && (ActionManager.CanUseActionOnTarget((uint)ActionID.RaisePvE, (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)obj.Struct())
             || ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)obj.Struct()));
     }
