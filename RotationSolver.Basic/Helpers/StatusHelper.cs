@@ -175,15 +175,6 @@ public static class StatusHelper
     ];
 
     /// <summary>
-    /// Statuses that indicate that a player cannot be raised.
-    /// </summary>
-    public static StatusID[] CanNotRaise { get; } =
-    [
-        StatusID.ResurrectionRestricted,
-        StatusID.ResurrectionDenied
-    ];
-
-    /// <summary>
     /// Statuses that can be dispelled by Occult Dispel.
     /// </summary>
     public static StatusID[] PhantomDispellable { get; } =

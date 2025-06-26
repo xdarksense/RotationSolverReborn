@@ -164,10 +164,7 @@ internal static partial class TargetUpdater
                 {
                     foreach (var target in DataCenter.PartyMembers.GetDeath())
                     {
-                        if (!target.IsTargetMoving())
-                        {
-                            deathParty.Add(target);
-                        }
+                        deathParty.Add(target);
                     }
                 }
 
@@ -179,7 +176,7 @@ internal static partial class TargetUpdater
                     {
                         foreach (var member in DataCenter.AllianceMembers)
                         {
-                            if (!member.IsTargetMoving())
+                            if (!deathParty.Contains(member))
                             {
                                 if (raisetype == RaiseType.PartyAndAllianceHealers && member.IsJobCategory(JobRole.Healer))
                                     validRaiseTargets.Add(member);
@@ -193,7 +190,7 @@ internal static partial class TargetUpdater
                 {
                     foreach (var target in DataCenter.AllTargets.GetDeath())
                     {
-                        if (!target.IsEnemy() && !target.IsTargetMoving() && !deathParty.Contains(target))
+                        if (!deathParty.Contains(target))
                         {
                             validRaiseTargets.Add(target);
                         }
