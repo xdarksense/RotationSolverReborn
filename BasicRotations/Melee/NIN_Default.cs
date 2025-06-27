@@ -343,7 +343,7 @@ public sealed class NIN_Default : NinjaRotation
                 return false;
             }
         }
-        else if ((TenPvE.Cooldown.CurrentCharges == TenPvE.Cooldown.MaxCharges) || TenPvE.Cooldown.HasOneCharge && (ShadowWalkerNeeded || InTrickAttack || TenPvE.Cooldown.WillHaveXChargesGCD(2, 2, 0)))
+        else if ((TenPvE.Cooldown.CurrentCharges == TenPvE.Cooldown.MaxCharges) || (TenPvE.Cooldown.HasOneCharge && (ShadowWalkerNeeded || InTrickAttack || TenPvE.Cooldown.WillHaveXChargesGCD(2, 2, 0))))
         {
             // Chooses buffs or AoE actions based on combat conditions and cooldowns.
             // For instance, setting Huton for speed buff or choosing AoE Ninjutsu like Katon or Doton based on enemy positioning.
