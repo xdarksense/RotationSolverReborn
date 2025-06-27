@@ -951,6 +951,7 @@ public static class ObjectHelper
     {
         return battleChara.IsWolfImmune()
             || battleChara.IsJeunoBossImmune()
+            || battleChara.IsDeadStarImmune()
             || battleChara.IsCODBossImmune()
             || battleChara.IsCinderDriftImmune()
             || battleChara.IsResistanceImmune()
