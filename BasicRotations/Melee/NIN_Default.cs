@@ -29,6 +29,17 @@ public sealed class NIN_Default : NinjaRotation
     // Holds the next ninjutsu action to perform.
     private IBaseAction? _ninActionAim = null;
     private readonly ActionID NinjutsuPvEid = AdjustId(ActionID.NinjutsuPvE);
+    private static bool NoActiveNinjutsu => AdjustId(ActionID.NinjutsuPvE) == ActionID.NinjutsuPvE;
+    private static bool RabbitMediumCurrent => AdjustId(ActionID.NinjutsuPvE) == ActionID.RabbitMediumPvE;
+    private static bool FumaShurikenCurrent => AdjustId(ActionID.NinjutsuPvE) == ActionID.FumaShurikenPvE;
+    private static bool KatonCurrent => AdjustId(ActionID.NinjutsuPvE) == ActionID.KatonPvE;
+    private static bool RaitonCurrent => AdjustId(ActionID.NinjutsuPvE) == ActionID.RaitonPvE;
+    private static bool HyotonCurrent => AdjustId(ActionID.NinjutsuPvE) == ActionID.HyotonPvE;
+    private static bool HutonCurrent => AdjustId(ActionID.NinjutsuPvE) == ActionID.HutonPvE;
+    private static bool DotonCurrent => AdjustId(ActionID.NinjutsuPvE) == ActionID.DotonPvE;
+    private static bool SuitonCurrent => AdjustId(ActionID.NinjutsuPvE) == ActionID.SuitonPvE;
+    private static bool GokaMekkyakuCurrent => AdjustId(ActionID.NinjutsuPvE) == ActionID.GokaMekkyakuPvE;
+    private static bool HyoshoRanryuCurrent => AdjustId(ActionID.NinjutsuPvE) == ActionID.HyoshoRanryuPvE;
 
     private bool KeepKassatsuinBurst => !Player.WillStatusEndGCD(2, 0, true, StatusID.Kassatsu) && HasKassatsu && !InTrickAttack && !IsExecutingMudra;
 
@@ -343,7 +354,7 @@ public sealed class NIN_Default : NinjaRotation
                 return false;
             }
         }
-        else if ((TenPvE.Cooldown.CurrentCharges == TenPvE.Cooldown.MaxCharges) || (TenPvE.Cooldown.HasOneCharge && (ShadowWalkerNeeded || InTrickAttack || TenPvE.Cooldown.WillHaveXChargesGCD(2, 2, 0))))
+        else if (TenPvE.CanUse(out _, usedUp: ShadowWalkerNeeded || InTrickAttack || TenPvE.Cooldown.WillHaveXChargesGCD(2, 2, 0)))
         {
             // Chooses buffs or AoE actions based on combat conditions and cooldowns.
             // For instance, setting Huton for speed buff or choosing AoE Ninjutsu like Katon or Doton based on enemy positioning.
@@ -384,13 +395,13 @@ public sealed class NIN_Default : NinjaRotation
             //Single
             if (!DeathBlossomPvE.CanUse(out _) && !HakkeMujinsatsuPvE.CanUse(out _) && !ShadowWalkerNeeded)
             {
-                if (RaitonPvE.EnoughLevel && TenPvE.Cooldown.HasOneCharge && RaitonPvE.IsEnabled && (!HasRaijuReady || (Player.StatusStack(true, StatusID.RaijuReady) < 3)))
+                if (RaitonPvE.EnoughLevel && RaitonPvE.IsEnabled && Player.StatusStack(true, StatusID.RaijuReady) < 3)
                 {
                     SetNinjutsu(RaitonPvE);
                     return false;
                 }
 
-                if (FumaShurikenPvE.EnoughLevel && TenPvE.Cooldown.HasOneCharge && FumaShurikenPvE.IsEnabled)
+                if (FumaShurikenPvE.EnoughLevel && FumaShurikenPvE.IsEnabled)
                 {
                     SetNinjutsu(FumaShurikenPvE);
                     return false;
@@ -493,14 +504,14 @@ public sealed class NIN_Default : NinjaRotation
         if (_ninActionAim == HyoshoRanryuPvE)
         {
             //Failed
-            if ((uint)AdjustId(NinjutsuPvEid) == RabbitMediumPvE.ID)
+            if (RabbitMediumCurrent)
             {
                 ClearNinjutsu();
                 act = null;
                 return false;
             }
             //Action Execution
-            else if ((uint)AdjustId(NinjutsuPvEid) == HyoshoRanryuPvE.ID)
+            else if (HyoshoRanryuCurrent)
             {
                 if (HyoshoRanryuPvE.CanUse(out act, skipAoeCheck: true))
                 {
@@ -508,7 +519,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //Second
-            else if ((uint)AdjustId(NinjutsuPvEid) == FumaShurikenPvE.ID)
+            else if (FumaShurikenCurrent && !IsLastAction(false, JinPvE_18807))
             {
                 if (JinPvE_18807.CanUse(out act, usedUp: true))
                 {
@@ -516,7 +527,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //First
-            else if ((uint)AdjustId(NinjutsuPvEid) == NinjutsuPvE.ID)
+            else if (NoActiveNinjutsu && !IsLastAction(false, ChiPvE_18806))
             {
                 if (ChiPvE_18806.CanUse(out act, usedUp: true))
                 {
@@ -539,14 +550,14 @@ public sealed class NIN_Default : NinjaRotation
         if (_ninActionAim == GokaMekkyakuPvE)
         {
             //Failed
-            if ((uint)AdjustId(NinjutsuPvEid) == RabbitMediumPvE.ID)
+            if (RabbitMediumCurrent)
             {
                 ClearNinjutsu();
                 act = null;
                 return false;
             }
             //Action Execution
-            else if ((uint)AdjustId(NinjutsuPvEid) == GokaMekkyakuPvE.ID)
+            else if (GokaMekkyakuCurrent)
             {
                 if (GokaMekkyakuPvE.CanUse(out act, skipAoeCheck: true))
                 {
@@ -554,7 +565,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //Second
-            else if ((uint)AdjustId(NinjutsuPvEid) == FumaShurikenPvE.ID)
+            else if (FumaShurikenCurrent && !IsLastAction(false, TenPvE_18805))
             {
                 if (TenPvE_18805.CanUse(out act, usedUp: true))
                 {
@@ -562,7 +573,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //First
-            else if ((uint)AdjustId(NinjutsuPvEid) == NinjutsuPvE.ID)
+            else if (NoActiveNinjutsu && !IsLastAction(false, ChiPvE_18806))
             {
                 if (ChiPvE_18806.CanUse(out act, usedUp: true))
                 {
@@ -585,14 +596,14 @@ public sealed class NIN_Default : NinjaRotation
         if (_ninActionAim == SuitonPvE)
         {
             //Failed
-            if ((uint)AdjustId(NinjutsuPvEid) == RabbitMediumPvE.ID)
+            if (RabbitMediumCurrent)
             {
                 ClearNinjutsu();
                 act = null;
                 return false;
             }
             //Action Execution
-            else if ((uint)AdjustId(NinjutsuPvEid) == SuitonPvE.ID)
+            else if (SuitonCurrent)
             {
                 if (SuitonPvE.CanUse(out act))
                 {
@@ -600,7 +611,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //Third
-            else if ((uint)AdjustId(NinjutsuPvEid) == RaitonPvE.ID)
+            else if (RaitonCurrent && !IsLastAction(false, JinPvE_18807))
             {
                 if (JinPvE_18807.CanUse(out act, usedUp: true))
                 {
@@ -608,7 +619,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //Second
-            else if ((uint)AdjustId(NinjutsuPvEid) == FumaShurikenPvE.ID)
+            else if (FumaShurikenCurrent && !IsLastAction(false, ChiPvE_18806))
             {
                 if (ChiPvE_18806.CanUse(out act, usedUp: true))
                 {
@@ -616,7 +627,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //First
-            else if ((uint)AdjustId(NinjutsuPvEid) == NinjutsuPvE.ID)
+            else if (NoActiveNinjutsu && !IsLastAction(false, TenPvE))
             {
                 if (TenPvE.CanUse(out act, usedUp: true))
                 {
@@ -639,14 +650,14 @@ public sealed class NIN_Default : NinjaRotation
         if (_ninActionAim == DotonPvE)
         {
             //Failed
-            if ((uint)AdjustId(NinjutsuPvEid) == RabbitMediumPvE.ID)
+            if (RabbitMediumCurrent)
             {
                 ClearNinjutsu();
                 act = null;
                 return false;
             }
             //Action Execution
-            else if ((uint)AdjustId(NinjutsuPvEid) == DotonPvE.ID)
+            else if (DotonCurrent)
             {
                 if (DotonPvE.CanUse(out act, skipAoeCheck: true))
                 {
@@ -654,7 +665,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //Third
-            else if ((uint)AdjustId(NinjutsuPvEid) == HyotonPvE.ID)
+            else if (HyotonCurrent && !IsLastAction(false, ChiPvE_18806))
             {
                 if (ChiPvE_18806.CanUse(out act, usedUp: true))
                 {
@@ -662,7 +673,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //Second
-            else if ((uint)AdjustId(NinjutsuPvEid) == FumaShurikenPvE.ID)
+            else if (FumaShurikenCurrent && !IsLastAction(false, JinPvE_18807))
             {
                 if (JinPvE_18807.CanUse(out act, usedUp: true))
                 {
@@ -670,7 +681,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //First
-            else if ((uint)AdjustId(NinjutsuPvEid) == NinjutsuPvE.ID)
+            else if (NoActiveNinjutsu && !IsLastAction(false, TenPvE))
             {
                 if (TenPvE.CanUse(out act, usedUp: true))
                 {
@@ -693,14 +704,14 @@ public sealed class NIN_Default : NinjaRotation
         if (_ninActionAim == HutonPvE)
         {
             //Failed
-            if ((uint)AdjustId(NinjutsuPvEid) == RabbitMediumPvE.ID)
+            if (RabbitMediumCurrent)
             {
                 ClearNinjutsu();
                 act = null;
                 return false;
             }
             //Action Execution
-            else if ((uint)AdjustId(NinjutsuPvEid) == HutonPvE.ID)
+            else if (HutonCurrent)
             {
                 if (HutonPvE.CanUse(out act, skipAoeCheck: true))
                 {
@@ -708,7 +719,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //Third
-            else if ((uint)AdjustId(NinjutsuPvEid) == HyotonPvE.ID)
+            else if (HyotonCurrent && !IsLastAction(false, TenPvE_18805))
             {
                 if (TenPvE_18805.CanUse(out act, usedUp: true))
                 {
@@ -716,7 +727,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //Second
-            else if ((uint)AdjustId(NinjutsuPvEid) == FumaShurikenPvE.ID)
+            else if (FumaShurikenCurrent && !IsLastAction(false, JinPvE_18807))
             {
                 if (JinPvE_18807.CanUse(out act, usedUp: true))
                 {
@@ -724,7 +735,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //First
-            else if ((uint)AdjustId(NinjutsuPvEid) == NinjutsuPvE.ID)
+            else if (NoActiveNinjutsu && !IsLastAction(false, ChiPvE))
             {
                 if (ChiPvE.CanUse(out act, usedUp: true))
                 {
@@ -747,14 +758,14 @@ public sealed class NIN_Default : NinjaRotation
         if (_ninActionAim == HyotonPvE)
         {
             //Failed
-            if ((uint)AdjustId(NinjutsuPvEid) == RabbitMediumPvE.ID)
+            if (RabbitMediumCurrent)
             {
                 ClearNinjutsu();
                 act = null;
                 return false;
             }
             //Action Execution
-            else if ((uint)AdjustId(NinjutsuPvEid) == HyotonPvE.ID)
+            else if (HyotonCurrent)
             {
                 if (HyotonPvE.CanUse(out act))
                 {
@@ -762,7 +773,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //Second
-            else if ((uint)AdjustId(NinjutsuPvEid) == FumaShurikenPvE.ID)
+            else if (FumaShurikenCurrent && !IsLastAction(false, JinPvE_18807))
             {
                 if (JinPvE_18807.CanUse(out act, usedUp: true))
                 {
@@ -770,7 +781,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //First
-            else if ((uint)AdjustId(NinjutsuPvEid) == NinjutsuPvE.ID)
+            else if (NoActiveNinjutsu && !IsLastAction(false, ChiPvE))
             {
                 if (ChiPvE.CanUse(out act, usedUp: true))
                 {
@@ -793,14 +804,14 @@ public sealed class NIN_Default : NinjaRotation
         if (_ninActionAim == RaitonPvE)
         {
             //Failed
-            if ((uint)AdjustId(NinjutsuPvEid) == RabbitMediumPvE.ID)
+            if (RabbitMediumCurrent)
             {
                 ClearNinjutsu();
                 act = null;
                 return false;
             }
             //Action Execution
-            else if ((uint)AdjustId(NinjutsuPvEid) == RaitonPvE.ID)
+            else if (RaitonCurrent)
             {
                 if (RaitonPvE.CanUse(out act))
                 {
@@ -808,7 +819,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //Second
-            else if ((uint)AdjustId(NinjutsuPvEid) == FumaShurikenPvE.ID)
+            else if (FumaShurikenCurrent && !IsLastAction(false, ChiPvE_18806))
             {
                 if (ChiPvE_18806.CanUse(out act, usedUp: true))
                 {
@@ -816,7 +827,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //First
-            else if ((uint)AdjustId(NinjutsuPvEid) == NinjutsuPvE.ID)
+            else if (NoActiveNinjutsu && !IsLastAction(false, TenPvE))
             {
                 if (TenPvE.CanUse(out act, usedUp: true))
                 {
@@ -839,14 +850,14 @@ public sealed class NIN_Default : NinjaRotation
         if (_ninActionAim == KatonPvE)
         {
             //Failed
-            if ((uint)AdjustId(NinjutsuPvEid) == RabbitMediumPvE.ID)
+            if (RabbitMediumCurrent)
             {
                 ClearNinjutsu();
                 act = null;
                 return false;
             }
             //Action Execution
-            else if ((uint)AdjustId(NinjutsuPvEid) == KatonPvE.ID)
+            else if (KatonCurrent)
             {
                 if (KatonPvE.CanUse(out act, skipAoeCheck: true))
                 {
@@ -854,7 +865,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //Second
-            else if ((uint)AdjustId(NinjutsuPvEid) == FumaShurikenPvE.ID)
+            else if (FumaShurikenCurrent && !IsLastAction(false, TenPvE_18805))
             {
                 if (TenPvE_18805.CanUse(out act, usedUp: true))
                 {
@@ -862,7 +873,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //First
-            else if ((uint)AdjustId(NinjutsuPvEid) == NinjutsuPvE.ID)
+            else if (NoActiveNinjutsu && !IsLastAction(false, ChiPvE))
             {
                 if (ChiPvE.CanUse(out act, usedUp: true))
                 {
@@ -885,14 +896,14 @@ public sealed class NIN_Default : NinjaRotation
         if (_ninActionAim == FumaShurikenPvE)
         {
             //Failed
-            if ((uint)AdjustId(NinjutsuPvEid) == RabbitMediumPvE.ID)
+            if (RabbitMediumCurrent)
             {
                 ClearNinjutsu();
                 act = null;
                 return false;
             }
             //Action Execution
-            else if ((uint)AdjustId(NinjutsuPvEid) == FumaShurikenPvE.ID)
+            else if (FumaShurikenCurrent)
             {
                 if (FumaShurikenPvE.CanUse(out act))
                 {
@@ -900,7 +911,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //First
-            else if ((uint)AdjustId(NinjutsuPvEid) == NinjutsuPvE.ID)
+            else if (NoActiveNinjutsu && !IsLastAction(false, TenPvE))
             {
                 if (TenPvE.CanUse(out act, usedUp: true))
                 {
@@ -945,7 +956,7 @@ public sealed class NIN_Default : NinjaRotation
             return true;
         }
 
-        if (_ninActionAim != null)
+        if (_ninActionAim != null && GCDTime() == 0f)
         {
             if (DoGokaMekkyaku(out act))
             {
@@ -998,6 +1009,11 @@ public sealed class NIN_Default : NinjaRotation
             }
         }
 
+        if (IsExecutingMudra)
+        {
+            return base.GeneralGCD(out act);
+        }
+
         if (HakkeMujinsatsuPvE.CanUse(out act))
         {
             return true;
@@ -1006,11 +1022,6 @@ public sealed class NIN_Default : NinjaRotation
         if (DeathBlossomPvE.CanUse(out act))
         {
             return true;
-        }
-
-        if (IsExecutingMudra)
-        {
-            return base.GeneralGCD(out act);
         }
 
         //Single

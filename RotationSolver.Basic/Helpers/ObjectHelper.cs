@@ -370,14 +370,6 @@ public static class ObjectHelper
             return true;
         }
 
-        foreach (Dalamud.Game.ClientState.Party.IPartyMember p in Svc.Party)
-        {
-            if (p.GameObject?.GameObjectId == battleChara.GameObjectId && battleChara.IsTargetable)
-            {
-                return true;
-            }
-        }
-
         if (!battleChara.IsTargetable)
         {
             return false;
@@ -386,6 +378,14 @@ public static class ObjectHelper
         if (battleChara.IsPet())
         {
             return false;
+        }
+
+        foreach (Dalamud.Game.ClientState.Party.IPartyMember p in Svc.Party)
+        {
+            if (p.GameObject?.GameObjectId == battleChara.GameObjectId)
+            {
+                return true;
+            }
         }
 
         if (Service.Config.FriendlyPartyNpcHealRaise3 && battleChara.IsNpcPartyMember())
