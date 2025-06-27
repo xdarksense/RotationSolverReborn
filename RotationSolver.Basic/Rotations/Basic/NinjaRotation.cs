@@ -26,7 +26,7 @@ public partial class NinjaRotation
     /// <summary>
     /// Do you need to prep or currently use shadowwalker
     /// </summary>
-    public bool ShadowWalkerNeeded => (TrickAttackPvE.EnoughLevel && TrickAttackPvE.Cooldown.WillHaveOneCharge(18)) || (KunaisBanePvE.EnoughLevel && KunaisBanePvE.Cooldown.WillHaveOneCharge(18));
+    public bool ShadowWalkerNeeded => ((TrickAttackPvE.EnoughLevel && TrickAttackPvE.Cooldown.WillHaveOneCharge(18)) || (KunaisBanePvE.EnoughLevel && KunaisBanePvE.Cooldown.WillHaveOneCharge(18)) && SuitonPvE.EnoughLevel);
 
     /// <summary>
     /// Determines if Trick Attack is in its effective period.
