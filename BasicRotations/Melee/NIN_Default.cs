@@ -56,7 +56,7 @@ public sealed class NIN_Default : NinjaRotation
     // Logic to determine the action to take during the countdown phase before combat starts.
     protected override IAction? CountDownAction(float remainTime)
     {
-        bool realInHuton = IsLastAction(false, HutonPvE);
+        _ = IsLastAction(false, HutonPvE);
         // Clears ninjutsu setup if countdown is more than 6 seconds or if Suiton is the aim but shouldn't be.
         if (remainTime > 6)
         {
@@ -113,8 +113,8 @@ public sealed class NIN_Default : NinjaRotation
 
         // If the last action performed matches any of a list of specific actions, it clears the Ninjutsu aim.
         // This serves as a reset/cleanup mechanism to ensure the decision logic starts fresh for the next cycle.
-        if (IsLastAction(true, NinjutsuPvE, RaitonPvE)
-            || (Player.HasStatus(true, StatusID.ShadowWalker) && (_ninActionAim == SuitonPvE || _ninActionAim == HutonPvE))
+        if (IsLastAction(false, FumaShurikenPvE, KatonPvE, RaitonPvE, HyotonPvE, DotonPvE, SuitonPvE)
+            || (IsShadowWalking && (_ninActionAim == SuitonPvE || _ninActionAim == HutonPvE))
             || (_ninActionAim == GokaMekkyakuPvE && IsLastGCD(false, GokaMekkyakuPvE))
             || (_ninActionAim == HyoshoRanryuPvE && IsLastGCD(false, HyoshoRanryuPvE))
             || (_ninActionAim == GokaMekkyakuPvE && !HasKassatsu)
@@ -354,7 +354,7 @@ public sealed class NIN_Default : NinjaRotation
                 return false;
             }
         }
-        else if (TenPvE.CanUse(out _, usedUp: ShadowWalkerNeeded || InTrickAttack || TenPvE.Cooldown.WillHaveXChargesGCD(2, 2, 0)))
+        else if (TenPvE.CanUse(out _, usedUp: ShadowWalkerNeeded || InTrickAttack || TenPvE.Cooldown.WillHaveXChargesGCD(2, 2, 0)) && _ninActionAim == null)
         {
             // Chooses buffs or AoE actions based on combat conditions and cooldowns.
             // For instance, setting Huton for speed buff or choosing AoE Ninjutsu like Katon or Doton based on enemy positioning.
@@ -519,7 +519,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //Second
-            else if (FumaShurikenCurrent && !IsLastAction(false, JinPvE_18807))
+            else if (FumaShurikenCurrent)
             {
                 if (JinPvE_18807.CanUse(out act, usedUp: true))
                 {
@@ -527,7 +527,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //First
-            else if (NoActiveNinjutsu && !IsLastAction(false, ChiPvE_18806))
+            else if (NoActiveNinjutsu)
             {
                 if (ChiPvE_18806.CanUse(out act, usedUp: true))
                 {
@@ -565,7 +565,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //Second
-            else if (FumaShurikenCurrent && !IsLastAction(false, TenPvE_18805))
+            else if (FumaShurikenCurrent)
             {
                 if (TenPvE_18805.CanUse(out act, usedUp: true))
                 {
@@ -573,7 +573,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //First
-            else if (NoActiveNinjutsu && !IsLastAction(false, ChiPvE_18806))
+            else if (NoActiveNinjutsu)
             {
                 if (ChiPvE_18806.CanUse(out act, usedUp: true))
                 {
@@ -611,7 +611,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //Third
-            else if (RaitonCurrent && !IsLastAction(false, JinPvE_18807))
+            else if (RaitonCurrent)
             {
                 if (JinPvE_18807.CanUse(out act, usedUp: true))
                 {
@@ -619,7 +619,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //Second
-            else if (FumaShurikenCurrent && !IsLastAction(false, ChiPvE_18806))
+            else if (FumaShurikenCurrent)
             {
                 if (ChiPvE_18806.CanUse(out act, usedUp: true))
                 {
@@ -627,7 +627,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //First
-            else if (NoActiveNinjutsu && !IsLastAction(false, TenPvE))
+            else if (NoActiveNinjutsu)
             {
                 if (TenPvE.CanUse(out act, usedUp: true))
                 {
@@ -665,7 +665,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //Third
-            else if (HyotonCurrent && !IsLastAction(false, ChiPvE_18806))
+            else if (HyotonCurrent)
             {
                 if (ChiPvE_18806.CanUse(out act, usedUp: true))
                 {
@@ -673,7 +673,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //Second
-            else if (FumaShurikenCurrent && !IsLastAction(false, JinPvE_18807))
+            else if (FumaShurikenCurrent)
             {
                 if (JinPvE_18807.CanUse(out act, usedUp: true))
                 {
@@ -681,7 +681,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //First
-            else if (NoActiveNinjutsu && !IsLastAction(false, TenPvE))
+            else if (NoActiveNinjutsu)
             {
                 if (TenPvE.CanUse(out act, usedUp: true))
                 {
@@ -719,7 +719,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //Third
-            else if (HyotonCurrent && !IsLastAction(false, TenPvE_18805))
+            else if (HyotonCurrent)
             {
                 if (TenPvE_18805.CanUse(out act, usedUp: true))
                 {
@@ -727,7 +727,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //Second
-            else if (FumaShurikenCurrent && !IsLastAction(false, JinPvE_18807))
+            else if (FumaShurikenCurrent)
             {
                 if (JinPvE_18807.CanUse(out act, usedUp: true))
                 {
@@ -735,7 +735,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //First
-            else if (NoActiveNinjutsu && !IsLastAction(false, ChiPvE))
+            else if (NoActiveNinjutsu)
             {
                 if (ChiPvE.CanUse(out act, usedUp: true))
                 {
@@ -773,7 +773,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //Second
-            else if (FumaShurikenCurrent && !IsLastAction(false, JinPvE_18807))
+            else if (FumaShurikenCurrent)
             {
                 if (JinPvE_18807.CanUse(out act, usedUp: true))
                 {
@@ -781,7 +781,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //First
-            else if (NoActiveNinjutsu && !IsLastAction(false, ChiPvE))
+            else if (NoActiveNinjutsu)
             {
                 if (ChiPvE.CanUse(out act, usedUp: true))
                 {
@@ -819,7 +819,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //Second
-            else if (FumaShurikenCurrent && !IsLastAction(false, ChiPvE_18806))
+            else if (FumaShurikenCurrent)
             {
                 if (ChiPvE_18806.CanUse(out act, usedUp: true))
                 {
@@ -827,7 +827,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //First
-            else if (NoActiveNinjutsu && !IsLastAction(false, TenPvE))
+            else if (NoActiveNinjutsu)
             {
                 if (TenPvE.CanUse(out act, usedUp: true))
                 {
@@ -865,7 +865,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //Second
-            else if (FumaShurikenCurrent && !IsLastAction(false, TenPvE_18805))
+            else if (FumaShurikenCurrent)
             {
                 if (TenPvE_18805.CanUse(out act, usedUp: true))
                 {
@@ -873,7 +873,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //First
-            else if (NoActiveNinjutsu && !IsLastAction(false, ChiPvE))
+            else if (NoActiveNinjutsu)
             {
                 if (ChiPvE.CanUse(out act, usedUp: true))
                 {
@@ -911,7 +911,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
             //First
-            else if (NoActiveNinjutsu && !IsLastAction(false, TenPvE))
+            else if (NoActiveNinjutsu)
             {
                 if (TenPvE.CanUse(out act, usedUp: true))
                 {
