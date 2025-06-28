@@ -192,6 +192,74 @@ public partial class NinjaRotation
     }
     #endregion
 
+    #region Mudra
+    static partial void ModifyTenPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => !RabbitMediumPvEActive && !IsLastAction(ActionID.TenPvE, ActionID.TenPvE_18805);
+        setting.UnlockedByQuestID = 65748;
+        setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            ShouldCheckStatus = false,
+        };
+    }
+
+    static partial void ModifyTenPvE_18805(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => !RabbitMediumPvEActive && !IsLastAction(ActionID.TenPvE, ActionID.TenPvE_18805);
+        setting.UnlockedByQuestID = 65748;
+        setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            ShouldCheckStatus = false,
+        };
+    }
+
+    static partial void ModifyChiPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => !RabbitMediumPvEActive && !IsLastAction(ActionID.ChiPvE, ActionID.ChiPvE_18806);
+        setting.UnlockedByQuestID = 65750;
+        setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            ShouldCheckStatus = false,
+        };
+    }
+
+    static partial void ModifyChiPvE_18806(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => !RabbitMediumPvEActive && !IsLastAction(ActionID.ChiPvE, ActionID.ChiPvE_18806);
+        setting.UnlockedByQuestID = 65750;
+        setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            ShouldCheckStatus = false,
+        };
+    }
+
+    static partial void ModifyJinPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => !RabbitMediumPvEActive && !IsLastAction(ActionID.JinPvE, ActionID.JinPvE_18807);
+        setting.UnlockedByQuestID = 65768;
+        setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            ShouldCheckStatus = false,
+        };
+    }
+
+    static partial void ModifyJinPvE_18807(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => !RabbitMediumPvEActive && !IsLastAction(ActionID.JinPvE, ActionID.JinPvE_18807);
+        setting.UnlockedByQuestID = 65768;
+        setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            ShouldCheckStatus = false,
+        };
+    }
+    #endregion
+
     #region PvE Actions
 
     static partial void ModifyRabbitMediumPvE(ref ActionSetting setting)
@@ -248,29 +316,9 @@ public partial class NinjaRotation
         };
     }
 
-    static partial void ModifyTenPvE(ref ActionSetting setting)
-    {
-        setting.UnlockedByQuestID = 65748;
-        setting.IsFriendly = true;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            ShouldCheckStatus = false,
-        };
-    }
-
     static partial void ModifyNinjutsuPvE(ref ActionSetting setting)
     {
 
-    }
-
-    static partial void ModifyChiPvE(ref ActionSetting setting)
-    {
-        setting.UnlockedByQuestID = 65750;
-        setting.IsFriendly = true;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            ShouldCheckStatus = false,
-        };
     }
 
     static partial void ModifyDeathBlossomPvE(ref ActionSetting setting)
@@ -290,16 +338,6 @@ public partial class NinjaRotation
     {
         setting.SpecialType = SpecialActionType.MovingForward;
         setting.UnlockedByQuestID = 65752;
-    }
-
-    static partial void ModifyJinPvE(ref ActionSetting setting)
-    {
-        setting.UnlockedByQuestID = 65768;
-        setting.IsFriendly = true;
-        setting.CreateConfig = () => new ActionConfig()
-        {
-            ShouldCheckStatus = false,
-        };
     }
 
     static partial void ModifyKassatsuPvE(ref ActionSetting setting)
@@ -350,9 +388,6 @@ public partial class NinjaRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
-        };
-        setting.CreateConfig = () => new ActionConfig()
-        {
             AoeCount = 1,
         };
     }
