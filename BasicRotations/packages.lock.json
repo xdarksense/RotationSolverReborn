@@ -2,6 +2,11 @@
   "version": 1,
   "dependencies": {
     "net9.0-windows7.0": {
+      "ECommons": {
+        "type": "Transitive",
+        "resolved": "3.0.0.1",
+        "contentHash": "f5tHcH5zAjjiG9QdUPlg4ylOasA2lPiwmNoFBxcc3A2R8YXNar8rDqwYeM+xSEE9Cw8HF4o+8wXIB5Esqy/8CA=="
+      },
       "ExCSS": {
         "type": "Transitive",
         "resolved": "4.2.3",
@@ -77,6 +82,7 @@
       "RotationSolverReborn.Basic": {
         "type": "Project",
         "dependencies": {
+          "ECommons": "[3.0.0.1, )",
           "RotationSolver.SourceGenerators": "[1.0.0, )",
           "Svg": "[3.4.7, )",
           "System.Drawing.Common": "[9.0.5, )"

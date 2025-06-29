@@ -23,7 +23,6 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\ECommons\ECommons\ECommons.csproj" />
 		<ProjectReference Include="..\RotationSolver.Basic\RotationSolver.Basic.csproj" />
 		
 		<Using Include="Dalamud.Game.ClientState.Objects.Types" />
