@@ -13,6 +13,9 @@
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="ECommons" Version="3.0.0.1" />
+  </ItemGroup>
+  <ItemGroup>
 	  <Reference Include="Dalamud.Common">
 		  <HintPath>$(DalamudLibPath)Dalamud.Common.dll</HintPath>
 		  <Private>False</Private>
