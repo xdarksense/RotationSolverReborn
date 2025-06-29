@@ -192,18 +192,7 @@ internal static class StateUpdater
     {
         if (DataCenter.DispelTarget != null)
         {
-            foreach (Dalamud.Game.ClientState.Statuses.Status status in DataCenter.DispelTarget.StatusList)
-            {
-                if (StatusHelper.IsDangerous(status))
-                {
-                    return true;
-                }
-            }
-
-            if (!DataCenter.HasHostilesInRange || Service.Config.DispelAll || DataCenter.IsPvP)
-            {
-                return true;
-            }
+            return true;
         }
         return false;
     }

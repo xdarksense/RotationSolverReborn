@@ -221,6 +221,11 @@ internal static class ActionUpdater
             return false;
         }
 
+        if (PlayerHasLockActions())
+        {
+            return false;
+        }
+
         if (NextAction == null)
         {
             return false;
@@ -234,6 +239,26 @@ internal static class ActionUpdater
 
         // GCD
         return RSCommands.CanDoAnAction(ActionHelper.CanUseGCD);
+    }
+
+    internal static bool PlayerHasLockActions()
+    {
+        if (Player.Object == null)
+        {
+            return false;
+        }
+
+        if (Player.Object.StatusList == null)
+        {
+            return false;
+        }
+
+        foreach (var status in Player.Object.StatusList)
+        {
+            if (status != null && status.LockActions())
+                return true;
+        }
+        return false;
     }
 
     private unsafe static bool IsPlayerOccupied()
