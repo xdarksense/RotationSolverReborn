@@ -230,7 +230,7 @@ internal partial class Configs : IPluginConfiguration
     /// Enabling this setting will force the usage of Esuna on all target that are affected by a
     /// cleansable debuff.
     /// </markdown>
-    [ConditionBool, UI("Cleanse all dispellable debuffs (not just those in the status list).",
+    [ConditionBool, UI("Cleanse all dispellable debuffs regardless of healing.",
         Filter = AutoActionUsage, Section = 3,
         PvEFilter = JobFilterType.Dispel, PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _dispelAll = false;

@@ -446,7 +446,7 @@ public static class StatusHelper
         {
             return;
         }
-
+        
         try
         {
             Chat.SendMessage($"/statusoff {GetStatusName(status)}");
@@ -699,5 +699,45 @@ public static class StatusHelper
     public static bool CanDispel(this Status status)
     {
         return status != null && status.GameData.Value.CanDispel == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool CanStatusOff(this Status status)
+    {
+        return status != null && status.GameData.Value.CanStatusOff == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool LockActions(this Status status)
+    {
+        return status != null && status.GameData.Value.LockActions == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool LockMovement(this Status status)
+    {
+        return status != null && status.GameData.Value.LockMovement == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool LockControl(this Status status)
+    {
+        return status != null && status.GameData.Value.LockControl == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain;
+    }
+
+    /// <summary>
+    /// Unknown3 is used to determine if the status indicates a tether.
+    /// </summary>
+    public static bool IsTether(this Status status)
+    {
+        return status != null && status.GameData.Value.Unknown3 == true && status.RemainingTime > 1 + DataCenter.DefaultGCDRemain;
     }
 }

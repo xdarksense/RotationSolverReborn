@@ -2738,8 +2738,7 @@ public partial class RotationConfigWindow : Window
         var list = new List<Status>();
         foreach (var s in sheet)
         {
-            if (!s.CanDispel && !s.LockMovement && !s.IsGaze && !s.IsFcBuff
-                && !string.IsNullOrEmpty(s.Name.ToString()) && s.Icon != 0)
+            if (!string.IsNullOrEmpty(s.Name.ToString()) && s.Icon != 0)
             {
                 list.Add(s);
             }
@@ -3568,6 +3567,7 @@ public partial class RotationConfigWindow : Window
     private static unsafe void DrawStatus()
     {
         ImGui.Text($"Merged Status: {DataCenter.MergedStatus}");
+        ImGui.Text($"PlayerHasLockActions: {ActionUpdater.PlayerHasLockActions()}");
         if ((IntPtr)FateManager.Instance() != IntPtr.Zero)
         {
             ImGui.Text($"Fate: {DataCenter.PlayerFateId}");

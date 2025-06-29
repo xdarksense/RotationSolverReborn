@@ -291,6 +291,13 @@ internal static partial class TargetUpdater
             _dispelPartyTargets.Delay(weakenPeople);
             var delayedWeakenPeople = _dispelPartyTargets.ToList();
 
+            var CanDispelNonDangerous = !DataCenter.MergedStatus.HasFlag(AutoStatus.HealAreaAbility)
+                    && !DataCenter.MergedStatus.HasFlag(AutoStatus.HealAreaSpell)
+                    && !DataCenter.MergedStatus.HasFlag(AutoStatus.HealSingleAbility)
+                    && !DataCenter.MergedStatus.HasFlag(AutoStatus.HealSingleSpell)
+                    && !DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseArea)
+                    && !DataCenter.MergedStatus.HasFlag(AutoStatus.DefenseSingle);
+
             foreach (IBattleChara person in delayedWeakenPeople)
             {
                 bool hasDangerous = false;
@@ -312,7 +319,15 @@ internal static partial class TargetUpdater
                 }
             }
 
-            return GetClosestTarget(dyingPeople) ?? GetClosestTarget(delayedWeakenPeople);
+            if (!CanDispelNonDangerous)
+            {
+                return GetClosestTarget(dyingPeople);
+            }
+
+            if (CanDispelNonDangerous || !DataCenter.HasHostilesInRange || Service.Config.DispelAll || DataCenter.IsPvP)
+            {
+                return GetClosestTarget(dyingPeople) ?? GetClosestTarget(delayedWeakenPeople);
+            }
         }
         return null;
     }

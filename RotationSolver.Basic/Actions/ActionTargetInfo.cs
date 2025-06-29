@@ -2132,37 +2132,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 return null;
             }
 
-            // Manual Any() check for GameObjectId match
-            bool found = false;
-            foreach (var o in battleChara)
-            {
-                if (o.GameObjectId == DataCenter.DispelTarget.GameObjectId)
-                {
-                    found = true;
-                    break;
-                }
-            }
-            if (found)
-            {
-                return DataCenter.DispelTarget;
-            }
-
-            // Manual FirstOrDefault for a battle chara with a dispellable status
-            foreach (var o in battleChara)
-            {
-                if (o is IBattleChara b)
-                {
-                    foreach (var status in b.StatusList)
-                    {
-                        if (StatusHelper.CanDispel(status))
-                        {
-                            return b;
-                        }
-                    }
-                }
-            }
-
-            return null;
+            return DataCenter.DispelTarget;
         }
 
         IBattleChara? FindTankTarget()
