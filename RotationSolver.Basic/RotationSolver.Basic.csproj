@@ -77,6 +77,8 @@
             <PrivateAssets>all</PrivateAssets>
         </ProjectReference>
 
+        <PackageReference Include="ECommons" Version="3.0.0.1" />
+
         <PackageReference Include="System.Drawing.Common" Version="9.0.5" />
         <ProjectReference Include="..\RotationSolver.SourceGenerators\RotationSolver.SourceGenerators.csproj" OutputItemType="Analyzer" ExcludeAssets="All" />
 
