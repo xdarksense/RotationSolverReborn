@@ -2,7 +2,7 @@
 
 [Rotation("Default PVP", CombatType.PvP, GameVersion = "7.25")]
 [SourceCode(Path = "main/BasicRotations/PVPRotations/Magical/SMN_Default.PVP.cs")]
-[Api(4)]
+[Api(5)]
 public class SMN_DefaultPvP : SummonerRotation
 {
     #region Configurations

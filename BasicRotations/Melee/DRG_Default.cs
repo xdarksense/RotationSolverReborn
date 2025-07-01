@@ -2,7 +2,7 @@ namespace RebornRotations.Melee;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.25")]
 [SourceCode(Path = "main/BasicRotations/Melee/DRG_Default.cs")]
-[Api(4)]
+[Api(5)]
 
 public sealed class DRG_Default : DragoonRotation
 {

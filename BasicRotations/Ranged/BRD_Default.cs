@@ -3,7 +3,7 @@ namespace RebornRotations.Ranged;
 [Rotation("Default", CombatType.PvE, GameVersion = "7.25",
     Description = "Please make sure that the three song times add up to 120 seconds, Wanderers default first song for now.")]
 [SourceCode(Path = "main/BasicRotations/Ranged/BRD_Default.cs")]
-[Api(4)]
+[Api(5)]
 public sealed class BRD_Default : BardRotation
 {
     #region Config Options

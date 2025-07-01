@@ -125,6 +125,7 @@ public partial class DutyRotation
     static partial void ModifyPhantomGuardPvE(ref ActionSetting setting)
     {
         setting.ActionCheck = () => KnightLevel >= 1;
+        setting.TargetType = TargetType.Self;
     }
 
     /// <summary>

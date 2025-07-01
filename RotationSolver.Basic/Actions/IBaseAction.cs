@@ -59,9 +59,8 @@ public interface IBaseAction : IAction
     /// Can I use this action.
     /// </summary>
     /// <param name="act">The return action</param>
-    /// <param name="isLastAbility">Use this ability as last during a GCD window?</param>
-    /// <param name="isFirstAbility">Use this ability as first during a GCD window?</param>
     /// <param name="skipStatusProvideCheck">Skip Status Provide Check</param>
+    /// <param name="skipStatusNeed">Skip Status Need Check</param>
     /// <param name="skipTargetStatusNeedCheck">Skip Status Provide Check</param>
     /// <param name="skipComboCheck">Skip Combo Check</param>
     /// <param name="skipCastingCheck">Skip Casting and Moving Check</param>
@@ -71,6 +70,6 @@ public interface IBaseAction : IAction
     /// <param name="gcdCountForAbility">the gcd count for the ability.</param>
     /// <param name="checkActionManager">Whether to check the in-game action manager in addition to our own internal logic.</param>
     /// <returns>can I use it</returns>
-    bool CanUse(out IAction act, bool isLastAbility = false, bool isFirstAbility = false, bool skipStatusProvideCheck = false, bool skipTargetStatusNeedCheck = false, bool skipComboCheck = false, bool skipCastingCheck = false,
+    bool CanUse(out IAction act, bool skipStatusProvideCheck = false, bool skipStatusNeed = false, bool skipTargetStatusNeedCheck = false, bool skipComboCheck = false, bool skipCastingCheck = false,
         bool usedUp = false, bool skipAoeCheck = false, bool skipTTKCheck = false, byte gcdCountForAbility = 0, bool checkActionManager = false);
 }

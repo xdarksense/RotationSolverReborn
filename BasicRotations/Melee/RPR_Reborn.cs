@@ -2,7 +2,7 @@
 
 [Rotation("Rework", CombatType.PvE, GameVersion = "7.25")]
 [SourceCode(Path = "main/BasicRotations/Melee/RPR_Reborn.cs")]
-[Api(4)]
+[Api(5)]
 public sealed class RPR_Reborn : ReaperRotation
 {
     #region Config Options

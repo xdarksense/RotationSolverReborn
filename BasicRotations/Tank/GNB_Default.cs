@@ -2,7 +2,7 @@ namespace RebornRotations.Tank;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.25")]
 [SourceCode(Path = "main/BasicRotations/Tank/GNB_Default.cs")]
-[Api(4)]
+[Api(5)]
 public sealed class GNB_Default : GunbreakerRotation
 {
     #region Config Options

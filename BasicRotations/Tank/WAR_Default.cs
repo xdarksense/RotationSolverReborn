@@ -2,7 +2,7 @@ namespace RebornRotations.Tank;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.25")]
 [SourceCode(Path = "main/BasicRotations/Tank/WAR_Default.cs")]
-[Api(4)]
+[Api(5)]
 public sealed class WAR_Default : WarriorRotation
 {
     #region Config Options
@@ -16,17 +16,17 @@ public sealed class WAR_Default : WarriorRotation
     [RotationConfig(CombatType.PvE, Name = "Bloodwhetting/Raw intuition heal threshold")]
     public float HealIntuition { get; set; } = 0.7f;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Primal Rend while moving (Danger)")]
-    public bool YEET { get; set; } = false;
-
     [RotationConfig(CombatType.PvE, Name = "Use both stacks of Onslaught during burst while standing still")]
     public bool YEETBurst { get; set; } = true;
 
     [RotationConfig(CombatType.PvE, Name = "Use a stack of Onslaught during when its about to overcap while standing still")]
     public bool YEETCooldown { get; set; } = false;
 
-    [RotationConfig(CombatType.PvE, Name = "Take targets hitbox size into account for Primal Rend distance calculation. (Beta)")]
-    public bool YEETBeta { get; set; } = false;
+    [RotationConfig(CombatType.PvE, Name = "Use Primal Rend while moving (Dangerous)")]
+    public bool YEET { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Primal Rend while standing still outside of configured melee range (Dangerous)")]
+    public bool YEETStill { get; set; } = false;
 
     [Range(1, 20, ConfigUnitType.Yalms)]
     [RotationConfig(CombatType.PvE, Name = "Max distance you can be from the boss for Primal Rend use (Danger, setting too high will get you killed)")]
@@ -272,29 +272,13 @@ public sealed class WAR_Default : WarriorRotation
         {
             if (PrimalRendPvE.CanUse(out act, skipAoeCheck: true))
             {
-                if (YEET || (!YEET && !IsMoving))
+                if (PrimalRendPvE.Target.Target != null && PrimalRendPvE.Target.Target.DistanceToPlayer() <= PrimalRendDistance2)
                 {
                     return true;
                 }
-                var target = PrimalRendPvE.Target.Target;
-                if (target != null)
+                if (YEET || (YEETStill && !IsMoving))
                 {
-                    float distance = target.DistanceToPlayer();
-                    if (!YEETBeta)
-                    {
-                        if (distance < PrimalRendDistance2)
-                        {
-                            return true;
-                        }
-                    }
-                    else
-                    {
-                        float hitboxRadius = target.HitboxRadius;
-                        if ((distance - hitboxRadius) < PrimalRendDistance2)
-                        {
-                            return true;
-                        }
-                    }
+                    return true;
                 }
             }
             if (PrimalRuinationPvE.CanUse(out act))

@@ -5,7 +5,7 @@ namespace RebornRotations.Melee;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.25", Description = "Uses Lunar Solar Opener from The Balance")]
 [SourceCode(Path = "main/BasicRotations/Melee/MNK_Default.cs")]
-[Api(4)]
+[Api(5)]
 
 public sealed class MNK_Default : MonkRotation
 {

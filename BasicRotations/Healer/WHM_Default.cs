@@ -5,7 +5,7 @@ namespace RebornRotations.Healer;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.25")]
 [SourceCode(Path = "main/BasicRotations/Healer/WHM_Default.cs")]
-[Api(4)]
+[Api(5)]
 public sealed class WHM_Default : WhiteMageRotation
 {
     #region Config Options

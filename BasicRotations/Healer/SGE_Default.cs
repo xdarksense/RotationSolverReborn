@@ -4,7 +4,7 @@ namespace RebornRotations.Healer;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.25")]
 [SourceCode(Path = "main/BasicRotations/Healer/SGE_Default.cs")]
-[Api(4)]
+[Api(5)]
 public sealed class SGE_Default : SageRotation
 {
     #region Config Options

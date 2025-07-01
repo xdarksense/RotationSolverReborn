@@ -2,7 +2,7 @@
 
 [Rotation("zAlpha DO NOT USE", CombatType.PvE, GameVersion = "7.25")]
 [SourceCode(Path = "main/BasicRotations/Magical/BLM_Alpha.cs")]
-[Api(4)]
+[Api(5)]
 public class BLM_zAlpha : BlackMageRotation
 {
     #region Config Options

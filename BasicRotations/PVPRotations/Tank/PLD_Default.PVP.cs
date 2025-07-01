@@ -2,7 +2,7 @@
 
 [Rotation("Default PVP", CombatType.PvP, GameVersion = "7.25")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Tank/PLD_Default.PvP.cs")]
-[Api(4)]
+[Api(5)]
 public sealed class PLD_DefaultPvP : PaladinRotation
 {
     #region Configurations
