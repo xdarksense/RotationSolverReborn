@@ -298,7 +298,7 @@ public partial class WarriorRotation
     {
         setting.StatusNeed = [StatusID.PrimalRendReady];
         setting.StatusProvide = [StatusID.PrimalRuinationReady];
-        setting.SpecialType = SpecialActionType.MovingForward;
+        setting.MPOverride = () => 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

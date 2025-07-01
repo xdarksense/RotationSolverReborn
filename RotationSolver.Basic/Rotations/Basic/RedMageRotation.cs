@@ -5,6 +5,8 @@ public partial class RedMageRotation
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Intelligence;
 
+    private protected sealed override IBaseAction Raise => VerraisePvE;
+
     /// <inheritdoc/>
     public override bool CanHealSingleSpell => DataCenter.PartyMembers.Count == 1 && base.CanHealSingleSpell;
 
@@ -27,72 +29,225 @@ public partial class RedMageRotation
     /// <summary>
     /// Is <see cref="WhiteMana"/> larger than <see cref="BlackMana"/>
     /// </summary>
-    public static bool IsWhiteManaLargerThanBlackMana => WhiteMana > BlackMana;
+    public static bool MoreWhiteMana => WhiteMana > BlackMana;
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool MoreBlackMana => BlackMana >= WhiteMana;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool BlackWhiteEqual => WhiteMana == BlackMana;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool EnoughManaCombo => JobGauge.BlackMana >= ManaNeeded() && JobGauge.WhiteMana >= ManaNeeded();
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasEnoughManaFor1Combo => BlackMana >= 20 && WhiteMana >= 20;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasEnoughManaFor23Combo => BlackMana >= 15 && WhiteMana >= 15;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasEnoughManaFor4Combo => BlackMana >= 5 && WhiteMana >= 5;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ManaStacksMaxed => JobGauge.ManaStacks == 3;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool CanUseFlare => MoreBlackMana && JobGauge.BlackMana - JobGauge.WhiteMana < 18;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool CanUseHoly => MoreWhiteMana && JobGauge.WhiteMana - JobGauge.BlackMana < 18;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public int ManaNeeded()
+    {
+        if (!ZwerchhauPvE.EnoughLevel) return 20;
+
+        if (ZwerchhauPvE.EnoughLevel && !RedoublementPvE.EnoughLevel) return 35;
+
+        if (RedoublementPvE.EnoughLevel && !EmboldenPvE.EnoughLevel) return 50;
+
+        if (EmboldenPvE.EnoughLevel)
+        {
+            if (HasEmbolden) return 50;
+            switch (EmboldenPvE.Cooldown.RecastTimeElapsed)
+            {
+                case > 80:
+                    return 60;
+                case > 40 and <= 80:
+                    return 50;
+                case > 15 and <= 40:
+                    return 70;
+                case <= 15:
+                    return 90;
+            }
+        }
+
+        return 0;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static string? VerEndsFirst
+    {
+        get
+        {
+            if (!CanVerBoth)
+                return null;
+            if (VerStoneTime == null || VerFireTime == null)
+                return null;
+            if (VerStoneTime < VerFireTime)
+                return "VerStone";
+            if (VerFireTime < VerStoneTime)
+                return "VerFire";
+            return "Equal";
+        }
+    }
+    #endregion
+
+    #region Status Check
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasEmbolden => Player.HasStatus(true, StatusID.Embolden);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasEmbolden2 => Player.HasStatus(true, StatusID.Embolden_1297);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasDualcast => Player.HasStatus(true, StatusID.Dualcast);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasAccelerate => Player.HasStatus(true, StatusID.Acceleration);
+
+    /// <summary>
+    /// Time left on VerFire.
+    /// </summary>
+    public static float? VerFireTime => Player.StatusTime(true, StatusID.VerfireReady);
+
+    /// <summary>
+    /// Time left on VerStone.
+    /// </summary>
+    public static float? VerStoneTime => Player.StatusTime(true, StatusID.VerstoneReady);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool CanVerBoth => CanVerStone && CanVerFire;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool CanVerEither => CanVerFire || CanVerStone;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool CanVerStone => Player.HasStatus(true, StatusID.VerstoneReady);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool CanVerFire => Player.HasStatus(true, StatusID.VerfireReady);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool CanGrandImpact => Player.HasStatus(true, StatusID.GrandImpactReady);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool CanMagickedSwordplay => Player.HasStatus(true, StatusID.MagickedSwordplay);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasManafication => Player.HasStatus(true, StatusID.Manafication);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool CanPrefulgence => Player.HasStatus(true, StatusID.PrefulgenceReady);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasThornedFlourish => Player.HasStatus(true, StatusID.ThornedFlourish);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool CanInstantCast => HasSwift || HasAccelerate;
+    #endregion
+
+    #region Status Display
     /// <inheritdoc/>
     public override void DisplayStatus()
     {
         ImGui.Text("WhiteMana: " + WhiteMana.ToString());
         ImGui.Text("BlackMana: " + BlackMana.ToString());
         ImGui.Text("ManaStacks: " + ManaStacks.ToString());
-        ImGui.Text("IsWhiteManaLargerThanBlackMana: " + IsWhiteManaLargerThanBlackMana.ToString());
+        ImGui.Text("MoreWhiteMana: " + MoreWhiteMana.ToString());
         ImGui.Text("CanHealSingleSpell: " + CanHealSingleSpell.ToString());
     }
     #endregion
 
-    private static readonly StatusID[] SwiftcastStatus = [.. StatusHelper.SwiftcastStatus, StatusID.Acceleration];
-    static partial void ModifyJoltPvE(ref ActionSetting setting)
-    {
-        setting.StatusProvide = SwiftcastStatus;
-    }
     #region PvE Actions
-    static partial void ModifyVerfirePvE(ref ActionSetting setting)
+    static partial void ModifyRipostePvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.VerfireReady];
-        setting.StatusProvide = SwiftcastStatus;
+
     }
 
-    static partial void ModifyVerstonePvE(ref ActionSetting setting)
+    static partial void ModifyJoltPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.VerstoneReady];
-        setting.StatusProvide = SwiftcastStatus;
+        setting.StatusProvide = [StatusID.Dualcast];
     }
 
     static partial void ModifyVerthunderPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = SwiftcastStatus;
+        setting.StatusProvide = [StatusID.VerfireReady];
+    }
+
+    static partial void ModifyCorpsacorpsPvE(ref ActionSetting setting)
+    {
+        
     }
 
     static partial void ModifyVeraeroPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = SwiftcastStatus;
-    }
-
-    static partial void ModifyReprisePvE(ref ActionSetting setting)
-    {
-
-    }
-
-    static partial void ModifyRipostePvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => (BlackMana >= 20 && WhiteMana >= 20) || Player.HasStatus(true, StatusID.MagickedSwordplay);
-    }
-
-    static partial void ModifyZwerchhauPvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => (BlackMana >= 15 && WhiteMana >= 15) || Player.HasStatus(true, StatusID.MagickedSwordplay);
-        setting.ComboIds = [ActionID.RipostePvE];
-    }
-
-    static partial void ModifyRedoublementPvE(ref ActionSetting setting)
-    {
-        setting.ActionCheck = () => (BlackMana >= 15 && WhiteMana >= 15) || Player.HasStatus(true, StatusID.MagickedSwordplay);
-        setting.ComboIds = [ActionID.ZwerchhauPvE];
+        setting.StatusProvide = [StatusID.VerstoneReady];
     }
 
     static partial void ModifyScatterPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = SwiftcastStatus;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 3,
@@ -101,39 +256,73 @@ public partial class RedMageRotation
 
     static partial void ModifyVerthunderIiPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = SwiftcastStatus;
+
     }
 
     static partial void ModifyVeraeroIiPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = SwiftcastStatus;
+
     }
 
-    static partial void ModifyMoulinetPvE(ref ActionSetting setting)
+    static partial void ModifyVerfirePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => BlackMana >= 20 && WhiteMana >= 20;
+        setting.StatusNeed = [StatusID.VerfireReady];
     }
 
-    static partial void ModifyScorchPvE(ref ActionSetting setting)
+    static partial void ModifyVerstonePvE(ref ActionSetting setting)
     {
-        setting.ComboIds = [ActionID.VerholyPvE, ActionID.VerfirePvE];
+        setting.StatusNeed = [StatusID.VerstoneReady];
     }
 
-    static partial void ModifyResolutionPvE(ref ActionSetting setting)
+    static partial void ModifyZwerchhauPvE(ref ActionSetting setting)
     {
-        setting.ComboIds = [ActionID.ScorchPvE];
+        setting.ComboIds = [ActionID.RipostePvE];
     }
 
-    private protected sealed override IBaseAction Raise => VerraisePvE;
+    static partial void ModifyDisplacementPvE(ref ActionSetting setting)
+    {
+        
+    }
+
+    static partial void ModifyEngagementPvE(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyFlechePvE(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyRedoublementPvE(ref ActionSetting setting)
+    {
+        setting.ComboIds = [ActionID.ZwerchhauPvE];
+    }
 
     static partial void ModifyAccelerationPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.Acceleration];
     }
 
+    static partial void ModifyMoulinetPvE(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 3,
+        };
+    }
+
     static partial void ModifyVercurePvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = SwiftcastStatus;
+        setting.StatusProvide = [StatusID.Dualcast];
+    }
+
+    static partial void ModifyContreSixtePvE(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyEmboldenPvE(ref ActionSetting setting)
@@ -141,6 +330,7 @@ public partial class RedMageRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 10,
+            AoeCount = 1,
         };
     }
 
@@ -175,40 +365,89 @@ public partial class RedMageRotation
         setting.IsFriendly = true;
     }
 
-    static partial void ModifyCorpsacorpsPvE(ref ActionSetting setting)
+    static partial void ModifyJoltIiPvE(ref ActionSetting setting)
     {
-        setting.SpecialType = SpecialActionType.MovingForward;
+        
+    }
+
+    static partial void ModifyVerraisePvE(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyVerflarePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => ManaStacks == 3;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyVerholyPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 68123;
+        setting.ActionCheck = () => ManaStacks == 3;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.VercurePvE)]
-    protected override bool HealSingleGCD(out IAction? act)
+    static partial void ModifyReprisePvE(ref ActionSetting setting)
     {
-        return VercurePvE.CanUse(out act, skipStatusProvideCheck: true) || base.HealSingleGCD(out act);
+
     }
 
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.CorpsacorpsPvE)]
-    protected override bool MoveForwardAbility(IAction nextGCD, out IAction? act)
+    static partial void ModifyScorchPvE(ref ActionSetting setting)
     {
-        return CorpsacorpsPvE.CanUse(out act) || base.MoveForwardAbility(nextGCD, out act);
+        setting.ComboIds = [ActionID.VerholyPvE, ActionID.VerfirePvE];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
-    /// <inheritdoc/>
-    [RotationDesc(ActionID.AddlePvE, ActionID.MagickBarrierPvE)]
-    protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
+    static partial void ModifyVerthunderIiiPvE(ref ActionSetting setting)
     {
-        return AddlePvE.CanUse(out act) || MagickBarrierPvE.CanUse(out act, skipAoeCheck: true) || base.DefenseAreaAbility(nextGCD, out act);
+        setting.StatusProvide = [StatusID.VerfireReady];
     }
+
+    static partial void ModifyVeraeroIiiPvE(ref ActionSetting setting)
+    {
+        setting.StatusProvide = [StatusID.VerstoneReady];
+    }
+
+    static partial void ModifyJoltIiiPvE(ref ActionSetting setting)
+    {
+
+    }
+
+    static partial void ModifyMagickBarrierPvE(ref ActionSetting setting)
+    {
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
+    static partial void ModifyResolutionPvE(ref ActionSetting setting)
+    {
+        setting.ComboIds = [ActionID.ScorchPvE];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+
 
     static partial void ModifyViceOfThornsPvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.ThornedFlourish];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyGrandImpactPvE(ref ActionSetting setting)
@@ -223,6 +462,47 @@ public partial class RedMageRotation
     static partial void ModifyPrefulgencePvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.PrefulgenceReady];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
+    }
+    #endregion
+
+    #region Enchanted Actions
+    static partial void ModifyEnchantedRipostePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => HasEnoughManaFor1Combo || CanMagickedSwordplay;
+    }
+
+    static partial void ModifyEnchantedZwerchhauPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => HasEnoughManaFor23Combo || CanMagickedSwordplay;
+    }
+
+    static partial void ModifyEnchantedRedoublementPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => HasEnoughManaFor23Combo || CanMagickedSwordplay;
+    }
+
+    static partial void ModifyEnchantedMoulinetPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => HasEnoughManaFor1Combo || CanMagickedSwordplay;
+    }
+
+    static partial void ModifyEnchantedMoulinetDeuxPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => HasEnoughManaFor23Combo || CanMagickedSwordplay;
+    }
+
+    static partial void ModifyEnchantedMoulinetTroisPvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => HasEnoughManaFor23Combo || CanMagickedSwordplay;
+    }
+
+    static partial void ModifyEnchantedReprisePvE(ref ActionSetting setting)
+    {
+        setting.ActionCheck = () => HasEnoughManaFor4Combo || CanMagickedSwordplay;
     }
     #endregion
 

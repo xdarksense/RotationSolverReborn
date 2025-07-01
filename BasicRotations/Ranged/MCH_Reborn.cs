@@ -4,7 +4,7 @@ namespace RebornRotations.Ranged;
 
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.25")]
 [SourceCode(Path = "main/BasicRotations/Ranged/MCH_Reborn.cs")]
-[Api(4)]
+[Api(5)]
 public sealed class MCH_Reborn : MachinistRotation
 {
     #region Config Options
@@ -52,14 +52,14 @@ public sealed class MCH_Reborn : MachinistRotation
                     return true;
                 }
             }
-            if ((HasWildfire || (WildfirePvE.Cooldown.IsCoolingDown && Battery == 100)) && !FullMetalFieldPvE.EnoughLevel)
+            if (!FullMetalFieldPvE.EnoughLevel && (HasWildfire || (WildfirePvE.Cooldown.IsCoolingDown && Battery == 100)))
             {
                 if (HyperchargePvE.CanUse(out act, skipTTKCheck: true))
                 {
                     return true;
                 }
             }
-            if (HasWildfire && FullMetalFieldPvE.EnoughLevel && IsLastAction(false, FullMetalFieldPvE))
+            if (HasWildfire && IsLastAction(false, FullMetalFieldPvE))
             {
                 if (HyperchargePvE.CanUse(out act, skipTTKCheck: true))
                 {
@@ -141,11 +141,6 @@ public sealed class MCH_Reborn : MachinistRotation
             }
         }
 
-        if (UseQueen(out act, nextGCD))
-        {
-            return true;
-        }
-
         bool LowLevelHyperCheck = !AutoCrossbowPvE.EnoughLevel && SpreadShotPvE.CanUse(out _);
 
         if (IsBurst)
@@ -154,7 +149,7 @@ public sealed class MCH_Reborn : MachinistRotation
             {
                 if ((Heat >= 50 || HasHypercharged) && !LowLevelHyperCheck)
                 {
-                    if (WeaponRemain < GCDTime(1) / 2
+                    if (WeaponRemain < (GCDTime(1) / 2)
                         && nextGCD.IsTheSameTo(false, FullMetalFieldPvE)
                         && WildfirePvE.CanUse(out act))
                     {
@@ -170,7 +165,7 @@ public sealed class MCH_Reborn : MachinistRotation
             {
                 if ((Heat >= 50 || HasHypercharged) && ToolChargeSoon(out _) && !LowLevelHyperCheck)
                 {
-                    if (WeaponRemain < GCDTime(1) / 2 && WildfirePvE.CanUse(out act))
+                    if (WeaponRemain < (GCDTime(1) / 2) && WildfirePvE.CanUse(out act))
                     {
                         var IsTargetBoss = WildfirePvE.Target.Target?.IsBossFromIcon() ?? false;
                         if ((IsTargetBoss && WildfireBoss) || !WildfireBoss)
@@ -180,6 +175,11 @@ public sealed class MCH_Reborn : MachinistRotation
                     }
                 }
             }
+        }
+
+        if (UseQueen(out act, nextGCD))
+        {
+            return true;
         }
 
         // Use Hypercharge if wildfire will not be up in 30 seconds or if you hit 100 heat

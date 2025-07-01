@@ -4,7 +4,7 @@ namespace RebornRotations.Tank;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.25")]
 [SourceCode(Path = "main/BasicRotations/Tank/PLD_Default.cs")]
-[Api(4)]
+[Api(5)]
 
 public sealed class PLD_Default : PaladinRotation
 {

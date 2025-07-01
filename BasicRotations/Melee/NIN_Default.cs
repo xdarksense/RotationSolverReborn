@@ -2,7 +2,7 @@ namespace RebornRotations.Melee;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.25")]
 [SourceCode(Path = "main/BasicRotations/Melee/NIN_Default.cs")]
-[Api(4)]
+[Api(5)]
 
 public sealed class NIN_Default : NinjaRotation
 {
@@ -1014,6 +1014,7 @@ public sealed class NIN_Default : NinjaRotation
             return base.GeneralGCD(out act);
         }
 
+        // AOE
         if (HakkeMujinsatsuPvE.CanUse(out act))
         {
             return true;
@@ -1055,6 +1056,7 @@ public sealed class NIN_Default : NinjaRotation
                 }
             }
         }
+
         if (GustSlashPvE.CanUse(out act))
         {
             return true;
@@ -1074,7 +1076,7 @@ public sealed class NIN_Default : NinjaRotation
             }
         }
 
-        if (AutoUnhide)
+        if (AutoUnhide && IsHidden)
         {
             StatusHelper.StatusOff(StatusID.Hidden);
         }

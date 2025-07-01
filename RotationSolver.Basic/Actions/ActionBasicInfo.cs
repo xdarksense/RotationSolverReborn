@@ -166,11 +166,12 @@ public readonly struct ActionBasicInfo
     /// Performs a basic check to determine whether the action can be used.
     /// </summary>
     /// <param name="skipStatusProvideCheck">Whether to skip the status provide check.</param>
+    /// /// <param name="skipStatusNeed">Whether to skip the casting check.</param>
     /// <param name="skipComboCheck">Whether to skip the combo check.</param>
     /// <param name="skipCastingCheck">Whether to skip the casting check.</param>
     /// /// <param name="checkActionManager">Whether to check the action manager directly for skills being usable.</param>
     /// <returns>True if the action passes the basic check; otherwise, false.</returns>
-    internal readonly bool BasicCheck(bool skipStatusProvideCheck, bool skipComboCheck, bool skipCastingCheck, bool checkActionManager = false)
+    internal readonly bool BasicCheck(bool skipStatusProvideCheck, bool skipStatusNeed,  bool skipComboCheck, bool skipCastingCheck, bool checkActionManager = false)
     {
 
         // 1. Player and action slot checks
@@ -190,7 +191,7 @@ public readonly struct ActionBasicInfo
         }
 
         // 3. Status checks: need or provide
-        if (IsStatusNeeded() || IsStatusProvided(skipStatusProvideCheck))
+        if (IsStatusNeeded(skipStatusNeed) || IsStatusProvided(skipStatusProvideCheck))
         {
             return false;
         }
@@ -255,9 +256,9 @@ public readonly struct ActionBasicInfo
         return DataCenter.CurrentMp >= MPNeed;
     }
 
-    private bool IsStatusNeeded()
+    private bool IsStatusNeeded(bool skipStatusNeed)
     {
-        return Player.Object.StatusList != null && _action.Setting.StatusNeed != null && Player.Object.WillStatusEndGCD(_action.Config.StatusGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusNeed);
+        return Player.Object.StatusList != null && !skipStatusNeed && _action.Setting.StatusNeed != null && Player.Object.WillStatusEndGCD(_action.Config.StatusGcdCount, 0, _action.Setting.StatusFromSelf, _action.Setting.StatusNeed);
     }
 
     private bool IsStatusProvided(bool skipStatusProvideCheck)

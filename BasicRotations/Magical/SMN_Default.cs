@@ -5,7 +5,7 @@ namespace RebornRotations.Magical;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.25")]
 [SourceCode(Path = "main/BasicRotations/Magical/SMN_Default.cs")]
-[Api(4)]
+[Api(5)]
 public sealed class SMN_Default : SummonerRotation
 {
 

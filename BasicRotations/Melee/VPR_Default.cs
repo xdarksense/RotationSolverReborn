@@ -2,7 +2,7 @@
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.25")]
 [SourceCode(Path = "main/BasicRotations/Melee/VPR_Default.cs")]
-[Api(4)]
+[Api(5)]
 public sealed class VPR_Default : ViperRotation
 {
     #region Config Options
