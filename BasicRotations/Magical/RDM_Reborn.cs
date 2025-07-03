@@ -18,7 +18,7 @@ public sealed class RDM_Reborn : RedMageRotation
     [RotationConfig(CombatType.PvE, Name = "Use Displacement after Engagement (use at own risk).")]
     public bool SuicideByDumber { get; set; } = false;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Corps-a-corps when standing still (use at own risk).")]
+    [RotationConfig(CombatType.PvE, Name = "Use Corps-a-corps when standing still (use at own risk). (Ignores the below setting)")]
     public bool SuicideByDumb { get; set; } = false;
 
     [Range(0, 25, ConfigUnitType.Yalms)]
@@ -291,18 +291,10 @@ public sealed class RDM_Reborn : RedMageRotation
             }
             if (WhiteMana < BlackMana)
             {
-                if (VeraeroIiPvE.CanUse(out act) && BlackMana - WhiteMana != 5)
-                {
-                    return true;
-                }
                 if (VeraeroPvE.CanUse(out act) && BlackMana - WhiteMana != 6)
                 {
                     return true;
                 }
-            }
-            if (VerthunderIiPvE.CanUse(out act))
-            {
-                return true;
             }
             if (VerthunderPvE.CanUse(out act))
             {
@@ -438,9 +430,26 @@ public sealed class RDM_Reborn : RedMageRotation
             return true;
         }
 
-        if (JoltPvE.CanUse(out act))
+        if (!CanInstantCast && !CanVerEither)
         {
-            return true;
+            if (WhiteMana < BlackMana)
+            {
+                if (VeraeroIiPvE.CanUse(out act))
+                {
+                    return true;
+                }
+            }
+            if (WhiteMana >= BlackMana)
+            {
+                if (VerthunderIiPvE.CanUse(out act))
+                {
+                    return true;
+                }
+            }
+            if (JoltPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         if (UseVercure && !InCombat && VercurePvE.CanUse(out act))
