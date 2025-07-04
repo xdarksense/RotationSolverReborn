@@ -2276,7 +2276,6 @@ public partial class RotationConfigWindow : Window
                     ImGui.Text("AoeCount: " + action.Config.AoeCount);
                     ImGui.Text("ShouldCheckStatus: " + action.Config.ShouldCheckStatus);
                     ImGui.Text("ShouldCheckTargetStatus: " + action.Config.ShouldCheckTargetStatus);
-#if DEBUG
                     ImGui.Text("Is Real GCD: " + action.Info.IsRealGCD);
                     ImGui.Text("Is PvP Action: " + action.Info.IsPvP);
                     ImGui.Text("Cast Type: " + action.Info.CastType);
@@ -2289,7 +2288,6 @@ public partial class RotationConfigWindow : Window
                     }
                     ImGui.Text("Cast Time: " + action.Info.CastTime);
                     ImGui.Text("MP: " + action.Info.MPNeed);
-#endif
                     ImGui.Text("AttackType: " + action.Info.AttackType);
                     ImGui.Text("Level: " + action.Info.Level);
                     ImGui.Text("Range: " + action.Info.Range);
