@@ -950,6 +950,7 @@ public static class ObjectHelper
     public static bool IsSpecialImmune(this IBattleChara battleChara)
     {
         return battleChara.IsWolfImmune()
+            || battleChara.IsSuperiorFlightUnitImmune()
             || battleChara.IsJeunoBossImmune()
             || battleChara.IsDeadStarImmune()
             || battleChara.IsCODBossImmune()
@@ -993,6 +994,54 @@ public static class ObjectHelper
                 if (Service.Config.InDebug)
                 {
                     PluginLog.Information("IsWolfImmune: StonePack status found");
+                }
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="battleChara">the object.</param>
+    /// <returns></returns>
+    public static bool IsSuperiorFlightUnitImmune(this IBattleChara battleChara)
+    {
+        if (DataCenter.TerritoryID == 736)
+        {
+            var ShieldProtocolAPlayer = Player.Object.HasStatus(false, StatusID.ShieldProtocolA);
+            var ShieldProtocolBPlayer = Player.Object.HasStatus(false, StatusID.ShieldProtocolB);
+            var ShieldProtocolCPlayer = Player.Object.HasStatus(false, StatusID.ShieldProtocolC);
+
+            var ProcessOfEliminationA = battleChara.HasStatus(false, StatusID.ProcessOfEliminationA);
+            var ProcessOfEliminationB = battleChara.HasStatus(false, StatusID.ProcessOfEliminationB);
+            var ProcessOfEliminationC = battleChara.HasStatus(false, StatusID.ProcessOfEliminationC);
+
+            if (ProcessOfEliminationA && (ShieldProtocolBPlayer || ShieldProtocolCPlayer))
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsSuperiorFlightUnitImmune: ProcessOfEliminationA Immune status found");
+                }
+                return true;
+            }
+
+            if (ProcessOfEliminationB && (ShieldProtocolAPlayer || ShieldProtocolCPlayer))
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsSuperiorFlightUnitImmune: ProcessOfEliminationB Immune status found");
+                }
+                return true;
+            }
+
+            if (ProcessOfEliminationC && (ShieldProtocolAPlayer || ShieldProtocolBPlayer))
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsSuperiorFlightUnitImmune: ProcessOfEliminationC Immune status found");
                 }
                 return true;
             }
