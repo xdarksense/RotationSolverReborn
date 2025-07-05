@@ -1007,6 +1007,44 @@ public static class ObjectHelper
     /// </summary>
     /// <param name="battleChara">the object.</param>
     /// <returns></returns>
+    public static bool IsIrminsulSawtoothImmune(this IBattleChara battleChara)
+    {
+        if (DataCenter.TerritoryID == 120)
+        {
+            var RangedPhysicalRole = Player.Job.IsPhysicalRangedDps();
+            var RangedMagicalRole = Player.Job.IsMagicalRangedDps();
+            var HealerRole = Player.Job.IsHealer();
+
+            var RangedResistance = battleChara.HasStatus(false, StatusID.RangedResistance);
+            var MagicResistance = battleChara.HasStatus(false, StatusID.MagicResistance);
+
+            if (RangedResistance && RangedPhysicalRole)
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsIrminsulSawtoothImmune: Sawtooth Immune status found");
+                }
+                return true;
+            }
+
+            if (MagicResistance && (RangedMagicalRole || HealerRole))
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsIrminsulSawtoothImmune: Irminsul Immune status found");
+                }
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="battleChara">the object.</param>
+    /// <returns></returns>
     public static bool IsSuperiorFlightUnitImmune(this IBattleChara battleChara)
     {
         if (DataCenter.TerritoryID == 736)
