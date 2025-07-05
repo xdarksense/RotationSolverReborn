@@ -281,7 +281,7 @@ public partial class MachinistRotation
     static partial void ModifyTacticianPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 67244;
-        setting.StatusProvide = StatusHelper.PhysicalRangedResistance;
+        setting.StatusProvide = StatusHelper.RangePhysicalDefense;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -290,7 +290,6 @@ public partial class MachinistRotation
 
     static partial void ModifyDrillPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = StatusHelper.PhysicalRangedResistance;
         setting.UnlockedByQuestID = 67246;
         setting.CreateConfig = () => new ActionConfig()
         {

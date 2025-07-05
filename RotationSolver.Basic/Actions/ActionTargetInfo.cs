@@ -288,6 +288,10 @@ public struct ActionTargetInfo(IBaseAction action)
         {
             return false;
         }
+        if (battleChara.StatusList == null)
+        {
+            return false;
+        }
 
         try
         {
@@ -307,7 +311,7 @@ public struct ActionTargetInfo(IBaseAction action)
             }
             if (Range >= 20) // Range
             {
-                if (battleChara.HasStatus(false, StatusID.RangedResistance, StatusID.EnergyField))
+                if (battleChara.HasStatus(false, StatusID.EnergyField))
                 {
                     return false;
                 }
