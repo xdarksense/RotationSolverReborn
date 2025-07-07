@@ -9,7 +9,7 @@ public sealed class BRD_Default : BardRotation
     #region Config Options
 
     [Range(1, 5, ConfigUnitType.Seconds, 0.1f)]
-    [RotationConfig(CombatType.PvE, Name = "Buff Alighnment Timer (Experimental, do not touch if you don't understand it)")]
+    [RotationConfig(CombatType.PvE, Name = "Buff Alignment Timer (Experimental, do not touch if you don't understand it)")]
     public float BuffAlignment { get; set; } = 1;
 
     [RotationConfig(CombatType.PvE, Name = "Attempt to assign Raging Strikes, Battle Voice, and Radiant Finale to specific ogcd slots (Experimental)")]

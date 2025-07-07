@@ -110,7 +110,7 @@ public partial class CustomRotation
         {
             IBaseAction.ShouldEndSpecial = true;
         }
-        if (DataCenter.MergedStatus.HasFlag(AutoStatus.Positional) && !Player.HasStatus(true, StatusID.Mudra) && TrueNorthPvE.Cooldown.CurrentCharges > 0 && !IsLastAbility(true, TrueNorthPvE) && TrueNorthPvE.CanUse(out act, skipComboCheck: true, usedUp: true))
+        if (DataCenter.MergedStatus.HasFlag(AutoStatus.Positional) && !Player.HasStatus(true, StatusID.Mudra) && !Player.HasStatus(true, StatusID.TrueNorth) && TrueNorthPvE.Cooldown.CurrentCharges > 0 && !IsLastAbility(false, TrueNorthPvE) && TrueNorthPvE.CanUse(out act, skipComboCheck: true, usedUp: true))
         {
             return true;
         }

@@ -61,7 +61,7 @@ public partial class SamuraiRotation
     }
     #endregion
 
-    #region Status Tracking
+    #region Old Status Tracking
 
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Strength;
@@ -80,11 +80,92 @@ public partial class SamuraiRotation
     /// 
     /// </summary>
     public static bool IsMoonTimeLessThanFlower => Player.StatusTime(true, StatusID.Fugetsu) < Player.StatusTime(true, StatusID.Fuka);
+    #endregion
+
+    #region Status Tracking
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasMeikyoShisui => Player.HasStatus(true, StatusID.MeikyoShisui);
 
     /// <summary>
     /// 
     /// </summary>
-    public static bool HaveMeikyoShisui => Player.HasStatus(true, StatusID.MeikyoShisui);
+    public static bool HasTendo => Player.HasStatus(true, StatusID.Tendo);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasTsubamegaeshiReady => Player.HasStatus(true, StatusID.Tsubamegaeshi);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasOgiNamikiri => Player.HasStatus(true, StatusID.OgiNamikiri);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasZanshinReady1318 => Player.HasStatus(true, StatusID.ZanshinReady);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasZanshinReady => Player.HasStatus(true, StatusID.ZanshinReady_3855);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasFugetsuAndFuka => HasFugetsu && HasFuka;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool WillFugetsuEnd => Player.WillStatusEnd(5, true, StatusID.Fugetsu);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool WillFukaEnd => Player.WillStatusEnd(5, true, StatusID.Fuka);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasFugetsu => Player.HasStatus(true, StatusID.Fugetsu);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasFuka => Player.HasStatus(true, StatusID.Fuka);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static float? FugetsuTime => Player.StatusTime(true, StatusID.Fugetsu);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static float? FukaTime => Player.StatusTime(true, StatusID.Fuka);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static string? FugetsuOrFukaEndsFirst
+    {
+        get
+        {
+            if (!HasFugetsuAndFuka)
+                return null;
+            if (FugetsuTime == null || FukaTime == null)
+                return null;
+            if (FugetsuTime < FukaTime)
+                return "Fugetsu";
+            if (FukaTime < FugetsuTime)
+                return "Fuka";
+            return "Equal";
+        }
+    }
     #endregion
 
     #region Actions Unassignable
@@ -137,6 +218,11 @@ public partial class SamuraiRotation
     /// 
     /// </summary>
     public static bool TendoKaeshiSetsugekkaReady => Service.GetAdjustedActionId(ActionID.TsubamegaeshiPvE) == ActionID.TendoKaeshiSetsugekkaPvE;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool TsubamegaeshiActionReady => Service.GetAdjustedActionId(ActionID.TsubamegaeshiPvE) != ActionID.TsubamegaeshiPvE;
     #endregion
 
     #region Debug
@@ -152,7 +238,7 @@ public partial class SamuraiRotation
         ImGui.Text("SenCount: " + SenCount.ToString());
         ImGui.Text("HasMoon: " + HasMoon.ToString());
         ImGui.Text("HasFlower: " + HasFlower.ToString());
-        ImGui.Text("HaveMeikyoShisui: " + HaveMeikyoShisui.ToString());
+        ImGui.Text("HaveMeikyoShisui: " + HasMeikyoShisui.ToString());
         ImGui.Text("HiganbanaReady: " + HiganbanaReady.ToString());
         ImGui.Text("TenkaGokenReady: " + TenkaGokenReady.ToString());
         ImGui.Text("MidareSetsugekkaReady: " + MidareSetsugekkaReady.ToString());
@@ -320,7 +406,7 @@ public partial class SamuraiRotation
 
     static partial void ModifyTsubamegaeshiPvE(ref ActionSetting setting)
     {
-
+        
     }
 
     static partial void ModifyShohaPvE(ref ActionSetting setting)
@@ -401,7 +487,7 @@ public partial class SamuraiRotation
 
     static partial void ModifyKaeshiGokenPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => KaeshiGokenReady;
+        setting.StatusNeed = [StatusID.TsubamegaeshiReady];
         setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -443,7 +529,7 @@ public partial class SamuraiRotation
 
     static partial void ModifyTendoKaeshiGokenPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => TendoKaeshiGokenReady;
+        setting.StatusNeed = [StatusID.Tsubamegaeshi_4217];
         setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -453,7 +539,6 @@ public partial class SamuraiRotation
 
     static partial void ModifyTendoKaeshiSetsugekkaPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => TendoKaeshiSetsugekkaReady;
         setting.StatusNeed = [StatusID.Tsubamegaeshi_4218];
     }
 
