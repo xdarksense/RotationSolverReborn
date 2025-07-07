@@ -116,12 +116,12 @@ public sealed class SAM_Reborn : SamuraiRotation
         if (MeikyoShisuiPvE.CanUse(out act, usedUp: !EnhancedMeikyoShisuiTrait.EnoughLevel || (EnhancedMeikyoShisuiTrait.EnoughLevel && MeikyoShisuiPvE.Cooldown.WillHaveXChargesGCD(2, 1)) || TsubamegaeshiActionReady)
             && HasHostilesInRange && (!HasFugetsuAndFuka || (isTargetBoss && isTargetDying) || (CurrentTarget?.HasStatus(true, StatusID.Higanbana) ?? false) && !(CurrentTarget?.WillStatusEndGCD(HiganbanaPvE.Config.StatusGcdCount, 0, true, StatusID.Higanbana) ?? false)))
         {
-            if (!EnhancedHissatsuTrait.EnoughLevel && SenCount == 0 && !TsubamegaeshiActionReady)
+            if ((!EnhancedHissatsuTrait.EnoughLevel && SenCount == 0 && !TsubamegaeshiActionReady) || !HasFugetsuAndFuka)
             {
                 return true;
             }
 
-            if (TsubamegaeshiActionReady)
+            if (!HasFugetsuAndFuka || TsubamegaeshiActionReady || IsLastAction(false, TendoKaeshiSetsugekkaPvE))
             {
                 return true;
             }
@@ -186,7 +186,7 @@ public sealed class SAM_Reborn : SamuraiRotation
 
         if (!HiganbanaTargets || (HiganbanaTargets && NumberOfAllHostilesInRange < 2) && HasFugetsuAndFuka && !WillFugetsuEnd && !WillFukaEnd && !HasMeikyoShisui && !MidareSetsugekkaReady)
         {
-            if (HiganbanaPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true) && HiganbanaPvE.Target.Target != null && (HiganbanaPvE.Target.Target?.WillStatusEnd(18, true, StatusID.Higanbana) ?? false))
+            if (HiganbanaPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipTTKCheck: isTargetBoss) && HiganbanaPvE.Target.Target != null && (HiganbanaPvE.Target.Target?.WillStatusEnd(18, true, StatusID.Higanbana) ?? false))
             {
                 return true;
             }
@@ -337,12 +337,12 @@ public sealed class SAM_Reborn : SamuraiRotation
         }
 
         // use 2nd finisher combo spell first
-        if (!KaeshiNamikiriReady && KaeshiSetsugekkaPvE.CanUse(out act, usedUp: true))
+        if (KaeshiSetsugekkaPvE.CanUse(out act))
         {
             return true;
         }
 
-        if (!KaeshiNamikiriReady && TendoKaeshiSetsugekkaPvE.CanUse(out act, usedUp: true))
+        if (TendoKaeshiSetsugekkaPvE.CanUse(out act))
         {
             return true;
         }
@@ -428,7 +428,7 @@ public sealed class SAM_Reborn : SamuraiRotation
             }
         }
 
-        if (!HasMeikyoShisui)
+        if (!HasMeikyoShisui && !TsubamegaeshiActionReady)
         {
             if (HakazePvE.CanUse(out act))
             {

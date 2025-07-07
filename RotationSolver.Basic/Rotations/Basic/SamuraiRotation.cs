@@ -222,7 +222,7 @@ public partial class SamuraiRotation
     /// <summary>
     /// 
     /// </summary>
-    public bool TsubamegaeshiActionReady => Service.GetAdjustedActionId(ActionID.TsubamegaeshiPvE) != ActionID.TsubamegaeshiPvE;
+    public static bool TsubamegaeshiActionReady => Service.GetAdjustedActionId(ActionID.TsubamegaeshiPvE) != ActionID.TsubamegaeshiPvE;
     #endregion
 
     #region Debug
@@ -462,7 +462,7 @@ public partial class SamuraiRotation
 
     static partial void ModifyHiganbanaPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => HiganbanaReady;
+        setting.ActionCheck = () => SenCount == 1;
         setting.TargetStatusProvide = [StatusID.Higanbana];
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -472,7 +472,7 @@ public partial class SamuraiRotation
 
     static partial void ModifyTenkaGokenPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => TenkaGokenReady;
+        setting.ActionCheck = () => SenCount == 2 && !HasTendo;
         setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -482,7 +482,7 @@ public partial class SamuraiRotation
 
     static partial void ModifyMidareSetsugekkaPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => MidareSetsugekkaReady;
+        setting.ActionCheck = () => SenCount == 3 && !HasTendo;
     }
 
     static partial void ModifyKaeshiGokenPvE(ref ActionSetting setting)
@@ -497,7 +497,6 @@ public partial class SamuraiRotation
 
     static partial void ModifyKaeshiSetsugekkaPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => KaeshiSetsugekkaReady;
         setting.StatusNeed = [StatusID.Tsubamegaeshi];
     }
 
@@ -512,7 +511,8 @@ public partial class SamuraiRotation
 
     static partial void ModifyTendoGokenPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => TendoGokenReady;
+        setting.ActionCheck = () => SenCount == 2;
+        setting.StatusNeed = [StatusID.Tendo];
         setting.IsFriendly = false;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -522,7 +522,7 @@ public partial class SamuraiRotation
 
     static partial void ModifyTendoSetsugekkaPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => TendoSetsugekkaReady;
+        setting.ActionCheck = () => SenCount == 3;
         setting.StatusProvide = [StatusID.Tsubamegaeshi];
         setting.StatusNeed = [StatusID.Tendo];
     }
