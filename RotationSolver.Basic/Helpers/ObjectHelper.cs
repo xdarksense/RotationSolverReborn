@@ -1009,7 +1009,7 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsIrminsulSawtoothImmune(this IBattleChara battleChara)
     {
-        if (DataCenter.TerritoryID == 120)
+        if (DataCenter.TerritoryID == 508)
         {
             var RangedPhysicalRole = Player.Job.IsPhysicalRangedDps();
             var RangedMagicalRole = Player.Job.IsMagicalRangedDps();
@@ -1047,7 +1047,7 @@ public static class ObjectHelper
     /// <returns></returns>
     public static bool IsSuperiorFlightUnitImmune(this IBattleChara battleChara)
     {
-        if (DataCenter.TerritoryID == 736)
+        if (DataCenter.TerritoryID == 917)
         {
             var ShieldProtocolAPlayer = Player.Object.HasStatus(false, StatusID.ShieldProtocolA);
             var ShieldProtocolBPlayer = Player.Object.HasStatus(false, StatusID.ShieldProtocolB);

@@ -2295,7 +2295,9 @@ public partial class RotationConfigWindow : Window
                     ImGui.Text("Aspect: " + action.Info.Aspect);
                     ImGui.Text("Has One:" + action.Cooldown.HasOneCharge);
                     ImGui.Text("Recast One: " + action.Cooldown.RecastTimeOneChargeRaw);
-                    ImGui.Text("Recast Elapsed: " + action.Cooldown.RecastTimeElapsedRaw);
+                    ImGui.Text("Recast Elapsed: " + action.Cooldown.RecastTimeElapsed);
+                    ImGui.Text("Recast Time Elapsed One Charge: " + action.Cooldown.RecastTimeElapsedOneCharge);
+                    ImGui.Text("Recast Time Remain One Charge: " + action.Cooldown.RecastTimeRemainOneCharge);
                     ImGui.Text($"Charges: {action.Cooldown.CurrentCharges} / {action.Cooldown.MaxCharges}");
 
                     ImGui.Text("IgnoreCastCheck:" + action.CanUse(out _, skipCastingCheck: true));
