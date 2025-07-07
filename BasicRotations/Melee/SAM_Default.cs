@@ -164,7 +164,7 @@ public sealed class SAM_Default : SamuraiRotation
         if ((CurrentTarget?.HasStatus(true, StatusID.Higanbana) ?? false) &&
             (CurrentTarget?.WillStatusEnd(32, true, StatusID.Higanbana) ?? false) &&
             !(CurrentTarget?.WillStatusEnd(28, true, StatusID.Higanbana) ?? false) &&
-            SenCount == 1 && IsLastAction(true, YukikazePvE) && !HaveMeikyoShisui)
+            SenCount == 1 && IsLastAction(true, YukikazePvE) && !HasMeikyoShisui)
         {
             if (HagakurePvE.CanUse(out act))
             {
@@ -289,12 +289,12 @@ public sealed class SAM_Default : SamuraiRotation
         }
 
         // aoe 12 combo's 2
-        if ((!HasMoon || IsMoonTimeLessThanFlower || !OkaPvE.EnoughLevel) && MangetsuPvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && !HasGetsu))
+        if ((!HasMoon || IsMoonTimeLessThanFlower || !OkaPvE.EnoughLevel) && MangetsuPvE.CanUse(out act, skipComboCheck: HasMeikyoShisui && !HasGetsu))
         {
             return true;
         }
 
-        if ((!HasFlower || !IsMoonTimeLessThanFlower) && OkaPvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && !HasKa))
+        if ((!HasFlower || !IsMoonTimeLessThanFlower) && OkaPvE.CanUse(out act, skipComboCheck: HasMeikyoShisui && !HasKa))
         {
             return true;
         }
@@ -339,28 +339,28 @@ public sealed class SAM_Default : SamuraiRotation
         }
 
         if (!HasSetsu && SamBuffs.All(buff => Player.HasStatus(true, buff)) &&
-            YukikazePvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && HasGetsu && HasKa))
+            YukikazePvE.CanUse(out act, skipComboCheck: HasMeikyoShisui && HasGetsu && HasKa))
         {
             return true;
         }
 
         // single target 123 combo's 3 or used 3 directly during burst when MeikyoShisui is active, while also trying to start with the one that player is in position for extra DMG
-        if (GekkoPvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && !HasGetsu) && GekkoPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, GekkoPvE.Target.Target))
+        if (GekkoPvE.CanUse(out act, skipComboCheck: HasMeikyoShisui && !HasGetsu) && GekkoPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, GekkoPvE.Target.Target))
         {
             return true;
         }
 
-        if (KashaPvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && !HasKa) && KashaPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, KashaPvE.Target.Target))
+        if (KashaPvE.CanUse(out act, skipComboCheck: HasMeikyoShisui && !HasKa) && KashaPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, KashaPvE.Target.Target))
         {
             return true;
         }
 
-        if (GekkoPvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && !HasGetsu))
+        if (GekkoPvE.CanUse(out act, skipComboCheck: HasMeikyoShisui && !HasGetsu))
         {
             return true;
         }
 
-        if (KashaPvE.CanUse(out act, skipComboCheck: HaveMeikyoShisui && !HasKa))
+        if (KashaPvE.CanUse(out act, skipComboCheck: HasMeikyoShisui && !HasKa))
         {
             return true;
         }
@@ -387,7 +387,7 @@ public sealed class SAM_Default : SamuraiRotation
         }
 
         // MeikyoShisui buff is not active - not bursting - single target 123 combo's 1
-        if (!HaveMeikyoShisui)
+        if (!HasMeikyoShisui)
         {
             // target in range
             if (HakazePvE.CanUse(out act))

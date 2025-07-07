@@ -166,7 +166,6 @@ public static class Watcher
         }
     }
 
-
     private static void ActionFromSelf(ActionEffectSet set)
     {
         try
@@ -302,5 +301,4 @@ public static class Watcher
             PluginLog.Error($"Error in ActionFromSelf: {ex}");
         }
     }
-
 }
