@@ -132,7 +132,7 @@ public sealed class SAM_Reborn : SamuraiRotation
             return true;
         }
 
-        if (MeleeMeditationcheck && !HasZanshinReady && !HasOgiNamikiri)
+        if ((MeleeMeditationcheck || IkishotenPvE.Cooldown.RecastTimeElapsed < 30) && !HasZanshinReady && !HasOgiNamikiri)
         {
             if (ShohaPvE.CanUse(out act))
             {
