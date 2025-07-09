@@ -467,6 +467,7 @@ public partial class SamuraiRotation
         setting.CreateConfig = () => new ActionConfig()
         {
             TimeToKill = 48,
+            StatusGcdCount = 6,
         };
     }
 
