@@ -253,7 +253,20 @@ public readonly struct ActionBasicInfo
 
     private bool HasEnoughMP()
     {
-        return DataCenter.CurrentMp >= MPNeed;
+        if (DataCenter.CurrentMp >= MPNeed)
+        {
+            return true;
+        }
+
+        if (Player.Job == Job.WHM)
+        {
+            if (Player.Object.HasStatus(true, StatusID.ThinAir))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private bool IsStatusNeeded(bool skipStatusNeed)

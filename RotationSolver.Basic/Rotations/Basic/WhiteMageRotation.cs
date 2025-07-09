@@ -72,7 +72,12 @@ public partial class WhiteMageRotation
     }
     #endregion
 
-
+    #region Status Tracking
+    /// <summary>
+    /// Player has Thin Air.
+    /// </summary>
+    public static bool HasThinAir => Player.HasStatus(true, StatusID.ThinAir);
+    #endregion
 
     #region Debug
     /// <inheritdoc/>
