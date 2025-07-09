@@ -64,7 +64,7 @@ public sealed class WHM_Default : WhiteMageRotation
         [Description("Reserve the last charge for raise")]
         ReserveLastChargeForRaise,
 
-        [Description("Reserve the last charge")]
+        [Description("Reserve the last charge for manual use")]
         ReserveLastCharge,
     }
     #endregion
@@ -112,19 +112,19 @@ public sealed class WHM_Default : WhiteMageRotation
     #region oGCD Logic
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
+        bool useLastThinAirCharge = ThinAirLastChargeUsage == ThinAirUsageStrategy.UseAllCharges || (ThinAirLastChargeUsage == ThinAirUsageStrategy.ReserveLastChargeForRaise && nextGCD == RaisePvE);
+        if (((nextGCD is IBaseAction action && action.Info.MPNeed >= ThinAirNeed) || (MergedStatus.HasFlag(AutoStatus.Raise) && Player.CurrentMp > 2400 && IsLastAction() == IsLastGCD())) &&
+            ThinAirPvE.CanUse(out act, usedUp: useLastThinAirCharge))
+        {
+            return true;
+        }
+
         if (Player.WillStatusEndGCD(2, 0, true, StatusID.DivineGrace) && DivineCaressPvE.CanUse(out act))
         {
             return true;
         }
 
         if (UseMedicine && !PresenceOfMindPvE.Cooldown.IsCoolingDown && UseBurstMedicine(out act))
-        {
-            return true;
-        }
-
-        bool useLastThinAirCharge = ThinAirLastChargeUsage == ThinAirUsageStrategy.UseAllCharges || (ThinAirLastChargeUsage == ThinAirUsageStrategy.ReserveLastChargeForRaise && nextGCD == RaisePvE);
-        if (nextGCD is IBaseAction action && action.Info.MPNeed >= ThinAirNeed &&
-            ThinAirPvE.CanUse(out act, usedUp: useLastThinAirCharge))
         {
             return true;
         }
@@ -259,7 +259,6 @@ public sealed class WHM_Default : WhiteMageRotation
     #endregion
 
     #region GCD Logic
-
     [RotationDesc(ActionID.AfflatusRapturePvE, ActionID.MedicaIiPvE, ActionID.CureIiiPvE, ActionID.MedicaPvE)]
     protected override bool HealAreaGCD(out IAction? act)
     {
@@ -342,6 +341,12 @@ public sealed class WHM_Default : WhiteMageRotation
     protected override bool GeneralGCD(out IAction? act)
     {
         act = null;
+
+        if (HasThinAir && MergedStatus.HasFlag(AutoStatus.Raise))
+        {
+            return base.RaiseGCD(out act);
+        }
+
         if ((HasSwift || IsLastAction(ActionID.SwiftcastPvE)) && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
         {
             return false;
