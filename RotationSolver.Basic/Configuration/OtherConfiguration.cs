@@ -81,7 +81,6 @@ internal class OtherConfiguration
     /// If you have any of the statuses listed, RSR will stop taking any actions.
     /// </markdown>
     public static HashSet<uint> NoCastingStatus = [];
-    public static HashSet<uint> AutoStatusOrder = [];
     public static List<Job> DancePartnerPriority = [];
     public static List<Job> TheSpearPriority = [];
     public static List<Job> TheBalancePriority = [];
@@ -99,7 +98,6 @@ internal class OtherConfiguration
         _ = Task.Run(() => InitOne(ref DangerousStatus, nameof(DangerousStatus)));
         _ = Task.Run(() => InitOne(ref PriorityStatus, nameof(PriorityStatus)));
         _ = Task.Run(() => InitOne(ref InvincibleStatus, nameof(InvincibleStatus)));
-        _ = Task.Run(() => InitOne(ref AutoStatusOrder, nameof(AutoStatusOrder)));
         _ = Task.Run(() => InitOne(ref DancePartnerPriority, nameof(DancePartnerPriority)));
         _ = Task.Run(() => InitOne(ref TheSpearPriority, nameof(TheSpearPriority)));
         _ = Task.Run(() => InitOne(ref TheBalancePriority, nameof(TheBalancePriority)));
@@ -122,7 +120,6 @@ internal class OtherConfiguration
             await SavePriorityStatus();
             await SaveDangerousStatus();
             await SaveInvincibleStatus();
-            await SaveAutoStatusOrder();
             await SaveDancePartnerPriority();
             await SaveTheSpearPriority();
             await SaveTheBalancePriority();
@@ -246,12 +243,6 @@ internal class OtherConfiguration
         return Task.Run(() => Save(BeneficialPositions, nameof(BeneficialPositions)));
     }
 
-    public static void ResetAutoStatusOrder()
-    {
-        InitOne(ref AutoStatusOrder, nameof(AutoStatusOrder), true, true);
-        SaveAutoStatusOrder().Wait();
-    }
-
     public static void ResetDancePartnerPriority()
     {
         InitOne(ref DancePartnerPriority, nameof(DancePartnerPriority), true, true);
@@ -274,11 +265,6 @@ internal class OtherConfiguration
     {
         InitOne(ref KardiaTankPriority, nameof(KardiaTankPriority), true, true);
         SaveKardiaTankPriority().Wait();
-    }
-
-    public static Task SaveAutoStatusOrder()
-    {
-        return Task.Run(() => Save(AutoStatusOrder, nameof(AutoStatusOrder)));
     }
 
     public static Task SaveDancePartnerPriority()
