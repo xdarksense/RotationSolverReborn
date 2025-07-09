@@ -36,147 +36,36 @@ internal static class StateUpdater
     {
         AutoStatus status = AutoStatus.None;
 
-        // Get the user-defined order of AutoStatus flags
-        uint[] autoStatusOrder;
-        if (OtherConfiguration.AutoStatusOrder != null)
-        {
-            var list = OtherConfiguration.AutoStatusOrder;
-            autoStatusOrder = [.. list];
-        }
-        else
-        {
-            autoStatusOrder = [];
-        }
-
-        foreach (uint autoStatus in autoStatusOrder)
-        {
-            switch (autoStatus)
-            {
-                case (uint)AutoStatus.NoCasting:
-                    if (ShouldAddNoCasting())
-                    {
-                        status |= AutoStatus.NoCasting;
-                    }
-
-                    break;
-
-                case (uint)AutoStatus.Dispel:
-                    if (ShouldAddDispel())
-                    {
-                        status |= AutoStatus.Dispel;
-                    }
-
-                    break;
-
-                case (uint)AutoStatus.Interrupt:
-                    if (ShouldAddInterrupt())
-                    {
-                        status |= AutoStatus.Interrupt;
-                    }
-
-                    break;
-
-                case (uint)AutoStatus.AntiKnockback:
-                    if (ShouldAddAntiKnockback())
-                    {
-                        status |= AutoStatus.AntiKnockback;
-                    }
-
-                    break;
-
-                case (uint)AutoStatus.Positional:
-                    if (ShouldAddPositional())
-                    {
-                        status |= AutoStatus.Positional;
-                    }
-
-                    break;
-
-                case (uint)AutoStatus.HealAreaAbility:
-                    if (ShouldAddHealAreaAbility())
-                    {
-                        status |= AutoStatus.HealAreaAbility;
-                    }
-
-                    break;
-
-                case (uint)AutoStatus.HealAreaSpell:
-                    if (ShouldAddHealAreaSpell())
-                    {
-                        status |= AutoStatus.HealAreaSpell;
-                    }
-
-                    break;
-
-                case (uint)AutoStatus.HealSingleAbility:
-                    if (ShouldAddHealSingleAbility())
-                    {
-                        status |= AutoStatus.HealSingleAbility;
-                    }
-
-                    break;
-
-                case (uint)AutoStatus.HealSingleSpell:
-                    if (ShouldAddHealSingleSpell())
-                    {
-                        status |= AutoStatus.HealSingleSpell;
-                    }
-
-                    break;
-
-                case (uint)AutoStatus.DefenseArea:
-                    if (ShouldAddDefenseArea())
-                    {
-                        status |= AutoStatus.DefenseArea;
-                    }
-
-                    break;
-
-                case (uint)AutoStatus.DefenseSingle:
-                    if (ShouldAddDefenseSingle())
-                    {
-                        status |= AutoStatus.DefenseSingle;
-                    }
-
-                    break;
-
-                case (uint)AutoStatus.Raise:
-                    if (ShouldAddRaise())
-                    {
-                        status |= AutoStatus.Raise;
-                    }
-
-                    break;
-
-                case (uint)AutoStatus.Provoke:
-                    if (ShouldAddProvoke())
-                    {
-                        status |= AutoStatus.Provoke;
-                    }
-
-                    break;
-
-                case (uint)AutoStatus.TankStance:
-                    if (ShouldAddTankStance())
-                    {
-                        status |= AutoStatus.TankStance;
-                    }
-
-                    break;
-
-                case (uint)AutoStatus.Speed:
-                    if (ShouldAddSpeed())
-                    {
-                        status |= AutoStatus.Speed;
-                    }
-
-                    break;
-
-                // Add other cases as needed
-                default:
-                    break;
-            }
-        }
+        if (ShouldAddNoCasting())
+            status |= AutoStatus.NoCasting;
+        if (ShouldAddDispel())
+            status |= AutoStatus.Dispel;
+        if (ShouldAddInterrupt())
+            status |= AutoStatus.Interrupt;
+        if (ShouldAddAntiKnockback())
+            status |= AutoStatus.AntiKnockback;
+        if (ShouldAddPositional())
+            status |= AutoStatus.Positional;
+        if (ShouldAddHealAreaAbility())
+            status |= AutoStatus.HealAreaAbility;
+        if (ShouldAddHealAreaSpell())
+            status |= AutoStatus.HealAreaSpell;
+        if (ShouldAddHealSingleAbility())
+            status |= AutoStatus.HealSingleAbility;
+        if (ShouldAddHealSingleSpell())
+            status |= AutoStatus.HealSingleSpell;
+        if (ShouldAddDefenseArea())
+            status |= AutoStatus.DefenseArea;
+        if (ShouldAddDefenseSingle())
+            status |= AutoStatus.DefenseSingle;
+        if (ShouldAddRaise())
+            status |= AutoStatus.Raise;
+        if (ShouldAddProvoke())
+            status |= AutoStatus.Provoke;
+        if (ShouldAddTankStance())
+            status |= AutoStatus.TankStance;
+        if (ShouldAddSpeed())
+            status |= AutoStatus.Speed;
 
         return status;
     }

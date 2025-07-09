@@ -243,7 +243,6 @@ public partial class RotationConfigWindow
     private static readonly CollapsingHeaderGroup _autoHeader = new(new Dictionary<Func<string>, Action>
     {
         { UiString.ConfigWindow_Basic_AutoSwitch.GetDescription, DrawBasicAutoSwitch },
-        { UiString.ConfigWindow_Auto_PrioritiesOrganizer.GetDescription, DrawAutoStatusOrderConfig },
         { UiString.ConfigWindow_Auto_ActionUsage.GetDescription, DrawActionUsageControl },
         { UiString.ConfigWindow_Auto_HealingCondition.GetDescription, DrawHealingActionCondition },
         { UiString.ConfigWindow_Auto_PvPSpecific.GetDescription, DrawPvPSpecificControls },
