@@ -104,15 +104,21 @@ public partial class CustomRotation
                 }
                 IBaseAction.AutoHealCheck = false;
             }
-            if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealAreaSpell) && (CanHealAreaSpell || DataCenter.IsInOccultCrescentOp))
+            if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealAreaSpell))
             {
                 IBaseAction.AutoHealCheck = true;
-                if (DataCenter.CurrentDutyRotation?.HealAreaGCD(out act) == true)
-                    return act;
-
-                if (HealAreaGCD(out IAction? action))
+                if (DataCenter.IsInOccultCrescentOp || HasVariantCure)
                 {
-                    return action;
+                    if (DataCenter.CurrentDutyRotation?.HealAreaGCD(out act) == true)
+                        return act;
+                }
+
+                if (CanHealAreaSpell)
+                {
+                    if (HealAreaGCD(out IAction? action))
+                    {
+                        return action;
+                    }
                 }
 
                 IBaseAction.AutoHealCheck = false;
@@ -130,15 +136,24 @@ public partial class CustomRotation
                 }
                 IBaseAction.AutoHealCheck = false;
             }
-            if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealSingleSpell) && (CanHealSingleSpell || DataCenter.IsInOccultCrescentOp))
+            if (DataCenter.AutoStatus.HasFlag(AutoStatus.HealSingleSpell))
             {
                 IBaseAction.AutoHealCheck = true;
                 if (DataCenter.CurrentDutyRotation?.HealSingleGCD(out act) == true)
                     return act;
 
-                if (HealSingleGCD(out IAction? action))
+                if (DataCenter.IsInOccultCrescentOp || HasVariantCure)
                 {
-                    return action;
+                    if (DataCenter.CurrentDutyRotation?.HealSingleGCD(out act) == true)
+                        return act;
+                }
+
+                if (CanHealSingleSpell)
+                {
+                    if (HealSingleGCD(out IAction? action))
+                    {
+                        return action;
+                    }
                 }
 
                 IBaseAction.AutoHealCheck = false;

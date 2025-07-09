@@ -216,7 +216,7 @@ public partial class RedMageRotation
         ImGui.Text("BlackMana: " + BlackMana.ToString());
         ImGui.Text("ManaStacks: " + ManaStacks.ToString());
         ImGui.Text("MoreWhiteMana: " + MoreWhiteMana.ToString());
-        ImGui.Text("CanHealSingleSpell: " + CanHealSingleSpell.ToString());
+        ImGui.Text("Can Heal Single Spell: " + CanHealSingleSpell.ToString());
     }
     #endregion
 

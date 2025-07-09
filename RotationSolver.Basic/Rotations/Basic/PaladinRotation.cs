@@ -8,7 +8,7 @@ public partial class PaladinRotation
     /// <summary>
     /// 
     /// </summary>
-    public override bool CanHealSingleSpell => DataCenter.PartyMembers.Count() == 1 && base.CanHealSingleSpell;
+    public override bool CanHealSingleSpell => DataCenter.PartyMembers.Count == 1 && base.CanHealSingleSpell;
 
     /// <summary>
     /// 
@@ -108,7 +108,8 @@ public partial class PaladinRotation
         ImGui.Text("OathGauge: " + OathGauge.ToString());
         ImGui.Text("HasDivineMight: " + HasDivineMight.ToString());
         ImGui.Text("HasFightOrFlight: " + HasFightOrFlight.ToString());
-        ImGui.Text("CanHealAreaAbility: " + CanHealAreaAbility.ToString());
+        ImGui.Text("Can Heal Area Ability: " + CanHealAreaAbility.ToString());
+        ImGui.Text("Can Heal Single Spell: " + CanHealSingleSpell.ToString());
         ImGui.Spacing();
         ImGui.Text("HasConfiteorReady: " + HasConfiteorReady.ToString());
         ImGui.Text("BladeOfFaithReady: " + BladeOfFaithReady.ToString());

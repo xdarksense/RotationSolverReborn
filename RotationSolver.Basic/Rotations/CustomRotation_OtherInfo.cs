@@ -32,6 +32,11 @@ public partial class CustomRotation
     public static bool HasTankInvuln => Player?.HasStatus(true, StatusHelper.NoNeedHealingStatus) ?? false;
 
     /// <summary>
+    /// 
+    /// </summary>
+    public static bool HasVariantCure => Player.HasStatus(true, StatusID.VariantCureSet);
+
+    /// <summary>
     /// Check the player is moving, such as running, walking or jumping.
     /// </summary>
     [Description("Is Moving or Jumping")]

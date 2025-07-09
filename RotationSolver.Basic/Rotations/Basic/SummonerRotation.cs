@@ -7,10 +7,8 @@ public partial class SummonerRotation
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Intelligence;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public override bool CanHealSingleSpell => false;
+    /// <inheritdoc/>
+    public override bool CanHealSingleSpell => DataCenter.PartyMembers.Count == 1 && base.CanHealSingleSpell;
 
     private protected sealed override IBaseAction Raise => ResurrectionPvE;
 
@@ -137,6 +135,7 @@ public partial class SummonerRotation
     /// </summary>
     private static bool HasSummon => DataCenter.HasPet() && SummonTimeEndAfterGCD();
     #endregion
+
     #region Status
 
     /// <summary>
@@ -262,6 +261,7 @@ public partial class SummonerRotation
         ImGui.Text("SummonTime: " + SummonTime.ToString());
         ImGui.Text("AttunmentTime: " + AttunmentTime.ToString());
         ImGui.Text("HasSummon: " + HasSummon.ToString());
+        ImGui.Text("Can Heal Single Spell: " + CanHealSingleSpell.ToString());
         ImGui.TextColored(ImGuiColors.DalamudViolet, "PvE Actions");
         ImGui.TextColored(AstralImpulsePvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "AstralImpulsePvEReady: " + AstralImpulsePvEReady.ToString());
         ImGui.TextColored(AstralFlarePvEReady ? ImGuiColors.HealerGreen : ImGuiColors.DalamudWhite, "AstralFlarePvEReady: " + AstralFlarePvEReady.ToString());
