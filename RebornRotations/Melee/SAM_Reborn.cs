@@ -297,18 +297,6 @@ public sealed class SAM_Reborn : SamuraiRotation
             {
                 return true;
             }
-
-            if (!HasFugetsu)
-            {
-                if (MangetsuPvE.CanUse(out act))
-                    return true;
-            }
-
-            if (!HasFuka)
-            {
-                if (OkaPvE.CanUse(out act))
-                    return true;
-            }
         }
 
         if (!HasMeikyoShisui)
