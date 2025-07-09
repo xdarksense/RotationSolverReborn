@@ -8,7 +8,7 @@ internal class VariantDefault : VariantRotation
 {
     public override bool ProvokeAbility(IAction nextGCD, out IAction? act)
     {
-        if (VariantUltimatumPvE.CanUse(out act))
+        if (VariantUltimatumPvE.CanUse(out act, skipStatusProvideCheck: true))
         {
             return true;
         }
@@ -33,6 +33,21 @@ internal class VariantDefault : VariantRotation
 
     public override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
+        if (VariantRampartPvE_33864.CanUse(out act, skipStatusProvideCheck: true))
+        {
+            return true;
+        }
+
+        if (VariantRampartPvE.CanUse(out act, skipStatusProvideCheck: true))
+        {
+            return true;
+        }
+
+        return base.DefenseSingleAbility(nextGCD, out act);
+    }
+
+    public override bool GeneralAbility(IAction nextGCD, out IAction? act)
+    {
         if (VariantRampartPvE_33864.CanUse(out act))
         {
             return true;
@@ -43,7 +58,12 @@ internal class VariantDefault : VariantRotation
             return true;
         }
 
-        return base.AttackAbility(nextGCD, out act);
+        if (VariantUltimatumPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.GeneralAbility(nextGCD, out act);
     }
 
     public override bool HealSingleGCD(out IAction? act)
@@ -53,7 +73,7 @@ internal class VariantDefault : VariantRotation
             return true;
         }
 
-        if (VariantCurePvE.CanUse(out act))
+        if (VariantCurePvE.CanUse(out act, skipStatusProvideCheck: true))
         {
             return true;
         }

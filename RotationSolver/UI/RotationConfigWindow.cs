@@ -1250,19 +1250,20 @@ public partial class RotationConfigWindow : Window
         ImGui.Spacing();
 
         // Create a new list of AutoDutyPlugin objects
-        List<AutoDutyPlugin> pluginsToCheck = new()
-        {
+        List<AutoDutyPlugin> pluginsToCheck =
+        [
         new AutoDutyPlugin { Name = "AutoDuty", Url = "https://puni.sh/api/repository/herc" },
         new AutoDutyPlugin { Name = "vnavmesh", Url = "https://puni.sh/api/repository/veyn" },
         new AutoDutyPlugin { Name = "BossModReborn", Url = "https://raw.githubusercontent.com/FFXIV-CombatReborn/CombatRebornRepo/main/pluginmaster.json" },
         new AutoDutyPlugin { Name = "Boss Mod", Url = "https://puni.sh/api/repository/veyn" },
         new AutoDutyPlugin { Name = "Avarice", Url = "https://love.puni.sh/ment.json" },
-        new AutoDutyPlugin { Name = "Deliveroo", Url = "https://plugins.carvel.li/" },
+        new AutoDutyPlugin { Name = "Deliveroo", Url = "https://puni.sh/api/repository/vera" },
         new AutoDutyPlugin { Name = "AutoRetainer", Url = "https://love.puni.sh/ment.json" },
         new AutoDutyPlugin { Name = "SkipCutscene", Url = "https://raw.githubusercontent.com/KangasZ/DalamudPluginRepository/main/plugin_repository.json" },
         new AutoDutyPlugin { Name = "AntiAfkKick", Url = "https://raw.githubusercontent.com/NightmareXIV/MyDalamudPlugins/main/pluginmaster.json" },
+        new AutoDutyPlugin { Name = "Gearsetter", Url = "https://plugins.carvel.li/" },
         // Add more plugins as needed
-    };
+    ];
 
         // Check if "Boss Mod" and "BossMod Reborn" are enabled
         bool isBossModEnabled = pluginsToCheck.Any(plugin => plugin.Name == "Boss Mod" && plugin.IsEnabled);
@@ -1321,6 +1322,16 @@ public partial class RotationConfigWindow : Window
             {
                 color = ImGuiColors.DalamudYellow; // Display "Boss Mod" in yellow if both are installed
                 text = $"{plugin.Name} is {(isEnabled ? "installed and enabled" : "not enabled")}. Both Boss Mods cannot be installed and enabled at the same time. Please disable Boss Mod.";
+            }
+            else if (plugin.Name == "Boss Mod" && isBossModEnabled && !isBossModRebornEnabled)
+            {
+                color = isEnabled ? ImGuiColors.DalamudYellow : ImGuiColors.DalamudRed;
+                text = $"{plugin.Name} is {(isEnabled ? "installed and enabled" : "not enabled")}. Please use BossModReborn instead, BMR has specific intergration with RSR that improves RSRs ability to react to combat i.e. Gaze effects.";
+            }
+            else if (plugin.Name == "BossModReborn" && isBossModRebornEnabled && !isBossModEnabled)
+            {
+                color = isEnabled ? ImGuiColors.ParsedGreen : ImGuiColors.DalamudRed;
+                text = $"{plugin.Name} is {(isEnabled ? "installed and enabled" : "not enabled")}.";
             }
             else
             {
