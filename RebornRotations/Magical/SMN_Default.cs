@@ -475,8 +475,6 @@ public sealed class SMN_Default : SummonerRotation
     #endregion
 
     #region Extra Methods
-    public override bool CanHealSingleSpell => false;
-
     public static bool DoesAnyPlayerNeedHeal()
     {
         return PartyMembersAverHP < 0.8f;

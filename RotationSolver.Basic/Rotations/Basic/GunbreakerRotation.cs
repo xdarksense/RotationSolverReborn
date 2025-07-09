@@ -6,15 +6,6 @@ public partial class GunbreakerRotation
 {
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Strength;
-    /// <summary>
-    /// 
-    /// </summary>
-    public override bool CanHealSingleSpell => false;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public override bool CanHealAreaSpell => false;
 
     #region Job Gauge
     /// <summary>

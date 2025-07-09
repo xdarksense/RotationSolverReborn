@@ -346,10 +346,4 @@ public sealed class GNB_Default : GunbreakerRotation
         return base.GeneralGCD(out act);
     }
     #endregion
-
-    #region Extra Methods
-    public override bool CanHealSingleSpell => false;
-
-    public override bool CanHealAreaSpell => false;
-    #endregion
 }
