@@ -13,7 +13,7 @@
 	<GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="ECommons" Version="3.0.0.1" />
+    <PackageReference Include="ECommons" Version="3.0.0.4" />
   </ItemGroup>
   <ItemGroup>
 	  <Reference Include="Dalamud.Common">

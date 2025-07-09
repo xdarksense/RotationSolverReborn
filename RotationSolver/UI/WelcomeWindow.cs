@@ -62,12 +62,12 @@ namespace RotationSolver.UI
                 }
                 else
                 {
-                    PluginLog.Error($"Failed to get comparison: {response.StatusCode}");
+                    PluginLog.Error($"Failed to get comparison 1: {response.StatusCode}");
                 }
             }
             catch (Exception ex)
             {
-                PluginLog.Error($"Failed to get comparison: {ex.Message}");
+                PluginLog.Error($"Failed to get comparison 2: {ex.Message}");
             }
         }
 
