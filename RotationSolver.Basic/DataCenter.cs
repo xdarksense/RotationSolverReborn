@@ -131,6 +131,39 @@ internal static class DataCenter
 
     #endregion
 
+    #region FATE
+    /// <summary>
+    /// 
+    /// </summary>
+    public static unsafe ushort PlayerFateId
+    {
+        get
+        {
+            try
+            {
+                if ((IntPtr)FateManager.Instance() != IntPtr.Zero
+                    && (IntPtr)FateManager.Instance()->CurrentFate != IntPtr.Zero
+                    && Player.Level <= FateManager.Instance()->CurrentFate->MaxLevel)
+                {
+                    return FateManager.Instance()->CurrentFate->FateId;
+                }
+            }
+            catch (Exception ex)
+            {
+                PluginLog.Error(ex.StackTrace ?? ex.Message);
+            }
+
+            return 0;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool IsInFate => PlayerFateId != 0 && !IsInBozja && !IsInOccultCrescentOp;
+
+    #endregion
+
     #region Bozja
     /// <summary>
     /// Determines if the current content is Bozjan Southern Front or Zadnor.
@@ -176,7 +209,6 @@ internal static class DataCenter
     public static bool IsInForkedTower => IsInOccultCrescentOp
         && Player.Object.HasStatus(false, StatusID.DutiesAsAssigned_4228);
     #endregion
-
 
     public static AutoStatus MergedStatus => AutoStatus | CommandStatus;
 
@@ -275,28 +307,6 @@ internal static class DataCenter
     internal static float MovingRaw { get; set; }
     internal static float DeadTimeRaw { get; set; }
     internal static float AliveTimeRaw { get; set; }
-
-    public static unsafe ushort PlayerFateId
-    {
-        get
-        {
-            try
-            {
-                if ((IntPtr)FateManager.Instance() != IntPtr.Zero
-                    && (IntPtr)FateManager.Instance()->CurrentFate != IntPtr.Zero
-                    && Player.Level <= FateManager.Instance()->CurrentFate->MaxLevel)
-                {
-                    return FateManager.Instance()->CurrentFate->FateId;
-                }
-            }
-            catch (Exception ex)
-            {
-                PluginLog.Error(ex.StackTrace ?? ex.Message);
-            }
-
-            return 0;
-        }
-    }
 
     #region GCD
 

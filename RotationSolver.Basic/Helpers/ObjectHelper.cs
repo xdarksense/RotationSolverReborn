@@ -212,6 +212,29 @@ public static class ObjectHelper
             return false;
         }
 
+        if (Service.Config.ForlornPriority && DataCenter.IsInFate)
+        {
+            const float sipRange = 25f;
+
+            bool sipInRange = false;
+            foreach (var o in Svc.Objects)
+            {
+                if (o is IBattleChara c && c.IsEnemy() && c.IsTargetable)
+                {
+                    if (c.IsForlorn() && Vector3.Distance(c.Position, Player.Object.Position) <= sipRange)
+                    {
+                        sipInRange = true;
+                        break;
+                    }
+                }
+            }
+
+            if (sipInRange && !battleChara.IsForlorn())
+            {
+                return false;
+            }
+        }
+
         if (battleChara.IsTopPriorityNamedHostile())
         {
             return true;
@@ -547,6 +570,11 @@ public static class ObjectHelper
             return false;
         }
 
+        if (DataCenter.IsInFate && battleChara.IsForlorn())
+        {
+            return true;
+        }
+
         // Check IBattleChara bespoke IsSpecialInclusionPriority method
         if (battleChara.IsSpecialInclusionPriority())
         {
@@ -628,19 +656,28 @@ public static class ObjectHelper
 
     internal static bool IsSpecialInclusionPriority(this IBattleChara battleChara)
     {
-        if (battleChara.NameId == 6737
-            || battleChara.NameId == 6738
-            || battleChara.NameId == 8145
+        if (battleChara.NameId == 8145
             || battleChara.NameId == 10259
             || battleChara.NameId == 12704)
         {
             return true;
         }
-        //6737 forlorn maiden
-        //6738 forlorn maiden
         //8145 Root in Dohn Meg boss 2
         //10259 Cinduruva in The Tower of Zot
         //12704 Crystalline Debris
+
+        return false;
+    }
+
+    internal static bool IsForlorn(this IBattleChara battleChara)
+    {
+        if (battleChara.NameId == 6737
+            || battleChara.NameId == 6738)
+        {
+            return true;
+        }
+        //6737 forlorn maiden
+        //6738 forlorn maiden
 
         return false;
     }

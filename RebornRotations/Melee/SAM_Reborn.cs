@@ -23,6 +23,10 @@ public sealed class SAM_Reborn : SamuraiRotation
     [RotationConfig(CombatType.PvE, Name = "Enable TEA Checker.")]
     public bool EnableTEAChecker { get; set; } = false;
 
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Health threshold needed to use Tengentsu/ThirdEye outside of AOE mit scenarios.")]
+    public float TengentsuHealth { get; set; } = 0.5f;
+
     [RotationConfig(CombatType.PvE, Name = "Use Hagakure or Midare/Tendo Setsugekka when going from single target to AOE scenarios")]
     public STtoAOEStrategy STtoAOE { get; set; } = STtoAOEStrategy.Hagakure;
     #endregion
@@ -67,7 +71,7 @@ public sealed class SAM_Reborn : SamuraiRotation
         return base.MoveForwardAbility(nextGCD, out act);
     }
 
-    [RotationDesc(ActionID.FeintPvE)]
+    [RotationDesc(ActionID.ThirdEyePvE, ActionID.TengentsuPvE, ActionID.FeintPvE)]
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
         if (!HasZanshinReady)
@@ -76,15 +80,6 @@ public sealed class SAM_Reborn : SamuraiRotation
             {
                 return true;
             }
-        }
-        return base.DefenseAreaAbility(nextGCD, out act);
-    }
-
-    [RotationDesc(ActionID.ThirdEyePvE)]
-    protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
-    {
-        if (!HasZanshinReady)
-        {
             if (TengentsuPvE.CanUse(out act))
             {
                 return true;
@@ -94,13 +89,31 @@ public sealed class SAM_Reborn : SamuraiRotation
                 return true;
             }
         }
-
-        return base.DefenseSingleAbility(nextGCD, out act);
+        return base.DefenseAreaAbility(nextGCD, out act);
     }
-
     #endregion
 
     #region oGCD Logic
+    protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
+    {
+        if (!HasZanshinReady && Player.GetHealthRatio() <= TengentsuHealth)
+        {
+            if (FeintPvE.CanUse(out act))
+            {
+                return true;
+            }
+            if (TengentsuPvE.CanUse(out act))
+            {
+                return true;
+            }
+            if (ThirdEyePvE.CanUse(out act))
+            {
+                return true;
+            }
+        }
+        return base.GeneralAbility(nextGCD, out act);
+    }
+
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
         act = null;

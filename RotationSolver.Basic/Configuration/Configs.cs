@@ -321,6 +321,10 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig, Section = 1)]
     private static readonly bool targetQuestThings = true;
 
+    [ConditionBool, UI("Ignore all other FATE target when Forlorn available (Experimental).",
+        Filter = TargetConfig, Section = 1)]
+    private static readonly bool forlornPriority = true;
+
     [ConditionBool, UI("Ignore target dummies",
                Filter = TargetConfig, Section = 1)]
     private static readonly bool _disableTargetDummys = false;
