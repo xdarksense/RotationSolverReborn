@@ -3492,6 +3492,7 @@ public partial class RotationConfigWindow : Window
     {
         {() => DataCenter.CurrentRotation != null ? "Rotation" : string.Empty, DrawDebugRotationStatus},
         {() => "Player Status", DrawStatus },
+        {() => "Duty Info", DrawDutyInfo },
         {() => "Party", DrawParty },
         {() => "Target Data", DrawTargetData },
         {() => "Next Action", DrawNextAction },
@@ -3514,18 +3515,15 @@ public partial class RotationConfigWindow : Window
     {
         ImGui.Text($"Merged Status: {DataCenter.MergedStatus}");
         ImGui.Text($"PlayerHasLockActions: {ActionUpdater.PlayerHasLockActions()}");
-        if ((IntPtr)FateManager.Instance() != IntPtr.Zero)
-        {
-            ImGui.Text($"Fate: {DataCenter.PlayerFateId}");
-        }
         ImGui.Text($"Height: {Player.Character->ModelContainer.CalculateHeight()}");
-        Dalamud.Game.ClientState.Conditions.ConditionFlag[] conditions = Svc.Condition.AsReadOnlySet().ToArray();
+        Dalamud.Game.ClientState.Conditions.ConditionFlag[] conditions = [.. Svc.Condition.AsReadOnlySet()];
         ImGui.Text("InternalCondition:");
         foreach (Dalamud.Game.ClientState.Conditions.ConditionFlag condition in conditions)
         {
             ImGui.Text($"    {condition}");
         }
         ImGui.Text($"OnlineStatus: {Player.OnlineStatus}");
+        ImGui.Text($"Current Hp: {Player.Object.CurrentHp}");
         ImGui.Text($"Effective Hp: {ObjectHelper.GetEffectiveHp(Player.Object)}");
         ImGui.Text($"Effective Hp Percent: {ObjectHelper.GetEffectiveHpPercent(Player.Object)}");
         ImGui.Text($"IsDead: {Player.Object.IsDead}");
@@ -3539,28 +3537,6 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Combo Time: {DataCenter.ComboTime}");
         ImGui.Text($"TargetingType: {DataCenter.TargetingType}");
         ImGui.Text($"DeathTarget: {DataCenter.DeathTarget}");
-        ImGui.Spacing();
-        ImGui.Text($"IsInBozjanFieldOp: {DataCenter.IsInBozjanFieldOp}");
-        ImGui.Text($"IsInBozjanFieldOpCE: {DataCenter.IsInBozjanFieldOpCE}");
-        ImGui.Text($"IsInDelubrumNormal: {DataCenter.IsInDelubrumNormal}");
-        ImGui.Text($"IsInDelubrumSavage: {DataCenter.IsInDelubrumSavage}");
-        ImGui.Text($"IsInBozja: {DataCenter.IsInBozja}");
-        ImGui.Spacing();
-        ImGui.Text($"In Occult Crescent: {DataCenter.IsInOccultCrescentOp}");
-        ImGui.Text($"Is In ForkedTower: {DataCenter.IsInForkedTower}");
-        ImGui.Text($"FreelancerLevel: {DutyRotation.FreelancerLevel}");
-        ImGui.Text($"KnightLevel: {DutyRotation.KnightLevel}");
-        ImGui.Text($"MonkLevel: {DutyRotation.MonkLevel}");
-        ImGui.Text($"BardLevel: {DutyRotation.BardLevel}");
-        ImGui.Text($"ChemistLevel: {DutyRotation.ChemistLevel}");
-        ImGui.Text($"TimeMageLevel: {DutyRotation.TimeMageLevel}");
-        ImGui.Text($"CannoneerLevel: {DutyRotation.CannoneerLevel}");
-        ImGui.Text($"OracleLevel: {DutyRotation.OracleLevel}");
-        ImGui.Text($"BerserkerLevel: {DutyRotation.BerserkerLevel}");
-        ImGui.Text($"RangerLevel: {DutyRotation.RangerLevel}");
-        ImGui.Text($"ThiefLevel: {DutyRotation.ThiefLevel}");
-        ImGui.Text($"SamuraiLevel: {DutyRotation.SamuraiLevel}");
-        ImGui.Text($"GeomancerLevel: {DutyRotation.GeomancerLevel}");
         ImGui.Spacing();
         ImGui.Text($"AttackedTargets: {DataCenter.AttackedTargets?.Count ?? 0}");
         if (DataCenter.AttackedTargets != null)
@@ -3660,7 +3636,6 @@ public partial class RotationConfigWindow : Window
             ImGui.Text("Dispel Target: None");
         }
 
-        ImGui.Text($"TerritoryType: {DataCenter.Territory?.ContentType}");
         ImGui.Text($"DPSTaken: {DataCenter.DPSTaken}");
         //ImGui.Text($"IsHostileCastingToTank: {DataCenter.IsHostileCastingToTank}");
         ImGui.Text($"CurrentRotation: {DataCenter.CurrentRotation}");
@@ -3685,12 +3660,47 @@ public partial class RotationConfigWindow : Window
         }
     }
 
-    private static unsafe void DrawParty()
+    private static unsafe void DrawDutyInfo()
     {
+        ImGui.Spacing();
         ImGui.Text($"Your combat state: {DataCenter.InCombat}");
         ImGui.Text($"TerritoryID: {DataCenter.TerritoryID}");
-        ImGui.Text($"Number of Party Members: {DataCenter.PartyMembers.Count}");
+        ImGui.Text($"TerritoryType: {DataCenter.Territory?.ContentType}");
         ImGui.Text($"Is in Alliance Raid: {DataCenter.IsInAllianceRaid}");
+        ImGui.Spacing();
+        ImGui.Text($"IsInFate: {DataCenter.IsInFate}");
+        if ((IntPtr)FateManager.Instance() != IntPtr.Zero)
+        {
+            ImGui.Text($"Fate ID: {DataCenter.PlayerFateId}");
+        }
+        ImGui.Spacing();
+        ImGui.Text($"IsInBozjanFieldOp: {DataCenter.IsInBozjanFieldOp}");
+        ImGui.Text($"IsInBozjanFieldOpCE: {DataCenter.IsInBozjanFieldOpCE}");
+        ImGui.Text($"IsInDelubrumNormal: {DataCenter.IsInDelubrumNormal}");
+        ImGui.Text($"IsInDelubrumSavage: {DataCenter.IsInDelubrumSavage}");
+        ImGui.Text($"IsInBozja: {DataCenter.IsInBozja}");
+        ImGui.Spacing();
+        ImGui.Text($"In Occult Crescent: {DataCenter.IsInOccultCrescentOp}");
+        ImGui.Text($"Is In ForkedTower: {DataCenter.IsInForkedTower}");
+        ImGui.Text($"FreelancerLevel: {DutyRotation.FreelancerLevel}");
+        ImGui.Text($"KnightLevel: {DutyRotation.KnightLevel}");
+        ImGui.Text($"MonkLevel: {DutyRotation.MonkLevel}");
+        ImGui.Text($"BardLevel: {DutyRotation.BardLevel}");
+        ImGui.Text($"ChemistLevel: {DutyRotation.ChemistLevel}");
+        ImGui.Text($"TimeMageLevel: {DutyRotation.TimeMageLevel}");
+        ImGui.Text($"CannoneerLevel: {DutyRotation.CannoneerLevel}");
+        ImGui.Text($"OracleLevel: {DutyRotation.OracleLevel}");
+        ImGui.Text($"BerserkerLevel: {DutyRotation.BerserkerLevel}");
+        ImGui.Text($"RangerLevel: {DutyRotation.RangerLevel}");
+        ImGui.Text($"ThiefLevel: {DutyRotation.ThiefLevel}");
+        ImGui.Text($"SamuraiLevel: {DutyRotation.SamuraiLevel}");
+        ImGui.Text($"GeomancerLevel: {DutyRotation.GeomancerLevel}");
+        ImGui.Spacing();
+    }
+
+    private static unsafe void DrawParty()
+    {
+        ImGui.Text($"Number of Party Members: {DataCenter.PartyMembers.Count}");
         ImGui.Text($"Number of Alliance Members: {DataCenter.AllianceMembers.Count}");
         ImGui.Text($"Average Party HP Percent: {DataCenter.PartyMembersAverHP * 100}");
         ImGui.Text($"Number of Party Members with Doomed To Heal status: {DataCenter.PartyMembers.Count(member => member.DoomNeedHealing())}");
@@ -3726,8 +3736,7 @@ public partial class RotationConfigWindow : Window
 
     private static unsafe void DrawTargetData()
     {
-        IBattleChara? target = Svc.Targets.Target as IBattleChara;
-        if (target == null)
+        if (Svc.Targets.Target is not IBattleChara target)
         {
             return;
         }

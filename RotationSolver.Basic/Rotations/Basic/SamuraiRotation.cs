@@ -274,6 +274,7 @@ public partial class SamuraiRotation
     {
         setting.StatusProvide = [StatusID.ThirdEye];
         setting.IsFriendly = true;
+        setting.TargetType = TargetType.Self;
     }
 
     static partial void ModifyShifuPvE(ref ActionSetting setting)
@@ -422,6 +423,7 @@ public partial class SamuraiRotation
     {
         setting.StatusProvide = [StatusID.Tengentsu];
         setting.IsFriendly = true;
+        setting.TargetType = TargetType.Self;
     }
 
     static partial void ModifyFukoPvE(ref ActionSetting setting)
