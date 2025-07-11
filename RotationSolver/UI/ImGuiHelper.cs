@@ -464,10 +464,7 @@ internal static class ImGuiHelper
 
     public static void ReactPopup(string key, string command, Action reset, bool showHand = true)
     {
-        if (reset == null)
-        {
-            throw new ArgumentNullException(nameof(reset));
-        }
+        ArgumentNullException.ThrowIfNull(reset);
 
         ExecuteHotKeysPopup(key, command, string.Empty, showHand, (reset, new VirtualKey[] { VirtualKey.BACK }));
     }
@@ -571,10 +568,7 @@ internal static class ImGuiHelper
             return;
         }
 
-        if (keys == null)
-        {
-            throw new ArgumentNullException(nameof(keys));
-        }
+        ArgumentNullException.ThrowIfNull(keys);
 
         ImGui.TableNextRow();
         _ = ImGui.TableNextColumn();
