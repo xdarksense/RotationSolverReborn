@@ -9,7 +9,7 @@ namespace RotationSolver.Commands;
 
 public static partial class RSCommands
 {
-    private static void DoOtherCommand(OtherCommandType otherType, string str)
+    public static void DoOtherCommand(OtherCommandType otherType, string str)
     {
         switch (otherType)
         {
@@ -341,7 +341,7 @@ public static partial class RSCommands
         }
     }
 
-    private static void DoActionCommand(string str)
+    public static void DoActionCommand(string str)
     {
         int lastHyphenIndex = str.LastIndexOf('-');
         if (lastHyphenIndex == -1 || lastHyphenIndex == str.Length - 1)

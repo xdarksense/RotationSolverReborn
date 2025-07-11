@@ -4,17 +4,24 @@ using RotationSolver.Commands;
 
 namespace RotationSolver.IPC
 {
+    /// <summary>
+    /// Provides IPC methods for external plugins or tools to interact with RotationSolver.
+    /// All public methods marked with <see cref="EzIPCAttribute"/> are exposed for IPC calls.
+    /// </summary>
     internal class IPCProvider
     {
+        /// <summary>
+        /// Initializes the IPC provider and registers IPC methods with the specified prefix.
+        /// </summary>
         internal IPCProvider()
         {
             _ = EzIPC.Init(this, prefix: "RotationSolverReborn");
         }
 
         /// <summary>
-        /// Test IPC method.
+        /// IPC method for testing connectivity and logging a debug message.
         /// </summary>
-        /// <param name="param">The parameter for the test.</param>
+        /// <param name="param">A string parameter to include in the debug log for verification.</param>
         [EzIPC]
         public void Test(string param)
         {
@@ -22,9 +29,9 @@ namespace RotationSolver.IPC
         }
 
         /// <summary>
-        /// Adds a priority name ID.
+        /// Adds a name ID to the prioritized list via IPC.
         /// </summary>
-        /// <param name="nameId">The name ID to add.</param>
+        /// <param name="nameId">The unique identifier to add to the prioritized name IDs collection.</param>
         [EzIPC]
         public void AddPriorityNameID(uint nameId)
         {
@@ -40,9 +47,9 @@ namespace RotationSolver.IPC
         }
 
         /// <summary>
-        /// Removes a priority name ID.
+        /// Removes a name ID from the prioritized list via IPC.
         /// </summary>
-        /// <param name="nameId">The name ID to remove.</param>
+        /// <param name="nameId">The unique identifier to remove from the prioritized name IDs collection.</param>
         [EzIPC]
         public void RemovePriorityNameID(uint nameId)
         {
@@ -65,9 +72,9 @@ namespace RotationSolver.IPC
         }
 
         /// <summary>
-        /// Adds a blacklist name ID.
+        /// Adds a name ID to the blacklist via IPC, preventing actions for this identifier.
         /// </summary>
-        /// <param name="nameId">The name ID to add.</param>
+        /// <param name="nameId">The unique identifier to add to the blacklist collection.</param>
         [EzIPC]
         public void AddBlacklistNameID(uint nameId)
         {
@@ -83,9 +90,9 @@ namespace RotationSolver.IPC
         }
 
         /// <summary>
-        /// Removes a blacklist name ID.
+        /// Removes a name ID from the blacklist via IPC, allowing actions for this identifier.
         /// </summary>
-        /// <param name="nameId">The name ID to remove.</param>
+        /// <param name="nameId">The unique identifier to remove from the blacklist collection.</param>
         [EzIPC]
         public void RemoveBlacklistNameID(uint nameId)
         {
@@ -108,9 +115,11 @@ namespace RotationSolver.IPC
         }
 
         /// <summary>
-        /// Changes the operating mode.
+        /// Changes the operating mode of the plugin via IPC.
         /// </summary>
-        /// <param name="stateCommand">The state command to change the operating mode.</param>
+        /// <param name="stateCommand">
+        /// The <see cref="StateCommandType"/> value specifying the desired operating mode, such as Off, Auto, or Manual.
+        /// </param>
         [EzIPC]
         public void ChangeOperatingMode(StateCommandType stateCommand)
         {
@@ -119,14 +128,50 @@ namespace RotationSolver.IPC
         }
 
         /// <summary>
-        /// Triggers a special state.
+        /// Triggers a special state in the plugin via IPC, such as healing, defense, or movement.
         /// </summary>
-        /// <param name="specialCommand">The special command to trigger the special state.</param>
+        /// <param name="specialCommand">
+        /// The <see cref="SpecialCommandType"/> value representing the special state to activate (e.g., HealArea, DefenseSingle, Burst).
+        /// </param>
         [EzIPC]
         public void TriggerSpecialState(SpecialCommandType specialCommand)
         {
             DataCenter.SpecialType = specialCommand;
             PluginLog.Debug($"IPC TriggerSpecialState was called. SpecialCommand:{specialCommand}");
+        }
+
+        /// <summary>
+        /// Changes a plugin setting or triggers an auxiliary command via IPC.
+        /// </summary>
+        /// <param name="otherType">
+        /// The <see cref="OtherCommandType"/> category of command to execute, such as DoActions, ToggleActions, Settings, NextAction, Rotations, or DutyRotations.
+        /// </param>
+        /// <param name="str">
+        /// The string value representing the modification or parameter for the command.
+        /// </param>
+        [EzIPC]
+        public void OtherCommand(OtherCommandType otherType, string str)
+        {
+            RSCommands.DoOtherCommand(otherType, str);
+            PluginLog.Debug($"IPC DoOtherCommand was called. OtherCommandType:{otherType}, String:{str},");
+        }
+
+        /// <summary>
+        /// Executes an action command via IPC, allowing external plugins or tools to trigger a specific action with a timing parameter.
+        /// </summary>
+        /// <param name="action">
+        /// The name of the action to execute. This needs to be the exact name of the action.
+        /// </param>
+        /// <param name="time">
+        /// The time value that the window to use the action is open (typcially 5 seconds).
+        /// </param>
+        [EzIPC]
+        public void ActionCommand(string action, float time)
+        {
+            string combinedString = $"{action}-{time}";
+
+            RSCommands.DoActionCommand($"{combinedString}");
+            PluginLog.Debug($"IPC ActionCommand was called. Action Name:{action}, Time:{time}");
         }
     }
 }

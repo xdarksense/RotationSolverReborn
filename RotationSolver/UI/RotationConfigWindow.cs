@@ -25,6 +25,7 @@ using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Rotations.Duties;
 using RotationSolver.Data;
 using RotationSolver.Helpers;
+using RotationSolver.IPC;
 using RotationSolver.UI.SearchableConfigs;
 using RotationSolver.Updaters;
 using System.Diagnostics;
@@ -3497,7 +3498,7 @@ public partial class RotationConfigWindow : Window
         {() => "Target Data", DrawTargetData },
         {() => "Next Action", DrawNextAction },
         {() => "Last Action", DrawLastAction },
-        {() => "Others", DrawOthers },
+        {() => "IPC Testing", DrawIPC },
         {() => "Effect", () =>
             {
                 ImGui.Text(Watcher.ShowStrSelf);
@@ -3664,6 +3665,7 @@ public partial class RotationConfigWindow : Window
     {
         ImGui.Spacing();
         ImGui.Text($"Your combat state: {DataCenter.InCombat}");
+        ImGui.Text($"Combat Time: {DataCenter.CombatTimeRaw}");
         ImGui.Text($"TerritoryID: {DataCenter.TerritoryID}");
         ImGui.Text($"TerritoryType: {DataCenter.Territory?.ContentType}");
         ImGui.Text($"Is in Alliance Raid: {DataCenter.IsInAllianceRaid}");
@@ -3724,6 +3726,8 @@ public partial class RotationConfigWindow : Window
 
             ImGui.Text(text);
         }
+        ImGui.Spacing();
+        ImGui.Text($"Limit Break: {CustomRotation.LimitBreakLevel}");
         ImGui.Spacing();
         ImGui.Text($"Object Data");
         ImGui.Text($"AllTargets Count: {DataCenter.AllTargets.Count()}");
@@ -3841,10 +3845,66 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"IsLastActionGCD: {IActionHelper.IsLastActionGCD()}");
     }
 
-    private static void DrawOthers()
+    private static string _ipcTestText = "Sent data";
+
+    private static void DrawIPC()
     {
-        ImGui.Text($"Combat Time: {DataCenter.CombatTimeRaw}");
-        ImGui.Text($"Limit Break: {CustomRotation.LimitBreakLevel}");
+        ImGui.SetNextItemWidth(200 * Scale);
+        ImGui.InputText("##IPCTextBox", ref _ipcTestText, 128);
+        ImGui.SameLine();
+        if (ImGui.Button("Test Function"))
+        {
+            IPCProvider ipcProvider = new();
+            ipcProvider.Test(_ipcTestText);
+        }
+
+        if (ImGui.Button("Test ChangeOperatingMode to Manual IPC"))
+        {
+            IPCProvider ipcProvider = new();
+            ipcProvider.ChangeOperatingMode(StateCommandType.Manual);
+        }
+
+        if (ImGui.Button("Test ChangeOperatingMode to Off IPC"))
+        {
+            IPCProvider ipcProvider = new();
+            ipcProvider.ChangeOperatingMode(StateCommandType.Off);
+        }
+
+        if (ImGui.Button("Test TriggerSpecialState DefenseArea IPC"))
+        {
+            IPCProvider ipcProvider = new();
+            ipcProvider.TriggerSpecialState(SpecialCommandType.DefenseArea);
+        }
+
+        if (ImGui.Button("Test TriggerSpecialState AntiKnockback IPC"))
+        {
+            IPCProvider ipcProvider = new();
+            ipcProvider.TriggerSpecialState(SpecialCommandType.AntiKnockback);
+        }
+
+        if (ImGui.Button("Test Setting IPC (Changing engage setting to All Target)"))
+        {
+            IPCProvider ipcProvider = new();
+            ipcProvider.OtherCommand(OtherCommandType.Settings, "HostileType AllTargetsCanAttack");
+        }
+
+        if (ImGui.Button("Test OtherCommand DoAction IPC (Magick Barrier on RDM)"))
+        {
+            IPCProvider ipcProvider = new();
+            ipcProvider.OtherCommand(OtherCommandType.DoActions, "Magick Barrier-5");
+        }
+
+        if (ImGui.Button("Test ToggleAction IPC (Magick Barrier on RDM)"))
+        {
+            IPCProvider ipcProvider = new();
+            ipcProvider.OtherCommand(OtherCommandType.ToggleActions, "Magick Barrier");
+        }
+
+        if (ImGui.Button("Test ActionCommand IPC (Magick Barrier on RDM)"))
+        {
+            IPCProvider ipcProvider = new();
+            ipcProvider.ActionCommand("Magick Barrier", 7);
+        }
     }
 
     private static void DrawAction(ActionID id, string type)
