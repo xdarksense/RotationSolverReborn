@@ -137,7 +137,7 @@ public sealed class DRG_Default : DragoonRotation
                 || (!DisembowelPvE.EnoughLevel && nextGCD.IsTheSameTo(true, VorpalThrustPvE))
                 || (!FullThrustPvE.EnoughLevel && nextGCD.IsTheSameTo(true, VorpalThrustPvE, DisembowelPvE))
                 || (!LanceChargePvE.EnoughLevel && nextGCD.IsTheSameTo(true, DisembowelPvE, FullThrustPvE))
-                || (!BattleLitanyPvE.EnoughLevel && nextGCD.IsTheSameTo(true, ChaosThrustPvE, FullThrustPvE)))
+                || (!BattleLitanyPvE.EnoughLevel && nextGCD.IsTheSameTo(true, FullThrustPvE)))
             {
                 if (LifeSurgePvE.CanUse(out act, usedUp: true))
                 {

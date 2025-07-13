@@ -18,6 +18,23 @@ namespace RotationSolver.Basic;
 
 internal static class DataCenter
 {
+    public static List<IBattleChara> PartyMembers { get; set; } = [];
+
+    public static List<IBattleChara> AllianceMembers { get; set; } = [];
+
+    public static List<IBattleChara> AllHostileTargets { get; set; } = [];
+
+    public static IBattleChara? InterruptTarget { get; set; }
+
+    public static IBattleChara? ProvokeTarget { get; set; }
+
+    public static IBattleChara? DeathTarget { get; set; }
+
+    public static IBattleChara? DispelTarget { get; set; }
+
+    public static List<IBattleChara> AllTargets { get; set; } = [];
+    public static Dictionary<float, List<IBattleChara>> TargetsByRange { get; set; } = [];
+
     private static ulong _hostileTargetId = 0;
 
     public static bool ResetActionConfigs { get; set; } = false;
@@ -90,10 +107,241 @@ internal static class DataCenter
     internal static int AttackedTargetsCount { get; set; } = 48;
     internal static Queue<(ulong id, DateTime time)> AttackedTargets { get; } = new(AttackedTargetsCount);
 
+    internal static Queue<MacroItem> Macros { get; } = new Queue<MacroItem>();
+
     internal static bool InEffectTime => DateTime.Now >= EffectTime && DateTime.Now <= EffectEndTime;
     internal static Dictionary<ulong, uint> HealHP { get; set; } = [];
     internal static Dictionary<ulong, uint> ApplyStatus { get; set; } = [];
     internal static uint MPGain { get; set; }
+
+    public static AutoStatus MergedStatus => AutoStatus | CommandStatus;
+    public static AutoStatus AutoStatus { get; set; } = AutoStatus.None;
+    public static AutoStatus CommandStatus { get; set; } = AutoStatus.None;
+
+    public static HashSet<uint> DisabledActionSequencer { get; set; } = [];
+
+    private static readonly List<NextAct> NextActs = [];
+    public static IAction? ActionSequencerAction { private get; set; }
+
+    public static IAction? CommandNextAction
+    {
+        get
+        {
+            NextAct? next = null;
+            if (NextActs.Count > 0)
+            {
+                next = NextActs[0];
+            }
+
+            while (next != null && NextActs.Count > 0 &&
+                   (next.DeadTime < DateTime.Now || IActionHelper.IsLastAction(true, next.Act)))
+            {
+                NextActs.RemoveAt(0);
+                next = NextActs.Count > 0 ? NextActs[0] : null;
+            }
+
+            return next != null ? next.Act : ActionSequencerAction;
+        }
+    }
+
+    internal static void AddCommandAction(IAction act, double time)
+    {
+        int index = -1;
+        for (int i = 0; i < NextActs.Count; i++)
+        {
+            if (NextActs[i].Act.ID == act.ID)
+            {
+                index = i;
+                break;
+            }
+        }
+
+        NextAct newItem = new(act, DateTime.Now.AddSeconds(time));
+        if (index < 0)
+        {
+            NextActs.Add(newItem);
+        }
+        else
+        {
+            NextActs[index] = newItem;
+        }
+
+        NextActs.Sort((a, b) => a.DeadTime.CompareTo(b.DeadTime));
+    }
+
+    public static TargetHostileType CurrentTargetToHostileType => Service.Config.HostileType;
+
+    public static TargetingType TargetingType
+    {
+        get
+        {
+            if (Service.Config.TargetingTypes.Count == 0)
+            {
+                Service.Config.TargetingTypes.Add(TargetingType.LowHP);
+                Service.Config.TargetingTypes.Add(TargetingType.HighHP);
+                Service.Config.TargetingTypes.Add(TargetingType.Small);
+                Service.Config.TargetingTypes.Add(TargetingType.Big);
+                Service.Config.Save();
+            }
+
+            return Service.Config.TargetingTypes[Service.Config.TargetingIndex % Service.Config.TargetingTypes.Count];
+        }
+    }
+
+    public static TinctureUseType CurrentTinctureUseType => Service.Config.TinctureType;
+
+    public static unsafe ActionID LastComboAction => (ActionID)ActionManager.Instance()->Combo.Action;
+
+    public static unsafe float ComboTime => ActionManager.Instance()->Combo.Timer;
+
+    public static bool IsMoving => Player.IsMoving;
+
+    internal static float StopMovingRaw { get; set; }
+
+    internal static float MovingRaw { get; set; }
+    internal static float DeadTimeRaw { get; set; }
+    internal static float AliveTimeRaw { get; set; }
+
+    public static uint[] BluSlots { get; internal set; } = new uint[24];
+
+    public static uint[] DutyActions { get; internal set; } = new uint[5];
+
+    private static DateTime _specialStateStartTime = DateTime.MinValue;
+    private static double SpecialTimeElapsed => (DateTime.Now - _specialStateStartTime).TotalSeconds;
+    public static double SpecialTimeLeft => Service.Config.SpecialDuration - SpecialTimeElapsed;
+
+    private static SpecialCommandType _specialType = SpecialCommandType.EndSpecial;
+
+    internal static SpecialCommandType SpecialType
+    {
+        get => SpecialTimeLeft < 0 ? SpecialCommandType.EndSpecial : _specialType;
+        set
+        {
+            _specialType = value;
+            _specialStateStartTime = value == SpecialCommandType.EndSpecial ? DateTime.MinValue : DateTime.Now;
+        }
+    }
+
+    public static bool State { get; set; } = false;
+
+    public static bool IsManual { get; set; } = false;
+
+    public static bool InCombat { get; set; } = false;
+
+    public static bool DrawingActions { get; set; } = false;
+
+    private static RandomDelay _notInCombatDelay = new(() => Service.Config.NotInCombatDelay);
+
+    /// <summary>
+    /// Is out of combat.
+    /// </summary>
+    public static bool NotInCombatDelay => _notInCombatDelay.Delay(!InCombat);
+
+    internal static float CombatTimeRaw { get; set; }
+
+    private static DateTime _startRaidTime = DateTime.MinValue;
+
+    internal static float RaidTimeRaw
+    {
+        get
+        {
+            // If the raid start time is not set, return 0.
+            if (_startRaidTime == DateTime.MinValue)
+            {
+                return 0;
+            }
+
+            // Calculate and return the total seconds elapsed since the raid started.
+            return (float)(DateTime.Now - _startRaidTime).TotalSeconds;
+        }
+        set
+        {
+            // If the provided value is negative, reset the raid start time.
+            if (value < 0)
+            {
+                _startRaidTime = DateTime.MinValue;
+            }
+            else
+            {
+                // Set the raid start time to the current time minus the provided value in seconds.
+                _startRaidTime = DateTime.Now - TimeSpan.FromSeconds(value);
+            }
+        }
+    }
+
+    public static bool MobsTime
+    {
+        get
+        {
+            float jobRange = JobRange;
+            int count = 0;
+            var targets = AllHostileTargets;
+            for (int i = 0, n = targets.Count; i < n; i++)
+            {
+                var o = targets[i];
+                if (o.DistanceToPlayer() < jobRange && o.CanSee())
+                {
+                    count++;
+                }
+            }
+            return count >= Service.Config.AutoDefenseNumber;
+        }
+    }
+
+    public static ulong[] TreasureCharas
+    {
+        get
+        {
+            List<ulong> charas = new(5);
+            //60687 - 60691 For treasure hunt.
+            for (int i = 60687; i <= 60691; i++)
+            {
+                IBattleChara? b = null;
+                for (int j = 0; j < AllTargets.Count; j++)
+                {
+                    IBattleChara battleChara = AllTargets[j];
+                    if (battleChara.GetNamePlateIcon() == i)
+                    {
+                        b = battleChara;
+                        break;
+                    }
+                }
+                if (b == null || b.CurrentHp == 0)
+                {
+                    continue;
+                }
+
+                charas.Add(b.GameObjectId);
+            }
+
+            return [.. charas];
+        }
+    }
+
+    private static float _avgTTK = 0f;
+    public static float AverageTTK
+    {
+        get
+        {
+            if (_avgTTK > 0)
+            {
+                return _avgTTK;
+            }
+            float total = 0;
+            int count = 0;
+            var targets = AllHostileTargets;
+            for (int i = 0, n = targets.Count; i < n; i++)
+            {
+                float tTK = targets[i].GetTTK();
+                if (!float.IsNaN(tTK))
+                {
+                    total += tTK;
+                    count++;
+                }
+            }
+            return _avgTTK = count > 0 ? total / count : 0;
+        }
+    }
 
     #region Territory Info Tracking
 
@@ -168,7 +416,7 @@ internal static class DataCenter
     /// <summary>
     /// Determines if the current content is Bozjan Southern Front or Zadnor.
     /// </summary>
-    public static bool IsInBozjanFieldOp => Content.ContentType == ECommons.GameHelpers.ContentType.FieldOperations 
+    public static bool IsInBozjanFieldOp => Content.ContentType == ECommons.GameHelpers.ContentType.FieldOperations
         && Territory?.ContentType == TerritoryContentType.SaveTheQueen;
 
     /// <summary>
@@ -232,37 +480,7 @@ internal static class DataCenter
     public static bool InVariantDungeon => AloaloIsland || MountRokkon || SildihnSubterrane;
     #endregion
 
-    public static AutoStatus MergedStatus => AutoStatus | CommandStatus;
-
-    public static AutoStatus AutoStatus { get; set; } = AutoStatus.None;
-    public static AutoStatus CommandStatus { get; set; } = AutoStatus.None;
-
-    public static HashSet<uint> DisabledActionSequencer { get; set; } = [];
-
-    private static readonly List<NextAct> NextActs = [];
-    public static IAction? ActionSequencerAction { private get; set; }
-
-    public static IAction? CommandNextAction
-    {
-        get
-        {
-            NextAct? next = null;
-            if (NextActs.Count > 0)
-            {
-                next = NextActs[0];
-            }
-
-            while (next != null && NextActs.Count > 0 &&
-                   (next.DeadTime < DateTime.Now || IActionHelper.IsLastAction(true, next.Act)))
-            {
-                NextActs.RemoveAt(0);
-                next = NextActs.Count > 0 ? NextActs[0] : null;
-            }
-
-            return next != null ? next.Act : ActionSequencerAction;
-        }
-    }
-
+    #region Job Info
     public static Job Job => Player.Job;
 
     public static JobRole Role
@@ -274,64 +492,30 @@ internal static class DataCenter
         }
     }
 
-    internal static void AddCommandAction(IAction act, double time)
-    {
-        int index = -1;
-        for (int i = 0; i < NextActs.Count; i++)
-        {
-            if (NextActs[i].Act.ID == act.ID)
-            {
-                index = i;
-                break;
-            }
-        }
-
-        NextAct newItem = new(act, DateTime.Now.AddSeconds(time));
-        if (index < 0)
-        {
-            NextActs.Add(newItem);
-        }
-        else
-        {
-            NextActs[index] = newItem;
-        }
-
-        NextActs.Sort((a, b) => a.DeadTime.CompareTo(b.DeadTime));
-    }
-
-    public static TargetHostileType CurrentTargetToHostileType => Service.Config.HostileType;
-    public static TinctureUseType CurrentTinctureUseType => Service.Config.TinctureType;
-
-    public static unsafe ActionID LastComboAction => (ActionID)ActionManager.Instance()->Combo.Action;
-    public static unsafe float ComboTime => ActionManager.Instance()->Combo.Timer;
-
-    public static TargetingType TargetingType
+    public static float JobRange
     {
         get
         {
-            if (Service.Config.TargetingTypes.Count == 0)
+            float radius = 25;
+            if (!Player.AvailableThreadSafe)
             {
-                Service.Config.TargetingTypes.Add(TargetingType.LowHP);
-                Service.Config.TargetingTypes.Add(TargetingType.HighHP);
-                Service.Config.TargetingTypes.Add(TargetingType.Small);
-                Service.Config.TargetingTypes.Add(TargetingType.Big);
-                Service.Config.Save();
+                return radius;
             }
 
-            return Service.Config.TargetingTypes[Service.Config.TargetingIndex % Service.Config.TargetingTypes.Count];
+            switch (DataCenter.Role)
+            {
+                case JobRole.Tank:
+                case JobRole.Melee:
+                    radius = 3;
+                    break;
+            }
+
+            return radius;
         }
     }
-
-    public static bool IsMoving => Player.IsMoving;
-
-    internal static float StopMovingRaw { get; set; }
-
-    internal static float MovingRaw { get; set; }
-    internal static float DeadTimeRaw { get; set; }
-    internal static float AliveTimeRaw { get; set; }
+    #endregion
 
     #region GCD
-
     /// <summary>
     /// Returns the time remaining until the next GCD (Global Cooldown) after considering the current animation lock.
     /// </summary>
@@ -374,366 +558,7 @@ internal static class DataCenter
     }
     #endregion
 
-    public static uint[] BluSlots { get; internal set; } = new uint[24];
-
-    public static uint[] DutyActions { get; internal set; } = new uint[5];
-
-    private static DateTime _specialStateStartTime = DateTime.MinValue;
-    private static double SpecialTimeElapsed => (DateTime.Now - _specialStateStartTime).TotalSeconds;
-    public static double SpecialTimeLeft => Service.Config.SpecialDuration - SpecialTimeElapsed;
-
-    private static SpecialCommandType _specialType = SpecialCommandType.EndSpecial;
-
-    internal static SpecialCommandType SpecialType
-    {
-        get => SpecialTimeLeft < 0 ? SpecialCommandType.EndSpecial : _specialType;
-        set
-        {
-            _specialType = value;
-            _specialStateStartTime = value == SpecialCommandType.EndSpecial ? DateTime.MinValue : DateTime.Now;
-        }
-    }
-
-    public static bool State { get; set; } = false;
-
-    public static bool IsManual { get; set; } = false;
-
-    public static bool InCombat { get; set; } = false;
-
-    public static bool DrawingActions { get; set; } = false;
-
-    private static RandomDelay _notInCombatDelay = new(() => Service.Config.NotInCombatDelay);
-
-    /// <summary>
-    /// Is out of combat.
-    /// </summary>
-    public static bool NotInCombatDelay => _notInCombatDelay.Delay(!InCombat);
-
-    internal static float CombatTimeRaw { get; set; }
-    private static DateTime _startRaidTime = DateTime.MinValue;
-
-    internal static float RaidTimeRaw
-    {
-        get
-        {
-            // If the raid start time is not set, return 0.
-            if (_startRaidTime == DateTime.MinValue)
-            {
-                return 0;
-            }
-
-            // Calculate and return the total seconds elapsed since the raid started.
-            return (float)(DateTime.Now - _startRaidTime).TotalSeconds;
-        }
-        set
-        {
-            // If the provided value is negative, reset the raid start time.
-            if (value < 0)
-            {
-                _startRaidTime = DateTime.MinValue;
-            }
-            else
-            {
-                // Set the raid start time to the current time minus the provided value in seconds.
-                _startRaidTime = DateTime.Now - TimeSpan.FromSeconds(value);
-            }
-        }
-    }
-
-    public static List<IBattleChara> PartyMembers { get; set; } = [];
-
-    public static List<IBattleChara> AllianceMembers { get; set; } = [];
-
-    public static List<IBattleChara> AllHostileTargets { get; set; } = [];
-
-    public static IBattleChara? InterruptTarget { get; set; }
-
-    public static IBattleChara? ProvokeTarget { get; set; }
-
-    public static IBattleChara? DeathTarget { get; set; }
-
-    public static IBattleChara? DispelTarget { get; set; }
-
-    public static List<IBattleChara> AllTargets { get; set; } = [];
-    public static Dictionary<float, List<IBattleChara>> TargetsByRange { get; set; } = [];
-
-    public static ulong[] TreasureCharas
-    {
-        get
-        {
-            List<ulong> charas = new(5);
-            //60687 - 60691 For treasure hunt.
-            for (int i = 60687; i <= 60691; i++)
-            {
-                IBattleChara? b = null;
-                for (int j = 0; j < AllTargets.Count; j++)
-                {
-                    IBattleChara battleChara = AllTargets[j];
-                    if (battleChara.GetNamePlateIcon() == i)
-                    {
-                        b = battleChara;
-                        break;
-                    }
-                }
-                if (b == null || b.CurrentHp == 0)
-                {
-                    continue;
-                }
-
-                charas.Add(b.GameObjectId);
-            }
-
-            return [.. charas];
-        }
-    }
-
-    public static bool HasHostilesInRange => NumberOfHostilesInRange > 0;
-    public static bool HasHostilesInMaxRange => NumberOfHostilesInMaxRange > 0;
-    public static int NumberOfHostilesInRange
-    {
-        get
-        {
-            float jobRange = JobRange;
-            var targets = AllHostileTargets;
-            int count = 0;
-            for (int i = 0, n = targets.Count; i < n; i++)
-            {
-                if (targets[i].DistanceToPlayer() < jobRange)
-                {
-                    count++;
-                }
-            }
-            return count;
-        }
-    }
-
-    public static int NumberOfHostilesInMaxRange
-    {
-        get
-        {
-            var targets = AllHostileTargets;
-            int count = 0;
-            for (int i = 0, n = targets.Count; i < n; i++)
-            {
-                if (targets[i].DistanceToPlayer() < 25)
-                {
-                    count++;
-                }
-            }
-            return count;
-        }
-    }
-
-    public static int NumberOfHostilesInRangeOf(float range)
-    {
-        var targets = AllHostileTargets;
-        int count = 0;
-        for (int i = 0, n = targets.Count; i < n; i++)
-        {
-            if (targets[i].DistanceToPlayer() < range)
-            {
-                count++;
-            }
-        }
-        return count;
-    }
-    public static int NumberOfAllHostilesInRange => NumberOfHostilesInRange;
-    public static int NumberOfAllHostilesInMaxRange => NumberOfHostilesInMaxRange;
-
-    public static bool MobsTime
-    {
-        get
-        {
-            float jobRange = JobRange;
-            int count = 0;
-            var targets = AllHostileTargets;
-            for (int i = 0, n = targets.Count; i < n; i++)
-            {
-                var o = targets[i];
-                if (o.DistanceToPlayer() < jobRange && o.CanSee())
-                {
-                    count++;
-                }
-            }
-            return count >= Service.Config.AutoDefenseNumber;
-        }
-    }
-
-    public static bool AreHostilesCastingKnockback
-    {
-        get
-        {
-            foreach (IBattleChara h in AllHostileTargets)
-            {
-                if (IsHostileCastingKnockback(h))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
-
-    public static float JobRange
-    {
-        get
-        {
-            float radius = 25;
-            if (!Player.AvailableThreadSafe)
-            {
-                return radius;
-            }
-
-            switch (DataCenter.Role)
-            {
-                case JobRole.Tank:
-                case JobRole.Melee:
-                    radius = 3;
-                    break;
-            }
-
-            return radius;
-        }
-    }
-
-    private static float _avgTTK = 0f;
-    public static float AverageTTK
-    {
-        get
-        {
-            if (_avgTTK > 0)
-            {
-                return _avgTTK;
-            }
-            float total = 0;
-            int count = 0;
-            var targets = AllHostileTargets;
-            for (int i = 0, n = targets.Count; i < n; i++)
-            {
-                float tTK = targets[i].GetTTK();
-                if (!float.IsNaN(tTK))
-                {
-                    total += tTK;
-                    count++;
-                }
-            }
-            return _avgTTK = count > 0 ? total / count : 0;
-        }
-    }
-
-    public static bool IsHostileCastingAOE =>
-    InCombat && (IsCastingAreaVfx() || (AllHostileTargets != null && IsAnyHostileCastingArea()));
-
-    private static bool IsAnyHostileCastingArea()
-    {
-        if (AllHostileTargets == null)
-        {
-            return false;
-        }
-
-        for (int i = 0; i < AllHostileTargets.Count; i++)
-        {
-            if (IsHostileCastingArea(AllHostileTargets[i]))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static bool IsHostileCastingToTank =>
-        InCombat && (IsCastingTankVfx() || (AllHostileTargets != null && IsAnyHostileCastingTank()));
-
-    private static bool IsAnyHostileCastingTank()
-    {
-        if (AllHostileTargets == null)
-        {
-            return false;
-        }
-
-        for (int i = 0; i < AllHostileTargets.Count; i++)
-        {
-            if (IsHostileCastingTank(AllHostileTargets[i]))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static bool IsHostileCastingStop =>
-        InCombat && Service.Config.CastingStop && AllHostileTargets != null && IsAnyHostileStop();
-
-    private static bool IsAnyHostileStop()
-    {
-        if (AllHostileTargets == null)
-        {
-            return false;
-        }
-
-        for (int i = 0; i < AllHostileTargets.Count; i++)
-        {
-            if (IsHostileStop(AllHostileTargets[i]))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static bool IsHostileStop(IBattleChara h)
-    {
-        return IsHostileCastingStopBase(h,
-            (act) => act.RowId != 0 && OtherConfiguration.HostileCastingStop.Contains(act.RowId));
-    }
-
-    public static bool IsHostileCastingStopBase(IBattleChara h, Func<Action, bool> check)
-    {
-        // Check if h is null
-        if (h == null)
-        {
-            return false;
-        }
-
-        // Check if the hostile character is casting
-        if (!h.IsCasting)
-        {
-            return false;
-        }
-
-        // Check if the cast is interruptible
-        if (h.IsCastInterruptible)
-        {
-            return false;
-        }
-
-        // Validate the cast time
-        if ((h.TotalCastTime - h.CurrentCastTime) > (Service.Config.CastingStopCalculate ? 100 : Service.Config.CastingStopTime))
-        {
-            return false;
-        }
-
-        // Get the action sheet
-        Lumina.Excel.ExcelSheet<Action> actionSheet = Service.GetSheet<Action>();
-        if (actionSheet == null)
-        {
-            return false; // Check if actionSheet is null
-        }
-
-        // Get the action being cast
-        Action action = actionSheet.GetRow(h.CastActionId);
-        if (action.RowId == 0)
-        {
-            return false; // Check if action is not initialized
-        }
-
-        // Invoke the check function on the action and return the result
-        return check?.Invoke(action) ?? false; // Check if check is null
-    }
-
-    /// <summary>
-    /// Player has a pet summoned.
-    /// </summary>
+    #region Pet Tracking
     public static bool HasPet()
     {
         return Svc.Buddies.PetBuddy != null;
@@ -771,6 +596,7 @@ internal static class DataCenter
         CharacterManager* characterManager = CharacterManager.Instance();
         return characterManager == null ? (BattleChara*)null : characterManager->LookupBuddyByOwnerObject(playerBattleChara);
     }
+    #endregion
 
     #region HP
 
@@ -938,8 +764,6 @@ internal static class DataCenter
     public static uint CurrentMp => Math.Min(10000, Player.Object.CurrentMp + MPGain);
     #endregion
 
-    internal static Queue<MacroItem> Macros { get; } = new Queue<MacroItem>();
-
     #region Action Record
     private const int QUEUECAPACITY = 48;
     private static readonly Queue<ActionRec> _actions = new(QUEUECAPACITY);
@@ -1071,6 +895,171 @@ internal static class DataCenter
     internal static DateTime KnockbackStart { get; set; } = DateTime.MinValue;
 
     #endregion
+
+    #region Hostile Range
+    public static bool HasHostilesInRange => NumberOfHostilesInRange > 0;
+    public static bool HasHostilesInMaxRange => NumberOfHostilesInMaxRange > 0;
+    public static int NumberOfHostilesInRange
+    {
+        get
+        {
+            float jobRange = JobRange;
+            var targets = AllHostileTargets;
+            int count = 0;
+            for (int i = 0, n = targets.Count; i < n; i++)
+            {
+                if (targets[i].DistanceToPlayer() < jobRange)
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
+    }
+    public static int NumberOfHostilesInMaxRange
+    {
+        get
+        {
+            var targets = AllHostileTargets;
+            int count = 0;
+            for (int i = 0, n = targets.Count; i < n; i++)
+            {
+                if (targets[i].DistanceToPlayer() < 25)
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
+    }
+    public static int NumberOfHostilesInRangeOf(float range)
+    {
+        var targets = AllHostileTargets;
+        int count = 0;
+        for (int i = 0, n = targets.Count; i < n; i++)
+        {
+            if (targets[i].DistanceToPlayer() < range)
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+    public static int NumberOfAllHostilesInRange => NumberOfHostilesInRange;
+    public static int NumberOfAllHostilesInMaxRange => NumberOfHostilesInMaxRange;
+    #endregion
+
+    #region Hostile Casting
+    public static bool IsHostileCastingAOE =>
+    InCombat && (IsCastingAreaVfx() || (AllHostileTargets != null && IsAnyHostileCastingArea()));
+
+    private static bool IsAnyHostileCastingArea()
+    {
+        if (AllHostileTargets == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < AllHostileTargets.Count; i++)
+        {
+            if (IsHostileCastingArea(AllHostileTargets[i]))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static bool IsHostileCastingToTank =>
+        InCombat && (IsCastingTankVfx() || (AllHostileTargets != null && IsAnyHostileCastingTank()));
+
+    private static bool IsAnyHostileCastingTank()
+    {
+        if (AllHostileTargets == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < AllHostileTargets.Count; i++)
+        {
+            if (IsHostileCastingTank(AllHostileTargets[i]))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static bool IsHostileCastingStop =>
+        InCombat && Service.Config.CastingStop && AllHostileTargets != null && IsAnyHostileStop();
+
+    private static bool IsAnyHostileStop()
+    {
+        if (AllHostileTargets == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < AllHostileTargets.Count; i++)
+        {
+            if (IsHostileStop(AllHostileTargets[i]))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static bool IsHostileStop(IBattleChara h)
+    {
+        return IsHostileCastingStopBase(h,
+            (act) => act.RowId != 0 && OtherConfiguration.HostileCastingStop.Contains(act.RowId));
+    }
+
+    public static bool IsHostileCastingStopBase(IBattleChara h, Func<Action, bool> check)
+    {
+        // Check if h is null
+        if (h == null)
+        {
+            return false;
+        }
+
+        // Check if the hostile character is casting
+        if (!h.IsCasting)
+        {
+            return false;
+        }
+
+        // Check if the cast is interruptible
+        if (h.IsCastInterruptible)
+        {
+            return false;
+        }
+
+        // Validate the cast time
+        if ((h.TotalCastTime - h.CurrentCastTime) > (Service.Config.CastingStopCalculate ? 100 : Service.Config.CastingStopTime))
+        {
+            return false;
+        }
+
+        // Get the action sheet
+        Lumina.Excel.ExcelSheet<Action> actionSheet = Service.GetSheet<Action>();
+        if (actionSheet == null)
+        {
+            return false; // Check if actionSheet is null
+        }
+
+        // Get the action being cast
+        Action action = actionSheet.GetRow(h.CastActionId);
+        if (action.RowId == 0)
+        {
+            return false; // Check if action is not initialized
+        }
+
+        // Invoke the check function on the action and return the result
+        return check?.Invoke(action) ?? false; // Check if check is null
+    }
+
     public static bool IsCastingVfx(List<VfxNewData> vfxDataQueueCopy, Func<VfxNewData, bool> isVfx)
     {
         // If thread safety is not a concern, avoid copying the list
@@ -1120,6 +1109,21 @@ internal static class DataCenter
     public static bool IsHostileCastingArea(IBattleChara h)
     {
         return IsHostileCastingBase(h, (act) => { return OtherConfiguration.HostileCastingArea.Contains(act.RowId); });
+    }
+
+    public static bool AreHostilesCastingKnockback
+    {
+        get
+        {
+            foreach (IBattleChara h in AllHostileTargets)
+            {
+                if (IsHostileCastingKnockback(h))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     public static bool IsHostileCastingKnockback(IBattleChara h)
@@ -1175,4 +1179,5 @@ internal static class DataCenter
         // Invoke the check function on the action and return the result
         return check?.Invoke(action) ?? false;
     }
+    #endregion
 }
