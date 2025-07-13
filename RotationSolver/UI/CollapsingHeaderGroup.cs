@@ -3,39 +3,25 @@ using ECommons.Logging;
 
 namespace RotationSolver.UI;
 
-internal class CollapsingHeaderGroup
+internal class CollapsingHeaderGroup(Dictionary<Func<string>, Action> headers)
 {
-    private readonly Dictionary<Func<string>, Action> _headers;
+    private readonly Dictionary<Func<string>, Action> _headers = headers ?? throw new ArgumentNullException(nameof(headers));
     private int _openedIndex = -1;
 
     public float HeaderSize { get; set; } = 24;
 
-    public CollapsingHeaderGroup(Dictionary<Func<string>, Action> headers)
-    {
-        _headers = headers ?? throw new ArgumentNullException(nameof(headers));
-    }
-
     public void AddCollapsingHeader(Func<string> name, Action action)
     {
-        if (name is null)
-        {
-            throw new ArgumentNullException(nameof(name));
-        }
+        ArgumentNullException.ThrowIfNull(name);
 
-        if (action is null)
-        {
-            throw new ArgumentNullException(nameof(action));
-        }
+        ArgumentNullException.ThrowIfNull(action);
 
         _headers[name] = action;
     }
 
     public void RemoveCollapsingHeader(Func<string> name)
     {
-        if (name is null)
-        {
-            throw new ArgumentNullException(nameof(name));
-        }
+        ArgumentNullException.ThrowIfNull(name);
 
         _ = _headers.Remove(name);
     }

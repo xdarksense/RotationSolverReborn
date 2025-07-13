@@ -1503,13 +1503,11 @@ public struct ActionTargetInfo(IBaseAction action)
                 return null;
             }
 
-            foreach (var o in battleChara)
+            if (DataCenter.ProvokeTarget != null)
             {
-                if (o.GameObjectId == DataCenter.ProvokeTarget.GameObjectId)
-                {
-                    return DataCenter.ProvokeTarget;
-                }
+                return DataCenter.ProvokeTarget;
             }
+
             return null;
         }
 

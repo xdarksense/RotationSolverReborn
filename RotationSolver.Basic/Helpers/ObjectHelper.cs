@@ -42,6 +42,11 @@ public static class ObjectHelper
             return false;
         }
 
+        if (Service.Config.ProvokeAnything)
+        {
+            return true;
+        }
+
         if (DataCenter.PlayerFateId != 0 && target.FateId() == DataCenter.PlayerFateId)
         {
             return false;
@@ -59,15 +64,18 @@ public static class ObjectHelper
             }
         }
 
-        // Target can move or too big and has a target
-        if ((target.GetObjectNPC()?.Unknown0 == 0 || target.HitboxRadius >= 5) // Unknown12 used to be the flag checked for the mobs ability to move, honestly just guessing on this one
-            && (target.TargetObject?.IsValid() ?? false))
+        if (!Service.Config.ProvokeAnything)
         {
-            // The target is not a tank role
-            if (Svc.Objects.SearchById(target.TargetObjectId) is IBattleChara targetObject && !targetObject.IsJobCategory(JobRole.Tank)
-                && (Vector3.Distance(target.Position, Player.Object?.Position ?? Vector3.Zero) > 5))
+            // Target can move or too big and has a target
+            if ((target.GetObjectNPC()?.Unknown0 == 0 || target.HitboxRadius >= 5) // Unknown12 used to be the flag checked for the mobs ability to move, honestly just guessing on this one
+                && (target.TargetObject?.IsValid() ?? false))
             {
-                return true;
+                // The target is not a tank role
+                if (Svc.Objects.SearchById(target.TargetObjectId) is IBattleChara targetObject && !targetObject.IsJobCategory(JobRole.Tank)
+                    && (Vector3.Distance(target.Position, Player.Object?.Position ?? Vector3.Zero) > 5))
+                {
+                    return true;
+                }
             }
         }
         return false;
