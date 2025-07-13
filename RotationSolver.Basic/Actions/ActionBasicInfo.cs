@@ -184,6 +184,11 @@ public readonly struct ActionBasicInfo
             return false;
         }
 
+        if (IsLimitBreak && !DataCenter.IsPvP)
+        {
+            return true;
+        }
+
         // 2. Basic requirements: not disabled, enough level, enough MP, spell unlocked
         if (IsActionDisabled() || !EnoughLevel || !HasEnoughMP() || !SpellUnlocked)
         {

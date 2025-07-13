@@ -28,7 +28,7 @@ internal static partial class TargetUpdater
             DataCenter.AllHostileTargets = GetAllHostileTargets();
             DataCenter.DeathTarget = GetDeathTarget();
             DataCenter.DispelTarget = GetDispelTarget();
-            DataCenter.ProvokeTarget = DataCenter.Role == JobRole.Tank ? GetFirstHostileTarget(ObjectHelper.CanProvoke) : null; // Calculating this per frame rather than on-demand is actually a fair amount worse
+            DataCenter.ProvokeTarget = (DataCenter.Role == JobRole.Tank || Player.Object.HasStatus(true, StatusID.VariantUltimatumSet)) ? GetFirstHostileTarget(ObjectHelper.CanProvoke) : null; // Calculating this per frame rather than on-demand is actually a fair amount worse
             DataCenter.InterruptTarget = GetFirstHostileTarget(ObjectHelper.CanInterrupt); // Tanks, Melee, RDM, and various phantom and duty actions can interrupt so just deal with it
         }
         UpdateTimeToKill();

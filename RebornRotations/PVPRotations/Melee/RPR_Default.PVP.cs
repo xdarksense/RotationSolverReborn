@@ -103,9 +103,9 @@ public sealed class RPR_DefaultPvP : ReaperRotation
             return false;
         }
 
-        if (LemuresSlicePvP.CanUse(out action))
+        if (HasEnshroudedPvP)
         {
-            if (HasEnshroudedPvP)
+            if (LemuresSlicePvP.CanUse(out action))
             {
                 return true;
             }
@@ -116,9 +116,12 @@ public sealed class RPR_DefaultPvP : ReaperRotation
             return true;
         }
 
-        if (GrimSwathePvP.CanUse(out action) && !HasEnshroudedPvP)
+        if (!HasEnshroudedPvP)
         {
-            return true;
+            if (GrimSwathePvP.CanUse(out action))
+            {
+                return true;
+            }
         }
 
         return base.AttackAbility(nextGCD, out action);
@@ -134,11 +137,14 @@ public sealed class RPR_DefaultPvP : ReaperRotation
             return false;
         }
 
-        if (CommunioPvP.CanUse(out action))
+        if (HasEnshroudedPvP)
         {
-            if (Player.StatusStack(true, StatusID.Enshrouded_2863) == 1 || Player.WillStatusEndGCD(1, 0, true, StatusID.Enshrouded_2863))
+            if (CommunioPvP.CanUse(out action))
             {
-                return true;
+                if (Player.StatusStack(true, StatusID.Enshrouded_2863) == 1 || Player.WillStatusEndGCD(1, 0, true, StatusID.Enshrouded_2863))
+                {
+                    return true;
+                }
             }
         }
 
@@ -157,11 +163,14 @@ public sealed class RPR_DefaultPvP : ReaperRotation
             return true;
         }
 
-        if (PlentifulHarvestPvP.CanUse(out action))
+        if (HasImmortalSacrificePvP)
         {
-            if (Player.StatusStack(true, StatusID.ImmortalSacrifice_3204) > 3)
+            if (PlentifulHarvestPvP.CanUse(out action))
             {
-                return true;
+                if (Player.StatusStack(true, StatusID.ImmortalSacrifice_3204) > 3)
+                {
+                    return true;
+                }
             }
         }
 

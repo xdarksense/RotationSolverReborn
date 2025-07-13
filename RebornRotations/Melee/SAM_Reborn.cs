@@ -248,7 +248,7 @@ public sealed class SAM_Reborn : SamuraiRotation
             return true;
         }
 
-        if (TendoKaeshiGokenPvE.CanUse(out act))
+        if (TendoKaeshiGokenPvE.CanUse(out act, skipAoeCheck: true))
         {
             return true;
         }
@@ -258,7 +258,7 @@ public sealed class SAM_Reborn : SamuraiRotation
             return true;
         }
 
-        if (KaeshiGokenPvE.CanUse(out act, skipComboCheck: true))
+        if (KaeshiGokenPvE.CanUse(out act, skipComboCheck: true, skipAoeCheck: true))
         {
             return true;
         }

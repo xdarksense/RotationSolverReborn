@@ -125,7 +125,7 @@ public sealed class RPR_Reborn : ReaperRotation
             }
         }
 
-        if (!HasBloodsownCircle && !HasPerfectioParata && !HasExecutioner && !HasImmortalSacrifice && ((GluttonyPvE.EnoughLevel && !GluttonyPvE.Cooldown.WillHaveOneChargeGCD(4)) || !GluttonyPvE.EnoughLevel || Soul == 100))
+        if (!HasBloodsownCircleSelf && !HasPerfectioParata && !HasExecutioner && !HasImmortalSacrifice && ((GluttonyPvE.EnoughLevel && !GluttonyPvE.Cooldown.WillHaveOneChargeGCD(4)) || !GluttonyPvE.EnoughLevel || Soul == 100))
         {
             if (GrimSwathePvE.CanUse(out act))
             {

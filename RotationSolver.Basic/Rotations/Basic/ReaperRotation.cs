@@ -43,6 +43,11 @@ public partial class ReaperRotation
     /// <summary>
     /// 
     /// </summary>
+    public static bool HasEnshroudedPvP => Player.HasStatus(true, StatusID.Enshrouded_2863);
+
+    /// <summary>
+    /// 
+    /// </summary>
     public static bool HasSoulReaver => Player.HasStatus(true, StatusID.SoulReaver);
 
     /// <summary>
@@ -76,19 +81,29 @@ public partial class ReaperRotation
     public static bool HasExecutioner => Player.HasStatus(true, StatusID.Executioner);
 
     /// <summary>
-    /// 
+    /// Able to execute Enshroud
     /// </summary>
     public static bool HasIdealHost => Player.HasStatus(true, StatusID.IdealHost);
 
     /// <summary>
-    /// 
+    /// Able to execute Plentiful Harvest
     /// </summary>
     public static bool HasImmortalSacrifice => Player.HasStatus(true, StatusID.ImmortalSacrifice);
 
     /// <summary>
-    /// 
+    /// PvP version of Immortal Sacrifice
     /// </summary>
-    public static bool HasBloodsownCircle => Player.HasStatus(true, StatusID.BloodsownCircle_2972);
+    public static bool HasImmortalSacrificePvP => Player.HasStatus(true, StatusID.ImmortalSacrifice_3204);
+
+    /// <summary>
+    /// Grants Immortal Sacrifice to the reaper who applied this effect when duration expires
+    /// </summary>
+    public static bool HasBloodsownCircleOther => Player.HasStatus(true, StatusID.BloodsownCircle);
+
+    /// <summary>
+    /// Able to gain stacks of Immortal Sacrifice from party members under the effect of your Circle of Sacrifice
+    /// </summary>
+    public static bool HasBloodsownCircleSelf => Player.HasStatus(true, StatusID.BloodsownCircle_2972);
 
     /// <summary>
     /// 
@@ -104,11 +119,6 @@ public partial class ReaperRotation
     /// 
     /// </summary>
     public static bool HasPerfectioParata => Player.HasStatus(true, StatusID.PerfectioParata);
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool HasEnshroudedPvP => Player.HasStatus(true, StatusID.Enshrouded_2863);
     #endregion
 
     #region Actions Unassignable
@@ -356,8 +366,11 @@ public partial class ReaperRotation
 
     static partial void ModifyPlentifulHarvestPvE(ref ActionSetting setting)
     {
-        setting.StatusNeed = [StatusID.ImmortalSacrifice];
-        setting.ActionCheck = () => !Player.HasStatus(true, StatusID.BloodsownCircle_2972);
+        setting.ActionCheck = () => !HasBloodsownCircleSelf && HasImmortalSacrifice;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            AoeCount = 1,
+        };
     }
 
     static partial void ModifyCommunioPvE(ref ActionSetting setting)

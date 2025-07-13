@@ -223,6 +223,10 @@ internal partial class Configs : IPluginConfiguration
         PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _interruptibleMoreCheck = true;
 
+    [ConditionBool, UI("Provoke anything not on the no provoke list.",
+        Filter = AutoActionUsage, Section = 3)]
+    private static readonly bool _provokeAnything = false;
+
     [ConditionBool, UI("Stop casting if the target dies.", Filter = Extra)]
     private static readonly bool _useStopCasting = false;
 
