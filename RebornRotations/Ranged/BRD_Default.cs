@@ -15,6 +15,9 @@ public sealed class BRD_Default : BardRotation
     [RotationConfig(CombatType.PvE, Name = "Attempt to assign Raging Strikes, Battle Voice, and Radiant Finale to specific ogcd slots (Experimental)")]
     public bool OGCDTimers { get; set; } = false;
 
+    [RotationConfig(CombatType.PvE, Name = "Only use DOTs on targets with Boss Icon")]
+    public bool DOTBoss { get; set; } = false;
+
     [Range(1, 45, ConfigUnitType.Seconds, 1)]
     [RotationConfig(CombatType.PvE, Name = "Wanderer's Minuet Uptime")]
     public float WANDTime { get; set; } = 43;
@@ -379,7 +382,7 @@ public sealed class BRD_Default : BardRotation
                 return true;
             }
 
-            if (CurrentTarget?.WillStatusEndGCD(1, 0.5f, true, StatusID.Windbite, StatusID.Stormbite, StatusID.VenomousBite, StatusID.CausticBite) ?? false)
+            if (BlastArrowPvE.Target.Target?.WillStatusEndGCD(1, 0.5f, true, StatusID.Windbite, StatusID.Stormbite, StatusID.VenomousBite, StatusID.CausticBite) ?? false)
             {
                 return false;
             }
@@ -406,23 +409,35 @@ public sealed class BRD_Default : BardRotation
             return true;
         }
 
-        if (IronJawsPvE.EnoughLevel && CurrentTarget?.HasStatus(true, StatusID.Windbite, StatusID.Stormbite) == true && CurrentTarget?.HasStatus(true, StatusID.VenomousBite, StatusID.CausticBite) == true)
+        if (StormbitePvE.CanUse(out act, skipTTKCheck: true))
         {
-            // Do not use WindbitePvE or VenomousBitePvE if both statuses are present and IronJawsPvE has enough level
-        }
-        else
-        {
-            if (WindbitePvE.CanUse(out act, skipTTKCheck: true))
+            if ((DOTBoss && StormbitePvE.Target.Target.IsBossFromIcon()) || !DOTBoss)
             {
-                return true;
-            }
-
-            if (VenomousBitePvE.CanUse(out act, skipTTKCheck: true))
-            {
-                return true;
+                if (IronJawsPvE.EnoughLevel && StormbitePvE.Target.Target.HasStatus(true, StatusID.Windbite, StatusID.Stormbite) == false)
+                {
+                    return true;
+                }
+                if (!IronJawsPvE.EnoughLevel)
+                {
+                    return true;
+                }
             }
         }
 
+        if (CausticBitePvE.CanUse(out act, skipTTKCheck: true))
+        {
+            if ((DOTBoss && CausticBitePvE.Target.Target.IsBossFromIcon()) || !DOTBoss)
+            {
+                if (IronJawsPvE.EnoughLevel && CausticBitePvE.Target.Target.HasStatus(true, StatusID.VenomousBite, StatusID.CausticBite) == false)
+                {
+                    return true;
+                }
+                if (!IronJawsPvE.EnoughLevel)
+                {
+                    return true;
+                }
+            }
+        }
 
         if (RefulgentArrowPvE.CanUse(out act, skipComboCheck: true))
         {

@@ -1,6 +1,7 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.ClientState.Objects.Types;
 using ECommons;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
@@ -9,6 +10,7 @@ using ECommons.GameHelpers;
 using ECommons.Logging;
 using ExCSS;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using Lumina.Excel.Sheets;
@@ -377,8 +379,47 @@ public static class ObjectHelper
 
     internal static unsafe bool IsEnemy(this IGameObject obj)
     {
-        return obj != null
-        && ActionManager.CanUseActionOnTarget((uint)ActionID.BlizzardPvE, obj.Struct());
+        if (obj == null)
+        {
+            return false;
+        }
+
+        if (!obj.IsTargetable)
+        {
+            return false;
+        }
+
+        if (ActionManager.CanUseActionOnTarget((uint)ActionID.BlizzardPvE, obj.Struct()))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    internal static unsafe bool IsFriendly(this IGameObject obj)
+    {
+        if (obj == null)
+        {
+            return false;
+        }
+
+        if (!obj.IsTargetable)
+        {
+            return false;
+        }
+
+        if (ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, obj.Struct()))
+        {
+            return true;
+        }
+
+        if (ActionManager.CanUseActionOnTarget((uint)ActionID.RaisePvE, obj.Struct()))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     internal static unsafe bool IsAllianceMember(this ICharacter obj)

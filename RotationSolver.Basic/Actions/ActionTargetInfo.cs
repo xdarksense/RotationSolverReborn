@@ -1754,7 +1754,7 @@ public struct ActionTargetInfo(IBaseAction action)
             }
 
             // Filter out characters marked with stop markers
-            if (Service.Config.FilterStopMark)
+            if (Service.Config.FilterStopMark && !DataCenter.IsPvP)
             {
                 IEnumerable<IBattleChara> filteredCharacters = MarkingHelper.FilterStopCharacters(battleChara);
                 // Manual Any() check
