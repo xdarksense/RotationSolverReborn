@@ -355,11 +355,18 @@ public partial class RotationConfigWindow : Window
                 }
                 else if (item == RotationConfigWindowTab.Duty && Player.Object != null)
                 {
-                    if (!DataCenter.IsInDuty)
+                    if (!DataCenter.IsInDuty || DataCenter.CurrentDutyRotation == null)
                     {
                         continue;
                     }
-                    displayName = $"Duty - {DutyRotation.ActivePhantomJob}"; // Use the active phantom job name for Duty tab
+
+                    displayName = true switch
+                    {
+                        var _ when DataCenter.IsInOccultCrescentOp => $"Duty - {DutyRotation.ActivePhantomJob}",
+                        var _ when DataCenter.InVariantDungeon => "Duty - Variant",
+                        var _ when DataCenter.IsInBozja => "Duty - Bozja",
+                        _ => "Duty",
+                    };
                 }
 
                 // Reverse the order of these to do the non-interop check first
@@ -3697,6 +3704,11 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"ThiefLevel: {DutyRotation.ThiefLevel}");
         ImGui.Text($"SamuraiLevel: {DutyRotation.SamuraiLevel}");
         ImGui.Text($"GeomancerLevel: {DutyRotation.GeomancerLevel}");
+        ImGui.Spacing();
+        ImGui.Text($"InVariantDungeon: {DataCenter.InVariantDungeon}");
+        ImGui.Text($"AloaloIsland: {DataCenter.AloaloIsland}");
+        ImGui.Text($"MountRokkon: {DataCenter.MountRokkon}");
+        ImGui.Text($"SildihnSubterrane: {DataCenter.SildihnSubterrane}");
         ImGui.Spacing();
     }
 

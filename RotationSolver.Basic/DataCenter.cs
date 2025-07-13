@@ -210,6 +210,28 @@ internal static class DataCenter
         && Player.Object.HasStatus(false, StatusID.DutiesAsAssigned_4228);
     #endregion
 
+    #region Variant Dungeon
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool SildihnSubterrane => IsInTerritory(1069);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool MountRokkon => IsInTerritory(1137);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool AloaloIsland => IsInTerritory(1176);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool InVariantDungeon => AloaloIsland || MountRokkon || SildihnSubterrane;
+    #endregion
+
     public static AutoStatus MergedStatus => AutoStatus | CommandStatus;
 
     public static AutoStatus AutoStatus { get; set; } = AutoStatus.None;

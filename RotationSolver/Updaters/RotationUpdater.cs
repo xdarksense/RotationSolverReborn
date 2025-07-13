@@ -446,7 +446,6 @@ internal static class RotationUpdater
         return false;
     }
 
-
     private static void PrintLoadedAssemblies(IEnumerable<string>? assemblies)
     {
         if (assemblies == null)
@@ -665,6 +664,13 @@ internal static class RotationUpdater
     {
         if (!DutyRotations.TryGetValue(Svc.ClientState.TerritoryType, out Type[]? rotations))
         {
+            // Unload the current duty rotation if leaving a duty
+            if (DataCenter.CurrentDutyRotation != null)
+            {
+                DataCenter.CurrentDutyRotation.Dispose();
+                DataCenter.CurrentDutyRotation = null;
+                _curDutyRotationName = string.Empty;
+            }
             return;
         }
 

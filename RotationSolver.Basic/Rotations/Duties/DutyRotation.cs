@@ -169,6 +169,26 @@ public partial class DutyRotation : IDisposable
     public static bool IsMoving => DataCenter.IsMoving;
 
     /// <summary>
+    /// 
+    /// </summary>
+    public static bool SildihnSubterrane => DataCenter.SildihnSubterrane;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool MountRokkon => DataCenter.MountRokkon;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool AloaloIsland => DataCenter.AloaloIsland;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool InVariantDungeon => DataCenter.InVariantDungeon;
+
+    /// <summary>
     /// This is the player.
     /// </summary>
     protected static IPlayerCharacter Player => ECommons.GameHelpers.Player.Object;
