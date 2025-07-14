@@ -38,14 +38,29 @@ public partial class MonkRotation
     public static int OpoOpoFury => JobGauge.OpoOpoFury;
 
     /// <summary>
+    /// 
+    /// </summary>
+    public static bool OpoOpoUnlocked => Player.Level >= 50;
+
+    /// <summary>
     /// Gets the amount of available Raptor Fury stacks.
     /// </summary>
     public static int RaptorFury => JobGauge.RaptorFury;
 
     /// <summary>
+    /// 
+    /// </summary>
+    public static bool RaptorUnlocked => Player.Level >= 18;
+
+    /// <summary>
     /// Gets the amount of available Coeurl Fury stacks.
     /// </summary>
     public static int CoeurlFury => JobGauge.CoeurlFury;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool CoeurlUnlocked => Player.Level >= 30;
 
     /// <summary>
     /// Determines whether all elements in the <see cref="BeastChakras"/> array are the same.
@@ -240,14 +255,14 @@ public partial class MonkRotation
 
     static partial void ModifyTrueStrikePvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (InRaptorForm || HasFormlessFist || HasPerfectBalance) && RaptorFury > 0;
+        setting.ActionCheck = () => (InRaptorForm || HasFormlessFist || HasPerfectBalance) && (RaptorFury > 0 || !RaptorUnlocked);
         setting.StatusProvide = [StatusID.CoeurlForm];
         setting.MPOverride = () => 0;
     }
 
     static partial void ModifySnapPunchPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => (InCoeurlForm || HasFormlessFist || HasPerfectBalance) && CoeurlFury > 0;
+        setting.ActionCheck = () => (InCoeurlForm || HasFormlessFist || HasPerfectBalance) && (CoeurlFury > 0 || !CoeurlUnlocked);
         setting.StatusProvide = [StatusID.OpoopoForm];
     }
 
@@ -287,7 +302,7 @@ public partial class MonkRotation
 
     static partial void ModifyRockbreakerPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => InCoeurlForm || HasFormlessFist || HasPerfectBalance;
+        setting.ActionCheck = () => (InCoeurlForm || HasFormlessFist || HasPerfectBalance);
         setting.StatusProvide = [StatusID.OpoopoForm];
         setting.UnlockedByQuestID = 66597;
         setting.CreateConfig = () => new ActionConfig()
@@ -518,19 +533,19 @@ public partial class MonkRotation
     static partial void ModifyLeapingOpoPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.RaptorForm];
-        setting.ActionCheck = () => (InOpoopoForm || HasFormlessFist || HasPerfectBalance) && OpoOpoFury > 0;
+        setting.ActionCheck = () => (InOpoopoForm || HasFormlessFist || HasPerfectBalance) && (OpoOpoFury > 0 || !OpoOpoUnlocked);
     }
 
     static partial void ModifyRisingRaptorPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.CoeurlForm];
-        setting.ActionCheck = () => (InRaptorForm || HasFormlessFist || HasPerfectBalance) && RaptorFury > 0;
+        setting.ActionCheck = () => (InRaptorForm || HasFormlessFist || HasPerfectBalance) && (RaptorFury > 0 || !RaptorUnlocked);
     }
 
     static partial void ModifyPouncingCoeurlPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.OpoopoForm];
-        setting.ActionCheck = () => (InCoeurlForm || HasFormlessFist || HasPerfectBalance) && CoeurlFury > 0;
+        setting.ActionCheck = () => (InCoeurlForm || HasFormlessFist || HasPerfectBalance) && (CoeurlFury > 0 || !CoeurlUnlocked);
     }
 
     static partial void ModifyElixirBurstPvE(ref ActionSetting setting)

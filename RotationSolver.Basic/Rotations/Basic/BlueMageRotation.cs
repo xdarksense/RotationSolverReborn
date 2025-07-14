@@ -180,12 +180,12 @@ public partial class BlueMageRotation
             List<uint> idList = new List<uint>(ActiveActions.Length);
             foreach (var a in ActiveActions)
             {
-                if (a.Info.SpellUnlocked)
+                if (a.Info.IsQuestUnlocked())
                 {
                     idList.Add(a.Action.RowId);
                 }
             }
-            uint[] idArray = idList.ToArray();
+            uint[] idArray = [.. idList];
 
             if (idArray.Equals(GetBlueMageActions()))
             {

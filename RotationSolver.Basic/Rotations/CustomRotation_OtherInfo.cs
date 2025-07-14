@@ -2,6 +2,7 @@
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Plugin.Services;
 using ECommons.DalamudServices;
+using ECommons.ExcelServices;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 
 namespace RotationSolver.Basic.Rotations;
@@ -65,6 +66,11 @@ public partial class CustomRotation
     /// </summary>
     [Description("Player's MP")]
     public static uint CurrentMp => DataCenter.CurrentMp;
+
+    /// <summary>
+    /// IsPGL.
+    /// </summary>
+    public static bool IsJobstoneless => DataCenter.BaseClass();
 
     /// <summary>
     /// Determines if the current combat time is within an even minute.

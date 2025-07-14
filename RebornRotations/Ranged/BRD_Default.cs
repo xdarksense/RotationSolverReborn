@@ -409,32 +409,64 @@ public sealed class BRD_Default : BardRotation
             return true;
         }
 
-        if (StormbitePvE.CanUse(out act, skipTTKCheck: true))
+        if (StormbitePvE.EnoughLevel)
         {
-            if ((DOTBoss && StormbitePvE.Target.Target.IsBossFromIcon()) || !DOTBoss)
+            if (StormbitePvE.CanUse(out act))
             {
-                if (IronJawsPvE.EnoughLevel && StormbitePvE.Target.Target.HasStatus(true, StatusID.Windbite, StatusID.Stormbite) == false)
+                if ((DOTBoss && StormbitePvE.Target.Target.IsBossFromIcon()) || !DOTBoss)
                 {
-                    return true;
+                    if (StormbitePvE.Target.Target.HasStatus(true, StatusID.Stormbite) == false)
+                    {
+                        return true;
+                    }
                 }
-                if (!IronJawsPvE.EnoughLevel)
+            }
+        }
+        if (CausticBitePvE.EnoughLevel)
+        {
+            if (CausticBitePvE.CanUse(out act))
+            {
+                if ((DOTBoss && CausticBitePvE.Target.Target.IsBossFromIcon()) || !DOTBoss)
                 {
-                    return true;
+                    if (CausticBitePvE.Target.Target.HasStatus(true, StatusID.VenomousBite) == false)
+                    {
+                        return true;
+                    }
                 }
             }
         }
 
-        if (CausticBitePvE.CanUse(out act, skipTTKCheck: true))
+        if (!StormbitePvE.EnoughLevel)
         {
-            if ((DOTBoss && CausticBitePvE.Target.Target.IsBossFromIcon()) || !DOTBoss)
+            if (WindbitePvE.CanUse(out act))
             {
-                if (IronJawsPvE.EnoughLevel && CausticBitePvE.Target.Target.HasStatus(true, StatusID.VenomousBite, StatusID.CausticBite) == false)
+                if ((DOTBoss && WindbitePvE.Target.Target.IsBossFromIcon()) || !DOTBoss)
                 {
-                    return true;
+                    if (IronJawsPvE.EnoughLevel && WindbitePvE.Target.Target.HasStatus(true, StatusID.Windbite) == false)
+                    {
+                        return true;
+                    }
+                    if (!IronJawsPvE.EnoughLevel)
+                    {
+                        return true;
+                    }
                 }
-                if (!IronJawsPvE.EnoughLevel)
+            }
+        }
+        if (!CausticBitePvE.EnoughLevel)
+        {
+            if (VenomousBitePvE.CanUse(out act))
+            {
+                if ((DOTBoss && VenomousBitePvE.Target.Target.IsBossFromIcon()) || !DOTBoss)
                 {
-                    return true;
+                    if (IronJawsPvE.EnoughLevel && VenomousBitePvE.Target.Target.HasStatus(true, StatusID.CausticBite) == false)
+                    {
+                        return true;
+                    }
+                    if (!IronJawsPvE.EnoughLevel)
+                    {
+                        return true;
+                    }
                 }
             }
         }

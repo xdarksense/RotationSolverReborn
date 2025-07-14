@@ -2223,10 +2223,12 @@ public partial class RotationConfigWindow : Window
                         ImGui.TextColored(ImGuiColors.DalamudRed, "Target is not a valid BattleChara.");
                         return;
                     }
-
+                    ImGui.Text($"Can Use: {action.CanUse(out _)} ");
+                    ImGui.Spacing();
                     ImGui.Text("ID: " + action.Info.ID);
                     ImGui.Text("AdjustedID: " + Service.GetAdjustedActionId(action.Info.ID));
-                    ImGui.Text($"Can Use: {action.CanUse(out _)} ");
+                    ImGui.Text($"IsQuestUnlocked: {action.Info.IsQuestUnlocked()} ({action.Action.UnlockLink.RowId})");
+                    ImGui.Text("EnoughLevel: " + action.EnoughLevel);
                     ImGui.Text("AoeCount: " + action.Config.AoeCount);
                     ImGui.Text("ShouldCheckStatus: " + action.Config.ShouldCheckStatus);
                     ImGui.Text("ShouldCheckTargetStatus: " + action.Config.ShouldCheckTargetStatus);
@@ -2242,6 +2244,7 @@ public partial class RotationConfigWindow : Window
                     }
                     ImGui.Text("Cast Time: " + action.Info.CastTime);
                     ImGui.Text("MP: " + action.Info.MPNeed);
+                    ImGui.Text("HasEnoughMP: " + action.Info.HasEnoughMP());
                     ImGui.Text("AttackType: " + action.Info.AttackType);
                     ImGui.Text("Level: " + action.Info.Level);
                     ImGui.Text("Range: " + action.Info.Range);
@@ -2256,7 +2259,6 @@ public partial class RotationConfigWindow : Window
 
                     ImGui.Text("IgnoreCastCheck:" + action.CanUse(out _, skipCastingCheck: true));
                     ImGui.Text("Target Name: " + action.Target.Target?.Name ?? string.Empty);
-                    ImGui.Text($"SpellUnlocked: {action.Info.SpellUnlocked} ({action.Action.UnlockLink.RowId})");
                 }
                 catch (Exception ex)
                 {

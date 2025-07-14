@@ -6,6 +6,7 @@ using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Fate;
+using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Configuration.Conditions;
@@ -345,7 +346,7 @@ internal static class DataCenter
 
     #region Territory Info Tracking
 
-    public static TerritoryInfo? Territory { get; set; }
+    public static Data.TerritoryInfo? Territory { get; set; }
     public static ushort TerritoryID => Svc.ClientState.TerritoryType;
 
     public static bool IsPvP => Territory?.IsPvP ?? false;
@@ -512,6 +513,28 @@ internal static class DataCenter
 
             return radius;
         }
+    }
+
+    /// <summary>
+    /// This quest is needed to do the quests that give Job Stones.
+    /// </summary>
+    public static unsafe bool SylphManagementFinished()
+    {
+        if (UIState.Instance()->IsUnlockLinkUnlockedOrQuestCompleted(66049))
+            return true;
+
+        return false;
+    }
+
+    /// <summary>
+    /// Returns true if the current class is a base class (pre-jobstone), otherwise false.
+    /// </summary>
+    public static bool BaseClass()
+    {
+        // FFXIV base classes: 1-7, 26, 29 (GLA, PGL, MRD, LNC, ARC, CNJ, THM, ACN, ROG)
+        if (Svc.ClientState.LocalPlayer == null) return false;
+        var rowId = Svc.ClientState.LocalPlayer.ClassJob.RowId;
+        return (rowId >= 1 && rowId <= 7) || rowId == 26 || rowId == 29;
     }
     #endregion
 
