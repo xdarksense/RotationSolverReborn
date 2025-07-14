@@ -156,9 +156,12 @@ public sealed class GNB_Default : GunbreakerRotation
     [RotationDesc(ActionID.AuroraPvE)]
     protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
-        if (AuroraPvE.CanUse(out act, usedUp: true))
+        if (!IsLastAbility(ActionID.AuroraPvE) && AuroraPvE.CanUse(out act, usedUp: Player.GetHealthRatio() < 0.9))
         {
-            return true;
+            if (AuroraPvE.Target.Target.HasStatus(true, StatusID.Aurora) == false)
+            {
+                return true;
+            }
         }
 
         return base.HealSingleAbility(nextGCD, out act);

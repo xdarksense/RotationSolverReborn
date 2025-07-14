@@ -68,6 +68,29 @@ public readonly struct ActionBasicInfo
     public readonly byte Level => _action.Action.ClassJobLevel;
 
     /// <summary>
+    /// 
+    /// </summary>
+    public readonly uint UnlockLink => _action.Action.UnlockLink.RowId;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public unsafe bool IsQuestUnlocked()
+    {
+        if (UnlockLink == 0)
+        {
+            return true;
+        }
+
+        if (!UIState.Instance()->IsUnlockLinkUnlockedOrQuestCompleted(UnlockLink))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
     /// Determines whether the player's level is sufficient to use the action.
     /// </summary>
     public readonly bool EnoughLevel => Player.Level >= Level;
@@ -190,7 +213,7 @@ public readonly struct ActionBasicInfo
         }
 
         // 2. Basic requirements: not disabled, enough level, enough MP, spell unlocked
-        if (IsActionDisabled() || !EnoughLevel || !HasEnoughMP() || !SpellUnlocked)
+        if (IsActionDisabled() || !EnoughLevel || !HasEnoughMP() || !IsQuestUnlocked())
         {
             return false;
         }
@@ -202,7 +225,12 @@ public readonly struct ActionBasicInfo
         }
 
         // 4. Combo and role checks
-        if (!IsComboValid(skipComboCheck) || !IsRoleActionValid())
+        if (!IsComboValid(skipComboCheck))
+        {
+            return false;
+        }
+
+        if (!IsActionJobValid())
         {
             return false;
         }
@@ -241,11 +269,6 @@ public readonly struct ActionBasicInfo
         return false;
     }
 
-    /// <summary>
-    /// Determines whether the spell is unlocked for the player.
-    /// </summary>
-    public unsafe bool SpellUnlocked => _action.Action.UnlockLink.RowId <= 0 || UIState.Instance()->IsUnlockLinkUnlockedOrQuestCompleted(_action.Action.UnlockLink.RowId);
-
     private bool IsActionEnabled()
     {
         return _action.Config?.IsEnabled ?? false;
@@ -256,7 +279,10 @@ public readonly struct ActionBasicInfo
         return !IBaseAction.ForceEnable && (DataCenter.DisabledActionSequencer?.Contains(ID) ?? false);
     }
 
-    private bool HasEnoughMP()
+    /// <summary>
+    /// Determines whether the player has enough MP to use the action.
+    /// </summary>
+    public bool HasEnoughMP()
     {
         if (DataCenter.CurrentMp >= MPNeed)
         {
@@ -289,9 +315,14 @@ public readonly struct ActionBasicInfo
         return skipComboCheck || !IsGeneralGCD || CheckForCombo();
     }
 
-    private bool IsRoleActionValid()
+    private bool IsActionJobValid()
     {
-        return !_action.Action.IsRoleAction || (_action.Action.ClassJobCategory.Value.DoesJobMatchCategory(DataCenter.Job) == true);
+        if (_action.Action.ClassJobCategory.Value.DoesJobMatchCategory(DataCenter.Job) == true)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private bool IsRotationCheckValid()
