@@ -1,13 +1,20 @@
 namespace RebornRotations.Tank;
 
 [Rotation("Default", CombatType.PvE, GameVersion = "7.25")]
-[SourceCode(Path = "main/BasicRotations/Tank/DRK_Default.cs")]
+[SourceCode(Path = "main/RebornRotations/Tank/DRK_Default.cs")]
 [Api(5)]
 public sealed class DRK_Default : DarkKnightRotation
 {
     #region Config Options
     [RotationConfig(CombatType.PvE, Name = "Keep at least 3000 MP")]
     public bool TheBlackestNight { get; set; } = true;
+
+    [RotationConfig(CombatType.PvE, Name = "Use The Blackest Night on lowest HP party member during AOE scenarios")]
+    public bool BlackLantern { get; set; } = false;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Target health threshold needed to use Blackest Night with above option")]
+    private float BlackLanternRatio { get; set; } = 0.5f;
     #endregion
 
     #region Countdown Logic
@@ -72,6 +79,12 @@ public sealed class DRK_Default : DarkKnightRotation
     [RotationDesc(ActionID.DarkMissionaryPvE, ActionID.ReprisalPvE)]
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
+        if (!InTwoMIsBurst && BlackLantern && TheBlackestNightPvE.CanUse(out act) &&
+            TheBlackestNightPvE.Target.Target == LowestHealthPartyMember && TheBlackestNightPvE.Target.Target.GetHealthRatio() <= BlackLanternRatio)
+        {
+            return true;
+        }
+        
         if (!InTwoMIsBurst && DarkMissionaryPvE.CanUse(out act))
         {
             return true;
@@ -95,6 +108,12 @@ public sealed class DRK_Default : DarkKnightRotation
         }
 
         if (TheBlackestNightPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (TheBlackestNightPvE.CanUse(out act) &&
+            TheBlackestNightPvE.Target.Target == Player)
         {
             return true;
         }
