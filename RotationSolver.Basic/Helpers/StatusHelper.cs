@@ -548,6 +548,11 @@ public static class StatusHelper
             return [];
         }
 
+        if (!battleChara.IsValid())
+        {
+            return [];
+        }
+
         try
         {
             if (battleChara.StatusList == null)

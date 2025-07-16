@@ -322,7 +322,6 @@ public partial class DarkKnightRotation
     static partial void ModifyTheBlackestNightPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.BlackestNight];
-        setting.ActionCheck = Player.IsTargetOnSelf;
         setting.UnlockedByQuestID = 68455;
         setting.IsFriendly = true;
     }

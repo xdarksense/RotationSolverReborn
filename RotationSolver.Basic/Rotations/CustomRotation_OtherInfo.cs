@@ -152,6 +152,32 @@ public partial class CustomRotation
     /// </summary>
     [Description("Average HP in party members.")]
     public static float PartyMembersAverHP => DataCenter.PartyMembersAverHP;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static IBattleChara? LowestHealthPartyMember
+    {
+        get
+        {
+            if (Player == null) return null;
+            IBattleChara lowest = Player;
+            var lowestHp = Player.GetHealthRatio();
+
+            foreach (var member in PartyMembers)
+            {
+                if (member == null || member.IsDead) continue;
+                var memberHpRatio = member.GetHealthRatio();
+                if (memberHpRatio < lowestHp)
+                {
+                    lowest = member;
+                    lowestHp = memberHpRatio;
+                }
+            }
+
+            return lowest;
+        }
+    }
     #endregion
 
     #region Target
