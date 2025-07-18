@@ -672,6 +672,10 @@ internal partial class Configs : IPluginConfiguration
     [Range(0, 90, ConfigUnitType.Degree, 0.02f)]
     public float MoveTargetAngle { get; set; } = 24;
 
+    [ConditionBool, UI("Treat target dummy as a boss.",
+        Filter = TargetConfig, Section = 3)]
+    private static readonly bool _dummyBoss = true;
+
     [UI("If target's TTK is higher than this, regard it as boss.",
         Filter = TargetConfig, Section = 1)]
     [Range(10, 1800, ConfigUnitType.Seconds, 0.02f)]

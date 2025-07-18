@@ -1,7 +1,6 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Game.ClientState.Objects.Types;
 using ECommons;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
@@ -10,7 +9,6 @@ using ECommons.GameHelpers;
 using ECommons.Logging;
 using ExCSS;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using Lumina.Excel.Sheets;
@@ -959,6 +957,38 @@ public static class ObjectHelper
         return battleChara.Struct()->NamePlateIconId;
     }
 
+    internal static int GetNameIconIdForBattleChara(this IBattleChara battleChara)
+    {
+        return 0;
+    }
+
+    /// <summary>
+    /// Is target a boss depends on the nameplateiconID.
+    /// </summary>
+    /// <param name="battleChara">the object.</param>
+    /// <returns></returns>
+    public static bool IsBossFromNameplateIcon(this IBattleChara battleChara)
+    {
+        if (battleChara == null)
+        {
+            return false;
+        }
+
+        if (Service.Config.DummyBoss && battleChara.IsDummy())
+        {
+            return true;
+        }
+
+        int icon = battleChara.GetNameIconIdForBattleChara();
+
+        if (icon == 61710 || icon == 61711 || icon == 61712)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     internal static unsafe EventHandlerContent GetEventType(this IBattleChara battleChara)
     {
         return battleChara.Struct()->EventId.ContentId;
@@ -1515,7 +1545,7 @@ public static class ObjectHelper
             return false;
         }
 
-        if (battleChara.IsDummy())
+        if (Service.Config.DummyBoss && battleChara.IsDummy())
         {
             return true;
         }
@@ -1536,7 +1566,7 @@ public static class ObjectHelper
             return false;
         }
 
-        if (battleChara.IsDummy())
+        if (Service.Config.DummyBoss && battleChara.IsDummy())
         {
             return true;
         }
