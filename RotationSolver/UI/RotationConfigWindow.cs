@@ -3771,12 +3771,13 @@ public partial class RotationConfigWindow : Window
 
         if (target is IBattleChara battleChara)
         {
-            ImGui.Text($"NamePlate: {battleChara.GetNamePlateIcon()}");
             ImGui.Text($"Is Status Capped: {StatusHelper.IsStatusCapped(battleChara)}");
             ImGui.Text($"CanSee: {battleChara.CanSee()}");
+            ImGui.Text($"HP: {battleChara.CurrentHp} / {battleChara.MaxHp}");
+            ImGui.Spacing();
+            ImGui.Text($"NamePlate Icon ID: {battleChara.GetNamePlateIcon()}");
             ImGui.Text($"Name Id: {battleChara.NameId}");
             ImGui.Text($"Data Id: {battleChara.DataId}");
-            ImGui.Text($"HP: {battleChara.CurrentHp} / {battleChara.MaxHp}");
             ImGui.Spacing();
             ImGui.Text($"Is Attackable: {battleChara.IsAttackable()}");
             ImGui.Text($"Is Others Players Mob: {battleChara.IsOthersPlayersMob()}");

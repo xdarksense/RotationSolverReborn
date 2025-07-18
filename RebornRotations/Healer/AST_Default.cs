@@ -34,7 +34,7 @@ public sealed class AST_Default : AstrologianRotation
 
     [Range(4, 20, ConfigUnitType.Seconds)]
     [RotationConfig(CombatType.PvE, Name = "Use Earthly Star during countdown timer.")]
-    public float UseEarthlyStarTime { get; set; } = 15;
+    public float UseEarthlyStarTime { get; set; } = 4;
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Aspected Benefic")]
