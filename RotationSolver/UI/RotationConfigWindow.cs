@@ -3744,11 +3744,28 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Limit Break: {CustomRotation.LimitBreakLevel}");
         ImGui.Spacing();
         ImGui.Text($"Object Data");
-        ImGui.Text($"AllTargets Count: {DataCenter.AllTargets.Count()}");
-        ImGui.Text($"AllHostileTargets Count: {DataCenter.AllHostileTargets.Count()}");
+        ImGui.Text($"AllTargets Count: {DataCenter.AllTargets.Count}");
+        ImGui.Text($"AllHostileTargets Count: {DataCenter.AllHostileTargets.Count}");
         foreach (IBattleChara item in DataCenter.AllHostileTargets)
         {
             ImGui.Text(item.Name.ToString());
+        }
+        ImGui.Spacing();
+        ImGui.Text($"Party Composition:");
+        var party = CustomRotation.PartyComposition;
+        if (party.Count == 0)
+        {
+            ImGui.Text("No party members.");
+        }
+        else
+        {
+            for (int i = 0; i < party.Count; i++)
+            {
+                // Assuming RowRef<ClassJob> has a .Value property with a .Name or .Abbreviation
+                var classJob = party[i].Value;
+                string jobName = classJob.Abbreviation.ToString() ?? classJob.Name.ToString() ?? $"Job #{i}";
+                ImGui.Text($"{i + 1}: {jobName}");
+            }
         }
     }
 
