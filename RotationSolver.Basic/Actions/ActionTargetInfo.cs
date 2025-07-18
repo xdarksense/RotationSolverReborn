@@ -82,7 +82,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 // or the target is the currently selected hard-target
                 // or the target is ourselves
                 // then => Check target is in the view && ActionManager.CanUse on target && CanSee Target && action.setting predicate is true of target
-                if (!DataCenter.IsManual || IsTargetFriendly || target.GameObjectId == Svc.Targets.Target?.GameObjectId || target.GameObjectId == Player.Object?.GameObjectId)
+                if (!DataCenter.IsManual || IsTargetFriendly || target.GameObjectId == Svc.Targets.Target?.GameObjectId || target.GameObjectId == Player.Object.GameObjectId)
                 {
                     var view = InViewTarget(target);
                     var canUse = CanUseTo(target);
@@ -1541,7 +1541,7 @@ public struct ActionTargetInfo(IBaseAction action)
                     return null;
                 }
 
-                List<IBattleChara> filteredTargets = new();
+                List<IBattleChara> filteredTargets = [];
                 foreach (var t in battleChara)
                 {
                     if (t.DistanceToPlayer() > Service.Config.DistanceForMoving)
@@ -1572,7 +1572,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 Vector3 pPosition = Player.Object.Position;
                 Vector3 faceVec = Player.Object.GetFaceVector();
 
-                List<IBattleChara> filteredTargets = new();
+                List<IBattleChara> filteredTargets = [];
                 foreach (var t in battleChara)
                 {
                     if (t.DistanceToPlayer() > Service.Config.DistanceForMoving)
@@ -2241,7 +2241,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
     private static IBattleChara? RandomObject(IEnumerable<IBattleChara> objs)
     {
-        return objs.Count() > 0 ? objs.ElementAt(new Random().Next(objs.Count())) : null;
+        return objs.Any() ? objs.ElementAt(new Random().Next(objs.Count())) : null;
         //Random ran = new(DateTime.Now.Millisecond);
         //var count = objs.Count();
         //if (count == 0) return null;
