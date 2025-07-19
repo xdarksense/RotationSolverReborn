@@ -1,9 +1,9 @@
 ﻿namespace RebornRotations.Melee;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.25")]
-[SourceCode(Path = "main/BasicRotations/Melee/VPR_Default.cs")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.25")]
+[SourceCode(Path = "main/RebornRotations/Melee/VPR_Reborn.cs")]
 [Api(5)]
-public sealed class VPR_Default : ViperRotation
+public sealed class VPR_Reborn : ViperRotation
 {
     #region Config Options
 
@@ -40,6 +40,9 @@ public sealed class VPR_Default : ViperRotation
 
     [RotationConfig(CombatType.PvE, Name = "Attempt to prevent regular combo from dropping (Experimental)")]
     public bool PreserveCombo { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Only allow switching to AOE rotation if your last combo action increased gauge (Experimental)")]
+    public bool STtoAOEBetaLogic { get; set; } = false;
     #endregion
 
     #region Additional oGCD Logic
@@ -463,23 +466,25 @@ public sealed class VPR_Default : ViperRotation
             if (HuntersBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
                 return true;
         }
-        // aoe 1
-        switch ((HasSteel, HasReavers))
+        if (!STtoAOEBetaLogic || (STtoAOEBetaLogic && (IsLastComboAction() || IsLastComboAction(ActionID.FlankstingStrikePvE, ActionID.FlanksbaneFangPvE, ActionID.HindsbaneFangPvE, ActionID.HindstingStrikePvE, ActionID.JaggedMawPvE, ActionID.BloodiedMawPvE))))
         {
-            case (true, _):
-                if (SteelMawPvE.CanUse(out act))
-                    return true;
-                break;
-            case (_, true):
-                if (ReavingMawPvE.CanUse(out act))
-                    return true;
-                break;
-            case (false, false):
-                if (ReavingMawPvE.CanUse(out act))
-                    return true;
-                if (SteelMawPvE.CanUse(out act))
-                    return true;
-                break;
+            switch ((HasSteel, HasReavers))
+            {
+                case (true, _):
+                    if (SteelMawPvE.CanUse(out act))
+                        return true;
+                    break;
+                case (_, true):
+                    if (ReavingMawPvE.CanUse(out act))
+                        return true;
+                    break;
+                case (false, false):
+                    if (ReavingMawPvE.CanUse(out act))
+                        return true;
+                    if (SteelMawPvE.CanUse(out act))
+                        return true;
+                    break;
+            }
         }
 
         ////Single Target Dread Combo
