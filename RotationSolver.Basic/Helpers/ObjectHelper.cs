@@ -428,6 +428,11 @@ public static class ObjectHelper
             || ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)obj.Struct()));
     }
 
+    internal static unsafe bool IsPlayer(this IBattleChara battleChara)
+    {
+        return battleChara == Player.Object;
+    }
+
     internal static bool IsParty(this IBattleChara battleChara)
     {
         if (battleChara == null)
@@ -514,44 +519,6 @@ public static class ObjectHelper
     internal static bool IsTargetOnSelf(this IBattleChara battleChara)
     {
         return battleChara.TargetObject?.TargetObject == battleChara;
-    }
-
-    internal static bool IsDeathToRaise(this IBattleChara battleChara)
-    {
-        if (battleChara == null)
-        {
-            return false;
-        }
-
-        if (!battleChara.IsDead || !battleChara.IsTargetable)
-        {
-            return false;
-        }
-
-        if (battleChara is IBattleChara b && b.CurrentHp != 0)
-        {
-            return false;
-        }
-
-        if (battleChara.HasStatus(false, StatusID.Raise))
-        {
-            return false;
-        }
-
-        if (!Service.Config.RaiseBrinkOfDeath && battleChara.HasStatus(false, StatusID.BrinkOfDeath))
-        {
-            return false;
-        }
-
-        foreach (IBattleChara c in DataCenter.PartyMembers)
-        {
-            if (c.CastTargetObjectId == battleChara.GameObjectId)
-            {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     internal static bool IsAlive(this IBattleChara battleChara)

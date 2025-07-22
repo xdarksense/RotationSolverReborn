@@ -500,7 +500,17 @@ internal partial class Configs : IPluginConfiguration
     [Range(0, 1, ConfigUnitType.Percent, 0.02f)]
     public float HealthSelfRatio { get; set; } = 0.4f;
 
-    [JobConfig, UI("Hard cast Raise while Swiftcast/Dualcast is on cooldown", Description = "If this is enabled and Swiftcast/Dualcast is on cooldown, you will only attempt to raise while standing still.",
+    [JobConfig, UI("Hard cast Raise while Swiftcast is on cooldown if Swiftcast cooldown is higher than Raise cast time (Experimental)",
+        Filter = HealingActionCondition, Section = 2,
+        PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
+    private static readonly bool _raiseSwiftCooldown = false;
+
+    [JobConfig, UI("Hard cast Raise while Swiftcast is on cooldown if all healers are dead (Experimental)",
+        Filter = HealingActionCondition, Section = 2,
+        PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
+    private static readonly bool _raiseHealerByCasting = false;
+
+    [JobConfig, UI("Hard cast Raise while Swiftcast is on cooldown",
         Filter = HealingActionCondition, Section = 2,
         PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _raisePlayerByCasting = true;

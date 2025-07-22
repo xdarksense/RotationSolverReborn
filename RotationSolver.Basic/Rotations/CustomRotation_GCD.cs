@@ -64,9 +64,54 @@ public partial class CustomRotation
                     return act;
                 }
 
-                if (Service.Config.RaisePlayerByCasting && SwiftcastPvE.Cooldown.IsCoolingDown && RaiseSpell(out act, true))
+                if (Service.Config.RaisePlayerByCasting && SwiftcastPvE.Cooldown.IsCoolingDown)
                 {
-                    return act;
+                    if (RaiseSpell(out act, true))
+                    {
+                        return act;
+                    }
+                }
+
+                if (Service.Config.RaiseSwiftCooldown)
+                {
+                    if (SwiftcastPvE.Cooldown.IsCoolingDown && Raise != null && Raise.Info.CastTime < SwiftcastPvE.Cooldown.RecastTimeRemainOneCharge)
+                    {
+                        if (RaiseSpell(out act, true))
+                        {
+                            return act;
+                        }
+                    }
+                }
+
+                if (Service.Config.RaiseHealerByCasting)
+                {
+                    var deadhealers = new HashSet<IBattleChara>();
+                    if (DataCenter.PartyMembers != null)
+                    {
+                        foreach (var battleChara in DataCenter.PartyMembers.GetDeath())
+                        {
+                            if (TargetFilter.IsJobCategory(battleChara, JobRole.Healer) && !battleChara.IsPlayer())
+                            {
+                                deadhealers.Add(battleChara);
+                            }
+                        }
+                    }
+
+                    var allhealers = new HashSet<IBattleChara>();
+                    if (DataCenter.PartyMembers != null)
+                    {
+                        foreach (var battleChara in DataCenter.PartyMembers)
+                        {
+                            if (TargetFilter.IsJobCategory(battleChara, JobRole.Healer) && !battleChara.IsPlayer())
+                            {
+                                allhealers.Add(battleChara);
+                            }
+                        }
+                    }
+                    if (RaiseSpell(out act, true) && deadhealers.Count == allhealers.Count)
+                    {
+                        return act;
+                    }
                 }
             }
 
@@ -194,9 +239,54 @@ public partial class CustomRotation
                     return act;
                 }
 
-                if (Service.Config.RaisePlayerByCasting && SwiftcastPvE.Cooldown.IsCoolingDown && RaiseSpell(out act, true))
+                if (Service.Config.RaisePlayerByCasting && SwiftcastPvE.Cooldown.IsCoolingDown)
                 {
-                    return act;
+                    if (RaiseSpell(out act, true))
+                    {
+                        return act;
+                    }
+                }
+
+                if (Service.Config.RaiseSwiftCooldown)
+                {
+                    if (SwiftcastPvE.Cooldown.IsCoolingDown && Raise != null && Raise.Info.CastTime < SwiftcastPvE.Cooldown.RecastTimeRemainOneCharge)
+                    {
+                        if (RaiseSpell(out act, true))
+                        {
+                            return act;
+                        }
+                    }
+                }
+
+                if (Service.Config.RaiseHealerByCasting)
+                {
+                    var deadhealers = new HashSet<IBattleChara>();
+                    if (DataCenter.PartyMembers != null)
+                    {
+                        foreach (var battleChara in DataCenter.PartyMembers.GetDeath())
+                        {
+                            if (TargetFilter.IsJobCategory(battleChara, JobRole.Healer) && !battleChara.IsPlayer())
+                            {
+                                deadhealers.Add(battleChara);
+                            }
+                        }
+                    }
+
+                    var allhealers = new HashSet<IBattleChara>();
+                    if (DataCenter.PartyMembers != null)
+                    {
+                        foreach (var battleChara in DataCenter.PartyMembers)
+                        {
+                            if (TargetFilter.IsJobCategory(battleChara, JobRole.Healer) && !battleChara.IsPlayer())
+                            {
+                                allhealers.Add(battleChara);
+                            }
+                        }
+                    }
+                    if (RaiseSpell(out act, true) && deadhealers.Count == allhealers.Count)
+                    {
+                        return act;
+                    }
                 }
             }
 
