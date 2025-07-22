@@ -1030,14 +1030,10 @@ public struct ActionTargetInfo(IBaseAction action)
             case TargetType.Death:
                 {
                     var filtered = new List<IBattleChara>();
-                    foreach (var t in battleChara)
+                    if (DataCenter.DeathTarget != null)
                     {
-                        if (ObjectHelper.IsDeathToRaise(t))
-                        {
-                            filtered.Add(t);
-                        }
+                        return DataCenter.DeathTarget;
                     }
-                    battleChara = filtered;
                 }
                 break;
 
@@ -2034,7 +2030,6 @@ public struct ActionTargetInfo(IBaseAction action)
                 return null;
             }
 
-            // Manual Any() check
             bool hasAny = false;
             foreach (var _ in battleChara)
             {
@@ -2046,7 +2041,6 @@ public struct ActionTargetInfo(IBaseAction action)
                 return null;
             }
 
-            // attachedT = IGameObjects.Where(ObjectHelper.IsTargetOnSelf)
             List<IBattleChara> attachedT = [];
             foreach (var t in battleChara)
             {
