@@ -336,30 +336,10 @@ public partial class RedMageRotation
 
     static partial void ModifyManaficationPvE(ref ActionSetting setting)
     {
-        setting.ActionCheck = () => WhiteMana <= 50 && BlackMana <= 50 && InCombat && ManaStacks == 0 && !IsLastGCD(
-            ActionID.RipostePvE,
-            ActionID.EnchantedRipostePvE,
-            ActionID.EnchantedRipostePvE_27055,
-            ActionID.EnchantedRipostePvE_24918,
-            ActionID.ZwerchhauPvE,
-            ActionID.EnchantedZwerchhauPvE,
-            ActionID.EnchantedZwerchhauPvE_27056,
-            ActionID.EnchantedZwerchhauPvE_24919,
-            ActionID.ScorchPvE,
-            ActionID.ScorchPvE_24831,
-            ActionID.ScorchPvE_24898,
-            ActionID.VerflarePvE,
-            ActionID.VerholyPvE,
-            ActionID.VerholyPvE_21923,
-            ActionID.VerholyPvE_27059,
-            ActionID.VerflarePvE_20532,
-            ActionID.VerflarePvE_27052
-        );
-        ;
-
+        setting.ActionCheck = () => InCombat;
         setting.CreateConfig = () => new ActionConfig()
         {
-            TimeToKill = 10,
+            TimeToKill = 0,
         };
         setting.UnlockedByQuestID = 68118;
         setting.IsFriendly = true;
