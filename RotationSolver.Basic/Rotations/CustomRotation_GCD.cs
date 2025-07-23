@@ -108,7 +108,7 @@ public partial class CustomRotation
                             }
                         }
                     }
-                    if (RaiseSpell(out act, true) && deadhealers.Count == allhealers.Count)
+                    if (RaiseSpell(out act, true) && deadhealers.Count == allhealers.Count && deadhealers.Count > 0)
                     {
                         return act;
                     }
@@ -429,7 +429,7 @@ public partial class CustomRotation
                 return true;
             }
 
-            if (Service.Config.RaisePlayerBySwift && !SwiftcastPvE.Cooldown.IsCoolingDown && SwiftcastPvE.CanUse(out _))
+            if (Service.Config.RaisePlayerBySwift && !SwiftcastPvE.Cooldown.IsCoolingDown && SwiftcastPvE.CanUse(out act))
             {
                 return true;
             }
