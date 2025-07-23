@@ -429,7 +429,7 @@ public partial class CustomRotation
                 return true;
             }
 
-            if (Service.Config.RaisePlayerBySwift && !SwiftcastPvE.Cooldown.IsCoolingDown && SwiftcastPvE.CanUse(out act))
+            if (Service.Config.RaisePlayerBySwift && !SwiftcastPvE.Cooldown.IsCoolingDown && SwiftcastPvE.CanUse(out _))
             {
                 return true;
             }

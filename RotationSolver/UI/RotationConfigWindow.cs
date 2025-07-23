@@ -3502,6 +3502,7 @@ public partial class RotationConfigWindow : Window
     {
         {() => DataCenter.CurrentRotation != null ? "Rotation" : string.Empty, DrawDebugRotationStatus},
         {() => "Player Status", DrawStatus },
+        {() => "Raise Info", DrawRaiseInfo },
         {() => "Duty Info", DrawDutyInfo },
         {() => "Party", DrawParty },
         {() => "Target Data", DrawTargetData },
@@ -3546,7 +3547,6 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"CountDownTime: {Service.CountDownTime}");
         ImGui.Text($"Combo Time: {DataCenter.ComboTime}");
         ImGui.Text($"TargetingType: {DataCenter.TargetingType}");
-        ImGui.Text($"DeathTarget: {DataCenter.DeathTarget}");
         ImGui.Spacing();
         ImGui.Text($"AttackedTargets: {DataCenter.AttackedTargets?.Count ?? 0}");
         if (DataCenter.AttackedTargets != null)
@@ -3583,21 +3583,6 @@ public partial class RotationConfigWindow : Window
         foreach (VfxNewData vfx in filteredVfx)
         {
             ImGui.Text($"Path: {vfx.Path}");
-        }
-
-        // Display dead party members
-        IEnumerable<IBattleChara> deadPartyMembers = DataCenter.PartyMembers.GetDeath();
-        if (deadPartyMembers.Any())
-        {
-            ImGui.Text("Dead Party Members:");
-            foreach (IBattleChara member in deadPartyMembers)
-            {
-                ImGui.Text($"- {member.Name}");
-            }
-        }
-        else
-        {
-            ImGui.Text("Dead Party Members: None");
         }
 
         // Display all party members
@@ -3667,6 +3652,39 @@ public partial class RotationConfigWindow : Window
             byte stacks = Player.Object.StatusStack(true, (StatusID)status.StatusId);
             string stackDisplay = stacks == byte.MaxValue ? "N/A" : stacks.ToString(); // Convert 255 to "N/A"
             ImGui.Text($"{status.GameData.Value.Name}: {status.StatusId} From: {source} Stacks: {stackDisplay}");
+        }
+    }
+
+    private static void DrawRaiseInfo()
+    {
+        ImGui.Text($"Can Raise: {DataCenter.CanRaise()}");
+        ImGui.Text($"Death Target: {DataCenter.DeathTarget}");
+        // Display dead party members
+        IEnumerable<IBattleChara> deadPartyMembers = DataCenter.PartyMembers.GetDeath();
+        if (deadPartyMembers.Any())
+        {
+            ImGui.Text("Dead Party Members:");
+            foreach (IBattleChara member in deadPartyMembers)
+            {
+                ImGui.Text($"- {member.Name}");
+            }
+        }
+        else
+        {
+            ImGui.Text("Dead Party Members: None");
+        }
+        IEnumerable<IBattleChara> deadAllianceMembers = DataCenter.AllianceMembers.GetDeath();
+        if (deadAllianceMembers.Any())
+        {
+            ImGui.Text("Dead Alliance Members:");
+            foreach (IBattleChara member in deadAllianceMembers)
+            {
+                ImGui.Text($"- {member.Name}");
+            }
+        }
+        else
+        {
+            ImGui.Text("Dead Alliance Members: None");
         }
     }
 
