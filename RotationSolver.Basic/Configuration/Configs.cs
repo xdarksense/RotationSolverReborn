@@ -500,12 +500,13 @@ internal partial class Configs : IPluginConfiguration
     [Range(0, 1, ConfigUnitType.Percent, 0.02f)]
     public float HealthSelfRatio { get; set; } = 0.4f;
 
+    #region
     [JobConfig, UI("Hard cast Raise while Swiftcast is on cooldown if Swiftcast cooldown is higher than Raise cast time (Experimental)",
         Filter = HealingActionCondition, Section = 2,
         PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _raiseSwiftCooldown = false;
 
-    [JobConfig, UI("Hard cast Raise while Swiftcast is on cooldown if all healers are dead (Experimental)",
+    [JobConfig, UI("Hard cast Raise while Swiftcast is on cooldown if all other healers are dead (Experimental)",
         Filter = HealingActionCondition, Section = 2,
         PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _raiseHealerByCasting = false;
@@ -539,6 +540,8 @@ internal partial class Configs : IPluginConfiguration
     [JobConfig, UI("Raise Red Mage and Summoners first if no Tanks or Healers are dead (Experimental)",
         Filter = HealingActionCondition, Section = 2)]
     private static readonly bool _offRaiserRaise = false;
+
+    #endregion
 
     /// <markdown file="Auto" name="How early before next GCD should RSR use swiftcast for raise" section="Healing Usage and Control">
     /// If your cast a GCD and your cooldown is of 2.5 seconds, if a teammate dies when your cooldown starts, the Swiftcast action will wait
