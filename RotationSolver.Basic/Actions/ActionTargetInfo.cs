@@ -1029,7 +1029,6 @@ public struct ActionTargetInfo(IBaseAction action)
         {
             case TargetType.Death:
                 {
-                    var filtered = new List<IBattleChara>();
                     if (DataCenter.DeathTarget != null)
                     {
                         return DataCenter.DeathTarget;
@@ -1061,7 +1060,6 @@ public struct ActionTargetInfo(IBaseAction action)
             TargetType.BeAttacked => FindBeAttackedTarget(),
             TargetType.Provoke => FindProvokeTarget(),
             TargetType.Dispel => FindDispelTarget(),
-            TargetType.Death => FindDeathPeople(),
             TargetType.Move => FindTargetForMoving(),
             TargetType.Heal => FindHealTarget(healRatio),
             TargetType.Interrupt => FindInterruptTarget(),
@@ -1504,23 +1502,6 @@ public struct ActionTargetInfo(IBaseAction action)
                 return DataCenter.ProvokeTarget;
             }
 
-            return null;
-        }
-
-        IBattleChara? FindDeathPeople()
-        {
-            if (battleChara == null || DataCenter.DeathTarget == null)
-            {
-                return null;
-            }
-
-            foreach (var o in battleChara)
-            {
-                if (o.GameObjectId == DataCenter.DeathTarget.GameObjectId)
-                {
-                    return DataCenter.DeathTarget;
-                }
-            }
             return null;
         }
 
