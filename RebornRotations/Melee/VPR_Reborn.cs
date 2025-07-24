@@ -221,9 +221,23 @@ public sealed class VPR_Reborn : ViperRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        if (SerpentsIrePvE.CanUse(out act))
+        if (IsBurst)
         {
-            return true;
+            if (!SerpentsLineageTrait.EnoughLevel)
+            {
+                if (SerpentsIrePvE.CanUse(out act))
+                {
+                    return true;
+                }
+            }
+
+            if (SerpentsLineageTrait.EnoughLevel && ReawakenPvE.IsEnabled)
+            {
+                if (SerpentsIrePvE.CanUse(out act))
+                {
+                    return true;
+                }
+            }
         }
 
         return base.AttackAbility(nextGCD, out act);
@@ -271,7 +285,7 @@ public sealed class VPR_Reborn : ViperRotation
             && SwiftTime > SwiftTimer && HuntersTime > HuntersTimer)
         {
             // If all above conditions are met, attempt to use Reawaken.
-            if (ReawakenPvE.CanUse(out act, skipComboCheck: true))
+            if (IsBurst && ReawakenPvE.CanUse(out act, skipComboCheck: true))
             {
                 return true;
             }
