@@ -8,7 +8,6 @@ namespace RebornRotations.Magical;
 [Api(5)]
 public sealed class SMN_Reborn : SummonerRotation
 {
-
     #region Config Options
 
     public enum SummonOrderType : byte
@@ -21,6 +20,9 @@ public sealed class SMN_Reborn : SummonerRotation
 
         [Description("Ruby-Emerald-Topaz")] RubyEmeraldTopaz,
     }
+
+    [RotationConfig(CombatType.PvE, Name = "Use GCDs to heal. (Ignored if there are no healers alive in party)")]
+    public bool GCDHeal { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Use Crimson Cyclone at any range, regardless of saftey use with caution (Enabling this ignores the below distance setting).")]
     public bool AddCrimsonCyclone { get; set; } = true;
@@ -492,6 +494,20 @@ public sealed class SMN_Reborn : SummonerRotation
     #endregion
 
     #region Extra Methods
+    public override bool CanHealSingleSpell
+    {
+        get
+        {
+            int aliveHealerCount = 0;
+            IEnumerable<IBattleChara> healers = PartyMembers.GetJobCategory(JobRole.Healer);
+            foreach (IBattleChara h in healers)
+            {
+                if (!h.IsDead)
+                    aliveHealerCount++;
+            }
 
+            return base.CanHealSingleSpell && (GCDHeal || aliveHealerCount == 0);
+        }
+    }
     #endregion
 }

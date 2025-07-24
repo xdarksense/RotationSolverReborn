@@ -416,7 +416,6 @@ public partial class CustomRotation
                 return false;
             }
         }
-
         if (RaiseGCD(out act))
         {
             return true;
@@ -444,7 +443,7 @@ public partial class CustomRotation
 
         bool RaiseAction(out IAction act, bool ignoreCastingCheck)
         {
-            if (Player.CurrentMp > Service.Config.LessMPNoRaise && (Raise?.CanUse(out act, skipCastingCheck: ignoreCastingCheck) ?? false))
+            if (Raise?.CanUse(out act, skipCastingCheck: ignoreCastingCheck) ?? false)
             {
                 return true;
             }

@@ -7,9 +7,6 @@ public partial class RedMageRotation
 
     private protected sealed override IBaseAction Raise => VerraisePvE;
 
-    /// <inheritdoc/>
-    public override bool CanHealSingleSpell => DataCenter.PartyMembers.Count == 1 && base.CanHealSingleSpell;
-
     #region Job Gauge
     /// <summary>
     /// 
@@ -353,6 +350,7 @@ public partial class RedMageRotation
     static partial void ModifyVerraisePvE(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.Dualcast];
+        setting.ActionCheck = () => Player.CurrentMp >= RaiseMPMinimum;
     }
 
     static partial void ModifyVerflarePvE(ref ActionSetting setting)

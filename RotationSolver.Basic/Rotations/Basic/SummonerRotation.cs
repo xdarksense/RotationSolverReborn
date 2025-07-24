@@ -8,9 +8,6 @@ public partial class SummonerRotation
     /// <inheritdoc/>
     public override MedicineType MedicineType => MedicineType.Intelligence;
 
-    /// <inheritdoc/>
-    public override bool CanHealSingleSpell => DataCenter.PartyMembers.Count == 1 && base.CanHealSingleSpell;
-
     private protected sealed override IBaseAction Raise => ResurrectionPvE;
 
     #region JobGauge
@@ -354,7 +351,7 @@ public partial class SummonerRotation
 
     static partial void ModifyResurrectionPvE(ref ActionSetting setting)
     {
-
+        setting.ActionCheck = () => Player.CurrentMp >= RaiseMPMinimum;
     }
 
     static partial void ModifySummonTopazPvE(ref ActionSetting setting)
