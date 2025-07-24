@@ -570,11 +570,11 @@ internal partial class Configs : IPluginConfiguration
     [Range(0, 10, ConfigUnitType.Seconds, 0.002f)]
     public Vector2 EsunaDelay { get; set; } = new(0f, 0f);
 
-    [Range(0, 10000, ConfigUnitType.None, 200)]
+    [Range(0, 10000, ConfigUnitType.None, 100)]
     [UI("Never raise player if MP is less than this",
         Filter = HealingActionCondition, Section = 2,
-        PvEFilter = JobFilterType.Raise)]
-    public int LessMPNoRaise { get; set; }
+        PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
+    public int LessMPNoRaise { get; set; } = 2400;
 
     /// <markdown file="Extra" name="HP standard deviation for using AoE heal">
     /// Controls how much party members' HP must differ before using AoE healing instead

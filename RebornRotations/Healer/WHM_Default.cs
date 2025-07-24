@@ -113,7 +113,7 @@ public sealed class WHM_Default : WhiteMageRotation
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
         bool useLastThinAirCharge = ThinAirLastChargeUsage == ThinAirUsageStrategy.UseAllCharges || (ThinAirLastChargeUsage == ThinAirUsageStrategy.ReserveLastChargeForRaise && nextGCD == RaisePvE);
-        if (((nextGCD is IBaseAction action && action.Info.MPNeed >= ThinAirNeed) || (MergedStatus.HasFlag(AutoStatus.Raise) && Player.CurrentMp > 2400 && IsLastAction() == IsLastGCD())) &&
+        if (((nextGCD is IBaseAction action && action.Info.MPNeed >= ThinAirNeed) || (MergedStatus.HasFlag(AutoStatus.Raise) && IsLastAction() == IsLastGCD())) &&
             ThinAirPvE.CanUse(out act, usedUp: useLastThinAirCharge))
         {
             return true;
