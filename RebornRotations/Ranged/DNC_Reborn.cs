@@ -2,10 +2,10 @@ using Dalamud.Interface.Colors;
 
 namespace RebornRotations.Ranged;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.25")]
-[SourceCode(Path = "main/BasicRotations/Ranged/DNC_Default.cs")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.25")]
+[SourceCode(Path = "main/RebornRotations/Ranged/DNC_Reborn.cs")]
 [Api(5)]
-public sealed class DNC_Default : DancerRotation
+public sealed class DNC_Reborn : DancerRotation
 {
     #region Config Options
     [RotationConfig(CombatType.PvE, Name = "Holds Tech Step if no targets in range (Warning, will drift)")]

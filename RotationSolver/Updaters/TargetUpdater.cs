@@ -102,7 +102,7 @@ internal static partial class TargetUpdater
 
         foreach (IBattleChara target in allTargets)
         {
-            if (!target.IsEnemy() || !target.IsTargetable || !target.CanSee())
+            if (!target.IsEnemy() || !target.IsTargetable || !target.CanSee() || target.DistanceToPlayer() >= 48)
                 continue;
 
             bool hasInvincible = false;

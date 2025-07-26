@@ -2,10 +2,10 @@ using System.ComponentModel;
 
 namespace RebornRotations.Healer;
 
-[Rotation("Default", CombatType.PvE, GameVersion = "7.25")]
-[SourceCode(Path = "main/BasicRotations/Healer/AST_Default.cs")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.25")]
+[SourceCode(Path = "main/RebornRotations/Healer/AST_Reborn.cs")]
 [Api(5)]
-public sealed class AST_Default : AstrologianRotation
+public sealed class AST_Reborn : AstrologianRotation
 {
     #region Config Options
     [RotationConfig(CombatType.PvE, Name = "Enable Swiftcast Restriction Logic to attempt to prevent actions other than Raise when you have swiftcast")]
