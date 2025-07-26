@@ -707,7 +707,7 @@ internal partial class Configs : IPluginConfiguration
 
     [ConditionBool, UI("Set target to closest targetable enemy if no valid action target nearby and target not set",
         Filter = TargetConfig, Section = 3)]
-    private static readonly bool _targetFreely = true;
+    private static readonly bool _targetFreely = false;
 
     [ConditionBool, UI("Only attack targets in view.",
         Filter = TargetConfig, Section = 1)]
