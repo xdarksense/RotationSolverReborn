@@ -1,4 +1,6 @@
-﻿namespace RebornRotations.Melee;
+﻿using Dalamud.Interface.Colors;
+
+namespace RebornRotations.Melee;
 
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.25")]
 [SourceCode(Path = "main/RebornRotations/Melee/VPR_Reborn.cs")]
@@ -41,8 +43,21 @@ public sealed class VPR_Reborn : ViperRotation
     [RotationConfig(CombatType.PvE, Name = "Attempt to prevent regular combo from dropping (Experimental)")]
     public bool PreserveCombo { get; set; } = false;
 
-    [RotationConfig(CombatType.PvE, Name = "Only allow switching to AOE rotation if your last combo action increased gauge (Experimental)")]
+    [RotationConfig(CombatType.PvE, Name = "Only allow switching from ST to AOE rotation if your last combo action increased gauge (Experimental)")]
     public bool STtoAOEBetaLogic { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Only allow switching from AOE to ST rotation if your last combo action increased gauge (Experimental)")]
+    public bool AOEtoSTBetaLogic { get; set; } = false;
+    #endregion
+
+    #region Tracking Properties
+    public override void DisplayStatus()
+    {
+        ImGui.TextColored(ImGuiColors.DalamudViolet, "Rotation Tracking:");
+        ImGui.Text($"No Last Combo Action: {IsNoActionCombo()}");
+        ImGui.TextColored(ImGuiColors.DalamudYellow, "Base Tracking:");
+        base.DisplayStatus();
+    }
     #endregion
 
     #region Additional oGCD Logic
@@ -480,7 +495,7 @@ public sealed class VPR_Reborn : ViperRotation
             if (HuntersBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
                 return true;
         }
-        if (!STtoAOEBetaLogic || (STtoAOEBetaLogic && (IsLastComboAction() || IsLastComboAction(ActionID.FlankstingStrikePvE, ActionID.FlanksbaneFangPvE, ActionID.HindsbaneFangPvE, ActionID.HindstingStrikePvE, ActionID.JaggedMawPvE, ActionID.BloodiedMawPvE))))
+        if (!STtoAOEBetaLogic || (STtoAOEBetaLogic && (!FlankstingStrikePvE.EnoughLevel || IsNoActionCombo() || IsLastComboAction(ActionID.FlankstingStrikePvE, ActionID.FlanksbaneFangPvE, ActionID.HindsbaneFangPvE, ActionID.HindstingStrikePvE, ActionID.JaggedMawPvE, ActionID.BloodiedMawPvE))))
         {
             switch ((HasSteel, HasReavers))
             {
@@ -733,22 +748,25 @@ public sealed class VPR_Reborn : ViperRotation
         }
 
         // st 1
-        switch ((HasSteel, HasReavers))
+        if (!AOEtoSTBetaLogic || (AOEtoSTBetaLogic && (!JaggedMawPvE.EnoughLevel || IsNoActionCombo() || IsLastComboAction(ActionID.FlankstingStrikePvE, ActionID.FlanksbaneFangPvE, ActionID.HindsbaneFangPvE, ActionID.HindstingStrikePvE, ActionID.JaggedMawPvE, ActionID.BloodiedMawPvE))))
         {
-            case (true, _):
-                if (SteelFangsPvE.CanUse(out act))
-                    return true;
-                break;
-            case (_, true):
-                if (ReavingFangsPvE.CanUse(out act))
-                    return true;
-                break;
-            case (false, false):
-                if (ReavingFangsPvE.CanUse(out act))
-                    return true;
-                if (SteelFangsPvE.CanUse(out act))
-                    return true;
-                break;
+            switch ((HasSteel, HasReavers))
+            {
+                case (true, _):
+                    if (SteelFangsPvE.CanUse(out act))
+                        return true;
+                    break;
+                case (_, true):
+                    if (ReavingFangsPvE.CanUse(out act))
+                        return true;
+                    break;
+                case (false, false):
+                    if (ReavingFangsPvE.CanUse(out act))
+                        return true;
+                    if (SteelFangsPvE.CanUse(out act))
+                        return true;
+                    break;
+            }
         }
 
         //Ranged

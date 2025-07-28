@@ -689,6 +689,14 @@ public partial class CustomRotation
     }
 
     /// <summary>
+    ///
+    /// </summary>
+    public static bool IsNoActionCombo()
+    {
+        return IActionHelper.IsNoActionCombo();
+    }
+
+    /// <summary>
     /// Have you already weaved an oGCD.
     /// </summary>
     public static bool HasWeaved()
