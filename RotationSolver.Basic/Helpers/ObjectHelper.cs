@@ -14,6 +14,7 @@ using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -1032,7 +1033,8 @@ public static class ObjectHelper
     /// <returns>True if the target is immune due to any special mechanic; otherwise, false.</returns>
     public static bool IsSpecialImmune(this IBattleChara battleChara)
     {
-        return battleChara.IsWolfImmune()
+        return battleChara.IsDrakeImmune()
+            || battleChara.IsWolfImmune()
             || battleChara.IsSuperiorFlightUnitImmune()
             || battleChara.IsJeunoBossImmune()
             || battleChara.IsDeadStarImmune()
@@ -1042,6 +1044,77 @@ public static class ObjectHelper
             || battleChara.IsOmegaImmune()
             || battleChara.IsLimitlessBlue()
             || battleChara.IsHanselorGretelShielded();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool IsDrakeImmune(this IBattleChara battleChara)
+    {
+        if (DataCenter.TerritoryID == 1069)
+        {
+            var Drakefather = battleChara.NameId == 11463;
+            var Drakemother = battleChara.NameId == 11464;
+            var Drakebrother = battleChara.NameId == 11465;
+            var Drakesister = battleChara.NameId == 11466;
+            var Drakeling = battleChara.NameId == 11467;
+
+            bool DrakefatherAlive = false;
+            foreach (var obj in DataCenter.AllHostileTargets)
+            {
+                if (obj is IBattleChara x && x.NameId == 11463 && x.CurrentHp > 0)
+                {
+                    DrakefatherAlive = true;
+                    break;
+                }
+            }
+            bool DrakemotherAlive = false;
+            foreach (var obj in DataCenter.AllHostileTargets)
+            {
+                if (obj is IBattleChara x && x.NameId == 11464 && x.CurrentHp > 0)
+                {
+                    DrakemotherAlive = true;
+                    break;
+                }
+            }
+            bool DrakebrotherAlive = false;
+            foreach (var obj in DataCenter.AllHostileTargets)
+            {
+                if (obj is IBattleChara x && x.NameId == 11465 && x.CurrentHp > 0)
+                {
+                    DrakebrotherAlive = true;
+                    break;
+                }
+            }
+            bool DrakesisterAlive = false;
+            foreach (var obj in DataCenter.AllHostileTargets)
+            {
+                if (obj is IBattleChara x && x.NameId == 11466 && x.CurrentHp > 0)
+                {
+                    DrakesisterAlive = true;
+                    break;
+                }
+            }
+
+            if (Drakemother && DrakefatherAlive)
+            {
+                return true;
+            }
+            if (Drakebrother && DrakemotherAlive)
+            {
+                return true;
+            }
+            if (Drakesister && DrakebrotherAlive)
+            {
+                return true;
+            }
+            if (Drakeling && DrakesisterAlive)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
