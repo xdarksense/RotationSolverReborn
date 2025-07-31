@@ -3534,6 +3534,7 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"    {condition}");
         }
         ImGui.Text($"OnlineStatus: {Player.OnlineStatus}");
+        ImGui.Text($"CanBeRaised: {Player.Object.CanBeRaised()}");
         ImGui.Text($"Current Hp: {Player.Object.CurrentHp}");
         ImGui.Text($"Effective Hp: {ObjectHelper.GetEffectiveHp(Player.Object)}");
         ImGui.Text($"Effective Hp Percent: {ObjectHelper.GetEffectiveHpPercent(Player.Object)}");
@@ -3808,6 +3809,7 @@ public partial class RotationConfigWindow : Window
         {
             ImGui.Text($"Is Status Capped: {StatusHelper.IsStatusCapped(battleChara)}");
             ImGui.Text($"CanSee: {battleChara.CanSee()}");
+            ImGui.Text($"CanBeRaised: {battleChara.CanBeRaised()}");
             ImGui.Text($"HP: {battleChara.CurrentHp} / {battleChara.MaxHp}");
             ImGui.Spacing();
             ImGui.Text($"NamePlate Icon ID: {battleChara.GetNamePlateIcon()}");
