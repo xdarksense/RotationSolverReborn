@@ -14,7 +14,6 @@ using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
 using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using System.Collections.Concurrent;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -429,6 +428,16 @@ public static class ObjectHelper
             || ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)obj.Struct()));
     }
 
+    internal static unsafe bool CanBeRaised(this IBattleChara battleChara)
+    {
+        if (battleChara == null)
+            return false;
+        if (!battleChara.IsTargetable)
+            return false;
+
+        return ActionManager.CanUseActionOnTarget((uint)ActionID.RaisePvE, (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)battleChara.Struct());
+    }
+
     internal static unsafe bool IsPlayer(this IBattleChara battleChara)
     {
         return battleChara == Player.Object;
@@ -524,7 +533,16 @@ public static class ObjectHelper
 
     internal static bool IsAlive(this IBattleChara battleChara)
     {
-        return battleChara is not IBattleChara b || (b.CurrentHp > 0 && battleChara.IsTargetable);
+        if (battleChara == null)
+            return false;
+        if (battleChara.IsDead)
+            return false;
+        if (!battleChara.IsTargetable)
+            return false;
+        if (battleChara.CurrentHp == 0)
+            return false;
+
+        return true;
     }
 
     /// <summary>
@@ -605,6 +623,49 @@ public static class ObjectHelper
         if (Player.Job == Job.MCH && (battleChara.HasStatus(true, StatusID.Wildfire) || battleChara.HasStatus(true, StatusID.Wildfire_1323)))
         {
             return true;
+        }
+
+        if (Service.Config.PrioAtomelith && DataCenter.IsPvP)
+        {
+            var IceBoundTomeLithA1 = battleChara.NameId == 4822;
+            var IceBoundTomeLithA2 = battleChara.NameId == 4823;
+            var IceBoundTomeLithA3 = battleChara.NameId == 4824;
+            var IceBoundTomeLithA4 = battleChara.NameId == 4825;
+            if (IceBoundTomeLithA1 || IceBoundTomeLithA2 || IceBoundTomeLithA3 || IceBoundTomeLithA4)
+            {
+                return true;
+            }
+        }
+
+        if (Service.Config.PrioBtomelith && DataCenter.IsPvP)
+        {
+            var IceBoundTomeLithB1 = battleChara.NameId == 4826;
+            var IceBoundTomeLithB2 = battleChara.NameId == 4827;
+            var IceBoundTomeLithB3 = battleChara.NameId == 4828;
+            var IceBoundTomeLithB4 = battleChara.NameId == 4829;
+            var IceBoundTomeLithB5 = battleChara.NameId == 4830;
+            var IceBoundTomeLithB6 = battleChara.NameId == 4831;
+            var IceBoundTomeLithB7 = battleChara.NameId == 4832;
+            var IceBoundTomeLithB8 = battleChara.NameId == 4833;
+            var IceBoundTomeLithB9 = battleChara.NameId == 4834;
+            var IceBoundTomeLithB10 = battleChara.NameId == 4835;
+            var IceBoundTomeLithB11 = battleChara.NameId == 4836;
+            var IceBoundTomeLithB12 = battleChara.NameId == 4837;
+            var IceBoundTomeLithB13 = battleChara.NameId == 4840;
+            var IceBoundTomeLithB14 = battleChara.NameId == 4841;
+            var IceBoundTomeLithB15 = battleChara.NameId == 4842;
+            var IceBoundTomeLithB16 = battleChara.NameId == 4843;
+            var IceBoundTomeLithB17 = battleChara.NameId == 4844;
+            var IceBoundTomeLithB18 = battleChara.NameId == 4845;
+
+            if (IceBoundTomeLithB1 || IceBoundTomeLithB2 || IceBoundTomeLithB3 || IceBoundTomeLithB4 ||
+                IceBoundTomeLithB5 || IceBoundTomeLithB6 || IceBoundTomeLithB7 || IceBoundTomeLithB8 ||
+                IceBoundTomeLithB9 || IceBoundTomeLithB10 || IceBoundTomeLithB11 || IceBoundTomeLithB12 ||
+                IceBoundTomeLithB13 || IceBoundTomeLithB14 || IceBoundTomeLithB15 || IceBoundTomeLithB16 ||
+                IceBoundTomeLithB17 || IceBoundTomeLithB18)
+            {
+                return true;
+            }
         }
 
         // Ensure StatusList is not null before iterating

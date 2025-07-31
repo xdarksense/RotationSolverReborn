@@ -9,8 +9,8 @@ namespace RotationSolver.Updaters;
 internal static partial class TargetUpdater
 {
     private static readonly ObjectListDelay<IBattleChara>
-        _raisePartyTargets = new(() => Service.Config.RaiseDelay),
-        _raiseAllTargets = new(() => Service.Config.RaiseDelay),
+        _raisePartyTargets = new(() => Service.Config.RaiseDelay2),
+        _raiseAllTargets = new(() => Service.Config.RaiseDelay2),
         _dispelPartyTargets = new(() => Service.Config.EsunaDelay);
 
     private static DateTime _lastUpdateTimeToKill = DateTime.MinValue;

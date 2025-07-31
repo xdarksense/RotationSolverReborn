@@ -488,7 +488,7 @@ internal partial class Configs : IPluginConfiguration
         Filter = HealingActionCondition, Section = 2,
         PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
     [Range(0, 10, ConfigUnitType.Seconds, 0.002f)]
-    public Vector2 RaiseDelay { get; set; } = new(0f, 0f);
+    public Vector2 RaiseDelay2 { get; set; } = new(3f, 3f);
 
     [UI("Random delay range for dispelling statuses.",
         Filter = HealingActionCondition, Section = 2,
@@ -810,6 +810,12 @@ internal partial class Configs : IPluginConfiguration
     #region PvP
     [ConditionBool, UI("Ignore TTK for PvP purposes.", Filter = PvPSpecificControls)]
     private static readonly bool _ignorePvPTTK = true;
+
+    [ConditionBool, UI("Prioritize A tier tomeliths in Shatter.", Filter = PvPSpecificControls)]
+    private static readonly bool _prioAtomelith = false;
+
+    [ConditionBool, UI("Prioritize B tier tomeliths in Shatter.", Filter = PvPSpecificControls)]
+    private static readonly bool _prioBtomelith = false;
 
     [JobConfig, UI("Ignore Invincibility for PvP purposes.", Filter = PvPSpecificControls)]
     private static readonly bool _ignorePvPInvincibility = false;
