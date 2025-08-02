@@ -442,8 +442,11 @@ public static class ObjectHelper
     {
         return battleChara == Player.Object;
     }
-
-    internal static bool IsParty(this IBattleChara battleChara)
+    
+    /// <summary>
+    ///
+    /// </summary>
+    public static bool IsParty(this IBattleChara battleChara)
     {
         if (battleChara == null)
         {
@@ -1094,7 +1097,8 @@ public static class ObjectHelper
     /// <returns>True if the target is immune due to any special mechanic; otherwise, false.</returns>
     public static bool IsSpecialImmune(this IBattleChara battleChara)
     {
-        return battleChara.IsDrakeImmune()
+        return battleChara.IsLyreImmune()
+            || battleChara.IsDrakeImmune()
             || battleChara.IsWolfImmune()
             || battleChara.IsSuperiorFlightUnitImmune()
             || battleChara.IsJeunoBossImmune()
@@ -1105,6 +1109,26 @@ public static class ObjectHelper
             || battleChara.IsOmegaImmune()
             || battleChara.IsLimitlessBlue()
             || battleChara.IsHanselorGretelShielded();
+    }
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool IsLyreImmune(this IBattleChara battleChara)
+    {
+        if (DataCenter.TerritoryID == 821)
+        {
+            var LiarsLyre = battleChara.NameId == 8958;
+            var Unfooled = Player.Object.HasStatus(false, StatusID.Unfooled);
+
+            if (LiarsLyre && !Unfooled)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>

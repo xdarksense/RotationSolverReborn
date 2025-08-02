@@ -221,6 +221,11 @@ public sealed class WHM_Reborn : WhiteMageRotation
             return true;
         }
 
+        if (IsLastAction(ActionID.BenedictionPvE))
+        {
+            return false;
+        }
+
         if (AsylumSingle && !IsMoving && AsylumPvE.CanUse(out act))
         {
             return true;

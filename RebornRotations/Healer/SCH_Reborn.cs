@@ -157,27 +157,21 @@ public sealed class SCH_Reborn : ScholarRotation
         {
             if (DeploymentTacticsUsage == DeploymentTacticsUsageStrategy.CatalyzeOnly)
             {
-                foreach (IBattleChara member in PartyMembers)
+                if (DeploymentTacticsPvE.CanUse(out act))
                 {
-                    if (member.HasStatus(true, StatusID.Catalyze))
+                    if (DeploymentTacticsPvE.Target.Target.IsParty() && DeploymentTacticsPvE.Target.Target.HasStatus(true, StatusID.Catalyze))
                     {
-                        if (DeploymentTacticsPvE.CanUse(out act))
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }
             else if (DeploymentTacticsUsage == DeploymentTacticsUsageStrategy.CatalyzeOrGalvanize)
             {
-                foreach (IBattleChara member in PartyMembers)
+                if (DeploymentTacticsPvE.CanUse(out act))
                 {
-                    if (member.HasStatus(true, StatusID.Galvanize))
+                    if (DeploymentTacticsPvE.Target.Target.IsParty() && DeploymentTacticsPvE.Target.Target.HasStatus(true, StatusID.Catalyze))
                     {
-                        if (DeploymentTacticsPvE.CanUse(out act))
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }
