@@ -1097,7 +1097,8 @@ public static class ObjectHelper
     /// <returns>True if the target is immune due to any special mechanic; otherwise, false.</returns>
     public static bool IsSpecialImmune(this IBattleChara battleChara)
     {
-        return battleChara.IsLyreImmune()
+        return battleChara.IsJagdDollImmune()
+            || battleChara.IsLyreImmune()
             || battleChara.IsDrakeImmune()
             || battleChara.IsWolfImmune()
             || battleChara.IsSuperiorFlightUnitImmune()
@@ -1111,6 +1112,24 @@ public static class ObjectHelper
             || battleChara.IsHanselorGretelShielded();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool IsJagdDollImmune(this IBattleChara battleChara)
+    {
+        if (DataCenter.TerritoryID == 887)
+        {
+            var JagdDoll = battleChara.NameId == 9214;
+            var HealthThreshold = battleChara.GetEffectiveHpPercent();
+
+            if (JagdDoll && HealthThreshold < 25)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /// <summary>
     /// 
