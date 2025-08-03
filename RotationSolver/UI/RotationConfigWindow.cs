@@ -51,6 +51,7 @@ public partial class RotationConfigWindow : Window
     private RotationAttribute _curRotationAttribute = new("Unknown", CombatType.PvE);
     private ICustomRotation? _currentRotation;
     private Dictionary<RotationConfigWindowTab, (bool, uint)> _configWindowTabProperties = [];
+    private bool _showResetPopup = false;
 
     public RotationConfigWindow()
     : base("###rsrConfigWindow", ImGuiWindowFlags.NoScrollbar, false)
@@ -63,6 +64,52 @@ public partial class RotationConfigWindow : Window
             MaximumSize = new Vector2(5000, 5000),
         };
         RespectCloseHotkey = true;
+
+        TitleBarButtons.Add(new TitleBarButton()
+        {
+            Icon = FontAwesomeIcon.Skull,
+            ShowTooltip = () =>
+            {
+                ImGui.BeginTooltip();
+                ImGui.Text("Click to reset plugin configs");
+                ImGui.EndTooltip();
+            },
+            Priority = 3,
+            Click = _ =>
+            {
+                _showResetPopup = true;
+            },
+            AvailableClickthrough = true
+        });
+
+        TitleBarButtons.Add(new TitleBarButton()
+        {
+            Icon = FontAwesomeIcon.Heart,
+            ShowTooltip = () =>
+            {
+                ImGui.BeginTooltip();
+                ImGui.Text("Support the developer on Ko-fi");
+                ImGui.EndTooltip();
+            },
+            Priority = 2,
+            Click = _ =>
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo()
+                    {
+                        FileName = "https://ko-fi.com/ltscombatreborn",
+                        UseShellExecute = true,
+                        Verb = String.Empty
+                    });
+                }
+                catch
+                {
+                    // ignored
+                }
+            },
+            AvailableClickthrough = true
+        });
     }
 
     public override void OnOpen()
@@ -82,7 +129,7 @@ public partial class RotationConfigWindow : Window
             }
         }
 
-        if (DalamudReflector.TryGetDalamudStartInfo(out Dalamud.Common.DalamudStartInfo? startinfo, Svc.PluginInterface))
+        if (DalamudReflector.TryGetDalamudStartInfo(out DalamudStartInfo? startinfo, Svc.PluginInterface))
         {
             _cachedDiagInfo = new DiagInfo(startinfo);
         }
@@ -118,6 +165,32 @@ public partial class RotationConfigWindow : Window
 
     public override void Draw()
     {
+        if (_showResetPopup)
+        {
+            ImGui.OpenPopup("Reset RSR Plugin Settings");
+            _showResetPopup = false;
+        }
+        if (ImGui.BeginPopupModal("Reset RSR Plugin Settings"))
+        {
+            ImGui.Text("Are you sure you want to reset all plugin settings?");
+            ImGui.Spacing();
+            ImGui.Text("This is often recommended for users having issues while using an installation of RSR using an outdated default configuration.");
+            ImGui.Spacing();
+
+            if (ImGui.Button("Yes", new Vector2(120, 0)))
+            {
+                Service.Config = new Configs();
+                Service.Config.Save();
+                ImGui.CloseCurrentPopup();
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("No", new Vector2(120, 0)))
+            {
+                ImGui.CloseCurrentPopup();
+            }
+            ImGui.EndPopup();
+        }
+
         if (DataCenter.HoldingRestore)
         {
             IsOpen = false;
