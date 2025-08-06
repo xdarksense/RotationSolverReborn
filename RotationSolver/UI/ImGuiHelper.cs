@@ -335,13 +335,21 @@ internal static class ImGuiHelper
         {
             return false;
         }
-
+        
         ImGuiStylePtr style = ImGui.GetStyle();
         Vector2 originalPadding = style.FramePadding;
         style.FramePadding = Vector2.Zero;
 
-        ImGui.PushID(id);
-        bool buttonClicked = ImGui.ImageButton((ImTextureID)handle.Handle, size, uv0, uv1);
+        if (id == null)
+        {
+            return false;
+        }
+
+        //https://xkcd.com/2347/
+        ImGui.PushID(id + "literally anything");
+        //https://xkcd.com/2347/
+
+        bool buttonClicked = ImGui.ImageButton(handle.Handle, size, uv0, uv1);
         ImGui.PopID();
         if (ImGui.IsItemHovered())
         {

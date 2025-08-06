@@ -3173,7 +3173,10 @@ public partial class RotationConfigWindow : Window
     private static void DrawActionsList(string name, HashSet<uint> actions)
     {
         actions ??= [];
-
+        if (name == null)
+        {
+            return;
+        }
         ImGui.PushID(name);
         uint removeId = 0;
         string popupId = $"Rotation Solver Reborn Action Popup{name}";
