@@ -195,29 +195,29 @@ public class BaseAction : IBaseAction
     /// <inheritdoc/>
     public unsafe bool Use()
     {
+        if (Player.Object == null) return false;
+        
         TargetResult target = Target;
-
         uint adjustId = AdjustedID;
+        
         if (TargetInfo.IsTargetArea)
         {
-            if (adjustId != ID)
-            {
+            if (adjustId != ID || !target.Position.HasValue)
                 return false;
-            }
-
-            if (!target.Position.HasValue)
-            {
-                return false;
-            }
 
             Vector3 loc = target.Position.Value;
-
-            return ActionManager.Instance() != null && ActionManager.Instance()->UseActionLocation(ActionType.Action, ID, Player.Object.GameObjectId, &loc);
+            var actionManager = ActionManager.Instance();
+            return actionManager != null && 
+                   actionManager->UseActionLocation(ActionType.Action, ID, Player.Object.GameObjectId, &loc);
         }
         else
         {
-            ulong targetId = target.Target?.GameObjectId ?? Player.Object?.GameObjectId ?? 0;
-            return Svc.Objects.SearchById(targetId) != null && ActionManager.Instance() != null && ActionManager.Instance()->UseAction(ActionType.Action, adjustId, targetId);
+            ulong targetId = target.Target?.GameObjectId ?? Player.Object.GameObjectId;
+            var actionManager = ActionManager.Instance();
+            return targetId != 0 && 
+                   Svc.Objects.SearchById(targetId) != null && 
+                   actionManager != null && 
+                   actionManager->UseAction(ActionType.Action, adjustId, targetId);
         }
     }
 

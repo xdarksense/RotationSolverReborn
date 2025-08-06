@@ -109,13 +109,17 @@ internal static partial class TargetUpdater
             var statusList = target.StatusList;
             if (statusList != null)
             {
-                for (int i = 0; i < statusList.Length; i++)
+                var statusCount = statusList.Length;
+                for (int i = 0; i < statusCount; i++)
                 {
                     var status = statusList[i];
-                    if (status != null && StatusHelper.IsInvincible(status))
+                    if (status != null)
                     {
-                        hasInvincible = true;
-                        break;
+                        if (status.StatusId != 0 && StatusHelper.IsInvincible(status))
+                        {
+                            hasInvincible = true;
+                            break;
+                        }
                     }
                 }
             }
