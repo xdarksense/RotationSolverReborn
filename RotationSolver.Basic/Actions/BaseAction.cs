@@ -1,7 +1,8 @@
-﻿using ECommons.DalamudServices;
+using ECommons.DalamudServices;
 using ECommons.GameHelpers;
 using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using RotationSolver.Basic.Helpers;
 using Action = Lumina.Excel.Sheets.Action;
 
 namespace RotationSolver.Basic.Actions;
@@ -206,18 +207,37 @@ public class BaseAction : IBaseAction
                 return false;
 
             Vector3 loc = target.Position.Value;
-            var actionManager = ActionManager.Instance();
-            return actionManager != null && 
-                   actionManager->UseActionLocation(ActionType.Action, ID, Player.Object.GameObjectId, &loc);
+            
+            // Use ActionManagerEx for enhanced timing if tweaks are enabled
+            if (Service.Config.RemoveAnimationLockDelay || Service.Config.RemoveCooldownDelay)
+            {
+                return ActionManagerEx.Instance.UseActionLocationWithTweaks(ActionType.Action, ID, Player.Object.GameObjectId, &loc);
+            }
+            else
+            {
+                var actionManager = ActionManager.Instance();
+                return actionManager != null && 
+                       actionManager->UseActionLocation(ActionType.Action, ID, Player.Object.GameObjectId, &loc);
+            }
         }
         else
         {
             ulong targetId = target.Target?.GameObjectId ?? Player.Object.GameObjectId;
-            var actionManager = ActionManager.Instance();
-            return targetId != 0 && 
-                   Svc.Objects.SearchById(targetId) != null && 
-                   actionManager != null && 
-                   actionManager->UseAction(ActionType.Action, adjustId, targetId);
+            
+            if (targetId == 0 || Svc.Objects.SearchById(targetId) == null)
+                return false;
+            
+            // Use ActionManagerEx for enhanced timing if tweaks are enabled
+            if (Service.Config.RemoveAnimationLockDelay || Service.Config.RemoveCooldownDelay)
+            {
+                return ActionManagerEx.Instance.UseActionWithTweaks(ActionType.Action, adjustId, targetId);
+            }
+            else
+            {
+                var actionManager = ActionManager.Instance();
+                return actionManager != null && 
+                       actionManager->UseAction(ActionType.Action, adjustId, targetId);
+            }
         }
     }
 

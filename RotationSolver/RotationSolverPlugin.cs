@@ -17,6 +17,7 @@ using RotationSolver.UI;
 using RotationSolver.UI.HighlightTeachingMode;
 using RotationSolver.UI.HighlightTeachingMode.ElementSpecial;
 using RotationSolver.Updaters;
+using RotationSolver.ActionTimeline;
 using WelcomeWindow = RotationSolver.UI.WelcomeWindow;
 
 namespace RotationSolver;
@@ -29,6 +30,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
     private static ControlWindow? _controlWindow;
     private static NextActionWindow? _nextActionWindow;
     private static CooldownWindow? _cooldownWindow;
+    private static ActionTimelineWindow? _actionTimelineWindow;
     private static WelcomeWindow? _changelogWindow;
     private static OverlayWindow? _overlayWindow;
 
@@ -85,6 +87,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         _controlWindow = new();
         _nextActionWindow = new();
         _cooldownWindow = new();
+        _actionTimelineWindow = new();
         _changelogWindow = new();
         _overlayWindow = new();
 
@@ -93,6 +96,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         windowSystem.AddWindow(_controlWindow);
         windowSystem.AddWindow(_nextActionWindow);
         windowSystem.AddWindow(_cooldownWindow);
+        windowSystem.AddWindow(_actionTimelineWindow);
         windowSystem.AddWindow(_changelogWindow);
         windowSystem.AddWindow(_overlayWindow);
         //Notify.Success("Overlay Window was added!");
@@ -251,6 +255,27 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
         _controlWindow!.IsOpen = isValid && Service.Config.ShowControlWindow;
         _cooldownWindow!.IsOpen = isValid && Service.Config.ShowCooldownWindow;
+        
+        // ActionTimeline window with additional checks
+        bool showActionTimeline = isValid && Service.Config.ShowActionTimelineWindow;
+        
+        // Check if timeline should only show when RSR is active
+        if (showActionTimeline && Service.Config.ActionTimelineOnlyWhenActive)
+        {
+            showActionTimeline = DataCenter.IsActivated();
+        }
+        
+        // Check if timeline should only show in combat
+        if (showActionTimeline && Service.Config.ActionTimelineOnlyInCombat)
+        {
+            showActionTimeline = Svc.Condition[ConditionFlag.InCombat];
+        }
+        
+        _actionTimelineWindow!.IsOpen = showActionTimeline;
+        
+        // Update combat state for timeline manager (for automatic JSON export)
+        ActionTimelineManager.Instance.UpdateCombatState(Svc.Condition[ConditionFlag.InCombat]);
+        
         _overlayWindow!.IsOpen = isValid && Service.Config.TeachingMode;
     }
 
@@ -287,6 +312,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
         MajorUpdater.Dispose();
         HotbarHighlightManager.Dispose();
+        ActionTimelineManager.Instance.Dispose();
         await OtherConfiguration.Save();
 
         ECommonsMain.Dispose();

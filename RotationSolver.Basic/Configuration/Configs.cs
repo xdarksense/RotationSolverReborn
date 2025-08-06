@@ -334,6 +334,24 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Show Cooldown Window", Filter = UiWindows)]
     private static readonly bool _showCooldownWindow = false;
 
+    [ConditionBool, UI("Show Action Timeline Window", Filter = UiWindows)]
+    private static readonly bool _showActionTimelineWindow = false;
+
+    [ConditionBool, UI("Only show timeline in combat", Parent = nameof(ShowActionTimelineWindow))]
+    private static readonly bool _actionTimelineOnlyInCombat = true;
+
+    [ConditionBool, UI("Only show timeline when RSR is active", Parent = nameof(ShowActionTimelineWindow))]
+    private static readonly bool _actionTimelineOnlyWhenActive = true;
+
+    [ConditionBool, UI("Show oGCD actions in timeline", Parent = nameof(ShowActionTimelineWindow))]
+    private static readonly bool _actionTimelineShowOGCD = true;
+
+    [ConditionBool, UI("Show auto-attacks in timeline", Parent = nameof(ShowActionTimelineWindow))]
+    private static readonly bool _actionTimelineShowAutoAttack = false;
+
+    [ConditionBool, UI("Save timeline to JSON file after combat", Parent = nameof(ShowActionTimelineWindow))]
+    private static readonly bool _actionTimelineSaveToFile = false;
+
     [ConditionBool, UI("Record AOE actions", Filter = List)]
     private static readonly bool _recordCastingArea = true;
 
@@ -640,6 +658,36 @@ internal partial class Configs : IPluginConfiguration
     [UI("Action Ahead (Percent of your GCD time remaining on a GCD cycle before RSR will try to queue the next GCD)", Filter = BasicTimer,
     Description = "This setting controls how many oGCDs RSR will try to fit in a single GCD window\nLower numbers mean more oGCDs, but potentially more GCD clipping")]
     private readonly float _action6head = 0.25f;
+
+    /// <summary>
+    /// Remove extra lag-induced animation lock delay from instant casts (read tooltip!)
+    /// Do NOT use with XivAlexander or NoClippy - this should automatically disable itself if they are detected, but double check first!
+    /// </summary>
+    [ConditionBool, UI("Remove extra lag-induced animation lock delay from instant casts (read tooltip!)", 
+    Description = "Do NOT use with XivAlexander or NoClippy - this should automatically disable itself if they are detected, but double check first!",
+    Filter = BasicTimer)]
+    private static readonly bool _removeAnimationLockDelay = false;
+
+    /// <summary>
+    /// Animation lock max. simulated delay in milliseconds
+    /// Configures the maximum simulated delay in milliseconds when using animation lock removal - this is required and cannot be reduced to zero.
+    /// Setting this to 20ms will enable triple-weaving when using autorotation. The minimum setting to remove triple-weaving is 26ms.
+    /// The minimum of 20ms has been accepted by FFLogs and should not cause issues with your logs.
+    /// </summary>
+    [UI("Animation lock max. simulated delay (read tooltip!)", 
+    Description = "Configures the maximum simulated delay in milliseconds when using animation lock removal - this is required and cannot be reduced to zero. Setting this to 20ms will enable triple-weaving when using autorotation. The minimum setting to remove triple-weaving is 26ms. The minimum of 20ms has been accepted by FFLogs and should not cause issues with your logs.",
+    Parent = nameof(RemoveAnimationLockDelay), Filter = BasicTimer)]
+    [Range(26, 50, ConfigUnitType.None, 1f)]
+    public int AnimationLockDelayMax { get; set; } = 20;
+
+    /// <summary>
+    /// Remove extra framerate-induced cooldown delay
+    /// Dynamically adjusts cooldown and animation locks to ensure queued actions resolve immediately regardless of framerate limitations
+    /// </summary>
+    [ConditionBool, UI("Remove extra framerate-induced cooldown delay", 
+    Description = "Dynamically adjusts cooldown and animation locks to ensure queued actions resolve immediately regardless of framerate limitations",
+    Filter = BasicTimer)]
+    private static readonly bool _removeCooldownDelay = false;
 
     [JobConfig, UI("The HP for using Guard.",
         Filter = PvPSpecificControls)]
