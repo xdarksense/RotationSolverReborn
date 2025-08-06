@@ -21,11 +21,21 @@ public sealed unsafe class AnimationLockTweak
     private float _lastReqInitialAnimLock;
     private uint _lastReqSequence = uint.MaxValue;
     
-    public float DelayMax => Service.Config.AnimationLockDelayMax * 0.001f;
-    public float DelaySmoothing = 0.8f; // Exponential smoothing factor
+    private static float DelayMax => Service.Config.AnimationLockDelayMax * 0.001f;
+    private static readonly float DelaySmoothing = 0.8f; // Exponential smoothing factor
+
+    /// <summary>
+    /// Gets the smoothed delay between client request and server response.
+    /// </summary>
     public float DelayAverage { get; private set; } = 0.1f; // Smoothed delay between client request and server response
+
+    /// <summary>
+    /// Gets a conservative estimate of the delay to use for animation lock reduction.
+    /// Returns <see cref="DelayMax"/> if animation lock delay removal is enabled; otherwise,
+    /// returns 1.5 times the smoothed delay average, clamped to a maximum of 0.1 seconds.
+    /// </summary>
     public float DelayEstimate => Service.Config.RemoveAnimationLockDelay ? DelayMax : Math.Min(DelayAverage * 1.5f, 0.1f); // Conservative estimate
-    
+
     /// <summary>
     /// Record initial animation lock after action request
     /// </summary>
@@ -87,6 +97,9 @@ public sealed unsafe class AnimationLockTweak
     {
         if (!Service.Config.RemoveAnimationLockDelay)
             return; // Nothing to do, tweak is already disabled
+
+        if (DataCenter.IsActivated())
+            return;
 
         if (packetOriginalAnimLock == packetModifiedAnimLock &&
             packetOriginalAnimLock == gameCurrAnimLock &&

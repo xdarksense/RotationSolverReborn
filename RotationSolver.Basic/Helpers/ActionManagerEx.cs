@@ -11,14 +11,25 @@ namespace RotationSolver.Basic.Helpers;
 public sealed unsafe class ActionManagerEx : IDisposable
 {
     private static ActionManagerEx? _instance;
+
+    /// <summary>
+    /// Gets the singleton instance of <see cref="ActionManagerEx"/>.
+    /// </summary>
     public static ActionManagerEx Instance => _instance ??= new ActionManagerEx();
-    
+
     private readonly AnimationLockTweak _animLockTweak = new();
     private readonly CooldownDelayTweak _cooldownTweak = new();
-    
+
+    /// <summary>
+    /// Gets the <see cref="AnimationLockTweak"/> instance used for animation lock timing adjustments.
+    /// </summary>
     public AnimationLockTweak AnimationLockTweak => _animLockTweak;
+
+    /// <summary>
+    /// Gets the <see cref="CooldownDelayTweak"/> instance used for cooldown delay adjustments.
+    /// </summary>
     public CooldownDelayTweak CooldownDelayTweak => _cooldownTweak;
-    
+
     private ActionManager* _actionManager;
     private uint _lastActionSequence;
     private float _lastAnimationLock;
@@ -209,7 +220,10 @@ public sealed unsafe class ActionManagerEx : IDisposable
     /// Get current cooldown adjustment
     /// </summary>
     public float GetCooldownAdjustment() => _cooldownTweak.Adjustment;
-    
+
+    /// <summary>
+    /// Releases all resources used by the <see cref="ActionManagerEx"/> instance.
+    /// </summary>
     public void Dispose()
     {
         // Clean up resources if needed
