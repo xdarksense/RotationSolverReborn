@@ -273,6 +273,9 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         
         _actionTimelineWindow!.IsOpen = showActionTimeline;
         
+        // Update combat state for timeline manager (for automatic JSON export)
+        ActionTimelineManager.Instance.UpdateCombatState(Svc.Condition[ConditionFlag.InCombat]);
+        
         _overlayWindow!.IsOpen = isValid && Service.Config.TeachingMode;
     }
 

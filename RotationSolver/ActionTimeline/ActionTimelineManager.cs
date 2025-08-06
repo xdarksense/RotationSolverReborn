@@ -9,6 +9,8 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using Lumina.Excel.Sheets;
 using System.Collections.Concurrent;
+using Newtonsoft.Json;
+using RotationSolver.Data;
 using Action = Lumina.Excel.Sheets.Action;
 using Status = Lumina.Excel.Sheets.Status;
 
@@ -27,6 +29,8 @@ public class ActionTimelineManager : IDisposable
     private readonly Queue<TimelineItem> _items = new(2048);
     private TimelineItem? _lastItem;
     private DateTime _lastTime = DateTime.MinValue;
+    private DateTime? _combatStartTime = null;
+    private bool _wasInCombat = false;
     
     private delegate void OnActorControlDelegate(uint entityId, uint type, uint buffID, uint direct, uint actionId, uint sourceId, uint arg4, uint arg5, ulong targetId, byte a10);
     
@@ -207,6 +211,137 @@ public class ActionTimelineManager : IDisposable
     {
         _onCastHook?.Original(sourceId, sourceCharacter);
         // Additional cast handling could go here
+    }
+
+    /// <summary>
+    /// Export timeline data to JSON file
+    /// </summary>
+    /// <param name="filePath">Path to save the JSON file</param>
+    /// <param name="combatStartTime">When combat started (for calculating combat time)</param>
+    /// <returns>True if export was successful</returns>
+    public bool ExportToJson(string filePath, DateTime? combatStartTime = null)
+    {
+        try
+        {
+            var session = CreateExportSession(combatStartTime);
+            var json = JsonConvert.SerializeObject(session, Formatting.Indented);
+            
+            var directory = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+            
+            File.WriteAllText(filePath, json);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Svc.Log.Error($"Failed to export timeline to JSON: {ex.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Create export session data from current timeline items
+    /// </summary>
+    /// <param name="combatStartTime">When combat started</param>
+    /// <returns>Export session data</returns>
+    private TimelineExportSession CreateExportSession(DateTime? combatStartTime)
+    {
+        var items = _items.ToArray();
+        var session = new TimelineExportSession();
+
+        if (items.Length == 0)
+        {
+            return session;
+        }
+
+        var startTime = combatStartTime ?? items.Min(i => i.StartTime);
+        var endTime = items.Max(i => i.EndTime);
+
+        // Fill session info
+        session.SessionInfo = new SessionInfo
+        {
+            StartTime = startTime,
+            EndTime = endTime,
+            DurationSeconds = (endTime - startTime).TotalSeconds,
+            PlayerName = Player.Available ? Player.Object.Name.TextValue : "Unknown",
+            PlayerJob = Player.Available ? Player.Job.ToString() : "Unknown",
+            Territory = DataCenter.Territory?.Name ?? "Unknown",
+            Duty = DataCenter.Territory?.ContentFinderName ?? "Unknown",
+            ExportedAt = DateTime.Now
+        };
+
+        // Convert timeline items to export format
+        foreach (var item in items.OrderBy(i => i.StartTime))
+        {
+            var exportedAction = new ExportedAction
+            {
+                Name = item.Name,
+                Id = 0, // We don't store action ID in TimelineItem currently
+                Icon = item.Icon,
+                Type = item.Type.ToString(),
+                StartTime = item.StartTime,
+                EndTime = item.EndTime,
+                CombatTimeSeconds = (item.StartTime - startTime).TotalSeconds,
+                CastTimeSeconds = Math.Max(item.CastingTime + item.AnimationLockTime, item.GCDTime),
+                State = item.State.ToString(),
+                Target = "" // We don't currently track target information
+            };
+
+            session.Actions.Add(exportedAction);
+        }
+
+        return session;
+    }
+
+    /// <summary>
+    /// Get a suggested filename for the export
+    /// </summary>
+    /// <returns>Suggested filename with timestamp</returns>
+    public string GetSuggestedFilename()
+    {
+        var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+        var jobName = Player.Available ? Player.Job.ToString() : "Unknown";
+        var dutyName = DataCenter.Territory?.ContentFinderName ?? DataCenter.Territory?.Name ?? "Timeline";
+        
+        // Sanitize filename
+        dutyName = string.Join("_", dutyName.Split(Path.GetInvalidFileNameChars()));
+        
+        return $"{timestamp}_{jobName}_{dutyName}.json";
+    }
+
+    /// <summary>
+    /// Update combat state and handle automatic export
+    /// </summary>
+    /// <param name="isInCombat">Current combat state</param>
+    public void UpdateCombatState(bool isInCombat)
+    {
+        if (isInCombat && !_wasInCombat)
+        {
+            // Combat started
+            _combatStartTime = DateTime.Now;
+        }
+        else if (!isInCombat && _wasInCombat && _combatStartTime.HasValue)
+        {
+            // Combat ended - check if we should auto-export
+            if (Service.Config.ActionTimelineSaveToFile && _items.Count > 0)
+            {
+                var timelineFolder = Path.Combine(Svc.PluginInterface.ConfigDirectory.FullName, "ActionTimeline");
+                var filename = GetSuggestedFilename();
+                var fullPath = Path.Combine(timelineFolder, filename);
+                
+                if (ExportToJson(fullPath, _combatStartTime))
+                {
+                    Svc.Log.Info($"Action timeline exported to: {fullPath}");
+                }
+            }
+            
+            _combatStartTime = null;
+        }
+        
+        _wasInCombat = isInCombat;
     }
 }
 

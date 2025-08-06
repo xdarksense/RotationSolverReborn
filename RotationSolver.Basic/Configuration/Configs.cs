@@ -338,7 +338,10 @@ internal partial class Configs : IPluginConfiguration
     private static readonly bool _showActionTimelineWindow = false;
 
     [ConditionBool, UI("Only show timeline in combat", Parent = nameof(ShowActionTimelineWindow))]
-    private static readonly bool _actionTimelineOnlyInCombat = false;
+    private static readonly bool _actionTimelineOnlyInCombat = true;
+
+    [ConditionBool, UI("Only show timeline when RSR is active", Parent = nameof(ShowActionTimelineWindow))]
+    private static readonly bool _actionTimelineOnlyWhenActive = true;
 
     [ConditionBool, UI("Show oGCD actions in timeline", Parent = nameof(ShowActionTimelineWindow))]
     private static readonly bool _actionTimelineShowOGCD = true;
@@ -346,8 +349,8 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Show auto-attacks in timeline", Parent = nameof(ShowActionTimelineWindow))]
     private static readonly bool _actionTimelineShowAutoAttack = false;
 
-    [ConditionBool, UI("Only show timeline when RSR is active", Parent = nameof(ShowActionTimelineWindow))]
-    private static readonly bool _actionTimelineOnlyWhenActive = false;
+    [ConditionBool, UI("Save timeline to JSON file after combat", Parent = nameof(ShowActionTimelineWindow))]
+    private static readonly bool _actionTimelineSaveToFile = false;
 
     [ConditionBool, UI("Record AOE actions", Filter = List)]
     private static readonly bool _recordCastingArea = true;
