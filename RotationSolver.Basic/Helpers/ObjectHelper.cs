@@ -1097,7 +1097,8 @@ public static class ObjectHelper
     /// <returns>True if the target is immune due to any special mechanic; otherwise, false.</returns>
     public static bool IsSpecialImmune(this IBattleChara battleChara)
     {
-        return battleChara.IsJagdDollImmune()
+        return battleChara.IsMesoImmune()
+            || battleChara.IsJagdDollImmune()
             || battleChara.IsLyreImmune()
             || battleChara.IsDrakeImmune()
             || battleChara.IsWolfImmune()
@@ -1110,6 +1111,73 @@ public static class ObjectHelper
             || battleChara.IsOmegaImmune()
             || battleChara.IsLimitlessBlue()
             || battleChara.IsHanselorGretelShielded();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool IsMesoImmune(this IBattleChara battleChara)
+    {
+        if (DataCenter.TerritoryID == 1292)
+        {
+            StatusID CellJailerA = (StatusID)4542;
+            StatusID CellJailerB = (StatusID)4543;
+            StatusID CellJailerC = (StatusID)4544;
+            StatusID CellJailerD = (StatusID)4545;
+
+            var JailerA = battleChara.HasStatus(false, CellJailerA);
+            var JailerB = battleChara.HasStatus(false, CellJailerB);
+            var JailerC = battleChara.HasStatus(false, CellJailerC);
+            var JailerD = battleChara.HasStatus(false, CellJailerD);
+
+            StatusID CellBlockAPrisoner = (StatusID)4542;
+            StatusID CellBlockBPrisoner = (StatusID)4543;
+            StatusID CellBlockCPrisoner = (StatusID)4544;
+            StatusID CellBlockDPrisoner = (StatusID)4545;
+
+            var CellBlockA = Player.Object.HasStatus(false, CellBlockAPrisoner);
+            var CellBlockB = Player.Object.HasStatus(false, CellBlockBPrisoner);
+            var CellBlockC = Player.Object.HasStatus(false, CellBlockCPrisoner);
+            var CellBlockD = Player.Object.HasStatus(false, CellBlockDPrisoner);
+
+            if (JailerA && (CellBlockB || CellBlockC || CellBlockD))
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsMesoImmune status found");
+                }
+                return true;
+            }
+
+            if (JailerB && (CellBlockA || CellBlockC || CellBlockD))
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsMesoImmune status found");
+                }
+                return true;
+            }
+
+            if (JailerC && (CellBlockA || CellBlockB || CellBlockD))
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsMesoImmune status found");
+                }
+                return true;
+            }
+
+            if (JailerD && (CellBlockA || CellBlockB || CellBlockC))
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsMesoImmune status found");
+                }
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
