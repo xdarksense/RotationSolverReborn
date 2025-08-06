@@ -219,7 +219,7 @@ internal abstract class CheckBoxSearch : Searchable
             ImGui.BeginGroup();
             Vector2 cursor = ImGui.GetCursorPos();
             float size = ImGuiHelpers.GlobalScale * 32;
-            if (ImGuiHelper.NoPaddingNoColorImageButton(texture!.ImGuiHandle, Vector2.One * size, ID))
+            if (ImGuiHelper.NoPaddingNoColorImageButton((nint)texture!.Handle.Handle, Vector2.One * size, ID))
             {
                 Value = enable;
             }

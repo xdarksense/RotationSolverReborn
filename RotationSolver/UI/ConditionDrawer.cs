@@ -40,7 +40,7 @@ internal static class ConditionDrawer
         {
             if (IconSet.GetTexture("ui/uld/image2.tex", out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture, true) || IconSet.GetTexture(0u, out texture))
             {
-                if (ImGuiHelper.SilenceImageButton(texture.ImGuiHandle, Vector2.One * size, false, id))
+                if (ImGuiHelper.SilenceImageButton((nint)texture.Handle.Handle, Vector2.One * size, false, id))
                 {
                     isNot = !isNot;
                 }
@@ -52,7 +52,7 @@ internal static class ConditionDrawer
         {
             if (IconSet.GetTexture("ui/uld/readycheck_hr1.tex", out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture, true))
             {
-                if (ImGuiHelper.SilenceImageButton(texture.ImGuiHandle, Vector2.One * size,
+                if (ImGuiHelper.SilenceImageButton((nint)texture.Handle.Handle, Vector2.One * size,
                     new Vector2(tag.Value ? 0 : 0.5f, 0),
                     new Vector2(tag.Value ? 0.5f : 1, 1), isNot ? ImGui.ColorConvertFloat4ToU32(new Vector4(1, 0.8f, 0.5f, 0.2f)) : 0, id))
                 {
@@ -71,14 +71,14 @@ internal static class ConditionDrawer
         {
             if (IconSet.GetTexture("ui/uld/image2.tex", out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture, true) || IconSet.GetTexture(0u, out texture))
             {
-                ImGui.Image(texture.ImGuiHandle, Vector2.One * size);
+                ImGui.Image(texture.Handle, Vector2.One * size);
             }
         }
         else
         {
             if (IconSet.GetTexture("ui/uld/readycheck_hr1.tex", out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture, true))
             {
-                ImGui.Image(texture.ImGuiHandle, Vector2.One * size,
+                ImGui.Image(texture.Handle, Vector2.One * size,
                     new Vector2(tag.Value ? 0 : 0.5f, 0),
                     new Vector2(tag.Value ? 0.5f : 1, 1));
             }
@@ -288,7 +288,7 @@ internal static class ConditionDrawer
                     using (ImRaii.IEndObject group = ImRaii.Group())
                     {
                         Vector2 cursor = ImGui.GetCursorPos();
-                        if (ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, Vector2.One * IconSize, group.GetHashCode().ToString()))
+                        if (ImGuiHelper.NoPaddingNoColorImageButton((nint)icon.Handle.Handle, Vector2.One * IconSize, group.GetHashCode().ToString()))
                         {
                             action?.Invoke(item);
                             ImGui.CloseCurrentPopup();
@@ -441,7 +441,7 @@ internal static class ConditionDrawer
                         if (group.Success)
                         {
                             Vector2 cursor = ImGui.GetCursorPos();
-                            if (ImGuiHelper.NoPaddingNoColorImageButton(traitIcon.ImGuiHandle, Vector2.One * IconSize, trait.GetHashCode().ToString()))
+                            if (ImGuiHelper.NoPaddingNoColorImageButton((nint)traitIcon.Handle.Handle, Vector2.One * IconSize, trait.GetHashCode().ToString()))
                             {
                                 traitCondition.TraitID = trait.ID;
                                 ImGui.CloseCurrentPopup();
@@ -462,7 +462,7 @@ internal static class ConditionDrawer
         if (traitCondition._trait?.GetTexture(out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon) ?? false || IconSet.GetTexture(4, out icon))
         {
             Vector2 cursor = ImGui.GetCursorPos();
-            if (ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, Vector2.One * IconSize, traitCondition.GetHashCode().ToString()))
+            if (ImGuiHelper.NoPaddingNoColorImageButton((nint)icon.Handle.Handle, Vector2.One * IconSize, traitCondition.GetHashCode().ToString()))
             {
                 if (!ImGui.IsPopupOpen(popUpKey))
                 {
@@ -499,7 +499,7 @@ internal static class ConditionDrawer
         if ((actionCondition._action?.GetTexture(out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon) ?? false) || IconSet.GetTexture(4, out icon))
         {
             Vector2 cursor = ImGui.GetCursorPos();
-            if (ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, Vector2.One * IconSize, actionCondition.GetHashCode().ToString()))
+            if (ImGuiHelper.NoPaddingNoColorImageButton((nint)icon.Handle.Handle, Vector2.One * IconSize, actionCondition.GetHashCode().ToString()))
             {
                 if (!ImGui.IsPopupOpen(popUpKey))
                 {
@@ -765,7 +765,7 @@ internal static class ConditionDrawer
                 if (rotationCondition._action?.GetTexture(out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon) ?? false || IconSet.GetTexture(4, out icon))
                 {
                     Vector2 cursor = ImGui.GetCursorPos();
-                    if (ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, Vector2.One * IconSize, rotationCondition.GetHashCode().ToString()))
+                    if (ImGuiHelper.NoPaddingNoColorImageButton((nint)icon.Handle.Handle, Vector2.One * IconSize, rotationCondition.GetHashCode().ToString()))
                     {
                         if (!ImGui.IsPopupOpen(popUpKey))
                         {
@@ -863,7 +863,7 @@ internal static class ConditionDrawer
             }, out icon))
         {
             Vector2 cursor = ImGui.GetCursorPos();
-            if (ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, Vector2.One * IconSize, targetCondition.GetHashCode().ToString()))
+            if (ImGuiHelper.NoPaddingNoColorImageButton((nint)icon.Handle.Handle, Vector2.One * IconSize, targetCondition.GetHashCode().ToString()))
             {
                 if (!ImGui.IsPopupOpen(popUpKey))
                 {
@@ -893,7 +893,7 @@ internal static class ConditionDrawer
             if (IconSet.GetTexture(targetCondition.Status?.Icon ?? 16220, out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon)
                 || IconSet.GetTexture(16220, out icon))
             {
-                if (ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, new Vector2(IconSize * 3 / 4, IconSize) * ImGuiHelpers.GlobalScale, targetCondition.GetHashCode().ToString()))
+                if (ImGuiHelper.NoPaddingNoColorImageButton((nint)icon.Handle.Handle, new Vector2(IconSize * 3 / 4, IconSize) * ImGuiHelpers.GlobalScale, targetCondition.GetHashCode().ToString()))
                 {
                     if (!ImGui.IsPopupOpen(popupId))
                     {

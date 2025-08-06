@@ -311,7 +311,7 @@ internal static class ImGuiHelper
         style.FramePadding = Vector2.Zero;
 
         ImGui.PushID(id);
-        bool buttonClicked = ImGui.ImageButton(handle, size, uv0, uv1);
+        bool buttonClicked = ImGui.ImageButton(new ImTextureID(handle), size, uv0, uv1);
         ImGui.PopID();
         if (ImGui.IsItemHovered())
         {
@@ -334,7 +334,7 @@ internal static class ImGuiHelper
         bool buttonClicked = false;
         DrawItemMiddle(() =>
         {
-            buttonClicked = NoPaddingNoColorImageButton(texture.ImGuiHandle, size, id);
+            buttonClicked = NoPaddingNoColorImageButton((nint)texture.Handle.Handle, size, id);
         }, wholeWidth, size.X);
         return buttonClicked;
     }
@@ -373,7 +373,7 @@ internal static class ImGuiHelper
 
                 Vector2 start = new(((96f * 0) + 4f) / cover.Width, 96f * 2 / cover.Height);
 
-                ImGui.Image(cover.ImGuiHandle, new Vector2(pixPerUnit * 88, pixPerUnit * 94),
+                ImGui.Image(cover.Handle, new Vector2(pixPerUnit * 88, pixPerUnit * 94),
                     start, start + new Vector2(88f / cover.Width, 94f / cover.Height));
             }
         }
@@ -388,7 +388,7 @@ internal static class ImGuiHelper
                 Vector2 step = new(88f / cover.Width, 96f / cover.Height);
                 Vector2 start = new(P % 9 * step.X, P / 9 * step.Y);
 
-                ImGui.Image(cover.ImGuiHandle, new Vector2(pixPerUnit * 88, pixPerUnit * 94),
+                ImGui.Image(cover.Handle, new Vector2(pixPerUnit * 88, pixPerUnit * 94),
                     start, start + new Vector2(88f / cover.Width, 94f / cover.Height));
             }
         }
@@ -398,7 +398,7 @@ internal static class ImGuiHelper
             {
                 ImGui.SetCursorPos(cursor - new Vector2(pixPerUnit * 3, pixPerUnit * 4));
 
-                ImGui.Image(cover.ImGuiHandle, new Vector2(pixPerUnit * 88, pixPerUnit * 94),
+                ImGui.Image(cover.Handle, new Vector2(pixPerUnit * 88, pixPerUnit * 94),
                     new Vector2(4f / cover.Width, 0f / cover.Height),
                     new Vector2(92f / cover.Width, 94f / cover.Height));
             }
@@ -415,7 +415,7 @@ internal static class ImGuiHelper
                 Vector2 step = new(88f / cover.Width, 96f / cover.Height);
                 Vector2 start = new(((P % 9) + 9) * step.X, P / 9 * step.Y);
 
-                ImGui.Image(cover.ImGuiHandle, new Vector2(pixPerUnit * 88, pixPerUnit * 94),
+                ImGui.Image(cover.Handle, new Vector2(pixPerUnit * 88, pixPerUnit * 94),
                     start, start + new Vector2(88f / cover.Width, 94f / cover.Height));
             }
         }

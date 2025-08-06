@@ -242,7 +242,7 @@ internal class ControlWindow : CtrlWindow
                     {
                         gcdHelp += "\n" + gcd.ToString();
                     }
-                    DrawIAction(texture.ImGuiHandle, baseId + nameof(gcd), gcdW, command, gcdHelp);
+                    DrawIAction((nint)texture.Handle.Handle, baseId + nameof(gcd), gcdW, command, gcdHelp);
                     if (IconSet.GetTexture(ability, out texture))
                     {
                         ImGui.SameLine();
@@ -254,7 +254,7 @@ internal class ControlWindow : CtrlWindow
                         {
                             abilityHelp += "\n" + ability.ToString();
                         }
-                        DrawIAction(texture.ImGuiHandle, baseId + nameof(ability), abilityW, command, abilityHelp);
+                        DrawIAction((nint)texture.Handle.Handle, baseId + nameof(ability), abilityW, command, abilityHelp);
                     }
                 }
             }
@@ -331,7 +331,7 @@ internal class ControlWindow : CtrlWindow
                 ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, (strWidth / 2) - (width / 2)));
                 if (texture != null)
                 {
-                    DrawIAction(texture.ImGuiHandle, baseId, abilityW, command, help);
+                    DrawIAction((nint)texture.Handle.Handle, baseId, abilityW, command, help);
                 }
             }
         }
@@ -374,7 +374,7 @@ internal class ControlWindow : CtrlWindow
                 if (IconSet.GetTexture(iconId, out IDalamudTextureWrap? texture))
                 {
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + Math.Max(0, (strWidth / 2) - (width / 2)));
-                    DrawIAction(texture.ImGuiHandle, baseId, abilityW, command, help);
+                    DrawIAction((nint)texture.Handle.Handle, baseId, abilityW, command, help);
                 }
 
             }
@@ -406,7 +406,7 @@ internal class ControlWindow : CtrlWindow
         {
             _ = Svc.Commands.ProcessCommand(command.GetCommandStr());
         }
-        ImGuiHelper.DrawActionOverlay(cursor, width, IconSet.GetTexture(0u, out IDalamudTextureWrap? text) && text.ImGuiHandle == handle ? -1 : 1);
+        ImGuiHelper.DrawActionOverlay(cursor, width, IconSet.GetTexture(0u, out IDalamudTextureWrap? text) && text.Handle == handle ? -1 : 1);
         ImguiTooltips.HoveredTooltip(help);
     }
 
@@ -431,7 +431,7 @@ internal class ControlWindow : CtrlWindow
         Vector2 cursor = ImGui.GetCursorPos();
 
         string desc = action?.Name ?? string.Empty;
-        if (ImGuiHelper.NoPaddingNoColorImageButton(texture.ImGuiHandle, Vector2.One * width, desc))
+        if (ImGuiHelper.NoPaddingNoColorImageButton((nint)texture.Handle.Handle, Vector2.One * width, desc))
         {
             if (!DataCenter.State)
             {

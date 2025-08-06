@@ -359,7 +359,7 @@ public partial class RotationConfigWindow : Window
                 ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth); // Set text wrapping position dynamically
 
                 // Calculate the required height for the button
-                Vector2 textSize = ImGui.CalcTextSize(warning, availableWidth);
+                Vector2 textSize = ImGui.CalcTextSize(warning, false, availableWidth);
                 float lineHeight = ImGui.GetTextLineHeight();
                 int lineCount = (int)Math.Ceiling(textSize.X / availableWidth);
                 float buttonHeight = (lineHeight * lineCount) + (ImGui.GetStyle().FramePadding.Y * 2);
@@ -448,7 +448,7 @@ public partial class RotationConfigWindow : Window
                     ImGuiHelper.DrawItemMiddle(() =>
                     {
                         Vector2 cursor = ImGui.GetCursorPos();
-                        if (ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, Vector2.One * iconSize, displayName))
+                        if (ImGuiHelper.NoPaddingNoColorImageButton((nint)icon.Handle.Handle, Vector2.One * iconSize, displayName))
                         {
                             _activeTab = item;
                             _searchResults = [];
@@ -514,7 +514,7 @@ public partial class RotationConfigWindow : Window
             ImGuiHelper.DrawItemMiddle(() =>
             {
                 Vector2 cursor = ImGui.GetCursorPos();
-                if (ImGuiHelper.SilenceImageButton(overlay.ImGuiHandle, Vector2.One * size,
+                if (ImGuiHelper.SilenceImageButton((nint)overlay.Handle.Handle, Vector2.One * size,
                     _activeTab == RotationConfigWindowTab.About, "About Icon"))
                 {
                     _activeTab = RotationConfigWindowTab.About;
@@ -525,7 +525,7 @@ public partial class RotationConfigWindow : Window
                 if (ThreadLoadImageHandler.TryGetTextureWrap(logoUrl, out IDalamudTextureWrap? logo))
                 {
                     ImGui.SetCursorPos(cursor);
-                    ImGui.Image(logo.ImGuiHandle, Vector2.One * size);
+                    ImGui.Image(logo.Handle, Vector2.One * size);
                 }
             }, wholeWidth, size);
             ImGui.Spacing();
@@ -604,7 +604,7 @@ public partial class RotationConfigWindow : Window
         if (!rotation.GetTexture(out IDalamudTextureWrap? jobIcon))
             return;
 
-        if (ImGuiHelper.SilenceImageButton(jobIcon.ImGuiHandle, Vector2.One * iconSize, _activeTab == RotationConfigWindowTab.Rotation))
+        if (ImGuiHelper.SilenceImageButton((nint)jobIcon.Handle.Handle, Vector2.One * iconSize, _activeTab == RotationConfigWindowTab.Rotation))
         {
             _activeTab = RotationConfigWindowTab.Rotation;
             _searchResults = [];
@@ -638,7 +638,7 @@ public partial class RotationConfigWindow : Window
         if (overlayTexture != null)
         {
             ImGui.SetCursorPos(cursor + (Vector2.One * iconSize / 2));
-            ImGui.Image(overlayTexture.ImGuiHandle, Vector2.One * iconSize / 2);
+            ImGui.Image(overlayTexture.Handle, Vector2.One * iconSize / 2);
         }
     }
 
@@ -671,7 +671,7 @@ public partial class RotationConfigWindow : Window
 
                     if (IconSet.GetTexture(rAttr.Type.GetIcon(), out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture))
                     {
-                        ImGui.Image(texture.ImGuiHandle, Vector2.One * 20 * Scale);
+                        ImGui.Image(texture.Handle, Vector2.One * 20 * Scale);
                         if (ImGui.IsItemHovered())
                         {
                             ImguiTooltips.ShowTooltip(() =>
@@ -1178,7 +1178,7 @@ public partial class RotationConfigWindow : Window
 
                 if (IconSet.GetTexture(icon, out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture))
                 {
-                    if (ImGuiHelper.NoPaddingNoColorImageButton(texture.ImGuiHandle, Vector2.One * iconSize))
+                    if (ImGuiHelper.NoPaddingNoColorImageButton((nint)texture.Handle.Handle, Vector2.One * iconSize))
                     {
                         Util.OpenLink(item.Url);
                     }
@@ -1573,7 +1573,7 @@ public partial class RotationConfigWindow : Window
 
                     if (IconSet.GetTexture(attr.IconID, out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? image))
                     {
-                        ImGui.Image(image.ImGuiHandle, Vector2.One * DESC_SIZE * Scale);
+                        ImGui.Image(image.Handle, Vector2.One * DESC_SIZE * Scale);
                     }
 
                     ImGui.SameLine();
@@ -1615,7 +1615,7 @@ public partial class RotationConfigWindow : Window
                         {
                             ImGui.SetCursorPosY(y);
                             Vector2 cursor = ImGui.GetCursorPos();
-                            _ = ImGuiHelper.NoPaddingNoColorImageButton(texture.ImGuiHandle, Vector2.One * size);
+                            _ = ImGuiHelper.NoPaddingNoColorImageButton((nint)texture.Handle.Handle, Vector2.One * size);
                             ImGuiHelper.DrawActionOverlay(cursor, size, 1);
                             ImguiTooltips.HoveredTooltip(item.Name);
                         }
@@ -2153,7 +2153,7 @@ public partial class RotationConfigWindow : Window
 
                                 ImGui.BeginGroup();
                                 Vector2 cursor = ImGui.GetCursorPos();
-                                if (ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, Vector2.One * size, item.Name + item.ID))
+                                if (ImGuiHelper.NoPaddingNoColorImageButton((nint)icon.Handle.Handle, Vector2.One * size, item.Name + item.ID))
                                 {
                                     _activeAction = item;
                                 }
@@ -2163,7 +2163,7 @@ public partial class RotationConfigWindow : Window
                                 {
                                     Vector2 offset = new(1 / 12f, 1 / 6f);
                                     ImGui.SetCursorPos(cursor + (new Vector2(0.6f, 0.7f) * size));
-                                    ImGui.Image(texture.ImGuiHandle, Vector2.One * size * 0.5f,
+                                    ImGui.Image(texture.Handle, Vector2.One * size * 0.5f,
                                         new Vector2(item.IsEnabled ? 0 : 0.5f, 0) + offset,
                                         new Vector2(item.IsEnabled ? 0.5f : 1, 1) - offset);
                                 }
@@ -2584,7 +2584,7 @@ public partial class RotationConfigWindow : Window
 
                     if (IconSet.GetTexture(IconSet.GetJobIcon(job, IconType.Framed), out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture, 62574))
                     {
-                        ImGui.Image(texture.ImGuiHandle, Vector2.One * 30 * Scale);
+                        ImGui.Image(texture.Handle, Vector2.One * 30 * Scale);
                     }
 
                     // Build tooltip text
@@ -2615,7 +2615,7 @@ public partial class RotationConfigWindow : Window
 
                 if (!string.IsNullOrEmpty(info.DonateLink)
                     && IconSet.GetTexture("https://storage.ko-fi.com/cdn/brandasset/kofi_button_red.png", out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon)
-                    && ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, new Vector2(1, (float)icon.Height / icon.Width) * MathF.Min(250, icon.Width) * Scale, info.FilePath ?? string.Empty))
+                    && ImGuiHelper.NoPaddingNoColorImageButton((nint)icon.Handle.Handle, new Vector2(1, (float)icon.Height / icon.Width) * MathF.Min(250, icon.Width) * Scale, info.FilePath ?? string.Empty))
                 {
                     Util.OpenLink(info.DonateLink);
                 }
@@ -2636,7 +2636,7 @@ public partial class RotationConfigWindow : Window
 
         if (IconSet.GetTexture($"https://github-readme-stats.vercel.app/api/pin/?username={userName}&repo={repository}&theme=dark", out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon)
             && (center ? ImGuiHelper.TextureButton(icon, wholeWidth, icon.Width, id)
-            : ImGuiHelper.NoPaddingNoColorImageButton(icon.ImGuiHandle, new Vector2(icon.Width, icon.Height), id)))
+            : ImGuiHelper.NoPaddingNoColorImageButton((nint)icon.Handle.Handle, new Vector2(icon.Width, icon.Height), id)))
         {
             Util.OpenLink(link);
         }
@@ -2664,7 +2664,7 @@ public partial class RotationConfigWindow : Window
             float ratio = MathF.Min(1, wholeWidth / width);
             ImGuiHelper.DrawItemMiddle(() =>
             {
-                if (hasDate && ImGuiHelper.NoPaddingNoColorImageButton(releaseDate.ImGuiHandle, new Vector2(releaseDate.Width, releaseDate.Height) * ratio, id))
+                if (hasDate && ImGuiHelper.NoPaddingNoColorImageButton((nint)releaseDate.Handle.Handle, new Vector2(releaseDate.Width, releaseDate.Height) * ratio, id))
                 {
                     Util.OpenLink(link);
                 }
@@ -2673,7 +2673,7 @@ public partial class RotationConfigWindow : Window
                     ImGui.SameLine();
                 }
 
-                if (hasCount && ImGuiHelper.NoPaddingNoColorImageButton(downloadCount.ImGuiHandle, new Vector2(downloadCount.Width, downloadCount.Height) * ratio, id))
+                if (hasCount && ImGuiHelper.NoPaddingNoColorImageButton((nint)downloadCount.Handle.Handle, new Vector2(downloadCount.Width, downloadCount.Height) * ratio, id))
                 {
                     Util.OpenLink(link);
                 }
@@ -2681,7 +2681,7 @@ public partial class RotationConfigWindow : Window
         }
         else
         {
-            if (hasDate && ImGuiHelper.NoPaddingNoColorImageButton(releaseDate.ImGuiHandle, new Vector2(releaseDate.Width, releaseDate.Height), id))
+            if (hasDate && ImGuiHelper.NoPaddingNoColorImageButton((nint)releaseDate.Handle.Handle, new Vector2(releaseDate.Width, releaseDate.Height), id))
             {
                 Util.OpenLink(link);
             }
@@ -2690,7 +2690,7 @@ public partial class RotationConfigWindow : Window
                 ImGui.SameLine();
             }
 
-            if (hasCount && ImGuiHelper.NoPaddingNoColorImageButton(downloadCount.ImGuiHandle, new Vector2(downloadCount.Width, downloadCount.Height), id))
+            if (hasCount && ImGuiHelper.NoPaddingNoColorImageButton((nint)downloadCount.Handle.Handle, new Vector2(downloadCount.Width, downloadCount.Height), id))
             {
                 Util.OpenLink(link);
             }
@@ -2992,7 +2992,7 @@ public partial class RotationConfigWindow : Window
                 {
                     ImGui.SameLine();
                 }
-                _ = ImGuiHelper.NoPaddingNoColorImageButton(texture.ImGuiHandle, new Vector2(IconWidth, IconHeight) * Scale, $"Status{status.RowId}");
+                _ = ImGuiHelper.NoPaddingNoColorImageButton((nint)texture.Handle.Handle, new Vector2(IconWidth, IconHeight) * Scale, $"Status{status.RowId}");
 
                 ImGuiHelper.ExecuteHotKeysPopup(key, string.Empty, $"{status.Name} ({status.RowId})", false,
                     (Delete, new[] { VirtualKey.DELETE }));
@@ -3075,7 +3075,7 @@ public partial class RotationConfigWindow : Window
                         {
                             ImGui.SameLine();
                         }
-                        if (ImGuiHelper.NoPaddingNoColorImageButton(texture.ImGuiHandle, new Vector2(size * 3 / 4, size) * Scale, $"Adding{status.RowId}"))
+                        if (ImGuiHelper.NoPaddingNoColorImageButton((nint)texture.Handle.Handle, new Vector2(size * 3 / 4, size) * Scale, $"Adding{status.RowId}"))
                         {
                             clicked?.Invoke(status);
                             ImGui.CloseCurrentPopup();
@@ -3361,7 +3361,7 @@ public partial class RotationConfigWindow : Window
             {
                 if (getIcon)
                 {
-                    ImGui.Image(texture.ImGuiHandle, Vector2.One * 28 * Scale);
+                    ImGui.Image(texture.Handle, Vector2.One * 28 * Scale);
                     ImGui.SameLine();
                 }
                 ImGui.Text(territoryName);
@@ -3541,7 +3541,7 @@ public partial class RotationConfigWindow : Window
 
             ImGuiHelper.DrawItemMiddle(() =>
             {
-                ImGui.Image(badgeTexture.ImGuiHandle, size);
+                ImGui.Image(badgeTexture.Handle, size);
             }, wholeWidth, size.X);
         }
     }
