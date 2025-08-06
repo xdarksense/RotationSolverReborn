@@ -334,6 +334,21 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Show Cooldown Window", Filter = UiWindows)]
     private static readonly bool _showCooldownWindow = false;
 
+    [ConditionBool, UI("Show Action Timeline Window", Filter = UiWindows)]
+    private static readonly bool _showActionTimelineWindow = false;
+
+    [ConditionBool, UI("Only show timeline in combat", Parent = nameof(ShowActionTimelineWindow))]
+    private static readonly bool _actionTimelineOnlyInCombat = false;
+
+    [ConditionBool, UI("Show oGCD actions in timeline", Parent = nameof(ShowActionTimelineWindow))]
+    private static readonly bool _actionTimelineShowOGCD = true;
+
+    [ConditionBool, UI("Show auto-attacks in timeline", Parent = nameof(ShowActionTimelineWindow))]
+    private static readonly bool _actionTimelineShowAutoAttack = false;
+
+    [ConditionBool, UI("Only show timeline when RSR is active", Parent = nameof(ShowActionTimelineWindow))]
+    private static readonly bool _actionTimelineOnlyWhenActive = false;
+
     [ConditionBool, UI("Record AOE actions", Filter = List)]
     private static readonly bool _recordCastingArea = true;
 
