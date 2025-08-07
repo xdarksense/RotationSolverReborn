@@ -113,12 +113,6 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         ActionContextMenu.Init();
         HotbarHighlightManager.Init();
 
-        // Load rotations on startup
-        _ = Task.Run(async () =>
-        {
-            await RotationUpdater.GetAllCustomRotationsAsync(DownloadOption.MustDownload | DownloadOption.ShowList);
-        });
-
         Svc.DutyState.DutyStarted += DutyState_DutyStarted;
         Svc.DutyState.DutyWiped += DutyState_DutyWiped;
         Svc.DutyState.DutyCompleted += DutyState_DutyCompleted;
@@ -209,6 +203,13 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
                 Service.Config.HideWarning.Value = true;
                 Svc.Chat.Print("Warning has been hidden.");
             }
+        });
+
+        // Load rotations on startup
+        _ = Task.Run(async () =>
+        {
+            await DownloadHelper.DownloadAsync();
+            await RotationUpdater.GetAllCustomRotationsAsync(DownloadOption.MustDownload | DownloadOption.ShowList);
         });
     }
 
