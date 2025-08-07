@@ -189,27 +189,19 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
         ChangeUITranslation();
 
-        OpenLinkPayload = Svc.Chat.AddChatLinkHandler((guid, seString) =>
+        OpenLinkPayload = Svc.Chat.AddChatLinkHandler(0, (guid, seString) =>
         {
-            if (guid == Guid.Empty)
+            if (guid == 0)
             {
                 OpenConfigWindow();
             }
         });
-        HideWarningLinkPayload = Svc.Chat.AddChatLinkHandler((guid, seString) =>
+        HideWarningLinkPayload = Svc.Chat.AddChatLinkHandler(1, (guid, seString) =>
         {
-            if (guid == Guid.Empty)
+            if (guid == 0)
             {
                 Service.Config.HideWarning.Value = true;
                 Svc.Chat.Print("Warning has been hidden.");
-            }
-        });
-        _ = Task.Run(async () =>
-        {
-            await DownloadHelper.DownloadAsync();
-            if (Service.Config.LoadRotationsAtStartup)
-            {
-                await RotationUpdater.GetAllCustomRotationsAsync(DownloadOption.Download);
             }
         });
     }
