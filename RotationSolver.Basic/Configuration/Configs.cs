@@ -200,9 +200,6 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Debug Mode", Filter = Debug)]
     private static readonly bool _inDebug = false;
 
-    [ConditionBool, UI("Load rotations automatically at startup", Filter = Rotations)]
-    private static readonly bool _loadRotationsAtStartup = true;
-
     [ConditionBool, UI("Load default rotations", Description = "Load the rotations provided by the Combat Reborn team", Filter = Rotations)]
     private static readonly bool _loadDefaultRotations = true;
 

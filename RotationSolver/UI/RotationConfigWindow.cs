@@ -1301,18 +1301,11 @@ public partial class RotationConfigWindow : Window
             Service.Config.FriendlyPartyNpcHealRaise3.Value = true;
         }
         ImGui.Spacing();
-        // Display the Auto Load Rotations status
-        ImGui.TextWrapped($"Auto Load Rotations: {Service.Config.LoadRotationsAtStartup}");
-        if (ImGui.Button("Enable Auto Loading Rotations"))
-        {
-            Service.Config.LoadRotationsAtStartup.Value = true;
-        }
-        ImGui.Spacing();
         // Display the Download Custom Rotations status
         ImGui.TextWrapped($"Download Custom Rotations: {Service.Config.DownloadCustomRotations}");
         if (ImGui.Button("Enable Downloading Custom Rotations"))
         {
-            Service.Config.LoadRotationsAtStartup.Value = true;
+            Service.Config.DownloadCustomRotations.Value = true;
         }
         ImGui.Spacing();
         // Display the Auto Off Between Area status

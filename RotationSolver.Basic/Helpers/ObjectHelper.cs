@@ -1127,10 +1127,10 @@ public static class ObjectHelper
     {
         if (DataCenter.TerritoryID == 1292)
         {
-            StatusID CellJailerA = (StatusID)4542;
-            StatusID CellJailerB = (StatusID)4543;
-            StatusID CellJailerC = (StatusID)4544;
-            StatusID CellJailerD = (StatusID)4545;
+            StatusID CellJailerA = (StatusID)4546;
+            StatusID CellJailerB = (StatusID)4547;
+            StatusID CellJailerC = (StatusID)4548;
+            StatusID CellJailerD = (StatusID)4549;
 
             var JailerA = battleChara.HasStatus(false, CellJailerA);
             var JailerB = battleChara.HasStatus(false, CellJailerB);
