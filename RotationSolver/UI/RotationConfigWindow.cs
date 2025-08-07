@@ -96,12 +96,7 @@ public partial class RotationConfigWindow : Window
             {
                 try
                 {
-                    Process.Start(new ProcessStartInfo()
-                    {
-                        FileName = "https://ko-fi.com/ltscombatreborn",
-                        UseShellExecute = true,
-                        Verb = String.Empty
-                    });
+                    Util.OpenLink("https://ko-fi.com/ltscombatreborn");
                 }
                 catch
                 {
