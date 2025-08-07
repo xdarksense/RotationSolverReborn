@@ -113,6 +113,12 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         ActionContextMenu.Init();
         HotbarHighlightManager.Init();
 
+        // Load rotations on startup
+        _ = Task.Run(async () =>
+        {
+            await RotationUpdater.GetAllCustomRotationsAsync(DownloadOption.MustDownload | DownloadOption.ShowList);
+        });
+
         Svc.DutyState.DutyStarted += DutyState_DutyStarted;
         Svc.DutyState.DutyWiped += DutyState_DutyWiped;
         Svc.DutyState.DutyCompleted += DutyState_DutyCompleted;
