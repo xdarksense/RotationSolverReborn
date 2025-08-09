@@ -76,6 +76,7 @@ internal static partial class TargetUpdater
         {
             try
             {
+                if (member.IsPet()) continue;
                 if (isParty && !member.IsParty()) continue;
                 if (isAlliance && (!ObjectHelper.IsAllianceMember(member) || member.IsParty())) continue;
 

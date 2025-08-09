@@ -518,11 +518,21 @@ public static class ObjectHelper
 
     internal static bool IsNpcPartyMember(this IBattleChara battleChara)
     {
+        if (battleChara.IsPet())
+        {
+            return false;
+        }
+
         return battleChara.GetBattleNPCSubKind() == BattleNpcSubKind.NpcPartyMember;
     }
 
     internal static bool IsFriendlyBattleNPC(this IBattleChara battleChara)
     {
+        if (battleChara.IsPet())
+        {
+            return false;
+        }
+
         return battleChara.GetNameplateKind() == NameplateKind.FriendlyBattleNPC;
     }
 
