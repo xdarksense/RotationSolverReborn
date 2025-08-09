@@ -1,6 +1,4 @@
-﻿using Dalamud.Interface.Colors;
-
-namespace RebornRotations.Ranged;
+﻿namespace RebornRotations.Ranged;
 
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.3")]
 [SourceCode(Path = "main/RebornRotations/Ranged/MCH_Reborn.cs")]
@@ -339,13 +337,10 @@ public sealed class MCH_Reborn : MachinistRotation
     #endregion
 
     #region Tracking Properties
-    public override void DisplayStatus()
+    public override void DisplayRotationStatus()
     {
-        ImGui.TextColored(ImGuiColors.DalamudViolet, "Rotation Tracking:");
         ImGui.Text($"QueenStep: {_currentStep}");
         ImGui.Text($"Step Pair Found: {foundStepPair}");
-        ImGui.TextColored(ImGuiColors.DalamudYellow, "Base Tracking:");
-        base.DisplayStatus();
     }
     #endregion
 

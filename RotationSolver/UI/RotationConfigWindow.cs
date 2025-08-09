@@ -292,7 +292,7 @@ public partial class RotationConfigWindow : Window
 
         foreach (IncompatiblePlugin plugin in _enabledIncompatiblePlugins)
         {
-            _ = diagInfo.AppendLine(plugin.Name != null ? plugin.Name : "Unnamed Incompatible Plugin");
+            _ = diagInfo.AppendLine(value: plugin.Name ?? "Unnamed Incompatible Plugin");
             diagColor = (int)plugin.Type == 5 ? new Vector4(1f, 0f, 0f, .3f) : new Vector4(1f, 1f, .4f, .3f);
         }
 
@@ -859,7 +859,7 @@ public partial class RotationConfigWindow : Window
         {
             return;
         }
-        DataCenter.CurrentDutyRotation?.DisplayStatus();
+        DataCenter.CurrentDutyRotation?.DisplayDutyStatus();
     }
 
     private static void DrawDutyRotationConfiguration()
@@ -1171,7 +1171,7 @@ public partial class RotationConfigWindow : Window
             ImGui.TableHeader("Enabled");
 
             // Ensure that IncompatiblePlugins is not null
-            IncompatiblePlugin[] incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? Array.Empty<IncompatiblePlugin>();
+            IncompatiblePlugin[] incompatiblePlugins = DownloadHelper.IncompatiblePlugins ?? [];
 
             // Iterate over each incompatible plugin and display its details
             foreach (IncompatiblePlugin item in incompatiblePlugins)
@@ -1666,7 +1666,7 @@ public partial class RotationConfigWindow : Window
 
     private static void DrawRotationStatus()
     {
-        DataCenter.CurrentRotation?.DisplayStatus();
+        DataCenter.CurrentRotation?.DisplayRotationStatus();
     }
 
     private static string ToCommandStr(OtherCommandType type, string str, string extra = "")
@@ -1899,7 +1899,7 @@ public partial class RotationConfigWindow : Window
             }
             ImGui.Spacing();
 
-            List<Job> kardiaTankPriority = OtherConfiguration.KardiaTankPriority.ToList();
+            List<Job> kardiaTankPriority = [.. OtherConfiguration.KardiaTankPriority];
             bool orderChanged = false;
 
             _ = ImGui.BeginChild("KardiaTankPriorityList", new Vector2(0, 200 * Scale), true);
@@ -1957,7 +1957,7 @@ public partial class RotationConfigWindow : Window
                 }
                 ImGui.Spacing();
 
-                List<Job> spearPriority = OtherConfiguration.TheSpearPriority.ToList();
+                List<Job> spearPriority = [.. OtherConfiguration.TheSpearPriority];
                 bool spearOrderChanged = false;
 
                 _ = ImGui.BeginChild("TheSpearPriorityList", new Vector2(0, 200 * Scale), true);
@@ -2008,7 +2008,7 @@ public partial class RotationConfigWindow : Window
                 }
                 ImGui.Spacing();
 
-                List<Job> balancePriority = OtherConfiguration.TheBalancePriority.ToList();
+                List<Job> balancePriority = [.. OtherConfiguration.TheBalancePriority];
                 bool balanceOrderChanged = false;
 
                 _ = ImGui.BeginChild("TheBalancePriorityList", new Vector2(0, 200 * Scale), true);
@@ -2474,7 +2474,7 @@ public partial class RotationConfigWindow : Window
     private static void DrawRotationsLoaded()
     {
         // Build a flat list of all rotations from RotationUpdater.CustomRotationsDict
-        List<Type> allRotations = new();
+        List<Type> allRotations = [];
         foreach (var dictEntry in RotationUpdater.CustomRotationsDict)
         {
             var groupList = dictEntry.Value;
@@ -2488,13 +2488,13 @@ public partial class RotationConfigWindow : Window
         }
 
         // Group by Assembly
-        Dictionary<Assembly, List<Type>> assemblyGroups = new();
+        Dictionary<Assembly, List<Type>> assemblyGroups = [];
         foreach (var rotation in allRotations)
         {
             var assembly = rotation.Assembly;
             if (!assemblyGroups.TryGetValue(assembly, out var list))
             {
-                list = new List<Type>();
+                list = [];
                 assemblyGroups[assembly] = list;
             }
             list.Add(rotation);
@@ -2546,7 +2546,7 @@ public partial class RotationConfigWindow : Window
 
                 // Group by Job (using JobsAttribute) and order by JobRole
                 // Build job groups
-                Dictionary<Job, List<Type>> jobGroups = new();
+                Dictionary<Job, List<Type>> jobGroups = [];
                 foreach (var type in typesInAssembly)
                 {
                     var jobsAttr = type.GetCustomAttribute<JobsAttribute>();
@@ -2555,14 +2555,14 @@ public partial class RotationConfigWindow : Window
                     var job = jobsAttr.Jobs[0];
                     if (!jobGroups.TryGetValue(job, out var jobList))
                     {
-                        jobList = new List<Type>();
+                        jobList = [];
                         jobGroups[job] = jobList;
                     }
                     jobList.Add(type);
                 }
 
                 // Build a list of jobs and their roles for ordering
-                List<(Job job, JobRole role)> jobOrderList = new();
+                List<(Job job, JobRole role)> jobOrderList = [];
                 foreach (var job in jobGroups.Keys)
                 {
                     var classJob = Svc.Data.GetExcelSheet<ClassJob>()?.GetRow((uint)job);
@@ -2741,7 +2741,7 @@ public partial class RotationConfigWindow : Window
         }
         if (removeIndex > -1)
         {
-            List<string> list = Service.Config.RotationLibs.ToList();
+            List<string> list = [.. Service.Config.RotationLibs];
             list.RemoveAt(removeIndex);
             Service.Config.RotationLibs = [.. list];
         }
@@ -2920,7 +2920,7 @@ public partial class RotationConfigWindow : Window
                 string clipboardText = ImGui.GetClipboardText();
                 if (clipboardText != null)
                 {
-                    foreach (uint aId in JsonConvert.DeserializeObject<uint[]>(clipboardText) ?? Array.Empty<uint>())
+                    foreach (uint aId in JsonConvert.DeserializeObject<uint[]>(clipboardText) ?? [])
                     {
                         _ = items.Add(aId);
                     }
@@ -3041,7 +3041,7 @@ public partial class RotationConfigWindow : Window
                 string searchingKey = searching;
 
                 // Manual filtering and sorting instead of LINQ
-                List<(Status status, double score)> filtered = new List<(Status, double)>();
+                List<(Status status, double score)> filtered = [];
                 for (int i = 0; i < allStatus.Length; i++)
                 {
                     Status s = allStatus[i];
@@ -3059,9 +3059,7 @@ public partial class RotationConfigWindow : Window
                     {
                         if (filtered[j].score > filtered[i].score)
                         {
-                            var temp = filtered[i];
-                            filtered[i] = filtered[j];
-                            filtered[j] = temp;
+                            (filtered[j], filtered[i]) = (filtered[i], filtered[j]);
                         }
                     }
                 }
@@ -3430,7 +3428,7 @@ public partial class RotationConfigWindow : Window
             }
             if (removeIndex > -1)
             {
-                List<string> list = libs.ToList();
+                List<string> list = [.. libs];
                 list.RemoveAt(removeIndex);
                 OtherConfiguration.NoHostileNames[territoryId] = [.. list];
                 _ = OtherConfiguration.SaveNoHostileNames();
@@ -3470,7 +3468,7 @@ public partial class RotationConfigWindow : Window
             }
             if (removeIndex > -1)
             {
-                List<string> list = libs.ToList();
+                List<string> list = [.. libs];
                 list.RemoveAt(removeIndex);
                 OtherConfiguration.NoProvokeNames[territoryId] = [.. list];
                 _ = OtherConfiguration.SaveNoProvokeNames();
@@ -3530,7 +3528,7 @@ public partial class RotationConfigWindow : Window
             }
             if (removeIndex > -1)
             {
-                List<Vector3> list = pts.ToList();
+                List<Vector3> list = [.. pts];
                 list.RemoveAt(removeIndex);
                 OtherConfiguration.BeneficialPositions[territoryId] = [.. list];
                 _ = OtherConfiguration.SaveBeneficialPositions();
@@ -3582,7 +3580,8 @@ public partial class RotationConfigWindow : Window
 
     private static readonly CollapsingHeaderGroup _debugHeader = new(new()
     {
-        {() => DataCenter.CurrentRotation != null ? "Rotation" : string.Empty, DrawDebugRotationStatus},
+        {() => DataCenter.CurrentRotation != null ? "Loaded Rotation Info" : string.Empty, DrawDebugRotationStatus},
+        {() => DataCenter.CurrentRotation != null ? "Base Rotation Info" : string.Empty, DrawDebugBaseStatus},
         {() => "Player Status", DrawStatus },
         {() => "Raise Info", DrawRaiseInfo },
         {() => "Duty Info", DrawDutyInfo },
@@ -3601,7 +3600,12 @@ public partial class RotationConfigWindow : Window
 
     private static void DrawDebugRotationStatus()
     {
-        DataCenter.CurrentRotation?.DisplayStatus();
+        DataCenter.CurrentRotation?.DisplayRotationStatus();
+    }
+
+    private static void DrawDebugBaseStatus()
+    {
+        DataCenter.CurrentRotation?.DisplayBaseStatus();
     }
 
     private static unsafe void DrawStatus()

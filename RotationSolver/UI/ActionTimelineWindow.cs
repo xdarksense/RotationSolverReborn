@@ -207,7 +207,7 @@ internal class ActionTimelineWindow : Window
     /// <summary>
     /// Filter timeline items based on configuration settings
     /// </summary>
-    private List<TimelineItem> FilterItems(List<TimelineItem> items)
+    private static List<TimelineItem> FilterItems(List<TimelineItem> items)
     {
         var config = Service.Config;
         var filteredItems = new List<TimelineItem>();

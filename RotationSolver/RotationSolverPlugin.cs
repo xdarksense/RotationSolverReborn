@@ -257,23 +257,26 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         
         // ActionTimeline window with additional checks
         bool showActionTimeline = isValid && Service.Config.ShowActionTimelineWindow;
-        
-        // Check if timeline should only show when RSR is active
-        if (showActionTimeline && Service.Config.ActionTimelineOnlyWhenActive)
+
+        if (showActionTimeline)
         {
-            showActionTimeline = DataCenter.IsActivated();
+            // Check if timeline should only show when RSR is active
+            if (showActionTimeline && Service.Config.ActionTimelineOnlyWhenActive)
+            {
+                showActionTimeline = DataCenter.IsActivated();
+            }
+
+            // Check if timeline should only show in combat
+            if (showActionTimeline && Service.Config.ActionTimelineOnlyInCombat)
+            {
+                showActionTimeline = DataCenter.InCombat;
+            }
+
+            _actionTimelineWindow!.IsOpen = showActionTimeline;
+
+            // Update combat state for timeline manager (for automatic JSON export)
+            ActionTimelineManager.Instance.UpdateCombatState();
         }
-        
-        // Check if timeline should only show in combat
-        if (showActionTimeline && Service.Config.ActionTimelineOnlyInCombat)
-        {
-            showActionTimeline = Svc.Condition[ConditionFlag.InCombat];
-        }
-        
-        _actionTimelineWindow!.IsOpen = showActionTimeline;
-        
-        // Update combat state for timeline manager (for automatic JSON export)
-        ActionTimelineManager.Instance.UpdateCombatState(Svc.Condition[ConditionFlag.InCombat]);
         
         _overlayWindow!.IsOpen = isValid && Service.Config.TeachingMode;
     }
