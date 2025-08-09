@@ -1,4 +1,3 @@
-using Dalamud.Interface.Colors;
 using System.ComponentModel;
 
 namespace RebornRotations.Healer;
@@ -98,12 +97,9 @@ public sealed class SCH_Reborn : ScholarRotation
     #endregion
 
     #region Tracking Properties
-    public override void DisplayStatus()
+    public override void DisplayRotationStatus()
     {
-        ImGui.TextColored(ImGuiColors.DalamudViolet, "Rotation Tracking:");
         ImGui.Text($"Max Targets to apply Bio to rather than spamming AoW: {GetAoWBreakevenTargets() - 1}");
-        ImGui.TextColored(ImGuiColors.DalamudYellow, "Base Tracking:");
-        base.DisplayStatus();
     }
     #endregion
 

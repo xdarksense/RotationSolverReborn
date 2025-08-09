@@ -1,4 +1,3 @@
-using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using Dalamud.Utility.Signatures;
 using ECommons.DalamudServices;
@@ -6,13 +5,8 @@ using ECommons.GameHelpers;
 using ECommons.Hooks;
 using ECommons.Hooks.ActionEffectTypes;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using Lumina.Excel.Sheets;
-using System.Collections.Concurrent;
-using Newtonsoft.Json;
-using RotationSolver.Data;
 using Action = Lumina.Excel.Sheets.Action;
-using Status = Lumina.Excel.Sheets.Status;
 
 namespace RotationSolver.ActionTimeline;
 
@@ -32,13 +26,11 @@ public class ActionTimelineManager : IDisposable
     private DateTime? _combatStartTime = null;
     private bool _wasInCombat = false;
     
-    private delegate void OnActorControlDelegate(uint entityId, uint type, uint buffID, uint direct, uint actionId, uint sourceId, uint arg4, uint arg5, ulong targetId, byte a10);
-    
+    private delegate void OnActorControlDelegate(uint entityId, uint type, uint buffID, uint direct, uint actionId, uint sourceId, uint arg4, uint arg5, ulong targetId, byte a10);  
     [Signature("E8 ?? ?? ?? ?? 0F B7 0B 83 E9 64", DetourName = nameof(OnActorControl))]
     private readonly Hook<OnActorControlDelegate>? _onActorControlHook = null;
 
     private delegate void OnCastDelegate(uint sourceId, IntPtr sourceCharacter);
-    
     [Signature("40 56 41 56 48 81 EC ?? ?? ?? ?? 48 8B F2", DetourName = nameof(OnCast))]
     private readonly Hook<OnCastDelegate>? _onCastHook = null;
 
@@ -67,6 +59,7 @@ public class ActionTimelineManager : IDisposable
         _onActorControlHook?.Dispose();
         _onCastHook?.Disable();
         _onCastHook?.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     public unsafe float GCD
@@ -83,20 +76,21 @@ public class ActionTimelineManager : IDisposable
         switch (type)
         {
             case ActionType.Action:
-                var action = Svc.Data.GetExcelSheet<Action>()?.GetRow(actionId);
-                if (action == null) break;
+                if (Svc.Data.GetExcelSheet<Action>()?.TryGetRow(actionId, out var action) != true)
+                    break;
 
                 if (actionId == 3) return TimelineItemType.OGCD; // Sprint
 
-                var isRealGcd = action.Value.CooldownGroup == GCDCooldownGroup || action.Value.AdditionalCooldownGroup == GCDCooldownGroup;
-                return action.Value.ActionCategory.Value.RowId == 1 // AutoAttack
+                var isRealGcd = action.CooldownGroup == GCDCooldownGroup || action.AdditionalCooldownGroup == GCDCooldownGroup;
+                return action.ActionCategory.Value.RowId == 1 // AutoAttack
                     ? TimelineItemType.AutoAttack
-                    : !isRealGcd && action.Value.ActionCategory.Value.RowId == 4 ? TimelineItemType.OGCD // Ability
+                    : !isRealGcd && action.ActionCategory.Value.RowId == 4 ? TimelineItemType.OGCD // Ability
                     : TimelineItemType.GCD;
 
             case ActionType.Item:
-                var item = Svc.Data.GetExcelSheet<Item>()?.GetRow(actionId);
-                return item?.CastTimeSeconds > 0 ? TimelineItemType.GCD : TimelineItemType.OGCD;
+                if (Svc.Data.GetExcelSheet<Item>()?.TryGetRow(actionId, out var item) != true)
+                    break;
+                return item.CastTimeSeconds > 0 ? TimelineItemType.GCD : TimelineItemType.OGCD;
         }
 
         return TimelineItemType.GCD;
@@ -300,7 +294,7 @@ public class ActionTimelineManager : IDisposable
     /// Get a suggested filename for the export
     /// </summary>
     /// <returns>Suggested filename with timestamp</returns>
-    public string GetSuggestedFilename()
+    public static string GetSuggestedFilename()
     {
         var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
         var jobName = Player.Available ? Player.Job.ToString() : "Unknown";
@@ -315,15 +309,14 @@ public class ActionTimelineManager : IDisposable
     /// <summary>
     /// Update combat state and handle automatic export
     /// </summary>
-    /// <param name="isInCombat">Current combat state</param>
-    public void UpdateCombatState(bool isInCombat)
+    public void UpdateCombatState()
     {
-        if (isInCombat && !_wasInCombat)
+        if (DataCenter.InCombat && !_wasInCombat)
         {
             // Combat started
             _combatStartTime = DateTime.Now;
         }
-        else if (!isInCombat && _wasInCombat && _combatStartTime.HasValue)
+        else if (!DataCenter.InCombat && _wasInCombat && _combatStartTime.HasValue)
         {
             // Combat ended - check if we should auto-export
             if (Service.Config.ActionTimelineSaveToFile && _items.Count > 0)
@@ -341,7 +334,7 @@ public class ActionTimelineManager : IDisposable
             _combatStartTime = null;
         }
         
-        _wasInCombat = isInCombat;
+        _wasInCombat = DataCenter.InCombat;
     }
 }
 

@@ -1,5 +1,3 @@
-using Dalamud.Interface.Colors;
-
 namespace RebornRotations.Healer;
 
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.3")]
@@ -75,13 +73,10 @@ public sealed class SGE_Reborn : SageRotation
 
     #region Tracking Properties
     private IBaseAction? _lastEukrasiaActionAim = null;
-    public override void DisplayStatus()
+    public override void DisplayRotationStatus()
     {
-        ImGui.TextColored(ImGuiColors.DalamudViolet, "Rotation Tracking:");
         ImGui.Text($"Last E.Action Aim Cleared From Queue: {_lastEukrasiaActionAim}");
         ImGui.Text($"Current E.Action Aim: {_EukrasiaActionAim}");
-        ImGui.TextColored(ImGuiColors.DalamudViolet, "Base Tracking:");
-        base.DisplayStatus();
     }
     #endregion
 

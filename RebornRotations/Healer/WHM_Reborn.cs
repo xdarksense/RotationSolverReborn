@@ -1,4 +1,3 @@
-using Dalamud.Interface.Colors;
 using System.ComponentModel;
 
 namespace RebornRotations.Healer;
@@ -70,12 +69,9 @@ public sealed class WHM_Reborn : WhiteMageRotation
     #endregion
 
     #region Tracking Properties
-    public override void DisplayStatus()
+    public override void DisplayRotationStatus()
     {
-        ImGui.TextColored(ImGuiColors.DalamudViolet, "Rotation Tracking:");
         ImGui.Text($"Use Lily Heal: {UseLily(out _)}");
-        ImGui.TextColored(ImGuiColors.DalamudViolet, "Base Tracking:");
-        base.DisplayStatus();
     }
     #endregion
 
