@@ -68,13 +68,6 @@ public sealed class WHM_Reborn : WhiteMageRotation
     }
     #endregion
 
-    #region Tracking Properties
-    public override void DisplayRotationStatus()
-    {
-        ImGui.Text($"Use Lily Heal: {UseLily(out _)}");
-    }
-    #endregion
-
     #region Countdown Logic
     protected override IAction? CountDownAction(float remainTime)
     {
@@ -362,9 +355,14 @@ public sealed class WHM_Reborn : WhiteMageRotation
 
         bool liliesNearlyFull = Lily == 2 && LilyTime < LilyOvercapTime;
         bool liliesFullNoBlood = Lily == 3;
-        if (UseLilyWhenFull && (liliesNearlyFull || liliesFullNoBlood) && AfflatusMiseryPvE.EnoughLevel && BloodLily < 3)
+        if (AfflatusMiseryPvE.EnoughLevel && UseLilyWhenFull && (liliesNearlyFull || liliesFullNoBlood) && AfflatusMiseryPvE.EnoughLevel && BloodLily < 3)
         {
-            if (UseLily(out act))
+            if (AfflatusRapturePvE.CanUse(out act, skipAoeCheck: true))
+            {
+                return true;
+            }
+
+            if (AfflatusSolacePvE.CanUse(out act))
             {
                 return true;
             }
@@ -390,9 +388,14 @@ public sealed class WHM_Reborn : WhiteMageRotation
             return true;
         }
 
-        if (UseLilyDowntime && (liliesNearlyFull || liliesFullNoBlood))
+        if (AfflatusMiseryPvE.EnoughLevel && UseLilyDowntime && (liliesNearlyFull || liliesFullNoBlood))
         {
-            if (UseLily(out act))
+            if (AfflatusRapturePvE.CanUse(out act, skipAoeCheck: true))
+            {
+                return true;
+            }
+
+            if (AfflatusSolacePvE.CanUse(out act))
             {
                 return true;
             }
@@ -437,16 +440,6 @@ public sealed class WHM_Reborn : WhiteMageRotation
 
             return base.CanHealAreaSpell && (GCDHeal || aliveHealerCount == 1);
         }
-    }
-
-    private bool UseLily(out IAction? act)
-    {
-        if (AfflatusRapturePvE.CanUse(out act, skipAoeCheck: true))
-        {
-            return true;
-        }
-
-        return AfflatusSolacePvE.CanUse(out act);
     }
     #endregion
 }

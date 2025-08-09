@@ -675,7 +675,7 @@ internal partial class Configs : IPluginConfiguration
     Description = "Configures the maximum simulated delay in milliseconds when using animation lock removal - this is required and cannot be reduced to zero. Setting this to 20ms will enable triple-weaving when using autorotation. The minimum setting to remove triple-weaving is 26ms. The minimum of 20ms has been accepted by FFLogs and should not cause issues with your logs.",
     Parent = nameof(RemoveAnimationLockDelay), Filter = BasicTimer)]
     [Range(26, 50, ConfigUnitType.None, 1f)]
-    public int AnimationLockDelayMax { get; set; } = 20;
+    public int AnimationLockDelayMax2 { get; set; } = 26;
 
     /// <summary>
     /// Remove extra framerate-induced cooldown delay
@@ -935,7 +935,7 @@ internal partial class Configs : IPluginConfiguration
     /// Relates to **GCD** single-target healing abilities **when they have a heal-over-time already applied to them, by you or a teammate**.
     /// </markdown>
     [JobConfig, Range(0, 1, ConfigUnitType.Percent)]
-    private readonly float _healthSingleSpellHot = 0.45f;
+    private readonly float _healthSingleSpellHot = 0.55f;
 
     /// <markdown file="Auto" name="HP threshold for single-target healing oGCDs (No Heal-over-time)" section="Healing Usage and Control" subsection="RotationSolver.Basic.Configuration.Configs._autoHeal">
     /// Relates to **oGCD** AoE healing abilities.
@@ -947,7 +947,7 @@ internal partial class Configs : IPluginConfiguration
     /// Relates to **GCD** single-target healing abilities.
     /// </markdown>
     [JobConfig, Range(0, 1, ConfigUnitType.Percent)]
-    private readonly float _healthSingleSpell = 0.55f;
+    private readonly float _healthSingleSpell = 0.65f;
 
     /// <markdown file="Auto" name="The HP% for tank to use invulnerability" section="Action Usage and Control">
     /// The threshold to automatically use your tank invulnerability action when falling below the HP percentage set.
