@@ -288,6 +288,21 @@ public sealed class SCH_Reborn : ScholarRotation
     [RotationDesc(ActionID.AetherpactPvE, ActionID.ExcogitationPvE, ActionID.LustratePvE, ActionID.SacredSoilPvE, ActionID.WhisperingDawnPvE_16537, ActionID.FeyBlessingPvE)]
     protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
+        bool haveLinkDRK = false;
+        foreach (IBattleChara p in PartyMembers)
+        {
+            if (p.HasStatus(true, StatusID.FeyUnion_1223) && p.HasStatus(false, StatusID.LivingDead))
+            {
+                haveLinkDRK = true;
+                break;
+            }
+        }
+        // remove link if the party member has link and also has Living Dead status
+        if (AetherpactPvE.CanUse(out act) && haveLinkDRK)
+        {
+            return true;
+        }
+
         // Check if any tank matches Excogitation target
         bool tankHasExcogTarget = false;
         IEnumerable<IBattleChara> tanks = PartyMembers.GetJobCategory(JobRole.Tank);
