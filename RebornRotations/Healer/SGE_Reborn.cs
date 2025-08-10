@@ -230,7 +230,7 @@ public sealed class SGE_Reborn : SageRotation
     [RotationDesc(ActionID.KeracholePvE, ActionID.PhysisPvE, ActionID.HolosPvE, ActionID.IxocholePvE)]
     protected override bool HealAreaAbility(IAction nextGCD, out IAction? act)
     {
-        if ((!MergedStatus.HasFlag(AutoStatus.DefenseArea) || !MergedStatus.HasFlag(AutoStatus.DefenseSingle)) && PepsisPvE.CanUse(out act))
+        if (!MergedStatus.HasFlag(AutoStatus.DefenseArea) && !MergedStatus.HasFlag(AutoStatus.DefenseSingle) && PepsisPvE.CanUse(out act))
         {
             return true;
         }
