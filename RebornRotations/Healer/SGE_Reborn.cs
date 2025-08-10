@@ -9,6 +9,9 @@ public sealed class SGE_Reborn : SageRotation
     [RotationConfig(CombatType.PvE, Name = "Use Eukrasia Action to heal")]
     public bool EukrasiaActionHeal { get; set; } = false;
 
+    [RotationConfig(CombatType.PvE, Name = "Attempt to prevent bricking by allowing E.Prog at the end of GCD logic (experimental)")]
+    public bool AntiBrick { get; set; } = false;
+
     [RotationConfig(CombatType.PvE, Name = "Use Eukrasia when out of combat")]
     public bool OOCEukrasia { get; set; } = true;
 
@@ -703,6 +706,15 @@ public sealed class SGE_Reborn : SageRotation
         if (InCombat && !HasHostilesInRange && EukrasiaPvE.CanUse(out act))
         {
             return true;
+        }
+
+        // fallback
+        if (AntiBrick && InCombat && HasHostilesInRange && HasEukrasia)
+        {
+            if (EukrasianPrognosisPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         if (InCombat && HasHostilesInRange && HasEukrasia)
