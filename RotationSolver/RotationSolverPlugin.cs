@@ -140,7 +140,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
             // Check if the id is valid before proceeding
             if (id == 0)
             {
-                PluginLog.Warning("Invalid territory id: 0");
+                PluginLog.Information("Invalid territory id: 0");
                 return;
             }
 
@@ -254,30 +254,27 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
         _controlWindow!.IsOpen = isValid && Service.Config.ShowControlWindow;
         _cooldownWindow!.IsOpen = isValid && Service.Config.ShowCooldownWindow;
-        
+
         // ActionTimeline window with additional checks
         bool showActionTimeline = isValid && Service.Config.ShowActionTimelineWindow;
 
+        if (Service.Config.ActionTimelineOnlyWhenActive)
+        {
+            showActionTimeline &= DataCenter.IsActivated();
+        }
+
+        if (Service.Config.ActionTimelineOnlyInCombat)
+        {
+            showActionTimeline &= DataCenter.InCombat;
+        }
+
+        _actionTimelineWindow!.IsOpen = showActionTimeline;
+
         if (showActionTimeline)
         {
-            // Check if timeline should only show when RSR is active
-            if (showActionTimeline && Service.Config.ActionTimelineOnlyWhenActive)
-            {
-                showActionTimeline = DataCenter.IsActivated();
-            }
-
-            // Check if timeline should only show in combat
-            if (showActionTimeline && Service.Config.ActionTimelineOnlyInCombat)
-            {
-                showActionTimeline = DataCenter.InCombat;
-            }
-
-            _actionTimelineWindow!.IsOpen = showActionTimeline;
-
-            // Update combat state for timeline manager (for automatic JSON export)
             ActionTimelineManager.Instance.UpdateCombatState();
         }
-        
+
         _overlayWindow!.IsOpen = isValid && Service.Config.TeachingMode;
     }
 
