@@ -249,7 +249,7 @@ public sealed class MCH_Reborn : MachinistRotation
             return true;
         }
 
-        if (IsLastAction(false, HyperchargePvE))
+        if (IsLastAction(false, HyperchargePvE) && HeatBlastPvE.EnoughLevel)
         {
             return false;
         }
@@ -311,9 +311,12 @@ public sealed class MCH_Reborn : MachinistRotation
         }
 
         // 1 AOE
-        if (SpreadShotPvE.CanUse(out act))
+        if (!IsOverheated)
         {
-            return true;
+            if (SpreadShotPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         // 3 ST
