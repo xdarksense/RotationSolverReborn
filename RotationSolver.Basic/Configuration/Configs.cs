@@ -829,6 +829,10 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig)]
     private static readonly bool _bigHP = false;
 
+    [ConditionBool, UI("Change clicking the DTR bar behaviour to cycle through each Target Type selected.",
+        Filter = TargetConfig)]
+    private static readonly bool _dtrCycle = false;
+
     #endregion
 
     #region Integer
