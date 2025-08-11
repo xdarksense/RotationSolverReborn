@@ -485,7 +485,7 @@ public sealed class SGE_Reborn : SageRotation
     {
         act = null;
 
-        if (_EukrasiaActionAim != null && (_EukrasiaActionAim == EukrasianPrognosisPvE || _EukrasiaActionAim == EukrasianPrognosisIiPvE) && _EukrasiaActionAim.CanUse(out _))
+        if (_EukrasiaActionAim != null && (_EukrasiaActionAim == EukrasianPrognosisPvE || _EukrasiaActionAim == EukrasianPrognosisIiPvE) && EukrasianPrognosisIiPvE.CanUse(out _))
         {
             if (EukrasiaPvE.CanUse(out act))
             {
@@ -503,7 +503,7 @@ public sealed class SGE_Reborn : SageRotation
     {
         act = null;
 
-        if (_EukrasiaActionAim != null && _EukrasiaActionAim == EukrasianDiagnosisPvE && _EukrasiaActionAim.CanUse(out _))
+        if (_EukrasiaActionAim != null && _EukrasiaActionAim == EukrasianDiagnosisPvE && EukrasianDiagnosisPvE.CanUse(out _))
         {
             if (EukrasiaPvE.CanUse(out act))
             {
@@ -521,7 +521,7 @@ public sealed class SGE_Reborn : SageRotation
     {
         act = null;
 
-        if (_EukrasiaActionAim != null && _EukrasiaActionAim == EukrasianDyskrasiaPvE && _EukrasiaActionAim.CanUse(out _))
+        if (_EukrasiaActionAim != null && _EukrasiaActionAim == EukrasianDyskrasiaPvE && EukrasianDyskrasiaPvE.CanUse(out _))
         {
             if (EukrasiaPvE.CanUse(out act))
             {
@@ -715,11 +715,6 @@ public sealed class SGE_Reborn : SageRotation
             {
                 return true;
             }
-        }
-
-        if (InCombat && HasHostilesInRange && HasEukrasia)
-        {
-            ClearEukrasia();
         }
 
         return base.GeneralGCD(out act);
