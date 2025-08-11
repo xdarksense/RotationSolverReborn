@@ -29,16 +29,13 @@ public static unsafe class Watcher
     private unsafe delegate bool UseActionDelegate(ActionManager* actionManager, ActionType actionType, uint actionId, ulong targetId, uint a4, uint a5, uint a6, void* a7);
     private unsafe delegate bool UseActionLocationDelegate(ActionManager* actionManager, ActionType actionType, uint actionId, ulong targetId, Vector3* location, uint a5);
 
-    public delegate void PreUseActionEventDelegate(ActionManager* actionManager, ref uint actionID);
-    public static event PreUseActionEventDelegate? PreUseAction;
-
     public static void Enable()
     {
         ActionEffect.ActionEffectEvent += ActionFromEnemy;
         ActionEffect.ActionEffectEvent += ActionFromSelf;
 
         // Initialize hooks
-        InitializeActionHooks();
+        //InitializeActionHooks();
     }
 
     public static void Disable()
@@ -47,7 +44,7 @@ public static unsafe class Watcher
         ActionEffect.ActionEffectEvent -= ActionFromSelf;
 
         // Dispose hooks
-        DisposeActionHooks();
+        //DisposeActionHooks();
     }
 
     private static unsafe void InitializeActionHooks()
@@ -97,9 +94,6 @@ public static unsafe class Watcher
         {
             try
             {
-                // Fire the PreUseAction event for other plugins/systems
-                PreUseAction?.Invoke(actionManager, ref actionId);
-
                 // Check if we should intercept this action
                 if (ShouldInterceptAction(actionType, actionId))
                 {
@@ -123,9 +117,6 @@ public static unsafe class Watcher
         {
             try
             {
-                // Fire the PreUseAction event for other plugins/systems
-                PreUseAction?.Invoke(actionManager, ref actionId);
-
                 // Check if we should intercept this action
                 if (ShouldInterceptAction(actionType, actionId))
                 {
