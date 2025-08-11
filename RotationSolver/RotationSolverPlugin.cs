@@ -109,6 +109,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
 
         MajorUpdater.Enable();
         Watcher.Enable();
+        ActionQueueManager.Enable();
         OtherConfiguration.Init();
         ActionContextMenu.Init();
         HotbarHighlightManager.Init();
@@ -299,7 +300,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
     {
         RSCommands.Disable();
         Watcher.Disable();
-
+        ActionQueueManager.Disable();
         Svc.PluginInterface.UiBuilder.OpenConfigUi -= OnOpenConfigUi;
         Svc.PluginInterface.UiBuilder.Draw -= OnDraw;
 
