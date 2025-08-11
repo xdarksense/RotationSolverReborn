@@ -43,6 +43,15 @@ internal partial class Configs : IPluginConfiguration
     public MacroInfo DutyStart { get; set; } = new MacroInfo();
     public MacroInfo DutyEnd { get; set; } = new MacroInfo();
 
+    [ConditionBool, UI("Intercept player input and queue it for RSR to execute the action. (Experimental)",
+    Filter = AutoActionUsage, Section = 5)]
+    private static readonly bool _interceptAction = true;
+
+    [UI("Intercepted action execution window",
+    Filter = AutoActionUsage, Section = 5)]
+    [Range(1, 10, ConfigUnitType.Seconds)]
+    public float InterceptActionTime { get; set; } = 5;
+
     /// <markdown file="Auto" name="What kind of AoE moves to use" section="Action Usage and Control">
     /// - Full: Use all available AoE actions.
     /// - Cleave: Use only single-target AoE actions.
