@@ -12,10 +12,6 @@ namespace RotationSolver.Updaters
         // Action Manager Hook for intercepting user input
         private static Hook<UseActionDelegate>? _useActionHook;
 
-        // Configuration flags
-        public static bool InterceptUserInput { get; set; } = Service.Config.InterceptAction;
-        public static double DefaultQueueTime { get; set; } = Service.Config.InterceptActionTime;
-
         // Delegates for ActionManager functions
         private unsafe delegate bool UseActionDelegate(ActionManager* actionManager, uint actionType, uint actionID, ulong targetObjectID, uint param, uint useType, int pvp, bool* isGroundTarget);
 
@@ -68,7 +64,7 @@ namespace RotationSolver.Updaters
 
         private static unsafe bool UseActionDetour(ActionManager* actionManager, uint actionType, uint actionID, ulong targetObjectID, uint param, uint useType, int pvp, bool* isGroundTarget)
         {
-            if (Player.Available && InterceptUserInput && DataCenter.State && DataCenter.InCombat && !DataCenter.IsPvP)
+            if (Player.Available && Service.Config.InterceptAction2 && DataCenter.State && DataCenter.InCombat && !DataCenter.IsPvP)
             {
                 try
                 {
@@ -118,17 +114,17 @@ namespace RotationSolver.Updaters
                 return false;
             }
 
-            if (!Service.Config.InterceptSpell && type == (uint)ActionCate.Spell)
+            if (!Service.Config.InterceptSpell2 && type == (uint)ActionCate.Spell)
             {
                 return false;
             }
 
-            if (!Service.Config.InterceptWeaponskill && type == (uint)ActionCate.Weaponskill)
+            if (!Service.Config.InterceptWeaponskill2 && type == (uint)ActionCate.Weaponskill)
             {
                 return false;
             }
 
-            if (!Service.Config.InterceptAbility && type == (uint)ActionCate.Ability)
+            if (!Service.Config.InterceptAbility2 && type == (uint)ActionCate.Ability)
             {
                 return false;
             }
@@ -165,7 +161,7 @@ namespace RotationSolver.Updaters
                     // Use the RSCommand system to queue the action - this is the correct approach
                     // The action will be queued using DataCenter.AddCommandAction and executed via RSCommands.DoAction()
                     string actionName = matchingAction.Name;
-                    string commandString = $"{actionName}-{DefaultQueueTime}";
+                    string commandString = $"{actionName}-{Service.Config.InterceptActionTime}";
 
                     // Use the DoActionCommand which properly integrates with the RSCommand system
                     RSCommands.DoActionCommand(commandString);
