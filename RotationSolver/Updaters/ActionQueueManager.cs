@@ -31,18 +31,17 @@ namespace RotationSolver.Updaters
         {            
             try
             {
-                var useActionAddress = (nint)ActionManager.Addresses.UseAction.Value;
-                var useActionLocationAddress = (nint)ActionManager.Addresses.UseActionLocation.Value;
+                var useActionAddress = ActionManager.Addresses.UseAction.Value;
 
                 _useActionHook = Svc.Hook.HookFromAddress<UseActionDelegate>(useActionAddress, UseActionDetour);
 
                 _useActionHook?.Enable();
 
-                PluginLog.Debug("[Watcher] Action interception hooks initialized");
+                PluginLog.Debug("[ActionQueueManager] Action interception hooks initialized");
             }
             catch (Exception ex)
             {
-                PluginLog.Error($"[Watcher] Failed to initialize action hooks: {ex}");
+                PluginLog.Error($"[ActionQueueManager] Failed to initialize action hooks: {ex}");
             }
         }
 
@@ -54,11 +53,11 @@ namespace RotationSolver.Updaters
                 _useActionHook?.Dispose();
                 _useActionHook = null;
 
-                PluginLog.Debug("[Watcher] Action interception hooks disposed");
+                PluginLog.Debug("[ActionQueueManager] Action interception hooks disposed");
             }
             catch (Exception ex)
             {
-                PluginLog.Error($"[Watcher] Failed to dispose action hooks: {ex}");
+                PluginLog.Error($"[ActionQueueManager] Failed to dispose action hooks: {ex}");
             }
         }
 
@@ -77,23 +76,21 @@ namespace RotationSolver.Updaters
                 }
                 catch (Exception ex)
                 {
-                    PluginLog.Error($"[Watcher] Error in UseActionDetour: {ex}");
+                    PluginLog.Error($"[ActionQueueManager] Error in UseActionDetour: {ex}");
                 }
             }
 
-            // Call original function if not intercepted
-            return _useActionHook!.Original(actionManager, actionType, actionID, targetObjectID, param, useType, pvp, isGroundTarget);
+            if (_useActionHook?.Original != null)
+            {
+                return _useActionHook.Original(actionManager, actionType, actionID, targetObjectID, param, useType, pvp, isGroundTarget);
+            }
+            return false;
         }
 
         private static bool ShouldInterceptAction(ActionType actionType, uint actionId)
         {
             // Only intercept player actions, not system actions
             if (actionType != ActionType.Action)
-                return false;
-
-            // Never intercept items - they should always go through the original game logic
-            // to ensure status effects are properly applied
-            if (actionType == ActionType.Item)
                 return false;
 
             if (ActionUpdater.NextAction != null && actionId == ActionUpdater.NextAction.AdjustedID)
@@ -166,16 +163,16 @@ namespace RotationSolver.Updaters
                     // Use the DoActionCommand which properly integrates with the RSCommand system
                     RSCommands.DoActionCommand(commandString);
 
-                    PluginLog.Debug($"[Watcher] Intercepted and queued action via RSCommand: {matchingAction.Name} (ID: {actionId})");
+                    PluginLog.Debug($"[ActionQueueManager] Intercepted and queued action via RSCommand: {matchingAction.Name} (ID: {actionId})");
                 }
                 else
                 {
-                    PluginLog.Warning($"[Watcher] Could not find matching action for intercepted ID: {actionId}");
+                    PluginLog.Warning($"[ActionQueueManager] Could not find matching action for intercepted ID: {actionId}");
                 }
             }
             catch (Exception ex)
             {
-                PluginLog.Error($"[Watcher] Error handling intercepted action {actionId}: {ex}");
+                PluginLog.Error($"[ActionQueueManager] Error handling intercepted action {actionId}: {ex}");
             }
         }
     }
