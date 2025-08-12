@@ -43,6 +43,27 @@ internal partial class Configs : IPluginConfiguration
     public MacroInfo DutyStart { get; set; } = new MacroInfo();
     public MacroInfo DutyEnd { get; set; } = new MacroInfo();
 
+    [ConditionBool, UI("Intercept player input and queue it for RSR to execute the action. (Experimental, PvE only at the moment)",
+    Filter = AutoActionUsage, Section = 5)]
+    private static readonly bool _interceptAction2 = false;
+
+    [ConditionBool, UI("Intercept Spells. (Experimental)",
+    Filter = AutoActionUsage, Section = 5)]
+    private static readonly bool _interceptSpell2 = false;
+
+    [ConditionBool, UI("Intercept Weaponskills. (Experimental)",
+    Filter = AutoActionUsage, Section = 5)]
+    private static readonly bool _interceptWeaponskill2 = false;
+
+    [ConditionBool, UI("Intercept Abilities. (Experimental)",
+    Filter = AutoActionUsage, Section = 5)]
+    private static readonly bool _interceptAbility2 = false;
+
+    [UI("Intercepted action execution window",
+    Filter = AutoActionUsage, Section = 5)]
+    [Range(1, 10, ConfigUnitType.Seconds)]
+    public float InterceptActionTime { get; set; } = 5;
+
     /// <markdown file="Auto" name="What kind of AoE moves to use" section="Action Usage and Control">
     /// - Full: Use all available AoE actions.
     /// - Cleave: Use only single-target AoE actions.
@@ -828,6 +849,10 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Prioritize Low HP targets instead of High HP targets when using Big Target and multiple Big targets present.",
         Filter = TargetConfig)]
     private static readonly bool _bigHP = false;
+
+    [ConditionBool, UI("Change clicking the DTR bar behaviour to cycle through each Target Type selected.",
+        Filter = TargetConfig)]
+    private static readonly bool _dtrCycle = false;
 
     #endregion
 

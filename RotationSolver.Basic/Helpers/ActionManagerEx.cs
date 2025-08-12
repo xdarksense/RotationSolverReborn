@@ -30,7 +30,7 @@ public sealed unsafe class ActionManagerEx : IDisposable
     /// </summary>
     public CooldownDelayTweak CooldownDelayTweak => _cooldownTweak;
 
-    private ActionManager* _actionManager;
+    private readonly ActionManager* _actionManager;
     private uint _lastActionSequence;
     private float _lastAnimationLock;
     private DateTime _lastFrameTime = DateTime.Now;
