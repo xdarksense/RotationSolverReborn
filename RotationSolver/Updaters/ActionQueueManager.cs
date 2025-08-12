@@ -32,7 +32,7 @@ namespace RotationSolver.Updaters
         }
 
         private static unsafe void InitializeActionHooks()
-        {
+        {            
             try
             {
                 var useActionAddress = (nint)ActionManager.Addresses.UseAction.Value;
@@ -68,7 +68,7 @@ namespace RotationSolver.Updaters
 
         private static unsafe bool UseActionDetour(ActionManager* actionManager, uint actionType, uint actionID, ulong targetObjectID, uint param, uint useType, int pvp, bool* isGroundTarget)
         {
-            if (Player.Available && InterceptUserInput && DataCenter.State && DataCenter.InCombat)
+            if (Player.Available && InterceptUserInput && DataCenter.State && DataCenter.InCombat && !DataCenter.IsPvP)
             {
                 try
                 {
@@ -106,8 +106,32 @@ namespace RotationSolver.Updaters
             // Don't intercept auto-attacks
             var actionSheet = Svc.Data.GetExcelSheet<Lumina.Excel.Sheets.Action>();
             var action = actionSheet?.GetRow(actionId);
-            if (action?.ActionCategory.Value.RowId == (uint)ActionCate.Autoattack)
+            var type = action?.ActionCategory.Value.RowId;
+
+            if (type == (uint)ActionCate.None)
+            {
                 return false;
+            }
+
+            if (type == (uint)ActionCate.Autoattack)
+            {
+                return false;
+            }
+
+            if (!Service.Config.InterceptSpell && type == (uint)ActionCate.Spell)
+            {
+                return false;
+            }
+
+            if (!Service.Config.InterceptWeaponskill && type == (uint)ActionCate.Weaponskill)
+            {
+                return false;
+            }
+
+            if (!Service.Config.InterceptAbility && type == (uint)ActionCate.Ability)
+            {
+                return false;
+            }
 
             return true;
         }
@@ -128,8 +152,8 @@ namespace RotationSolver.Updaters
                 // Find matching action by ID
                 IAction? matchingAction = null;
                 foreach (var action in allActions)
-                {
-                    if (action.AdjustedID == actionId)
+                {                  
+                    if (action.ID == Service.GetAdjustedActionId(actionId))
                     {
                         matchingAction = action;
                         break;
