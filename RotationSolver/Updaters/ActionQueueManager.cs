@@ -68,7 +68,7 @@ namespace RotationSolver.Updaters
                 {
                     if (actionType == 1 && (useType != 2 || Service.Config.InterceptMacro)) // ActionType.Action == 1
                     {
-                        if (ShouldInterceptAction(actionType, actionID))
+                        if (ShouldInterceptAction(actionID))
                         {
                             // More efficient action lookup - avoid creating new collections
                             var rotationActions = RotationUpdater.CurrentRotationActions ?? [];
@@ -129,7 +129,7 @@ namespace RotationSolver.Updaters
             return true;
         }
 
-        private static bool ShouldInterceptAction(uint actionType, uint actionId)
+        private static bool ShouldInterceptAction(uint actionId)
         {
             if (ActionUpdater.NextAction != null && actionId == ActionUpdater.NextAction.AdjustedID)
                 return false;

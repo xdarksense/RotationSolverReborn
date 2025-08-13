@@ -36,10 +36,8 @@ public static class Watcher
         if (_cachedBranch != null)
             return _cachedBranch;
 
-        const string stg = "stg";
         const string release = "release";
-        const string other = "other";
-        string result = other;
+        string result = release; // Default to "release" instead of "other"
 
         if (DalamudReflector.TryGetDalamudStartInfo(out Dalamud.Common.DalamudStartInfo? startinfo, Svc.PluginInterface))
         {
@@ -52,17 +50,12 @@ public static class Watcher
                     if (doc.RootElement.TryGetProperty("DalamudBetaKind", out var kindProp))
                     {
                         string? type = kindProp.GetString();
-                        result = type switch
-                        {
-                            "stg" => stg,
-                            "release" => release,
-                            _ => other,
-                        };
+                        result = string.IsNullOrEmpty(type) ? release : type; // Return the actual string or default to "release"
                     }
                 }
                 catch
                 {
-                    result = other;
+                    result = release; // Default to "release" on error
                 }
             }
         }

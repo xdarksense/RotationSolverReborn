@@ -232,18 +232,14 @@ public partial class RotationConfigWindow : Window
             return true;
         }
 
-        if (DataCenter.SystemWarnings != null)
+        if (DataCenter.SystemWarnings != null && DataCenter.SystemWarnings.Count > 0)
         {
-            bool hasAny = false;
-            foreach (KeyValuePair<string, DateTime> _ in DataCenter.SystemWarnings)
-            {
-                hasAny = true;
-                break;
-            }
-            if (hasAny)
-            {
-                return true;
-            }
+            return true;
+        }
+
+        if (Watcher.DalamudBranch() != "release")
+        {
+            return true;
         }
 
         return Player.AvailableThreadSafe && (Player.Job == Job.CRP || Player.Job == Job.BSM || Player.Job == Job.ARM || Player.Job == Job.GSM ||
@@ -321,13 +317,11 @@ public partial class RotationConfigWindow : Window
         string errorText = string.Empty;
         float availableWidth = ImGui.GetContentRegionAvail().X; // Get the available width dynamically
 
-        // Dalamud branch warning
-        string branch = Watcher.DalamudBranch();
-        if (!string.Equals(branch, "release", StringComparison.OrdinalIgnoreCase))
+        if (Watcher.DalamudBranch() != "release")
         {
             ImGui.PushTextWrapPos(ImGui.GetCursorPos().X + availableWidth);
             ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudOrange);
-            ImGui.TextWrapped($"Warning: You are running the '{branch}' branch of Dalamud. For best compatibility, use /xlbranch and switch back to 'release' branch if available for your current version of FFXIV.");
+            ImGui.TextWrapped($"Warning: You are running the '{Watcher.DalamudBranch()}' branch of Dalamud. For best compatibility, use /xlbranch and switch back to 'release' branch if available for your current version of FFXIV.");
             ImGui.PopStyleColor();
             ImGui.PopTextWrapPos();
             ImGui.Spacing();
