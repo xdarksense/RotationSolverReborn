@@ -40,9 +40,6 @@ internal enum RotationConfigWindowTab : byte
     [Description("Configure abilities and custom conditions for your current job.")]
     [TabIcon(Icon = 4)] Actions,
 
-    [Description("View and manage all loaded RSR rotations.")]
-    [TabIcon(Icon = 47)] Rotations,
-
     [Description("Configure reactive actions and status effect lists.")]
     [TabIcon(Icon = 21)] List,
 

@@ -1,5 +1,4 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32228.430
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -25,10 +24,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RotationSolver.SourceGenera
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RotationSolver.GameData", "RotationSolver.GameData\RotationSolver.GameData.csproj", "{FE8D8078-67F6-473E-9076-B01C62F5B937}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RotationSolver.DummyRotations", "RotationSolver.DummyRotations\RotationSolver.DummyRotations.csproj", "{2C9BACA6-A791-478C-84BB-8A798123468A}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RebornRotations", "RebornRotations\RebornRotations.csproj", "{054B46FA-5639-45A0-A5A1-4A8ED860DDC9}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RotationSolver.DocumentationGenerator", "RotationSolver.DocumentationGenerator\RotationSolver.DocumentationGenerator.csproj", "{17FAD28D-4AC9-42DE-94D0-98ED1BE86595}"
 EndProject
 Global
@@ -53,10 +48,6 @@ Global
 		{FE8D8078-67F6-473E-9076-B01C62F5B937}.Debug|x64.Build.0 = Debug|x64
 		{FE8D8078-67F6-473E-9076-B01C62F5B937}.Release|x64.ActiveCfg = Release|x64
 		{FE8D8078-67F6-473E-9076-B01C62F5B937}.Release|x64.Build.0 = Release|x64
-		{2C9BACA6-A791-478C-84BB-8A798123468A}.Debug|x64.ActiveCfg = Debug|x64
-		{2C9BACA6-A791-478C-84BB-8A798123468A}.Debug|x64.Build.0 = Debug|x64
-		{2C9BACA6-A791-478C-84BB-8A798123468A}.Release|x64.ActiveCfg = Release|x64
-		{2C9BACA6-A791-478C-84BB-8A798123468A}.Release|x64.Build.0 = Release|x64
 		{054B46FA-5639-45A0-A5A1-4A8ED860DDC9}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{054B46FA-5639-45A0-A5A1-4A8ED860DDC9}.Debug|x64.Build.0 = Debug|Any CPU
 		{054B46FA-5639-45A0-A5A1-4A8ED860DDC9}.Release|x64.ActiveCfg = Release|Any CPU

@@ -163,48 +163,6 @@ namespace RotationSolver.Data
         [Description("Conditions that disable automatic use of an action")]
         ConfigWindow_Actions_DisabledConditionSet_Description,
 
-        [Description("Custom rotations are like plugins and have full access to the game and your computer")]
-        ConfigWindow_Rotations_Warning,
-
-        [Description("Please only load rotations from sources that you trust")]
-        ConfigWindow_Rotations_Warning2,
-
-        [Description("Update Rotations")]
-        ConfigWindow_Rotations_Download,
-
-        [Description("Reset to Defaults")]
-        ConfigWindow_Rotations_Reset,
-
-        [Description("Rotation Sources:")]
-        ConfigWindow_Rotations_Sources,
-
-        [Description("Links to online rotations")]
-        ConfigWindow_Rotations_Links,
-
-        [Description("Settings")]
-        ConfigWindow_Rotations_Settings,
-
-        [Description("Loaded")]
-        ConfigWindow_Rotations_Loaded,
-
-        [Description("GitHub")]
-        ConfigWindow_Rotations_GitHub,
-
-        [Description("Libraries")]
-        ConfigWindow_Rotations_Libraries,
-
-        [Description("Username")]
-        ConfigWindow_Rotations_UserName,
-
-        [Description("Repository")]
-        ConfigWindow_Rotations_Repository,
-
-        [Description("File Name")]
-        ConfigWindow_Rotations_FileName,
-
-        [Description("The folder containing the rotation library or the download URL for the rotation library")]
-        ConfigWindow_Rotations_Library,
-
         [Description("In this window, you can set parameters that can be customized using lists.")]
         ConfigWindow_List_Description,
 
@@ -676,7 +634,7 @@ namespace RotationSolver.Data
 
     public static class EnumExtensions
     {
-        private static Dictionary<Enum, string> _enumDescriptions = [];
+        private static readonly Dictionary<Enum, string> _enumDescriptions = [];
 
         public static string GetDescription(this Enum value)
         {
