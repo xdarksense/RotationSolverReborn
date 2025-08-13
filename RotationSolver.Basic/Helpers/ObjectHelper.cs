@@ -2034,7 +2034,7 @@ public static class ObjectHelper
         {
             if (id == battleChara.GameObjectId)
             {
-                return now - time <= TimeSpan.FromSeconds(1);
+                return now - time >= TimeSpan.FromSeconds(1);
             }
         }
         return false;
