@@ -187,9 +187,12 @@ public sealed class RDM_Reborn : RedMageRotation
 
         if (HasEmbolden || IsLastAbility(ActionID.EmboldenPvE))
         {
-            if (ManaficationPvE.CanUse(out act))
+            if (!IsLastComboAction(ActionID.RipostePvE, ActionID.ZwerchhauPvE))
             {
-                return true;
+                if (ManaficationPvE.CanUse(out act))
+                {
+                    return true;
+                }
             }
         }
 
@@ -239,9 +242,11 @@ public sealed class RDM_Reborn : RedMageRotation
     [RotationDesc(ActionID.VercurePvE)]
     protected override bool HealSingleGCD(out IAction? act)
     {
-        if (PreventHeal)
+        if (PreventRaising)
         {
-            if (HasManafication || HasEmbolden || ManaStacks == 3 || CanMagickedSwordplay || CanGrandImpact)
+            if (HasManafication || HasEmbolden || ManaStacks == 3 || CanMagickedSwordplay || CanGrandImpact
+                || ScorchPvE.CanUse(out _) || ResolutionPvE.CanUse(out _)
+                || IsLastComboAction(ActionID.RipostePvE, ActionID.ZwerchhauPvE))
             {
                 return base.HealSingleGCD(out act);
             }
@@ -260,7 +265,9 @@ public sealed class RDM_Reborn : RedMageRotation
     {
         if (PreventRaising)
         {
-            if (HasManafication || HasEmbolden || ManaStacks == 3 || CanMagickedSwordplay || CanGrandImpact)
+            if (HasManafication || HasEmbolden || ManaStacks == 3 || CanMagickedSwordplay || CanGrandImpact 
+                || ScorchPvE.CanUse(out _) || ResolutionPvE.CanUse(out _)
+                || IsLastComboAction(ActionID.RipostePvE, ActionID.ZwerchhauPvE))
             {
                 return base.RaiseGCD(out act);
             }
