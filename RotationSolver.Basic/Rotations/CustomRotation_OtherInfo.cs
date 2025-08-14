@@ -5,6 +5,7 @@ using ECommons.DalamudServices;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
+using System;
 
 namespace RotationSolver.Basic.Rotations;
 public partial class CustomRotation
@@ -114,6 +115,156 @@ public partial class CustomRotation
     }
 
     /// <summary>
+    ///
+    /// </summary>
+    public static bool HasBuffs
+    {
+        get
+        {
+            StatusList();
+
+            if (Buffs.Count == 0) return false;
+
+            bool playerHasBuffs = true;
+            if (Player == null)
+            {
+                playerHasBuffs = false;
+            }
+            else
+            {
+                for (int i = 0; i < Buffs.Count; i++)
+                {
+                    var buff = Buffs[i];
+                    if (buff.Type != StatusType.Buff) continue;
+
+                    if (!Player.HasStatus(false, buff.Ids) || Player.WillStatusEnd(0, false, buff.Ids))
+                    {
+                        playerHasBuffs = false;
+                        break;
+                    }
+                }
+            }
+
+            bool targetHasDebuffs = HostileTarget != null;
+            if (targetHasDebuffs)
+            {
+                var target = HostileTarget!;
+                for (int i = 0; i < Buffs.Count; i++)
+                {
+                    var buff = Buffs[i];
+                    if (buff.Type != StatusType.Debuff) continue;
+
+                    if (!target.HasStatus(false, buff.Ids) || target.WillStatusEnd(0, false, buff.Ids))
+                    {
+                        targetHasDebuffs = false;
+                        break;
+                    }
+                }
+            }
+
+            return playerHasBuffs || targetHasDebuffs;
+        }
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public static List<StatusInfo> Buffs { get; } = [];
+
+    /// <summary>
+    ///
+    /// </summary>
+    public static void StatusList()
+    {
+        Buffs.Clear();
+        var processedJobs = new HashSet<string>();
+
+        if (CustomRotation.PartyComposition == null)
+        {
+            var abbr = Player.ClassJob.Value.Abbreviation.ToString();
+            AddJobBuffs(abbr, processedJobs);
+        }
+        else
+        {
+            foreach (var job in CustomRotation.PartyComposition)
+            {
+                var abbr = job.Value.Abbreviation.ToString();
+                AddJobBuffs(abbr, processedJobs);
+            }
+        }
+    }
+
+    private static readonly Dictionary<string, List<StatusInfo>> JobBuffs = new()
+    {
+        { "AST", [new StatusInfo("Divination", "AST", StatusType.Buff, StatusID.Divination)] },
+        { "BRD", [new StatusInfo("Battle Voice", "BRD", StatusType.Buff, StatusID.BattleVoice),
+            new StatusInfo("Radiant Finale", "BRD", StatusType.Buff, StatusID.RadiantFinale_2964,
+                    StatusID.RadiantFinale)] },
+        { "DNC", [new StatusInfo("Technical Finish", "DNC", StatusType.Buff, StatusID.TechnicalFinish)] },
+        { "DRG", [new StatusInfo("Battle Litany", "DRG", StatusType.Buff, StatusID.BattleLitany)] },
+        { "MNK", [new StatusInfo("Brotherhood", "MNK", StatusType.Buff, StatusID.Brotherhood)] },
+        { "NIN", [new StatusInfo("Mug", "NIN", StatusType.Debuff, StatusID.Mug),
+            new StatusInfo("Dokumori", "NIN", StatusType.Debuff, StatusID.Dokumori, StatusID.Dokumori_4303)] },
+        { "PCT", [new StatusInfo("Starry Muse", "PCT", StatusType.Buff, StatusID.StarryMuse)] },
+        { "RPR", [new StatusInfo("Arcane Circle", "RPR", StatusType.Buff, StatusID.ArcaneCircle)] },
+        { "RDM", [new StatusInfo("Embolden", "RDM", StatusType.Buff, StatusID.Embolden, StatusID.Embolden_1297)] },
+        { "SCH", [new StatusInfo("Chain Stratagem", "SCH", StatusType.Debuff, StatusID.ChainStratagem, StatusID.ChainStratagem_1406)] },
+        { "SMN", [new StatusInfo("Searing Light", "SMN", StatusType.Buff, StatusID.SearingLight)] }
+    };
+
+    private static void AddJobBuffs(string abbr, HashSet<string> processedJobs)
+    {
+        if (!processedJobs.Add(abbr)) return;
+
+        if (JobBuffs.TryGetValue(abbr, out var buffs))
+        {
+            Buffs.AddRange(buffs);
+        }
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public enum StatusType
+    {
+        /// <summary>
+        ///
+        /// </summary>
+        Buff,
+
+        /// <summary>
+        ///
+        /// </summary>
+        Debuff
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    public class StatusInfo(string name, string jobAbbr, StatusType type, params StatusID[] ids)
+    {
+        /// <summary>
+        ///
+        /// </summary>
+        public StatusID[] Ids { get; } = ids;
+
+        /// <summary>
+        ///
+        /// </summary>
+        public string Name { get; } = name;
+
+        /// <summary>
+        ///
+        /// </summary>
+        public string JobAbbr { get; } = jobAbbr;
+
+        /// <summary>
+        ///
+        /// </summary>
+        public StatusType Type { get; } = type;
+    }
+
+    /// <summary>
     /// Determines if the current combat time is within the first 15 seconds of an even minute.
     /// WARNING: Do not use as a main function of your rotation, hardcoding timers is begging for everything to fuck up.
     /// </summary>
@@ -159,7 +310,23 @@ public partial class CustomRotation
     /// Whether the number of party members is 8.
     /// </summary>
     [Description("Is Full Party")]
-    public static bool IsFullParty => PartyMembers.Count() is 8 or 9;
+    public static bool IsFullParty
+    {
+        get
+        {
+            int count = 0;
+            var members = PartyMembers;
+            if (members != null)
+            {
+                foreach (var _ in members)
+                {
+                    count++;
+                    if (count > 9) break;
+                }
+            }
+            return count == 8 || count == 9;
+        }
+    }
 
     /// <summary>
     /// party members HP.
