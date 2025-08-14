@@ -46,9 +46,6 @@ namespace RotationSolver.Data
         [Description("Invalid Rotation! \nPlease update to the latest version or contact {0}!")]
         ConfigWindow_Rotation_InvalidRotation,
 
-        [Description("Beta Rotation!")]
-        ConfigWindow_Rotation_BetaRotation,
-
         [Description("Click to switch rotations")]
         ConfigWindow_Helper_SwitchRotation,
 
@@ -114,9 +111,6 @@ namespace RotationSolver.Data
 
         [Description("Duty Configuration")]
         ConfigWindow_DutyRotation_Configuration,
-
-        [Description("Information")]
-        ConfigWindow_Rotation_Information,
 
         [Description("Status")]
         ConfigWindow_Rotation_Status,

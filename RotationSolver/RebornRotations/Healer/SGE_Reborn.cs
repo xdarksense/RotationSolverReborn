@@ -2,7 +2,7 @@ namespace RotationSolver.RebornRotations.Healer;
 
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.3")]
 [SourceCode(Path = "main/RebornRotations/Healer/SGE_Reborn.cs")]
-[Api(6)]
+
 public sealed class SGE_Reborn : SageRotation
 {
     #region Config Options

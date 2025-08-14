@@ -32,7 +32,6 @@ using System.Diagnostics;
 using System.Text;
 using GAction = Lumina.Excel.Sheets.Action;
 using Status = Lumina.Excel.Sheets.Status;
-using Task = System.Threading.Tasks.Task;
 
 namespace RotationSolver.UI;
 
@@ -686,8 +685,8 @@ public partial class RotationConfigWindow : Window
                         }
                     }
                     ImGui.SameLine();
-                    ImGui.PushStyleColor(ImGuiCol.Text, r.IsBeta()
-                        ? ImGuiColors.DalamudWhite : ImGuiColors.DalamudOrange);
+                    ImGui.PushStyleColor(ImGuiCol.Text, rotation.GetColor());
+
                     if (ImGui.Selectable(rAttr.Name))
                     {
                         if (DataCenter.IsPvP)
@@ -708,15 +707,6 @@ public partial class RotationConfigWindow : Window
         }
 
         string warning = "Game version: " + _curRotationAttribute.GameVersion;
-        if (!rotation.IsValid)
-        {
-            warning += "\n" + string.Format(UiString.ConfigWindow_Rotation_InvalidRotation.GetDescription(),
-                rotation.GetType().Assembly.GetInfo().Author);
-        }
-        if (rotation.IsBeta())
-        {
-            warning += "\n" + UiString.ConfigWindow_Rotation_BetaRotation.GetDescription();
-        }
         warning += "\n \n" + UiString.ConfigWindow_Helper_SwitchRotation.GetDescription();
         ImguiTooltips.HoveredTooltip(warning);
     }
@@ -1462,25 +1452,6 @@ public partial class RotationConfigWindow : Window
 
         _ = ImGui.GetWindowWidth();
         Type type = rotation.GetType();
-        AssemblyInfo info = type.Assembly.GetInfo();
-
-        if (!string.IsNullOrEmpty(rotation.WhyNotValid))
-        {
-            string? author = info.Author;
-            if (string.IsNullOrEmpty(author))
-            {
-                author = "Author";
-            }
-
-            // Add a button to copy the WhyNotValid string to the clipboard
-            if (ImGui.Button("Copy Error Message"))
-            {
-                ImGui.SetClipboardText(rotation.WhyNotValid);
-            }
-
-            using ImRaii.Color color = ImRaii.PushColor(ImGuiCol.Text, ImGuiColors.DPSRed);
-            ImGui.TextWrapped(string.Format(rotation.WhyNotValid, author));
-        }
 
         _rotationHeader.Draw();
     }
@@ -1499,8 +1470,6 @@ public partial class RotationConfigWindow : Window
         { GetRotationStatusHead,  DrawRotationStatus },
         
         { UiString.ConfigWindow_Rotation_Configuration.GetDescription, DrawRotationConfiguration },
-
-        { UiString.ConfigWindow_Rotation_Information.GetDescription, DrawRotationInformation },
     });
 
     private const float DESC_SIZE = 24;
@@ -1522,126 +1491,97 @@ public partial class RotationConfigWindow : Window
             attrs.Add(RotationDescAttribute.MergeToOne(m.GetCustomAttributes<RotationDescAttribute>()));
         }
 
-        using (ImRaii.IEndObject table = ImRaii.Table("Rotation Description", 2, ImGuiTableFlags.Borders
+        using ImRaii.IEndObject table = ImRaii.Table("Rotation Description", 2, ImGuiTableFlags.Borders
             | ImGuiTableFlags.Resizable
-            | ImGuiTableFlags.SizingStretchProp))
+            | ImGuiTableFlags.SizingStretchProp);
+        if (table)
         {
-            if (table)
+            foreach (RotationDescAttribute[] a in RotationDescAttribute.Merge(attrs))
             {
-                foreach (RotationDescAttribute[] a in RotationDescAttribute.Merge(attrs))
+                RotationDescAttribute? attr = RotationDescAttribute.MergeToOne(a);
+                if (attr == null)
                 {
-                    RotationDescAttribute? attr = RotationDescAttribute.MergeToOne(a);
-                    if (attr == null)
-                    {
-                        continue;
-                    }
+                    continue;
+                }
 
-                    List<IBaseAction> allActions = [];
-                    foreach (ActionID actionId in attr.Actions)
+                List<IBaseAction> allActions = [];
+                foreach (ActionID actionId in attr.Actions)
+                {
+                    IBaseAction? action = null;
+                    foreach (IBaseAction baseAction in rotation.AllBaseActions)
                     {
-                        IBaseAction? action = null;
-                        foreach (IBaseAction baseAction in rotation.AllBaseActions)
+                        if (baseAction.ID == (uint)actionId)
                         {
-                            if (baseAction.ID == (uint)actionId)
-                            {
-                                action = baseAction;
-                                break;
-                            }
-                        }
-                        if (action != null)
-                        {
-                            allActions.Add(action);
+                            action = baseAction;
+                            break;
                         }
                     }
-
-                    bool hasDesc = !string.IsNullOrEmpty(attr.Description);
-
-                    if (!hasDesc && allActions.Count == 0)
+                    if (action != null)
                     {
-                        continue;
-                    }
-
-                    ImGui.TableNextRow();
-                    _ = ImGui.TableNextColumn();
-
-                    if (IconSet.GetTexture(attr.IconID, out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? image))
-                    {
-                        ImGui.Image(image.Handle, Vector2.One * DESC_SIZE * Scale);
-                    }
-
-                    ImGui.SameLine();
-                    bool isOnCommand = attr.IsOnCommand;
-                    if (isOnCommand)
-                    {
-                        ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
-                    }
-
-                    ImGui.Text(" " + attr.Type.GetDescription());
-                    if (isOnCommand)
-                    {
-                        ImGui.PopStyleColor();
-                    }
-
-                    _ = ImGui.TableNextColumn();
-
-                    if (hasDesc)
-                    {
-                        ImGui.Text(attr.Description);
-                    }
-
-                    bool notStart = false;
-                    float size = DESC_SIZE * Scale;
-                    float y = ImGui.GetCursorPosY() + (size * 4 / 82);
-                    foreach (IBaseAction item in allActions)
-                    {
-                        if (item == null)
-                        {
-                            continue;
-                        }
-
-                        if (notStart)
-                        {
-                            ImGui.SameLine();
-                        }
-
-                        if (item.GetTexture(out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture))
-                        {
-                            ImGui.SetCursorPosY(y);
-                            Vector2 cursor = ImGui.GetCursorPos();
-                            _ = ImGuiHelper.NoPaddingNoColorImageButton(texture, Vector2.One * size);
-                            ImGuiHelper.DrawActionOverlay(cursor, size, 1);
-                            ImguiTooltips.HoveredTooltip(item.Name);
-                        }
-                        notStart = true;
+                        allActions.Add(action);
                     }
                 }
-            }
-        }
 
-        IEnumerable<LinkDescriptionAttribute> links = type.GetCustomAttributes<LinkDescriptionAttribute>();
+                bool hasDesc = !string.IsNullOrEmpty(attr.Description);
 
-        foreach (LinkDescriptionAttribute link in links)
-        {
-            DrawLinkDescription(link.LinkDescription, wholeWidth, true);
-        }
-    }
+                if (!hasDesc && allActions.Count == 0)
+                {
+                    continue;
+                }
 
-    internal static void DrawLinkDescription(LinkDescription link, float wholeWidth, bool drawQuestion)
-    {
-        bool hasTexture = IconSet.GetTexture(link.Url, out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture);
+                ImGui.TableNextRow();
+                _ = ImGui.TableNextColumn();
 
-        if (hasTexture && ImGuiHelper.TextureButton(texture, wholeWidth, wholeWidth))
-        {
-            Util.OpenLink(link.Url);
-        }
+                if (IconSet.GetTexture(attr.IconID, out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? image))
+                {
+                    ImGui.Image(image.Handle, Vector2.One * DESC_SIZE * Scale);
+                }
 
-        ImGui.TextWrapped(link.Description);
+                ImGui.SameLine();
+                bool isOnCommand = attr.IsOnCommand;
+                if (isOnCommand)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Text, ImGuiColors.DalamudYellow);
+                }
 
-        if (drawQuestion && !hasTexture && !string.IsNullOrEmpty(link.Url))
-        {
-            if (ImGuiEx.IconButton(FontAwesomeIcon.Question, link.Description))
-            {
-                Util.OpenLink(link.Url);
+                ImGui.Text(" " + attr.Type.GetDescription());
+                if (isOnCommand)
+                {
+                    ImGui.PopStyleColor();
+                }
+
+                _ = ImGui.TableNextColumn();
+
+                if (hasDesc)
+                {
+                    ImGui.Text(attr.Description);
+                }
+
+                bool notStart = false;
+                float size = DESC_SIZE * Scale;
+                float y = ImGui.GetCursorPosY() + (size * 4 / 82);
+                foreach (IBaseAction item in allActions)
+                {
+                    if (item == null)
+                    {
+                        continue;
+                    }
+
+                    if (notStart)
+                    {
+                        ImGui.SameLine();
+                    }
+
+                    if (item.GetTexture(out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture))
+                    {
+                        ImGui.SetCursorPosY(y);
+                        Vector2 cursor = ImGui.GetCursorPos();
+                        _ = ImGuiHelper.NoPaddingNoColorImageButton(texture, Vector2.One * size);
+                        ImGuiHelper.DrawActionOverlay(cursor, size, 1);
+                        ImguiTooltips.HoveredTooltip(item.Name);
+                    }
+                    notStart = true;
+                }
             }
         }
     }
@@ -2037,72 +1977,6 @@ public partial class RotationConfigWindow : Window
             }
         }
     }
-
-    private static void DrawRotationInformation()
-    {
-        ICustomRotation? rotation = DataCenter.CurrentRotation;
-        if (rotation == null)
-        {
-            return;
-        }
-
-        string? youtubeLink = rotation.GetType().GetCustomAttribute<YoutubeLinkAttribute>()?.ID;
-
-        float wholeWidth = ImGui.GetWindowWidth();
-        if (!string.IsNullOrEmpty(youtubeLink))
-        {
-            ImGui.NewLine();
-            if (IconSet.GetTexture("https://www.gstatic.com/youtube/img/branding/youtubelogo/svg/youtubelogo.svg", out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon) && ImGuiHelper.TextureButton(icon, wholeWidth, 250 * Scale, "Youtube Link"))
-            {
-                Util.OpenLink("https://www.youtube.com/watch?v=" + youtubeLink);
-            }
-        }
-
-        Assembly assembly = rotation.GetType().Assembly;
-        AssemblyInfo info = assembly.GetInfo();
-
-        if (info != null)
-        {
-            ImGui.NewLine();
-
-            SourceCodeAttribute? link = rotation.GetType().GetCustomAttribute<SourceCodeAttribute>();
-            if (link != null)
-            {
-                string? userName = info.GitHubUserName;
-                string? repository = info.GitHubRepository;
-
-                if (!string.IsNullOrEmpty(userName) && !string.IsNullOrEmpty(repository) && !string.IsNullOrEmpty(link.Path))
-                {
-                    DrawGitHubBadge(userName, repository, link.Path, $"https://github.com/{userName}/{repository}/blob/{link.Path}", center: true);
-                }
-            }
-            ImGui.NewLine();
-
-            ImGuiHelper.DrawItemMiddle(() =>
-            {
-                using ImRaii.IEndObject group = ImRaii.Group();
-                if (group)
-                {
-                    if (ImGui.Button(info.Name))
-                    {
-                        _ = Process.Start("explorer.exe", "/select, \"" + info.FilePath + "\"");
-                    }
-
-                    Version? version = assembly.GetName().Version;
-                    if (version != null)
-                    {
-                        ImGui.Text(" v " + version.ToString());
-                    }
-                    ImGui.Text(" - " + info.Author);
-                }
-
-            }, wholeWidth, _groupWidth);
-
-            _groupWidth = ImGui.GetItemRectSize().X;
-        }
-    }
-
-    private static float _groupWidth = 100;
     #endregion
 
     #region Actions
@@ -2392,246 +2266,6 @@ public partial class RotationConfigWindow : Window
         HeaderSize = 18,
     };
     #endregion
-
-    #region Rotations
-    private static void DrawRotationsSettings()
-    {
-        _allSearchable.DrawItems(Configs.Rotations);
-    }
-
-    private static void DrawRotationsLoaded()
-    {
-        // Build a flat list of all rotations from RotationUpdater.CustomRotationsDict
-        List<Type> allRotations = [];
-        foreach (var dictEntry in RotationUpdater.CustomRotationsDict)
-        {
-            var groupList = dictEntry.Value;
-            foreach (var group in groupList)
-            {
-                foreach (var rotation in group.Rotations)
-                {
-                    allRotations.Add(rotation);
-                }
-            }
-        }
-
-        // Group by Assembly
-        Dictionary<Assembly, List<Type>> assemblyGroups = [];
-        foreach (var rotation in allRotations)
-        {
-            var assembly = rotation.Assembly;
-            if (!assemblyGroups.TryGetValue(assembly, out var list))
-            {
-                list = [];
-                assemblyGroups[assembly] = list;
-            }
-            list.Add(rotation);
-        }
-
-        using ImRaii.IEndObject table = ImRaii.Table("Rotation Solver AssemblyTable", 3, ImGuiTableFlags.BordersInner
-            | ImGuiTableFlags.Resizable
-            | ImGuiTableFlags.SizingStretchProp);
-
-        if (table)
-        {
-            ImGui.TableSetupScrollFreeze(0, 1);
-            ImGui.TableNextRow(ImGuiTableRowFlags.Headers);
-
-            _ = ImGui.TableNextColumn();
-            ImGui.TableHeader("Information");
-
-            _ = ImGui.TableNextColumn();
-            ImGui.TableHeader("Rotations");
-
-            _ = ImGui.TableNextColumn();
-            ImGui.TableHeader("Links");
-
-            // Iterate over each assembly group
-            foreach (var assemblyPair in assemblyGroups)
-            {
-                ImGui.TableNextRow();
-
-                Assembly assembly = assemblyPair.Key;
-                List<Type> typesInAssembly = assemblyPair.Value;
-
-                AssemblyInfo info = assembly.GetInfo();
-                _ = ImGui.TableNextColumn();
-
-                if (ImGui.Button(info.Name))
-                {
-                    _ = Process.Start("explorer.exe", "/select, \"" + info.FilePath + "\"");
-                }
-
-                Version? version = assembly.GetName().Version;
-                if (version != null)
-                {
-                    ImGui.Text(" v " + version.ToString());
-                }
-
-                ImGui.Text(" - " + info.Author);
-
-                _ = ImGui.TableNextColumn();
-
-                // Group by Job (using JobsAttribute) and order by JobRole
-                // Build job groups
-                Dictionary<Job, List<Type>> jobGroups = [];
-                foreach (var type in typesInAssembly)
-                {
-                    var jobsAttr = type.GetCustomAttribute<JobsAttribute>();
-                    if (jobsAttr == null || jobsAttr.Jobs.Length == 0)
-                        continue;
-                    var job = jobsAttr.Jobs[0];
-                    if (!jobGroups.TryGetValue(job, out var jobList))
-                    {
-                        jobList = [];
-                        jobGroups[job] = jobList;
-                    }
-                    jobList.Add(type);
-                }
-
-                // Build a list of jobs and their roles for ordering
-                List<(Job job, JobRole role)> jobOrderList = [];
-                foreach (var job in jobGroups.Keys)
-                {
-                    var classJob = Svc.Data.GetExcelSheet<ClassJob>()?.GetRow((uint)job);
-                    var role = classJob.HasValue ? classJob.Value.GetJobRole() : JobRole.None;
-                    jobOrderList.Add((job, role));
-                }
-
-                // Sort by role
-                jobOrderList.Sort((a, b) => a.role.CompareTo(b.role));
-
-                JobRole lastRole = JobRole.None;
-                foreach (var jobRolePair in jobOrderList)
-                {
-                    var job = jobRolePair.job;
-                    var role = jobRolePair.role;
-                    var jobs = jobGroups[job];
-
-                    if (lastRole == role && lastRole != JobRole.None)
-                    {
-                        ImGui.SameLine();
-                    }
-                    lastRole = role;
-
-                    if (IconSet.GetTexture(IconSet.GetJobIcon(job, IconType.Framed), out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? texture, 62574) && texture?.Handle != null)
-                    {
-                        ImGui.Image(texture.Handle, Vector2.One * 30 * Scale);
-                    }
-
-                    // Build tooltip text
-                    StringBuilder tooltipNames = new();
-                    StringBuilder tooltipTypes = new();
-                    for (int i = 0; i < jobs.Count; i++)
-                    {
-                        var t = jobs[i];
-                        var uiAttr = t.GetCustomAttribute<UIAttribute>();
-                        var rotAttr = t.GetCustomAttribute<RotationAttribute>();
-                        tooltipNames.Append(uiAttr?.Name ?? t.Name);
-                        tooltipTypes.Append(rotAttr?.Type.ToString() ?? CombatType.None.ToString());
-                        if (i < jobs.Count - 1)
-                        {
-                            tooltipNames.Append('\n');
-                            tooltipTypes.Append('\n');
-                        }
-                    }
-                    ImguiTooltips.HoveredTooltip(tooltipNames.ToString() + Environment.NewLine + tooltipTypes.ToString());
-                }
-
-                _ = ImGui.TableNextColumn();
-
-                if (!string.IsNullOrEmpty(info.GitHubUserName) && !string.IsNullOrEmpty(info.GitHubRepository) && !string.IsNullOrEmpty(info.FilePath))
-                {
-                    DrawGitHubBadge(info.GitHubUserName, info.GitHubRepository, info.FilePath);
-                }
-
-                if (!string.IsNullOrEmpty(info.DonateLink)
-                    && IconSet.GetTexture("https://storage.ko-fi.com/cdn/brandasset/kofi_button_red.png", out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon)
-                    && icon?.Handle != null
-                    && ImGuiHelper.NoPaddingNoColorImageButton(icon, new Vector2(1, (float)icon.Height / icon.Width) * MathF.Min(250, icon.Width) * Scale, info.FilePath ?? string.Empty))
-                {
-                    Util.OpenLink(info.DonateLink);
-                }
-            }
-        }
-    }
-
-    private static void DrawGitHubBadge(string userName, string repository, string id = "", string link = "", bool center = false)
-    {
-        if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(repository))
-        {
-            return;
-        }
-
-        float wholeWidth = ImGui.GetWindowWidth();
-
-        link = string.IsNullOrEmpty(link) ? $"https://GitHub.com/{userName}/{repository}" : link;
-
-        if (IconSet.GetTexture($"https://github-readme-stats.vercel.app/api/pin/?username={userName}&repo={repository}&theme=dark", out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? icon)
-            && icon?.Handle != null
-            && (center ? ImGuiHelper.TextureButton(icon, wholeWidth, icon.Width, id)
-            : ImGuiHelper.NoPaddingNoColorImageButton(icon, new Vector2(icon.Width, icon.Height), id)))
-        {
-            Util.OpenLink(link);
-        }
-
-        bool hasDate = IconSet.GetTexture($"https://img.shields.io/github/release-date/{userName}/{repository}?style=for-the-badge", out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? releaseDate);
-
-        bool hasCount = IconSet.GetTexture($"https://img.shields.io/github/downloads/{userName}/{repository}/latest/total?style=for-the-badge&label=", out Dalamud.Interface.Textures.TextureWraps.IDalamudTextureWrap? downloadCount);
-
-        ImGuiStylePtr style = ImGui.GetStyle();
-        Vector2 spacing = style.ItemSpacing;
-        style.ItemSpacing = Vector2.Zero;
-        if (center)
-        {
-            float width = 0;
-            if (hasDate)
-            {
-                width += releaseDate.Width;
-            }
-
-            if (hasCount)
-            {
-                width += downloadCount.Width;
-            }
-
-            float ratio = MathF.Min(1, wholeWidth / width);
-            ImGuiHelper.DrawItemMiddle(() =>
-            {
-                if (hasDate && releaseDate?.Handle != null && ImGuiHelper.NoPaddingNoColorImageButton(releaseDate, new Vector2(releaseDate.Width, releaseDate.Height) * ratio, id))
-                {
-                    Util.OpenLink(link);
-                }
-                if (hasDate && hasCount)
-                {
-                    ImGui.SameLine();
-                }
-
-                if (hasCount && downloadCount?.Handle != null && ImGuiHelper.NoPaddingNoColorImageButton(downloadCount, new Vector2(downloadCount.Width, downloadCount.Height) * ratio, id))
-                {
-                    Util.OpenLink(link);
-                }
-            }, wholeWidth, width * ratio);
-        }
-        else
-        {
-            if (hasDate && releaseDate?.Handle != null && ImGuiHelper.NoPaddingNoColorImageButton(releaseDate, new Vector2(releaseDate.Width, releaseDate.Height), id))
-            {
-                Util.OpenLink(link);
-            }
-            if (hasDate && hasCount)
-            {
-                ImGui.SameLine();
-            }
-
-            if (hasCount && downloadCount?.Handle != null && ImGuiHelper.NoPaddingNoColorImageButton(downloadCount, new Vector2(downloadCount.Width, downloadCount.Height), id))
-            {
-                Util.OpenLink(link);
-            }
-        }
-        style.ItemSpacing = spacing;
-    }
-    #endregion 
 
     #region List
     private static readonly Lazy<Status[]> _allDispelStatus = new(() =>

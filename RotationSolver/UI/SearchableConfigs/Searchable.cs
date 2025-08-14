@@ -207,7 +207,6 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
             return result;
         }
     }
-    public virtual LinkDescription[]? Tooltips => [.. _property.GetCustomAttributes<LinkDescriptionAttribute>().Select(l => l.LinkDescription)];
     public virtual string ID => _property.Name;
     private string Popup_Key => "Rotation Solver RightClicking: " + ID;
     protected bool IsJob => _property.GetCustomAttribute<JobConfigAttribute>() != null
@@ -281,11 +280,10 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
 
     protected abstract void DrawMain();
 
-
     protected void ShowTooltip(bool showHand = true)
     {
         bool showDesc = !string.IsNullOrEmpty(Description);
-        if (showDesc || (Tooltips != null && Tooltips.Length > 0))
+        if (showDesc)
         {
             ImguiTooltips.ShowTooltip(() =>
             {
@@ -293,19 +291,12 @@ internal abstract class Searchable(PropertyInfo property) : ISearchable
                 {
                     ImGui.BulletText(Description);
                 }
-                if (showDesc && Tooltips != null && Tooltips.Length > 0)
+                if (showDesc)
                 {
                     ImGui.Separator();
                 }
                 float wholeWidth = ImGui.GetWindowWidth();
 
-                if (Tooltips != null)
-                {
-                    foreach (LinkDescription tooltip in Tooltips)
-                    {
-                        RotationConfigWindow.DrawLinkDescription(tooltip, wholeWidth, false);
-                    }
-                }
             });
         }
 

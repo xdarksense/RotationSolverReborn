@@ -166,10 +166,6 @@ internal static class RotationUpdater
         {
             foreach (Type type in TryGetTypes(assembly))
             {
-                ApiAttribute? apiAttribute = type.GetCustomAttribute<ApiAttribute>();
-                AssemblyInfo info = assembly.GetInfo();
-                string authorName = info.Author ?? "Unknown Author";
-
                 bool implementsICustomRotation = false;
                 foreach (var iface in type.GetInterfaces())
                 {
@@ -183,15 +179,7 @@ internal static class RotationUpdater
                 if (implementsICustomRotation
                     && !type.IsAbstract && !type.IsInterface && type.GetConstructor(Type.EmptyTypes) != null)
                 {
-                    if (apiAttribute?.ApiVersion == Service.ApiVersion)
-                    {
-                        rotationList.Add(type);
-                    }
-                    else
-                    {
-                        string warning = $"Failed to load rotation {type.Assembly.GetName().Name} by {authorName} due to API update";
-                        WarningHelper.AddSystemWarning(warning);
-                    }
+                    rotationList.Add(type);
                 }
             }
         }

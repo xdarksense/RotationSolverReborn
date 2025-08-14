@@ -2,7 +2,7 @@ namespace RotationSolver.RebornRotations.PVPRotations.Ranged;
 
 [Rotation("Default PVP", CombatType.PvP, GameVersion = "7.3")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Ranged/MCH_Default.PvP.cs")]
-[Api(6)]
+
 public sealed class MCH_DefaultPvP : MachinistRotation
 {
     #region Configurations

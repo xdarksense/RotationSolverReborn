@@ -2,7 +2,7 @@
 
 [Rotation("Default", CombatType.PvP, GameVersion = "7.3")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Melee/MNK_Default.PVP.cs")]
-[Api(6)]
+
 public sealed class MNK_DefaultPvP : MonkRotation
 {
     #region Configurations

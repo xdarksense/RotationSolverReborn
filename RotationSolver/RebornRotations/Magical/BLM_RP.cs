@@ -2,7 +2,7 @@
 
 [Rotation("RebornPowerdox(TESTING)", CombatType.PvE, GameVersion = "7.3")]
 [SourceCode(Path = "main/BasicRotations/Magical/BLM_RP.cs")]
-[Api(6)]
+
 public class BLM_RP : BlackMageRotation
 {
     #region Config Options

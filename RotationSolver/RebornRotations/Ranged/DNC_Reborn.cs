@@ -4,7 +4,7 @@ namespace RotationSolver.RebornRotations.Ranged;
 
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.3")]
 [SourceCode(Path = "main/RebornRotations/Ranged/DNC_Reborn.cs")]
-[Api(6)]
+
 public sealed class DNC_Reborn : DancerRotation
 {
     #region Config Options

@@ -6,28 +6,10 @@ namespace RotationSolver.Helpers;
 
 internal static class RotationHelper
 {
-    private static readonly Dictionary<Assembly, AssemblyInfo> _assemblyInfos = [];
-    private static readonly Dictionary<ICustomRotation, bool> _betaInfo = [];
+    private static readonly Dictionary<ICustomRotation, bool> _extraRotation = [];
     private static readonly Dictionary<ICustomRotation, RotationAttribute> _rotationAttributes = [];
 
     public static List<LoadedAssembly> LoadedCustomRotations { get; } = [];
-
-    public static AssemblyInfo GetInfo(this Assembly assembly)
-    {
-        if (_assemblyInfos.TryGetValue(assembly, out AssemblyInfo? info))
-        {
-            return info;
-        }
-
-        string? name = assembly.GetName().Name;
-        string location = assembly.Location;
-        string? company = assembly.GetCustomAttribute<AssemblyCompanyAttribute>()?.Company;
-        AssemblyInfo assemblyInfo = new(name, company, location, string.Empty, company, name, DateTime.Now);
-
-        _assemblyInfos[assembly] = assemblyInfo;
-
-        return assemblyInfo;
-    }
 
     public static unsafe Vector4 GetColor(this ICustomRotation rotation)
     {
@@ -41,19 +23,24 @@ internal static class RotationHelper
             return ImGuiColors.DPSRed;
         }
 
-        return rotation.IsBeta() ? ImGuiColors.DalamudOrange : ImGuiColors.DalamudWhite;
-    }
-
-    public static bool IsBeta(this ICustomRotation rotation)
-    {
-        if (_betaInfo.TryGetValue(rotation, out bool isBeta))
+        if (rotation.IsExtra())
         {
-            return isBeta;
+            return ImGuiColors.DalamudViolet;
         }
 
-        BetaRotationAttribute? betaAttribute = rotation.GetType().GetCustomAttribute<BetaRotationAttribute>();
-        _betaInfo[rotation] = betaAttribute != null;
-        return _betaInfo[rotation];
+        return ImGuiColors.DalamudWhite;
+    }
+
+    public static bool IsExtra(this ICustomRotation rotation)
+    {
+        if (_extraRotation.TryGetValue(rotation, out bool isExtra))
+        {
+            return isExtra;
+        }
+
+        ExtraRotationAttribute? extraRotationAttribute = rotation.GetType().GetCustomAttribute<ExtraRotationAttribute>();
+        _extraRotation[rotation] = extraRotationAttribute != null;
+        return _extraRotation[rotation];
     }
 
     public static RotationAttribute? GetAttributes(this ICustomRotation rotation)
@@ -69,55 +56,6 @@ internal static class RotationHelper
         }
 
         return attributes;
-    }
-
-    public static Assembly LoadCustomRotationAssembly(string filePath)
-    {
-        DirectoryInfo? directoryInfo = new FileInfo(filePath).Directory;
-        RotationLoadContext loadContext = new(directoryInfo);
-        Assembly assembly = loadContext.LoadFromFile(filePath);
-
-        string? assemblyName = assembly.GetName().Name;
-        string author = GetAuthor(filePath, assemblyName);
-
-        AssemblyLinkAttribute? link = assembly.GetCustomAttribute<AssemblyLinkAttribute>();
-        AssemblyInfo assemblyInfo = new(
-            assemblyName,
-            author,
-            filePath,
-            link?.Donate,
-            link?.UserName,
-            link?.Repository,
-            DateTime.Now);
-
-        Assembly? existingAssembly = GetAssemblyFromPath(filePath);
-        if (existingAssembly != null)
-        {
-            _ = _assemblyInfos.Remove(existingAssembly);
-        }
-
-        _assemblyInfos[assembly] = assemblyInfo;
-
-        LoadedAssembly loadedAssembly = new(
-            filePath,
-            File.GetLastWriteTimeUtc(filePath).ToString());
-
-        _ = LoadedCustomRotations.RemoveAll(item => item.FilePath == loadedAssembly.FilePath);
-        LoadedCustomRotations.Add(loadedAssembly);
-
-        return assembly;
-    }
-
-    private static Assembly? GetAssemblyFromPath(string filePath)
-    {
-        foreach (KeyValuePair<Assembly, AssemblyInfo> asm in _assemblyInfos)
-        {
-            if (asm.Value.FilePath == filePath)
-            {
-                return asm.Key;
-            }
-        }
-        return null;
     }
 
     private static string GetAuthor(string filePath, string? assemblyName)

@@ -2,7 +2,7 @@
 
 [Rotation("Default PVP", CombatType.PvP, GameVersion = "7.3")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Tank/NIN_Default.PvP.cs")]
-[Api(6)]
+
 public sealed class NIN_DefaultPvP : NinjaRotation
 {
     #region Configurations

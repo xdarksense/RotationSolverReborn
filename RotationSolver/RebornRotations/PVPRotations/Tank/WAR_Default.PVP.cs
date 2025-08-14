@@ -2,7 +2,7 @@
 
 [Rotation("Default PVP", CombatType.PvP, GameVersion = "7.3")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Tank/WAR_Default.PvP.cs")]
-[Api(6)]
+
 public sealed class WAR_DefaultPvP : WarriorRotation
 {
     #region Configurations
