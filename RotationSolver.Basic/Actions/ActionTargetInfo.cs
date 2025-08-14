@@ -844,11 +844,9 @@ public struct ActionTargetInfo(IBaseAction action)
             yield break;
         }
 
-        // Cleave mode: keep candidate list intact (do not try to hunt for large clusters)
-        if (Service.Config.AoEType == AoEType.Cleave && aoeCount > 1)
+        // Cleave mode
+        if (aoeCount > 1 && Service.Config.AoEType == AoEType.Cleave)
         {
-            foreach (IBattleChara target in canTargets)
-                yield return target;
             yield break;
         }
 
