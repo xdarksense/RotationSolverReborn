@@ -15,12 +15,10 @@ using ECommons.GameHelpers;
 using ECommons.ImGuiMethods;
 using ECommons.Logging;
 using ECommons.Reflection;
-using ExCSS;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Fate;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
-using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Rotations.Duties;
 using RotationSolver.Data;
@@ -613,7 +611,7 @@ public partial class RotationConfigWindow : Window
         {
             ImguiTooltips.ShowTooltip(() =>
             {
-                ImGui.Text($"{rotation.Name ?? string.Empty} ({_curRotationAttribute?.Name ?? string.Empty})");
+                ImGui.TextColored(rotation.GetColor(), $"{rotation.Name ?? string.Empty} ({_curRotationAttribute?.Name ?? string.Empty})");
                 _curRotationAttribute?.Type.Draw();
 
                 if (!string.IsNullOrEmpty(rotation.Description))
@@ -646,7 +644,7 @@ public partial class RotationConfigWindow : Window
         ImGui.SetNextItemWidth(comboSize);
         const string popUp = "Rotation Solver Select Rotation";
         var rotationColor = rotation.GetColor();
-        using (ImRaii.Color color = ImRaii.PushColor(ImGuiCol.Text, rotationColor))
+        using (ImRaii.Color color = ImRaii.PushColor(ImGuiCol.Text, rotation.IsExtra() ? ImGuiColors.DalamudViolet : ImGuiColors.DalamudWhite))
         {
             if (ImGui.Selectable(_curRotationAttribute.Name + "##RotationName:" + rotation.Name))
             {
@@ -685,7 +683,7 @@ public partial class RotationConfigWindow : Window
                         }
                     }
                     ImGui.SameLine();
-                    ImGui.PushStyleColor(ImGuiCol.Text, rotation.GetColor());
+                    ImGui.PushStyleColor(ImGuiCol.Text, r.IsExtra() ? ImGuiColors.DalamudViolet : ImGuiColors.DalamudWhite);
 
                     if (ImGui.Selectable(rAttr.Name))
                     {
