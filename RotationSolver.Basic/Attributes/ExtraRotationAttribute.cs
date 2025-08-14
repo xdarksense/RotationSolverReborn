@@ -1,9 +1,9 @@
 ﻿namespace RotationSolver.Basic.Attributes;
 
 /// <summary>
-/// To tag the rotations that are in beta version.
+/// Tag for rotations that are 3rd party (Extra).
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class BetaRotationAttribute : Attribute
+public class ExtraRotationAttribute : Attribute
 {
 }

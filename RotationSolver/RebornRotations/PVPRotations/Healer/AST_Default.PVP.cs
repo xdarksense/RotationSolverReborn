@@ -2,7 +2,7 @@
 
 [Rotation("Default PVP", CombatType.PvP, GameVersion = "7.3")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Healer/AST_Default.PVP.cs")]
-[Api(6)]
+
 public class AST_DefaultPVP : AstrologianRotation
 {
     #region Configurations

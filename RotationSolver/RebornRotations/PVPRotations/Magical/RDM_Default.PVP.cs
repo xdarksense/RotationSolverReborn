@@ -2,7 +2,7 @@
 
 [Rotation("Default PVP", CombatType.PvP, GameVersion = "7.3")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Magical/RDM_Default.PVP.cs")]
-[Api(6)]
+
 public class RDM_DefaultPvP : RedMageRotation
 {
     #region Configurations

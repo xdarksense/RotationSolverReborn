@@ -2,7 +2,7 @@
 
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.3")]
 [SourceCode(Path = "main/RebornRotations/Ranged/MCH_Reborn.cs")]
-[Api(6)]
+
 public sealed class MCH_Reborn : MachinistRotation
 {
     #region Config Options
