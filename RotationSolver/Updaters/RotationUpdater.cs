@@ -22,38 +22,15 @@ internal static class RotationUpdater
 
     public static IAction[] CurrentRotationActions { get; private set; } = [];
 
-    private static DateTime LastRunTime;
-
     private static bool _isLoading = false;
     private static string _curDutyRotationName = string.Empty;
 
-    public static Task ResetToDefaults()
-    {
-        try
-        {
-            string relayFolder = Svc.PluginInterface.ConfigDirectory.FullName + "\\Rotations";
-            string[] files = Directory.GetFiles(relayFolder);
-            foreach (string file in files)
-            {
-                PluginLog.Information($"Deleting {file}");
-                File.Delete(file);
-            }
-        }
-        catch (Exception ex)
-        {
-            PluginLog.Error($"Failed to delete the rotation files: {ex.Message}");
-        }
-
-        return Task.CompletedTask;
-    }
-
     /// <summary>
-    /// Retrieves custom rotations from local and/or downloads
-    /// them from remote server based on DownloadOption
+    /// Retrieves custom rotations from built-in assemblies
     /// </summary>
     /// <param name="option"></param>
     /// <returns></returns>
-    public static async Task GetAllCustomRotationsAsync(DownloadOption option)
+    public static async Task GetAllCustomRotationsAsync()
     {
         if (_isLoading)
         {
@@ -64,39 +41,26 @@ internal static class RotationUpdater
 
         try
         {
-            string relayFolder = Svc.PluginInterface.ConfigDirectory.FullName + "\\Rotations";
-            _ = Directory.CreateDirectory(relayFolder);
+            // Load only built-in rotations without DLL loading
+            LoadBuiltInRotations();
 
-            if (option.HasFlag(DownloadOption.Local))
+            List<string> assemblies = [];
+            HashSet<string> seen = [];
+            foreach (KeyValuePair<JobRole, CustomRotationGroup[]> d in CustomRotationsDict)
             {
-                LoadRotationsFromLocal(relayFolder);
-            }
-
-            if (option.HasFlag(DownloadOption.Download) && Service.Config.DownloadCustomRotations)
-            {
-                await DownloadRotationsAsync(relayFolder, option.HasFlag(DownloadOption.MustDownload));
-            }
-
-            if (option.HasFlag(DownloadOption.ShowList))
-            {
-                List<string> assemblies = [];
-                HashSet<string> seen = [];
-                foreach (KeyValuePair<JobRole, CustomRotationGroup[]> d in CustomRotationsDict)
+                foreach (CustomRotationGroup g in d.Value)
                 {
-                    foreach (CustomRotationGroup g in d.Value)
+                    foreach (Type r in g.Rotations)
                     {
-                        foreach (Type r in g.Rotations)
+                        string name = r.Assembly.FullName ?? string.Empty;
+                        if (seen.Add(name))
                         {
-                            string name = r.Assembly.FullName ?? string.Empty;
-                            if (seen.Add(name))
-                            {
-                                assemblies.Add(name);
-                            }
+                            assemblies.Add(name);
                         }
                     }
                 }
-                PrintLoadedAssemblies(assemblies);
             }
+            PrintLoadedAssemblies(assemblies);
         }
         catch (Exception ex)
         {
@@ -107,91 +71,16 @@ internal static class RotationUpdater
         {
             _isLoading = false;
         }
-    }
 
-    private static Assembly? LoadDefaultRotationsFromLocal()
-    {
-        DirectoryInfo? directory = Svc.PluginInterface.AssemblyLocation.Directory;
-        if (directory == null || !directory.Exists)
-        {
-            PluginLog.Error("Failed to find main assembly directory");
-            return null;
-        }
-        string assemblyPath = Path.Combine(directory.ToString(),
-#if DEBUG
-            "net9.0-windows\\RebornRotations.dll"
-#else
-            "RebornRotations.dll"
-#endif
-        );
-        return LoadOne(assemblyPath);
+        await Task.CompletedTask;
     }
 
     /// <summary>
-    /// This method loads custom rotation groups from local directories and assemblies, creates a sorted list of
-    /// author hashes, and creates a sorted list of custom rotations grouped by job role.
+    /// Loads custom rotation groups from the current assembly
     /// </summary>
-    /// <param name="relayFolder"></param>
-    private static void LoadRotationsFromLocal(string relayFolder)
+    public static void LoadBuiltInRotations()
     {
-        List<string> directories = [];
-        foreach (string lib in Service.Config.RotationLibs)
-        {
-            if (Directory.Exists(lib))
-            {
-                directories.Add(lib);
-            }
-        }
-        if (Directory.Exists(relayFolder))
-        {
-            directories.Add(relayFolder);
-        }
-
-        List<Assembly> assemblies = [];
-
-        if (Service.Config.LoadDefaultRotations)
-        {
-            Assembly? defaultAssembly = LoadDefaultRotationsFromLocal();
-            if (defaultAssembly == null)
-            {
-                PluginLog.Error("Failed to load default rotations from local directory");
-                return;
-            }
-            assemblies.Add(defaultAssembly);
-        }
-
-        foreach (string dir in directories)
-        {
-            if (Directory.Exists(dir))
-            {
-                foreach (string dll in Directory.GetFiles(dir, "*.dll"))
-                {
-                    if (dll.Contains("RebornRotations.dll"))
-                    {
-                        continue;
-                    }
-
-                    Assembly? assembly = LoadOne(dll);
-
-                    bool found = false;
-                    if (assembly != null)
-                    {
-                        foreach (Assembly a in assemblies)
-                        {
-                            if (a.FullName == assembly.FullName)
-                            {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found)
-                        {
-                            assemblies.Add(assembly);
-                        }
-                    }
-                }
-            }
-        }
+        List<Assembly> assemblies = [typeof(RotationUpdater).Assembly];
 
         DutyRotations = LoadDutyRotationGroup(assemblies);
         CustomRotations = LoadCustomRotationGroup(assemblies);
@@ -224,7 +113,7 @@ internal static class RotationUpdater
                     }
                 }
             }
-            CustomRotationsDict[kvp.Key] = customRotationGroups.ToArray();
+            CustomRotationsDict[kvp.Key] = [.. customRotationGroups];
         }
     }
 
@@ -340,112 +229,6 @@ internal static class RotationUpdater
         return [.. result];
     }
 
-
-    /// <summary>
-    /// Downloads rotation files from a remote server and saves them to a local folder.
-    /// The download list is obtained from a JSON file on the remote server.
-    /// If mustDownload is set to true, it will always download the files, otherwise it will only download if the file doesn't exist locally. 
-    /// </summary>
-    /// <param name="relayFolder"></param>
-    /// <param name="mustDownload"></param>
-    /// <returns></returns>
-    private static async Task DownloadRotationsAsync(string relayFolder, bool mustDownload)
-    {
-        // Code to download rotations from remote server
-        bool hasDownload = false;
-
-        using (HttpClient client = new())
-        {
-            foreach (string url in Service.Config.RotationLibs)
-            {
-                hasDownload |= await DownloadOneUrlAsync(url, relayFolder, client, mustDownload);
-                string pdbUrl = Path.ChangeExtension(url, ".pdb");
-                _ = await DownloadOneUrlAsync(pdbUrl, relayFolder, client, mustDownload);
-            }
-        }
-        if (hasDownload)
-        {
-            LoadRotationsFromLocal(relayFolder);
-        }
-    }
-
-    private static string Convert(string value)
-    {
-        string[] split = value.Split('|');
-        if (split == null || split.Length < 2)
-        {
-            return value;
-        }
-
-        string username = split[0];
-        string repo = split[1];
-        string file = split.Last();
-        return string.IsNullOrEmpty(username) || string.IsNullOrEmpty(repo) || string.IsNullOrEmpty(file)
-            ? value
-            : $"https://GitHub.com/{username}/{repo}/releases/latest/download/{file}.dll";
-    }
-
-    private static async Task<bool> DownloadOneUrlAsync(string url, string relayFolder, HttpClient client, bool mustDownload)
-    {
-        try
-        {
-            bool valid = Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out Uri? uriResult)
-                 && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
-            if (!valid)
-            {
-                return false;
-            }
-        }
-        catch
-        {
-            return false;
-        }
-        try
-        {
-            string? fileName = url.Split('/').LastOrDefault();
-            if (string.IsNullOrEmpty(fileName))
-            {
-                return false;
-            }
-
-            string filePath = Path.Combine(relayFolder, fileName);
-
-            // Check if the file needs to be downloaded
-            HttpResponseMessage response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-            FileInfo fileInfo = new(filePath);
-            System.Net.Http.Headers.HttpContentHeaders header = response.Content.Headers;
-            bool shouldDownload = mustDownload || !File.Exists(filePath) ||
-                                  !header.LastModified.HasValue ||
-                                  header.LastModified.Value.UtcDateTime >= fileInfo.LastWriteTimeUtc ||
-                                  fileInfo.Length != header.ContentLength;
-
-            if (!shouldDownload)
-            {
-                return false; // No need to download
-            }
-
-            // If reaching here, either the local file doesn't exist, or it's outdated. Proceed to download.
-            if (File.Exists(filePath))
-            {
-                File.Delete(filePath); // Delete the old local file
-            }
-
-            using (FileStream stream = new(filePath, FileMode.CreateNew))
-            {
-                await response.Content.CopyToAsync(stream);
-            }
-
-            PluginLog.Information($"Successfully downloaded {filePath}");
-            return true;
-        }
-        catch (Exception ex)
-        {
-            WarningHelper.AddSystemWarning($"Failed to download from {url} Please check VPN");
-            PluginLog.Error($"Failed to download from {url}: {ex.Message}");
-        }
-        return false;
-    }
-
     private static void PrintLoadedAssemblies(IEnumerable<string>? assemblies)
     {
         if (assemblies == null)
@@ -457,63 +240,6 @@ internal static class RotationUpdater
         {
             Svc.Chat.Print("Loaded: " + assembly);
         }
-    }
-
-    private static Assembly? LoadOne(string filePath)
-    {
-        try
-        {
-            return RotationHelper.LoadCustomRotationAssembly(filePath);
-        }
-        catch (Exception ex)
-        {
-            WarningHelper.AddSystemWarning("Failed to load " + filePath);
-            PluginLog.Warning($"Failed to load {filePath}: {ex.Message}");
-        }
-        return null;
-    }
-
-    // This method watches for changes in local rotation files by checking the
-    // last modified time of the files in the directories specified in the configuration.
-    // If there are new changes, it triggers a reload of the custom rotation.
-    // This method uses Parallel.ForEach to improve performance.
-    // It also has a check to ensure it's not running too frequently, to avoid hurting the FPS of the game.
-    public static void LocalRotationWatcher()
-    {
-        if (DateTime.Now < LastRunTime.AddSeconds(2))
-        {
-            return;
-        }
-
-        string[] dirs = Service.Config.RotationLibs;
-
-        foreach (string dir in dirs)
-        {
-            if (string.IsNullOrEmpty(dir) || !Directory.Exists(dir))
-            {
-                continue;
-            }
-
-            string[] dlls = Directory.GetFiles(dir, "*.dll");
-
-            // There may be many files in these directories,
-            // so we opt to use Parallel.ForEach for performance.
-            _ = Parallel.ForEach(dlls, async dll =>
-            {
-                LoadedAssembly loadedAssembly = new(
-                    dll,
-                    File.GetLastWriteTimeUtc(dll).ToString());
-
-                int index = RotationHelper.LoadedCustomRotations.FindIndex(item => item.LastModified == loadedAssembly.LastModified);
-
-                if (index == -1)
-                {
-                    await GetAllCustomRotationsAsync(DownloadOption.Local);
-                }
-            });
-        }
-
-        LastRunTime = DateTime.Now;
     }
 
     public static Type[] TryGetTypes(Assembly assembly)
@@ -637,12 +363,12 @@ internal static class RotationUpdater
             return [];
         }
 
-        if (!CustomRotationsLookup.TryGetValue(playerJob, out Dictionary<CombatType, List<ICustomRotation>>? validCustomRotations))
+        if (!CustomRotationsLookup.TryGetValue(playerJob, out _))
         {
             InitReferenceDict(playerJob);
         }
 
-        if (CustomRotationsLookup.TryGetValue(playerJob, out validCustomRotations))
+        if (CustomRotationsLookup.TryGetValue(playerJob, out Dictionary<CombatType, List<ICustomRotation>>? validCustomRotations))
         {
             if (validCustomRotations.Count == 0)
             {

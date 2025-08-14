@@ -1,5 +1,8 @@
-﻿using ECommons.GameFunctions;
+﻿using ECommons.DalamudServices;
+using ECommons.GameFunctions;
 using ECommons.Logging;
+using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Object;
 
 namespace RotationSolver.Basic.Helpers
 {
@@ -18,104 +21,127 @@ namespace RotationSolver.Basic.Helpers
         /// </returns>
         public static List<IBattleChara> GetTargetsByRange(float range, bool? getFriendly = null)
         {
-            if (DataCenter.AllTargets == null)
-            {
-                return [];
-            }
+            if (DataCenter.AllTargets == null) return [];
 
             List<IBattleChara> targets = [];
             float searchRange = range;
+
+            // Build a non-colliding cache key without mutating input range
+            float groupBias = getFriendly == true ? 1000f : getFriendly == false ? 2000f : 0f;
+            float cacheKey = MathF.Round(searchRange, 0) + groupBias;
+
+            if (DataCenter.TargetsByRange.TryGetValue(cacheKey, out List<IBattleChara>? cachedTargets))
+            {
+                return cachedTargets;
+            }
+
+            var blacklisted = new HashSet<uint>(DataCenter.BlacklistedNameIds);
+            var stopTargets = Service.Config.FilterStopMark
+                ? [.. MarkingHelper.GetStopTargets()]
+                : new HashSet<long>();
+
             if (getFriendly == true)
             {
-                range += 1000; // Store party with flag 1000
+                foreach (IBattleChara target in DataCenter.PartyMembers.GetObjectInRadius(searchRange))
+                {
+                    if (!ValidityCheck(target, blacklisted, stopTargets)) continue;
+                    targets.Add(target);
+                }
             }
             else if (getFriendly == false)
             {
-                range += 2000; // Store hostiles with flag 2000
-            }
-
-            if (DataCenter.TargetsByRange.TryGetValue(float.Round(range, 0), out List<IBattleChara>? cachedTargets))
-            {
-                targets = cachedTargets;
+                foreach (IBattleChara target in DataCenter.AllHostileTargets.GetObjectInRadius(searchRange))
+                {
+                    if (!ValidityCheck(target, blacklisted, stopTargets)) continue;
+                    targets.Add(target);
+                }
             }
             else
             {
-                if (getFriendly == true)
+                foreach (IBattleChara target in DataCenter.AllTargets.GetObjectInRadius(searchRange))
                 {
-                    foreach (IBattleChara target in DataCenter.PartyMembers.GetObjectInRadius(searchRange))
-                    {
-                        if (!ValidityCheck(target))
-                        {
-                            continue;
-                        }
-
-                        targets.Add(target);
-                    }
+                    if (!ValidityCheck(target, blacklisted, stopTargets)) continue;
+                    targets.Add(target);
                 }
-                else if (getFriendly == false)
-                {
-                    foreach (IBattleChara target in DataCenter.AllHostileTargets.GetObjectInRadius(searchRange))
-                    {
-                        if (!ValidityCheck(target))
-                        {
-                            continue;
-                        }
-
-                        targets.Add(target);
-                    }
-                }
-                else
-                {
-                    foreach (IBattleChara target in DataCenter.AllTargets.GetObjectInRadius(searchRange))
-                    {
-                        if (!ValidityCheck(target))
-                        {
-                            continue;
-                        }
-
-                        targets.Add(target);
-                    }
-                }
-
-                DataCenter.TargetsByRange[float.Round(range, 0)] = targets;
             }
 
+            DataCenter.TargetsByRange[cacheKey] = targets;
             return targets;
+        }
+
+        /// <summary>
+        /// Retrieves targets for an action considering both cast range and effect range.
+        /// If castRange is 0 (self-centered AoE), effectRange is used to gather candidates.
+        /// </summary>
+        public static List<IBattleChara> GetTargetsByCastAndEffect(float castRange, float effectRange, bool? getFriendly = null)
+        {
+            float searchRange = castRange > 0 ? castRange : MathF.Max(effectRange, 0);
+            return GetTargetsByRange(searchRange, getFriendly);
+        }
+
+        /// <summary>
+        /// Get targets currently usable by a specific action (defers to ActionManager)
+        /// </summary>
+        public static unsafe List<IBattleChara> GetTargetsUsableByAction(float range, uint actionId, bool? getFriendly = null, bool checkRangeAndLoS = true)
+        {
+            var candidates = GetTargetsByRange(range, getFriendly);
+            if (candidates.Count == 0) return candidates;
+
+            List<IBattleChara> usable = [];
+            foreach (var t in candidates)
+            {
+                if (IsUsableByAction(t, actionId, checkRangeAndLoS))
+                {
+                    usable.Add(t);
+                }
+            }
+            return usable;
+        }
+
+        /// <summary>
+        /// Get targets currently usable by a specific action, considering both cast range and effect range.
+        /// Uses effectRange when castRange is 0 (self-centered AoE).
+        /// </summary>
+        public static unsafe List<IBattleChara> GetTargetsUsableByAction(float castRange, float effectRange, uint actionId, bool? getFriendly = null, bool checkRangeAndLoS = true)
+        {
+            float searchRange = castRange > 0 ? castRange : MathF.Max(effectRange, 0);
+            var candidates = GetTargetsByRange(searchRange, getFriendly);
+            if (candidates.Count == 0) return candidates;
+
+            List<IBattleChara> usable = [];
+            foreach (var t in candidates)
+            {
+                if (IsUsableByAction(t, actionId, checkRangeAndLoS))
+                {
+                    usable.Add(t);
+                }
+            }
+            return usable;
         }
 
         /// <summary>
         /// Performs a general check on the specified battle character to determine if it meets the criteria for targeting.
         /// </summary>
         /// <param name="battleChara">The battle character to check.</param>
+        /// <param name="blacklisted"></param>
+        /// <param name="stopTargets"></param>
         /// <returns>
         /// <c>true</c> if the battle character meets the criteria for targeting; otherwise, <c>false</c>.
         /// </returns>
-        private static bool ValidityCheck(IBattleChara battleChara)
+        private static bool ValidityCheck(IBattleChara battleChara, HashSet<uint> blacklisted, HashSet<long> stopTargets)
         {
-            if (battleChara == null)
-            {
-                return false;
-            }
+            if (battleChara == null) return false;
 
             unsafe
             {
-                if (battleChara.Struct() == null)
-                {
-                    return false;
-                }
+                if (battleChara.Struct() == null) return false;
             }
 
-            if (!battleChara.IsTargetable)
-            {
-                return false;
-            }
+            if (!battleChara.IsTargetable) return false;
 
             try
             {
-                if (battleChara.StatusList == null)
-                {
-                    return false;
-                }
+                if (battleChara.StatusList == null) return false;
             }
             catch (Exception ex)
             {
@@ -123,35 +149,43 @@ namespace RotationSolver.Basic.Helpers
                 return false;
             }
 
-            bool isBlacklisted = false;
-            foreach (uint id in DataCenter.BlacklistedNameIds)
-            {
-                if (id == battleChara.NameId)
-                {
-                    isBlacklisted = true;
-                    break;
-                }
-            }
-            if (isBlacklisted)
-            {
+            if (blacklisted.Contains(battleChara.NameId)) return false;
+
+            if (battleChara.IsEnemy() && !battleChara.IsAttackable()) return false;
+
+            // Respect stop marks only when configured
+            if (Service.Config.FilterStopMark && stopTargets.Contains((long)battleChara.GameObjectId))
                 return false;
+
+            return true;
+        }
+
+        private static unsafe bool IsUsableByAction(IBattleChara target, uint actionId, bool checkRangeAndLoS)
+        {
+            if (target == null) return false;
+
+            var am = ActionManager.Instance();
+            if (am == null) return false;
+
+            uint adjusted = am->GetAdjustedActionId(actionId);
+
+            if (!am->IsActionOffCooldown(ActionType.Action, adjusted))
+                return false;
+
+            var go = (GameObject*)target.Struct();
+            if (go == null) return false;
+
+            if (checkRangeAndLoS)
+            {
+                var player = Svc.ClientState.LocalPlayer;
+                if (player == null) return false;
+                var playerPtr = (GameObject*)player.Address;
+                var err = ActionManager.GetActionInRangeOrLoS(adjusted, playerPtr, go);
+                if (err != 0 && err != 565)
+                    return false;
             }
 
-            if (battleChara.IsEnemy() && !battleChara.IsAttackable())
-            {
-                return false;
-            }
-
-            bool isStopTarget = false;
-            foreach (long stopId in MarkingHelper.GetStopTargets())
-            {
-                if (stopId == (long)battleChara.GameObjectId)
-                {
-                    isStopTarget = true;
-                    break;
-                }
-            }
-            return !isStopTarget || !Service.Config.FilterStopMark;
+            return ActionManager.CanUseActionOnTarget(adjusted, go);
         }
     }
 }

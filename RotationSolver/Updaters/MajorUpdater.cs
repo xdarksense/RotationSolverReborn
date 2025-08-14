@@ -13,6 +13,7 @@ namespace RotationSolver.Updaters;
 internal static class MajorUpdater
 {
     private static TimeSpan _timeSinceUpdate = TimeSpan.Zero;
+    private static bool _rotationsLoaded = false;
 
     public static bool IsValid
     {
@@ -42,7 +43,23 @@ internal static class MajorUpdater
     {
         ActionSequencerUpdater.Enable(Svc.PluginInterface.ConfigDirectory.FullName + "\\Conditions");
         Svc.Framework.Update += RSRUpdate;
+
+        // Load rotations on enable
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await RotationUpdater.GetAllCustomRotationsAsync();
+                _rotationsLoaded = true;
+                PluginLog.Information("Rotations loaded successfully on plugin enable");
+            }
+            catch (Exception ex)
+            {
+                PluginLog.Error($"Failed to load rotations on enable: {ex.Message}");
+            }
+        });
     }
+
     private static void RSRUpdate(IFramework framework)
     {
         _timeSinceUpdate += framework.UpdateDelta;
@@ -53,6 +70,23 @@ internal static class MajorUpdater
         else
         {
             _timeSinceUpdate = TimeSpan.Zero;
+        }
+
+        // Load rotations if not already loaded and conditions are met
+        if (!_rotationsLoaded && IsValid)
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await RotationUpdater.GetAllCustomRotationsAsync();
+                    PluginLog.Information("Rotations loaded successfully");
+                }
+                catch (Exception ex)
+                {
+                    PluginLog.Error($"Failed to load rotations: {ex.Message}");
+                }
+            });
         }
 
         if (Service.Config.TeachingMode)
@@ -176,7 +210,7 @@ internal static class MajorUpdater
             ActionUpdater.UpdateCombatInfo();
             
             // Update timing tweaks
-            RotationSolver.Basic.Helpers.ActionManagerEx.Instance.UpdateTweaks();
+            ActionManagerEx.Instance.UpdateTweaks();
 
             // Update displaying the additional UI windows
             RotationSolverPlugin.UpdateDisplayWindow();
@@ -205,12 +239,6 @@ internal static class MajorUpdater
             if (DataCenter.VfxDataQueue.Count > 0)
             {
                 _ = DataCenter.VfxDataQueue.RemoveAll(vfx => vfx.TimeDuration > TimeSpan.FromSeconds(6));
-            }
-
-            // Check local rotation files
-            if (Service.Config.AutoReloadRotations)
-            {
-                RotationUpdater.LocalRotationWatcher();
             }
 
             // Change loaded rotation based on job

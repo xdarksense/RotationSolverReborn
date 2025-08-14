@@ -210,7 +210,7 @@ public sealed class RotationSolverPlugin : IDalamudPlugin, IDisposable
         _ = Task.Run(async () =>
         {
             await DownloadHelper.DownloadAsync();
-            await RotationUpdater.GetAllCustomRotationsAsync(DownloadOption.MustDownload | DownloadOption.ShowList);
+            await RotationUpdater.GetAllCustomRotationsAsync();
         });
     }
 

@@ -782,10 +782,6 @@ public partial class RotationConfigWindow : Window
                         DrawActions();
                         break;
 
-                    case RotationConfigWindowTab.Rotations:
-                        DrawRotations();
-                        break;
-
                     case RotationConfigWindowTab.List:
                         DrawList();
                         break;
@@ -2398,67 +2394,6 @@ public partial class RotationConfigWindow : Window
     #endregion
 
     #region Rotations
-    private static void DrawRotations()
-    {
-        float width = ImGui.GetWindowWidth();
-
-        ImGui.PushFont(FontManager.GetFont(ImGui.GetFontSize() + 5));
-        string text = UiString.ConfigWindow_Rotations_Warning.GetDescription();
-        float textWidth = ImGuiHelpers.GetButtonSize(text).X;
-        ImGuiHelper.DrawItemMiddle(() =>
-        {
-            ImGui.TextColored(ImGuiColors.DalamudYellow, text);
-        }, width, textWidth);
-        text = UiString.ConfigWindow_Rotations_Warning2.GetDescription();
-        textWidth = ImGuiHelpers.GetButtonSize(text).X;
-        ImGuiHelper.DrawItemMiddle(() =>
-        {
-            ImGui.TextColored(ImGuiColors.DalamudYellow, text);
-        }, width, textWidth);
-        ImGui.PopFont();
-
-        ImGui.Separator();
-        DrawRotationsSettings();
-
-        ImGui.Separator();
-        text = UiString.ConfigWindow_Rotations_Download.GetDescription();
-        textWidth = ImGuiHelpers.GetButtonSize(text).X;
-        ImGuiHelper.DrawItemMiddle(() =>
-        {
-            if (ImGui.Button(text))
-            {
-                _ = Task.Run(async () =>
-                {
-                    await RotationUpdater.GetAllCustomRotationsAsync(DownloadOption.MustDownload | DownloadOption.ShowList);
-                });
-            }
-        }, width, textWidth);
-        text = UiString.ConfigWindow_Rotations_Reset.GetDescription();
-        textWidth = ImGuiHelpers.GetButtonSize(text).X;
-        ImGuiHelper.DrawItemMiddle(() =>
-        {
-            if (ImGui.Button(text))
-            {
-                _ = Task.Run(async () =>
-                {
-                    await RotationUpdater.ResetToDefaults();
-                    await RotationUpdater.GetAllCustomRotationsAsync(DownloadOption.MustDownload | DownloadOption.ShowList);
-                });
-            }
-        }, width, textWidth);
-        ImGui.PushFont(FontManager.GetFont(ImGui.GetFontSize() + 3));
-        ImGui.Text(UiString.ConfigWindow_Rotations_Sources.GetDescription());
-        ImGui.PopFont();
-        DrawRotationsLibraries();
-
-
-        _rotationsHeader?.Draw();
-    }
-    private static readonly CollapsingHeaderGroup _rotationsHeader = new(new()
-    {
-        { UiString.ConfigWindow_Rotations_Loaded.GetDescription, DrawRotationsLoaded},
-    });
-
     private static void DrawRotationsSettings()
     {
         _allSearchable.DrawItems(Configs.Rotations);
@@ -2695,49 +2630,6 @@ public partial class RotationConfigWindow : Window
             }
         }
         style.ItemSpacing = spacing;
-    }
-
-    private static void DrawRotationsLibraries()
-    {
-        bool hasEmpty = false;
-        for (int i = 0; i < Service.Config.RotationLibs.Length; i++)
-        {
-            if (string.IsNullOrEmpty(Service.Config.RotationLibs[i]))
-            {
-                hasEmpty = true;
-                break;
-            }
-        }
-        if (!hasEmpty)
-        {
-            var newLibs = new string[Service.Config.RotationLibs.Length + 1];
-            Array.Copy(Service.Config.RotationLibs, newLibs, Service.Config.RotationLibs.Length);
-            newLibs[^1] = string.Empty;
-            Service.Config.RotationLibs = newLibs;
-        }
-
-        ImGui.Spacing();
-
-        float width = ImGui.GetWindowWidth() - ImGuiEx.CalcIconSize(FontAwesomeIcon.Ban).X - ImGui.GetStyle().ItemSpacing.X - (10 * Scale);
-
-        int removeIndex = -1;
-        for (int i = 0; i < Service.Config.RotationLibs.Length; i++)
-        {
-            ImGui.SetNextItemWidth(width);
-            _ = ImGui.InputTextWithHint($"##Rotation Solver OtherLib{i}", UiString.ConfigWindow_Rotations_Library.GetDescription(), ref Service.Config.RotationLibs[i], 1024);
-            ImGui.SameLine();
-
-            if (ImGuiEx.IconButton(FontAwesomeIcon.Ban, $"##Rotation Solver Remove Rotation Library{i}"))
-            {
-                removeIndex = i;
-            }
-        }
-        if (removeIndex > -1)
-        {
-            List<string> list = [.. Service.Config.RotationLibs];
-            list.RemoveAt(removeIndex);
-            Service.Config.RotationLibs = [.. list];
-        }
     }
     #endregion 
 
