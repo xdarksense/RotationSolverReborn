@@ -22,6 +22,7 @@ jobs:
       - name: Get Environment Variables
         run: |
           $tag = "${{ github.ref }}" -replace 'refs/tags/', ''
+
           "tag=$tag" | Out-File -Append -FilePath $Env:GITHUB_ENV
           
       - name: Set up .NET
@@ -34,18 +35,14 @@ jobs:
           Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/latest.zip -OutFile latest.zip
           Expand-Archive -Force latest.zip -DestinationPath "$env:AppData\XIVLauncher\addon\Hooks\dev"
 
-      - name: Restore Dependencies
-        run: |
-          dotnet restore RotationSolver/RotationSolver.csproj
-          dotnet restore RotationSolver.Basic/RotationSolver.Basic.csproj
+      - name: Restore Nuget Packages for RSR
+        run: dotnet restore RotationSolver/RotationSolver.csproj
 
       - name: Build Plugin
-        run: |
-          dotnet build --no-restore -c Release RotationSolver/RotationSolver.csproj -p:AssemblyVersion=${{ env.tag }} -p:FileVersion=${{ env.tag }} -p:PackageVersion=${{ env.tag }} -p:InformationalVersion=${{ env.tag }} --output .\build
-          dotnet build --no-restore -c Release RotationSolver.Basic/RotationSolver.Basic.csproj --output .\build
+        run: dotnet build --no-restore -c Release RotationSolver/RotationSolver.csproj -p:AssemblyVersion=${{ env.tag }} -p:FileVersion=${{ env.tag }} -p:PackageVersion=${{ env.tag }} -p:InformationalVersion=${{ env.tag }} --output .\build
 
       - name: Zip Plugin
-        run: Compress-Archive -Path .\build\RotationSolver.dll,.\build\RotationSolver.Basic.dll -DestinationPath .\build\RotationSolver.zip
+        run: Compress-Archive -Path .\build\* -DestinationPath .\build\RotationSolver.zip
 
       - name: Publish Plugin
         uses: softprops/action-gh-release@v2
@@ -58,9 +55,9 @@ jobs:
           dotnet pack -c Release RotationSolver.DocumentationGenerator/RotationSolver.DocumentationGenerator.csproj
           dotnet tool restore --add-source RotationSolver.DocumentationGenerator/nupkg
       - name: Build Docs
-        run: dotnet tool run docgen build/RotationSolver.Basic.xml
+        run: dotnet tool run docgen build/RotationSolver.Basic.xml build/RebornRotations.xml
       - name: Publish Docs
-        uses: Andrew-Chen-Wang/github-wiki-action@v5
+        uses: Andrew-Chen-Wang/github-wiki-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           path: _doc/
