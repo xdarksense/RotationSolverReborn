@@ -6,7 +6,7 @@ namespace RotationSolver.ExtraRotations.Tank;
 [Rotation("ChurinDRK", CombatType.PvE, GameVersion = "7.3", Description = "Find it in your heart. You'll need to break past the ribs and then scoop it out, but it's in there, and you need to find it. Quickly.")]
 [SourceCode(Path = "main/ExtraRotations/Tank/ChurinDRK.cs")]
 [ExtraRotation]
-public sealed partial class ChurinDRK : DarkKnightRotation
+public sealed class ChurinDRK : DarkKnightRotation
 {
     #region Properties
     private static bool HasDisesteem => Player.HasStatus(true, StatusID.Scorn);
