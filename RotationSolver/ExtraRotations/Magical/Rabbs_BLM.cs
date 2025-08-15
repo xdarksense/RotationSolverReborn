@@ -1,51 +1,15 @@
-﻿using Dalamud.Game.ClientState.Objects;
-using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Utility.Signatures;
-using ECommons;
-using ExCSS;
-using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using FFXIVClientStructs.FFXIV.Client.Game.Gauge;
-using FFXIVClientStructs.FFXIV.Client.Game.Group;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
-using FFXIVClientStructs.FFXIV.Client.Game.UI;
-using Lumina.Excel;
-using Lumina.Excel.Sheets;
+﻿using Lumina.Excel.Sheets;
 using Lumina.Excel.Sheets.Experimental;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Rotations.Basic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Runtime.Intrinsics.Arm;
-using System.Runtime.Serialization;
-using static Dalamud.Interface.Utility.Raii.ImRaii;
-using static FFXIVClientStructs.FFXIV.Client.UI.Misc.DataCenterHelper;
-using FFXIVClientStructs.FFXIV.Client.System.Framework;
-using FFXIVClientStructs.FFXIV.Client.UI;
-using FFXIVClientStructs.FFXIV.Client.UI.Misc;
-using System;
-using System.Collections.Generic;
-using LuminaAction = Lumina.Excel.Sheets.Action;
-using Dalamud.Game;
-using Dalamud.Interface.Windowing;
-using Dalamud.IoC;
-using Dalamud.Plugin;
-using Dalamud.Plugin.Services;
-using System.Collections.Concurrent;
 using ActionSetting = RotationSolver.Basic.Actions.ActionSetting;
 
-
-
-
-namespace RabbsRotationsNET8.Magical;
+namespace RotationSolver.ExtraRotations.Magical;
 [Rotation("Rabbs Black Mage", CombatType.PvE, GameVersion = "7.3")]
-[SourceCode(Path = "main/RebornRotations/Magical/Rabbs_BLM.cs")]
+[SourceCode(Path = "main/ExtraRotations/Magical/Rabbs_BLM.cs")]
 [ExtraRotation]
 
-public sealed class BLM_Gamma : BlackMageRotation
+public sealed class Rabbs_BLM : BlackMageRotation
 {
     #region Config Options
 
