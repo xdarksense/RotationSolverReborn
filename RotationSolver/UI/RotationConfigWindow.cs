@@ -872,6 +872,12 @@ public partial class RotationConfigWindow : Window
                 continue;
             }
 
+            // Check parent-child visibility logic
+            if (!ShouldShowRotationConfig(config, set))
+            {
+                continue;
+            }
+
             string key = rotation.GetType().FullName ?? rotation.GetType().Name + "." + config.Name;
             string name = $"##{config.GetHashCode()}_{key}.Name";
             string command = ToCommandStr(OtherCommandType.DutyRotations, config.Name, config.DefaultValue);
@@ -1464,9 +1470,9 @@ public partial class RotationConfigWindow : Window
     private static readonly CollapsingHeaderGroup _rotationHeader = new(new()
     {
         { UiString.ConfigWindow_Rotation_Description.GetDescription, DrawRotationDescription },
-        
+
         { GetRotationStatusHead,  DrawRotationStatus },
-        
+
         { UiString.ConfigWindow_Rotation_Configuration.GetDescription, DrawRotationConfiguration },
     });
 
@@ -1607,6 +1613,72 @@ public partial class RotationConfigWindow : Window
         return result;
     }
 
+    /// <summary>
+    /// Checks if a rotation config should be visible based on parent-child relationships.
+    /// </summary>
+    /// <param name="config">The configuration to check.</param>
+    /// <param name="configSet">The set of all configurations.</param>
+    /// <returns>True if the config should be shown, false otherwise.</returns>
+    private static bool ShouldShowRotationConfig(IRotationConfig config, IRotationConfigSet configSet)
+    {
+        // If config has no parent, always show it
+        if (string.IsNullOrEmpty(config.Parent))
+        {
+            return true;
+        }
+
+        // Find the parent config by name
+        var parentConfig = configSet.Configs.FirstOrDefault(c => c.Name == config.Parent);
+        switch (parentConfig)
+        {
+            case null:
+                // Parent not found, show the config by default
+                return true;
+            // Check if parent is a boolean and is enabled
+            case RotationConfigBoolean parentBool:
+            {
+                if (!bool.TryParse(parentBool.Value, out var isEnabled) || !isEnabled)
+                {
+                    return false;
+                }
+                // If enabled, continue to other checks for ParentValue
+                break;
+            }
+            default:
+            {
+                // Check if this config has a ParentValue property
+                var parentValueProperty = config.GetType().GetProperty("ParentValue");
+                if (parentValueProperty != null)
+                {
+                    // Get the ParentValue from the config instance
+                    var parentValue = parentValueProperty.GetValue(config);
+                    if (parentValue != null)
+                    {
+                        var parentValueStr = parentValue.ToString();
+
+                        // Handle enums by getting just the enum value name if it's a qualified name
+                        if (parentValue.GetType().IsEnum)
+                        {
+                            // For enum values, extract just the enum value name if it's fully qualified
+                            if (parentValueStr != null && parentValueStr.Contains('.'))
+                            {
+                                parentValueStr = parentValueStr.Split('.').Last();
+                            }
+                        }
+
+                        // Compare the parent's current value with the expected parent value
+                        // Both values need to be trimmed and compared case-insensitive
+                        return parentConfig.Value != null &&
+                               parentConfig.Value.Trim().Equals(parentValueStr?.Trim(), StringComparison.OrdinalIgnoreCase);
+                    }
+                }
+                break;
+            }
+        }
+        // If we got here and there's no ParentValue check, the config should be shown
+        return true;
+    }
+
     private static void DrawRotationConfiguration()
     {
         ICustomRotation? rotation = DataCenter.CurrentRotation;
@@ -1652,6 +1724,12 @@ public partial class RotationConfigWindow : Window
                 {
                     continue;
                 }
+            }
+
+            // Check parent-child visibility logic
+            if (!ShouldShowRotationConfig(config, set))
+            {
+                continue;
             }
 
             string key = rotation.GetType().FullName ?? rotation.GetType().Name + "." + config.Name;
@@ -1866,59 +1944,53 @@ public partial class RotationConfigWindow : Window
         if (Player.AvailableThreadSafe && DataCenter.PartyMembers != null && Player.Object.IsJobs(Job.AST))
         {
             ImGui.Spacing();
+            ImGui.Text("Spear Card Priority");
+            ImGui.Spacing();
+            //var currentTheSpearPriority = ActionTargetInfo.FindTargetByType(DataCenter.PartyMembers, TargetType.TheSpear, 0, SpecialActionType.None);
+            //ImGui.Text($"Current Target: {currentTheSpearPriority?.Name ?? "None"}");
+            //ImGui.Spacing();
 
-            if (ImGui.BeginTable("PriorityTable", 2, ImGuiTableFlags.SizingStretchProp))
+            if (ImGui.Button("Reset to Default##Spear"))
             {
-                // The Spear Priority Column
-                _ = ImGui.TableNextColumn();
-                ImGui.Spacing();
-                ImGui.Text("Spear Card Priority");
-                ImGui.Spacing();
-                //var currentTheSpearPriority = ActionTargetInfo.FindTargetByType(DataCenter.PartyMembers, TargetType.TheSpear, 0, SpecialActionType.None);
-                //ImGui.Text($"Current Target: {currentTheSpearPriority?.Name ?? "None"}");
-                //ImGui.Spacing();
+                OtherConfiguration.ResetTheSpearPriority();
+            }
+            ImGui.Spacing();
 
-                if (ImGui.Button("Reset to Default##Spear"))
+            List<Job> spearPriority = [.. OtherConfiguration.TheSpearPriority];
+            bool spearOrderChanged = false;
+
+            _ = ImGui.BeginChild("TheSpearPriorityList", new Vector2(0, 200 * Scale), true);
+
+            for (int i = 0; i < spearPriority.Count; i++)
+            {
+                Job job = spearPriority[i];
+                string jobName = job.ToString();
+
+                if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowUp, $"##UpSpear{i}") && i > 0)
                 {
-                    OtherConfiguration.ResetTheSpearPriority();
-                }
-                ImGui.Spacing();
-
-                List<Job> spearPriority = [.. OtherConfiguration.TheSpearPriority];
-                bool spearOrderChanged = false;
-
-                _ = ImGui.BeginChild("TheSpearPriorityList", new Vector2(0, 200 * Scale), true);
-
-                for (int i = 0; i < spearPriority.Count; i++)
-                {
-                    Job job = spearPriority[i];
-                    string jobName = job.ToString();
-
-                    if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowUp, $"##UpSpear{i}") && i > 0)
-                    {
-                        (spearPriority[i], spearPriority[i - 1]) = (spearPriority[i - 1], spearPriority[i]);
-                        spearOrderChanged = true;
-                    }
-
-                    ImGui.SameLine();
-
-                    if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowDown, $"##DownSpear{i}") && i < spearPriority.Count - 1)
-                    {
-                        (spearPriority[i], spearPriority[i + 1]) = (spearPriority[i + 1], spearPriority[i]);
-                        spearOrderChanged = true;
-                    }
-
-                    ImGui.SameLine();
-                    ImGui.Text(jobName);
+                    (spearPriority[i], spearPriority[i - 1]) = (spearPriority[i - 1], spearPriority[i]);
+                    spearOrderChanged = true;
                 }
 
-                ImGui.EndChild();
+                ImGui.SameLine();
 
-                if (spearOrderChanged)
+                if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowDown, $"##DownSpear{i}") && i < spearPriority.Count - 1)
                 {
-                    OtherConfiguration.TheSpearPriority = spearPriority;
-                    _ = OtherConfiguration.SaveTheSpearPriority();
+                    (spearPriority[i], spearPriority[i + 1]) = (spearPriority[i + 1], spearPriority[i]);
+                    spearOrderChanged = true;
                 }
+
+                ImGui.SameLine();
+                ImGui.Text(jobName);
+            }
+
+            ImGui.EndChild();
+
+            if (spearOrderChanged)
+            {
+                OtherConfiguration.TheSpearPriority = spearPriority;
+                _ = OtherConfiguration.SaveTheSpearPriority();
+            }
 
                 // The Balance Priority Column
                 _ = ImGui.TableNextColumn();
@@ -1938,41 +2010,40 @@ public partial class RotationConfigWindow : Window
                 List<Job> balancePriority = [.. OtherConfiguration.TheBalancePriority];
                 bool balanceOrderChanged = false;
 
-                _ = ImGui.BeginChild("TheBalancePriorityList", new Vector2(0, 200 * Scale), true);
+            _ = ImGui.BeginChild("TheBalancePriorityList", new Vector2(0, 200 * Scale), true);
 
-                for (int i = 0; i < balancePriority.Count; i++)
+            for (int i = 0; i < balancePriority.Count; i++)
+            {
+                Job job = balancePriority[i];
+                string jobName = job.ToString();
+
+                if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowUp, $"##UpBalance{i}") && i > 0)
                 {
-                    Job job = balancePriority[i];
-                    string jobName = job.ToString();
-
-                    if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowUp, $"##UpBalance{i}") && i > 0)
-                    {
-                        (balancePriority[i], balancePriority[i - 1]) = (balancePriority[i - 1], balancePriority[i]);
-                        balanceOrderChanged = true;
-                    }
-
-                    ImGui.SameLine();
-
-                    if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowDown, $"##DownBalance{i}") && i < balancePriority.Count - 1)
-                    {
-                        (balancePriority[i], balancePriority[i + 1]) = (balancePriority[i + 1], balancePriority[i]);
-                        balanceOrderChanged = true;
-                    }
-
-                    ImGui.SameLine();
-                    ImGui.Text(jobName);
+                    (balancePriority[i], balancePriority[i - 1]) = (balancePriority[i - 1], balancePriority[i]);
+                    balanceOrderChanged = true;
                 }
 
-                ImGui.EndChild();
+                ImGui.SameLine();
 
-                if (balanceOrderChanged)
+                if (ImGuiEx.IconButton(FontAwesomeIcon.ArrowDown, $"##DownBalance{i}") && i < balancePriority.Count - 1)
                 {
-                    OtherConfiguration.TheBalancePriority = balancePriority;
-                    _ = OtherConfiguration.SaveTheBalancePriority();
+                    (balancePriority[i], balancePriority[i + 1]) = (balancePriority[i + 1], balancePriority[i]);
+                    balanceOrderChanged = true;
                 }
 
-                ImGui.EndTable();
+                ImGui.SameLine();
+                ImGui.Text(jobName);
             }
+
+            ImGui.EndChild();
+
+            if (balanceOrderChanged)
+            {
+                OtherConfiguration.TheBalancePriority = balancePriority;
+                _ = OtherConfiguration.SaveTheBalancePriority();
+            }
+
+            ImGui.EndTable();
         }
     }
     #endregion
@@ -2161,7 +2232,7 @@ public partial class RotationConfigWindow : Window
                         ImGui.TextColored(ImGuiColors.DalamudRed, "Target is not a valid BattleChara.");
                         return;
                     }
-                    ImGui.Text($"Can Use: {action.CanUse(out _)} ");
+                    ImGui.Text("Can Use: " + action.CanUse(out _));
                     ImGui.Spacing();
                     ImGui.Text("ID: " + action.Info.ID);
                     ImGui.Text("AdjustedID: " + Service.GetAdjustedActionId(action.Info.ID));
