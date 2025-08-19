@@ -159,14 +159,19 @@ internal partial class Configs : IPluginConfiguration
     private static readonly bool _useKnockback = true;
 
     [ConditionBool, UI("Automatically use HP Potions",
-    Description = "Enable to allow the plugin to use HP potions automatically. (Experimental feature)",
+    Description = "Enable to allow the plugin to use HP potions automatically.",
     Filter = AutoActionUsage)]
     private static readonly bool _useHpPotions = false;
 
     [ConditionBool, UI("Automatically use MP Potions",
-    Description = "Enable to allow the plugin to use MP potions automatically. (Experimental feature)",
+    Description = "Enable to allow the plugin to use MP potions automatically.",
     Filter = AutoActionUsage)]
     private static readonly bool _useMpPotions = false;
+
+    [ConditionBool, UI("Automatically use Phoenix Down",
+    Description = "Enable to allow the plugin to use Phoenix Down item. (Experimental feature)",
+    Filter = AutoActionUsage)]
+    private static readonly bool _usePhoenixDown = false;
 
     [ConditionBool, UI("Allow the use of AOEs against priority-marked targets.",
     Description = "Enable to allow AoE actions to hit targets with priority markers.",

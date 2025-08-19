@@ -169,13 +169,19 @@ internal static class DataCenter
 
         NextActs.Sort((a, b) => a.DeadTime.CompareTo(b.DeadTime));
     }
-
     public static TargetHostileType CurrentTargetToHostileType => Service.Config.HostileType;
+
+    public static TargetingType? TargetingTypeOverride { get; set; }
 
     public static TargetingType TargetingType
     {
         get
         {
+            if (TargetingTypeOverride.HasValue)
+            {
+                return TargetingTypeOverride.Value;
+            }
+
             if (Service.Config.TargetingTypes.Count == 0)
             {
                 Service.Config.TargetingTypes.Add(TargetingType.LowHP);
@@ -493,11 +499,17 @@ internal static class DataCenter
     #region Job Info
     public static Job Job => Player.Job;
 
+    private static readonly BaseItem PhoenixDownItem = new(4570);
     public static bool CanRaise()
     {
         if (IsPvP)
         {
             return false;
+        }
+
+        if (Service.Config.UsePhoenixDown && PhoenixDownItem.HasIt)
+        {
+            return true;
         }
 
         if ((Role == JobRole.Healer || Job == Job.SMN) && Player.Level >= 12)
