@@ -249,7 +249,8 @@ public partial class AstrologianRotation
 
     static partial void ModifyAspectedBeneficPvE(ref ActionSetting setting)
     {
-        setting.StatusProvide = [StatusID.AspectedBenefic];
+        setting.TargetStatusProvide = [StatusID.AspectedBenefic];
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyAspectedHeliosPvE(ref ActionSetting setting)
@@ -259,7 +260,7 @@ public partial class AstrologianRotation
         setting.IsFriendly = true;
         setting.CreateConfig = () => new ActionConfig()
         {
-            AoeCount = 1,
+            AoeCount = 2,
         };
     }
 

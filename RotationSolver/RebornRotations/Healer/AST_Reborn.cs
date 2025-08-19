@@ -139,7 +139,7 @@ public sealed class AST_Reborn : AstrologianRotation
 
         if (nextGCD.IsTheSameTo(false, HeliosConjunctionPvE, HeliosPvE))
         {
-            if (HoroscopePvE.CanUse(out act))
+            if (PartyMembersAverHP < HoroscopeHeal && HoroscopePvE.CanUse(out act))
             {
                 return true;
             }
@@ -307,12 +307,12 @@ public sealed class AST_Reborn : AstrologianRotation
             return true;
         }
 
-        if (HoroscopePvE_16558.CanUse(out act))
+        if (PartyMembersAverHP < HoroscopeHeal && HoroscopePvE_16558.CanUse(out act))
         {
             return true;
         }
 
-        if (HoroscopePvE.CanUse(out act))
+        if (PartyMembersAverHP < HoroscopeHeal && HoroscopePvE.CanUse(out act))
         {
             return true;
         }
