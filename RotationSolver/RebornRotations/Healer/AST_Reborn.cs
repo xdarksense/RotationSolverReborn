@@ -42,7 +42,7 @@ public sealed class AST_Reborn : AstrologianRotation
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Synastry")]
-    public float SynastryHeal { get; set; } = 0.2f;
+    public float SynastryHeal { get; set; } = 0.5f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold among party member needed to use Horoscope")]
@@ -534,16 +534,26 @@ public sealed class AST_Reborn : AstrologianRotation
              EssentialDignityPvE.Cooldown.CurrentCharges == EssentialDignityPvE.Cooldown.MaxCharges);
 
         // Custom Logic to ensure Benefic is used if the target has Synastry and the player is not moving (or has lightspeed)
-        if (shouldUseEssentialDignity && (HasLightspeed || !IsMoving))
+        if (shouldUseEssentialDignity)
         {
-            if (BeneficIiPvE.CanUse(out act) && HasOrCanHaveSynastryStatus(BeneficIiPvE, SynastryPvE, SynastryHeal))
+            if (HasLightspeed || !IsMoving)
             {
-                return true;
-            }
+                if (BeneficIiPvE.CanUse(out act) && HasOrCanHaveSynastryStatus(BeneficIiPvE, SynastryPvE, SynastryHeal))
+                {
+                    return true;
+                }
 
-            if (BeneficPvE.CanUse(out act) && HasOrCanHaveSynastryStatus(BeneficPvE, SynastryPvE, SynastryHeal))
+                if (BeneficPvE.CanUse(out act) && HasOrCanHaveSynastryStatus(BeneficPvE, SynastryPvE, SynastryHeal))
+                {
+                    return true;
+                }
+            }
+            else
             {
-                return true;
+                if (AspectedBeneficPvE.CanUse(out act) && HasOrCanHaveSynastryStatus(AspectedBeneficPvE, SynastryPvE, SynastryHeal))
+                {
+                    return true;
+                }
             }
         }
 
@@ -573,7 +583,7 @@ public sealed class AST_Reborn : AstrologianRotation
         // Local function defining whether the target has synastry, or if synastry can be used on the target.
         static bool HasOrCanHaveSynastryStatus(IBaseAction action, IBaseAction synastry, float synastryHeal) =>
             action.Target.Target?.HasStatus(true, StatusID.Synastry_846) == true ||
-            (synastry.CanUse(out _) && synastry.Target.Target?.GetHealthRatio() < synastryHeal);
+            (synastry.CanUse(out _) && synastry.Target.Target?.GetHealthRatio() < synastryHeal && synastry.Target.Target == action.Target.Target);
     }
 
     [RotationDesc(ActionID.AspectedHeliosPvE, ActionID.HeliosPvE, ActionID.HeliosConjunctionPvE)]
