@@ -2312,6 +2312,9 @@ public partial class RotationConfigWindow : Window
                         ImGui.Text("Status HQ: " + ActionManager.Instance()->GetActionStatus(ActionType.Item, item.ID + 1000000).ToString());
                         float remain = ActionManager.Instance()->GetRecastTime(ActionType.Item, item.ID) - ActionManager.Instance()->GetRecastTimeElapsed(ActionType.Item, item.ID);
                         ImGui.Text("remain: " + remain.ToString());
+                        ImGui.Text("ID: " + item.ID.ToString());
+                        ImGui.Text("A4: " + item.A4.ToString());
+                        ImGui.Text("AdjustedID: " + item.AdjustedID.ToString());
                     }
 
                     ImGui.Text("CanUse: " + item.CanUse(out _, true).ToString());
@@ -3657,6 +3660,11 @@ public partial class RotationConfigWindow : Window
         {
             IPCProvider ipcProvider = new();
             ipcProvider.ActionCommand("Magick Barrier", 7);
+        }
+        if (ImGui.Button("Test AutodutyChangeOperatingMode IPC (AutoDuty, HighHPPercent)"))
+        {
+            IPCProvider ipcProvider = new();
+            ipcProvider.AutodutyChangeOperatingMode(StateCommandType.AutoDuty, TargetingType.HighHPPercent);
         }
     }
 
