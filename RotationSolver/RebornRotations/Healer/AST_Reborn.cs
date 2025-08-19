@@ -41,6 +41,10 @@ public sealed class AST_Reborn : AstrologianRotation
     public float AspectedBeneficHeal { get; set; } = 0.4f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Synastry")]
+    public float SynastryHeal { get; set; } = 0.5f;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold among party member needed to use Horoscope")]
     public float HoroscopeHeal { get; set; } = 0.3f;
 
@@ -147,7 +151,7 @@ public sealed class AST_Reborn : AstrologianRotation
 
         if (nextGCD.IsTheSameTo(true, BeneficPvE, BeneficIiPvE, AspectedBeneficPvE))
         {
-            if (SynastryPvE.CanUse(out act))
+            if (SynastryPvE.CanUse(out act) && SynastryPvE.Target.Target?.GetHealthRatio() < SynastryHeal)
             {
                 return true;
             }
@@ -523,12 +527,38 @@ public sealed class AST_Reborn : AstrologianRotation
             return false;
         }
 
-        if (EssentialPrio2 == EssentialPrioStrategy.AnyCharges && EssentialDignityPvE.EnoughLevel && EssentialDignityPvE.Cooldown.CurrentCharges > 0)
+        var shouldUseEssentialDignity =
+            (EssentialPrio2 == EssentialPrioStrategy.AnyCharges && EssentialDignityPvE.EnoughLevel &&
+             EssentialDignityPvE.Cooldown.CurrentCharges > 0) ||
+            (EssentialPrio2 == EssentialPrioStrategy.CappedCharges && EssentialDignityPvE.EnoughLevel &&
+             EssentialDignityPvE.Cooldown.CurrentCharges == EssentialDignityPvE.Cooldown.MaxCharges);
+
+        // Custom Logic to ensure Benefic is used if the target has Synastry and the player is not moving (or has lightspeed)
+        if (shouldUseEssentialDignity)
         {
-            return false;
+            if (HasLightspeed || !IsMoving)
+            {
+                if (BeneficIiPvE.CanUse(out act) && HasOrCanHaveSynastryStatus(BeneficIiPvE, SynastryPvE, SynastryHeal))
+                {
+                    return true;
+                }
+
+                if (BeneficPvE.CanUse(out act) && HasOrCanHaveSynastryStatus(BeneficPvE, SynastryPvE, SynastryHeal))
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                if (AspectedBeneficPvE.CanUse(out act) && HasOrCanHaveSynastryStatus(AspectedBeneficPvE, SynastryPvE, SynastryHeal))
+                {
+                    return true;
+                }
+            }
         }
 
-        if (EssentialPrio2 == EssentialPrioStrategy.CappedCharges && EssentialDignityPvE.EnoughLevel && EssentialDignityPvE.Cooldown.CurrentCharges == EssentialDignityPvE.Cooldown.MaxCharges)
+
+        if (shouldUseEssentialDignity)
         {
             return false;
         }
@@ -549,6 +579,11 @@ public sealed class AST_Reborn : AstrologianRotation
         }
 
         return base.HealSingleGCD(out act);
+
+        // Local function defining whether the target has synastry, or if synastry can be used on the target.
+        static bool HasOrCanHaveSynastryStatus(IBaseAction action, IBaseAction synastry, float synastryHeal) =>
+            action.Target.Target?.HasStatus(true, StatusID.Synastry_846) == true ||
+            (synastry.CanUse(out _) && synastry.Target.Target?.GetHealthRatio() < synastryHeal && synastry.Target.Target == action.Target.Target);
     }
 
     [RotationDesc(ActionID.AspectedHeliosPvE, ActionID.HeliosPvE, ActionID.HeliosConjunctionPvE)]
