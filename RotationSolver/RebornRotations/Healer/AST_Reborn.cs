@@ -41,6 +41,10 @@ public sealed class AST_Reborn : AstrologianRotation
     public float AspectedBeneficHeal { get; set; } = 0.4f;
 
     [Range(0, 1, ConfigUnitType.Percent)]
+    [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold party member needs to be to use Synastry")]
+    public float SynastryHeal { get; set; } = 0.2f;
+
+    [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Minimum HP threshold among party member needed to use Horoscope")]
     public float HoroscopeHeal { get; set; } = 0.3f;
 
@@ -147,7 +151,7 @@ public sealed class AST_Reborn : AstrologianRotation
 
         if (nextGCD.IsTheSameTo(true, BeneficPvE, BeneficIiPvE, AspectedBeneficPvE))
         {
-            if (SynastryPvE.CanUse(out act))
+            if (SynastryPvE.Target.Target?.GetHealthRatio() < SynastryHeal && SynastryPvE.CanUse(out act))
             {
                 return true;
             }
@@ -523,12 +527,33 @@ public sealed class AST_Reborn : AstrologianRotation
             return false;
         }
 
-        if (EssentialPrio2 == EssentialPrioStrategy.AnyCharges && EssentialDignityPvE.EnoughLevel && EssentialDignityPvE.Cooldown.CurrentCharges > 0)
+        var shouldUseEssentialDignity = (EssentialPrio2 == EssentialPrioStrategy.AnyCharges &&
+                                         EssentialDignityPvE.EnoughLevel &&
+                                         EssentialDignityPvE.Cooldown.CurrentCharges > 0) ||
+                                        (EssentialPrio2 == EssentialPrioStrategy.CappedCharges &&
+                                         EssentialDignityPvE.EnoughLevel &&
+                                         EssentialDignityPvE.Cooldown.CurrentCharges ==
+                                         EssentialDignityPvE.Cooldown.MaxCharges);
+            
+        // Custom Logic to ensure Benefic is used if the target has Synastry and the player is not moving (or has lightspeed)
+        if ((BeneficIiPvE.Target.Target?.HasStatus(true, StatusID.Synastry_846) == true 
+             || BeneficPvE.Target.Target?.HasStatus(true, StatusID.Synastry_846) == true)
+            && shouldUseEssentialDignity
+            && (HasLightspeed || !IsMoving))
         {
-            return false;
+            if (BeneficIiPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (BeneficPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
-        if (EssentialPrio2 == EssentialPrioStrategy.CappedCharges && EssentialDignityPvE.EnoughLevel && EssentialDignityPvE.Cooldown.CurrentCharges == EssentialDignityPvE.Cooldown.MaxCharges)
+
+        if (shouldUseEssentialDignity)
         {
             return false;
         }
