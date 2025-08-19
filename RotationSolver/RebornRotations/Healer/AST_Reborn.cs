@@ -151,9 +151,29 @@ public sealed class AST_Reborn : AstrologianRotation
 
         if (nextGCD.IsTheSameTo(true, BeneficPvE, BeneficIiPvE, AspectedBeneficPvE))
         {
-            if (SynastryPvE.CanUse(out act) && SynastryPvE.Target.Target?.GetHealthRatio() < SynastryHeal)
+            if (SynastryPvE.CanUse(out act))
             {
-                return true;
+                if (BeneficPvE.CanUse(out _) && SynastryPvE.Target.Target == BeneficPvE.Target.Target)
+                {
+                    if (SynastryPvE.Target.Target.GetHealthRatio() < SynastryHeal)
+                    {
+                        return true;
+                    }
+                }
+                if (BeneficIiPvE.CanUse(out _) && SynastryPvE.Target.Target == BeneficIiPvE.Target.Target)
+                {
+                    if (SynastryPvE.Target.Target.GetHealthRatio() < SynastryHeal)
+                    {
+                        return true;
+                    }
+                }
+                if (AspectedBeneficPvE.CanUse(out _) && SynastryPvE.Target.Target == AspectedBeneficPvE.Target.Target)
+                {
+                    if (SynastryPvE.Target.Target.GetHealthRatio() < SynastryHeal)
+                    {
+                        return true;
+                    }
+                }
             }
         }
 
@@ -533,57 +553,39 @@ public sealed class AST_Reborn : AstrologianRotation
             (EssentialPrio2 == EssentialPrioStrategy.CappedCharges && EssentialDignityPvE.EnoughLevel &&
              EssentialDignityPvE.Cooldown.CurrentCharges == EssentialDignityPvE.Cooldown.MaxCharges);
 
-        // Custom Logic to ensure Benefic is used if the target has Synastry and the player is not moving (or has lightspeed)
         if (shouldUseEssentialDignity)
         {
-            if (HasLightspeed || !IsMoving)
-            {
-                if (BeneficIiPvE.CanUse(out act) && HasOrCanHaveSynastryStatus(BeneficIiPvE, SynastryPvE, SynastryHeal))
-                {
-                    return true;
-                }
-
-                if (BeneficPvE.CanUse(out act) && HasOrCanHaveSynastryStatus(BeneficPvE, SynastryPvE, SynastryHeal))
-                {
-                    return true;
-                }
-            }
-            else
-            {
-                if (AspectedBeneficPvE.CanUse(out act) && HasOrCanHaveSynastryStatus(AspectedBeneficPvE, SynastryPvE, SynastryHeal))
-                {
-                    return true;
-                }
-            }
-        }
-
-
-        if (shouldUseEssentialDignity)
-        {
-            return false;
+            return base.HealSingleGCD(out act);
         }
 
         if (AspectedBeneficPvE.CanUse(out act) && (IsMoving || AspectedBeneficPvE.Target.Target?.GetHealthRatio() < AspectedBeneficHeal))
         {
+            if (AspectedBeneficPvE.Target.Target.HasStatus(true, StatusID.Synastry_846))
+            {
+                return true;
+            }
             return true;
         }
 
         if (BeneficIiPvE.CanUse(out act))
         {
+            if (BeneficIiPvE.Target.Target.HasStatus(true, StatusID.Synastry_846))
+            {
+                return true;
+            }
             return true;
         }
 
         if (BeneficPvE.CanUse(out act))
         {
+            if (BeneficPvE.Target.Target.HasStatus(true, StatusID.Synastry_846))
+            {
+                return true;
+            }
             return true;
         }
 
         return base.HealSingleGCD(out act);
-
-        // Local function defining whether the target has synastry, or if synastry can be used on the target.
-        static bool HasOrCanHaveSynastryStatus(IBaseAction action, IBaseAction synastry, float synastryHeal) =>
-            action.Target.Target?.HasStatus(true, StatusID.Synastry_846) == true ||
-            (synastry.CanUse(out _) && synastry.Target.Target?.GetHealthRatio() < synastryHeal && synastry.Target.Target == action.Target.Target);
     }
 
     [RotationDesc(ActionID.AspectedHeliosPvE, ActionID.HeliosPvE, ActionID.HeliosConjunctionPvE)]
