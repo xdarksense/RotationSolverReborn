@@ -151,7 +151,7 @@ public sealed class AST_Reborn : AstrologianRotation
 
         if (nextGCD.IsTheSameTo(true, BeneficPvE, BeneficIiPvE, AspectedBeneficPvE))
         {
-            if (SynastryPvE.Target.Target?.GetHealthRatio() < SynastryHeal && SynastryPvE.CanUse(out act))
+            if (SynastryPvE.CanUse(out act) && SynastryPvE.Target.Target?.GetHealthRatio() < SynastryHeal)
             {
                 return true;
             }
@@ -527,26 +527,21 @@ public sealed class AST_Reborn : AstrologianRotation
             return false;
         }
 
-        var shouldUseEssentialDignity = (EssentialPrio2 == EssentialPrioStrategy.AnyCharges &&
-                                         EssentialDignityPvE.EnoughLevel &&
-                                         EssentialDignityPvE.Cooldown.CurrentCharges > 0) ||
-                                        (EssentialPrio2 == EssentialPrioStrategy.CappedCharges &&
-                                         EssentialDignityPvE.EnoughLevel &&
-                                         EssentialDignityPvE.Cooldown.CurrentCharges ==
-                                         EssentialDignityPvE.Cooldown.MaxCharges);
-            
+        var shouldUseEssentialDignity =
+            (EssentialPrio2 == EssentialPrioStrategy.AnyCharges && EssentialDignityPvE.EnoughLevel &&
+             EssentialDignityPvE.Cooldown.CurrentCharges > 0) ||
+            (EssentialPrio2 == EssentialPrioStrategy.CappedCharges && EssentialDignityPvE.EnoughLevel &&
+             EssentialDignityPvE.Cooldown.CurrentCharges == EssentialDignityPvE.Cooldown.MaxCharges);
+
         // Custom Logic to ensure Benefic is used if the target has Synastry and the player is not moving (or has lightspeed)
-        if ((BeneficIiPvE.Target.Target?.HasStatus(true, StatusID.Synastry_846) == true 
-             || BeneficPvE.Target.Target?.HasStatus(true, StatusID.Synastry_846) == true)
-            && shouldUseEssentialDignity
-            && (HasLightspeed || !IsMoving))
+        if (shouldUseEssentialDignity && (HasLightspeed || !IsMoving))
         {
-            if (BeneficIiPvE.CanUse(out act))
+            if (BeneficIiPvE.CanUse(out act) && HasOrCanHaveSynastryStatus(BeneficIiPvE, SynastryPvE, SynastryHeal))
             {
                 return true;
             }
 
-            if (BeneficPvE.CanUse(out act))
+            if (BeneficPvE.CanUse(out act) && HasOrCanHaveSynastryStatus(BeneficPvE, SynastryPvE, SynastryHeal))
             {
                 return true;
             }
@@ -574,6 +569,11 @@ public sealed class AST_Reborn : AstrologianRotation
         }
 
         return base.HealSingleGCD(out act);
+
+        // Local function defining whether the target has synastry, or if synastry can be used on the target.
+        static bool HasOrCanHaveSynastryStatus(IBaseAction action, IBaseAction synastry, float synastryHeal) =>
+            action.Target.Target?.HasStatus(true, StatusID.Synastry_846) == true ||
+            (synastry.CanUse(out _) && synastry.Target.Target?.GetHealthRatio() < synastryHeal);
     }
 
     [RotationDesc(ActionID.AspectedHeliosPvE, ActionID.HeliosPvE, ActionID.HeliosConjunctionPvE)]
