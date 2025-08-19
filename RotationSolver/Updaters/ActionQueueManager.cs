@@ -75,38 +75,16 @@ namespace RotationSolver.Updaters
                             var dutyActions = DataCenter.CurrentDutyRotation?.AllActions ?? [];
 
                             // Find matching action by ID without creating intermediate collections
-                            IAction? matchingAction = null;
                             uint adjustedActionId = Service.GetAdjustedActionId(actionID);
 
                             PluginLog.Debug($"[ActionQueueManager] Detected player input: (ID: {actionID})");
 
-                            // Search rotation actions first
-                            foreach (var action in rotationActions)
-                            {                                
-                                if (action.ID == adjustedActionId)
-                                {
-                                    matchingAction = action;
-                                    break;
-                                }
-                            }
-
-                            // If not found, search duty actions
-                            if (matchingAction == null)
-                            {
-                                foreach (var action in dutyActions)
-                                {
-                                    if (action.ID == adjustedActionId)
-                                    {
-                                        matchingAction = action;
-                                        break;
-                                    }
-                                }
-                            }
-
-                            PluginLog.Debug($"[ActionQueueManager] Matching action decided: (ID: {matchingAction})");
+                            var matchingAction = ((ActionID)adjustedActionId).GetActionFromID(false, rotationActions, dutyActions);
 
                             if (matchingAction != null)
                             {
+                                PluginLog.Debug($"[ActionQueueManager] Matching action decided: (ID: {matchingAction})");
+                                
                                 if (matchingAction.IsIntercepted)
                                 {
                                     if (matchingAction.EnoughLevel && CanInterceptAction(matchingAction))

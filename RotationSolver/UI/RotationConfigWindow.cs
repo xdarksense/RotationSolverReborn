@@ -3439,6 +3439,7 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"Number of Party Members: {DataCenter.PartyMembers.Count}");
         ImGui.Text($"Number of Alliance Members: {DataCenter.AllianceMembers.Count}");
         ImGui.Text($"Average Party HP Percent: {DataCenter.PartyMembersAverHP * 100}");
+        ImGui.Text($"Average Lowest Party HP Percent: {DataCenter.LowestPartyMembersAverHP * 100}");
         ImGui.Text($"Number of Party Members with Doomed To Heal status: {DataCenter.PartyMembers.Count(member => member.DoomNeedHealing())}");
         foreach (Dalamud.Game.ClientState.Party.IPartyMember p in Svc.Party)
         {

@@ -715,6 +715,8 @@ internal static class DataCenter
     private static float _partyAvgHp = 0;
     private static float _partyStdDevHp = 0;
     private static int _partyHpCount = 0;
+    private static float _lowestPartyAvgHp = 0;
+    private static float _lowestPartyStdDevHp = 0;
 
     private static readonly float[] _hpBuffer = new float[8];
     private static void UpdatePartyHpCache()
@@ -746,28 +748,47 @@ internal static class DataCenter
             _partyMinHp = 0;
             _partyAvgHp = 0;
             _partyStdDevHp = 0;
+            _lowestPartyAvgHp = 0;
+            _lowestPartyStdDevHp = 0;
             return;
         }
 
+        // If there are more than 4 players, we order the array
+        if (hpCount > 4)
+        {
+            Array.Sort(_hpBuffer);
+        }
+
         float sum = 0;
+        float lowestHpMembersSum = 0;
         float min = float.MaxValue;
         for (int i = 0; i < hpCount; i++)
         {
             sum += _hpBuffer[i];
+            if (i < 4) lowestHpMembersSum += _hpBuffer[i];
             if (_hpBuffer[i] < min) min = _hpBuffer[i];
         }
 
         float avg = sum / hpCount;
+        float lowestHpMembersAvg = lowestHpMembersSum / (hpCount > 4 ? 4 : hpCount);
         float variance = 0;
+        float lowestHpMembersVariance = 0;
         for (int i = 0; i < hpCount; i++)
         {
             float diff = _hpBuffer[i] - avg;
             variance += diff * diff;
+            if (i < 4)
+            {
+                float lowestHpMembersDiff = _hpBuffer[i] - lowestHpMembersAvg;
+                lowestHpMembersVariance += lowestHpMembersDiff * lowestHpMembersDiff;
+            }
         }
 
         _partyMinHp = min;
         _partyAvgHp = avg;
         _partyStdDevHp = (float)Math.Sqrt(variance / hpCount);
+        _lowestPartyAvgHp = lowestHpMembersAvg;
+        _lowestPartyStdDevHp = (float)Math.Sqrt(lowestHpMembersVariance / (hpCount > 4 ? 4 : hpCount));
         _partyHpCacheFrame = currentFrame;
     }
 
@@ -784,6 +805,16 @@ internal static class DataCenter
     public static float PartyMembersDifferHP
     {
         get { UpdatePartyHpCache(); return _partyStdDevHp; }
+    }
+
+    public static float LowestPartyMembersAverHP
+    {
+        get { UpdatePartyHpCache(); return _lowestPartyAvgHp; }
+    }
+
+    public static float LowestPartyMembersDifferHP
+    {
+        get { UpdatePartyHpCache(); return _lowestPartyStdDevHp; }
     }
 
     public static IEnumerable<float> PartyMembersHP
