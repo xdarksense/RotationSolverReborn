@@ -2265,7 +2265,10 @@ public partial class RotationConfigWindow : Window
                     ImGui.Text("AdjustedID: " + Service.GetAdjustedActionId(action.Info.ID));
                     ImGui.Text($"IsQuestUnlocked: {action.Info.IsQuestUnlocked()} ({action.Action.UnlockLink.RowId})");
                     ImGui.Text("EnoughLevel: " + action.EnoughLevel);
-                    ImGui.Text("AoeCount: " + action.Config.AoeCount);
+                    if (!action.TargetInfo.IsSingleTarget)
+                    {
+                        ImGui.Text("AoeCount: " + action.Config.AoeCount);
+                    }
                     ImGui.Text("ShouldCheckStatus: " + action.Config.ShouldCheckStatus);
                     ImGui.Text("ShouldCheckTargetStatus: " + action.Config.ShouldCheckTargetStatus);
                     ImGui.Text("Is Real GCD: " + action.Info.IsRealGCD);

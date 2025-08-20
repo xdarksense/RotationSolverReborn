@@ -97,6 +97,11 @@ public partial class AstrologianRotation
     /// Able to execute Earthly Dominance Stellar Detonation.
     /// </summary>
     public static bool HasEarthlyDominance => Player.HasStatus(true, StatusID.EarthlyDominance);
+
+    /// <summary>
+    /// Has Macrocosmos.
+    /// </summary>
+    public static bool HasSynastry => Player.HasStatus(true, StatusID.Synastry);
     #endregion
 
     #region Debug

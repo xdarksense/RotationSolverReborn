@@ -149,25 +149,33 @@ public sealed class AST_Reborn : AstrologianRotation
             }
         }
 
-        if (nextGCD.IsTheSameTo(true, BeneficPvE, BeneficIiPvE, AspectedBeneficPvE))
+        if (SynastryPvE.CanUse(out act))
         {
-            if (SynastryPvE.CanUse(out act))
+            if (nextGCD.IsTheSameTo(false, AspectedBeneficPvE))
             {
-                if (BeneficPvE.CanUse(out _) && SynastryPvE.Target.Target == BeneficPvE.Target.Target)
+                if (SynastryPvE.Target.Target == AspectedBeneficPvE.Target.Target)
                 {
                     if (SynastryPvE.Target.Target.GetHealthRatio() < SynastryHeal)
                     {
                         return true;
                     }
                 }
-                if (BeneficIiPvE.CanUse(out _) && SynastryPvE.Target.Target == BeneficIiPvE.Target.Target)
+            }
+
+            if (nextGCD.IsTheSameTo(false, BeneficIiPvE))
+            {
+                if (SynastryPvE.Target.Target == BeneficIiPvE.Target.Target)
                 {
                     if (SynastryPvE.Target.Target.GetHealthRatio() < SynastryHeal)
                     {
                         return true;
                     }
                 }
-                if (AspectedBeneficPvE.CanUse(out _) && SynastryPvE.Target.Target == AspectedBeneficPvE.Target.Target)
+            }
+
+            if (nextGCD.IsTheSameTo(false, BeneficPvE))
+            {
+                if (SynastryPvE.Target.Target == BeneficPvE.Target.Target)
                 {
                     if (SynastryPvE.Target.Target.GetHealthRatio() < SynastryHeal)
                     {
@@ -564,7 +572,6 @@ public sealed class AST_Reborn : AstrologianRotation
             {
                 return true;
             }
-            return true;
         }
 
         if (BeneficIiPvE.CanUse(out act))
@@ -573,7 +580,6 @@ public sealed class AST_Reborn : AstrologianRotation
             {
                 return true;
             }
-            return true;
         }
 
         if (BeneficPvE.CanUse(out act))
@@ -582,6 +588,20 @@ public sealed class AST_Reborn : AstrologianRotation
             {
                 return true;
             }
+        }
+
+        if (AspectedBeneficPvE.CanUse(out act) && (IsMoving || AspectedBeneficPvE.Target.Target?.GetHealthRatio() < AspectedBeneficHeal))
+        {
+            return true;
+        }
+
+        if (BeneficIiPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (BeneficPvE.CanUse(out act))
+        {
             return true;
         }
 
