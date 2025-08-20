@@ -218,6 +218,7 @@ internal static class MiscUpdater
         bool stopDueStatus = statusTimes.Length > 0 && minStatusTime > Player.Object.TotalCastTime - Player.Object.CurrentCastTime && minStatusTime < 5;
         
         bool shouldStopHealing = Service.Config.StopHealingAfterThresholdExperimental && DataCenter.InCombat &&
+                                 !CustomRotation.HealingWhileDoingNothing &&
                                  DataCenter.CommandNextAction?.AdjustedID != Player.Object.CastActionId &&
                                  ((ActionID)Player.Object.CastActionId).GetActionFromID(true, RotationUpdater.CurrentRotationActions) is IBaseAction {Setting.IsFriendly: true} && 
                                  (DataCenter.MergedStatus & (AutoStatus.HealAreaSpell | AutoStatus.HealSingleSpell)) == 0;

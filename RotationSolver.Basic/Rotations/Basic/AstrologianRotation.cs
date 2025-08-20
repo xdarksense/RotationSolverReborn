@@ -99,7 +99,7 @@ public partial class AstrologianRotation
     public static bool HasEarthlyDominance => Player.HasStatus(true, StatusID.EarthlyDominance);
 
     /// <summary>
-    /// Has Macrocosmos.
+    /// Has Synastry.
     /// </summary>
     public static bool HasSynastry => Player.HasStatus(true, StatusID.Synastry);
     #endregion

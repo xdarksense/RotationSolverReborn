@@ -151,37 +151,11 @@ public sealed class AST_Reborn : AstrologianRotation
 
         if (SynastryPvE.CanUse(out act))
         {
-            if (nextGCD.IsTheSameTo(false, AspectedBeneficPvE))
+            if (CanCastSynastry(AspectedBeneficPvE, SynastryPvE, SynastryHeal, nextGCD) ||
+                CanCastSynastry(BeneficIiPvE, SynastryPvE, SynastryHeal, nextGCD) ||
+                CanCastSynastry(BeneficPvE, SynastryPvE, SynastryHeal, nextGCD))
             {
-                if (SynastryPvE.Target.Target == AspectedBeneficPvE.Target.Target)
-                {
-                    if (SynastryPvE.Target.Target.GetHealthRatio() < SynastryHeal)
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            if (nextGCD.IsTheSameTo(false, BeneficIiPvE))
-            {
-                if (SynastryPvE.Target.Target == BeneficIiPvE.Target.Target)
-                {
-                    if (SynastryPvE.Target.Target.GetHealthRatio() < SynastryHeal)
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            if (nextGCD.IsTheSameTo(false, BeneficPvE))
-            {
-                if (SynastryPvE.Target.Target == BeneficPvE.Target.Target)
-                {
-                    if (SynastryPvE.Target.Target.GetHealthRatio() < SynastryHeal)
-                    {
-                        return true;
-                    }
-                }
+                return true;
             }
         }
 
@@ -196,6 +170,11 @@ public sealed class AST_Reborn : AstrologianRotation
         }
 
         return base.EmergencyAbility(nextGCD, out act);
+
+        static bool CanCastSynastry(IBaseAction actionCheck, IBaseAction synastry, float synastryHp, IAction next)
+            => next.IsTheSameTo(false, actionCheck) &&
+               synastry.Target.Target == actionCheck.Target.Target &&
+               synastry.Target.Target.GetHealthRatio() < synastryHp;
     }
 
     [RotationDesc(ActionID.ExaltationPvE, ActionID.TheArrowPvE, ActionID.TheSpirePvE, ActionID.TheBolePvE, ActionID.TheEwerPvE)]
