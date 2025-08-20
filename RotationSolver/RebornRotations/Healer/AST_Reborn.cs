@@ -547,30 +547,6 @@ public sealed class AST_Reborn : AstrologianRotation
 
         if (AspectedBeneficPvE.CanUse(out act) && (IsMoving || AspectedBeneficPvE.Target.Target?.GetHealthRatio() < AspectedBeneficHeal))
         {
-            if (AspectedBeneficPvE.Target.Target.HasStatus(true, StatusID.Synastry_846))
-            {
-                return true;
-            }
-        }
-
-        if (BeneficIiPvE.CanUse(out act))
-        {
-            if (BeneficIiPvE.Target.Target.HasStatus(true, StatusID.Synastry_846))
-            {
-                return true;
-            }
-        }
-
-        if (BeneficPvE.CanUse(out act))
-        {
-            if (BeneficPvE.Target.Target.HasStatus(true, StatusID.Synastry_846))
-            {
-                return true;
-            }
-        }
-
-        if (AspectedBeneficPvE.CanUse(out act) && (IsMoving || AspectedBeneficPvE.Target.Target?.GetHealthRatio() < AspectedBeneficHeal))
-        {
             return true;
         }
 
