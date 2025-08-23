@@ -60,6 +60,10 @@ internal static class MiscUpdater
                 {
                     _dtrEntry.OnClick = _ => RSCommands.CycleStateWithAllTargetTypes();
                 }
+                else if (Service.Config.DTRType == DTRType.DTRAuto)
+                {
+                    _dtrEntry.OnClick = _ => RSCommands.CycleStateAuto();
+                }
                 else if (Service.Config.DTRType == DTRType.DTRManual)
                 {
                     _dtrEntry.OnClick = _ => RSCommands.CycleStateManual();

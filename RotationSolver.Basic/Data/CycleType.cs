@@ -18,6 +18,12 @@ public enum CycleType : byte
     CycleAllAuto,
 
     /// <summary>
+    /// Cycle between Auto and Off
+    /// </summary>
+    [Description("Cycle between Auto and Off")]
+    CycleAuto,
+
+    /// <summary>
     /// Cycle between Manual and Off
     /// </summary>
     [Description("Cycle between Manual and Off")]

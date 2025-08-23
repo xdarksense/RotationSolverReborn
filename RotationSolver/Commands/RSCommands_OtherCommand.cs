@@ -53,6 +53,10 @@ public static partial class RSCommands
         {
             CycleStateWithAllTargetTypes();
         }
+        else if (Service.Config.CycleType == CycleType.CycleAuto)
+        {
+            CycleStateAuto();
+        }
         else if (Service.Config.CycleType == CycleType.CycleManual)
         {
             CycleStateManual();

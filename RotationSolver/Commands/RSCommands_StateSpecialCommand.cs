@@ -100,6 +100,26 @@ namespace RotationSolver.Commands
             DoStateCommandType(StateCommandType.Manual);
         }
 
+        public static void CycleStateAuto()
+        {
+            // If currently Off, go to Auto
+            if (!DataCenter.State)
+            {
+                DoStateCommandType(StateCommandType.Auto);
+                return;
+            }
+
+            // If currently in Auto mode, turn Off
+            if (DataCenter.State)
+            {
+                DoStateCommandType(StateCommandType.Off);
+                return;
+            }
+
+            // If currently On but not Auto, switch to Auto
+            DoStateCommandType(StateCommandType.Manual);
+        }
+
         public static void CycleStateManual()
         {
             // If currently Off, go to Manual
