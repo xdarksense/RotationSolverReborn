@@ -1,23 +1,9 @@
-﻿
-using Dalamud.Game.ClientState.Objects.Enums;
-using Dalamud.Plugin.Services;
-using ECommons.GameFunctions;
-using ExCSS;
-using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
-using FFXIVClientStructs.FFXIV.Client.UI;
-using FFXIVClientStructs.FFXIV.Client.UI.Misc;
-using Lumina.Excel.Sheets;
+﻿using Lumina.Excel.Sheets;
 using Lumina.Excel.Sheets.Experimental;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 
-
-
-
-
-namespace RabbsRotationsNET8.Magical;
+namespace RotationSolver.ExtraRotations.Magical;
 [Rotation("Rabbs Blackest Mage", CombatType.PvE, GameVersion = "7.3")]
 [SourceCode(Path = "main/RebornRotations/Magical/Rabbs_BLM.cs")]
 [ExtraRotation]
@@ -25,8 +11,6 @@ namespace RabbsRotationsNET8.Magical;
 public sealed class Rabbs_BLM : BlackMageRotation
 {
     #region Config Options
-
-
     [RotationConfig(CombatType.PvE, Name = "Use Countdown Ability (Fire 3)")]
     public bool Usecountdown { get; set; } = true;
 
@@ -34,11 +18,9 @@ public sealed class Rabbs_BLM : BlackMageRotation
     [Range(1, 4, ConfigUnitType.None, 1)]
     public OpenWhen When2Open { get; set; } = OpenWhen.Never;
 
-
     [RotationConfig(CombatType.PvE, Name = "Which Opener to use")]
     [Range(1, 2, ConfigUnitType.None, 1)]
     public Openchoice Openerchoice { get; set; } = Openchoice.Standard;
-
 
     [RotationConfig(CombatType.PvE, Name = "When to use Burst")]
     [Range(1, 5, ConfigUnitType.None, 1)]
@@ -48,16 +30,9 @@ public sealed class Rabbs_BLM : BlackMageRotation
     [Range(1, 3, ConfigUnitType.None, 1)]
     public Burstchoice ChoiceBurst { get; set; } = Burstchoice.Leylines;
 
-
-    [RotationConfig(CombatType.PvE, Name = "How to use pots)")]
+    [RotationConfig(CombatType.PvE, Name = "How to use pots")]
     [Range(1, 3, ConfigUnitType.None, 1)]
     public Potchoice Poterchoice { get; set; } = Potchoice.Never;
-
-
-
-
-
-
 
     public enum Openchoice : byte
     {
@@ -96,75 +71,61 @@ public sealed class Rabbs_BLM : BlackMageRotation
         [Description("Every Two Minutes (uses combat time so expect some error)")] Q2M,
         [Description("All day everyday")] Allday,
     }
-
     #endregion
 
     #region Config Under Hood Stuff
-
     // temp flare fix for alt flare opener only
     public IBaseAction AltFlareOpenerPvE => _AltFlareOpenerPvE.Value;
 
-    private static void ModifyAltFlareOpenerPvE(ref RotationSolver.Basic.Actions.ActionSetting setting)
+    private static void ModifyAltFlareOpenerPvE(ref Basic.Actions.ActionSetting setting)
     {
         setting.RotationCheck = () => InAstralFire;
         setting.UnlockedByQuestID = 66614u;
-
     }
 
-    private readonly Lazy<IBaseAction> _AltFlareOpenerPvE = new Lazy<IBaseAction>(delegate
+    private readonly Lazy<IBaseAction> _AltFlareOpenerPvE = new(static delegate
     {
         IBaseAction action460 = new BaseAction(ActionID.FlarePvE);
-        RotationSolver.Basic.Actions.ActionSetting setting460 = action460.Setting;
+        Basic.Actions.ActionSetting setting460 = action460.Setting;
         ModifyAltFlareOpenerPvE(ref setting460);
         action460.Setting = setting460;
         return action460;
     });
 
+    private static readonly HashSet<uint> burstStatusIds =
+    [
+        (uint)StatusID.Divination,
+        (uint)StatusID.Brotherhood,
+        (uint)StatusID.BattleLitany,
+        (uint)StatusID.ArcaneCircle,
+        (uint)StatusID.StarryMuse,
+        (uint)StatusID.Embolden,
+        (uint)StatusID.SearingLight,
+        (uint)StatusID.BattleVoice,
+        (uint)StatusID.TechnicalFinish,
+        (uint)StatusID.RadiantFinale
 
+    ];
 
-
-    private static readonly HashSet<uint> burstStatusIds = new HashSet<uint>
-{
-    (uint)StatusID.Divination,
-    (uint)StatusID.Brotherhood,
-    (uint)StatusID.BattleLitany,
-    (uint)StatusID.ArcaneCircle,
-    (uint)StatusID.StarryMuse,
-    (uint)StatusID.Embolden,
-    (uint)StatusID.SearingLight,
-    (uint)StatusID.BattleVoice,
-    (uint)StatusID.TechnicalFinish,
-    (uint)StatusID.RadiantFinale
-
-};
-
-    public bool isPartyBurst => PartyMembers?.Any(member =>
+    public static bool IsPartyBurst => PartyMembers?.Any(member =>
         member?.StatusList?.Any(status => burstStatusIds.Contains(status.StatusId)) == true
     ) == true;
 
-    public bool isPartyMedicated => PartyMembers?.Any(member =>
+    public static bool IsPartyMedicated => PartyMembers?.Any(member =>
     member?.StatusList?.Any(status => status.StatusId == (uint)StatusID.Medicated) == true
-) == true;
+    ) == true;
 
+    public static bool IsAnyBossinRange => AllHostileTargets is not null && AllHostileTargets.Any(hostile => hostile.IsBossFromIcon() || hostile.IsBossFromTTK());
 
+    public static bool IsCurrentTargetBoss => CurrentTarget is not null && (CurrentTarget.IsBossFromIcon() || CurrentTarget.IsBossFromTTK());
 
+    public bool IsOpenerChosen => (When2Open == OpenWhen.BossIsTarget && IsCurrentTargetBoss) || (When2Open == OpenWhen.BossInRoom && IsAnyBossinRange) || When2Open == OpenWhen.Allday;
 
+    public bool IsInOpener => IsOpenerChosen && CombatTime > 0 && CombatTime < 60 && InCombat && !Player.HasStatus(true, StatusID.BrinkOfDeath, StatusID.Weakness);
 
+    public bool IsPotReady => (Poterchoice == Potchoice.WithOthers && IsPartyMedicated) || (Poterchoice == Potchoice.Q2M && IsWithinFirst15SecondsOfEvenMinute()) || (Poterchoice == Potchoice.Allday);
 
-
-    public bool isAnyBossinRange => AllHostileTargets is not null && AllHostileTargets.Any(hostile => hostile.IsBossFromIcon() || hostile.IsBossFromTTK());
-
-    public bool isCurrentTargetBoss => CurrentTarget is not null && (CurrentTarget.IsBossFromIcon() || CurrentTarget.IsBossFromTTK());
-
-    public bool isOpenerChosen => (When2Open == OpenWhen.BossIsTarget && isCurrentTargetBoss) || (When2Open == OpenWhen.BossInRoom && isAnyBossinRange) || When2Open == OpenWhen.Allday;
-
-    public bool isInOpener => isOpenerChosen && CombatTime > 0 && CombatTime < 60 && InCombat && !Player.HasStatus(true, StatusID.BrinkOfDeath, StatusID.Weakness);
-
-    public bool isPotReady => (Poterchoice == Potchoice.WithOthers && isPartyMedicated) || (Poterchoice == Potchoice.Q2M && IsWithinFirst15SecondsOfEvenMinute()) || (Poterchoice == Potchoice.Allday);
-
-    public bool isBurstReady => (When2Burst == BurstWhen.WithOthers && isPartyBurst) || (When2Burst == BurstWhen.Q2M && IsWithinFirst15SecondsOfEvenMinute()) || (When2Burst == BurstWhen.Allday);
-
-
+    public bool IsBurstReady => (When2Burst == BurstWhen.WithOthers && IsPartyBurst) || (When2Burst == BurstWhen.Q2M && IsWithinFirst15SecondsOfEvenMinute()) || (When2Burst == BurstWhen.Allday);
     #endregion
 
     #region underhood stuff
@@ -173,13 +134,13 @@ public sealed class Rabbs_BLM : BlackMageRotation
     {
     StatusID.Thunder, StatusID.ThunderIi, StatusID.ThunderIii, StatusID.ThunderIv,
     StatusID.HighThunder_3872, StatusID.HighThunder
-};
+    };
 
     /// <summary>
     /// Time remaining on Thunder DoT for the current target. 
     /// Returns null if no target or no Thunder present.
     /// </summary>
-    public double? ThunderDuration =>
+    public static double? ThunderDuration =>
         Target?.StatusTime(true, ThunderStatusIds) > 0
             ? Target.StatusTime(true, ThunderStatusIds)
             : null;
@@ -238,7 +199,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
     {
         get
         {
-            if (isInOpener)
+            if (IsInOpener)
             {
                 const int openerMinGcd = 9;
                 const int openerMaxGcd = 12;
@@ -271,10 +232,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
     {
         if (InCombat && NumberOfAllHostilesInMaxRange == 0)
         {
-            if (noHostilesTimer == null)
-            {
-                noHostilesTimer = Stopwatch.StartNew();
-            }
+            noHostilesTimer ??= Stopwatch.StartNew();
             return noHostilesTimer.Elapsed.TotalSeconds;
         }
         else
@@ -299,8 +257,6 @@ public sealed class Rabbs_BLM : BlackMageRotation
             int soulDeficit = 6 - AstralSoulStacks;
             int discountedCasts = Math.Min(soulDeficit, UmbralHearts);
             int normalCasts = soulDeficit - discountedCasts;
-
-
 
             // If Manafont is available, we can likely cast enough spells to get 6 stacks
             // before running out of MP (given its significant MP recovery).
@@ -362,17 +318,11 @@ public sealed class Rabbs_BLM : BlackMageRotation
         }
     }
 
-
-
-
-
-
-
-    public int GetAoeCount(IBaseAction action)
+    public static int GetAoeCount(IBaseAction action)
     {
         int maxAoeCount = 0;
 
-        if (!CustomRotation.IsManual)
+        if (!IsManual)
         {
             if (AllHostileTargets != null)
             {
@@ -396,8 +346,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
         return maxAoeCount;
     }
 
-
-    public bool shouldTranspose
+    public bool ShouldTranspose
     {
         get
         {
@@ -452,7 +401,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
             return false;
         }
     }
-        public bool shouldTransposeLowLevel
+        public bool ShouldTransposeLowLevel
         {
             get
             {
@@ -555,7 +504,6 @@ public sealed class Rabbs_BLM : BlackMageRotation
                         }
                     }
 
-
                         // General combat downtime check
                         if (GetTimeSinceNoHostilesInCombat() > 5f)
                         {
@@ -571,36 +519,35 @@ public sealed class Rabbs_BLM : BlackMageRotation
             }
         }
 
-
-    public bool shouldXeno
+    public bool ShouldXeno
     {
         get
         {
             if (PolyglotStacks == 3)
             { return true; }
 
-            if (PolyglotStacks > 0 && isBurstReady && CombatTime > 60)
+            if (PolyglotStacks > 0 && IsBurstReady && CombatTime > 60)
             {
                 if (ChoiceBurst == Burstchoice.Both || ChoiceBurst == Burstchoice.XenoOnly)
                 { return true; }
             }
-            if (PolyglotStacks > 0 && isInOpener && CombatTime < 30 && Openerchoice == Openchoice.Standard && CurrentMp < FireIvPvE.Info.MPNeed)
+            if (PolyglotStacks > 0 && IsInOpener && CombatTime < 30 && Openerchoice == Openchoice.Standard && CurrentMp < FireIvPvE.Info.MPNeed)
                 return true;
-            if (PolyglotStacks > 0 && isInOpener && CombatTime < 30 && Openerchoice == Openchoice.AltFlare && AstralSoulStacks == 2)
+            if (PolyglotStacks > 0 && IsInOpener && CombatTime < 30 && Openerchoice == Openchoice.AltFlare && AstralSoulStacks == 2)
                 return true;
 
             return false;
         }
     }
 
-    public bool shouldLeyLine
+    public bool ShouldLeyLine
     {
         get
         {
             if (LeyLinesPvE.Cooldown.CurrentCharges == LeyLinesPvE.Cooldown.MaxCharges && !Player.HasStatus(true, StatusID.LeyLines) && (ChoiceBurst == Burstchoice.Leylines || ChoiceBurst == Burstchoice.Both) && When2Burst == BurstWhen.PreventCap)
             { return true; }
 
-            if (LeyLinesPvE.Cooldown.CurrentCharges > 0 && isBurstReady && !Player.HasStatus(true, StatusID.LeyLines))
+            if (LeyLinesPvE.Cooldown.CurrentCharges > 0 && IsBurstReady && !Player.HasStatus(true, StatusID.LeyLines))
             {
                 if (ChoiceBurst == Burstchoice.Both || ChoiceBurst == Burstchoice.Leylines)
                 { return true; }
@@ -639,31 +586,29 @@ public sealed class Rabbs_BLM : BlackMageRotation
     #endregion
 
     #region Additional oGCD Logic
-
     [RotationDesc]
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
         if (Player.Level == 100)
         {
-            if (shouldTranspose)
+            if (ShouldTranspose)
             {
                 if (TransposePvE.CanUse(out act, skipCastingCheck: true, skipComboCheck: true, skipAoeCheck: true, skipStatusProvideCheck: true, skipTargetStatusNeedCheck: true, skipTTKCheck: true, usedUp: true)) return true;
             }
+
             if (nextGCD.IsTheSameTo(true, BlizzardIiiPvE))
             {
                 if (!NextGCDisInstant && CanMakeInstant && InCombat)
                 {
-                    if (isInOpener)
+                    if (IsInOpener)
                     {
                         if (TriplecastPvE.CanUse(out act, usedUp: true)) return true;
                     }
                     if (SwiftcastPvE.CanUse(out act)) return true;
                     if (TriplecastPvE.CanUse(out act, usedUp: true)) return true;
                 }
-
-
-
             }
+
             if (!NextGCDisInstant && CanMakeInstant && InCombat && InAstralFire)
             {
                 if (CurrentMp < 800 && AstralSoulStacks < 6 && !WillBeAbleToFlareStarMT && !WillBeAbleToFlareStarST && (!IsParadoxActive || CurrentMp < 1600) && ManafontPvE.Cooldown.IsCoolingDown)
@@ -671,18 +616,20 @@ public sealed class Rabbs_BLM : BlackMageRotation
                     if (SwiftcastPvE.CanUse(out act)) return true;
                 }
             }
+
             #region Opener
-            if (isInOpener)
+            if (IsInOpener)
             {
                 if (AmplifierPvE.Cooldown.IsCoolingDown && !Player.HasStatus(true, StatusID.LeyLines))
                 {
                     if (LeyLinesPvE.CanUse(out act)) return true;
                 }
             }
+
             if (InAstralFire)
             {
 
-                if (isInOpener)
+                if (IsInOpener)
                 {
                     if (!NextGCDisInstant && CombatTime < 30)
                     {
@@ -692,15 +639,14 @@ public sealed class Rabbs_BLM : BlackMageRotation
                     {
                         if (AmplifierPvE.CanUse(out act)) return true;
                     }
-                    if (isPotReady && UseBurstMedicine(out act)) return true;
+                    if (IsPotReady && UseBurstMedicine(out act)) return true;
                 }
 
 
 
             }
-
             #endregion
-            if (nextGCD.IsTheSameTo(true, FlarePvE) && isInOpener && Openerchoice == Openchoice.AltFlare && InCombat)
+            if (nextGCD.IsTheSameTo(true, FlarePvE) && IsInOpener && Openerchoice == Openchoice.AltFlare && InCombat)
             {
                 if (!NextGCDisInstant && CanMakeInstant)
                 {
@@ -728,6 +674,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
                     }
                 }
             }
+
             if (!ManafontPvE.Cooldown.IsCoolingDown && CurrentMp < 800 && AstralSoulStacks < 6 && InAstralFire)
             {
                 if (ManafontPvE.CanUse(out act, skipCastingCheck: true, skipComboCheck: true, skipAoeCheck: true, skipStatusProvideCheck: true, skipTargetStatusNeedCheck: true, skipTTKCheck: true, usedUp: true)) return true;
@@ -776,10 +723,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
     [RotationDesc(ActionID.TransposePvE, ActionID.LeyLinesPvE, ActionID.RetracePvE)]
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
-
-
-
-        if (shouldLeyLine && InCombat && HasHostilesInRange && LeyLinesPvE.CanUse(out act, usedUp: shouldLeyLine)) return true;
+        if (ShouldLeyLine && InCombat && HasHostilesInRange && LeyLinesPvE.CanUse(out act, usedUp: ShouldLeyLine)) return true;
         //if (!IsLastAbility(ActionID.LeyLinesPvE) && UseRetrace && InCombat && HasHostilesInRange && !Player.HasStatus(true, StatusID.CircleOfPower) && RetracePvE.CanUse(out act)) return true;
 
         return base.GeneralAbility(nextGCD, out act);
@@ -810,7 +754,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
                     {
                         if (AmplifierPvE.CanUse(out act)) return true;
                     }
-                    if (isPotReady && UseBurstMedicine(out act)) return true;
+                    if (IsPotReady && UseBurstMedicine(out act)) return true;
                 }
 
             }
@@ -821,17 +765,12 @@ public sealed class Rabbs_BLM : BlackMageRotation
     #endregion
 
     #region GCD Logic
-
     protected override bool GeneralGCD(out IAction? act)
     {
-
-
         var isTargetBoss = CurrentTarget?.IsBossFromTTK() ?? false;
         var isTargetDying = CurrentTarget?.IsDying() ?? false;
         //var recentActions = RecordActions.Take(4);
         //var lastAction = RecordActions.FirstOrDefault(); // Get the first (most recent) action, or null if the list is empty
-
-
 
         if(Player.Level < 100)
         {
@@ -871,7 +810,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
 
             if (InAstralFire)
             {
-                if (shouldTransposeLowLevel)
+                if (ShouldTransposeLowLevel)
                 {
                     if (TransposePvE.CanUse(out act)) return true;
                 }
@@ -924,7 +863,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
 
             if (InUmbralIce)
             {
-                if (shouldTransposeLowLevel)
+                if (ShouldTransposeLowLevel)
                 {
                     if (TransposePvE.CanUse(out act)) return true;
                 }
@@ -958,17 +897,6 @@ public sealed class Rabbs_BLM : BlackMageRotation
             }
 
         }
-
-
-
-
-
-
-
-
-
-
-
 
         if (Player.Level == 100)
         {
@@ -1107,13 +1035,13 @@ public sealed class Rabbs_BLM : BlackMageRotation
             {
                 //single target section starts here
                 if (ThunderPvE.CanUse(out act) && ShouldThunder) return true;
-                if (shouldXeno)
+                if (ShouldXeno)
                 {
-                    if (XenoglossyPvE.CanUse(out act, usedUp: shouldXeno)) return true;
+                    if (XenoglossyPvE.CanUse(out act, usedUp: ShouldXeno)) return true;
                 }
                 if (InAstralFire)
                 {
-                    if (Openerchoice == Openchoice.AltFlare && isInOpener)
+                    if (Openerchoice == Openchoice.AltFlare && IsInOpener)
                     {
                         if (AstralSoulStacks == 4 && CombatTime < 30 && ManafontPvE.Cooldown.HasOneCharge)
                         {
@@ -1195,8 +1123,6 @@ public sealed class Rabbs_BLM : BlackMageRotation
                 {
                     if (BlizzardIiiPvE.CanUse(out act, skipAoeCheck: true)) return true;
                 }
-
-
             }
         }
         return base.GeneralGCD(out act);
@@ -1211,13 +1137,11 @@ public sealed class Rabbs_BLM : BlackMageRotation
 
     public unsafe override void DisplayRotationStatus()
     {
-
         //motif
         ImGui.Text("GCDTime " + GCDTime());
         ImGui.Text("IsSoulStacksMaxed " + IsSoulStacksMaxed);
         ImGui.Text("FlareAoeNumber " + GetAoeCount(FlarePvE));
         ImGui.Text("falre aoe range " + FlarePvE.Info.EffectRange);
-
 
         base.DisplayRotationStatus();
     }
