@@ -1,23 +1,14 @@
-﻿
-using Dalamud.Game.ClientState.Objects.Enums;
-using Dalamud.Plugin.Services;
-using ECommons.GameFunctions;
-using ExCSS;
-using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
-using FFXIVClientStructs.FFXIV.Client.UI;
-using FFXIVClientStructs.FFXIV.Client.UI.Misc;
-using Lumina.Excel.Sheets;
+﻿using Lumina.Excel.Sheets;
 using Lumina.Excel.Sheets.Experimental;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 
 
 
 
 
-namespace RabbsRotationsNET8.Magical;
+
+namespace RotationSolver.ExtraRotations.Magical;
 [Rotation("Rabbs Blackest Mage", CombatType.PvE, GameVersion = "7.3")]
 [SourceCode(Path = "main/RebornRotations/Magical/Rabbs_BLM.cs")]
 [ExtraRotation]
@@ -101,28 +92,6 @@ public sealed class Rabbs_BLM : BlackMageRotation
 
     #region Config Under Hood Stuff
 
-    // temp flare fix for alt flare opener only
-    public IBaseAction AltFlareOpenerPvE => _AltFlareOpenerPvE.Value;
-
-    private static void ModifyAltFlareOpenerPvE(ref RotationSolver.Basic.Actions.ActionSetting setting)
-    {
-        setting.RotationCheck = () => InAstralFire;
-        setting.UnlockedByQuestID = 66614u;
-
-    }
-
-    private readonly Lazy<IBaseAction> _AltFlareOpenerPvE = new Lazy<IBaseAction>(delegate
-    {
-        IBaseAction action460 = new BaseAction(ActionID.FlarePvE);
-        RotationSolver.Basic.Actions.ActionSetting setting460 = action460.Setting;
-        ModifyAltFlareOpenerPvE(ref setting460);
-        action460.Setting = setting460;
-        return action460;
-    });
-
-
-
-
     private static readonly HashSet<uint> burstStatusIds = new HashSet<uint>
 {
     (uint)StatusID.Divination,
@@ -204,33 +173,31 @@ public sealed class Rabbs_BLM : BlackMageRotation
         {
             const int minTargets = 3;
             const double soonThreshold = 3.0;
-            float aoeRange = ThunderIiPvE.Info.EffectRange;
 
-            if (AllHostileTargets == null || !AllHostileTargets.Any())
+            // Use the safe helper method to get only targets that are valid for Thunder II.
+            // This makes the check more efficient and reliable.
+            var validHostileTargets = TargetHelper.GetTargetsUsableByAction(
+                ThunderIiPvE.Info.Range,
+                ThunderIiPvE.Info.EffectRange,
+                ThunderIiPvE.ID,
+                getFriendly: false,
+                checkRangeAndLoS: true);
+
+            if (validHostileTargets == null || !validHostileTargets.Any())
                 return false;
 
-            foreach (var centerTarget in AllHostileTargets)
+            // Check if any of the valid targets can be a center for an AoE with enough targets needing Thunder.
+            return validHostileTargets.Any(centerTarget =>
             {
-                var inAoE = AllHostileTargets.Where(t =>
+                var targetsInAoe = validHostileTargets.Where(t =>
                     Vector3.Distance(centerTarget.Position, t.Position) <
-                    (aoeRange + centerTarget.HitboxRadius));
+                    (ThunderIiPvE.Info.EffectRange + centerTarget.HitboxRadius));
 
-                int needThunder = 0;
+                int targetsNeedingThunder = targetsInAoe.Count(t =>
+                    !t.HasStatus(true, ThunderStatusIds) || t.StatusTime(true, ThunderStatusIds) <= soonThreshold);
 
-                foreach (var t in inAoE)
-                {
-                    if (!t.HasStatus(true, ThunderStatusIds) ||
-                        t.StatusTime(true, ThunderStatusIds) <= soonThreshold)
-                    {
-                        needThunder++;
-                    }
-
-                    if (needThunder >= minTargets)
-                        return true;
-                }
-            }
-
-            return false;
+                return targetsNeedingThunder >= minTargets;
+            });
         }
     }
 
@@ -371,19 +338,21 @@ public sealed class Rabbs_BLM : BlackMageRotation
     public int GetAoeCount(IBaseAction action)
     {
         int maxAoeCount = 0;
-
         if (!CustomRotation.IsManual)
         {
             if (AllHostileTargets != null)
             {
-                foreach (var centerTarget in AllHostileTargets)
+                // Filter the hostile targets using the safe helper method from TargetHelper.
+                // This method handles the unsafe calls internally, allowing us to keep this method safe.
+                var validHostileTargets = TargetHelper.GetTargetsUsableByAction(action.Info.Range, action.Info.EffectRange, action.ID, getFriendly: false, checkRangeAndLoS: true);
+
+                foreach (var centerTarget in validHostileTargets)
                 {
+                    // Now, count only the targets from the valid list that are within the AoE radius.
+                    int currentAoeCount = validHostileTargets.Count(otherTarget =>
+                        Vector3.Distance(centerTarget.Position, otherTarget.Position) < (action.Info.EffectRange + centerTarget.HitboxRadius));
 
-                        int currentAoeCount = AllHostileTargets.Count(otherTarget =>
-                            Vector3.Distance(centerTarget.Position, otherTarget.Position) < (action.Info.EffectRange + centerTarget.HitboxRadius));
-
-                        maxAoeCount = Math.Max(maxAoeCount, currentAoeCount);
-                    
+                    maxAoeCount = Math.Max(maxAoeCount, currentAoeCount);
                 }
             }
         }
@@ -419,6 +388,8 @@ public sealed class Rabbs_BLM : BlackMageRotation
                     {
                         return true;
                     }
+                    if (UmbralHearts == 3 && UmbralIceStacks == 3 && !IsParadoxActive && CurrentMp == 10000)
+                    { return true; }
                 }
                 if (InAstralFire)
                 {
@@ -1123,7 +1094,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
                         if (ManafontPvE.Cooldown.IsCoolingDown && ManafontPvE.Cooldown.RecastTimeElapsed > 6 && AstralSoulStacks == 4)
                         {
                             if (ParadoxPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
-                            if (AltFlareOpenerPvE.CanUse(out act, skipAoeCheck: true)) return true;
+                            if (FlarePvE.CanUse(out act, skipAoeCheck: true)) return true;
                         }
 
                     }
@@ -1137,7 +1108,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
                     }
                     if (WillBeAbleToFlareStarMT && !WillBeAbleToFlareStarST)
                     {
-                        if (AltFlareOpenerPvE.CanUse(out act, skipAoeCheck: true)) return true;
+                        if (FlarePvE.CanUse(out act, skipAoeCheck: true)) return true;
                     }
 
                     if (CurrentMp < FireIvPvE.Info.MPNeed && (!IsParadoxActive || CurrentMp < ParadoxPvE.Info.MPNeed) && AstralSoulStacks < 6)
