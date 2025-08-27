@@ -284,7 +284,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
             // calculate the mp needed to get to 6 stacks
             int howMuchManaINeed = (discountedCasts * fireFourCostWithHeart) + (normalCasts * baseFireFourCost);
 
-            if (CurrentMp > howMuchManaINeed)
+            if (CurrentMp >= howMuchManaINeed)
             {
                 return true;
             }
@@ -319,7 +319,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
                 }
             }
             if (flaresNeeded == 1)
-                if (CurrentMp > 800)
+                if (CurrentMp >= 800)
                 {
                     return true;
                 }
@@ -361,7 +361,6 @@ public sealed class Rabbs_BLM : BlackMageRotation
             maxAoeCount = AllHostileTargets.Count(otherTarget =>
                 Vector3.Distance(CurrentTarget.Position, otherTarget.Position) < (action.Info.EffectRange + otherTarget.HitboxRadius));
         }
-
         return maxAoeCount;
     }
 
@@ -629,7 +628,6 @@ public sealed class Rabbs_BLM : BlackMageRotation
                         if (TriplecastPvE.CanUse(out act, usedUp: true)) return true;
                     }
                     if (SwiftcastPvE.CanUse(out act)) return true;
-                    if (TriplecastPvE.CanUse(out act, usedUp: true)) return true;
                 }
 
 
@@ -767,11 +765,9 @@ public sealed class Rabbs_BLM : BlackMageRotation
                 {
                     if (IsLastAction(ActionID.TransposePvE))
                     {
-                        if (CanMakeInstant)
-                        {
+
                             if (SwiftcastPvE.CanUse(out act)) return true;
-                            if (TriplecastPvE.CanUse(out act, usedUp: true)) return true;
-                        }
+                        
                     }
                 }
 
@@ -1159,7 +1155,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
                         if (ParadoxPvE.CanUse(out act, skipStatusProvideCheck: true)) return true;
                     }
 
-                    if (BlizzardIiiPvE.CanUse(out act)) return true;
+                    if (BlizzardIiiPvE.CanUse(out act) && CurrentMp < 10000) return true;
 
                 }
                 if (!InUmbralIce && !InAstralFire)
