@@ -1006,7 +1006,7 @@ public sealed class Rabbs_BLM : BlackMageRotation
                         if (FoulPvE.CanUse(out act, skipAoeCheck: true, usedUp: true)) return true;
                         if (ParadoxPvE.CanUse(out act, skipAoeCheck: true)) return true;
                     }
-                    if (FreezePvE.CanUse(out act, skipAoeCheck: true)) return true;
+                    if (FreezePvE.CanUse(out act, skipAoeCheck: true) && UmbralHearts == 0) return true;
                 }
                 //assumes neither, either start of combat in dungeon or death recovery, use high blizard II as there are no other options
                 if (!InUmbralIce && !InAstralFire)
