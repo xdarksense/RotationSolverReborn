@@ -373,12 +373,12 @@ public sealed class NIN_Reborn : NinjaRotation
             //Single
             if (!DeathBlossomPvE.CanUse(out _) && !HakkeMujinsatsuPvE.CanUse(out _) && !ShadowWalkerNeeded)
             {
-                if (RaitonPvE.EnoughLevel && RaitonPvE.IsEnabled && Player.StatusStack(true, StatusID.RaijuReady) < 3)
+                if (RaitonPvE.EnoughLevel && RaitonPvE.IsEnabled && (!Player.HasStatus(true, StatusID.RaijuReady) || (Player.HasStatus(true, StatusID.RaijuReady) && Player.StatusStack(true, StatusID.RaijuReady) < 3)))
                 {
                     SetNinjutsu(RaitonPvE);
                 }
 
-                if (FumaShurikenPvE.EnoughLevel && FumaShurikenPvE.IsEnabled)
+                if (FumaShurikenPvE.EnoughLevel && FumaShurikenPvE.IsEnabled && (!RaitonPvE.EnoughLevel || (Player.HasStatus(true, StatusID.RaijuReady) && Player.StatusStack(true, StatusID.RaijuReady) == 3)))
                 {
                     SetNinjutsu(FumaShurikenPvE);
                 }
