@@ -3484,6 +3484,7 @@ public partial class RotationConfigWindow : Window
         ImGui.Text($"MountRokkon: {DataCenter.MountRokkon}");
         ImGui.Text($"SildihnSubterrane: {DataCenter.SildihnSubterrane}");
         ImGui.Spacing();
+        ImGui.Text($"IsCastingMultiHit: {DataCenter.IsCastingMultiHit()}");
     }
 
     private static unsafe void DrawParty()
