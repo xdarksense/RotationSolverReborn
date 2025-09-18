@@ -7,7 +7,6 @@ using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Logging;
-using ExCSS;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
@@ -1117,7 +1116,8 @@ public static class ObjectHelper
     /// <returns>True if the target is immune due to any special mechanic; otherwise, false.</returns>
     public static bool IsSpecialImmune(this IBattleChara battleChara)
     {
-        return battleChara.IsMesoImmune()
+        return battleChara.IsLOTAImmune()
+            || battleChara.IsMesoImmune()
             || battleChara.IsJagdDollImmune()
             || battleChara.IsLyreImmune()
             || battleChara.IsDrakeImmune()
@@ -1131,6 +1131,29 @@ public static class ObjectHelper
             || battleChara.IsOmegaImmune()
             || battleChara.IsLimitlessBlue()
             || battleChara.IsHanselorGretelShielded();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool IsLOTAImmune(this IBattleChara battleChara)
+    {
+        if (DataCenter.TerritoryID == 174)
+        {
+            var Thanatos = battleChara.NameId == 710;
+            var AstralRealignment = Player.Object.HasStatus(false, StatusID.AstralRealignment);
+
+            if (Thanatos && !AstralRealignment)
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsLOTAImmune status found");
+                }
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
