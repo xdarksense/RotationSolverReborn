@@ -133,7 +133,7 @@ internal static class MajorUpdater
                 }
             }
         }
-
+        TargetUpdater.UpdateTargets();
         if (DataCenter.IsActivated())
         {
             try
@@ -147,7 +147,6 @@ internal static class MajorUpdater
                 }
 
                 MacroUpdater.UpdateMacro();
-                TargetUpdater.UpdateTargets();
                 StateUpdater.UpdateState();
                 ActionUpdater.UpdateNextAction();
                 ActionSequencerUpdater.UpdateActionSequencerAction();
