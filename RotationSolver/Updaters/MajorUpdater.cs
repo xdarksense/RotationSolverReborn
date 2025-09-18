@@ -127,6 +127,10 @@ internal static class MajorUpdater
     {
         if (!_shouldRunThisCycle)
             return;
+      
+        if (!DataCenter.IsActivated())
+            return;
+      
         try
         {
             //Always Update Targets so auto on has that information to use.
