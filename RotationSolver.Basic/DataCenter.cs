@@ -12,7 +12,6 @@ using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Configuration.Conditions;
 using RotationSolver.Basic.Rotations.Duties;
 using System.Collections.Concurrent;
-using Svg;
 using Action = Lumina.Excel.Sheets.Action;
 using CharacterManager = FFXIVClientStructs.FFXIV.Client.Game.Character.CharacterManager;
 using CombatRole = RotationSolver.Basic.Data.CombatRole;
@@ -21,7 +20,6 @@ namespace RotationSolver.Basic;
 
 internal static class DataCenter
 {
-    public static bool MasterEnabled = false;
     public static List<IBattleChara> PartyMembers { get; set; } = [];
 
     public static List<IBattleChara> AllianceMembers { get; set; } = [];
@@ -45,7 +43,7 @@ internal static class DataCenter
 
     public static bool IsActivated()
     {
-        return Player.AvailableThreadSafe && (MasterEnabled && (State || IsManual || Service.Config.TeachingMode));
+        return Player.AvailableThreadSafe && (State || IsManual || Service.Config.TeachingMode);
     }
 
     public static bool PlayerAvailable()
