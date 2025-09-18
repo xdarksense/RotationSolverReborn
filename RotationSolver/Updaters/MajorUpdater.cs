@@ -125,14 +125,19 @@ internal static class MajorUpdater
 
     private static void RSRActivatedCoreUpdate(IFramework framework)
     {
-        if (!_shouldRunThisCycle || !_isActivatedThisCycle)
+        if (!_shouldRunThisCycle)
             return;
-
+      
         if (!DataCenter.IsActivated())
             return;
-
+      
         try
         {
+            //Always Update Targets so auto on has that information to use.
+            TargetUpdater.UpdateTargets();
+            if (!_isActivatedThisCycle)
+                return;
+            
             bool canDoAction = ActionUpdater.CanDoAction();
             MovingUpdater.UpdateCanMove(canDoAction);
 

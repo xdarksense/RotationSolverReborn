@@ -215,26 +215,26 @@ public static class ObjectHelper
             }
         }
 
-        //if (DataCenter.IsInOccultCrescentOp)
-        //{
-        //    //bool isInCE = this needs to be fixed to sort out indiicator for in CE or not 
+        /*if (DataCenter.IsInOccultCrescentOp)
+        {
+            bool isInCE = DataCenter.IsInOccultCrescentOpCE;
 
-        //    if (isInCE)
-        //    {
-        //        if (!battleChara.IsOccultCEMob())
-        //        {
-        //            return false;
-        //        }
-        //    }
+            if (isInCE)
+            {
+                if (!battleChara.IsOccultCEMob())
+                {
+                    return false;
+                }
+            }
 
-        //    if (!isInCE)
-        //    {
-        //        if (battleChara.IsOccultCEMob())
-        //        {
-        //            return false;
-        //        }
-        //    }
-        //}
+            if (!isInCE)
+            {
+                if (battleChara.IsOccultCEMob())
+                {
+                    return false;
+                }
+            }
+        }*/
 
         if (Service.Config.TargetQuestThings && battleChara.IsOthersPlayersMob())
         {
