@@ -46,6 +46,11 @@ internal static class DataCenter
         return Player.AvailableThreadSafe && (State || IsManual || Service.Config.TeachingMode);
     }
 
+    public static bool PlayerAvailable()
+    {
+        return Player.AvailableThreadSafe;
+    }
+
     internal static IBattleChara? HostileTarget
     {
         get => Svc.Objects.SearchById(_hostileTargetId) as IBattleChara;
