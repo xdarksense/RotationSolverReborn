@@ -144,7 +144,6 @@ public static class StatusHelper
         StatusID.GreatNebula,
         StatusID.Holmgang_409,
         StatusID.LivingDead,
-        StatusID.Superbolide,
     ];
 
     /// <summary>
@@ -153,7 +152,6 @@ public static class StatusHelper
     public static StatusID[] NoPositionalStatus { get; } =
     [
         StatusID.TrueNorth,
-        StatusID.RightEye,
     ];
 
     /// <summary>
@@ -289,7 +287,7 @@ public static class StatusHelper
         }
 
         float statusTime = battleChara.StatusTime(isFromSelf, statusIDs);
-        return (statusTime >= 0 || !battleChara.HasStatus(isFromSelf, statusIDs)) && statusTime <= time;
+        return !battleChara.HasStatus(isFromSelf, statusIDs) && statusTime <= time;
     }
 
     /// <summary>
