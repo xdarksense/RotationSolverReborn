@@ -271,22 +271,7 @@ namespace RotationSolver.Commands
                     return;
                 }
 
-                IBattleChara? target = null;
-                if (Service.Config.StartOnAttackedBySomeone && !DataCenter.State && DataCenter.MasterEnabled)
-                {
-                    foreach (var t in DataCenter.AllHostileTargets)
-                    {
-                        if (t != null && t is IBattleChara battleChara && battleChara.TargetObjectId == Player.Object.GameObjectId)
-                        {
-                            target = battleChara;
-                            break;
-                        }
-                    }
-                    if (target != null && !ObjectHelper.IsDummy(target))
-                    {
-                        DoStateCommandType(StateCommandType.Manual);
-                    }
-                }
+                
 
                 //PluginLog.Debug($"AllTargetsCount = {DataCenter.AllTargets.Count} && AllHostileTargets: {DataCenter.AllHostileTargets.Count} && PartyCount: {DataCenter.PartyMembers.Count} && DataCenter.State = {DataCenter.State} && StartOnPartyIsInCombat = {Service.Config.StartOnPartyIsInCombat} && StartOnAllianceIsInCombat = {Service.Config.StartOnAllianceIsInCombat} && StartOnFieldOpInCombat = {Service.Config.StartOnFieldOpInCombat}");
                 
@@ -370,7 +355,22 @@ namespace RotationSolver.Commands
                         }
                     }
                 }
-
+                IBattleChara? target = null;
+                if (Service.Config.StartOnAttackedBySomeone && !DataCenter.State && DataCenter.MasterEnabled)
+                {
+                    foreach (var t in DataCenter.AllHostileTargets)
+                    {
+                        if (t != null && t is IBattleChara battleChara && battleChara.TargetObjectId == Player.Object.GameObjectId)
+                        {
+                            target = battleChara;
+                            break;
+                        }
+                    }
+                    if (target != null && !ObjectHelper.IsDummy(target))
+                    {
+                        DoStateCommandType(StateCommandType.Manual);
+                    }
+                }
                 if (Service.Config.StartOnCountdown)
                 {
                     if (Service.CountDownTime > 0)
