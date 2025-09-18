@@ -128,6 +128,9 @@ internal static class MajorUpdater
         if (!_shouldRunThisCycle || !_isActivatedThisCycle)
             return;
 
+        if (!DataCenter.IsActivated())
+            return;
+
         try
         {
             bool canDoAction = ActionUpdater.CanDoAction();
