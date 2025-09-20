@@ -409,7 +409,7 @@ internal static partial class TargetUpdater
     // Has performance implications for keeping too much data for too many targets as they're also all evaluated multiple times a frame for expected TTK
     private static void UpdateTimeToKill()
     {
-        DateTime now = DateTime.UtcNow;
+        DateTime now = DateTime.Now;
         if (now - _lastUpdateTimeToKill < TimeToKillUpdateInterval)
         {
             return;
