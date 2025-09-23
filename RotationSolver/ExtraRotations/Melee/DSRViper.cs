@@ -1,9 +1,9 @@
-namespace RotationSolver.RebornRotations.Melee;
+namespace RotationSolver.ExtraRotations.Melee;
 
-[Rotation("Optimal", CombatType.PvE, GameVersion = "7.31")]
-[SourceCode(Path = "main/RebornRotations/Melee/VPR_Optimal.cs")]
+[Rotation("DSRViper by freddersly", CombatType.PvE, GameVersion = "7.31")]
+[SourceCode(Path = "main/ExtraRotations/Melee/DSRViper.cs")]
 
-public sealed class VPR_Optimal : ViperRotation
+public sealed class DSRViper : ViperRotation
 {
     #region Config Options
 
@@ -35,7 +35,7 @@ public sealed class VPR_Optimal : ViperRotation
     private bool IsPoolingForBurst()
     {
         return SaveOfferingsForBurst && SerpentsIrePvE.EnoughLevel && 
-               SerpentsIrePvE.Cooldown.RecastTimeRemain <= DualWieldPrepTime &&
+               SerpentsIrePvE.Cooldown.RecastTimeRemainOneCharge <= DualWieldPrepTime &&
                SerpentOffering < 100;
     }
 
@@ -46,7 +46,7 @@ public sealed class VPR_Optimal : ViperRotation
 
     private bool ShouldRefreshBuffsBeforeBurst()
     {
-        return ForceBurstBuffRefresh && SerpentsIrePvE.Cooldown.RecastTimeRemain <= DualWieldPrepTime &&
+        return ForceBurstBuffRefresh && SerpentsIrePvE.Cooldown.RecastTimeRemainOneCharge <= DualWieldPrepTime &&
                (SwiftTime <= 50 || HuntersTime <= 50);
     }
 
@@ -144,7 +144,7 @@ public sealed class VPR_Optimal : ViperRotation
 
         // Priority 6: Early Tincture timing (based on Balance guide)
         if (EarlyTincture && NoAbilityReady && SerpentsIrePvE.EnoughLevel && 
-            SerpentsIrePvE.Cooldown.ElapsedAfter(115) && SerpentsIrePvE.Cooldown.RecastTimeRemain <= 5 &&
+            SerpentsIrePvE.Cooldown.ElapsedAfter(115) && SerpentsIrePvE.Cooldown.RecastTimeRemainOneCharge <= 5 &&
             UseBurstMedicine(out act))
         {
             return true;
