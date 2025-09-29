@@ -6,7 +6,6 @@ using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using ECommons;
 using ECommons.DalamudServices;
@@ -50,6 +49,10 @@ public partial class RotationConfigWindow : Window
     private ICustomRotation? _currentRotation;
     private Dictionary<RotationConfigWindowTab, (bool, uint)> _configWindowTabProperties = [];
     private bool _showResetPopup = false;
+
+    // Cache for remote logo texture to avoid per-frame retrieval
+    private IDalamudTextureWrap? _logoTexture;
+    private DateTime _lastLogoFetchAttempt = DateTime.MinValue;
 
     public RotationConfigWindow()
     : base("###rsrConfigWindow", ImGuiWindowFlags.NoScrollbar, false)
@@ -139,6 +142,20 @@ public partial class RotationConfigWindow : Window
 
                 _configWindowTabProperties[tab] = (shouldSkip, tab.GetAttribute<TabIconAttribute>()?.Icon ?? 0);
             }
+        }
+
+        // Preload logo texture once
+        try
+        {
+            string logoUrl = $"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Images/Logo.png";
+            if (ThreadLoadImageHandler.TryGetTextureWrap(logoUrl, out IDalamudTextureWrap? logo) && logo != null)
+            {
+                _logoTexture = logo;
+            }
+        }
+        catch
+        {
+            // ignore
         }
 
         base.OnOpen();
@@ -476,6 +493,7 @@ public partial class RotationConfigWindow : Window
                         var _ when DataCenter.IsInOccultCrescentOp => $"Duty - {DutyRotation.ActivePhantomJob}",
                         var _ when DataCenter.InVariantDungeon => "Duty - Variant",
                         var _ when DataCenter.IsInBozja => "Duty - Bozja",
+                        var _ when DataCenter.InMonsterHunterDuty => "Duty - Monster Hunter",
                         _ => "Duty",
                     };
                 }
@@ -559,11 +577,25 @@ public partial class RotationConfigWindow : Window
                     _searchResults = [];
                 }
                 ImguiTooltips.HoveredTooltip(UiString.ConfigWindow_About_Punchline.GetDescription());
-                string logoUrl = $"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Images/Logo.png";
-                if (ThreadLoadImageHandler.TryGetTextureWrap(logoUrl, out IDalamudTextureWrap? logo) && logo != null)
+                if (_logoTexture != null)
                 {
                     ImGui.SetCursorPos(cursor);
-                    ImGui.Image(logo.Handle, Vector2.One * size);
+                    ImGui.Image(_logoTexture.Handle, Vector2.One * size);
+                }
+                else
+                {
+                    // Retry loading the logo texture in draw (throttled) if not ready at OnOpen
+                    if ((DateTime.UtcNow - _lastLogoFetchAttempt).TotalSeconds > 1)
+                    {
+                        _lastLogoFetchAttempt = DateTime.UtcNow;
+                        string logoUrl = $"https://raw.githubusercontent.com/{Service.USERNAME}/{Service.REPO}/main/Images/Logo.png";
+                        if (ThreadLoadImageHandler.TryGetTextureWrap(logoUrl, out IDalamudTextureWrap? logo) && logo != null)
+                        {
+                            _logoTexture = logo;
+                            ImGui.SetCursorPos(cursor);
+                            ImGui.Image(_logoTexture.Handle, Vector2.One * size);
+                        }
+                    }
                 }
             }, wholeWidth, size);
             ImGui.Spacing();
@@ -3598,6 +3630,9 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"HP: {battleChara.CurrentHp} / {battleChara.MaxHp}");
             ImGui.Spacing();
             ImGui.Text($"NamePlate Icon ID: {battleChara.GetNamePlateIcon()}");
+            ImGui.Text($"Event Type: {battleChara.GetEventType()}");
+            ImGui.Text($"TargetCharaCondition: {battleChara.TargetCharaCondition()}");
+            //ImGui.Text($"GetMarkerNumber: {MarkingHelper.GetMarkerNumber((long)battleChara.GameObjectId)}");
             ImGui.Text($"Name Id: {battleChara.NameId}");
             ImGui.Text($"Data Id: {battleChara.DataId}");
             ImGui.Spacing();

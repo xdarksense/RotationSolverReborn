@@ -310,36 +310,6 @@ internal static class DataCenter
         }
     }
 
-    public static ulong[] TreasureCharas
-    {
-        get
-        {
-            List<ulong> charas = new(5);
-            //60687 - 60691 For treasure hunt.
-            for (int i = 60687; i <= 60691; i++)
-            {
-                IBattleChara? b = null;
-                for (int j = 0; j < AllTargets.Count; j++)
-                {
-                    IBattleChara battleChara = AllTargets[j];
-                    if (battleChara.GetNamePlateIcon() == i)
-                    {
-                        b = battleChara;
-                        break;
-                    }
-                }
-                if (b == null || b.CurrentHp == 0)
-                {
-                    continue;
-                }
-
-                charas.Add(b.GameObjectId);
-            }
-
-            return [.. charas];
-        }
-    }
-
     private static float _avgTTK = 0f;
     public static float AverageTTK
     {
@@ -497,6 +467,27 @@ internal static class DataCenter
     /// 
     /// </summary>
     public static bool InVariantDungeon => AloaloIsland || MountRokkon || SildihnSubterrane;
+    #endregion
+
+    #region Misc Duty Info
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool RathalosNormal => IsInTerritory(761);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool RathalosEX => IsInTerritory(762);
+
+    //public static bool ArkveldNormal => IsInTerritory(?);
+
+    //public static bool ArkveldEX => IsInTerritory(?);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool InMonsterHunterDuty => RathalosNormal || RathalosEX;
     #endregion
 
     #region Job Info

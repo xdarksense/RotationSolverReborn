@@ -1188,24 +1188,72 @@ public struct ActionTargetInfo(IBaseAction action)
                 }
                 break;
 
-            case SpecialActionType.MovingForward:
+            case SpecialActionType.HostileMovingForward:
                 if (Service.Config != null)
                 {
                     if (DataCenter.MergedStatus.HasFlag(AutoStatus.MoveForward) || Service.CountDownTime > 0)
                     {
-                        type = TargetType.Move;
+                        if (Svc.Targets.Target is IBattleChara IsHostiletarg && IsHostiletarg.IsHostile())
+                        {
+                            return IsHostiletarg;
+                        }
+                    }
+                    if (DataCenter.MergedStatus.HasFlag(AutoStatus.Intercepting))
+                    {
+                        if (Svc.Targets.Target is IBattleChara IsHostiletarg && IsHostiletarg.IsHostile())
+                        {
+                            return IsHostiletarg;
+                        }
                     }
                     else
                     {
                         var filtered = new List<IBattleChara>();
                         foreach (var t in battleChara)
                         {
-                            if (t.DistanceToPlayer() < Service.Config.DistanceForMoving)
+                            if (t.DistanceToPlayer() < Service.Config.DistanceForMoving2)
                             {
                                 filtered.Add(t);
                             }
                         }
                         battleChara = filtered;
+                    }
+                }
+                break;
+
+            case SpecialActionType.FriendlyMovingForward:
+                if (Svc.Targets.FocusTarget != null)
+                {
+                    if (Svc.Targets.FocusTarget is IBattleChara focus && focus.IsParty())
+                    {
+                        return focus;
+                    }
+                }
+                else if (Svc.Targets.FocusTarget == null && Svc.Targets.Target != null)
+                {
+                    if (Svc.Targets.Target is IBattleChara IsPartytarg && IsPartytarg.IsParty())
+                    {
+                        return IsPartytarg;
+                    }
+                }
+                break;
+
+            case SpecialActionType.HostileFriendlyMovingForward:
+                if (Svc.Targets.FocusTarget != null)
+                {
+                    if (Svc.Targets.FocusTarget is IBattleChara focus && focus.IsParty())
+                    {
+                        return focus;
+                    }
+                }
+                else if (Svc.Targets.FocusTarget == null && Svc.Targets.Target != null)
+                {
+                    if (Svc.Targets.Target is IBattleChara IsPartytarg && IsPartytarg.IsParty())
+                    {
+                        return IsPartytarg;
+                    }
+                    if (Svc.Targets.Target is IBattleChara IsHostiletarg && IsHostiletarg.IsHostile())
+                    {
+                        return IsHostiletarg;
                     }
                 }
                 break;
@@ -1233,6 +1281,13 @@ public struct ActionTargetInfo(IBaseAction action)
                         if (Svc.Targets.FocusTarget is IBattleChara focus && focus.IsParty())
                         {
                             return focus;
+                        }
+                    }
+                    else if (Svc.Targets.Target != null)
+                    {
+                        if (Svc.Targets.Target is IBattleChara targ && targ.IsParty())
+                        {
+                            return targ;
                         }
                     }
                 }
@@ -1746,7 +1801,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 List<IBattleChara> filteredTargets = [];
                 foreach (var t in battleChara)
                 {
-                    if (t.DistanceToPlayer() > Service.Config.DistanceForMoving)
+                    if (t.DistanceToPlayer() > Service.Config.DistanceForMoving2)
                     {
                         continue;
                     }
@@ -1777,7 +1832,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 List<IBattleChara> filteredTargets = [];
                 foreach (var t in battleChara)
                 {
-                    if (t.DistanceToPlayer() > Service.Config.DistanceForMoving)
+                    if (t.DistanceToPlayer() > Service.Config.DistanceForMoving2)
                     {
                         continue;
                     }
@@ -1973,43 +2028,6 @@ public struct ActionTargetInfo(IBaseAction action)
                 {
                     battleChara = filteredCharacters;
                 }
-            }
-
-            // Handle treasure characters
-            if (DataCenter.TreasureCharas != null && DataCenter.TreasureCharas.Length > 0)
-            {
-                IBattleChara? treasureChara = null;
-                foreach (var b in battleChara)
-                {
-                    if (b.GameObjectId == DataCenter.TreasureCharas[0])
-                    {
-                        treasureChara = b;
-                        break;
-                    }
-                }
-                if (treasureChara != null)
-                {
-                    return treasureChara;
-                }
-
-                var tempList = new List<IBattleChara>();
-                foreach (var b in battleChara)
-                {
-                    bool found = false;
-                    foreach (var id in DataCenter.TreasureCharas)
-                    {
-                        if (b.GameObjectId == id)
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found)
-                    {
-                        tempList.Add(b);
-                    }
-                }
-                battleChara = tempList;
             }
 
             // Filter high priority hostiles

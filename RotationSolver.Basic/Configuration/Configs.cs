@@ -176,6 +176,11 @@ internal partial class Configs : IPluginConfiguration
     Filter = AutoActionUsage)]
     private static readonly bool _usePhoenixDown = false;
 
+    [UI("Use damaging gap closer abilites if the distance to your target is less than this.",
+        Filter = AutoActionUsage)]
+    [Range(0, 30, ConfigUnitType.Yalms, 1f)]
+    public float DistanceForMoving2 { get; set; } = 3f;
+
     [ConditionBool, UI("Allow the use of AOEs against priority-marked targets.",
     Description = "Enable to allow AoE actions to hit targets with priority markers.",
     Parent = nameof(ChooseAttackMark))]
@@ -248,18 +253,6 @@ internal partial class Configs : IPluginConfiguration
 
     [ConditionBool, UI("Debug Mode", Filter = Debug)]
     private static readonly bool _inDebug = false;
-
-    [ConditionBool, UI("Load default rotations", Description = "Load the rotations provided by the Combat Reborn team", Filter = Rotations)]
-    private static readonly bool _loadDefaultRotations = true;
-
-    [ConditionBool, UI("Download custom rotations from the internet",
-               Description = "This will allow RSR to download custom rotations from the internet. This is a security risk and should only be enabled if you trust the source of the rotations.",
-               Filter = Rotations)]
-    private static readonly bool _downloadCustomRotations = true;
-
-    [ConditionBool, UI("Monitor local rotations for changes (Developer Mode)",
-               Filter = Rotations)]
-    private static readonly bool _autoReloadRotations = false;
 
     [ConditionBool, UI("Make /rotation Manual a toggle command.",
         Filter = BasicParams)]
@@ -613,15 +606,6 @@ internal partial class Configs : IPluginConfiguration
     [Range(1, 20, ConfigUnitType.Seconds, 1f)]
     public float SpecialDuration { get; set; } = 3;
 
-    /// <markdown file="Basic" name="Action Execution Delay">
-    /// Random time in seconds to wait before RSR can take another action.
-    /// (RSR will not take actions during window).
-    /// </markdown>
-    [UI("Action Execution Delay.\n(RSR will not take actions during window).",
-        Filter = BasicTimer)]
-    [Range(0, 1, ConfigUnitType.Seconds, 0.002f)]
-    public Vector2 WeaponDelay { get; set; } = new(0, 0);
-
     [UI("Random range of delay for RSR to stop attacking when the target is dead or immune to damage.",
         Parent = nameof(UseStopCasting))]
     [Range(0, 3, ConfigUnitType.Seconds, 0.002f)]
@@ -796,10 +780,6 @@ internal partial class Configs : IPluginConfiguration
     Filter = TargetConfig)]
     private static readonly bool _ignoreNonFateInFate = true;
 
-    [ConditionBool, UI("Prevent targeting invalid targets in Bozjan Southern Front and Zadnor",
-        Filter = TargetConfig)]
-    private static readonly bool _bozjaCEmobtargeting = false;
-
     [ConditionBool, UI("Move to the furthest position for targeting area movement actions.",
         Filter = TargetConfig, Section = 2)]
     private static readonly bool _moveAreaActionFarthest = false;
@@ -873,11 +853,6 @@ internal partial class Configs : IPluginConfiguration
                 Filter = TargetConfig, Section = 1)]
     [Range(0, 0.1f, ConfigUnitType.Percent, 0.01f)]
     public float IsDyingConfig { get; set; } = 0.02f;
-
-    [UI("Use gapcloser as a damage ability if the distance to your target is less than this.",
-        Filter = TargetConfig, Section = 2)]
-    [Range(0, 30, ConfigUnitType.Yalms, 1f)]
-    public float DistanceForMoving { get; set; } = 1.2f;
 
     [ConditionBool, UI("Prioritize Low HP targets instead of High HP targets when using Small Target and multiple Small targets present.",
         Filter = TargetConfig)]
