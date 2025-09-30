@@ -1,9 +1,8 @@
-namespace RotationSolver.RebornRotations.Melee;
+namespace RotationSolver.ExtraRotations.Melee;
 
-[Rotation("Optimal", CombatType.PvE, GameVersion = "7.31")]
-[SourceCode(Path = "main/RebornRotations/Melee/VPR_Optimal.cs")]
-
-public sealed class VPR_Optimal : ViperRotation
+[Rotation("DSRViper by freddersly", CombatType.PvE, GameVersion = "7.31")]
+[SourceCode(Path = "main/ExtraRotations/Melee/DSRViper.cs")]
+public sealed class DSRViper : ViperRotation
 {
     #region Config Options
 
