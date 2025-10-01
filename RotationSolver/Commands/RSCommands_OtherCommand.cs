@@ -291,9 +291,29 @@ public static partial class RSCommands
         }
     }
 
+    private static IAction[] GetAllActions()
+    {
+        var rotationActions = RotationUpdater.CurrentRotationActions ?? [];
+        var dutyActions = DataCenter.CurrentDutyRotation?.AllActions ?? [];
+
+        int totalLength = rotationActions.Length + dutyActions.Length;
+        List<IAction> allActionsList = new(totalLength);
+        HashSet<IAction> seen = [];
+        for (int i = 0; i < rotationActions.Length; i++)
+        {
+            if (seen.Add(rotationActions[i]))
+                allActionsList.Add(rotationActions[i]);
+        }
+        for (int i = 0; i < dutyActions.Length; i++)
+        {
+            if (seen.Add(dutyActions[i]))
+                allActionsList.Add(dutyActions[i]);
+        }
+        return [.. allActionsList];
+    }
+
     private static Enum GetNextEnumValue(Enum currentEnumValue)
     {
-        // Remove LINQ: .Cast<Enum>().ToArray()
         Array values = Enum.GetValues(currentEnumValue.GetType());
         Enum[] enumValues = new Enum[values.Length];
         for (int i = 0; i < values.Length; i++)
@@ -309,44 +329,15 @@ public static partial class RSCommands
     {
         string trimStr = str.Trim();
 
-        // Combine both regular and duty actions, avoiding duplicates by reference
-        var rotationActions = RotationUpdater.CurrentRotationActions ?? [];
-        var dutyActions = DataCenter.CurrentDutyRotation?.AllActions ?? [];
+        IAction[] allActions = GetAllActions();
 
-        // Manual concat and deduplication
-        int totalLength = rotationActions.Length + dutyActions.Length;
-        List<IAction> allActionsList = new(totalLength);
-        HashSet<IAction> seen = [];
-        for (int i = 0; i < rotationActions.Length; i++)
-        {
-            if (seen.Add(rotationActions[i]))
-                allActionsList.Add(rotationActions[i]);
-        }
-        for (int i = 0; i < dutyActions.Length; i++)
-        {
-            if (seen.Add(dutyActions[i]))
-                allActionsList.Add(dutyActions[i]);
-        }
-        IAction[] allActions = [.. allActionsList];
+        // Sort by Name.Length descending
+        IAction[] sortedActions = [.. allActions];
+        Array.Sort(sortedActions, (a, b) => b.Name.Length.CompareTo(a.Name.Length));
 
-        // Sort by Name.Length descending (bubble sort)
-        int n = allActions.Length;
-        IAction[] sortedActions = new IAction[n];
-        Array.Copy(allActions, sortedActions, n);
-        for (int i = 0; i < n - 1; i++)
+        for (int i = 0; i < sortedActions.Length; i++)
         {
-            for (int j = 0; j < n - i - 1; j++)
-            {
-                if (sortedActions[j].Name.Length < sortedActions[j + 1].Name.Length)
-                {
-                    (sortedActions[j + 1], sortedActions[j]) = (sortedActions[j], sortedActions[j + 1]);
-                }
-            }
-        }
-
-        for (int i = 0; i < n; i++)
-        {
-            IAction? act = sortedActions[i];
+            IAction act = sortedActions[i];
             if (trimStr.Equals(act.Name, StringComparison.OrdinalIgnoreCase))
             {
                 act.IsEnabled = !act.IsEnabled;
@@ -383,25 +374,7 @@ public static partial class RSCommands
 
         if (double.TryParse(timeStr, out double time))
         {
-            // Combine both regular and duty actions, avoiding duplicates by reference
-            var rotationActions = RotationUpdater.CurrentRotationActions ?? [];
-            var dutyActions = DataCenter.CurrentDutyRotation?.AllActions ?? [];
-
-            // Manual concat and deduplication
-            int totalLength = rotationActions.Length + dutyActions.Length;
-            List<IAction> allActionsList = new(totalLength);
-            HashSet<IAction> seen = [];
-            for (int i = 0; i < rotationActions.Length; i++)
-            {
-                if (seen.Add(rotationActions[i]))
-                    allActionsList.Add(rotationActions[i]);
-            }
-            for (int i = 0; i < dutyActions.Length; i++)
-            {
-                if (seen.Add(dutyActions[i]))
-                    allActionsList.Add(dutyActions[i]);
-            }
-            IAction[] allActions = [.. allActionsList];
+            IAction[] allActions = GetAllActions();
 
             for (int i = 0; i < allActions.Length; i++)
             {
