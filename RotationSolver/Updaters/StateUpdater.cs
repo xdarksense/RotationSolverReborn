@@ -25,7 +25,7 @@ internal static class StateUpdater
                 attackedTargetsCount++;
             }
         }
-        if (!DataCenter.InCombat && attackedTargetsCount == 0)
+        if (!DataCenter.InCombat && attackedTargetsCount > 0)
         {
             DataCenter.ResetAllRecords();
         }
