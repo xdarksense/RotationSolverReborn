@@ -302,6 +302,14 @@ internal partial class Configs : IPluginConfiguration
         Filter = UiInformation)]
     private static readonly bool _showTooltips = true;
 
+    [ConditionBool, UI("Color disabled actions on hotbars",
+        Description = "When enabled, actions you have disabled in RSR will be tinted on in-game hotbars.",
+        Filter = UiInformation)]
+    private static readonly bool _reddenDisabledHotbarActions = false;
+
+    [UI("Disabled actions hotbar tint color", Parent = nameof(ReddenDisabledHotbarActions), Filter = UiInformation)]
+    public Vector4 HotbarDisabledTintColor { get; set; } = new(1f, 0f, 0f, 0.40f);
+
     [ConditionBool, UI("Display do action feedback on toast",
         Filter = UiInformation)]
     private static readonly bool _showToastsAboutDoAction = false;
