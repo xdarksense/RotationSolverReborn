@@ -3611,7 +3611,7 @@ public partial class RotationConfigWindow : Window
             ImGui.Text($"TargetCharaCondition: {battleChara.TargetCharaCondition()}");
             //ImGui.Text($"GetMarkerNumber: {MarkingHelper.GetMarkerNumber((long)battleChara.GameObjectId)}");
             ImGui.Text($"Name Id: {battleChara.NameId}");
-            ImGui.Text($"Data Id: {battleChara.DataId}");
+            ImGui.Text($"Data Id: {battleChara.BaseId}");
             ImGui.Spacing();
             ImGui.Text($"Is Attackable: {battleChara.IsAttackable()}");
             ImGui.Text($"Is Others Players Mob: {battleChara.IsOthersPlayersMob()}");
