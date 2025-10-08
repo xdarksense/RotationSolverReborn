@@ -815,7 +815,7 @@ internal partial class Configs : IPluginConfiguration
 
     [ConditionBool, UI("Block targeting quest mobs belonging to other players (Broken).",
         Filter = TargetConfig, Section = 1)]
-    private static readonly bool targetQuestThings = true;
+    private static readonly bool targetQuestThings2 = false;
 
     [ConditionBool, UI("Ignore all other FATE target when Forlorn available (Experimental).",
         Filter = TargetConfig, Section = 1)]
