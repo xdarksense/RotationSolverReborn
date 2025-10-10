@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace RotationSolver.RebornRotations.Melee;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.3", Description = "Uses Lunar Solar Opener from The Balance")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.31", Description = "Uses Lunar Solar Opener from The Balance")]
 [SourceCode(Path = "main/RebornRotations/Melee/MNK_Reborn.cs")]
 
 
@@ -72,10 +72,9 @@ public sealed class MNK_Reborn : MonkRotation
     #region oGCD Logic
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
         if (EnableTEAChecker && Target.Name.ToString() == "Jagd Doll" && Target.GetHealthRatio() < 0.25)
         {
-            return false;
+            return base.EmergencyAbility(nextGCD, out act);
         }
 
         // PerfectBalancePvE after first gcd + TheForbiddenChakraPvE after second gcd
@@ -207,10 +206,9 @@ public sealed class MNK_Reborn : MonkRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
         if (EnableTEAChecker && Target.Name.ToString() == "Jagd Doll" && Target.GetHealthRatio() < 0.25)
         {
-            return false;
+            return base.AttackAbility(nextGCD, out act);
         }
 
         if (RiddleOfFirePvE.CanUse(out _))
@@ -395,10 +393,9 @@ public sealed class MNK_Reborn : MonkRotation
 
     protected override bool GeneralGCD(out IAction? act)
     {
-        act = null;
         if (EnableTEAChecker && Target.Name.ToString() == "Jagd Doll" && Target.GetHealthRatio() < 0.25)
         {
-            return false;
+            return base.GeneralGCD(out act);
         }
 
         // bullet proofed finisher - use when during burst

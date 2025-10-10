@@ -352,7 +352,7 @@ public partial class SamuraiRotation
 
     static partial void ModifyHissatsuGyotenPvE(ref ActionSetting setting)
     {
-        setting.SpecialType = SpecialActionType.MovingForward;
+        setting.SpecialType = SpecialActionType.HostileMovingForward;
         setting.ActionCheck = () => Kenki >= 10;
         setting.CreateConfig = () => new ActionConfig()
         {
@@ -383,10 +383,10 @@ public partial class SamuraiRotation
         setting.IsFriendly = true;
     }
 
-    static partial void ModifyIkishotenPvE(ref ActionSetting setting)
+static partial void ModifyIkishotenPvE(ref ActionSetting setting)
     {
         setting.StatusProvide = [StatusID.OgiNamikiriReady, StatusID.ZanshinReady];
-        setting.ActionCheck = () => InCombat && Kenki <= 50;
+        setting.ActionCheck = () => InCombat && Kenki >= 50;
         setting.IsFriendly = true;
     }
 

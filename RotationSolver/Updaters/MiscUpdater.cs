@@ -16,6 +16,7 @@ namespace RotationSolver.Updaters;
 
 internal static class MiscUpdater
 {
+    
     internal static void UpdateMisc()
     {
         UpdateEntry();
@@ -52,85 +53,32 @@ internal static class MiscUpdater
                     new IconPayload(icon),
                     new TextPayload(showStr)
                 );
-                if (Service.Config.DtrManual)
+                
+                if (Service.Config.DTRType == DTRType.DTRNormal)
                 {
-                    _dtrEntry.OnClick = _ => CycleStateWithAllTargetTypes();
+                    _dtrEntry.OnClick = _ => RSCommands.CycleStateWithOneTargetTypes();
                 }
-                else if (Service.Config.DtrCycle)
+                else if (Service.Config.DTRType == DTRType.DTRAllAuto)
                 {
-                    _dtrEntry.OnClick = _ => CycleStateWithAllTargetTypes();
+                    _dtrEntry.OnClick = _ => RSCommands.CycleStateWithAllTargetTypes();
                 }
-                else
+                else if (Service.Config.DTRType == DTRType.DTRAuto)
                 {
-                    _dtrEntry.OnClick = _ => RSCommands.IncrementState();
+                    _dtrEntry.OnClick = _ => RSCommands.CycleStateAuto();
                 }
-            }
+                else if (Service.Config.DTRType == DTRType.DTRManual)
+                {
+                    _dtrEntry.OnClick = _ => RSCommands.CycleStateManual();
+                }
+                else if (Service.Config.DTRType == DTRType.DTRManualAuto)
+                {
+                    _dtrEntry.OnClick = _ => RSCommands.CycleStateManualAuto();
+                }
+            }           
         }
         else if (_dtrEntry != null && _dtrEntry.Shown)
         {
             _dtrEntry.Shown = false;
-        }
-    }
-
-    private static void CycleStateManual()
-    {
-        // If currently in off mode and not manual, go to Manual
-        if (DataCenter.State && !DataCenter.IsManual)
-        {
-            RSCommands.DoStateCommandType(StateCommandType.Manual);
-            return;
-        }
-
-        // If currently in Manual mode, turn off
-        if (DataCenter.State && DataCenter.IsManual)
-        {
-            RSCommands.DoStateCommandType(StateCommandType.Off);
-            return;
-        }
-    }
-
-    private static void CycleStateWithAllTargetTypes()
-    {
-        // If currently Off, start with the first TargetType
-        if (!DataCenter.State)
-        {
-            if (Service.Config.TargetingTypes.Count > 0)
-            {
-                Service.Config.TargetingIndex = 0;
-                RSCommands.DoStateCommandType(StateCommandType.Auto, 0);
-            }
-            else
-            {
-                // No targeting types configured, go to Manual
-                RSCommands.DoStateCommandType(StateCommandType.Manual);
-            }
-            return;
-        }
-
-        // If currently in Auto mode, cycle through all TargetTypes
-        if (DataCenter.State && !DataCenter.IsManual)
-        {
-            int nextIndex = Service.Config.TargetingIndex + 1;
-
-            // If we've gone through all TargetTypes, switch to Manual
-            if (nextIndex >= Service.Config.TargetingTypes.Count)
-            {
-                RSCommands.DoStateCommandType(StateCommandType.Manual);
-            }
-            else
-            {
-                // Move to next TargetType
-                Service.Config.TargetingIndex = nextIndex;
-                RSCommands.DoStateCommandType(StateCommandType.Auto, nextIndex);
-            }
-            return;
-        }
-
-        // If currently in Manual mode, turn off
-        if (DataCenter.State && DataCenter.IsManual)
-        {
-            RSCommands.DoStateCommandType(StateCommandType.Off);
-            return;
         }
     }
 
@@ -188,21 +136,25 @@ internal static class MiscUpdater
 
     private static unsafe void UpdateCancelCast()
     {
-        if (!Player.Object.IsCasting)
+        if (Player.Object == null || !Player.Object.IsCasting)
         {
             return;
         }
 
+        if (!DataCenter.State)
+        {
+            return;
+        }
+
+        IBattleChara? castTarget = Svc.Objects.SearchById(Player.Object.CastTargetObjectId) as IBattleChara;
+
         bool tarDead = Service.Config.UseStopCasting
-            && Svc.Objects.SearchById(Player.Object.CastTargetObjectId) is IBattleChara b
-            && b.IsEnemy() && b.CurrentHp == 0;
+            && castTarget != null
+            && castTarget.IsEnemy()
+            && castTarget.CurrentHp == 0;
 
         // Cancel raise cast if target already has Raise status
-        bool tarHasRaise = false;
-        if (Svc.Objects.SearchById(Player.Object.CastTargetObjectId) is IBattleChara battleChara)
-        {
-            tarHasRaise = battleChara.HasStatus(false, StatusID.Raise);
-        }
+        bool tarHasRaise = castTarget != null && castTarget.HasStatus(false, StatusID.Raise);
 
         float[] statusTimes = GetStatusTimes();
 
@@ -215,14 +167,22 @@ internal static class MiscUpdater
             }
         }
 
-        bool stopDueStatus = statusTimes.Length > 0 && minStatusTime > Player.Object.TotalCastTime - Player.Object.CurrentCastTime && minStatusTime < 5;
-        
-        bool shouldStopHealing = Service.Config.StopHealingAfterThresholdExperimental && DataCenter.InCombat &&
-                                 !CustomRotation.HealingWhileDoingNothing &&
-                                 DataCenter.CommandNextAction?.AdjustedID != Player.Object.CastActionId &&
-                                 ((ActionID)Player.Object.CastActionId).GetActionFromID(true, RotationUpdater.CurrentRotationActions) is IBaseAction {Setting.IsFriendly: true} && 
-                                 (DataCenter.MergedStatus & (AutoStatus.HealAreaSpell | AutoStatus.HealSingleSpell)) == 0;
-        
+        float remainingCast = MathF.Max(0, Player.Object.TotalCastTime - Player.Object.CurrentCastTime);
+
+        // Cancel if a "no-casting" status will expire before the cast completes and it's soon (<5s)
+        bool stopDueStatus = statusTimes.Length > 0
+            && minStatusTime <= remainingCast
+            && minStatusTime < 5;
+
+        bool shouldStopHealing =
+            Service.Config.StopHealingAfterThresholdExperimental2
+            && DataCenter.InCombat
+            && !CustomRotation.HealingWhileDoingNothing
+            && DataCenter.CommandNextAction?.AdjustedID != Player.Object.CastActionId
+            && ((ActionID)Player.Object.CastActionId).GetActionFromID(true, RotationUpdater.CurrentRotationActions)
+                is IBaseAction { Setting.GCDSingleHeal: true }
+            && (DataCenter.MergedStatus & (AutoStatus.HealAreaSpell | AutoStatus.HealSingleSpell)) == 0;
+
         if (_tarStopCastDelay.Delay(tarDead) || stopDueStatus || tarHasRaise || shouldStopHealing)
         {
             UIState* uiState = UIState.Instance();
@@ -283,7 +243,6 @@ internal static class MiscUpdater
         int index = 0;
         int hotBarIndex = 0;
 
-        // Replace .Union() LINQ with manual enumeration
         List<nint> addonPtrs =
         [
             .. Service.GetAddons<AddonActionBar>(),
@@ -333,6 +292,9 @@ internal static class MiscUpdater
 
     public static unsafe void Dispose()
     {
-
+        if (_dtrEntry?.Title != null)
+        {
+            Svc.DtrBar.Remove(_dtrEntry.Title);
+        }
     }
 }

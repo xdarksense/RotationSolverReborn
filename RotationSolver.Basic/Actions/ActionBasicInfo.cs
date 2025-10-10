@@ -1,5 +1,6 @@
 ﻿using ECommons.ExcelServices;
 using ECommons.GameHelpers;
+using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 
@@ -117,11 +118,6 @@ public readonly struct ActionBasicInfo
     {
         get
         {
-            if (IsPvP && ID != 29711)
-            {
-                return 0;
-            }
-
             uint? mpOver = _action.Setting.MPOverride?.Invoke();
             if (mpOver.HasValue)
             {
@@ -224,35 +220,41 @@ public readonly struct ActionBasicInfo
     /// <returns>True if the action passes the basic check; otherwise, false.</returns>
     internal readonly bool BasicCheck(bool skipStatusProvideCheck, bool skipStatusNeed,  bool skipComboCheck, bool skipCastingCheck, bool checkActionManager = false)
     {
-
         // 1. Player and action slot checks
         if (Player.Object.StatusList == null)
         {
             return false;
         }
+
+        if (IsLimitBreak)
+        {
+            return false;
+        }
+
         if (!IsActionEnabled() || !IsOnSlot)
         {
             return false;
         }
 
-        if (IsLimitBreak && !DataCenter.IsPvP)
+        if (!IsQuestUnlocked())
         {
-            return true;
+            PluginLog.Warning($"Do your class quests, action not unlocked: {Name}");
+            return false;
         }
 
-        // 2. Basic requirements: not disabled, enough level, enough MP, spell unlocked
-        if (IsActionDisabled() || !EnoughLevel || !HasEnoughMP() || !IsQuestUnlocked())
+        // 2. Basic requirements: not disabled, enough level, enough MP
+        if (IsActionDisabled() || !EnoughLevel || !HasEnoughMP())
         {
             return false;
         }
 
-        // 3. Status checks: need or provide
+        // Status checks: need or provide
         if (IsStatusNeeded(skipStatusNeed) || IsStatusProvided(skipStatusProvideCheck))
         {
             return false;
         }
 
-        // 4. Combo and role checks
+        // Combo and role checks
         if (!IsComboValid(skipComboCheck))
         {
             return false;
@@ -319,6 +321,13 @@ public readonly struct ActionBasicInfo
 
         if (Player.Job == Job.WHM)
         {
+            // Freecure makes the next Cure II cost 0 MP
+            if (ID == (uint)ActionID.CureIiPvE && Player.Object.HasStatus(true, StatusID.Freecure))
+            {
+                return true;
+            }
+
+            // Thin Air covers any expensive spell (including Raise)
             if (Player.Object.HasStatus(true, StatusID.ThinAir) || CustomRotation.IsLastAction(ActionID.ThinAirPvE))
             {
                 return true;

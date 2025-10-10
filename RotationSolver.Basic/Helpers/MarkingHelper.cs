@@ -1,4 +1,5 @@
 ﻿using FFXIVClientStructs.FFXIV.Client.Game.UI;
+using Dalamud.Game.ClientState.Objects.SubKinds; // Added for IPlayerCharacter
 
 namespace RotationSolver.Basic.Helpers
 {
@@ -68,8 +69,8 @@ namespace RotationSolver.Basic.Helpers
         /// </summary>
         internal static long[] GetAttackSignTargets()
         {
-            return new long[]
-            {
+            return
+            [
                 GetMarker(HeadMarker.Attack1),
                 GetMarker(HeadMarker.Attack2),
                 GetMarker(HeadMarker.Attack3),
@@ -78,7 +79,7 @@ namespace RotationSolver.Basic.Helpers
                 GetMarker(HeadMarker.Attack6),
                 GetMarker(HeadMarker.Attack7),
                 GetMarker(HeadMarker.Attack8),
-            };
+            ];
         }
 
         /// <summary>
@@ -86,22 +87,22 @@ namespace RotationSolver.Basic.Helpers
         /// </summary>
         internal static long[] GetStopTargets()
         {
-            return new long[]
-            {
+            return
+            [
                 GetMarker(HeadMarker.Stop1),
                 GetMarker(HeadMarker.Stop2),
-            };
+            ];
         }
 
         /// <summary>
-        /// Filters out characters that have stop markers.
+        /// Filters out characters that have stop markers, but keeps player characters.
         /// </summary>
         /// <param name="charas">The characters to filter.</param>
         /// <returns>The filtered characters.</returns>
         internal static unsafe IEnumerable<IBattleChara> FilterStopCharacters(IEnumerable<IBattleChara> charas)
         {
             long[] stopTargets = GetStopTargets();
-            HashSet<long> ids = [];
+            HashSet<long> ids = new(stopTargets.Length);
             for (int i = 0; i < stopTargets.Length; i++)
             {
                 if (stopTargets[i] != 0)
@@ -110,9 +111,16 @@ namespace RotationSolver.Basic.Helpers
                 }
             }
 
-            List<IBattleChara> result = [];
+            int capacity = (charas as ICollection<IBattleChara>)?.Count ?? 0;
+            List<IBattleChara> result = capacity > 0 ? new List<IBattleChara>(capacity) : [];
             foreach (IBattleChara b in charas)
             {
+                // Keep all player characters even if they are marked with stop markers
+                if (!b.IsEnemy())
+                {
+                    continue;
+                }
+
                 if (!ids.Contains((long)b.GameObjectId))
                 {
                     result.Add(b);

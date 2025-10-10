@@ -88,6 +88,12 @@ public enum SpecialCommandType : byte
     /// </summary>
     [Description("Open a window to do not use the casting action.")]
     NoCasting,
+
+    /// <summary>
+    /// Intercepting action.
+    /// </summary>
+    [Description("Indicator for when RSR is intercepting action.")]
+    Intercepting,
 }
 
 /// <summary>
@@ -161,4 +167,10 @@ public enum OtherCommandType : byte
     /// </summary>
     [Description("Do the next action.")]
     NextAction,
+
+    /// <summary>
+    /// Cycles between states following settings in Target > Configuration.
+    /// </summary>
+    [Description("Cycles between states following settings in Target > Configuration.")]
+    Cycle,
 }

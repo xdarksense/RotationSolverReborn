@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.Melee;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.3")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.31")]
 [SourceCode(Path = "main/RebornRotations/Melee/RPR_Reborn.cs")]
 
 public sealed class RPR_Reborn : ReaperRotation
@@ -9,10 +9,10 @@ public sealed class RPR_Reborn : ReaperRotation
     [RotationConfig(CombatType.PvE, Name = "Pool Shroud for Arcane Circle.")]
     public bool EnshroudPooling { get; set; } = false;
 
-    [RotationConfig(CombatType.PvE, Name = "Use custom timing (below) to refresh Death's Design")]
+    [RotationConfig(CombatType.PvE, Name = "Use custom timing to refresh Death's Design")]
     public bool UseCustomDDTiming { get; set; } = false;
 
-    [RotationConfig(CombatType.PvE, Name = "Refresh Death's Design with this many seconds remaining")]
+    [RotationConfig(CombatType.PvE, Name = "Refresh Death's Design with this many seconds remaining", Parent = nameof(UseCustomDDTiming))]
     public int RefreshDDSecondsRemaining { get; set; } = 10;
 
     #endregion
@@ -160,6 +160,10 @@ public sealed class RPR_Reborn : ReaperRotation
                         if (ExecutionersGallowsPvE.CanUse(out act, skipComboCheck: true) && ExecutionersGallowsPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, ExecutionersGallowsPvE.Target.Target))
                             return true;
                         if (ExecutionersGibbetPvE.CanUse(out act, skipComboCheck: true) && ExecutionersGibbetPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, ExecutionersGibbetPvE.Target.Target))
+                            return true;
+                        if (ExecutionersGallowsPvE.CanUse(out act, skipComboCheck: true))
+                            return true;
+                        if (ExecutionersGibbetPvE.CanUse(out act, skipComboCheck: true))
                             return true;
                         break;
                     case (true, false):
@@ -315,6 +319,10 @@ public sealed class RPR_Reborn : ReaperRotation
                     if (GallowsPvE.CanUse(out act, skipComboCheck: true) && GallowsPvE.Target.Target != null && CanHitPositional(EnemyPositional.Rear, GallowsPvE.Target.Target))
                         return true;
                     if (GibbetPvE.CanUse(out act, skipComboCheck: true) && GibbetPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, GibbetPvE.Target.Target))
+                        return true;
+                    if (GallowsPvE.CanUse(out act, skipComboCheck: true))
+                        return true;
+                    if (GibbetPvE.CanUse(out act, skipComboCheck: true))
                         return true;
                     break;
                 case (true, _):

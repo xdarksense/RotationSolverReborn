@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.Ranged;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.3")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.31")]
 [SourceCode(Path = "main/RebornRotations/Ranged/MCH_Reborn.cs")]
 
 public sealed class MCH_Reborn : MachinistRotation
@@ -73,10 +73,9 @@ public sealed class MCH_Reborn : MachinistRotation
     [RotationDesc(ActionID.TacticianPvE, ActionID.DismantlePvE)]
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
         if (IsOverheated || HasWildfire || HasFullMetalMachinist)
         {
-            return false;
+            return base.DefenseAreaAbility(nextGCD, out act);
         }
 
         if (TacticianPvE.CanUse(out act))
@@ -95,10 +94,9 @@ public sealed class MCH_Reborn : MachinistRotation
     // Logic for using attack abilities outside of GCD, focusing on burst windows and cooldown management.
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
         if (FullMetalFieldPvE.EnoughLevel && HasFullMetalMachinist && IsLastAction(false, WildfirePvE))
         {
-            return false;
+            return base.AttackAbility(nextGCD, out act);
         }
 
         // Reassemble Logic
@@ -122,13 +120,27 @@ public sealed class MCH_Reborn : MachinistRotation
         }
 
         // Start Ricochet/Gauss cooldowns rolling if they are not already
-        if (!RicochetPvE.Cooldown.IsCoolingDown && RicochetPvE.CanUse(out act))
+        if (!RicochetPvE.Cooldown.IsCoolingDown)
         {
-            return true;
+            if (CheckmatePvE.EnoughLevel && CheckmatePvE.CanUse(out act))
+            {
+                return true;
+            }
+            if (!CheckmatePvE.EnoughLevel && RicochetPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
-        if (!GaussRoundPvE.Cooldown.IsCoolingDown && GaussRoundPvE.CanUse(out act))
+        if (!GaussRoundPvE.Cooldown.IsCoolingDown)
         {
-            return true;
+            if (DoubleCheckPvE.EnoughLevel && DoubleCheckPvE.CanUse(out act))
+            {
+                return true;
+            }
+            if (!DoubleCheckPvE.EnoughLevel && GaussRoundPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         if (IsBurst)
@@ -145,16 +157,16 @@ public sealed class MCH_Reborn : MachinistRotation
         {
             if (FullMetalFieldPvE.EnoughLevel)
             {
-                if ((Heat >= 50 || HasHypercharged) && !LowLevelHyperCheck)
+                if (Heat >= 50 || HasHypercharged)
                 {
-                    if (WeaponRemain < (GCDTime(1) / 2)
-                        && nextGCD.IsTheSameTo(false, FullMetalFieldPvE)
-                        && WildfirePvE.CanUse(out act))
+                    if (WeaponRemain < (GCDTime(1) / 2) && nextGCD.IsTheSameTo(false, FullMetalFieldPvE))
                     {
-                        var IsTargetBoss = WildfirePvE.Target.Target?.IsBossFromIcon() ?? false;
-                        if ((IsTargetBoss && WildfireBoss) || !WildfireBoss)
+                        if (WildfirePvE.CanUse(out act))
                         {
-                            return true;
+                            if ((WildfirePvE.Target.Target.IsBossFromIcon() && WildfireBoss) || !WildfireBoss)
+                            {
+                                return true;
+                            }
                         }
                     }
                 }
@@ -163,12 +175,14 @@ public sealed class MCH_Reborn : MachinistRotation
             {
                 if ((Heat >= 50 || HasHypercharged) && ToolChargeSoon(out _) && !LowLevelHyperCheck)
                 {
-                    if (WeaponRemain < (GCDTime(1) / 2) && WildfirePvE.CanUse(out act))
+                    if (WeaponRemain < (GCDTime(1) / 2))
                     {
-                        var IsTargetBoss = WildfirePvE.Target.Target?.IsBossFromIcon() ?? false;
-                        if ((IsTargetBoss && WildfireBoss) || !WildfireBoss)
+                        if (WildfirePvE.CanUse(out act))
                         {
-                            return true;
+                            if ((WildfirePvE.Target.Target.IsBossFromIcon() && WildfireBoss) || !WildfireBoss)
+                            {
+                                return true;
+                            }
                         }
                     }
                 }
@@ -198,16 +212,31 @@ public sealed class MCH_Reborn : MachinistRotation
             _ => "GaussRound"
         };
 
-        switch (whichToUse)
+        if (!FullMetalFieldPvE.EnoughLevel || (FullMetalFieldPvE.EnoughLevel && !nextGCD.IsTheSameTo(false, FullMetalFieldPvE)))
         {
-            case "Ricochet":
-                if (RicochetPvE.CanUse(out act, usedUp: true))
-                    return true;
-                break;
-            case "GaussRound":
-                if (GaussRoundPvE.CanUse(out act, usedUp: true))
-                    return true;
-                break;
+            switch (whichToUse)
+            {
+                case "Ricochet":
+                    if (CheckmatePvE.EnoughLevel && CheckmatePvE.CanUse(out act, usedUp: IsBurst || IsOverheated))
+                    {
+                        return true;
+                    }
+                    if (!CheckmatePvE.EnoughLevel && RicochetPvE.CanUse(out act, usedUp: IsBurst || IsOverheated))
+                    {
+                        return true;
+                    }
+                    break;
+                case "GaussRound":
+                    if (DoubleCheckPvE.EnoughLevel && DoubleCheckPvE.CanUse(out act, usedUp: IsBurst || IsOverheated))
+                    {
+                        return true;
+                    }
+                    if (!DoubleCheckPvE.EnoughLevel && GaussRoundPvE.CanUse(out act, usedUp: IsBurst || IsOverheated))
+                    {
+                        return true;
+                    }
+                    break;
+            }
         }
 
         return base.AttackAbility(nextGCD, out act);
@@ -221,7 +250,11 @@ public sealed class MCH_Reborn : MachinistRotation
         if (IsLastComboAction(true, SlugShotPvE) && LiveComboTime >= GCDTime(1) && LiveComboTime <= GCDTime(2) && !IsOverheated)
         {
             // 3
-            if (CleanShotPvE.CanUse(out act))
+            if (HeatedCleanShotPvE.EnoughLevel && HeatedCleanShotPvE.CanUse(out act))
+            {
+                return true;
+            }
+            if (!HeatedCleanShotPvE.EnoughLevel && CleanShotPvE.CanUse(out act))
             {
                 return true;
             }
@@ -231,7 +264,11 @@ public sealed class MCH_Reborn : MachinistRotation
         if (IsLastComboAction(true, SplitShotPvE) && LiveComboTime >= GCDTime(1) && LiveComboTime <= GCDTime(2) && !IsOverheated)
         {
             // 2
-            if (SlugShotPvE.CanUse(out act))
+            if (HeatedSlugShotPvE.EnoughLevel && HeatedSlugShotPvE.CanUse(out act))
+            {
+                return true;
+            }
+            if (!HeatedSlugShotPvE.EnoughLevel && SlugShotPvE.CanUse(out act))
             {
                 return true;
             }
@@ -244,14 +281,18 @@ public sealed class MCH_Reborn : MachinistRotation
         }
 
         // Overheated ST
-        if (HeatBlastPvE.CanUse(out act))
+        if (BlazingShotPvE.EnoughLevel && BlazingShotPvE.CanUse(out act))
+        {
+            return true;
+        }
+        if (!BlazingShotPvE.EnoughLevel && HeatBlastPvE.CanUse(out act))
         {
             return true;
         }
 
         if (IsLastAction(false, HyperchargePvE) && HeatBlastPvE.EnoughLevel)
         {
-            return false;
+            return base.GeneralGCD(out act);
         }
 
         // Drill AOE
@@ -293,15 +334,12 @@ public sealed class MCH_Reborn : MachinistRotation
             return true;
         }
 
-        if (AirAnchorPvE.Cooldown.IsCoolingDown && DrillPvE.Cooldown.CurrentCharges < 2 && ChainSawPvE.Cooldown.IsCoolingDown
-            && !HasExcavatorReady)
+        if (!AirAnchorPvE.CanUse(out _) && !ChainSawPvE.CanUse(out _) && !ExcavatorPvE.CanUse(out _) && !HasExcavatorReady
+            && !IsLastGCD(false, ChainSawPvE) && DrillPvE.Cooldown.CurrentCharges < 2 && (!WildfirePvE.Cooldown.IsCoolingDown || IsLastAction(false, WildfirePvE)))
         {
-            if (!WildfirePvE.Cooldown.IsCoolingDown || IsLastAbility(true, WildfirePvE))
+            if (FullMetalFieldPvE.CanUse(out act))
             {
-                if (FullMetalFieldPvE.CanUse(out act))
-                {
-                    return true;
-                }
+                return true;
             }
         }
 
@@ -310,27 +348,65 @@ public sealed class MCH_Reborn : MachinistRotation
             return true;
         }
 
-        // 1 AOE
-        if (!IsOverheated)
+        if (Player.WillStatusEnd(3, true, StatusID.FullMetalMachinist))
         {
-            if (SpreadShotPvE.CanUse(out act))
+            if (FullMetalFieldPvE.CanUse(out act))
             {
                 return true;
             }
         }
 
+        if (Player.WillStatusEnd(3, true, StatusID.ExcavatorReady))
+        {
+            if (ExcavatorPvE.CanUse(out act))
+            {
+                return true;
+            }
+        }
+
+        // 1 AOE
+        if (!IsOverheated)
+        {
+            if (ScattergunPvE.EnoughLevel)
+            {
+                if (ScattergunPvE.CanUse(out act))
+                {
+                    return true;
+                }
+            }
+            if (!ScattergunPvE.EnoughLevel)
+            {
+                if (SpreadShotPvE.CanUse(out act))
+                {
+                    return true;
+                }
+            }
+        }
+
         // 3 ST
-        if (CleanShotPvE.CanUse(out act))
+        if (HeatedCleanShotPvE.EnoughLevel && HeatedCleanShotPvE.CanUse(out act))
+        {
+            return true;
+        }
+        if (!HeatedCleanShotPvE.EnoughLevel && CleanShotPvE.CanUse(out act))
         {
             return true;
         }
         // 2 ST
-        if (SlugShotPvE.CanUse(out act))
+        if (HeatedSlugShotPvE.EnoughLevel && HeatedSlugShotPvE.CanUse(out act))
+        {
+            return true;
+        }
+        if (!HeatedSlugShotPvE.EnoughLevel && SlugShotPvE.CanUse(out act))
         {
             return true;
         }
         // 1 ST
-        if (SplitShotPvE.CanUse(out act))
+        if (HeatedSplitShotPvE.EnoughLevel && HeatedSplitShotPvE.CanUse(out act))
+        {
+            return true;
+        }
+        if (!HeatedSplitShotPvE.EnoughLevel && SplitShotPvE.CanUse(out act))
         {
             return true;
         }
@@ -439,7 +515,12 @@ public sealed class MCH_Reborn : MachinistRotation
         // Opener
         if (Battery == 60 && IsLastGCD(false, ExcavatorPvE) && CombatTime < 15)
         {
-            if (RookAutoturretPvE.CanUse(out act, skipTTKCheck: true))
+            if (AutomatonQueenPvE.CanUse(out act, skipTTKCheck: true))
+            {
+                return true;
+            }
+
+            if (RookAutoturretPvE.CanUse(out act, skipTTKCheck: true) && !AutomatonQueenPvE.EnoughLevel)
             {
                 return true;
             }
@@ -448,7 +529,12 @@ public sealed class MCH_Reborn : MachinistRotation
         // Only allow battery usage if the current transition matches the expected step
         if (foundStepPair)
         {
-            if (RookAutoturretPvE.CanUse(out act, skipTTKCheck: true))
+            if (AutomatonQueenPvE.CanUse(out act, skipTTKCheck: true))
+            {
+                return true;
+            }
+
+            if (RookAutoturretPvE.CanUse(out act, skipTTKCheck: true) && !AutomatonQueenPvE.EnoughLevel)
             {
                 return true;
             }
@@ -458,7 +544,12 @@ public sealed class MCH_Reborn : MachinistRotation
         if ((nextGCD.IsTheSameTo(false, CleanShotPvE, HeatedCleanShotPvE) && Battery > 90)
             || (nextGCD.IsTheSameTo(false, HotShotPvE, AirAnchorPvE, ChainSawPvE, ExcavatorPvE) && Battery > 80))
         {
-            if (RookAutoturretPvE.CanUse(out act, skipTTKCheck: true))
+            if (AutomatonQueenPvE.CanUse(out act, skipTTKCheck: true))
+            {
+                return true;
+            }
+
+            if (RookAutoturretPvE.CanUse(out act, skipTTKCheck: true) && !AutomatonQueenPvE.EnoughLevel)
             {
                 return true;
             }

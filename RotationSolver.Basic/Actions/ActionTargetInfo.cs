@@ -386,6 +386,12 @@ public struct ActionTargetInfo(IBaseAction action)
             return null;
         }
 
+        // If AoE is disabled, block all hostile non-single-target actions (including ground-targeted)
+        if (!action.Setting.IsFriendly && Service.Config.AoEType == AoEType.Off && !IsSingleTarget)
+        {
+            return null;
+        }
+
         if (IsTargetArea)
         {
             return FindTargetArea(canTargets, canAffects, Range, Player.Object);
@@ -836,11 +842,9 @@ public struct ActionTargetInfo(IBaseAction action)
             yield break;
         }
 
-        // For hostile actions: if AoE is disabled, pass candidates through
+        // For hostile actions: if AoE is disabled, block all non-single-target actions here
         if (!action.Setting.IsFriendly && Service.Config.AoEType == AoEType.Off)
         {
-            foreach (IBattleChara target in canTargets)
-                yield return target;
             yield break;
         }
 
@@ -1184,24 +1188,72 @@ public struct ActionTargetInfo(IBaseAction action)
                 }
                 break;
 
-            case SpecialActionType.MovingForward:
+            case SpecialActionType.HostileMovingForward:
                 if (Service.Config != null)
                 {
                     if (DataCenter.MergedStatus.HasFlag(AutoStatus.MoveForward) || Service.CountDownTime > 0)
                     {
-                        type = TargetType.Move;
+                        if (Svc.Targets.Target is IBattleChara IsHostiletarg && IsHostiletarg.IsHostile())
+                        {
+                            return IsHostiletarg;
+                        }
+                    }
+                    if (DataCenter.MergedStatus.HasFlag(AutoStatus.Intercepting))
+                    {
+                        if (Svc.Targets.Target is IBattleChara IsHostiletarg && IsHostiletarg.IsHostile())
+                        {
+                            return IsHostiletarg;
+                        }
                     }
                     else
                     {
                         var filtered = new List<IBattleChara>();
                         foreach (var t in battleChara)
                         {
-                            if (t.DistanceToPlayer() < Service.Config.DistanceForMoving)
+                            if (t.DistanceToPlayer() < Service.Config.DistanceForMoving2)
                             {
                                 filtered.Add(t);
                             }
                         }
                         battleChara = filtered;
+                    }
+                }
+                break;
+
+            case SpecialActionType.FriendlyMovingForward:
+                if (Svc.Targets.FocusTarget != null)
+                {
+                    if (Svc.Targets.FocusTarget is IBattleChara focus && focus.IsParty())
+                    {
+                        return focus;
+                    }
+                }
+                else if (Svc.Targets.FocusTarget == null && Svc.Targets.Target != null)
+                {
+                    if (Svc.Targets.Target is IBattleChara IsPartytarg && IsPartytarg.IsParty())
+                    {
+                        return IsPartytarg;
+                    }
+                }
+                break;
+
+            case SpecialActionType.HostileFriendlyMovingForward:
+                if (Svc.Targets.FocusTarget != null)
+                {
+                    if (Svc.Targets.FocusTarget is IBattleChara focus && focus.IsParty())
+                    {
+                        return focus;
+                    }
+                }
+                else if (Svc.Targets.FocusTarget == null && Svc.Targets.Target != null)
+                {
+                    if (Svc.Targets.Target is IBattleChara IsPartytarg && IsPartytarg.IsParty())
+                    {
+                        return IsPartytarg;
+                    }
+                    if (Svc.Targets.Target is IBattleChara IsHostiletarg && IsHostiletarg.IsHostile())
+                    {
+                        return IsHostiletarg;
                     }
                 }
                 break;
@@ -1220,6 +1272,25 @@ public struct ActionTargetInfo(IBaseAction action)
 
             case TargetType.Move:
                 // No filtering needed for Move type
+                break;
+
+            case TargetType.FriendMove:
+                {
+                    if (Svc.Targets.FocusTarget != null)
+                    {
+                        if (Svc.Targets.FocusTarget is IBattleChara focus && focus.IsParty())
+                        {
+                            return focus;
+                        }
+                    }
+                    else if (Svc.Targets.Target != null)
+                    {
+                        if (Svc.Targets.Target is IBattleChara targ && targ.IsParty())
+                        {
+                            return targ;
+                        }
+                    }
+                }
                 break;
 
             default:
@@ -1414,8 +1485,16 @@ public struct ActionTargetInfo(IBaseAction action)
                     if (member == Player.Object) continue;
                     if (member.IsJobs(job) && !member.IsDead && !member.HasStatus(false, StatusID.DamageDown_2911, StatusID.DamageDown, StatusID.Weakness, StatusID.BrinkOfDeath, StatusID.DancePartner, StatusID.ClosedPosition))
                     {
-                        PluginLog.Debug($"FindDancePartner: {member.Name} selected target.");
-                        return member;
+                        if (member.IsConditionCannotTarget())
+                        {
+                            PluginLog.Debug($"FindDancePartner: {member.Name} selected target.");
+                            return null;
+                        }
+                        if (!member.IsConditionCannotTarget())
+                        {
+                            PluginLog.Debug($"FindDancePartner: {member.Name} selected target.");
+                            return member;
+                        }
                     }
                 }
             }
@@ -1427,8 +1506,16 @@ public struct ActionTargetInfo(IBaseAction action)
                     if (member == Player.Object) continue;
                     if (member.IsJobs(job) && !member.IsDead && !member.HasStatus(false, StatusID.DamageDown_2911, StatusID.DamageDown, StatusID.Weakness, StatusID.BrinkOfDeath))
                     {
-                        PluginLog.Debug($"FindDancePartner: {member.Name} secondary logic target.");
-                        return member;
+                        if (member.IsConditionCannotTarget())
+                        {
+                            PluginLog.Debug($"FindDancePartner: {member.Name} secondary logic target.");
+                            return null;
+                        }
+                        if (!member.IsConditionCannotTarget())
+                        {
+                            PluginLog.Debug($"FindDancePartner: {member.Name} secondary logic target.");
+                            return member;
+                        }
                     }
                 }
             }
@@ -1448,7 +1535,7 @@ public struct ActionTargetInfo(IBaseAction action)
 
         IBattleChara? FindTheSpear()
         {
-            // The Spear priority based on the info from The Balance Discord for Level 100 Dance Partner
+            // The Spear priority based on the info from The Balance Discord (user-configurable)
             List<Job> TheSpearPriority = OtherConfiguration.TheSpearPriority;
 
             if (!Player.Object.IsJobs(Job.AST))
@@ -1466,33 +1553,85 @@ public struct ActionTargetInfo(IBaseAction action)
                 return Player.Object;
             }
 
-            foreach (Job job in TheSpearPriority)
+            // Build filtered candidate list
+            List<IBattleChara> candidates = [];
+            foreach (IBattleChara m in DataCenter.PartyMembers)
             {
-                foreach (IBattleChara member in DataCenter.PartyMembers)
+                if (m == null) continue;
+                if (m == Player.Object) continue; // never card self
+                if (m.IsDead) continue;
+                if (m.IsConditionCannotTarget()) continue;
+                //if (StatusHelper.IsStatusCapped(m)) continue; // cannot receive more statuses
+                if (m.HasStatus(false, StatusID.DamageDown_2911, StatusID.DamageDown, StatusID.Weakness, StatusID.BrinkOfDeath)) continue; // poor target value
+                if (m.HasStatus(false, StatusID.TheSpear_3889)) continue; // already has a card
+                candidates.Add(m);
+            }
+
+            // Primary: find the highest-priority match across the whole party
+            IBattleChara? best = null;
+            int bestIndex = int.MaxValue;
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                var member = candidates[i];
+                int idx = -1;
+                for (int j = 0; j < TheSpearPriority.Count; j++)
                 {
-                    if (member.IsJobs(job) && !member.IsDead)
+                    if (member.IsJobs(TheSpearPriority[j]))
                     {
-                        PluginLog.Debug($"FindTheSpear: {member.Name} selected target.");
-                        return member;
+                        idx = j;
+                        break;
+                    }
+                }
+                if (idx >= 0)
+                {
+                    if (idx < bestIndex || best == null)
+                    {
+                        bestIndex = idx;
+                        best = member;
+                    }
+                    else if (idx == bestIndex)
+                    {
+                        // Tie-breakers: higher MaxHp, then higher CurrentHp
+                        uint bestMaxHp = best?.MaxHp ?? 0;
+                        uint memMaxHp = member.MaxHp;
+                        if (memMaxHp > bestMaxHp)
+                        {
+                            best = member;
+                        }
+                        else if (memMaxHp == bestMaxHp)
+                        {
+                            uint bestHp = best?.CurrentHp ?? 0;
+                            uint memHp = member.CurrentHp;
+                            if (memHp > bestHp)
+                            {
+                                best = member;
+                            }
+                        }
                     }
                 }
             }
+            if (best != null)
+            {
+                PluginLog.Debug($"FindTheSpear: {best.Name} selected by priority index {bestIndex} with tie-breakers.");
+                return best;
+            }
 
+            // Fallback: prefer ranged for Spear, then other DPS buckets (aligns with 6% on ranged/healer)
             IBattleChara? result = null;
-            result = RandomRangeTarget(battleChara);
+            result = RandomRangeTarget(candidates);
             if (result != null) return result;
-            result = RandomMeleeTarget(battleChara);
+            result = RandomMeleeTarget(candidates);
             if (result != null) return result;
-            result = RandomMagicalTarget(battleChara);
+            result = RandomMagicalTarget(candidates);
             if (result != null) return result;
-            result = RandomPhysicalTarget(battleChara);
+            result = RandomPhysicalTarget(candidates);
             if (result != null) return result;
             return null;
         }
 
         IBattleChara? FindTheBalance()
         {
-            // The Balance priority based on the info from The Balance Discord for Level 100 Dance Partner
+            // The Balance priority based on the info from The Balance Discord (user-configurable)
             List<Job> TheBalancePriority = OtherConfiguration.TheBalancePriority;
 
             if (!Player.Object.IsJobs(Job.AST))
@@ -1510,25 +1649,78 @@ public struct ActionTargetInfo(IBaseAction action)
                 return Player.Object;
             }
 
-            foreach (Job job in TheBalancePriority)
+            // Build filtered candidate list
+            List<IBattleChara> candidates = [];
+            foreach (IBattleChara m in DataCenter.PartyMembers)
             {
-                foreach (IBattleChara member in DataCenter.PartyMembers)
+                if (m == null) continue;
+                if (m == Player.Object) continue; // never card self
+                if (m.IsDead) continue;
+                if (m.IsConditionCannotTarget()) continue;
+                //if (StatusHelper.IsStatusCapped(m)) continue; // cannot receive more statuses
+                if (m.HasStatus(false, StatusID.DamageDown_2911, StatusID.DamageDown, StatusID.Weakness, StatusID.BrinkOfDeath)) continue; // poor target value
+                if (m.HasStatus(false, StatusID.TheBalance_3887)) continue; // already has a card
+                candidates.Add(m);
+            }
+
+            // Primary: find the highest-priority match across the whole party
+            IBattleChara? best = null;
+            int bestIndex = int.MaxValue;
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                var member = candidates[i];
+                int idx = -1;
+                for (int j = 0; j < TheBalancePriority.Count; j++)
                 {
-                    if (member.IsJobs(job) && !member.IsDead)
+                    if (member.IsJobs(TheBalancePriority[j]))
                     {
-                        PluginLog.Debug($"FindTheBalance: {member.Name} selected target.");
-                        return member;
+                        idx = j;
+                        break;
+                    }
+                }
+                if (idx >= 0)
+                {
+                    if (idx < bestIndex || best == null)
+                    {
+                        bestIndex = idx;
+                        best = member;
+                    }
+                    else if (idx == bestIndex)
+                    {
+                        // Tie-breakers: higher MaxHp, then higher CurrentHp
+                        uint bestMaxHp = best?.MaxHp ?? 0;
+                        uint memMaxHp = member.MaxHp;
+                        if (memMaxHp > bestMaxHp)
+                        {
+                            best = member;
+                        }
+                        else if (memMaxHp == bestMaxHp)
+                        {
+                            uint bestHp = best?.CurrentHp ?? 0;
+                            uint memHp = member.CurrentHp;
+                            if (memHp > bestHp)
+                            {
+                                best = member;
+                            }
+                        }
                     }
                 }
             }
+            if (best != null)
+            {
+                PluginLog.Debug($"FindTheBalance: {best.Name} selected by priority index {bestIndex} with tie-breakers.");
+                return best;
+            }
 
-            IBattleChara? result = RandomMeleeTarget(battleChara);
+            // Fallback: prefer melee for Balance, then other DPS buckets (aligns with 6% on melee/tank)
+            IBattleChara? result = null;
+            result = RandomMeleeTarget(candidates);
             if (result != null) return result;
-            result = RandomRangeTarget(battleChara);
+            result = RandomRangeTarget(candidates);
             if (result != null) return result;
-            result = RandomMagicalTarget(battleChara);
+            result = RandomMagicalTarget(candidates);
             if (result != null) return result;
-            result = RandomPhysicalTarget(battleChara);
+            result = RandomPhysicalTarget(candidates);
             if (result != null) return result;
             return null;
         }
@@ -1561,8 +1753,16 @@ public struct ActionTargetInfo(IBaseAction action)
                         // 1. Tanks with tank stance and without Kardion
                         if (m.HasStatus(false, StatusHelper.TankStanceStatus) && !m.HasStatus(false, StatusID.Kardion))
                         {
-                            PluginLog.Debug($"FindKardia 1: {m.Name} is a tank with TankStanceStatus and without Kardion.");
-                            return m;
+                            if (m.IsConditionCannotTarget())
+                            {
+                                PluginLog.Debug($"FindKardia 1: {m.Name} is a tank with TankStanceStatus and without Kardion.");
+                                return null;
+                            }
+                            if (!m.IsConditionCannotTarget())
+                            {
+                                PluginLog.Debug($"FindKardia 1: {m.Name} is a tank with TankStanceStatus and without Kardion.");
+                                return m;
+                            }
                         }
                     }
                 }
@@ -1577,8 +1777,16 @@ public struct ActionTargetInfo(IBaseAction action)
                         // 2. Tanks with tank stance (regardless of Kardion)
                         if (m.HasStatus(false, StatusHelper.TankStanceStatus))
                         {
-                            PluginLog.Debug($"FindKardia 2: {m.Name} is a tank with TankStanceStatus.");
-                            return m;
+                            if (m.IsConditionCannotTarget())
+                            {
+                                PluginLog.Debug($"FindKardia 2: {m.Name} is a tank with TankStanceStatus.");
+                                return null;
+                            }
+                            if (!m.IsConditionCannotTarget())
+                            {
+                                PluginLog.Debug($"FindKardia 2: {m.Name} is a tank with TankStanceStatus.");
+                                return m;
+                            }
                         }
                     }
                 }
@@ -1591,8 +1799,16 @@ public struct ActionTargetInfo(IBaseAction action)
                     if (m.IsJobCategory(JobRole.Tank) && m.IsJobs(job) && !m.IsDead)
                     {
                         // 3. Any alive tank in priority order
-                        PluginLog.Debug($"FindKardia 3: {m.Name} is a tank fallback.");
-                        return m;
+                        if (m.IsConditionCannotTarget())
+                        {
+                            PluginLog.Debug($"FindKardia 3: {m.Name} is a tank fallback.");
+                            return null;
+                        }
+                        if (!m.IsConditionCannotTarget())
+                        {
+                            PluginLog.Debug($"FindKardia 3: {m.Name} is a tank fallback.");
+                            return m;
+                        }
                     }
                 }
             }
@@ -1630,6 +1846,8 @@ public struct ActionTargetInfo(IBaseAction action)
             IBattleChara? bestGalvanize = null;
             uint bestGalvanizeShield = 0;
 
+            const float spreadRadius = 10f; // Deployment Tactics spreads within 10y of the target
+
             foreach (IBattleChara battleChara in DataCenter.PartyMembers)
             {
                 if (battleChara == null || battleChara.IsDead)
@@ -1638,6 +1856,31 @@ public struct ActionTargetInfo(IBaseAction action)
                 }
 
                 uint shield = ObjectHelper.GetObjectShield(battleChara);
+                if (shield == 0)
+                {
+                    // No effective shield to spread
+                    continue;
+                }
+
+                // Require at least one other party member in spread radius
+                int neighbors = 0;
+                foreach (IBattleChara member in DataCenter.PartyMembers)
+                {
+                    if (member == null || member.IsDead || member.GameObjectId == battleChara.GameObjectId)
+                    {
+                        continue;
+                    }
+                    if (Vector3.Distance(member.Position, battleChara.Position) <= spreadRadius)
+                    {
+                        neighbors++;
+                        if (neighbors >= 1) break;
+                    }
+                }
+                if (neighbors == 0)
+                {
+                    // Nothing to spread to
+                    continue;
+                }
 
                 if (!battleChara.WillStatusEnd(20, true, StatusID.Catalyze))
                 {
@@ -1659,13 +1902,13 @@ public struct ActionTargetInfo(IBaseAction action)
 
             if (bestCatalyze != null)
             {
-                PluginLog.Debug($"FindDeploymentTacticsTarget: {bestCatalyze.Name} is a valid target with Catalyze and largest shield.");
+                PluginLog.Debug($"FindDeploymentTacticsTarget: {bestCatalyze.Name} is a valid target with Catalyze, largest shield, and nearby allies.");
                 return bestCatalyze;
             }
 
             if (bestGalvanize != null)
             {
-                PluginLog.Debug($"FindDeploymentTacticsTarget: {bestGalvanize.Name} is a valid target with Galvanize and largest shield.");
+                PluginLog.Debug($"FindDeploymentTacticsTarget: {bestGalvanize.Name} is a valid target with Galvanize, largest shield, and nearby allies.");
                 return bestGalvanize;
             }
 
@@ -1703,7 +1946,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 List<IBattleChara> filteredTargets = [];
                 foreach (var t in battleChara)
                 {
-                    if (t.DistanceToPlayer() > Service.Config.DistanceForMoving)
+                    if (t.DistanceToPlayer() > Service.Config.DistanceForMoving2)
                     {
                         continue;
                     }
@@ -1734,7 +1977,7 @@ public struct ActionTargetInfo(IBaseAction action)
                 List<IBattleChara> filteredTargets = [];
                 foreach (var t in battleChara)
                 {
-                    if (t.DistanceToPlayer() > Service.Config.DistanceForMoving)
+                    if (t.DistanceToPlayer() > Service.Config.DistanceForMoving2)
                     {
                         continue;
                     }
@@ -1839,7 +2082,10 @@ public struct ActionTargetInfo(IBaseAction action)
                 List<IBattleChara> healerTars = [];
                 foreach (var o in healingNeededObjs)
                 {
-                    if (TargetFilter.GetJobCategory([o], JobRole.Healer).Any())
+                    var enumHealer = TargetFilter.GetJobCategory([o], JobRole.Healer).GetEnumerator();
+                    bool isHealer = enumHealer.MoveNext();
+                    enumHealer.Dispose();
+                    if (isHealer)
                     {
                         healerTars.Add(o);
                     }
@@ -1848,7 +2094,10 @@ public struct ActionTargetInfo(IBaseAction action)
                 List<IBattleChara> tankTars = [];
                 foreach (var o in healingNeededObjs)
                 {
-                    if (TargetFilter.GetJobCategory([o], JobRole.Tank).Any())
+                    var enumTank = TargetFilter.GetJobCategory([o], JobRole.Tank).GetEnumerator();
+                    bool isTank = enumTank.MoveNext();
+                    enumTank.Dispose();
+                    if (isTank)
                     {
                         tankTars.Add(o);
                     }
@@ -1930,43 +2179,6 @@ public struct ActionTargetInfo(IBaseAction action)
                 {
                     battleChara = filteredCharacters;
                 }
-            }
-
-            // Handle treasure characters
-            if (DataCenter.TreasureCharas != null && DataCenter.TreasureCharas.Length > 0)
-            {
-                IBattleChara? treasureChara = null;
-                foreach (var b in battleChara)
-                {
-                    if (b.GameObjectId == DataCenter.TreasureCharas[0])
-                    {
-                        treasureChara = b;
-                        break;
-                    }
-                }
-                if (treasureChara != null)
-                {
-                    return treasureChara;
-                }
-
-                var tempList = new List<IBattleChara>();
-                foreach (var b in battleChara)
-                {
-                    bool found = false;
-                    foreach (var id in DataCenter.TreasureCharas)
-                    {
-                        if (b.GameObjectId == id)
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found)
-                    {
-                        tempList.Add(b);
-                    }
-                }
-                battleChara = tempList;
             }
 
             // Filter high priority hostiles
@@ -2377,6 +2589,7 @@ public struct ActionTargetInfo(IBaseAction action)
             IBattleChara? tar = RandomPickByJobs(tars, role.ToJobs());
             if (tar != null)
             {
+                if (tar.IsConditionCannotTarget()) continue;
                 return tar;
             }
         }
@@ -2388,6 +2601,7 @@ public struct ActionTargetInfo(IBaseAction action)
         List<IBattleChara> targets = [];
         foreach (var t in tars)
         {
+            if (t.IsConditionCannotTarget()) continue;
             if (t.IsJobs(jobs))
             {
                 targets.Add(t);
@@ -2398,11 +2612,19 @@ public struct ActionTargetInfo(IBaseAction action)
 
     private static IBattleChara? RandomObject(IEnumerable<IBattleChara> objs)
     {
-        return objs.Any() ? objs.ElementAt(new Random().Next(objs.Count())) : null;
-        //Random ran = new(DateTime.Now.Millisecond);
-        //var count = objs.Count();
-        //if (count == 0) return null;
-        //return objs.ElementAt(ran.Next(count));
+        List<IBattleChara> list = [];
+        foreach (var o in objs)
+        {
+            if (o == null) continue;
+            if (o.IsConditionCannotTarget()) continue;
+            list.Add(o);
+        }
+
+        int count = list.Count;
+        if (count == 0) return null;
+
+        int index = new Random().Next(count);
+        return list[index];
     }
 
     #endregion
@@ -2422,6 +2644,7 @@ public enum TargetType : byte
     Death,
     Dispel,
     Move,
+    FriendMove,
     BeAttacked,
     Heal,
     Tank,

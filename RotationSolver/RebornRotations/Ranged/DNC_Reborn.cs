@@ -2,7 +2,7 @@ using Dalamud.Interface.Colors;
 
 namespace RotationSolver.RebornRotations.Ranged;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.3")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.31")]
 [SourceCode(Path = "main/RebornRotations/Ranged/DNC_Reborn.cs")]
 
 public sealed class DNC_Reborn : DancerRotation
@@ -101,8 +101,7 @@ public sealed class DNC_Reborn : DancerRotation
             return base.EmergencyAbility(nextGCD, out act); // Fallback to base class method if none of the above conditions are met
         }
 
-        act = null;
-        return false;
+        return base.EmergencyAbility(nextGCD, out act);
     }
 
     [RotationDesc(ActionID.CuringWaltzPvE, ActionID.ImprovisationPvE)]
@@ -146,18 +145,16 @@ public sealed class DNC_Reborn : DancerRotation
     // Override the method for handling attack abilities
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
-
         //If dancing or about to dance avoid using abilities to avoid animation lock delaying the dance
         if (IsDancing || StandardStepPvE.Cooldown.ElapsedAfter(28) || TechnicalStepPvE.Cooldown.ElapsedAfter(118))
         {
-            return false;
+            return base.AttackAbility(nextGCD, out act);
         }
 
         // Prevent triple weaving by checking if an action was just used
         if (AnimationLock > 0.75f)
         {
-            return false;
+            return base.AttackAbility(nextGCD, out act);
         }
 
         if (IsBurst)
@@ -213,22 +210,9 @@ public sealed class DNC_Reborn : DancerRotation
     // Override the method for handling general Global Cooldown (GCD) actions
     protected override bool GeneralGCD(out IAction? act)
     {
-        // Attempt to use Closed Position if applicable
-        if (!InCombat && !HasClosedPosition && ClosedPositionPvE.CanUse(out act))
+        if (ClosedPositionPvE.EnoughLevel && !HasClosedPosition && ClosedPositionPvE.CanUse(out _))
         {
-
-            if (DancePartnerName != "")
-            {
-                foreach (IBattleChara player in PartyMembers)
-                {
-                    if (player.Name.ToString() == DancePartnerName)
-                    {
-                        ClosedPositionPvE.Target = new TargetResult(player, [player], player.Position);
-                    }
-                }
-            }
-
-            return true;
+            return base.GeneralGCD(out act);
         }
 
         // Try to finish the dance if applicable
@@ -266,7 +250,6 @@ public sealed class DNC_Reborn : DancerRotation
             return true;
         }
 
-        // Fallback to the base method if no custom GCD actions are found
         return base.GeneralGCD(out act);
     }
     #endregion
@@ -448,21 +431,28 @@ public sealed class DNC_Reborn : DancerRotation
             return false;
         }
 
+        // Attempt to use Closed Position with name if applicable
+        if (!InCombat && !HasClosedPosition && ClosedPositionPvE.CanUse(out act))
+        {
+            if (DancePartnerName != "")
+            {
+                foreach (IBattleChara player in PartyMembers)
+                {
+                    if (player.Name.ToString() == DancePartnerName)
+                    {
+                        ClosedPositionPvE.Target = new TargetResult(player, [player], player.Position);
+                    }
+                }
+            }
+
+            return true;
+        }
+
         if (!HasClosedPosition)
         {
-            // Check for party members with Closed Position status
-            foreach (IBattleChara friend in PartyMembers)
+            if (ClosedPositionPvE.CanUse(out act))
             {
-                if (friend.HasStatus(true, StatusID.ClosedPosition_2026))
-                {
-                    // Use Closed Position if target is not the same as the friend with the status
-                    if (ClosedPositionPvE.Target.Target != friend)
-                    {
-                        return true;
-                    }
-
-                    break;
-                }
+                return true;
             }
         }
         return false;

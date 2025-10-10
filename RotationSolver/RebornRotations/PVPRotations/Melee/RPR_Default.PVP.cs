@@ -1,14 +1,11 @@
 ﻿namespace RotationSolver.RebornRotations.PVPRotations.Melee;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.3")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.31")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Melee/RPR_Default.PvP.cs")]
 
 public sealed class RPR_DefaultPvP : ReaperRotation
 {
     #region Configurations
-
-    [RotationConfig(CombatType.PvP, Name = "Use Purify")]
-    public bool UsePurifyPvP { get; set; } = true;
 
     [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
     public bool RespectGuard { get; set; } = true;
@@ -22,35 +19,15 @@ public sealed class RPR_DefaultPvP : ReaperRotation
     public float SmitePvPPercent { get; set; } = 0.25f;
     #endregion
 
-    #region Standard PVP Utilities
-    private bool DoPurify(out IAction? action)
-    {
-        action = null;
-        if (!UsePurifyPvP)
-        {
-            return false;
-        }
-
-        List<int> purifiableStatusesIDs = new()
-        {
-            // Stun, DeepFreeze, HalfAsleep, Sleep, Bind, Heavy, Silence
-            1343, 3219, 3022, 1348, 1345, 1344, 1347
-        };
-
-        return purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)) && PurifyPvP.CanUse(out action);
-    }
-    #endregion
-
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
         {
-            return false;
+            return base.EmergencyAbility(nextGCD, out action);
         }
 
-        if (DoPurify(out action))
+        if (PurifyPvP.CanUse(out action))
         {
             return true;
         }
@@ -68,12 +45,9 @@ public sealed class RPR_DefaultPvP : ReaperRotation
             return true;
         }
 
-        if (SmitePvP.CanUse(out action))
+        if (SmitePvP.CanUse(out action) && SmitePvP.Target.Target.GetHealthRatio() <= SmitePvPPercent)
         {
-            if (CurrentTarget?.GetHealthRatio() <= SmitePvPPercent)
-            {
-                return true;
-            }
+            return false;
         }
 
         return base.EmergencyAbility(nextGCD, out action);
@@ -81,10 +55,9 @@ public sealed class RPR_DefaultPvP : ReaperRotation
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
-        action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
         {
-            return false;
+            return base.DefenseSingleAbility(nextGCD, out action);
         }
 
         if (ArcaneCrestPvP.CanUse(out action))
@@ -97,10 +70,9 @@ public sealed class RPR_DefaultPvP : ReaperRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
         {
-            return false;
+            return base.AttackAbility(nextGCD, out action);
         }
 
         if (HasEnshroudedPvP)
@@ -131,10 +103,9 @@ public sealed class RPR_DefaultPvP : ReaperRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        action = null;
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
         {
-            return false;
+            return base.GeneralGCD(out action);
         }
 
         if (HasEnshroudedPvP)

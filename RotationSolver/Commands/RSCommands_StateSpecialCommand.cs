@@ -33,7 +33,7 @@ namespace RotationSolver.Commands
             _lastToastMessage = currentMessage;
         }
 
-        public static unsafe void DoStateCommandType(StateCommandType stateType, int index = -1)
+        public static void DoStateCommandType(StateCommandType stateType, int index = -1)
         {
             DoOneCommandType((type, role) => type.ToStateString(role), role =>
             {
@@ -46,11 +46,11 @@ namespace RotationSolver.Commands
             });
         }
 
-        public static unsafe void DoAutodutyStateCommandType(StateCommandType stateType, TargetingType targetingType)
+        public static void DoAutodutyStateCommandType(StateCommandType stateType, TargetingType targetingType)
         {
             DoOneCommandType((type, role) => type.ToStateString(role), role =>
             {
-                UpdateState(stateType, role);
+                AutodutyUpdateState(stateType, role, targetingType);
                 return stateType;
             });
         }
@@ -80,13 +80,160 @@ namespace RotationSolver.Commands
             return stateType;
         }
 
+        public static void CycleStateManualAuto()
+        {
+            // If currently Off, go to Manual
+            if (!DataCenter.State)
+            {
+                DoStateCommandType(StateCommandType.Manual);
+                return;
+            }
+
+            // If currently in Manual mode, switch to Auto
+            if (DataCenter.IsManual)
+            {
+                DoStateCommandType(StateCommandType.Auto);
+                return;
+            }
+
+            // If currently On but not Manual, switch to Manual
+            DoStateCommandType(StateCommandType.Manual);
+        }
+
+        public static void CycleStateAuto()
+        {
+            // If currently Off, go to Auto
+            if (!DataCenter.State)
+            {
+                DoStateCommandType(StateCommandType.Auto);
+                return;
+            }
+
+            // If currently in Auto mode, turn Off
+            if (DataCenter.State && !DataCenter.IsManual)
+            {
+                DoStateCommandType(StateCommandType.Off);
+                return;
+            }
+
+            // If currently On but not Auto (i.e., Manual), switch to Auto
+            DoStateCommandType(StateCommandType.Auto);
+        }
+
+        public static void CycleStateManual()
+        {
+            // If currently Off, go to Manual
+            if (!DataCenter.State)
+            {
+                DoStateCommandType(StateCommandType.Manual);
+                return;
+            }
+
+            // If currently in Manual mode, turn Off
+            if (DataCenter.IsManual)
+            {
+                DoStateCommandType(StateCommandType.Off);
+                return;
+            }
+
+            // If currently On but not Manual, switch to Manual
+            DoStateCommandType(StateCommandType.Manual);
+        }
+
+        public static void CycleStateWithAllTargetTypes()
+        {
+            // If currently Off, start with the first TargetType
+            if (!DataCenter.State)
+            {
+                if (Service.Config.TargetingTypes.Count > 0)
+                {
+                    Service.Config.TargetingIndex = 0;
+                    DoStateCommandType(StateCommandType.Auto, 0);
+                }
+                else
+                {
+                    // No targeting types configured, go to Manual
+                    DoStateCommandType(StateCommandType.Manual);
+                }
+                return;
+            }
+
+            // If currently in Auto mode, cycle through all TargetTypes
+            if (DataCenter.State && !DataCenter.IsManual)
+            {
+                int nextIndex = Service.Config.TargetingIndex + 1;
+
+                // If we've gone through all TargetTypes, switch to Manual
+                if (nextIndex >= Service.Config.TargetingTypes.Count)
+                {
+                    DoStateCommandType(StateCommandType.Manual);
+                }
+                else
+                {
+                    // Move to next TargetType
+                    Service.Config.TargetingIndex = nextIndex;
+                    DoStateCommandType(StateCommandType.Auto, nextIndex);
+                }
+                return;
+            }
+
+            // If currently in Manual mode, turn off
+            if (DataCenter.State && DataCenter.IsManual)
+            {
+                DoStateCommandType(StateCommandType.Off);
+                return;
+            }
+        }
+
+        public static void CycleStateWithOneTargetTypes()
+        {
+            // If currently Off, go to Auto using the highest TargetingIndex (last configured type)
+            if (!DataCenter.State)
+            {
+                if (Service.Config.TargetingTypes.Count > 0)
+                {
+                    int lastIdx = Service.Config.TargetingTypes.Count - 1;
+                    Service.Config.TargetingIndex = lastIdx;
+                    DoStateCommandType(StateCommandType.Auto, lastIdx);
+                }
+                else
+                {
+                    // No targeting types configured, go to Manual
+                    DoStateCommandType(StateCommandType.Manual);
+                }
+                return;
+            }
+
+            // If currently in Auto mode, switch to Manual
+            if (DataCenter.State && !DataCenter.IsManual)
+            {
+                DoStateCommandType(StateCommandType.Manual);
+                return;
+            }
+
+            // If currently in Manual mode, turn Off
+            if (DataCenter.State && DataCenter.IsManual)
+            {
+                DoStateCommandType(StateCommandType.Off);
+                return;
+            }
+        }
+
         private static void UpdateTargetingIndex(ref int index)
         {
+            int count = Service.Config.TargetingTypes.Count;
+            if (count == 0)
+            {
+                index = 0;
+                Service.Config.TargetingIndex = 0;
+                return;
+            }
+
             if (index == -1)
             {
                 index = Service.Config.TargetingIndex + 1;
             }
-            index %= Service.Config.TargetingTypes.Count;
+            index %= count;
             Service.Config.TargetingIndex = index;
         }
 
@@ -168,7 +315,7 @@ namespace RotationSolver.Commands
             UpdateToast();
         }
 
-        private static void DoSpecialCommandType(SpecialCommandType specialType, bool sayout = true)
+        public static void DoSpecialCommandType(SpecialCommandType specialType, bool sayout = true)
         {
             DoOneCommandType((type, role) => type.ToSpecialString(role), role =>
             {

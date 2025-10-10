@@ -238,7 +238,10 @@ public partial class SummonerRotation
 
     static partial void ModifyPhysickPvE(ref ActionSetting setting)
     {
-
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            GCDSingleHeal = true,
+        };
     }
 
     static partial void ModifyAetherchargePvE(ref ActionSetting setting)
@@ -654,6 +657,7 @@ public partial class SummonerRotation
 
     static partial void ModifyCrimsonCyclonePvE(ref ActionSetting setting)
     {
+        //setting.SpecialType = SpecialActionType.HostileMovingForward;
         setting.StatusProvide = [StatusID.CrimsonStrikeReady_4403];
         setting.StatusNeed = [StatusID.IfritsFavor];
         setting.ActionCheck = () => InIfrit;
@@ -777,7 +781,7 @@ public partial class SummonerRotation
 
     static partial void ModifyCrimsonCyclonePvP(ref ActionSetting setting)
     {
-        setting.SpecialType = SpecialActionType.MovingForward;
+        //setting.SpecialType = SpecialActionType.HostileMovingForward;
         setting.StatusProvide = [StatusID.CrimsonStrikeReady_4403];
         setting.CreateConfig = () => new ActionConfig()
         {

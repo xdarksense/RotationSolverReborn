@@ -4,21 +4,21 @@
     "net9.0-windows7.0": {
       "DalamudPackager": {
         "type": "Direct",
-        "requested": "[13.0.0, )",
-        "resolved": "13.0.0",
-        "contentHash": "Mb3cUDSK/vDPQ8gQIeuCw03EMYrej1B4J44a1AvIJ9C759p9XeqdU9Hg4WgOmlnlPe0G7ILTD32PKSUpkQNa8w=="
+        "requested": "[13.1.0, )",
+        "resolved": "13.1.0",
+        "contentHash": "XdoNhJGyFby5M/sdcRhnc5xTop9PHy+H50PTWpzLhJugjB19EDBiHD/AsiDF66RETM+0qKUdJBZrNuebn7qswQ=="
       },
       "DotNet.ReproducibleBuilds": {
         "type": "Direct",
-        "requested": "[1.2.25, )",
-        "resolved": "1.2.25",
-        "contentHash": "xCXiw7BCxHJ8pF6wPepRUddlh2dlQlbr81gXA72hdk4FLHkKXas7EH/n+fk5UCA/YfMqG1Z6XaPiUjDbUNBUzg=="
+        "requested": "[1.2.39, )",
+        "resolved": "1.2.39",
+        "contentHash": "fcFN01tDTIQqDuTwr1jUQK/geofiwjG5DycJQOnC72i1SsLAk1ELe+apBOuZ11UMQG8YKFZG1FgvjZPbqHyatg=="
       },
       "ECommons": {
         "type": "Direct",
-        "requested": "[3.0.1.9, )",
-        "resolved": "3.0.1.9",
-        "contentHash": "Bv7Uv9VZwPpS/AA4TnzeCCPw2uanp1Pg9RGpM5lcDWC8ENBNkyp/fAe9JdHwI3WByOZSZVkMvW8jRycBhzehlA=="
+        "requested": "[3.0.1.20, )",
+        "resolved": "3.0.1.20",
+        "contentHash": "dvBP03mG+qU9IsbWY8OboYtEVPS+Ba8L5v4xibfTD5eIdkL8xcT44hDvTZPmQfyR/9BpfH9Vq1pv4p3DwXXCxw=="
       },
       "ExCSS": {
         "type": "Transitive",
@@ -53,8 +53,8 @@
       },
       "Microsoft.Win32.SystemEvents": {
         "type": "Transitive",
-        "resolved": "9.0.8",
-        "contentHash": "64oQBN8I8EOcyHGNt6+rlcqm4tlcKfqOpswtBCJZnpzBQ15L6IFKqjnbjbOWBpG9wKq9A/aC2LFSmSqplbwTYA=="
+        "resolved": "9.0.9",
+        "contentHash": "eJU9vZbN710Cc25p/jPecPEL+gFcnynAvznNRnEvMU7i7u0PSjFXlGO4SOlaIUvkykTlS2N++M9B/coxYT7aPw=="
       },
       "Svg": {
         "type": "Transitive",
@@ -72,10 +72,10 @@
       },
       "System.Drawing.Common": {
         "type": "Transitive",
-        "resolved": "9.0.8",
-        "contentHash": "ineIJmF+yuBEHGft9R153J9kmBFaeEfFL5Put5nzENneRcGGPUb3MvM8zrZ5pERQ0jPPSE3Wqw/clXvOq2F/Kw==",
+        "resolved": "9.0.9",
+        "contentHash": "BS17VFUf4RS9G/JoA6br+79jAjyTj0UaomgXCVNJJn9EWIvmHkn0ZCqAynxwloO00yPIvWgXBF9SBjcM06bl1w==",
         "dependencies": {
-          "Microsoft.Win32.SystemEvents": "9.0.8"
+          "Microsoft.Win32.SystemEvents": "9.0.9"
         }
       },
       "System.Reflection.Metadata": {
@@ -92,10 +92,10 @@
       "RotationSolverReborn.Basic": {
         "type": "Project",
         "dependencies": {
-          "ECommons": "[3.0.1.9, )",
+          "ECommons": "[3.0.1.20, )",
           "RotationSolver.SourceGenerators": "[1.0.0, )",
           "Svg": "[3.4.7, )",
-          "System.Drawing.Common": "[9.0.8, )"
+          "System.Drawing.Common": "[9.0.9, )"
         }
       }
     }

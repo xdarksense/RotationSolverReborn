@@ -1,14 +1,11 @@
 ﻿namespace RotationSolver.RebornRotations.PVPRotations.Melee;
 
-[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.3")]
+[Rotation("Default PVP", CombatType.PvP, GameVersion = "7.31")]
 [SourceCode(Path = "main/RebornRotations/PVPRotations/Tank/NIN_Default.PvP.cs")]
 
 public sealed class NIN_DefaultPvP : NinjaRotation
 {
     #region Configurations
-
-    [RotationConfig(CombatType.PvP, Name = "Use Purify")]
-    public bool UsePurifyPvP { get; set; } = true;
 
     [RotationConfig(CombatType.PvP, Name = "Stop attacking while in Guard.")]
     public bool RespectGuard { get; set; } = true;
@@ -22,40 +19,20 @@ public sealed class NIN_DefaultPvP : NinjaRotation
     public float SmitePvPPercent { get; set; } = 0.25f;
     #endregion
 
-    #region Standard PVP Utilities
-    private bool DoPurify(out IAction? action)
-    {
-        action = null;
-        if (!UsePurifyPvP)
-        {
-            return false;
-        }
-
-        List<int> purifiableStatusesIDs = new()
-        {
-            // Stun, DeepFreeze, HalfAsleep, Sleep, Bind, Heavy, Silence
-            1343, 3219, 3022, 1348, 1345, 1344, 1347
-        };
-
-        return purifiableStatusesIDs.Any(id => Player.HasStatus(false, (StatusID)id)) && PurifyPvP.CanUse(out action);
-    }
-    #endregion
-
     #region oGCDs
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? action)
     {
-        action = null;
         if (Player.HasStatus(true, StatusID.Hidden_1316))
         {
-            return false;
+            return base.EmergencyAbility(nextGCD, out action);
         }
 
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
         {
-            return false;
+            return base.EmergencyAbility(nextGCD, out action);
         }
 
-        if (DoPurify(out action))
+        if (PurifyPvP.CanUse(out action))
         {
             return true;
         }
@@ -70,26 +47,24 @@ public sealed class NIN_DefaultPvP : NinjaRotation
             return true;
         }
 
-        if (SmitePvP.CanUse(out action) && CurrentTarget?.GetHealthRatio() <= SmitePvPPercent)
+        if (SmitePvP.CanUse(out action) && SmitePvP.Target.Target.GetHealthRatio() <= SmitePvPPercent)
         {
-            return true;
+            return false;
         }
-
 
         return base.EmergencyAbility(nextGCD, out action);
     }
 
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? action)
     {
-        action = null;
         if (Player.HasStatus(true, StatusID.Hidden_1316))
         {
-            return false;
+            return base.DefenseSingleAbility(nextGCD, out action);
         }
 
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
         {
-            return false;
+            return base.DefenseSingleAbility(nextGCD, out action);
         }
 
         return base.DefenseSingleAbility(nextGCD, out action);
@@ -97,15 +72,14 @@ public sealed class NIN_DefaultPvP : NinjaRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? action)
     {
-        action = null;
         if (Player.HasStatus(true, StatusID.Hidden_1316))
         {
-            return false;
+            return base.AttackAbility(nextGCD, out action);
         }
 
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
         {
-            return false;
+            return base.AttackAbility(nextGCD, out action);
         }
 
         if (DokumoriPvP.CanUse(out action))
@@ -131,14 +105,13 @@ public sealed class NIN_DefaultPvP : NinjaRotation
     #region GCDs
     protected override bool GeneralGCD(out IAction? action)
     {
-        action = null;
         if (Player.HasStatus(true, StatusID.Hidden_1316))
         {
             return AssassinatePvP.CanUse(out action);
         }
         if (RespectGuard && Player.HasStatus(true, StatusID.Guard))
         {
-            return false;
+            return base.GeneralGCD(out action);
         }
 
         if (ZeshoMeppoPvP.CanUse(out action))

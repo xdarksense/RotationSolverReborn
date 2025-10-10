@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.Melee;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.3")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.31")]
 [SourceCode(Path = "main/RebornRotations/Melee/VPR_Reborn.cs")]
 
 public sealed class VPR_Reborn : ViperRotation
@@ -257,11 +257,20 @@ public sealed class VPR_Reborn : ViperRotation
     #region GCD Logic
     protected override bool GeneralGCD(out IAction? act)
     {
-        act = null;
         if (AbilityPrio2 &&
             !NoAbilityReady)
         {
-            return false;
+            if ((UFGhosting || (!UFGhosting && NoAbilityReady)) && !HasHostilesInRange && UncoiledFuryPvE.CanUse(out act, usedUp: true))
+            {
+                return true;
+            }
+
+            if ((UFGhosting || (!UFGhosting && NoAbilityReady)) && !HasHostilesInRange && WrithingSnapPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            return base.GeneralGCD(out act);
         }
             
         ////Reawaken Combo
@@ -291,7 +300,7 @@ public sealed class VPR_Reborn : ViperRotation
         }
 
         // Check if player meets Serpents Ire requirements, then check buff timers.
-        if (((SerpentsIrePvE.EnoughLevel && (!SerpentsIrePvE.Cooldown.ElapsedAfter(ReawakenDelayTimer) || SerpentOffering == 100)) || !SerpentsIrePvE.EnoughLevel)
+        if (((PreserveCombo && LiveComboTime > GCDTime(6)) || !PreserveCombo) && ((SerpentsIrePvE.EnoughLevel && (!SerpentsIrePvE.Cooldown.ElapsedAfter(ReawakenDelayTimer) || SerpentOffering == 100)) || !SerpentsIrePvE.EnoughLevel)
             && SwiftTime > SwiftTimer && HuntersTime > HuntersTimer)
         {
             // If all above conditions are met, attempt to use Reawaken.
@@ -364,6 +373,7 @@ public sealed class VPR_Reborn : ViperRotation
                         break;
                     case "Equal":
                     case null:
+                    default:
                         if (HuntersDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
                             return true;
                         if (SwiftskinsDenPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
@@ -454,6 +464,8 @@ public sealed class VPR_Reborn : ViperRotation
                             return true;
                         break;
                     case "Equal":
+                    case null:
+                    default:
                         if (SwiftskinsBitePvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
                             return true;
                         break;
@@ -553,6 +565,7 @@ public sealed class VPR_Reborn : ViperRotation
                         break;
                     case "Equal":
                     case null:
+                    default:
                         if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
                             return true;
                         if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
@@ -574,17 +587,27 @@ public sealed class VPR_Reborn : ViperRotation
                     {
                         return true;
                     }
+
+                    if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                    {
+                        return true;
+                    }
+
+                    if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
+                    {
+                        return true;
+                    }
                 }
 
                 if (!IsSwift)
                 {
-                    if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
+                    if (SwiftskinsCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
                         return true;
                 }
 
                 if (!IsHunter)
                 {
-                    if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true, skipAoeCheck: true))
+                    if (HuntersCoilPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
                         return true;
                 }
             }
@@ -686,6 +709,8 @@ public sealed class VPR_Reborn : ViperRotation
                                 return true;
                             break;
                         case "Equal":
+                        case null:
+                        default:
                             if (SwiftskinsStingPvE.CanUse(out act, skipStatusProvideCheck: true, skipComboCheck: true))
                                 return true;
                             break;

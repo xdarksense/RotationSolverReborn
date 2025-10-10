@@ -24,7 +24,7 @@ public partial class CustomRotation
             return true;
         }
 
-        if (!Service.Config.UseAbility || Player.TotalCastTime > 0)
+        if (!Service.Config.UseAbility || Player.TotalCastTime > 0 || Player.HasStatus(false, StatusID.ShackledAbilities))
         {
             act = null;
             return false;
@@ -126,9 +126,12 @@ public partial class CustomRotation
             {
                 return true;
             }
-            if (HealAreaAbility(nextGCD, out act))
+            if (!Player.HasStatus(false, StatusID.Scalebound) && !Player.HasStatus(false, StatusID.ShackledHealing))
             {
-                return true;
+                if (HealAreaAbility(nextGCD, out act))
+                {
+                    return true;
+                }
             }
             IBaseAction.AllEmpty = false;
             IBaseAction.ShouldEndSpecial = false;
@@ -141,9 +144,12 @@ public partial class CustomRotation
             {
                 return true;
             }
-            if (HealAreaAbility(nextGCD, out act))
+            if (!Player.HasStatus(false, StatusID.Scalebound) && !Player.HasStatus(false, StatusID.ShackledHealing))
             {
-                return true;
+                if (HealAreaAbility(nextGCD, out act))
+                {
+                    return true;
+                }
             }
             IBaseAction.AutoHealCheck = false;
         }
@@ -156,9 +162,12 @@ public partial class CustomRotation
             {
                 return true;
             }
-            if (HealSingleAbility(nextGCD, out act))
+            if (!Player.HasStatus(false, StatusID.Scalebound) && !Player.HasStatus(false, StatusID.ShackledHealing))
             {
-                return true;
+                if (HealSingleAbility(nextGCD, out act))
+                {
+                    return true;
+                }
             }
             IBaseAction.AllEmpty = false;
             IBaseAction.ShouldEndSpecial = false;
@@ -171,9 +180,12 @@ public partial class CustomRotation
             {
                 return true;
             }
-            if (HealSingleAbility(nextGCD, out act))
+            if (!Player.HasStatus(false, StatusID.Scalebound) && !Player.HasStatus(false, StatusID.ShackledHealing))
             {
-                return true;
+                if (HealSingleAbility(nextGCD, out act))
+                {
+                    return true;
+                }
             }
             IBaseAction.AutoHealCheck = false;
         }
@@ -562,6 +574,11 @@ public partial class CustomRotation
         {
             return true;
         }
+
+        if (DataCenter.IsPvP && RecuperatePvP.CanUse(out act) && !Player.HasStatus(true, StatusID.Guard))
+        {
+            return true;
+        }
         #endregion
 
         act = null;
@@ -605,10 +622,6 @@ public partial class CustomRotation
     [RotationDesc(DescType.HealSingleAbility)]
     protected virtual bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
-        if (RecuperatePvP.CanUse(out act))
-        {
-            return true;
-        }
 
         act = null;
         return false;

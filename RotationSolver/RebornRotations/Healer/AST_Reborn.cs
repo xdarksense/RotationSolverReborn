@@ -2,12 +2,15 @@ using System.ComponentModel;
 
 namespace RotationSolver.RebornRotations.Healer;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.3")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.31")]
 [SourceCode(Path = "main/RebornRotations/Healer/AST_Reborn.cs")]
 
 public sealed class AST_Reborn : AstrologianRotation
 {
     #region Config Options
+    [RotationConfig(CombatType.PvE, Name = "Limit Macrocosmos to multihit party stacks")]
+    public bool MultiHitRestrict { get; set; } = false;
+
     [RotationConfig(CombatType.PvE, Name = "Enable Swiftcast Restriction Logic to attempt to prevent actions other than Raise when you have swiftcast")]
     public bool SwiftLogic { get; set; } = true;
 
@@ -82,6 +85,17 @@ public sealed class AST_Reborn : AstrologianRotation
 
     private static bool InBurstStatus => HasDivination;
 
+    #region Tracking Properties
+    public override void DisplayRotationStatus()
+    {
+        ImGui.Text($"Suntouched 1: {Player.WillStatusEndGCD(1, 0, true, StatusID.Suntouched)}");
+        ImGui.Text($"Suntouched 2: {Player.WillStatusEndGCD(2, 0, true, StatusID.Suntouched)}");
+        ImGui.Text($"Suntouched 3: {Player.WillStatusEndGCD(3, 0, true, StatusID.Suntouched)}");
+        ImGui.Text($"Suntouched 4: {Player.WillStatusEndGCD(4, 0, true, StatusID.Suntouched)}");
+        ImGui.Text($"Suntouched Time: {Player.StatusTime(true, StatusID.Suntouched)}");
+    }
+    #endregion
+
     #region Countdown Logic
     protected override IAction? CountDownAction(float remainTime)
     {
@@ -91,11 +105,6 @@ public sealed class AST_Reborn : AstrologianRotation
         }
 
         if (remainTime < 3 && UseBurstMedicine(out act))
-        {
-            return act;
-        }
-
-        if (remainTime is < 4 and > 3 && AspectedBeneficPvE.CanUse(out act))
         {
             return act;
         }
@@ -112,20 +121,19 @@ public sealed class AST_Reborn : AstrologianRotation
     #region oGCD Logic
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
         if (BubbleProtec && HasCollectiveUnconscious)
         {
-            return false;
+            return base.EmergencyAbility(nextGCD, out act);
         }
 
         if (MicroPrio && HasMacrocosmos)
         {
-            return false;
+            return base.EmergencyAbility(nextGCD, out act);
         }
 
         if (!InCombat)
         {
-            return false;
+            return base.EmergencyAbility(nextGCD, out act);
         }
 
         if (OraclePvE.CanUse(out act))
@@ -180,10 +188,9 @@ public sealed class AST_Reborn : AstrologianRotation
     [RotationDesc(ActionID.ExaltationPvE, ActionID.TheArrowPvE, ActionID.TheSpirePvE, ActionID.TheBolePvE, ActionID.TheEwerPvE)]
     protected override bool DefenseSingleAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
         if (BubbleProtec && HasCollectiveUnconscious)
         {
-            return false;
+            return base.DefenseSingleAbility(nextGCD, out act);
         }
 
         if (InCombat && TheSpirePvE.CanUse(out act))
@@ -207,10 +214,9 @@ public sealed class AST_Reborn : AstrologianRotation
     [RotationDesc(ActionID.CollectiveUnconsciousPvE, ActionID.SunSignPvE)]
     protected override bool DefenseAreaAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
         if (BubbleProtec && HasCollectiveUnconscious)
         {
-            return false;
+            return base.DefenseAreaAbility(nextGCD, out act);
         }
 
         if (SunSignPvE.CanUse(out act))
@@ -226,7 +232,7 @@ public sealed class AST_Reborn : AstrologianRotation
         if ((MacrocosmosPvE.Cooldown.IsCoolingDown && !MacrocosmosPvE.Cooldown.WillHaveOneCharge(150))
             || (CollectiveUnconsciousPvE.Cooldown.IsCoolingDown && !CollectiveUnconsciousPvE.Cooldown.WillHaveOneCharge(40)))
         {
-            return false;
+            return base.DefenseAreaAbility(nextGCD, out act);
         }
 
         if (CollectiveUnconsciousPvE.CanUse(out act))
@@ -240,15 +246,14 @@ public sealed class AST_Reborn : AstrologianRotation
     [RotationDesc(ActionID.TheArrowPvE, ActionID.TheEwerPvE, ActionID.EssentialDignityPvE, ActionID.CelestialIntersectionPvE)]
     protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
         if (BubbleProtec && HasCollectiveUnconscious)
         {
-            return false;
+            return base.HealSingleAbility(nextGCD, out act);
         }
 
         if (MicroPrio && HasMacrocosmos)
         {
-            return false;
+            return base.HealSingleAbility(nextGCD, out act);
         }
 
         if (InCombat && TheArrowPvE.CanUse(out act))
@@ -287,10 +292,9 @@ public sealed class AST_Reborn : AstrologianRotation
     [RotationDesc(ActionID.CelestialOppositionPvE, ActionID.StellarDetonationPvE, ActionID.HoroscopePvE, ActionID.HoroscopePvE_16558, ActionID.LadyOfCrownsPvE)]
     protected override bool HealAreaAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
         if (BubbleProtec && HasCollectiveUnconscious)
         {
-            return false;
+            return base.HealAreaAbility(nextGCD, out act);
         }
 
         if (HasGiantDominance && StellarDetonationPvE.CanUse(out act))
@@ -305,7 +309,7 @@ public sealed class AST_Reborn : AstrologianRotation
 
         if (MicroPrio && HasMacrocosmos)
         {
-            return false;
+            return base.HealAreaAbility(nextGCD, out act);
         }
 
         if (CelestialOppositionPvE.CanUse(out act))
@@ -344,9 +348,9 @@ public sealed class AST_Reborn : AstrologianRotation
             return false;
         }
 
-        if (Player.WillStatusEnd(5, true, StatusID.Suntouched))
+        if (Player.HasStatus(true, StatusID.Suntouched) && Player.WillStatusEndGCD(3, 0, true, StatusID.Suntouched))
         {
-            if (SunSignPvE.CanUse(out act))
+            if (SunSignPvE.CanUse(out act, skipAoeCheck: true, skipTTKCheck: true))
             {
                 return true;
             }
@@ -407,10 +411,9 @@ public sealed class AST_Reborn : AstrologianRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
         if (BubbleProtec && HasCollectiveUnconscious)
         {
-            return false;
+            return base.AttackAbility(nextGCD, out act);
         }
 
         if (SimpleLord && InCombat && HasDivination && LordOfCrownsPvE.CanUse(out act))
@@ -464,19 +467,17 @@ public sealed class AST_Reborn : AstrologianRotation
     #endregion
 
     #region GCD Logic
-    [RotationDesc(ActionID.MacrocosmosPvE)]
     protected override bool DefenseSingleGCD(out IAction? act)
     {
-        act = null;
         if (BubbleProtec && HasCollectiveUnconscious)
         {
-            return false;
+            return base.DefenseAreaGCD(out act);
         }
 
         if ((MacrocosmosPvE.Cooldown.IsCoolingDown && !MacrocosmosPvE.Cooldown.WillHaveOneCharge(150))
             || (CollectiveUnconsciousPvE.Cooldown.IsCoolingDown && !CollectiveUnconsciousPvE.Cooldown.WillHaveOneCharge(40)))
         {
-            return false;
+            return base.DefenseAreaGCD(out act);
         }
 
         if ((NeutralSectPvE.CanUse(out _) || HasNeutralSect || IsLastAbility(false, NeutralSectPvE)) && AspectedBeneficPvE.CanUse(out act, skipStatusProvideCheck: true))
@@ -490,16 +491,15 @@ public sealed class AST_Reborn : AstrologianRotation
     [RotationDesc(ActionID.MacrocosmosPvE)]
     protected override bool DefenseAreaGCD(out IAction? act)
     {
-        act = null;
         if (BubbleProtec && HasCollectiveUnconscious)
         {
-            return false;
+            return base.DefenseAreaGCD(out act);
         }
 
         if ((MacrocosmosPvE.Cooldown.IsCoolingDown && !MacrocosmosPvE.Cooldown.WillHaveOneCharge(150))
             || (CollectiveUnconsciousPvE.Cooldown.IsCoolingDown && !CollectiveUnconsciousPvE.Cooldown.WillHaveOneCharge(40)))
         {
-            return false;
+            return base.DefenseAreaGCD(out act);
         }
 
         if ((NeutralSectPvE.CanUse(out _) || HasNeutralSect || IsLastAbility(false, NeutralSectPvE)) && HeliosConjunctionPvE.CanUse(out act, skipStatusProvideCheck: true))
@@ -507,9 +507,12 @@ public sealed class AST_Reborn : AstrologianRotation
             return true;
         }
 
-        if (MacrocosmosPvE.CanUse(out act))
+        if ((MultiHitRestrict && IsCastingMultiHit) || !MultiHitRestrict)
         {
-            return true;
+            if (MacrocosmosPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         return base.DefenseAreaGCD(out act);
@@ -518,20 +521,19 @@ public sealed class AST_Reborn : AstrologianRotation
     [RotationDesc(ActionID.AspectedBeneficPvE, ActionID.BeneficIiPvE, ActionID.BeneficPvE)]
     protected override bool HealSingleGCD(out IAction? act)
     {
-        act = null;
         if (BubbleProtec && HasCollectiveUnconscious)
         {
-            return false;
+            return base.HealSingleGCD(out act);
         }
 
         if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
         {
-            return false;
+            return base.HealSingleGCD(out act);
         }
 
         if (MicroPrio && HasMacrocosmos)
         {
-            return false;
+            return base.HealSingleGCD(out act);
         }
 
         var shouldUseEssentialDignity =
@@ -566,28 +568,27 @@ public sealed class AST_Reborn : AstrologianRotation
     [RotationDesc(ActionID.AspectedHeliosPvE, ActionID.HeliosPvE, ActionID.HeliosConjunctionPvE)]
     protected override bool HealAreaGCD(out IAction? act)
     {
-        act = null;
         if (BubbleProtec && HasCollectiveUnconscious)
         {
-            return false;
+            return base.HealAreaGCD(out act);
         }
 
         if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
         {
-            return false;
+            return base.HealAreaGCD(out act);
         }
 
         if (MicroPrio && HasMacrocosmos)
         {
-            return false;
+            return base.HealAreaGCD(out act);
         }
 
-        if (HeliosConjunctionPvE.CanUse(out act))
+        if (HeliosConjunctionPvE.EnoughLevel && HeliosConjunctionPvE.CanUse(out act))
         {
             return true;
         }
 
-        if (AspectedHeliosPvE.CanUse(out act))
+        if (!HeliosConjunctionPvE.EnoughLevel && AspectedHeliosPvE.CanUse(out act))
         {
             return true;
         }
@@ -602,15 +603,14 @@ public sealed class AST_Reborn : AstrologianRotation
 
     protected override bool GeneralGCD(out IAction? act)
     {
-        act = null;
         if (BubbleProtec && HasCollectiveUnconscious)
         {
-            return false;
+            return base.GeneralGCD(out act);
         }
 
         if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
         {
-            return false;
+            return base.GeneralGCD(out act);
         }
 
         if (GravityPvE.CanUse(out act))

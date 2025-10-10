@@ -449,7 +449,8 @@ public partial class ViperRotation
 
     static partial void ModifySlitherPvE(ref ActionSetting setting)
     {
-        
+        setting.SpecialType = SpecialActionType.HostileFriendlyMovingForward;
+        setting.IsFriendly = false;
     }
 
     static partial void ModifySteelFangsPvE(ref ActionSetting setting)

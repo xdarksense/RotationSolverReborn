@@ -18,6 +18,7 @@ internal static partial class TargetUpdater
 
     internal static void UpdateTargets()
     {
+        //PluginLog.Debug("Updating targets");
         DataCenter.TargetsByRange.Clear();
         DataCenter.AllTargets = GetAllTargets();
         if (DataCenter.AllTargets != null)
@@ -58,14 +59,21 @@ internal static partial class TargetUpdater
     private static unsafe List<IBattleChara> GetAllianceMembers()
     {
         RaiseType raisetype = Service.Config.RaiseType;
+
         if (raisetype == RaiseType.PartyOnly)
         {
             return [];
         }
-        return GetMembers(DataCenter.AllTargets, isParty: false, isAlliance: true);
+
+        if (raisetype == RaiseType.AllOutOfDuty)
+        {
+            return GetMembers(DataCenter.AllTargets, isParty: false, isAlliance: false, IsOutDuty: true);
+        }
+
+        return GetMembers(DataCenter.AllTargets, isParty: false, isAlliance: true, IsOutDuty: false);
     }
 
-    private static unsafe List<IBattleChara> GetMembers(List<IBattleChara> source, bool isParty, bool isAlliance = false)
+    private static unsafe List<IBattleChara> GetMembers(List<IBattleChara> source, bool isParty, bool isAlliance = false, bool IsOutDuty = false)
     {
         List<IBattleChara> members = [];
         if (source == null) return members;
@@ -77,15 +85,12 @@ internal static partial class TargetUpdater
                 if (member.IsPet()) continue;
                 if (isParty && !member.IsParty()) continue;
                 if (isAlliance && (!ObjectHelper.IsAllianceMember(member) || member.IsParty())) continue;
+                if (IsOutDuty && (!ObjectHelper.IsOtherPlayerOutOfDuty(member) || member.IsParty())) continue;
 
                 FFXIVClientStructs.FFXIV.Client.Game.Character.Character* character = member.Character();
                 if (character == null) continue;
 
-                byte status = character->CharacterData.OnlineStatus;
-                if (status != 15 && status != 5 && member.IsTargetable)
-                {
-                    members.Add(member);
-                }
+                members.Add(member);
             }
             catch (Exception ex)
             {
@@ -191,13 +196,16 @@ internal static partial class TargetUpdater
                         }
                     }
                 }
-                else if (raisetype == RaiseType.All && DataCenter.AllTargets != null)
+                else if (raisetype == RaiseType.All || raisetype == RaiseType.AllOutOfDuty)
                 {
-                    foreach (var target in DataCenter.AllTargets.GetDeath())
+                    if (DataCenter.AllianceMembers != null)
                     {
-                        if (!deathParty.Contains(target))
+                        foreach (var target in DataCenter.AllianceMembers.GetDeath())
                         {
-                            validRaiseTargets.Add(target);
+                            if (!deathParty.Contains(target))
+                            {
+                                validRaiseTargets.Add(target);
+                            }
                         }
                     }
                 }
@@ -293,7 +301,11 @@ internal static partial class TargetUpdater
 
             // Apply dispel delay
             _dispelPartyTargets.Delay(weakenPeople);
-            var delayedWeakenPeople = _dispelPartyTargets.ToList();
+            var delayedWeakenPeople = new List<IBattleChara>();
+            foreach (var person in _dispelPartyTargets)
+            {
+                delayedWeakenPeople.Add(person);
+            }
 
             var CanDispelNonDangerous = !DataCenter.MergedStatus.HasFlag(AutoStatus.HealAreaAbility)
                     && !DataCenter.MergedStatus.HasFlag(AutoStatus.HealAreaSpell)
@@ -323,15 +335,19 @@ internal static partial class TargetUpdater
                 }
             }
 
-            if (!CanDispelNonDangerous)
+            // Allow non-dangerous dispels when either we're in a safe context or explicitly configured to do so.
+            bool allowNonDangerous = CanDispelNonDangerous
+                                     || !DataCenter.HasHostilesInRange
+                                     || Service.Config.DispelAll
+                                     || DataCenter.IsPvP;
+
+            IBattleChara? dangerousTarget = GetClosestTarget(dyingPeople);
+            if (!allowNonDangerous)
             {
-                return GetClosestTarget(dyingPeople);
+                return dangerousTarget;
             }
 
-            if (CanDispelNonDangerous || !DataCenter.HasHostilesInRange || Service.Config.DispelAll || DataCenter.IsPvP)
-            {
-                return GetClosestTarget(dyingPeople) ?? GetClosestTarget(delayedWeakenPeople);
-            }
+            return dangerousTarget ?? GetClosestTarget(delayedWeakenPeople);
         }
         return null;
     }
@@ -397,15 +413,22 @@ internal static partial class TargetUpdater
 
         _lastUpdateTimeToKill = now;
 
+        var hostiles = DataCenter.AllHostileTargets;
+        if (hostiles == null || hostiles.Count == 0)
+        {
+            return;
+        }
+
         if (DataCenter.RecordedHP.Count >= DataCenter.HP_RECORD_TIME)
         {
             _ = DataCenter.RecordedHP.Dequeue();
         }
 
-        Dictionary<ulong, float> currentHPs = [];
-        foreach (IBattleChara target in DataCenter.AllHostileTargets)
+        Dictionary<ulong, float> currentHPs = new(hostiles.Count);
+        for (int i = 0; i < hostiles.Count; i++)
         {
-            if (target.CurrentHp != 0)
+            var target = hostiles[i];
+            if (target != null && target.CurrentHp != 0)
             {
                 currentHPs[target.GameObjectId] = target.GetHealthRatio();
             }

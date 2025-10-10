@@ -7,7 +7,6 @@ using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
 using ECommons.Logging;
-using ExCSS;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Common.Component.BGCollision;
@@ -27,6 +26,8 @@ public static class ObjectHelper
     private static readonly EventHandlerContent[] _eventType =
     [
         EventHandlerContent.TreasureHuntDirector,
+        EventHandlerContent.BattleLeveDirector,
+        EventHandlerContent.CompanyLeveDirector,
         EventHandlerContent.Quest,
     ];
 
@@ -39,7 +40,7 @@ public static class ObjectHelper
 
     internal static BNpcBase? GetObjectNPC(this IBattleChara battleChara)
     {
-        return battleChara == null ? null : Service.GetSheet<Lumina.Excel.Sheets.BNpcBase>().GetRow(battleChara.DataId);
+        return battleChara == null ? null : Service.GetSheet<Lumina.Excel.Sheets.BNpcBase>().GetRow(battleChara.BaseId);
     }
 
     internal static bool CanProvoke(this IBattleChara target)
@@ -118,13 +119,23 @@ public static class ObjectHelper
             return false;
         }
 
-        return Svc.Data.GetExcelSheet<BNpcBase>().TryGetRow(battleChara.DataId, out var dataRow) && !dataRow.IsOmnidirectional;
+        return Svc.Data.GetExcelSheet<BNpcBase>().TryGetRow(battleChara.BaseId, out var dataRow) && !dataRow.IsOmnidirectional;
     }
 
     internal static unsafe bool IsOthersPlayersMob(this IBattleChara battleChara)
     {
         //SpecialType but no NamePlateIcon
-        return _eventType.Contains(battleChara.GetEventType()) && battleChara.GetNamePlateIcon() == 0;
+        bool isEventType = false;
+        var ev = battleChara.GetEventType();
+        for (int i = 0; i < _eventType.Length; i++)
+        {
+            if (_eventType[i] == ev)
+            {
+                isEventType = true;
+                break;
+            }
+        }
+        return isEventType && battleChara.GetNamePlateIcon() == 0;
     }
 
     internal static bool IsAttackable(this IBattleChara battleChara)
@@ -191,7 +202,7 @@ public static class ObjectHelper
 
             if (isInCE)
             {
-                if (!battleChara.IsBozjanCEMob())
+                if (!battleChara.IsBozjanCEMob() && battleChara.GetBattleNPCSubKind() != BattleNpcSubKind.BattleNpcPart)
                 {
                     return false;
                 }
@@ -206,28 +217,28 @@ public static class ObjectHelper
             }
         }
 
-        //if (DataCenter.IsInOccultCrescentOp)
-        //{
-        //    //bool isInCE = this needs to be fixed to sort out indiicator for in CE or not 
+        /*if (DataCenter.IsInOccultCrescentOp)
+        {
+            bool isInCE = DataCenter.IsInOccultCrescentOpCE;
 
-        //    if (isInCE)
-        //    {
-        //        if (!battleChara.IsOccultCEMob())
-        //        {
-        //            return false;
-        //        }
-        //    }
+            if (isInCE)
+            {
+                if (!battleChara.IsOccultCEMob())
+                {
+                    return false;
+                }
+            }
 
-        //    if (!isInCE)
-        //    {
-        //        if (battleChara.IsOccultCEMob())
-        //        {
-        //            return false;
-        //        }
-        //    }
-        //}
+            if (!isInCE)
+            {
+                if (battleChara.IsOccultCEMob())
+                {
+                    return false;
+                }
+            }
+        }*/
 
-        if (Service.Config.TargetQuestThings && battleChara.IsOthersPlayersMob())
+        if (Service.Config.TargetQuestThings2 && battleChara.IsOthersPlayersMob())
         {
             return false;
         }
@@ -407,6 +418,28 @@ public static class ObjectHelper
         return false;
     }
 
+    internal static uint TargetCharaCondition(this IBattleChara obj)
+    {
+        uint statusId = obj.OnlineStatus.RowId;
+        if (statusId != 0)
+        {
+            return statusId;
+        }
+
+        return 0;
+    }
+
+    internal static bool IsConditionCannotTarget(this IBattleChara obj)
+    {
+        uint statusId = obj.OnlineStatus.RowId;
+        if (statusId == 15 || statusId == 5)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     internal static unsafe bool IsFriendly(this IGameObject obj)
     {
         if (obj == null)
@@ -436,6 +469,14 @@ public static class ObjectHelper
     {
         return obj.GameObjectId is not 0
             && !DataCenter.IsPvP && (DataCenter.IsInAllianceRaid || DataCenter.IsInBozjanFieldOpCE || DataCenter.IsInOccultCrescentOp) && obj is IPlayerCharacter
+            && (ActionManager.CanUseActionOnTarget((uint)ActionID.RaisePvE, (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)obj.Struct())
+            || ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)obj.Struct()));
+    }
+
+    internal static unsafe bool IsOtherPlayerOutOfDuty(this ICharacter obj)
+    {
+        return obj.GameObjectId is not 0
+            && !DataCenter.IsPvP && obj is IPlayerCharacter
             && (ActionManager.CanUseActionOnTarget((uint)ActionID.RaisePvE, (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)obj.Struct())
             || ActionManager.CanUseActionOnTarget((uint)ActionID.CurePvE, (FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject*)obj.Struct()));
     }
@@ -723,13 +764,15 @@ public static class ObjectHelper
 
         uint icon = battleChara.GetNamePlateIcon();
 
-        // Hunt bill, Relic weapon, and Leve target
-        if (Service.Config.TargetHuntingRelicLevePriority && (icon == 60092 || icon == 60096 || icon == 71244))
+        if (Service.Config.TargetHuntingRelicLevePriority && (icon == 60092 || icon == 60094 || icon == 60096 || icon == 60097 || icon == 60098 || icon == 71244))
         {
             return true;
         }
-        //60092 Hunt Target
+        //60092 Hunt Log
+        //60094 Treasure Mob
         //60096 Relic Weapon
+        //60097 Hunt Bill
+        //60098 Crescent
         //71244 Leve Target
 
         // Quest
@@ -798,7 +841,7 @@ public static class ObjectHelper
     /// <summary>
     /// List of NameIds that Undead enemies in Occult Crecent.
     /// </summary>
-    public static uint[] IsOCUndeadList { get; } =
+private static readonly HashSet<uint> IsOCUndeadSet =
     [
         13741, //Lifereaper
         13924, //Armor
@@ -815,13 +858,13 @@ public static class ObjectHelper
     /// </summary>
     public static bool IsOCUndeadTarget(this IBattleChara battleChara)
     {
-        return IsOCUndeadList.Contains(battleChara.NameId);
+        return IsOCUndeadSet.Contains(battleChara.NameId);
     }
 
     /// <summary>
     /// List of NameIds that are immune to OC Slowga.
     /// </summary>
-    public static uint[] IsOCSlowgaImmuneList { get; } =
+    private static readonly HashSet<uint> IsOCSlowgaImmuneSet =
     [
         13933, //Marolith
         13893, //AnimatedDoll
@@ -846,13 +889,13 @@ public static class ObjectHelper
     /// </summary>
     public static bool IsOCSlowgaImmuneTarget(this IBattleChara battleChara)
     {
-        return IsOCSlowgaImmuneList.Contains(battleChara.NameId);
+        return IsOCSlowgaImmuneSet.Contains(battleChara.NameId);
     }
 
     /// <summary>
     /// List of NameIds that are immune to OC Doom.
     /// </summary>
-    public static uint[] IsOCDoomImmuneList { get; } =
+    private static readonly HashSet<uint> IsOCDoomImmuneSet =
     [
         13893, //AnimatedDoll
         13894, //AnimatedDoll
@@ -883,13 +926,13 @@ public static class ObjectHelper
     /// </summary>
     public static bool IsOCDoomImmuneTarget(this IBattleChara battleChara)
     {
-        return IsOCDoomImmuneList.Contains(battleChara.NameId);
+        return IsOCDoomImmuneSet.Contains(battleChara.NameId);
     }
 
     /// <summary>
     /// List of NameIds that are immune to OC Stun.
     /// </summary>
-    public static uint[] IsOCStunImmuneList { get; } =
+    private static readonly HashSet<uint> IsOCStunImmuneSet =
     [
         13873, //Tormentor
         13891, //LionStatant
@@ -914,13 +957,13 @@ public static class ObjectHelper
     /// </summary>
     public static bool IsOCStunImmuneTarget(this IBattleChara battleChara)
     {
-        return IsOCStunImmuneList.Contains(battleChara.NameId);
+        return IsOCStunImmuneSet.Contains(battleChara.NameId);
     }
 
     /// <summary>
     /// List of NameIds that are immune to OC Freeze.
     /// </summary>
-    public static uint[] IsOCFreezeImmuneList { get; } =
+    private static readonly HashSet<uint> IsOCFreezeImmuneSet =
     [
         13876, //Fan
         13917, //Sculpture
@@ -947,13 +990,13 @@ public static class ObjectHelper
     /// </summary>
     public static bool IsOCFreezeImmuneTarget(this IBattleChara battleChara)
     {
-        return IsOCFreezeImmuneList.Contains(battleChara.NameId);
+        return IsOCFreezeImmuneSet.Contains(battleChara.NameId);
     }
 
     /// <summary>
     /// List of NameIds that are immune to OC Blind.
     /// </summary>
-    public static uint[] IsOCBlindImmuneList { get; } =
+    private static readonly HashSet<uint> IsOCBlindImmuneSet =
     [
         13931, //Chaochu
         13874, //Snapweed
@@ -978,13 +1021,13 @@ public static class ObjectHelper
     /// </summary>
     public static bool IsOCBlindImmuneTarget(this IBattleChara battleChara)
     {
-        return IsOCBlindImmuneList.Contains(battleChara.NameId);
+        return IsOCBlindImmuneSet.Contains(battleChara.NameId);
     }
 
     /// <summary>
     /// List of NameIds that are immune to OC Paralysis.
     /// </summary>
-    public static uint[] IsOCParalysisImmuneList { get; } =
+    private static readonly HashSet<uint> IsOCParalysisImmuneSet =
     [
         13931, //Chaochu
         13874, //Snapweed
@@ -1015,7 +1058,7 @@ public static class ObjectHelper
     /// </summary>
     public static bool IsOCParalysisImmuneTarget(this IBattleChara battleChara)
     {
-        return IsOCParalysisImmuneList.Contains(battleChara.NameId);
+        return IsOCParalysisImmuneSet.Contains(battleChara.NameId);
     }
 
     internal static unsafe uint GetNamePlateIcon(this IBattleChara battleChara)
@@ -1099,7 +1142,8 @@ public static class ObjectHelper
     /// <returns>True if the target is immune due to any special mechanic; otherwise, false.</returns>
     public static bool IsSpecialImmune(this IBattleChara battleChara)
     {
-        return battleChara.IsMesoImmune()
+        return battleChara.IsLOTAImmune()
+            || battleChara.IsMesoImmune()
             || battleChara.IsJagdDollImmune()
             || battleChara.IsLyreImmune()
             || battleChara.IsDrakeImmune()
@@ -1113,6 +1157,29 @@ public static class ObjectHelper
             || battleChara.IsOmegaImmune()
             || battleChara.IsLimitlessBlue()
             || battleChara.IsHanselorGretelShielded();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool IsLOTAImmune(this IBattleChara battleChara)
+    {
+        if (DataCenter.TerritoryID == 174)
+        {
+            var Thanatos = battleChara.NameId == 710;
+            var AstralRealignment = Player.Object.HasStatus(false, StatusID.AstralRealignment);
+
+            if (Thanatos && !AstralRealignment)
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsLOTAImmune status found");
+                }
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -1776,7 +1843,7 @@ public static class ObjectHelper
             return true;
         }
 
-        return Svc.Data.GetExcelSheet<BNpcBase>().TryGetRow(battleChara.DataId, out var dataRow) && dataRow.Rank is 2 or 6;
+        return Svc.Data.GetExcelSheet<BNpcBase>().TryGetRow(battleChara.BaseId, out var dataRow) && dataRow.Rank is 2 or 6;
     }
 
     /// <summary>
@@ -1840,11 +1907,16 @@ public static class ObjectHelper
     }
 
     private static readonly Dictionary<ulong, Vector3> LastPositions = [];
-    internal static bool IsTargetMoving(this IBattleChara battleChara)
+internal static bool IsTargetMoving(this IBattleChara battleChara)
     {
         if (battleChara == null)
         {
             return false;
+        }
+
+        if (Svc.Condition[ConditionFlag.BetweenAreas] || LastPositions.Count > 4096)
+        {
+            LastPositions.Clear();
         }
 
         ulong id = battleChara.GameObjectId;
@@ -1873,7 +1945,7 @@ public static class ObjectHelper
     /// <returns>
     /// The estimated time to kill the battle character in seconds, or <see cref="float.NaN"/> if the calculation cannot be performed.
     /// </returns>
-    internal static float GetTTK(this IBattleChara battleChara, bool wholeTime = false)
+internal static float GetTTK(this IBattleChara battleChara, bool wholeTime = false)
     {
         if (battleChara == null)
         {
@@ -1885,29 +1957,36 @@ public static class ObjectHelper
             return 999.99f;
         }
 
+        const int movingAverageWindow = 5;
+        ulong objId = battleChara.GameObjectId;
+
         DateTime startTime = DateTime.MinValue;
-        float initialHpRatio = 0;
+        float initialHpRatio = 0f;
 
-        // Use a snapshot of the RecordedHP collection to avoid modification during enumeration
-        (DateTime time, Dictionary<ulong, float> hpRatios)[] recordedHPCopy = [.. DataCenter.RecordedHP];
+        // Small fixed-size window for last ratios without copying the whole queue
+        float[] window = new float[movingAverageWindow];
+        int wCount = 0;
 
-        // Calculate a moving average of HP ratios
-        const int movingAverageWindow = 5; // TODO: Possibly this should be configurable?
-        if (recordedHPCopy.Length == 0)
+        foreach ((DateTime time, Dictionary<ulong, float> hpRatiosDict) in DataCenter.RecordedHP)
         {
-            return float.NaN; // No recorded HP data available
-        }
-
-        List<float> hpRatios = new(movingAverageWindow);
-
-        // We just need the first injured entry and last movingAverageWindow entries
-        foreach ((DateTime time, Dictionary<ulong, float> hpRatiosDict) in recordedHPCopy)
-        {
-            if (hpRatiosDict != null && hpRatiosDict.TryGetValue(battleChara.GameObjectId, out float ratio) && ratio != 1)
+            if (hpRatiosDict != null && hpRatiosDict.TryGetValue(objId, out float ratio) && ratio != 1f)
             {
-                startTime = time;
-                initialHpRatio = ratio;
-                break;
+                if (startTime == DateTime.MinValue)
+                {
+                    startTime = time;
+                    initialHpRatio = ratio;
+                }
+
+                if (wCount < movingAverageWindow)
+                {
+                    window[wCount++] = ratio;
+                }
+                else
+                {
+                    // shift left by one; window is very small so this is cheap
+                    Array.Copy(window, 1, window, 0, movingAverageWindow - 1);
+                    window[movingAverageWindow - 1] = ratio;
+                }
             }
         }
 
@@ -1916,35 +1995,15 @@ public static class ObjectHelper
             return float.NaN;
         }
 
-        // Skip to just the last movingAverageWindow entries
-        if (recordedHPCopy.Length > movingAverageWindow)
-        {
-            recordedHPCopy = recordedHPCopy[^movingAverageWindow..];
-        }
-
-        foreach ((_, Dictionary<ulong, float> hpRatiosDict) in recordedHPCopy)
-        {
-            if (hpRatiosDict != null && hpRatiosDict.TryGetValue(battleChara.GameObjectId, out float ratio) && ratio != 1)
-            {
-                hpRatios.Add(ratio);
-            }
-        }
-
         float currentHealthRatio = battleChara.GetHealthRatio();
         if (float.IsNaN(currentHealthRatio))
         {
             return float.NaN;
         }
 
-        // Manual average calculation to avoid LINQ
-        float sum = 0;
-        int count = 0;
-        foreach (float r in hpRatios)
-        {
-            sum += r;
-            count++;
-        }
-        float avg = count > 0 ? sum / count : 0;
+        float sum = 0f;
+        for (int i = 0; i < wCount; i++) sum += window[i];
+        float avg = wCount > 0 ? sum / wCount : 0f;
 
         float hpRatioDifference = initialHpRatio - avg;
         if (hpRatioDifference <= 0)

@@ -125,6 +125,7 @@ public partial class CustomRotation
     {
         //Recuperate will knock off Guard, likely killing you.
         setting.ActionCheck = () => Player.MaxHp - Player.CurrentHp > 15000 && Player.TimeAlive() > 5;
+        setting.TargetType = TargetType.Self;
         setting.IsFriendly = true;
     }
 
@@ -137,7 +138,7 @@ public partial class CustomRotation
 
     static partial void ModifyPurifyPvP(ref ActionSetting setting)
     {
-        setting.TargetType = TargetType.Dispel;
+        setting.ActionCheck = () => Player.HasStatus(false, StatusHelper.PurifyPvPStatuses);
         setting.IsFriendly = true;
     }
 
@@ -237,6 +238,7 @@ public partial class CustomRotation
 
     static partial void ModifyBloodbathPvP(ref ActionSetting setting)
     {
+        setting.ActionCheck = () => Player.TimeAlive() > 5;
         setting.StatusNeed = [StatusID.PvPRoleActionBloodbath];
     }
 

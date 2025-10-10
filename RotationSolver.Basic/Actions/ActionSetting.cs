@@ -23,7 +23,17 @@ public enum SpecialActionType : byte
     /// <summary>
     /// 
     /// </summary>
-    MovingForward,
+    HostileMovingForward,
+
+    /// <summary>
+    /// 
+    /// </summary>
+    FriendlyMovingForward,
+
+    /// <summary>
+    /// 
+    /// </summary>
+    HostileFriendlyMovingForward,
 }
 
 /// <summary>
@@ -100,6 +110,11 @@ public class ActionSetting()
     /// Is this action friendly.
     /// </summary>
     public bool IsFriendly { get; set; }
+
+    /// <summary>
+    /// Is this action a Single Target Healing GCD.
+    /// </summary>
+    public bool GCDSingleHeal { get; set; }
 
     private TargetType _type = TargetType.Big;
 

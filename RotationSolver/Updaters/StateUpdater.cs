@@ -168,7 +168,7 @@ internal static class StateUpdater
             bool attacked = false;
             if (tarOnMeCount != 0)
             {
-                attacked = attackedCount / tarOnMeCount > 0.7f;
+                attacked = attackedCount / tarOnMeCount > 0f;
             }
 
             if (tarOnMeCount >= Service.Config.AutoDefenseNumber
@@ -514,27 +514,15 @@ internal static class StateUpdater
             SpecialCommandType.AntiKnockback => AutoStatus.AntiKnockback,
             SpecialCommandType.Burst => AutoStatus.Burst,
             SpecialCommandType.Speed => AutoStatus.Speed,
+            SpecialCommandType.Intercepting => AutoStatus.Intercepting,
             _ => AutoStatus.None,
         };
 
-        AddStatus(ref status, AutoStatus.HealAreaSpell | AutoStatus.HealAreaAbility, DataCenter.CurrentConditionValue.HealAreaConditionSet);
-        AddStatus(ref status, AutoStatus.HealSingleSpell | AutoStatus.HealSingleAbility, DataCenter.CurrentConditionValue.HealSingleConditionSet);
-        AddStatus(ref status, AutoStatus.DefenseArea, DataCenter.CurrentConditionValue.DefenseAreaConditionSet);
-        AddStatus(ref status, AutoStatus.DefenseSingle, DataCenter.CurrentConditionValue.DefenseSingleConditionSet);
-
-        AddStatus(ref status, AutoStatus.Dispel | AutoStatus.TankStance | AutoStatus.Positional,
-            DataCenter.CurrentConditionValue.DispelStancePositionalConditionSet);
-        AddStatus(ref status, AutoStatus.Raise | AutoStatus.Shirk, DataCenter.CurrentConditionValue.RaiseShirkConditionSet);
-        AddStatus(ref status, AutoStatus.MoveForward, DataCenter.CurrentConditionValue.MoveForwardConditionSet);
-        AddStatus(ref status, AutoStatus.MoveBack, DataCenter.CurrentConditionValue.MoveBackConditionSet);
-        AddStatus(ref status, AutoStatus.AntiKnockback, DataCenter.CurrentConditionValue.AntiKnockbackConditionSet);
 
         if (!status.HasFlag(AutoStatus.Burst) && Service.Config.AutoBurst)
         {
             status |= AutoStatus.Burst;
         }
-        AddStatus(ref status, AutoStatus.Speed, DataCenter.CurrentConditionValue.SpeedConditionSet);
-        AddStatus(ref status, AutoStatus.NoCasting, DataCenter.CurrentConditionValue.NoCastingConditionSet);
 
         return status;
     }

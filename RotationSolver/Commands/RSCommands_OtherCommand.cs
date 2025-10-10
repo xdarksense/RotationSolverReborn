@@ -13,6 +13,10 @@ public static partial class RSCommands
     {
         switch (otherType)
         {
+            case OtherCommandType.Cycle:
+                ExecuteCycleCommand();
+                break;
+
             case OtherCommandType.Rotations:
                 ExecuteRotationCommand(str);
                 break;
@@ -36,6 +40,30 @@ public static partial class RSCommands
             case OtherCommandType.NextAction:
                 DoAction();
                 break;
+        }
+    }
+
+    private static void ExecuteCycleCommand()
+    {
+        if (Service.Config.CycleType == CycleType.CycleNormal)
+        {
+            CycleStateWithOneTargetTypes();
+        }
+        else if (Service.Config.CycleType == CycleType.CycleAllAuto)
+        {
+            CycleStateWithAllTargetTypes();
+        }
+        else if (Service.Config.CycleType == CycleType.CycleAuto)
+        {
+            CycleStateAuto();
+        }
+        else if (Service.Config.CycleType == CycleType.CycleManual)
+        {
+            CycleStateManual();
+        }
+        else if (Service.Config.CycleType == CycleType.CycleManualAuto)
+        {
+            CycleStateManualAuto();
         }
     }
 
@@ -265,7 +293,6 @@ public static partial class RSCommands
 
     private static Enum GetNextEnumValue(Enum currentEnumValue)
     {
-        // Remove LINQ: .Cast<Enum>().ToArray()
         Array values = Enum.GetValues(currentEnumValue.GetType());
         Enum[] enumValues = new Enum[values.Length];
         for (int i = 0; i < values.Length; i++)
@@ -281,11 +308,9 @@ public static partial class RSCommands
     {
         string trimStr = str.Trim();
 
-        // Combine both regular and duty actions, avoiding duplicates by reference
         var rotationActions = RotationUpdater.CurrentRotationActions ?? [];
         var dutyActions = DataCenter.CurrentDutyRotation?.AllActions ?? [];
 
-        // Manual concat and deduplication
         int totalLength = rotationActions.Length + dutyActions.Length;
         List<IAction> allActionsList = new(totalLength);
         HashSet<IAction> seen = [];
@@ -355,11 +380,9 @@ public static partial class RSCommands
 
         if (double.TryParse(timeStr, out double time))
         {
-            // Combine both regular and duty actions, avoiding duplicates by reference
             var rotationActions = RotationUpdater.CurrentRotationActions ?? [];
             var dutyActions = DataCenter.CurrentDutyRotation?.AllActions ?? [];
 
-            // Manual concat and deduplication
             int totalLength = rotationActions.Length + dutyActions.Length;
             List<IAction> allActionsList = new(totalLength);
             HashSet<IAction> seen = [];
@@ -404,7 +427,8 @@ public static partial class RSCommands
         IRotationConfigSet configs = customCombo.Configs;
         foreach (IRotationConfig config in configs)
         {
-            if (config.DoCommand(configs, str))
+            bool result = config.DoCommand(configs, str);
+            if (result)
             {
                 if (Service.Config.ShowToggledSettingInChat)
                 {

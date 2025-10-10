@@ -108,7 +108,10 @@ public partial class WhiteMageRotation
 
     static partial void ModifyCurePvE(ref ActionSetting setting)
     {
-
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            GCDSingleHeal = true,
+        };
     }
 
     static partial void ModifyAeroPvE(ref ActionSetting setting)
@@ -141,6 +144,10 @@ public partial class WhiteMageRotation
     static partial void ModifyCureIiPvE(ref ActionSetting setting)
     {
         setting.UnlockedByQuestID = 65977;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            GCDSingleHeal = true,
+        };
     }
 
     static partial void ModifyPresenceOfMindPvE(ref ActionSetting setting)
@@ -176,7 +183,7 @@ public partial class WhiteMageRotation
 
     static partial void ModifyAetherialShiftPvE(ref ActionSetting setting)
     {
-        setting.SpecialType = SpecialActionType.MovingForward;
+        setting.TargetType = TargetType.Move;
         setting.IsFriendly = true;
     }
 
@@ -388,7 +395,8 @@ public partial class WhiteMageRotation
 
     static partial void ModifyAquaveilPvP(ref ActionSetting setting)
     {
-
+        setting.TargetStatusNeed = StatusHelper.PurifyPvPStatuses;
+        setting.IsFriendly = true;
     }
 
     static partial void ModifyMiracleOfNaturePvP(ref ActionSetting setting)
@@ -398,7 +406,7 @@ public partial class WhiteMageRotation
 
     static partial void ModifySeraphStrikePvP(ref ActionSetting setting)
     {
-        setting.SpecialType = SpecialActionType.MovingForward;
+        //setting.SpecialType = SpecialActionType.MovingForward;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,

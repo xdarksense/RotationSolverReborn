@@ -2,7 +2,7 @@
 
 namespace RotationSolver.RebornRotations.Melee;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.3")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.31")]
 [SourceCode(Path = "main/RebornRotations/Melee/SAM_Reborn.cs")]
 
 public sealed class SAM_Reborn : SamuraiRotation
@@ -106,14 +106,13 @@ public sealed class SAM_Reborn : SamuraiRotation
 
     protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        act = null;
         bool MeleeMeditationcheck = nextGCD.IsTheSameTo(true, ActionID.OgiNamikiriPvE, ActionID.HiganbanaPvE, ActionID.TenkaGokenPvE, ActionID.MidareSetsugekkaPvE, ActionID.TendoGokenPvE, ActionID.TendoSetsugekkaPvE, ActionID.TendoGokenPvE);
         bool isTargetBoss = CurrentTarget?.IsBossFromTTK() ?? false;
         bool isTargetDying = CurrentTarget?.IsDying() ?? false;
 
         if (EnableTEAChecker && Target.Name.ToString() == "Jagd Doll" && Target.GetHealthRatio() < 0.25)
         {
-            return false;
+            return base.AttackAbility(nextGCD, out act);
         }
 
         if (MeikyoShisuiPvE.CanUse(out act, usedUp: !EnhancedMeikyoShisuiTrait.EnoughLevel || (EnhancedMeikyoShisuiTrait.EnoughLevel && MeikyoShisuiPvE.Cooldown.WillHaveXChargesGCD(2, 1)) || TsubamegaeshiActionReady)
@@ -145,7 +144,7 @@ public sealed class SAM_Reborn : SamuraiRotation
 
         if (!HasZanshinReady)
         {
-            if (!CombatElapsedLessGCD(2) && Kenki < 50 && IkishotenPvE.CanUse(out act))
+            if (!CombatElapsedLessGCD(2) && Kenki <= 50 && IkishotenPvE.CanUse(out act))
             {
                 return true;
             }
@@ -189,7 +188,7 @@ public sealed class SAM_Reborn : SamuraiRotation
 
         if (!HiganbanaTargets || (HiganbanaTargets && NumberOfAllHostilesInRange < 2) && HasFugetsuAndFuka && !WillFugetsuEnd && !WillFukaEnd && !HasMeikyoShisui && !MidareSetsugekkaReady)
         {
-            if (HiganbanaPvE.CanUse(out act, skipComboCheck: true, skipTTKCheck: isTargetBoss))
+            if (HiganbanaPvE.CanUse(out act, skipComboCheck: true, skipTTKCheck: isTargetBoss || IsInHighEndDuty))
             {
                 return true;
             }
@@ -402,6 +401,16 @@ public sealed class SAM_Reborn : SamuraiRotation
             }
 
             if (!HasFuka && ShifuPvE.CanUse(out act) && ShifuPvE.Target.Target != null && CanHitPositional(EnemyPositional.Flank, ShifuPvE.Target.Target))
+            {
+                return true;
+            }
+
+            if (!HasFugetsu && JinpuPvE.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (!HasFuka && ShifuPvE.CanUse(out act))
             {
                 return true;
             }

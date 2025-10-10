@@ -18,22 +18,43 @@ namespace RotationSolver.Commands
                 HelpMessage = UiString.Commands_Rotation.GetDescription(),
                 ShowInHelp = true,
             });
+            _ = Svc.Commands.AddHandler(Service.AUTOCOMMAND, new CommandInfo(OnCommand)
+            {
+                HelpMessage = UiString.Commands_Start.GetDescription(),
+                ShowInHelp = true,
+            });
+            _ = Svc.Commands.AddHandler(Service.OFFCOMMAND, new CommandInfo(OnCommand)
+            {
+                HelpMessage = UiString.Commands_Off.GetDescription(),
+                ShowInHelp = true,
+            });
         }
 
         internal static void Disable()
         {
             _ = Svc.Commands.RemoveHandler(Service.COMMAND);
             _ = Svc.Commands.RemoveHandler(Service.ALTCOMMAND);
+            _ = Svc.Commands.RemoveHandler(Service.AUTOCOMMAND);
+            _ = Svc.Commands.RemoveHandler(Service.OFFCOMMAND);
         }
 
         private static void OnCommand(string command, string arguments)
         {
-            DoOneCommand(arguments);
+            DoOneCommand(arguments ?? string.Empty);
         }
 
         private static void DoOneCommand(string command)
         {
-            if (command.Equals("cancel", StringComparison.OrdinalIgnoreCase))
+            command = (command ?? string.Empty).Trim();
+
+            // No args => open config
+            if (command.Length == 0)
+            {
+                RotationSolverPlugin.OpenConfigWindow();
+                return;
+            }
+
+            if (string.Equals(command, "cancel", StringComparison.OrdinalIgnoreCase))
             {
                 command = "off";
             }
@@ -90,15 +111,17 @@ namespace RotationSolver.Commands
         private static bool TryGetOneEnum<T>(string command, out T type) where T : struct, Enum
         {
             type = default;
-            foreach (T c in Enum.GetValues<T>())
+
+            if (string.IsNullOrWhiteSpace(command))
             {
-                if (command.StartsWith(c.ToString(), StringComparison.OrdinalIgnoreCase))
-                {
-                    type = c;
-                    return true;
-                }
+                return false;
             }
-            return false;
+
+            // Parse only the first token (case-insensitive).
+            int spaceIdx = command.IndexOf(' ');
+            string token = spaceIdx >= 0 ? command[..spaceIdx] : command;
+
+            return Enum.TryParse(token, ignoreCase: true, out type);
         }
 
         internal static string GetCommandStr(this Enum command, string extraCommand = "")

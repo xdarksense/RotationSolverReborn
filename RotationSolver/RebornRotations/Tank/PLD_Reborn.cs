@@ -1,6 +1,6 @@
 ﻿namespace RotationSolver.RebornRotations.Tank;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.3")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.31")]
 [SourceCode(Path = "main/RebornRotations/Tank/PLD_Reborn.cs")]
 
 
@@ -170,9 +170,12 @@ public sealed class PLD_Reborn : PaladinRotation
                 return true;
             }
 
-            if (!HolyCirclePvE.EnoughLevel && (NumberOfHostilesInRange == 1 || (RequiescatPvE.Target.Target?.IsBossFromIcon() ?? false)) && RequiescatPvE.CanUse(out act, skipAoeCheck: true, usedUp: true))
+            if (RequiescatPvE.CanUse(out act, skipAoeCheck: true, usedUp: true))
             {
-                return true;
+                if (!HolyCirclePvE.EnoughLevel && (NumberOfHostilesInRange == 1 || RequiescatPvE.Target.Target.IsBossFromIcon()))
+                {
+                    return true;
+                }
             }
         }
 

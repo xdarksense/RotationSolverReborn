@@ -11,6 +11,7 @@ using Lumina.Excel.Sheets;
 using RotationSolver.Basic.Configuration;
 using RotationSolver.Basic.Configuration.Conditions;
 using RotationSolver.Basic.Rotations.Duties;
+using System.Collections.Concurrent;
 using Action = Lumina.Excel.Sheets.Action;
 using CharacterManager = FFXIVClientStructs.FFXIV.Client.Game.Character.CharacterManager;
 using CombatRole = RotationSolver.Basic.Data.CombatRole;
@@ -45,6 +46,11 @@ internal static class DataCenter
         return Player.AvailableThreadSafe && (State || IsManual || Service.Config.TeachingMode);
     }
 
+    public static bool PlayerAvailable()
+    {
+        return Player.AvailableThreadSafe;
+    }
+
     internal static IBattleChara? HostileTarget
     {
         get => Svc.Objects.SearchById(_hostileTargetId) as IBattleChara;
@@ -54,7 +60,7 @@ internal static class DataCenter
     internal static List<uint> PrioritizedNameIds { get; set; } = [];
     internal static List<uint> BlacklistedNameIds { get; set; } = [];
 
-    internal static List<VfxNewData> VfxDataQueue { get; } = [];
+    internal static ConcurrentQueue<VfxNewData> VfxDataQueue { get; } = new();
 
     /// <summary>
     /// This one never be null.
@@ -304,58 +310,25 @@ internal static class DataCenter
         }
     }
 
-    public static ulong[] TreasureCharas
-    {
-        get
-        {
-            List<ulong> charas = new(5);
-            //60687 - 60691 For treasure hunt.
-            for (int i = 60687; i <= 60691; i++)
-            {
-                IBattleChara? b = null;
-                for (int j = 0; j < AllTargets.Count; j++)
-                {
-                    IBattleChara battleChara = AllTargets[j];
-                    if (battleChara.GetNamePlateIcon() == i)
-                    {
-                        b = battleChara;
-                        break;
-                    }
-                }
-                if (b == null || b.CurrentHp == 0)
-                {
-                    continue;
-                }
-
-                charas.Add(b.GameObjectId);
-            }
-
-            return [.. charas];
-        }
-    }
-
     private static float _avgTTK = 0f;
     public static float AverageTTK
     {
         get
         {
-            if (_avgTTK > 0)
-            {
-                return _avgTTK;
-            }
-            float total = 0;
+            float total = 0f;
             int count = 0;
             var targets = AllHostileTargets;
             for (int i = 0, n = targets.Count; i < n; i++)
             {
-                float tTK = targets[i].GetTTK();
-                if (!float.IsNaN(tTK))
+                float ttk = targets[i].GetTTK();
+                if (!float.IsNaN(ttk))
                 {
-                    total += tTK;
+                    total += ttk;
                     count++;
                 }
             }
-            return _avgTTK = count > 0 ? total / count : 0;
+            _avgTTK = count > 0 ? total / count : 0f;
+            return _avgTTK;
         }
     }
 
@@ -462,7 +435,7 @@ internal static class DataCenter
 
     #region Occult Crescent
     /// <summary>
-    /// Determines if the current content is Bozjan Southern Front or Zadnor.
+    /// Determines if the current content is Occult
     /// </summary>
     public static bool IsInOccultCrescentOp => Content.ContentType == ECommons.GameHelpers.ContentType.FieldOperations
         && Territory?.ContentType == TerritoryContentType.OccultCrescent;
@@ -494,6 +467,33 @@ internal static class DataCenter
     /// 
     /// </summary>
     public static bool InVariantDungeon => AloaloIsland || MountRokkon || SildihnSubterrane;
+    #endregion
+
+    #region Misc Duty Info
+    /// <summary>
+    /// Determines if the current content is a Monster Hunter duty
+    /// </summary>
+    public static bool IsInMonsterHunterDuty => RathalosNormal || RathalosEX || ArkveldNormal || ArkveldEX;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool RathalosNormal => IsInTerritory(761);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool RathalosEX => IsInTerritory(762);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ArkveldNormal => IsInTerritory(1300);
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool ArkveldEX => IsInTerritory(1306);
     #endregion
 
     #region Job Info
@@ -973,7 +973,7 @@ internal static class DataCenter
         _actions.Clear();
 
         AttackedTargets.Clear();
-        VfxDataQueue.Clear();
+        while (VfxDataQueue.TryDequeue(out _)) { }
         AllHostileTargets.Clear();
         AllianceMembers.Clear();
         PartyMembers.Clear();
@@ -1160,17 +1160,16 @@ internal static class DataCenter
         return check?.Invoke(action) ?? false; // Check if check is null
     }
 
-    public static bool IsCastingVfx(List<VfxNewData> vfxDataQueueCopy, Func<VfxNewData, bool> isVfx)
+    public static bool IsCastingVfx(VfxNewData[] vfxData, Func<VfxNewData, bool> isVfx)
     {
-        // If thread safety is not a concern, avoid copying the list
-        if (vfxDataQueueCopy.Count == 0)
+        if (vfxData == null || vfxData.Length == 0)
         {
             return false;
         }
 
-        for (int i = 0, n = vfxDataQueueCopy.Count; i < n; i++)
+        for (int i = 0, n = vfxData.Length; i < n; i++)
         {
-            if (isVfx(vfxDataQueueCopy[i]))
+            if (isVfx(vfxData[i]))
             {
                 return true;
             }
@@ -1178,18 +1177,55 @@ internal static class DataCenter
         return false;
     }
 
+    public static bool IsCastingMultiHit()
+    {
+        return IsCastingVfx([.. VfxDataQueue], s =>
+        {
+            if (!Player.AvailableThreadSafe)
+            {
+                return false;
+            }
+
+            // For x6fe, ignore target and player role checks.
+            if (s.Path.StartsWith("vfx/lockon/eff/com_share5a1"))
+            {
+                return true;
+            }
+
+            if (s.Path.StartsWith("vfx/lockon/eff/m0922trg_t2w"))
+            {
+                return true;
+            }
+
+            return false;
+        });
+    }
+
     public static bool IsCastingTankVfx()
     {
-        return IsCastingVfx(VfxDataQueue, s =>
+        return IsCastingVfx([.. VfxDataQueue], s =>
         {
-            return Player.AvailableThreadSafe && (!Player.Object.IsJobCategory(JobRole.Tank) || s.ObjectId == Player.Object.GameObjectId) && (s.Path.StartsWith("vfx/lockon/eff/tank_lockon")
-            || s.Path.StartsWith("vfx/lockon/eff/tank_laser"));
+            if (!Player.AvailableThreadSafe)
+            {
+                return false;
+            }
+
+            // For x6fe, ignore target and player role checks.
+            if (s.Path.StartsWith("vfx/lockon/eff/x6fe"))
+            {
+                return true;
+            }
+
+            // Preserve original checks for other tank lock-on effects.
+            return (!Player.Object.IsJobCategory(JobRole.Tank) || s.ObjectId == Player.Object.GameObjectId)
+                   && (s.Path.StartsWith("vfx/lockon/eff/tank_lockon")
+                       || s.Path.StartsWith("vfx/lockon/eff/tank_laser"));
         });
     }
 
     public static bool IsCastingAreaVfx()
     {
-        return IsCastingVfx(VfxDataQueue, s =>
+        return IsCastingVfx([.. VfxDataQueue], s =>
         {
             return Player.AvailableThreadSafe && (s.Path.StartsWith("vfx/lockon/eff/coshare")
             || s.Path.StartsWith("vfx/lockon/eff/share_laser")

@@ -15,7 +15,7 @@
 	<NoWarn>1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="ECommons" Version="3.0.1.9" />
+    <PackageReference Include="ECommons" Version="3.0.1.20" />
   </ItemGroup>
   <ItemGroup>
 	  <Reference Include="Dalamud.Common">
@@ -43,6 +43,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Update="DalamudPackager" Version="13.0.0" />
+	  <PackageReference Update="DalamudPackager" Version="13.1.0" />
+	  <PackageReference Update="DotNet.ReproducibleBuilds" Version="1.2.39" />
 	</ItemGroup>
 </Project>

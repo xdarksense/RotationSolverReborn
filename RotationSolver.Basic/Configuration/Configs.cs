@@ -43,31 +43,31 @@ internal partial class Configs : IPluginConfiguration
     public MacroInfo DutyStart { get; set; } = new MacroInfo();
     public MacroInfo DutyEnd { get; set; } = new MacroInfo();
 
-    [ConditionBool, UI("Intercept player input and queue it for RSR to execute the action. (Experimental, PvE only at the moment)",
+    [ConditionBool, UI("Intercept player input and queue it for RSR to execute the action. (PvE only)",
     Filter = AutoActionUsage, Section = 5)]
     private static readonly bool _interceptAction2 = false;
 
-    [ConditionBool, UI("Allow intercepting Spells. (Experimental)",
+    [ConditionBool, UI("Allow intercepting Spells.",
     Filter = AutoActionUsage, Section = 5, Parent = nameof(InterceptAction2))]
     private static readonly bool _interceptSpell2 = false;
 
-    [ConditionBool, UI("Allow intercepting Weaponskills. (Experimental)",
+    [ConditionBool, UI("Allow intercepting Weaponskills.",
     Filter = AutoActionUsage, Section = 5, Parent = nameof(InterceptAction2))]
     private static readonly bool _interceptWeaponskill2 = false;
 
-    [ConditionBool, UI("Allow intercepting Abilities. (Experimental)",
+    [ConditionBool, UI("Allow intercepting Abilities.",
     Filter = AutoActionUsage, Section = 5, Parent = nameof(InterceptAction2))]
     private static readonly bool _interceptAbility2 = false;
 
-    [ConditionBool, UI("Allow intercepting actions in macros. (Experimental)",
+    [ConditionBool, UI("Allow intercepting actions in macros.",
     Filter = AutoActionUsage, Section = 5, Parent = nameof(InterceptAction2))]
     private static readonly bool _interceptMacro = false;
 
-    [ConditionBool, UI("Allow intercepting actions that are currently on cooldown. (Experimental)",
+    [ConditionBool, UI("Allow intercepting actions that are currently on cooldown.",
     Filter = AutoActionUsage, Section = 5, Parent = nameof(InterceptAction2))]
     private static readonly bool _interceptCooldown = false;
 
-    [UI("Intercepted action execution window",
+    [UI("Intercepted action execution window (amount of time RSR is allowed to attempt to use an action after it has been intercepted)",
     Filter = AutoActionUsage, Section = 5)]
     [Range(1, 10, ConfigUnitType.Seconds)]
     public float InterceptActionTime { get; set; } = 5;
@@ -125,6 +125,9 @@ internal partial class Configs : IPluginConfiguration
     Filter = UiInformation)]
     private static readonly bool _showInfoOnDtr = true;
 
+    [UI("DTR Behaviour", Filter = UiInformation, Parent = nameof(ShowInfoOnDtr))]
+    public DTRType DTRType { get; set; } = DTRType.DTRNormal;
+
     [ConditionBool, UI("Display plugin status in toast popup",
     Description = "Show a toast notification with the combat state when changed.",
     Filter = UiInformation)]
@@ -173,6 +176,11 @@ internal partial class Configs : IPluginConfiguration
     Filter = AutoActionUsage)]
     private static readonly bool _usePhoenixDown = false;
 
+    [UI("Use damaging gap closer abilites if the distance to your target is less than this.",
+        Filter = AutoActionUsage)]
+    [Range(0, 30, ConfigUnitType.Yalms, 1f)]
+    public float DistanceForMoving2 { get; set; } = 3f;
+
     [ConditionBool, UI("Allow the use of AOEs against priority-marked targets.",
     Description = "Enable to allow AoE actions to hit targets with priority markers.",
     Parent = nameof(ChooseAttackMark))]
@@ -200,6 +208,18 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Auto turn on manual mode when attacked.",
         Filter = BasicAutoSwitch, Section = 1)]
     private static readonly bool _startOnAttackedBySomeone = false;
+    
+    [ConditionBool, UI("Auto turn on auto mode when party is in combat.",
+         Filter = BasicAutoSwitch, Section = 1)]
+    private static readonly bool _startOnPartyIsInCombat = false;
+    
+    [ConditionBool, UI("Auto turn on auto mode when alliance is in combat.",
+         Filter = BasicAutoSwitch, Section = 1)]
+    private static readonly bool _startOnAllianceIsInCombat = false;
+    
+    [ConditionBool, UI("Auto turn on auto mode when in combat in Bozja/Eureka/Occult Fate/CE",
+         Filter = BasicAutoSwitch, Section = 1)]
+    private static readonly bool _startOnFieldOpInCombat = false;
 
     /// <markdown file="Auto" name="Use healing abilities when playing a non-healer role" section="Healing Usage and Control">
     /// Allow usage of healing abilities when not playing as a healer (such as Vercure, Bloodbath, etc.)
@@ -233,18 +253,6 @@ internal partial class Configs : IPluginConfiguration
 
     [ConditionBool, UI("Debug Mode", Filter = Debug)]
     private static readonly bool _inDebug = false;
-
-    [ConditionBool, UI("Load default rotations", Description = "Load the rotations provided by the Combat Reborn team", Filter = Rotations)]
-    private static readonly bool _loadDefaultRotations = true;
-
-    [ConditionBool, UI("Download custom rotations from the internet",
-               Description = "This will allow RSR to download custom rotations from the internet. This is a security risk and should only be enabled if you trust the source of the rotations.",
-               Filter = Rotations)]
-    private static readonly bool _downloadCustomRotations = true;
-
-    [ConditionBool, UI("Monitor local rotations for changes (Developer Mode)",
-               Filter = Rotations)]
-    private static readonly bool _autoReloadRotations = false;
 
     [ConditionBool, UI("Make /rotation Manual a toggle command.",
         Filter = BasicParams)]
@@ -294,6 +302,14 @@ internal partial class Configs : IPluginConfiguration
         Filter = UiInformation)]
     private static readonly bool _showTooltips = true;
 
+    [ConditionBool, UI("Color disabled actions on hotbars",
+        Description = "When enabled, actions you have disabled in RSR will be tinted on in-game hotbars.",
+        Filter = UiInformation)]
+    private static readonly bool _reddenDisabledHotbarActions = false;
+
+    [UI("Disabled actions hotbar tint color", Parent = nameof(ReddenDisabledHotbarActions), Filter = UiInformation)]
+    public Vector4 HotbarDisabledTintColor { get; set; } = new(1f, 0f, 0f, 0.40f);
+
     [ConditionBool, UI("Display do action feedback on toast",
         Filter = UiInformation)]
     private static readonly bool _showToastsAboutDoAction = false;
@@ -323,8 +339,8 @@ internal partial class Configs : IPluginConfiguration
     /// <markdown file="Auto" name="Stop Healing Cast After Reaching Threshold" section="Healing Usage and Control" isSubsection="1">
     /// When enabled, you can customize the healing thresholds for when healing will be cast occur on target(s).
     /// </markdown>
-    [ConditionBool, UI("Stop healing after reaching threshold. (Experimental)", Filter = HealingActionCondition, Section = 1, Order = 2, Description = "If you have another healer on the team, their healing might put the target player(s) above the healing threshold and you'll waste MP. This interrupts the cast if it happens.")]
-    private static readonly bool _stopHealingAfterThresholdExperimental = false;
+    [ConditionBool, UI("Stop single target GCD healing after reaching threshold. (EXTREMELY Experimental)", Filter = HealingActionCondition, Section = 1, Order = 2, Description = "If you have another healer on the team, their healing might put the target player(s) above the healing threshold and you'll waste MP. This interrupts the cast if it happens.")]
+    private static readonly bool _stopHealingAfterThresholdExperimental2 = false;
 
     /// <markdown file="Auto" name="Auto-use oGCD abilities" section="Action Usage and Control" isSubsection="1">
     /// Whether to use oGCD abilities or not at all.
@@ -428,11 +444,8 @@ internal partial class Configs : IPluginConfiguration
     [ConditionBool, UI("Record knockback actions", Filter = List2)]
     private static readonly bool _recordKnockbackies = false;
 
-    [UI("Use additional conditions", Filter = BasicParams)]
-    public bool UseAdditionalConditions { get; set; } = false;
-
     [ConditionBool, UI("Set Blue Mage Actions Automatically", Description = "When using a Blue Mage Rotation, RSR can automatically set your spell book to the spells required by that rotation.", Filter = Extra)]
-    private static readonly bool _setBluActions = true;
+    private static readonly bool _setBluActions2 = false;
 
     #region Float
     [UI("Auto turn off RSR when combat is over for more than...",
@@ -485,29 +498,18 @@ internal partial class Configs : IPluginConfiguration
     public float HealthSelfRatio { get; set; } = 0.4f;
 
     #region
-    [JobConfig, UI("Hard cast Raise while Swiftcast is on cooldown if Swiftcast cooldown is higher than Raise cast time (Experimental)",
-        Filter = HealingActionCondition, Section = 2,
-        PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
-    private static readonly bool _raiseSwiftCooldown = false;
-
-    [JobConfig, UI("Hard cast Raise while Swiftcast is on cooldown if all other healers are dead (Experimental)",
-        Filter = HealingActionCondition, Section = 2,
-        PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
-    private static readonly bool _raiseHealerByCasting = false;
-
-    [JobConfig, UI("Hard cast Raise while Swiftcast is on cooldown",
-        Filter = HealingActionCondition, Section = 2,
-        PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
-    private static readonly bool _raisePlayerByCasting = true;
+    [JobConfig, UI("Prioritize raising dead players over Healing/Defense.",
+        Filter = HealingActionCondition, Section = 2)]
+    private static readonly bool _raisePlayerFirst = false;
 
     [JobConfig, UI("Raise player by using Swiftcast/Dualcast if available", Description = "If this is disabled, you will never use Swiftcast/Dualcast to raise players.",
         Filter = HealingActionCondition, Section = 2,
         PvEFilter = JobFilterType.Raise, PvPFilter = JobFilterType.NoJob)]
     private static readonly bool _raisePlayerBySwift = true;
 
-    [JobConfig, UI("Prioritize raising dead players over Healing/Defense.",
+    [JobConfig, UI("Hard cast Raise logic",
         Filter = HealingActionCondition, Section = 2)]
-    private static readonly bool _raisePlayerFirst = false;
+    private readonly HardCastRaiseType _HardCastRaiseType = HardCastRaiseType.HardCastNormal;
 
     [JobConfig, UI("Raise styles",
         Filter = HealingActionCondition, Section = 2)]
@@ -608,15 +610,6 @@ internal partial class Configs : IPluginConfiguration
         Filter = BasicTimer, Section = 1)]
     [Range(1, 20, ConfigUnitType.Seconds, 1f)]
     public float SpecialDuration { get; set; } = 3;
-
-    /// <markdown file="Basic" name="Action Execution Delay">
-    /// Random time in seconds to wait before RSR can take another action.
-    /// (RSR will not take actions during window).
-    /// </markdown>
-    [UI("Action Execution Delay.\n(RSR will not take actions during window).",
-        Filter = BasicTimer)]
-    [Range(0, 1, ConfigUnitType.Seconds, 0.002f)]
-    public Vector2 WeaponDelay { get; set; } = new(0, 0);
 
     [UI("Random range of delay for RSR to stop attacking when the target is dead or immune to damage.",
         Parent = nameof(UseStopCasting))]
@@ -729,6 +722,17 @@ internal partial class Configs : IPluginConfiguration
     Filter = Extra)]
     private static readonly bool _removeCooldownDelay = false;
 
+    // Cactbot timeline integration
+    [ConditionBool, UI("Enable cactbot timeline integration (Extremely experimental)",
+        Description = "Connects to OverlayPlugin's WebSocket server and reacts to cactbot broadcast messages (raidwide, tankbuster, knockback, downtime/untargetable).",
+        Filter = Extra)]
+    private static readonly bool _enableCactbotTimeline = false;
+
+    [ConditionBool, UI("Show cactbot event toasts (debug)",
+    Description = "Show a toast when a cactbot broadcast is received and mapped to a RotationSolver special.",
+    Filter = Extra)]
+    private static readonly bool _showCactbotToasts = false;
+
     [JobConfig, UI("The HP for using Guard.",
         Filter = PvPSpecificControls)]
     [Range(0, 1, ConfigUnitType.Percent, 0.02f)]
@@ -781,10 +785,6 @@ internal partial class Configs : IPluginConfiguration
     Filter = TargetConfig)]
     private static readonly bool _ignoreNonFateInFate = true;
 
-    [ConditionBool, UI("Prevent targeting invalid targets in Bozjan Southern Front and Zadnor",
-        Filter = TargetConfig)]
-    private static readonly bool _bozjaCEmobtargeting = false;
-
     [ConditionBool, UI("Move to the furthest position for targeting area movement actions.",
         Filter = TargetConfig, Section = 2)]
     private static readonly bool _moveAreaActionFarthest = false;
@@ -815,7 +815,7 @@ internal partial class Configs : IPluginConfiguration
 
     [ConditionBool, UI("Block targeting quest mobs belonging to other players (Broken).",
         Filter = TargetConfig, Section = 1)]
-    private static readonly bool targetQuestThings = true;
+    private static readonly bool targetQuestThings2 = false;
 
     [ConditionBool, UI("Ignore all other FATE target when Forlorn available (Experimental).",
         Filter = TargetConfig, Section = 1)]
@@ -859,11 +859,6 @@ internal partial class Configs : IPluginConfiguration
     [Range(0, 0.1f, ConfigUnitType.Percent, 0.01f)]
     public float IsDyingConfig { get; set; } = 0.02f;
 
-    [UI("Use gapcloser as a damage ability if the distance to your target is less than this.",
-        Filter = TargetConfig, Section = 2)]
-    [Range(0, 30, ConfigUnitType.Yalms, 1f)]
-    public float DistanceForMoving { get; set; } = 1.2f;
-
     [ConditionBool, UI("Prioritize Low HP targets instead of High HP targets when using Small Target and multiple Small targets present.",
         Filter = TargetConfig)]
     private static readonly bool _smallHP = false;
@@ -872,14 +867,11 @@ internal partial class Configs : IPluginConfiguration
         Filter = TargetConfig)]
     private static readonly bool _bigHP = false;
 
-    [ConditionBool, UI("Change clicking the DTR bar behaviour to cycle between Off and Manual (Overrides below option).",
-        Filter = TargetConfig)]
-    private static readonly bool _dtrManual = false;
+    [UI("/rotation Cycle behaviour", Filter = TargetConfig)]
+    public CycleType CycleType { get; set; } = CycleType.CycleNormal;
 
-    [ConditionBool, UI("Change clicking the DTR bar behaviour to cycle through each Target Type selected.",
-        Filter = TargetConfig)]
-    private static readonly bool _dtrCycle = false;
-
+    [JobConfig, UI("Engage settings", Filter = TargetConfig, PvPFilter = JobFilterType.NoJob)]
+    private readonly TargetHostileType _hostileType = TargetHostileType.AllTargetsWhenSoloInDuty;
     #endregion
 
     #region Integer
@@ -1013,9 +1005,6 @@ internal partial class Configs : IPluginConfiguration
     [UI("HP%% needed to use single/self targetted mitigation on Tanks", Parent = nameof(UseDefenseAbility),
         PvEFilter = JobFilterType.Tank)]
     private readonly float _healthForAutoDefense = 1;
-
-    [JobConfig, UI("Engage settings", Filter = TargetConfig, PvPFilter = JobFilterType.NoJob)]
-    private readonly TargetHostileType _hostileType = TargetHostileType.AllTargetsWhenSoloInDuty;
 
     [JobConfig]
     private readonly string _PvPRotationChoice = string.Empty;

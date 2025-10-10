@@ -2,12 +2,15 @@ using System.ComponentModel;
 
 namespace RotationSolver.RebornRotations.Healer;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.3")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.31")]
 [SourceCode(Path = "main/RebornRotations/Healer/SCH_Reborn.cs")]
 
 public sealed class SCH_Reborn : ScholarRotation
 {
     #region Config Options
+    [RotationConfig(CombatType.PvE, Name = "Limit Seraphism to multihit party stacks")]
+    public bool MultiHitRestrict { get; set; } = false;
+
     [Range(0, 1, ConfigUnitType.Percent)]
     [RotationConfig(CombatType.PvE, Name = "Remove Aetherpact if the linked party member's HP is above this percentage")]
     public float AetherpactRemove { get; set; } = 0.9f;
@@ -165,7 +168,8 @@ public sealed class SCH_Reborn : ScholarRotation
             {
                 if (DeploymentTacticsPvE.CanUse(out act))
                 {
-                    if (DeploymentTacticsPvE.Target.Target.IsParty() && DeploymentTacticsPvE.Target.Target.HasStatus(true, StatusID.Catalyze))
+                    IBattleChara t = DeploymentTacticsPvE.Target.Target;
+                    if (t.IsParty() && (t.HasStatus(true, StatusID.Catalyze) || t.HasStatus(true, StatusID.Galvanize)))
                     {
                         return true;
                     }
@@ -406,9 +410,12 @@ public sealed class SCH_Reborn : ScholarRotation
         }
 
         // Seraphism is really good but we want to save it if we can, and should alternate it with Summon Seraph outside of the hardest content
-        if ((SummonSeraphPvE.Cooldown.IsCoolingDown || CurrentMp <= EmergencyHealingMPThreshold) && SeraphismPvE.CanUse(out act))
+        if ((MultiHitRestrict && IsCastingMultiHit) || !MultiHitRestrict)
         {
-            return true;
+            if ((SummonSeraphPvE.Cooldown.IsCoolingDown || CurrentMp <= EmergencyHealingMPThreshold) && SeraphismPvE.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         if (WhisperingDawnPvE.Cooldown.IsCoolingDown && FeyBlessingPvE.Cooldown.IsCoolingDown)
@@ -514,10 +521,9 @@ public sealed class SCH_Reborn : ScholarRotation
     [RotationDesc(ActionID.SuccorPvE, ActionID.ConcitationPvE, ActionID.AccessionPvE)]
     protected override bool HealAreaGCD(out IAction? act)
     {
-        act = null;
         if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
         {
-            return false;
+            return base.HealAreaGCD(out act);
         }
 
         // If emergency tactics is up we are using succor for raidwide recovery not shields
@@ -548,10 +554,9 @@ public sealed class SCH_Reborn : ScholarRotation
     [RotationDesc(ActionID.AdloquiumPvE, ActionID.ManifestationPvE, ActionID.PhysickPvE)]
     protected override bool HealSingleGCD(out IAction? act)
     {
-        act = null;
         if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
         {
-            return false;
+            return base.HealSingleGCD(out act);
         }
 
         if (ManifestationPvE.CanUse(out act, skipCastingCheck: true))
@@ -575,10 +580,9 @@ public sealed class SCH_Reborn : ScholarRotation
     [RotationDesc(ActionID.SuccorPvE, ActionID.ConcitationPvE, ActionID.AccessionPvE)]
     protected override bool DefenseAreaGCD(out IAction? act)
     {
-        act = null;
         if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
         {
-            return false;
+            return base.DefenseAreaGCD(out act);
         }
 
         // Only have all 3 checks in case players have added their own custom configurations.
@@ -602,10 +606,9 @@ public sealed class SCH_Reborn : ScholarRotation
 
     protected override bool GeneralGCD(out IAction? act)
     {
-        act = null;
         if (HasSwift && SwiftLogic && MergedStatus.HasFlag(AutoStatus.Raise))
         {
-            return false;
+            return base.GeneralGCD(out act);
         }
 
         // Summon Eos
@@ -617,7 +620,7 @@ public sealed class SCH_Reborn : ScholarRotation
         // Don't use attacks if we're in a wipe scenario spamming rezzes and heals
         if (CurrentMp < EmergencyHealingMPThreshold)
         {
-            return false;
+            return base.GeneralGCD(out act);
         }
 
         int nearbyHostiles = NumberOfHostilesInRangeOf(5);

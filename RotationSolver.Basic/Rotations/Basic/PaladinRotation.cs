@@ -271,6 +271,10 @@ public partial class PaladinRotation
             return !t.HasStatus(false, StatusHelper.TankStanceStatus);
         };
         setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            GCDSingleHeal = true,
+        };
     }
 
     static partial void ModifyRoyalAuthorityPvE(ref ActionSetting setting)
@@ -318,7 +322,7 @@ public partial class PaladinRotation
 
     static partial void ModifyIntervenePvE(ref ActionSetting setting)
     {
-        setting.SpecialType = SpecialActionType.MovingForward;
+        setting.SpecialType = SpecialActionType.HostileMovingForward;
     }
 
     static partial void ModifyAtonementPvE(ref ActionSetting setting)
@@ -451,16 +455,19 @@ public partial class PaladinRotation
     static partial void ModifyAtonementPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.AtonementReady_2015];
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifySupplicationPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.SupplicationReady_4281];
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifySepulchrePvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.SepulchreReady_4282];
+        setting.MPOverride = () => 0;
     }
 
     static partial void ModifyHolySpiritPvP(ref ActionSetting setting)
@@ -500,12 +507,13 @@ public partial class PaladinRotation
 
     static partial void ModifyIntervenePvP(ref ActionSetting setting)
     {
-        setting.SpecialType = SpecialActionType.MovingForward;
+        //setting.SpecialType = SpecialActionType.MovingForward;
     }
 
     static partial void ModifyBladeOfFaithPvP(ref ActionSetting setting)
     {
         setting.StatusNeed = [StatusID.BladeOfFaithReady];
+        setting.MPOverride = () => 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1

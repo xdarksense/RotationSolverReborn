@@ -135,6 +135,10 @@ public partial class AstrologianRotation
     static partial void ModifyBeneficPvE(ref ActionSetting setting)
     {
         setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            GCDSingleHeal = true,
+        };
     }
 
     static partial void ModifyCombustPvE(ref ActionSetting setting)
@@ -175,6 +179,10 @@ public partial class AstrologianRotation
     static partial void ModifyBeneficIiPvE(ref ActionSetting setting)
     {
         setting.IsFriendly = true;
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            GCDSingleHeal = true,
+        };
     }
 
     static partial void ModifyAstralDrawPvE(ref ActionSetting setting)
@@ -255,6 +263,10 @@ public partial class AstrologianRotation
     static partial void ModifyAspectedBeneficPvE(ref ActionSetting setting)
     {
         setting.TargetStatusProvide = [StatusID.AspectedBenefic];
+        setting.CreateConfig = () => new ActionConfig()
+        {
+            GCDSingleHeal = true,
+        };
         setting.IsFriendly = true;
     }
 
@@ -489,6 +501,7 @@ public partial class AstrologianRotation
         setting.StatusNeed = [StatusID.Suntouched];
         setting.MPOverride = () => 0;
         setting.IsFriendly = true;
+        setting.TargetType = TargetType.Self;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -575,6 +588,7 @@ public partial class AstrologianRotation
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.MinorArcanaPvP) == ActionID.LadyOfCrownsPvP;
         setting.IsFriendly = true;
+        setting.MPOverride = () => 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -585,6 +599,7 @@ public partial class AstrologianRotation
     {
         setting.ActionCheck = () => Service.GetAdjustedActionId(ActionID.MinorArcanaPvP) == ActionID.LordOfCrownsPvP;
         setting.IsFriendly = false;
+        setting.MPOverride = () => 0;
         setting.CreateConfig = () => new ActionConfig()
         {
             AoeCount = 1,
@@ -603,7 +618,7 @@ public partial class AstrologianRotation
 
     static partial void ModifyEpicyclePvP(ref ActionSetting setting)
     {
-        setting.SpecialType = SpecialActionType.MovingForward;
+        //setting.SpecialType = SpecialActionType.MovingForward;
         setting.IsFriendly = true;
     }
 
@@ -611,6 +626,7 @@ public partial class AstrologianRotation
     {
         setting.ActionCheck = () => Player.HasStatus(true, StatusID.RetrogradeReady);
         setting.IsFriendly = true;
+        setting.MPOverride = () => 0;
         setting.SpecialType = SpecialActionType.MovingBackward;
     }
     #endregion

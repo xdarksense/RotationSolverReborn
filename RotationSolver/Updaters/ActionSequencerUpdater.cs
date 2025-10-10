@@ -8,59 +8,8 @@ internal class ActionSequencerUpdater
 
     public static void UpdateActionSequencerAction()
     {
-        if (DataCenter.ConditionSets == null)
-        {
-            return;
-        }
-
-        ICustomRotation? customRotation = DataCenter.CurrentRotation;
-        if (customRotation == null)
-        {
-            return;
-        }
-
-        IAction[] allActions = RotationUpdater.CurrentRotationActions;
-
-        MajorConditionValue set = DataCenter.CurrentConditionValue;
-        if (set == null)
-        {
-            return;
-        }
-
-        HashSet<uint> disabledActions = [];
-        foreach (KeyValuePair<uint, ConditionSet> pair in set.DisableConditionDict)
-        {
-            if (pair.Value.IsTrue(customRotation))
-            {
-                _ = disabledActions.Add(pair.Key);
-            }
-        }
-        DataCenter.DisabledActionSequencer = disabledActions;
-
-        Dictionary<uint, ConditionSet> conditions = set.ConditionDict;
-        if (conditions != null)
-        {
-            foreach (KeyValuePair<uint, ConditionSet> conditionPair in conditions)
-            {
-                object? nextAct = null;
-                foreach (IAction a in allActions)
-                {
-                    if (a.ID == conditionPair.Key)
-                    {
-                        nextAct = a;
-                        break;
-                    }
-                }
-                if (nextAct == null || !conditionPair.Value.IsTrue(customRotation))
-                {
-                    continue;
-                }
-
-                DataCenter.ActionSequencerAction = nextAct as IAction;
-                return;
-            }
-        }
-
+        // Condition-based action sequencer disabled.
+        DataCenter.DisabledActionSequencer = [];
         DataCenter.ActionSequencerAction = null;
     }
 
@@ -84,13 +33,24 @@ internal class ActionSequencerUpdater
 
         try
         {
-            Directory.Delete(_actionSequencerFolder, true);
-            _ = Directory.CreateDirectory(_actionSequencerFolder);
+            if (Directory.Exists(_actionSequencerFolder))
+            {
+                Directory.Delete(_actionSequencerFolder, true);
+            }
         }
         catch (Exception ex)
         {
-            // Log the exception or handle it as needed
             Console.WriteLine($"Error deleting directory: {ex.Message}");
+        }
+        finally
+        {
+            // Ensure the directory exists before writing files.
+            _ = Directory.CreateDirectory(_actionSequencerFolder);
+        }
+
+        if (DataCenter.ConditionSets == null)
+        {
+            return;
         }
 
         foreach (MajorConditionValue set in DataCenter.ConditionSets)
@@ -111,6 +71,12 @@ internal class ActionSequencerUpdater
 
     public static void AddNew()
     {
+        if (DataCenter.ConditionSets == null)
+        {
+            DataCenter.ConditionSets = [new MajorConditionValue()];
+            return;
+        }
+
         bool hasUnnamed = false;
         foreach (MajorConditionValue conditionSet in DataCenter.ConditionSets)
         {
@@ -125,7 +91,8 @@ internal class ActionSequencerUpdater
         {
             List<MajorConditionValue> newConditionSets =
             [
-.. DataCenter.ConditionSets,                 new MajorConditionValue()
+                .. DataCenter.ConditionSets,
+                new MajorConditionValue()
             ];
             DataCenter.ConditionSets = [.. newConditionSets];
         }
@@ -133,17 +100,23 @@ internal class ActionSequencerUpdater
 
     public static void Delete(string name)
     {
-        List<MajorConditionValue> newConditionSets = [];
-        foreach (MajorConditionValue conditionSet in DataCenter.ConditionSets)
+        if (DataCenter.ConditionSets != null)
         {
-            if (conditionSet.Name != name)
+            List<MajorConditionValue> newConditionSets = [];
+            foreach (MajorConditionValue conditionSet in DataCenter.ConditionSets)
             {
-                newConditionSets.Add(conditionSet);
+                if (conditionSet.Name != name)
+                {
+                    newConditionSets.Add(conditionSet);
+                }
             }
+            DataCenter.ConditionSets = [.. newConditionSets];
         }
-        DataCenter.ConditionSets = [.. newConditionSets];
 
-        string filePath = Path.Combine(_actionSequencerFolder ?? string.Empty, $"{name}.json");
-        File.Delete(filePath);
+        if (!string.IsNullOrWhiteSpace(_actionSequencerFolder))
+        {
+            string filePath = Path.Combine(_actionSequencerFolder, $"{name}.json");
+            File.Delete(filePath);
+        }
     }
 }
