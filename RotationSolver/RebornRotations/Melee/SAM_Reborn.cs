@@ -101,6 +101,12 @@ public sealed class SAM_Reborn : SamuraiRotation
                 return true;
             }
         }
+
+        if ((HasOgiNamikiri || HasZanshinReady) && InCombat && UseBurstMedicine(out act))
+        {
+            return true;
+        }
+
         return base.GeneralAbility(nextGCD, out act);
     }
 

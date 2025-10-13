@@ -219,6 +219,12 @@ public sealed class PCT_Reborn : PictomancerRotation
         {
             return true;
         }
+
+        if (HasStarryMuse && InCombat && UseBurstMedicine(out act))
+        {
+            return true;
+        }
+
         return base.AttackAbility(nextGCD, out act);
     }
     #endregion

@@ -288,6 +288,11 @@ public sealed class PLD_Reborn : PaladinRotation
             return true;
         }
 
+        if (HasFightOrFlight && InCombat && UseBurstMedicine(out act))
+        {
+            return true;
+        }
+
         return base.GeneralAbility(nextGCD, out act);
     }
 

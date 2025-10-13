@@ -158,7 +158,8 @@ public sealed class SCH_Reborn : ScholarRotation
             {
                 if (DeploymentTacticsPvE.CanUse(out act))
                 {
-                    if (DeploymentTacticsPvE.Target.Target.IsParty() && DeploymentTacticsPvE.Target.Target.HasStatus(true, StatusID.Catalyze))
+                    IBattleChara CatalyzeOnlyt = DeploymentTacticsPvE.Target.Target;
+                    if (CatalyzeOnlyt.IsParty() && CatalyzeOnlyt.HasStatus(true, StatusID.Catalyze))
                     {
                         return true;
                     }
@@ -168,8 +169,8 @@ public sealed class SCH_Reborn : ScholarRotation
             {
                 if (DeploymentTacticsPvE.CanUse(out act))
                 {
-                    IBattleChara t = DeploymentTacticsPvE.Target.Target;
-                    if (t.IsParty() && (t.HasStatus(true, StatusID.Catalyze) || t.HasStatus(true, StatusID.Galvanize)))
+                    IBattleChara CatalyzeOrGalvanizet = DeploymentTacticsPvE.Target.Target;
+                    if (CatalyzeOrGalvanizet.IsParty() && (CatalyzeOrGalvanizet.HasStatus(true, StatusID.Catalyze) || CatalyzeOrGalvanizet.HasStatus(true, StatusID.Galvanize)))
                     {
                         return true;
                     }
@@ -509,6 +510,11 @@ public sealed class SCH_Reborn : ScholarRotation
         }
 
         if (!HasAetherflow && AetherflowPvE.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (HasBuffs && UseBurstMedicine(out act))
         {
             return true;
         }

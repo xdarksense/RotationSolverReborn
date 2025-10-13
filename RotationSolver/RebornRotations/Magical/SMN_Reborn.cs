@@ -148,6 +148,12 @@ public sealed class SMN_Reborn : SummonerRotation
                 }
             }
         }
+
+        if (HasSearingLight && InCombat && UseBurstMedicine(out act))
+        {
+            return true;
+        }
+
         return base.GeneralAbility(nextGCD, out act);
     }
 

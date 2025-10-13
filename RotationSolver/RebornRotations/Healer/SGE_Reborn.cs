@@ -401,6 +401,11 @@ public sealed class SGE_Reborn : SageRotation
             return true;
         }
 
+        if (HasBuffs && UseBurstMedicine(out act))
+        {
+            return true;
+        }
+
         return base.GeneralAbility(nextGCD, out act);
     }
     #endregion

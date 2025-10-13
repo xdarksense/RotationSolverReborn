@@ -174,6 +174,11 @@ public sealed class WAR_Reborn : WarriorRotation
                 }
             }
         }
+
+        if (Player.HasStatus(true, StatusID.PrimalRendReady) && InCombat && UseBurstMedicine(out act))
+        {
+            return true;
+        }
         return base.GeneralAbility(nextGCD, out act);
     }
 

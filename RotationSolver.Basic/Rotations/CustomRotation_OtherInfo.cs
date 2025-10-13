@@ -179,14 +179,14 @@ public partial class CustomRotation
         Buffs.Clear();
         var processedJobs = new HashSet<string>();
 
-        if (CustomRotation.PartyComposition == null)
+        if (PartyComposition == null)
         {
             var abbr = Player.ClassJob.Value.Abbreviation.ToString();
             AddJobBuffs(abbr, processedJobs);
         }
         else
         {
-            foreach (var job in CustomRotation.PartyComposition)
+            foreach (var job in PartyComposition)
             {
                 var abbr = job.Value.Abbreviation.ToString();
                 AddJobBuffs(abbr, processedJobs);

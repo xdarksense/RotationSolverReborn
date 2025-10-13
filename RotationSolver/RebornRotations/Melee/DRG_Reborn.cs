@@ -81,6 +81,11 @@ public sealed class DRG_Reborn : DragoonRotation
             }
         }
 
+        if (HasBattleLitany && InCombat && UseBurstMedicine(out act))
+        {
+            return true;
+        }
+
         return base.EmergencyAbility(nextGCD, out act);
     }
 

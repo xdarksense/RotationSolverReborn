@@ -204,6 +204,11 @@ public sealed class NIN_Reborn : NinjaRotation
             }
         }
 
+        if (InTrickAttack && InCombat && UseBurstMedicine(out act))
+        {
+            return true;
+        }
+
         // If none of the specific conditions are met, falls back to the base class's emergency ability logic.
         return base.EmergencyAbility(nextGCD, out act);
     }

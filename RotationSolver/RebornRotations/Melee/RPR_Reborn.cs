@@ -140,6 +140,16 @@ public sealed class RPR_Reborn : ReaperRotation
 
         return base.AttackAbility(nextGCD, out act);
     }
+
+    protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
+    {
+        if (HasArcaneCircle && InCombat && UseBurstMedicine(out act))
+        {
+            return true;
+        }
+
+        return base.GeneralAbility(nextGCD, out act);
+    }
     #endregion
 
     #region GCD Logic
