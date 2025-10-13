@@ -213,6 +213,11 @@ public class BLM_Default : BlackMageRotation
             }
         }
 
+        if (HasBuffs && UseBurstMedicine(out act))
+        {
+            return true;
+        }
+
         return base.AttackAbility(nextGCD, out act);
     }
     #endregion

@@ -135,6 +135,11 @@ public sealed class MNK_Reborn : MonkRotation
         }
         //if (CombatElapsedLessGCD(1) && TheForbiddenChakraPvE.CanUse(out act)) return true; // if it weaves one day in the future...
 
+        if (HasBrotherhood && InCombat && UseBurstMedicine(out act))
+        {
+            return true;
+        }
+
         return base.EmergencyAbility(nextGCD, out act);
     }
 

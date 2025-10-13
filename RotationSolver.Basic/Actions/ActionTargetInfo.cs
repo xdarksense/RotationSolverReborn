@@ -1882,7 +1882,7 @@ public struct ActionTargetInfo(IBaseAction action)
                     continue;
                 }
 
-                if (!battleChara.WillStatusEnd(20, true, StatusID.Catalyze))
+                if (battleChara.HasStatus(true, StatusID.Catalyze))
                 {
                     if (bestCatalyze == null || shield > bestCatalyzeShield)
                     {
@@ -1890,7 +1890,7 @@ public struct ActionTargetInfo(IBaseAction action)
                         bestCatalyzeShield = shield;
                     }
                 }
-                else if (!battleChara.WillStatusEnd(20, true, StatusID.Galvanize))
+                else if (battleChara.HasStatus(true, StatusID.Galvanize))
                 {
                     if (bestGalvanize == null || shield > bestGalvanizeShield)
                     {
