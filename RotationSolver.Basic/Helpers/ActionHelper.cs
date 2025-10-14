@@ -15,6 +15,10 @@ internal static class ActionHelper
     /// </summary>
     internal const byte GCDCooldownGroup = 58;
 
+    internal const byte AbilityCooldownGroup = 19;
+
+    internal const byte OGCDCooldownGroup = 71;
+
     /// <inheritdoc/>
     public static float AnimationLockTime => Player.AnimationLock;
 

@@ -152,32 +152,6 @@ public sealed class SCH_Reborn : ScholarRotation
             return true;
         }
 
-        if (DeploymentTacticsPvE.EnoughLevel && InCombat)
-        {
-            if (DeploymentTacticsUsage == DeploymentTacticsUsageStrategy.CatalyzeOnly)
-            {
-                if (DeploymentTacticsPvE.CanUse(out act))
-                {
-                    IBattleChara CatalyzeOnlyt = DeploymentTacticsPvE.Target.Target;
-                    if (CatalyzeOnlyt.IsParty() && CatalyzeOnlyt.HasStatus(true, StatusID.Catalyze))
-                    {
-                        return true;
-                    }
-                }
-            }
-            else if (DeploymentTacticsUsage == DeploymentTacticsUsageStrategy.CatalyzeOrGalvanize)
-            {
-                if (DeploymentTacticsPvE.CanUse(out act))
-                {
-                    IBattleChara CatalyzeOrGalvanizet = DeploymentTacticsPvE.Target.Target;
-                    if (CatalyzeOrGalvanizet.IsParty() && (CatalyzeOrGalvanizet.HasStatus(true, StatusID.Catalyze) || CatalyzeOrGalvanizet.HasStatus(true, StatusID.Galvanize)))
-                    {
-                        return true;
-                    }
-                }
-            }
-        }
-
         // Only use emergency tactics if we're healing from a raid wide damage or multiple members need to be healed for doom
         if (nextGCD.IsTheSameTo(false, SuccorPvE, ConcitationPvE, AccessionPvE) && EmergencyTacticsPvE.CanUse(out act))
         {
@@ -386,10 +360,25 @@ public sealed class SCH_Reborn : ScholarRotation
         // Deployment Tactics is modified in the base rotation to only use if they have galvanize so can trust that targets are at least valid?
         // The number of times that we adlo to heal a DPS and then would like to use this is actually reasonably high in dungeons
         // TODO: This is typically skipping because the target it's trying to cast the area defense on isn't the galvanized target
-        if ((!RecitationPvE.EnoughLevel || RecitationPvE.Cooldown.IsCoolingDown || PartyMembers.Any(member => member.HasStatus(true, StatusID.Catalyze)))
-            && DeploymentTacticsPvE.CanUse(out act))
+        if (DeploymentTacticsPvE.EnoughLevel && InCombat && (!RecitationPvE.EnoughLevel || RecitationPvE.Cooldown.IsCoolingDown))
         {
-            return true;
+            if (DeploymentTacticsUsage == DeploymentTacticsUsageStrategy.CatalyzeOnly)
+            {
+                if (DeploymentTacticsPvE.CanUse(out act))
+                {
+                    if (DeploymentTacticsPvE.Target.Target.HasStatus(true, StatusID.Catalyze))
+                    {
+                        return true;
+                    }
+                }
+            }
+            else if (DeploymentTacticsUsage == DeploymentTacticsUsageStrategy.CatalyzeOrGalvanize)
+            {
+                if (DeploymentTacticsPvE.CanUse(out act))
+                {
+                    return true;
+                }
+            }
         }
 
         // Consolation is great if Seraph is up
