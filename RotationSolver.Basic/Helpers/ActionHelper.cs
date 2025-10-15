@@ -27,7 +27,7 @@ internal static class ActionHelper
     /// </summary>
     /// <param name="action">The action to get the category for.</param>
     /// <returns>The action category.</returns>
-    internal static ActionCate GetActionCate(this Action action)
+    public static ActionCate GetActionCate(this Action action)
     {
         return (ActionCate)(action.ActionCategory.IsValid ? action.ActionCategory.Value.RowId : 0);
     }

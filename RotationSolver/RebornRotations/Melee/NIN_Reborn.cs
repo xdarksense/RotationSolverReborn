@@ -1,6 +1,6 @@
 namespace RotationSolver.RebornRotations.Melee;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.31")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.35")]
 [SourceCode(Path = "main/RebornRotations/Melee/NIN_Reborn.cs")]
 
 

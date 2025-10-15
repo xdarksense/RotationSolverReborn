@@ -1,11 +1,8 @@
 ﻿using System.ComponentModel;
-using Dalamud.Utility.Timing;
-using RotationSolver.ExtraRotations.ChurinHelpers;
-using RotationSolver.Helpers;
 
 namespace RotationSolver.ExtraRotations.Ranged;
 
-[Rotation("Churin DNC", CombatType.PvE, GameVersion = "7.3", Description = "Candles lit, runes drawn upon the floor, sacrifice prepared. Everything is ready for the summoning. I begin the incantation: \"Shakira, Shakira!\"")]
+[Rotation("Churin DNC", CombatType.PvE, GameVersion = "7.35", Description = "Candles lit, runes drawn upon the floor, sacrifice prepared. Everything is ready for the summoning. I begin the incantation: \"Shakira, Shakira!\"")]
 [SourceCode(Path = "main/ExtraRotations/Ranged/ChurinDNC.cs")]
 [ExtraRotation]
 public sealed class ChurinDNC : DancerRotation
@@ -184,8 +181,6 @@ public sealed class ChurinDNC : DancerRotation
     }
     #endregion
 
-    
-
     #region Config Options
     [RotationConfig(CombatType.PvE, Name = "Technical Step, Technical Finish & Tillana Hold Strategy")]
     private HoldStrategy TechHoldStrategy  { get; set; }
@@ -204,7 +199,7 @@ public sealed class ChurinDNC : DancerRotation
     [RotationConfig(CombatType.PvE, Name = "Disable Standard Step in Burst")]
     private bool DisableStandardInBurst { get; set; } = true;
 
-    private static ChurinPotions _churinPotions = new ChurinDNCPotions();
+    private static readonly Potions _churinPotions = new();
 
     private float _firstPotionTiming = 0;
     private float _secondPotionTiming = 0;
@@ -260,7 +255,7 @@ public sealed class ChurinDNC : DancerRotation
 
     private void UpdateCustomTimings()
     {
-        _churinPotions.CustomTimings = new ChurinPotions.CustomTimingsData
+        _churinPotions.CustomTimings = new Potions.CustomTimingsData
         {
             Timings = [FirstPotionTiming, SecondPotionTiming, ThirdPotionTiming]
         };
@@ -781,9 +776,8 @@ public sealed class ChurinDNC : DancerRotation
     /// <summary>
     /// DNC-specific potion manager that extends base potion logic with job-specific conditions.
     /// </summary>
-    private class ChurinDNCPotions : ChurinPotions
-    {
-    
+    private class ChurinDNCPotions : Potions
+    { 
         public override bool IsConditionMet()
         {
 
@@ -793,8 +787,7 @@ public sealed class ChurinDNC : DancerRotation
             // Check for Technical Step completion (4+ steps) or Standard Step completion (2+ steps)
             return (HasTechnicalStep && CompletedSteps > 3) || (HasStandardStep && CompletedSteps > 1);
         }
-
-       
+        
         protected override bool IsTimingValid(float timing)
         {
             if (timing > 0 && DataCenter.CombatTimeRaw >= timing && DataCenter.CombatTimeRaw - timing <= TimingWindowSeconds)
@@ -812,7 +805,6 @@ public sealed class ChurinDNC : DancerRotation
             return false;
         }
     }
-
 
     #endregion
     #endregion

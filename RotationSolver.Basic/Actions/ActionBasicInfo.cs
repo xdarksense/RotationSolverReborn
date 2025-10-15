@@ -234,6 +234,23 @@ public readonly struct ActionBasicInfo
             return false;
         }
 
+        var type = ActionHelper.GetActionCate(_action.Action);
+        if (type is ActionCate.Weaponskill)
+        {
+            if (Player.Object.HasStatus(false, StatusID.Pacification_620))
+            {
+                return false;
+            }
+        }
+
+        if (type is ActionCate.Spell)
+        {
+            if (Player.Object.HasStatus(false, StatusID.Silence))
+            {
+                return false;
+            }
+        }
+
         if (IsLimitBreak)
         {
             return false;
