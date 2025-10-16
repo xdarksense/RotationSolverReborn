@@ -211,7 +211,8 @@ public partial class CustomRotation
         var list = new List<HpPotionItem>();
         foreach (var i in items)
         {
-            if ((i.FilterGroup == 8 && i.ItemSearchCategory.RowId == 43) || i.RowId == 22306)
+            bool isDeepDungeons = DataCenter.Territory?.ContentType == TerritoryContentType.DeepDungeons;
+            if ((i.FilterGroup == 8 && i.ItemSearchCategory.RowId == 43) || i.RowId == 22306 || (i.RowId == 47102 && isDeepDungeons))
             {
                 list.Add(new HpPotionItem(i));
             }
