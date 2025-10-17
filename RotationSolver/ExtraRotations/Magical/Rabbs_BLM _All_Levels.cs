@@ -20,7 +20,7 @@ using static FFXIVClientStructs.FFXIV.Client.Game.Character.ActionEffectHandler;
 
 namespace RotationSolver.ExtraRotations.Magical;
 [Rotation("Rabbs Blackest Mage", CombatType.PvE, GameVersion = "7.3")]
-[SourceCode(Path = "main/ExtraRotations/Magical/Rabbs_BLM.cs")]
+[SourceCode(Path = "main/ExtraRotations/Magical/Rabbs_BLM_All_Levels.cs")]
 [ExtraRotation]
 
 

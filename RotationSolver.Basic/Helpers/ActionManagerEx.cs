@@ -2,6 +2,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using ECommons.Logging;
 using RotationSolver.Basic.Tweaks;
 using System.Diagnostics;
+using ECommons.GameHelpers;
 
 namespace RotationSolver.Basic.Helpers;
 
@@ -31,9 +32,9 @@ public sealed unsafe class ActionManagerEx : IDisposable
     /// </summary>
     public CooldownDelayTweak CooldownDelayTweak => _cooldownTweak;
 
-private readonly ActionManager* _actionManager;
-    private uint _lastActionSequence;
+    private readonly ActionManager* _actionManager;
     private float _lastAnimationLock;
+    private float _frameDeltaSec;
     private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
     
     private ActionManagerEx()
@@ -49,26 +50,11 @@ private readonly ActionManager* _actionManager;
     {
         if (_actionManager == null) return;
         
-var deltaTime = (float)_stopwatch.Elapsed.TotalSeconds;
+        var dt = (float)_stopwatch.Elapsed.TotalSeconds;
+        _frameDeltaSec = Math.Clamp(dt, 0f, 0.25f);
         _stopwatch.Restart();
         
-        var currentAnimLock = _actionManager->AnimationLock;
-        
-        // Record any changes in animation lock for the animation lock tweak
-        if (Math.Abs(currentAnimLock - _lastAnimationLock) > 0.001f)
-        {
-            // Animation lock changed, this might indicate an action was used
-            if (_lastAnimationLock < currentAnimLock)
-            {
-                // Animation lock increased, an action was likely used
-                var currentSequence = _actionManager->LastUsedActionSequence;
-                if (currentSequence != _lastActionSequence)
-                {
-                    _animLockTweak.RecordRequest(currentSequence, currentAnimLock);
-                    _lastActionSequence = currentSequence;
-                }
-            }
-        }
+        var currentAnimLock = Player.AnimationLock;
         
         _lastAnimationLock = currentAnimLock;
     }
@@ -85,14 +71,13 @@ var deltaTime = (float)_stopwatch.Elapsed.TotalSeconds;
         if (_actionManager == null) return false;
         
         // Record current state for tweaks
-        var prevAnimLock = _actionManager->AnimationLock;
-        var prevCooldown = GetRemainingCooldown(actionId);
-var deltaTime = (float)_stopwatch.Elapsed.TotalSeconds;
+        var prevAnimLock = Player.AnimationLock;
+        var prevCooldown = GetRemainingCooldown(actionType, actionId);
         
         // Start cooldown adjustment if enabled
         if (Service.Config.RemoveCooldownDelay)
         {
-            _cooldownTweak.StartAdjustment(prevAnimLock, prevCooldown, deltaTime);
+            _cooldownTweak.StartAdjustment(prevAnimLock, prevCooldown, _frameDeltaSec);
         }
         
         // Determine the expected sequence for the upcoming action
@@ -106,7 +91,7 @@ var deltaTime = (float)_stopwatch.Elapsed.TotalSeconds;
             // Record the initial animation lock bump after a successful use
             if (Service.Config.RemoveAnimationLockDelay)
             {
-                var initAnimLock = _actionManager->AnimationLock;
+                var initAnimLock = Player.AnimationLock;
                 if (initAnimLock > prevAnimLock)
                 {
                     _animLockTweak.RecordRequest((uint)expectedSequence, initAnimLock);
@@ -137,14 +122,13 @@ var deltaTime = (float)_stopwatch.Elapsed.TotalSeconds;
         if (_actionManager == null || location == null) return false;
         
         // Record current state for tweaks
-        var prevAnimLock = _actionManager->AnimationLock;
-        var prevCooldown = GetRemainingCooldown(actionId);
-var deltaTime = (float)_stopwatch.Elapsed.TotalSeconds;
+        var prevAnimLock = Player.AnimationLock;
+        var prevCooldown = GetRemainingCooldown(actionType, actionId);
         
         // Start cooldown adjustment if enabled
         if (Service.Config.RemoveCooldownDelay)
         {
-            _cooldownTweak.StartAdjustment(prevAnimLock, prevCooldown, deltaTime);
+            _cooldownTweak.StartAdjustment(prevAnimLock, prevCooldown, _frameDeltaSec);
         }
         
         // Determine the expected sequence for the upcoming action
@@ -158,7 +142,7 @@ var deltaTime = (float)_stopwatch.Elapsed.TotalSeconds;
             // Record the initial animation lock bump after a successful use
             if (Service.Config.RemoveAnimationLockDelay)
             {
-                var initAnimLock = _actionManager->AnimationLock;
+                var initAnimLock = Player.AnimationLock;
                 if (initAnimLock > prevAnimLock)
                 {
                     _animLockTweak.RecordRequest((uint)expectedSequence, initAnimLock);
@@ -186,13 +170,13 @@ var deltaTime = (float)_stopwatch.Elapsed.TotalSeconds;
         // Apply animation lock reduction
         if (Service.Config.RemoveAnimationLockDelay && prevAnimLock > 0)
         {
-            var currentAnimLock = _actionManager->AnimationLock;
+            var currentAnimLock = Player.AnimationLock;
             var reduction = _animLockTweak.Apply(expectedSequence, prevAnimLock, currentAnimLock, currentAnimLock, currentAnimLock, out var delay);
             
             // Apply the reduction to the current animation lock
             if (reduction > 0)
             {
-_actionManager->AnimationLock = Math.Max(0, currentAnimLock - reduction);
+                _actionManager->AnimationLock = Math.Max(0, currentAnimLock - reduction);
                 if (Service.Config.InDebug)
                 {
                     PluginLog.Debug($"[ActionManagerEx] Reduced animation lock by {reduction:f3}s (delay: {delay:f3}s)");
@@ -205,7 +189,7 @@ _actionManager->AnimationLock = Math.Max(0, currentAnimLock - reduction);
         {
             // Note: In a full implementation, we would need to adjust specific action cooldowns
             // This is a simplified version that demonstrates the concept
-if (Service.Config.InDebug)
+            if (Service.Config.InDebug)
             {
                 PluginLog.Debug($"[ActionManagerEx] Cooldown adjustment: {_cooldownTweak.Adjustment:f3}s");
             }
@@ -216,12 +200,12 @@ if (Service.Config.InDebug)
     /// <summary>
     /// Get the remaining cooldown for a specific action
     /// </summary>
-    private float GetRemainingCooldown(uint actionId)
+    private float GetRemainingCooldown(ActionType actionType, uint actionId)
     {
         if (_actionManager == null) return 0;
         
-        var recastTime = _actionManager->GetRecastTime(ActionType.Action, actionId);
-        var elapsedTime = _actionManager->GetRecastTimeElapsed(ActionType.Action, actionId);
+        var recastTime = _actionManager->GetRecastTime(actionType, actionId);
+        var elapsedTime = _actionManager->GetRecastTimeElapsed(actionType, actionId);
         return Math.Max(0, recastTime - elapsedTime);
     }
     

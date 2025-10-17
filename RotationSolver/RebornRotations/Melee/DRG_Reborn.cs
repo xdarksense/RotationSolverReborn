@@ -1,6 +1,6 @@
 namespace RotationSolver.RebornRotations.Melee;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.31")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.35")]
 [SourceCode(Path = "main/RebornRotations/Melee/DRG_Reborn.cs")]
 
 
@@ -18,8 +18,6 @@ public sealed class DRG_Reborn : DragoonRotation
     [RotationConfig(CombatType.PvE, Name = "Max distance you need to be from the target for Dragonfire Dive useage")]
     public float DragonfireDiveDistance { get; set; } = 20;
     #endregion
-
-    private static bool InBurstStatus => Player.HasStatus(true, StatusID.BattleLitany);
 
     #region Additional oGCD Logic
 
@@ -81,6 +79,11 @@ public sealed class DRG_Reborn : DragoonRotation
                     return true;
                 }
             }
+        }
+
+        if (HasBattleLitany && InCombat && UseBurstMedicine(out act))
+        {
+            return true;
         }
 
         return base.EmergencyAbility(nextGCD, out act);
