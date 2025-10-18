@@ -2,7 +2,7 @@
 
 namespace RotationSolver.RebornRotations.Magical;
 
-[Rotation("Reborn", CombatType.PvE, GameVersion = "7.31")]
+[Rotation("Reborn", CombatType.PvE, GameVersion = "7.35")]
 [SourceCode(Path = "main/RebornRotations/Magical/SMN_Reborn.cs")]
 
 public sealed class SMN_Reborn : SummonerRotation
@@ -148,6 +148,12 @@ public sealed class SMN_Reborn : SummonerRotation
                 }
             }
         }
+
+        if (HasSearingLight && InCombat && UseBurstMedicine(out act))
+        {
+            return true;
+        }
+
         return base.GeneralAbility(nextGCD, out act);
     }
 
