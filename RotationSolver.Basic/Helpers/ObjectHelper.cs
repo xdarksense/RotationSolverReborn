@@ -6,6 +6,7 @@ using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
+using ECommons.ImGuiMethods;
 using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
@@ -1142,7 +1143,8 @@ private static readonly HashSet<uint> IsOCUndeadSet =
     /// <returns>True if the target is immune due to any special mechanic; otherwise, false.</returns>
     public static bool IsSpecialImmune(this IBattleChara battleChara)
     {
-        return battleChara.IsLOTAImmune()
+        return battleChara.IsEminentGriefImmune()
+            || battleChara.IsLOTAImmune()
             || battleChara.IsMesoImmune()
             || battleChara.IsJagdDollImmune()
             || battleChara.IsLyreImmune()
@@ -1157,6 +1159,41 @@ private static readonly HashSet<uint> IsOCUndeadSet =
             || battleChara.IsOmegaImmune()
             || battleChara.IsLimitlessBlue()
             || battleChara.IsHanselorGretelShielded();
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static bool IsEminentGriefImmune(this IBattleChara battleChara)
+    {
+        if (DataCenter.TerritoryID == 1311 || DataCenter.TerritoryID == 1333 || DataCenter.TerritoryID == 1290)
+        {
+            var EminentGrief = battleChara.NameId == 14037;
+            var DevouredEater = battleChara.NameId == 14038;
+
+            var LightVengeance = Player.Object.HasStatus(false, StatusID.LightVengeance);
+            var DarkVengeance = Player.Object.HasStatus(false, StatusID.DarkVengeance);
+
+            if (EminentGrief && !LightVengeance)
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsEminentGriefImmune status found");
+                }
+                return true;
+            }
+
+            if (DevouredEater && !DarkVengeance)
+            {
+                if (Service.Config.InDebug)
+                {
+                    PluginLog.Information("IsEminentGriefImmune status found");
+                }
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
