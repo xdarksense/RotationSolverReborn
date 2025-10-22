@@ -277,6 +277,7 @@ namespace RotationSolver.Commands
             {
                 case StateCommandType.Off:
                     DataCenter.State = false;
+                    DataCenter.IsAutoDuty = false;
                     DataCenter.IsManual = false;
                     DataCenter.ResetAllRecords();
                     ActionUpdater.NextAction = ActionUpdater.NextGCDAction = null;
@@ -286,6 +287,7 @@ namespace RotationSolver.Commands
 
                 case StateCommandType.Auto:
                     DataCenter.IsManual = false;
+                    DataCenter.IsAutoDuty = false;
                     DataCenter.State = true;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                     DataCenter.TargetingTypeOverride = null;
@@ -294,6 +296,7 @@ namespace RotationSolver.Commands
 
                 case StateCommandType.Manual:
                     DataCenter.IsManual = true;
+                    DataCenter.IsAutoDuty = false;
                     DataCenter.State = true;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                     DataCenter.TargetingTypeOverride = null;
@@ -302,6 +305,7 @@ namespace RotationSolver.Commands
 
                 case StateCommandType.AutoDuty:
                     DataCenter.IsManual = false;
+                    DataCenter.IsAutoDuty = true;
                     DataCenter.State = true;
                     ActionUpdater.AutoCancelTime = DateTime.MinValue;
                     DataCenter.TargetingTypeOverride = targetingType;

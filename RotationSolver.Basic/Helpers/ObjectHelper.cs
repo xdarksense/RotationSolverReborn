@@ -6,7 +6,6 @@ using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameFunctions;
 using ECommons.GameHelpers;
-using ECommons.ImGuiMethods;
 using ECommons.Logging;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
@@ -297,6 +296,7 @@ public static class ObjectHelper
                 TargetHostileType.AllTargetsWhenSolo => DataCenter.PartyMembers.Count == 1 || battleChara.TargetObject is not null,
                 TargetHostileType.AllTargetsWhenSoloInDuty => (DataCenter.PartyMembers.Count == 1 && (Svc.Condition[ConditionFlag.BoundByDuty] || Svc.Condition[ConditionFlag.BoundByDuty56]))
                                     || battleChara.TargetObject is not null,
+                TargetHostileType.SoloDeepDungeonSmart => IsSoloDeepDungeonSmartAttackable(battleChara),
                 _ => true,
             };
     }
@@ -320,6 +320,48 @@ public static class ObjectHelper
 
         // Get the EventId of the mob
         return battleChara.GetEventType() == EventHandlerContent.PublicContentDirector;
+    }
+
+    private static bool IsSoloDeepDungeonSmartAttackable(IBattleChara battleChara)
+    {
+        // In combat: only previously engaged targets.
+        if (DataCenter.InCombat)
+        {
+            return battleChara.TargetObject is not null;
+        }
+
+        // Out of combat: if any previously engaged targets are nearby, only attack those; otherwise, only the nearest single enemy.
+        bool hasEngagedNearby = false;
+        var hostiles = DataCenter.AllHostileTargets;
+        for (int i = 0, n = hostiles.Count; i < n; i++)
+        {
+            var h = hostiles[i];
+            if (h != null && h.TargetObject != null && h.DistanceToPlayer() < 25f)
+            {
+                hasEngagedNearby = true;
+                break;
+            }
+        }
+
+        if (hasEngagedNearby)
+        {
+            return battleChara.TargetObject is not null;
+        }
+
+        IBattleChara? nearest = null;
+        float best = float.MaxValue;
+        for (int i = 0, n = hostiles.Count; i < n; i++)
+        {
+            var h = hostiles[i];
+            if (h == null) continue;
+            float d = h.DistanceToPlayer();
+            if (d < best)
+            {
+                best = d;
+                nearest = h;
+            }
+        }
+        return nearest != null && battleChara.GameObjectId == nearest.GameObjectId;
     }
 
     internal static bool IsOccultCEMob(this IBattleChara battleChara)
@@ -820,6 +862,25 @@ public static class ObjectHelper
                 {
                     return true;
                 }
+            }
+        }
+
+        // striking shrublet - Floor 10 boss ads
+        if (DataCenter.TerritoryID == 1281)
+        {
+            if (battleChara.NameId == 13980)
+            {
+                return true;
+            }
+        }
+
+
+        // forgiven adulation - Floor 30 boss ads
+        if (DataCenter.TerritoryID == 1284)
+        {
+            if (battleChara.NameId == 13978)
+            {
+                return true;
             }
         }
 
