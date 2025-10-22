@@ -211,12 +211,30 @@ namespace RotationSolver.Commands
             DoSpecialCommandType(SpecialCommandType.EndSpecial, false);
         }
 
-        internal static void CancelState()
+internal static void CancelState()
         {
             DataCenter.ResetAllRecords();
             if (DataCenter.State)
             {
                 DoStateCommandType(StateCommandType.Off);
+            }
+        }
+
+        public static void UpdateTargetFromNextAction()
+        {
+            IAction? nextAction = ActionUpdater.NextAction;
+            if (nextAction is BaseAction baseAct)
+            {
+                if (baseAct.Target.Target is IBattleChara target && target != Player.Object && target.IsEnemy())
+                {
+                    DataCenter.HostileTarget = target;
+                    if (!DataCenter.IsManual &&
+                        (Service.Config.SwitchTargetFriendly || ((Svc.Targets.Target?.IsEnemy() ?? true)
+                        || Svc.Targets.Target.GetObjectKind() == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Treasure)))
+                    {
+                        Svc.Targets.Target = target;
+                    }
+                }
             }
         }
 
