@@ -330,6 +330,11 @@ public static class ObjectHelper
             return battleChara.TargetObject is not null;
         }
 
+        if (DataCenter.PartyMembers.Count > 1)
+        {
+            return battleChara.TargetObject is not null;
+        }
+
         // Out of combat: if any previously engaged targets are nearby, only attack those; otherwise, only the nearest single enemy.
         bool hasEngagedNearby = false;
         var hostiles = DataCenter.AllHostileTargets;

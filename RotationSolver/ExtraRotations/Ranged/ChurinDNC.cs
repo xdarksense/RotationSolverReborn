@@ -90,8 +90,7 @@ public sealed class ChurinDNC : DancerRotation
                 {
                     return AreDanceTargetsInRange;
                 }
-
-                return true;
+                else return true;
             }
             
             if (TechHoldStrategy == HoldStrategy.HoldFinishOnly)
@@ -100,12 +99,13 @@ public sealed class ChurinDNC : DancerRotation
                 {
                     return AreDanceTargetsInRange;
                 }
-                return true;
+                else return true;
             }
             if (TechHoldStrategy == HoldStrategy.HoldStepAndFinish)
             {
                 return AreDanceTargetsInRange;
             }
+
             if (TechHoldStrategy == HoldStrategy.DontHoldStepAndFinish)
             {
                 return true;
@@ -119,7 +119,7 @@ public sealed class ChurinDNC : DancerRotation
                 {
                     return AreDanceTargetsInRange;
                 }
-                return true;
+                else return true;
             }
             if (StandardHoldStrategy == HoldStrategy.HoldFinishOnly)
             {
@@ -128,7 +128,7 @@ public sealed class ChurinDNC : DancerRotation
                     return AreDanceTargetsInRange;
                 }
 
-                return true;
+                else return true;
             }
             if (StandardHoldStrategy == HoldStrategy.HoldStepAndFinish)
             {
@@ -471,7 +471,7 @@ public sealed class ChurinDNC : DancerRotation
         act = null;
         if (!HasStandardStep || HasFinishingMove) return false;
 
-        var shouldFinish = CompletedSteps == 2 && CanUseStepHoldCheck(StandardHoldStrategy);
+        var shouldFinish = HasStandardStep && CompletedSteps == 2 && CanUseStepHoldCheck(StandardHoldStrategy);
         var aboutToTimeOut = Player.WillStatusEnd(1, true, StatusID.StandardStep);
 
         if ((shouldFinish || aboutToTimeOut) && DoubleStandardFinishPvE.CanUse(out act, skipAoeCheck: true))
@@ -487,7 +487,7 @@ public sealed class ChurinDNC : DancerRotation
         act = null;
         if (!HasTechnicalStep) return false;
 
-        var shouldFinish = CompletedSteps == 4 && CanUseStepHoldCheck(TechHoldStrategy);
+        var shouldFinish = HasTechnicalStep && CompletedSteps == 4 && CanUseStepHoldCheck(TechHoldStrategy);
         var aboutToTimeOut = Player.WillStatusEnd(1, true, StatusID.TechnicalStep);
 
         if ((shouldFinish || aboutToTimeOut) && QuadrupleTechnicalFinishPvE.CanUse(out act, skipAoeCheck: true))
