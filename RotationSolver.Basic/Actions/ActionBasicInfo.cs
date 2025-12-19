@@ -79,12 +79,17 @@ public readonly struct ActionBasicInfo
     /// </summary>
     public unsafe bool IsQuestUnlocked()
     {
-        if (UnlockLink == 0)
+        if (UnlockLink == 0 && _action.Setting.UnlockedByQuestID == 0)
         {
             return true;
         }
 
-        if (!UIState.Instance()->IsUnlockLinkUnlockedOrQuestCompleted(UnlockLink))
+        if (UnlockLink != 0 && !UIState.Instance()->IsUnlockLinkUnlockedOrQuestCompleted(UnlockLink))
+        {
+            return false;
+        }
+
+        if (_action.Setting.UnlockedByQuestID != 0 && !UIState.Instance()->IsUnlockLinkUnlockedOrQuestCompleted(_action.Setting.UnlockedByQuestID))
         {
             return false;
         }
@@ -95,7 +100,20 @@ public readonly struct ActionBasicInfo
     /// <summary>
     /// Determines whether the player's level is sufficient to use the action.
     /// </summary>
-    public readonly bool EnoughLevel => Player.Level >= Level;
+    public readonly bool EnoughLevel => DataCenter.PlayerSyncedLevel() >= Level;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool EnoughLevelAndQuest()
+    {
+        if (EnoughLevel && IsQuestUnlocked())
+        {
+            return true;
+        }
+
+        return false;
+    }
 
     /// <summary>
     /// Determines whether the action is a PvP action.
@@ -234,6 +252,11 @@ public readonly struct ActionBasicInfo
             return false;
         }
 
+        if (!EnoughLevel)
+        {
+            return false;
+        }
+
         var type = ActionHelper.GetActionCate(_action.Action);
         if (type is ActionCate.Weaponskill)
         {
@@ -261,15 +284,15 @@ public readonly struct ActionBasicInfo
             return false;
         }
 
-        if (!IsQuestUnlocked())
+        if (IsActionDisabled() || !HasEnoughMP())
         {
-            PluginLog.Warning($"Do your class quests, action not unlocked: {Name}");
             return false;
         }
 
-        // 2. Basic requirements: not disabled, enough level, enough MP
-        if (IsActionDisabled() || !EnoughLevel || !HasEnoughMP())
+        if (!IsQuestUnlocked())
         {
+            PluginLog.Warning($"Do your class quests, action not unlocked: {Name}");
+            BasicWarningHelper.AddSystemWarning($"Do your class quests, action not unlocked: {Name}");
             return false;
         }
 
@@ -283,7 +306,7 @@ public readonly struct ActionBasicInfo
 
         if (IsAbility && !IsRealGCD)
         {
-            if (ConfigurationHelper.BadStatusAbility.Contains(ActionManager.Instance()->GetActionStatus(ActionType.Ability, AdjustedID)))
+            if (ConfigurationHelper.BadStatusAbility.Contains(ActionManager.Instance()->GetActionStatus(ActionType.EventAction, AdjustedID)))
             {
                 return false;
             }

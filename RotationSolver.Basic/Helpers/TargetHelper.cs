@@ -11,7 +11,7 @@ namespace RotationSolver.Basic.Helpers
     /// </summary>
     public static class TargetHelper
     {
-        private static readonly HashSet<long> s_emptyStopTargets = new();
+        private static readonly HashSet<long> s_emptyStopTargets = [];
 
         /// <summary>
         /// Retrieves a collection of valid battle characters that can be targeted based on the specified criteria.
@@ -169,13 +169,21 @@ namespace RotationSolver.Basic.Helpers
                 return false;
             }
 
-            if (blacklisted.Contains(battleChara.NameId)) return false;
+            foreach (var id in blacklisted)
+            {
+                if (id == battleChara.NameId) return false;
+            }
 
             if (battleChara.IsEnemy() && !battleChara.IsAttackable()) return false;
 
             // Respect stop marks only when configured
-            if (Service.Config.FilterStopMark && stopTargets.Contains((long)battleChara.GameObjectId) && battleChara.IsEnemy())
-                return false;
+            if (Service.Config.FilterStopMark && battleChara.IsEnemy())
+            {
+                foreach (var stopTargetId in stopTargets)
+                {
+                    if (stopTargetId == (long)battleChara.GameObjectId) return false;
+                }
+            }
 
             return true;
         }
@@ -197,7 +205,7 @@ namespace RotationSolver.Basic.Helpers
 
             if (checkRangeAndLoS)
             {
-                var player = Svc.ClientState.LocalPlayer;
+                var player = Svc.Objects.LocalPlayer;
                 if (player == null) return false;
                 var playerPtr = (GameObject*)player.Address;
                 var err = ActionManager.GetActionInRangeOrLoS(adjusted, playerPtr, go);

@@ -9,7 +9,7 @@ namespace RotationSolver.Basic.Helpers;
 public static class TargetFilter
 {
     private static Dictionary<JobRole, HashSet<byte>>? _roleJobs;
-    private static readonly object _roleJobsLock = new();
+    private static readonly Lock _roleJobsLock = new();
 
     private static Dictionary<JobRole, HashSet<byte>> GetRoleMap()
     {
@@ -160,7 +160,11 @@ public static bool IsJobCategory(this IBattleChara battleChara, JobRole role)
 
     private static bool IsJobs(this IGameObject battleChara, HashSet<byte> validJobs)
     {
-        return battleChara is IBattleChara b && validJobs != null && validJobs.Contains((byte)b.ClassJob.Value.RowId);
+        if (battleChara is IBattleChara b && validJobs != null)
+        {
+            return validJobs.TryGetValue((byte)b.ClassJob.Value.RowId, out _);
+        }
+        return false;
     }
     #endregion
 

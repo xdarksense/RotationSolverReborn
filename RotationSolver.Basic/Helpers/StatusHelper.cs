@@ -181,7 +181,10 @@ public static class StatusHelper
     [
         StatusID.DamageUp_1161,
         StatusID.DamageUp,
-        StatusID.DarkDefenses
+        StatusID.DarkDefenses,
+        StatusID.MagicDamageUp_2556,
+        StatusID.EvasionUp_1706
+        //StatusID.Invincibility_4539 maybe this, need verification, seems to be on guardian knight in Rooms & Lockwards part of forked tower
     ];
 
     /// <summary>
@@ -195,6 +198,20 @@ public static class StatusHelper
         StatusID.Silence_1347,
         StatusID.DeepFreeze_3219,
         StatusID.MiracleOfNature,
+    ];
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static StatusID[] RotationLockoutStatus { get; } =
+    [
+        StatusID.Reawakened,
+        StatusID.Overheated,
+        StatusID.InnerRelease,
+        StatusID.Eukrasia,
+        StatusID.Mudra,
+        StatusID.TenChiJin,
+        StatusID.FullMetalMachinist
     ];
 
     /// <summary>

@@ -1,5 +1,4 @@
-﻿using ECommons.GameHelpers;
-using Lumina.Excel.Sheets;
+﻿using Lumina.Excel.Sheets;
 
 namespace RotationSolver.Basic.Traits;
 
@@ -13,7 +12,7 @@ public class BaseTrait : IBaseTrait
     /// <summary>
     /// Gets a value indicating whether the player has a sufficient level for this trait.
     /// </summary>
-    public bool EnoughLevel => Player.Level >= Level;
+    public bool EnoughLevel => DataCenter.PlayerSyncedLevel() >= Level;
 
     /// <summary>
     /// Gets the level required for this trait.
@@ -44,6 +43,11 @@ public class BaseTrait : IBaseTrait
     /// 
     /// </summary>
     public bool IsIntercepted { get; set; }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool IsRestrictedDOT { get; set; }
 
     /// <summary>
     /// Gets the ID of this trait.

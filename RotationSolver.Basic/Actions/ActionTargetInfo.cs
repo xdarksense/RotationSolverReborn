@@ -71,6 +71,18 @@ public struct ActionTargetInfo(IBaseAction action)
                 continue;
             }
 
+            // When this action is flagged as Restricted DoT, skip targets on the restricted list
+            if (action.IsRestrictedDOT && DataCenter.RestrictedDotNameIds != null)
+            {
+                for (int i = 0; i < DataCenter.RestrictedDotNameIds.Count; i++)
+                {
+                    if (target.NameId == DataCenter.RestrictedDotNameIds[i])
+                    {
+                        continue;
+                    }
+                }
+            }
+
             var statusCheck = CheckStatus(target, skipStatusProvideCheck, skipTargetStatusNeedCheck);
             var ttkCheck = CheckTimeToKill(target);
             var resistanceCheck = CheckResistance(target);
@@ -90,8 +102,9 @@ public struct ActionTargetInfo(IBaseAction action)
                 var view = TargetOnScreen(target);
                 var canUse = CanUseTo(target);
                 var asCanTarget = action.Setting.CanTarget(target);
+                var MinHPPass = !action.MinHPFeature || (action.MinHPFeature && target.GetHealthRatio() > action.MinHPPercent);
 
-                if (view && canUse && asCanTarget)
+                if (view && canUse && asCanTarget && MinHPPass)
                 {
                     validTargets.Add(target);
                 }
@@ -132,6 +145,21 @@ public struct ActionTargetInfo(IBaseAction action)
             if (type == TargetType.Heal && tar.GetHealthRatio() >= 1)
             {
                 continue;
+            }
+
+            // When this action is flagged as Restricted DoT, skip targets on the restricted list
+            if (action.IsRestrictedDOT && DataCenter.RestrictedDotNameIds != null)
+            {
+                bool isRestricted = false;
+                for (int i = 0; i < DataCenter.RestrictedDotNameIds.Count; i++)
+                {
+                    if (tar.NameId == DataCenter.RestrictedDotNameIds[i])
+                    {
+                        isRestricted = true;
+                        break;
+                    }
+                }
+                if (isRestricted) continue;
             }
 
             if (CheckStatus(tar, skipStatusProvideCheck, skipTargetStatusNeedCheck) && CheckTimeToKill(tar) && CheckResistance(tar))

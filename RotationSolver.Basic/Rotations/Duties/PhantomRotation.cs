@@ -1,4 +1,5 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game.Event;
+﻿using ECommons.ExcelServices;
+using FFXIVClientStructs.FFXIV.Client.Game.Event;
 
 namespace RotationSolver.Basic.Rotations.Duties;
 
@@ -21,23 +22,9 @@ public partial class DutyRotation
     #region Status Tracking
 
     /// <summary>
-    /// 
-    /// </summary>
-    public static StatusID[] RotationLockoutStatus { get; } =
-    [
-        StatusID.Reawakened,
-        StatusID.Overheated,
-        StatusID.InnerRelease,
-        StatusID.Eukrasia,
-        StatusID.Mudra,
-        StatusID.TenChiJin,
-        StatusID.FullMetalMachinist
-    ];
-
-    /// <summary>
     /// Has a status that is important to the main rotation and should prevent Duty Actions from being executed.
     /// </summary>
-    public static bool HasLockoutStatus => Player.HasStatus(true, RotationLockoutStatus) && InCombat;
+    public static bool HasLockoutStatus => Player.HasStatus(true, StatusHelper.RotationLockoutStatus) && InCombat;
 
     /// <summary>
     /// Able to execute Cleansing.
@@ -58,6 +45,11 @@ public partial class DutyRotation
     /// Able to execute Blessing.
     /// </summary>
     public static bool HasBlessing => Player.HasStatus(true, StatusID.PredictionOfBlessing) || Player.HasStatus(false, StatusID.PredictionOfBlessing);
+
+    /// <summary>
+    ///
+    /// </summary>
+    public static bool NeedsViperBuffs => DataCenter.Job == Job.VPR && (!ViperRotation.HasHunterAndSwift || ViperRotation.WillSwiftEnd || ViperRotation.WillHunterEnd);
     #endregion
 
     #region Freelancer

@@ -19,12 +19,17 @@ public partial class CustomRotation
         }
         IBaseAction.ForceEnable = false;
 
+        if ((Service.Config.LagMitigation || Player.HasStatus(true, StatusID.Mudra)) && DataCenter.DefaultGCDRemain < 0.625f)
+        {
+            return false;
+        }
+
         if (act is IBaseItem i && i.CanUse(out _, true))
         {
             return true;
         }
 
-        if (!Service.Config.UseAbility || Player.TotalCastTime > 0 || Player.HasStatus(false, StatusID.ShackledAbilities))
+        if (!Service.Config.UseAbility || Player.TotalCastTime > 0 || (Player.HasStatus(false, StatusID.ShackledAbilities) && DataCenter.NumberOfPartyMembersInRangeOf(8) > 1))
         {
             act = null;
             return false;
@@ -126,7 +131,7 @@ public partial class CustomRotation
             {
                 return true;
             }
-            if (!Player.HasStatus(false, StatusID.Scalebound) && !Player.HasStatus(false, StatusID.ShackledHealing))
+            if (!Player.HasStatus(false, StatusID.Scalebound) && (!Player.HasStatus(false, StatusID.ShackledHealing) || Player.HasStatus(false, StatusID.ShackledHealing) && DataCenter.NumberOfPartyMembersInRangeOf(21) == 1))
             {
                 if (HealAreaAbility(nextGCD, out act))
                 {
@@ -144,7 +149,7 @@ public partial class CustomRotation
             {
                 return true;
             }
-            if (!Player.HasStatus(false, StatusID.Scalebound) && !Player.HasStatus(false, StatusID.ShackledHealing))
+            if (!Player.HasStatus(false, StatusID.Scalebound) && (!Player.HasStatus(false, StatusID.ShackledHealing) || Player.HasStatus(false, StatusID.ShackledHealing) && DataCenter.NumberOfPartyMembersInRangeOf(21) == 1))
             {
                 if (HealAreaAbility(nextGCD, out act))
                 {
@@ -162,7 +167,7 @@ public partial class CustomRotation
             {
                 return true;
             }
-            if (!Player.HasStatus(false, StatusID.Scalebound) && !Player.HasStatus(false, StatusID.ShackledHealing))
+            if (!Player.HasStatus(false, StatusID.Scalebound) && (!Player.HasStatus(false, StatusID.ShackledHealing) || Player.HasStatus(false, StatusID.ShackledHealing) && DataCenter.NumberOfPartyMembersInRangeOf(21) == 1))
             {
                 if (HealSingleAbility(nextGCD, out act))
                 {
@@ -180,7 +185,7 @@ public partial class CustomRotation
             {
                 return true;
             }
-            if (!Player.HasStatus(false, StatusID.Scalebound) && !Player.HasStatus(false, StatusID.ShackledHealing))
+            if (!Player.HasStatus(false, StatusID.Scalebound) && (!Player.HasStatus(false, StatusID.ShackledHealing) || Player.HasStatus(false, StatusID.ShackledHealing) && DataCenter.NumberOfPartyMembersInRangeOf(21) == 1))
             {
                 if (HealSingleAbility(nextGCD, out act))
                 {

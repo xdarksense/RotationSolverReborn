@@ -80,11 +80,34 @@ public class BaseAction : IBaseAction
         set => Config.IsIntercepted = value;
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool IsRestrictedDOT
+    {
+        get => Config.IsRestrictedDOT;
+        set => Config.IsRestrictedDOT = value;
+    }
+
     /// <inheritdoc/>
     public bool IsOnCooldownWindow
     {
         get => Config.IsOnCooldownWindow;
         set => Config.IsOnCooldownWindow = value;
+    }
+
+    /// <inheritdoc/>
+    public bool MinHPFeature
+    {
+        get => Config.MinHPFeature;
+        set => Config.MinHPFeature = value;
+    }
+
+    /// <inheritdoc/>
+    public float MinHPPercent
+    {
+        get => Config.MinHPPercent;
+        set => Config.MinHPPercent = value;
     }
 
     /// <inheritdoc/>
@@ -187,7 +210,7 @@ public class BaseAction : IBaseAction
 
         if (!skipTTKCheck)
         {
-            if (!DataCenter.IsPvP || !Service.Config.IgnorePvPttk)
+            if (!DataCenter.IsPvP || (DataCenter.IsPvP && !Service.Config.IgnorePvPttk))
             {
                 if (!IsTimeToKillValid())
                 {

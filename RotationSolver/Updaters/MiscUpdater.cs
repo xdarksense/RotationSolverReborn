@@ -38,7 +38,7 @@ internal static class MiscUpdater
             }
             catch
             {
-                WarningHelper.AddSystemWarning("Unable to add server bar entry");
+                BasicWarningHelper.AddSystemWarning("Unable to add server bar entry");
                 return;
             }
 
@@ -228,6 +228,16 @@ internal static class MiscUpdater
             }
 
             if (hot.Value.ApparentSlotType is not RaptureHotbarModule.HotbarSlotType.CraftAction and not RaptureHotbarModule.HotbarSlotType.Action)
+            {
+                return false;
+            }
+
+            if (hot.Value.OriginalApparentSlotType == RaptureHotbarModule.HotbarSlotType.Macro)
+            {
+                return false;
+            }
+
+            if (hot.Value.ApparentSlotType == RaptureHotbarModule.HotbarSlotType.Macro)
             {
                 return false;
             }

@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace RotationSolver.ExtraRotations.Ranged;
 
@@ -29,97 +28,36 @@ public sealed class ChurinBRD : BardRotation
         [Description("Late")] Late
     }
 
-    private enum PotionTimings
-    {
-        [Description("None")] None,
-
-        [Description("Opener and Six Minutes")]
-        ZeroSix,
-
-        [Description("Two Minutes and Eight Minutes")]
-        TwoEight,
-
-        [Description("Opener, Five Minutes and Ten Minutes")]
-        ZeroFiveTen
-    }
-
     private float WandTime => SongTimings switch
     {
-        SongTiming.Standard or SongTiming.AdjustedStandard => 42,
-        SongTiming.Cycle369 => 42,
+        SongTiming.Standard or SongTiming.AdjustedStandard => 42f,
+        SongTiming.Cycle369 => 42f,
         SongTiming.Custom => CustomWandTime,
-        _ => 0
+        _ => 0f
     };
 
     private float MageTime => SongTimings switch
     {
-        SongTiming.Standard or SongTiming.AdjustedStandard => 42,
-        SongTiming.Cycle369 => 39,
+        SongTiming.Standard or SongTiming.AdjustedStandard => 42f,
+        SongTiming.Cycle369 => 39f,
         SongTiming.Custom => CustomMageTime,
-        _ => 0
+        _ => 0f
     };
 
     private float ArmyTime => SongTimings switch
     {
-        SongTiming.Standard or SongTiming.AdjustedStandard => 33,
-        SongTiming.Cycle369 => 36,
+        SongTiming.Standard or SongTiming.AdjustedStandard => 33f,
+        SongTiming.Cycle369 => 36f,
         SongTiming.Custom => CustomArmyTime,
-        _ => 0
+        _ => 0f
     };
-    private float WandRemainTime => 45 - WandTime;
-    private float MageRemainTime => 45 - MageTime;
-    private float ArmyRemainTime => 45 - ArmyTime;
+    private float WandRemainTime => 45f - WandTime;
+    private float MageRemainTime => 45f - MageTime;
+    private float ArmyRemainTime => 45f - ArmyTime;
 
-    #region Potions
-    private readonly List<(int Time, bool Enabled, bool Used)> _potions = [];
-    private void InitializePotions()
-    {
-        _potions.Clear();
-        switch (PotionTiming, CustomPotionTiming)
-        {
-            case (PotionTimings.None, false):
-                break;
-            case (PotionTimings.ZeroSix, false):
-                _potions.Add((0, true, false));
-                _potions.Add((6, true, false));
-                break;
-            case (PotionTimings.TwoEight, false):
-                _potions.Add((2, true, false));
-                _potions.Add((8, true, false));
-                break;
-            case (PotionTimings.ZeroFiveTen, false):
-                _potions.Add((0, true, false));
-                _potions.Add((5, true, false));
-                _potions.Add((10, true, false));
-                break;
-        }
-
-        if (CustomPotionTiming)
-        {
-            if (CustomEnableFirstPotion)
-            {
-                _potions.Add((CustomFirstPotionTime, true, false));
-            }
-
-            if (CustomEnableSecondPotion)
-            {
-                _potions.Add((CustomSecondPotionTime, true, false));
-            }
-
-            if (CustomEnableThirdPotion)
-            {
-                _potions.Add((CustomThirdPotionTime, true, false));
-            }
-        }
-
-    }
-    #endregion
-
-
-    private static double RecastTime => ActionManager.GetAdjustedRecastTime(ActionType.Action, 16495U) / 1000.00;
-    private static bool CanLateWeave => WeaponRemain < LateWeaveWindow && EnoughWeaveTime;
-    private static bool CanEarlyWeave => WeaponRemain > LateWeaveWindow;
-    private static float LateWeaveWindow => (float)(RecastTime * 0.45f);
+    private static bool CanLateWeave => (WeaponRemain > 0) && (WeaponRemain <= LateWeaveWindow) && EnoughWeaveTime;
+    private static bool CanEarlyWeave => (WeaponRemain > 0) && (WeaponRemain > LateWeaveWindow);
+    private static float LateWeaveWindow => WeaponTotal * 0.5f;
 
     private static bool TargetHasDoTs =>
         CurrentTarget?.HasStatus(true, StatusID.Windbite, StatusID.Stormbite) == true &&
@@ -133,14 +71,11 @@ public sealed class ChurinBRD : BardRotation
     private static bool InMages => Song == Song.Mage;
     private static bool InArmys => Song == Song.Army;
     private static bool NoSong => Song == Song.None;
-    private static bool IsMedicated => Player.HasStatus(true, StatusID.Medicated) && !Player.WillStatusEnd(0,true, StatusID.Medicated);
+    private static bool IsMedicated => Player.HasStatus(true, StatusID.Medicated) && !Player.WillStatusEnd(0f,true, StatusID.Medicated);
     private static bool HasResonantArrow => Player.HasStatus(true, StatusID.ResonantArrowReady);
-    private static bool InTwoMinuteWindow => !IsFirstCycle && HasRadiantFinale && HasBattleVoice && !HasRagingStrikes;
-    private static bool InOddMinuteWindow => InMages && SongTime > 15;
-
-    private static bool EnoughWeaveTime => WeaponRemain > DefaultAnimationLock;
-
-    private const float DefaultAnimationLock = 0.6f;
+    private static bool InOddMinuteWindow => InMages && SongTime > 15f;
+    private static bool EnoughWeaveTime => (WeaponRemain > AnimLock) && WeaponRemain > 0;
+    private static float AnimLock => Math.Max(AnimationLock, WeaponTotal * 0.25f);
 
     private bool InBurst => (!BattleVoicePvE.EnoughLevel && !RadiantFinalePvE.EnoughLevel && HasRagingStrikes) ||
                             (!RadiantFinalePvE.EnoughLevel && HasRagingStrikes && HasBattleVoice) ||
@@ -149,116 +84,175 @@ public sealed class ChurinBRD : BardRotation
     private static bool IsFirstCycle { get; set; }
 
     #endregion
+
+    #region  Tracking Properties
+
+    public override void DisplayRotationStatus()
+    {
+        ImGui.Text("===GCD Status===");
+        ImGui.Text($"Weapon Remain: {WeaponRemain}");
+        ImGui.Text($"Animation Lock: {AnimLock}");
+        ImGui.Text($"Enough Weave Time: {EnoughWeaveTime}");
+        ImGui.Text($"Can Late Weave: {CanLateWeave}");
+        ImGui.Text($"Can Early Weave: {CanEarlyWeave}");
+    }
+
+    #endregion
+
     #region Config Options
 
     [RotationConfig(CombatType.PvE, Name = "Only use DOTs on targets with Boss Icon")]
     private bool DoTsBoss { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Choose Bard Song Timing Preset")]
-    private SongTiming SongTimings { get; set; } = SongTiming.Standard;
+    private static SongTiming SongTimings { get; set; }
 
     [Range(1, 45, ConfigUnitType.Seconds, 1)]
     [RotationConfig(CombatType.PvE, Name = "Custom Wanderer's Minuet Uptime", Parent = nameof(SongTimings), ParentValue = SongTiming.Custom)]
-    private float CustomWandTime { get; set; } = 45;
+    private float CustomWandTime { get; set; } = 45f;
 
     [Range(1, 45, ConfigUnitType.Seconds, 1)]
     [RotationConfig(CombatType.PvE, Name = "Custom Mage's Ballad Uptime", Parent = nameof(SongTimings), ParentValue = SongTiming.Custom)]
-    private float CustomMageTime { get; set; } = 45;
+    private float CustomMageTime { get; set; } = 45f;
 
     [Range(1, 45, ConfigUnitType.Seconds, 1)]
     [RotationConfig(CombatType.PvE, Name = "Custom Army's Paeon Uptime", Parent = nameof(SongTimings), ParentValue = SongTiming.Custom)]
-    private float CustomArmyTime { get; set; } = 45;
+    private float CustomArmyTime { get; set; } = 45f;
 
     [RotationConfig(CombatType.PvE, Name = "Custom Wanderer's Weave Slot Timing", Parent = nameof(SongTimings), ParentValue = SongTiming.Custom)]
     private WandererWeave WanderersWeave { get; set; } = WandererWeave.Early;
 
     [RotationConfig(CombatType.PvE, Name = "Enable PrepullHeartbreak Shot? - Use with BMR Auto Attack Manager")]
     private bool EnablePrepullHeartbreakShot { get; set; } = true;
-    [RotationConfig(CombatType.PvE, Name = "Potion Presets")]
-    private PotionTimings PotionTiming { get; set; } = PotionTimings.None;
 
-    [Range(0, 20, ConfigUnitType.Seconds, 0.5f)]
-    [RotationConfig(CombatType.PvE, Name = "Use Opener Potion at minus time in seconds - only use if potting early in the opener")]
-    private float OpenerPotionTime { get; set; } = 0f;
+    private static readonly ChurinBRDPotions ChurinPotions = new();
+    private float _firstPotionTiming;
+    private float _secondPotionTiming;
+    private float _thirdPotionTiming;
 
-    [RotationConfig(CombatType.PvE, Name = "Use Custom Potion Timing")]
-    private bool CustomPotionTiming { get; set; } = false;
+    [RotationConfig(CombatType.PvE, Name = "Enable Potion Usage")]
+    private static bool PotionUsageEnabled
+    { get => ChurinPotions.Enabled; set => ChurinPotions.Enabled = value; }
 
-    [RotationConfig(CombatType.PvE, Name = "Custom Potions - Enable First Potion", Parent = nameof(CustomPotionTiming))]
-    private bool CustomEnableFirstPotion { get; set; }
+    [RotationConfig(CombatType.PvE, Name = "Potion Usage Presets", Parent = nameof(PotionUsageEnabled))]
+    private static PotionStrategy PotionUsagePresets
+    { get => ChurinPotions.Strategy; set => ChurinPotions.Strategy = value; }
 
-    [Range(0, 20, ConfigUnitType.None, 1)]
-    [RotationConfig(CombatType.PvE, Name = "Custom Potions - First Potion(time in minutes)", Parent = nameof(CustomEnableFirstPotion))]
-    private int CustomFirstPotionTime { get; set; } = 0;
+    [Range(0,20, ConfigUnitType.Seconds, 0)]
+    [RotationConfig(CombatType.PvE, Name = "Use Opener Potion at minus time in seconds - only use if potting early in the opener", Parent = nameof(PotionUsageEnabled))]
+    private static float OpenerPotionTime { get => ChurinPotions.OpenerPotionTime; set => ChurinPotions.OpenerPotionTime = value; }
 
-    [RotationConfig(CombatType.PvE, Name = "Custom Potions - Enable Second Potion", Parent = nameof(CustomPotionTiming))]
-    private bool CustomEnableSecondPotion { get; set; }
+    [Range(0, 1200, ConfigUnitType.Seconds, 0)]
+    [RotationConfig(CombatType.PvE, Name = "Use 1st Potion at (value in seconds - leave at 0 if using in opener)", Parent = nameof(PotionUsagePresets), ParentValue = "Use custom potion timings")]
+    private float FirstPotionTiming
+    {
+        get => _firstPotionTiming;
+        set
+        {
+            _firstPotionTiming = value;
+            UpdateCustomTimings();
+        }
+    }
 
-    [Range(0, 20, ConfigUnitType.None, 1)]
-    [RotationConfig(CombatType.PvE, Name = "Custom Potions - Second Potion(time in minutes)", Parent = nameof(CustomEnableSecondPotion))]
-    private int CustomSecondPotionTime { get; set; } = 0;
+    [Range(0, 1200, ConfigUnitType.Seconds, 0)]
+    [RotationConfig(CombatType.PvE, Name = "Use 2nd Potion at (value in seconds)", Parent = nameof(PotionUsagePresets), ParentValue = "Use custom potion timings")]
+    private float SecondPotionTiming
+    {
+        get => _secondPotionTiming;
+        set
+        {
+            _secondPotionTiming = value;
+            UpdateCustomTimings();
+        }
+    }
 
-    [RotationConfig(CombatType.PvE, Name = "Custom Potions - Enable Third Potion", Parent = nameof(CustomPotionTiming))]
-    private bool CustomEnableThirdPotion { get; set; }
+    [Range(0, 1200, ConfigUnitType.Seconds, 0)]
+    [RotationConfig(CombatType.PvE, Name = "Use 3rd Potion at (value in seconds)", Parent = nameof(PotionUsagePresets), ParentValue = "Use custom potion timings")]
+    private float ThirdPotionTiming
+    {
+        get => _thirdPotionTiming;
+        set
+        {
+            _thirdPotionTiming = value;
+            UpdateCustomTimings();
+        }
+    }
 
-    [Range(0, 20, ConfigUnitType.None, 1)]
-    [RotationConfig(CombatType.PvE, Name = "Custom Potions - Third Potion(time in minutes)", Parent = nameof(CustomEnableThirdPotion))]
-    private int CustomThirdPotionTime { get; set; } = 0;
+    private void UpdateCustomTimings()
+    {
+        ChurinPotions.CustomTimings = new Potions.CustomTimingsData
+        {
+            Timings = [FirstPotionTiming, SecondPotionTiming, ThirdPotionTiming]
+        };
+    }
     [RotationConfig(CombatType.PvE, Name = "Enable Sandbag Mode?")]
     private static bool EnableSandbagMode { get; set; } = false;
 
     #endregion
+
     #region Countdown Logic
     protected override IAction? CountDownAction(float remainTime)
     {
         IsFirstCycle = true;
-        InitializePotions();
-        UpdatePotions();
-        if (remainTime <= OpenerPotionTime && OpenerPotionTime > 0 && TryUsePotion(out var act)) return act;
+        if (ChurinPotions.ShouldUsePotion(this, out var potionAct))
+        {
+            return potionAct;
+        }
         return SongTimings switch
         {
-            SongTiming.AdjustedStandard when remainTime <= 0 && HeartbreakShotPvE.CanUse(out act) => act,
-            SongTiming.Cycle369 when EnablePrepullHeartbreakShot && remainTime <= 1.6f && HeartbreakShotPvE.CanUse(out act) => act,
-            SongTiming.Cycle369 when remainTime <= 0 && StormbitePvE.CanUse(out act) => act,
+            SongTiming.AdjustedStandard when remainTime <= 0f && HeartbreakShotPvE.CanUse(out var act) => act,
+            SongTiming.Cycle369 when EnablePrepullHeartbreakShot && remainTime < 1.65f && HeartbreakShotPvE.CanUse(out var act) => act,
+            SongTiming.Cycle369 when remainTime < 1.29f && StormbitePvE.CanUse(out var act) => act,
             _ => base.CountDownAction(remainTime)
-        };    }
+        };    
+    }
 
 #endregion
+
     #region oGCD Logic
     protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
     {
-        UpdatePotions();
+        if (ChurinPotions.ShouldUsePotion(this, out act)) return true;
+
         if (IsFirstCycle && InArmys && !RadiantFinalePvE.Cooldown.IsCoolingDown)
         {
             IsFirstCycle = false;
         }
 
-        return TryUsePotion(out act) ||
-               TryUseEmpyrealArrow(out act) ||
-               TryUsePitchPerfect(out act) ||
-               base.EmergencyAbility(nextGCD, out act);
+        if (!EnoughWeaveTime) return false;
+
+        return TryUseEmpyrealArrow(out act)
+               || TryUseHeartBreakShot(out act)
+               || TryUsePitchPerfect(out act)
+               || base.EmergencyAbility(nextGCD, out act);
     }
 
     protected override bool GeneralAbility(IAction nextGCD, out IAction? act)
     {
-        return TryUseWanderers(out act) ||
-               TryUseMages(out act) ||
-               TryUseArmys(out act) ||
-               base.GeneralAbility(nextGCD, out act);
+        act = null;
+        if (!EnoughWeaveTime) return false;
+
+        return TryUseWanderers(out act)
+               || TryUseMages(out act)
+               || TryUseArmys(out act)
+               || base.GeneralAbility(nextGCD, out act);
     }
 
     protected override bool AttackAbility(IAction nextGcd, out IAction? act)
-        {
-            return TryUseRadiantFinale(out act) ||
-                   TryUseBattleVoice(out act) ||
-                   TryUseRagingStrikes(out act) ||
-                   TryUseBarrage(out act)||
-                   TryUseHeartBreakShot(out act) ||
-                   TryUseSideWinder(out act) ||
-                   base.AttackAbility(nextGcd, out act);
+    {
+        act = null;
+        if (!EnoughWeaveTime) return false;
+
+            return TryUseRadiantFinale(out act)
+                   || TryUseBattleVoice(out act)
+                   || TryUseRagingStrikes(out act)
+                   || TryUseBarrage(out act)
+                   || TryUseSideWinder(out act)
+                   || base.AttackAbility(nextGcd, out act);
         }
 
     #endregion
+
     #region GCD Logic
     protected override bool GeneralGCD(out IAction? act)
     {
@@ -281,7 +275,7 @@ public sealed class ChurinBRD : BardRotation
 
     private bool TryUseIronJaws(out IAction? act)
     {
-        if (IronJawsPvE.CanUse(out act, skipStatusProvideCheck: true) && (IronJawsPvE.Target.Target?.WillStatusEnd(30, true, IronJawsPvE.Setting.TargetStatusProvide ?? []) ?? false))
+        if (IronJawsPvE.CanUse(out act, skipStatusProvideCheck: true) && (IronJawsPvE.Target.Target?.WillStatusEnd(30f, true, IronJawsPvE.Setting.TargetStatusProvide ?? []) ?? false))
         {
             if (InBurst && Player.WillStatusEndGCD(1, 1, true, StatusID.BattleVoice, StatusID.RadiantFinale, StatusID.RagingStrikes) && !BlastArrowPvE.CanUse(out _))
             {
@@ -399,17 +393,20 @@ public sealed class ChurinBRD : BardRotation
 
         private bool TryUseBarrage(out IAction? act)
         {
+            act = null;
             var empyrealArrowReady = EmpyrealArrowPvE.EnoughLevel && Repertoire == 3;
 
             if (!HasRagingStrikes || empyrealArrowReady || HasHawksEye || ShouldEnterSandbagMode())
-                return SetActToNull(out act);
+                return false;
 
             return BarragePvE.CanUse(out act) && EnoughWeaveTime ;
         }
 
         private bool TryUseEmpyrealArrow(out IAction? act)
         {
-            if (ShouldEnterSandbagMode()) return SetActToNull(out act);
+            act = null;
+            if (ShouldEnterSandbagMode()
+                || !EmpyrealArrowPvE.Cooldown.HasOneCharge) return false;
 
             if (EmpyrealArrowPvE.CanUse(out act))
             {
@@ -422,7 +419,7 @@ public sealed class ChurinBRD : BardRotation
                                                         (InMages || InArmys) && EnoughWeaveTime,
                     (SongTiming.Cycle369, Song.Wanderer) =>  HasRagingStrikes && EnoughWeaveTime ||
                                                              RagingStrikesPvE.Cooldown.IsCoolingDown &&
-                                                             !RagingStrikesPvE.Cooldown.WillHaveOneCharge(1) &&
+                                                             !RagingStrikesPvE.Cooldown.WillHaveOneCharge(1f) &&
                                                              EnoughWeaveTime,
                     (SongTiming.Cycle369, Song.Mage) => IsFirstCycle ? EnoughWeaveTime : !SongEndAfter(MageRemainTime),
                     (SongTiming.Cycle369, Song.Army) => EnoughWeaveTime,
@@ -439,11 +436,12 @@ public sealed class ChurinBRD : BardRotation
 
         private bool TryUseWanderers(out IAction? act)
         {
-            if (!TheWanderersMinuetPvE.EnoughLevel ||
-                !EnableSandbagMode && (IsLastAbility(ActionID.ArmysPaeonPvE) ||
-                                       IsLastAbility(ActionID.MagesBalladPvE)))
+            act = null;
+            if (!TheWanderersMinuetPvE.EnoughLevel
+                || !EnableSandbagMode && (IsLastAbility(ActionID.ArmysPaeonPvE)
+                                          || IsLastAbility(ActionID.MagesBalladPvE)))
             {
-                return SetActToNull(out act);
+                return false;
             }
 
             if (NoSong && IsFirstCycle && TheWanderersMinuetPvE.CanUse(out act))
@@ -455,34 +453,36 @@ public sealed class ChurinBRD : BardRotation
                                          WanderersWeave == WandererWeave.Late && CanLateWeave,
                                          _ => false
                 };
+
             if (!IsFirstCycle &&
-                (InArmys && SongEndAfter(ArmyRemainTime) ||
-                 (NoSong && (ArmysPaeonPvE.Cooldown.IsCoolingDown ||
-                             MagesBalladPvE.Cooldown.IsCoolingDown))) &&
-                CanLateWeave)
+                (InArmys && SongEndAfter(ArmyRemainTime)
+                 || (NoSong && (ArmysPaeonPvE.Cooldown.IsCoolingDown
+                                || MagesBalladPvE.Cooldown.IsCoolingDown))) && CanLateWeave)
             {
                 return TheWanderersMinuetPvE.CanUse(out act);
             }
-            return SetActToNull(out act);
+            return false;
         }
 
         private bool TryUseMages(out IAction? act)
         {
-            if (!MagesBalladPvE.EnoughLevel ||
-                !EnableSandbagMode && (IsLastAbility(ActionID.ArmysPaeonPvE) ||
-                                       IsLastAbility(ActionID.TheWanderersMinuetPvE)))
+            act = null;
+            if (!MagesBalladPvE.EnoughLevel
+                || !EnableSandbagMode && (IsLastAbility(ActionID.ArmysPaeonPvE)
+                                          || IsLastAbility(ActionID.TheWanderersMinuetPvE)))
             {
-                return SetActToNull(out act);
+                return false;
             }
 
-            if (MagesBalladPvE.CanUse(out act) && CanLateWeave)
+            if (MagesBalladPvE.CanUse(out act))
             {
-                if (InWanderers && SongEndAfter(WandRemainTime) && (Repertoire == 0 || !HasHostilesInMaxRange) ||
-                    InArmys && SongEndAfterGCD(2) && TheWanderersMinuetPvE.Cooldown.IsCoolingDown ||
-                    NoSong && (TheWanderersMinuetPvE.Cooldown.IsCoolingDown || ArmysPaeonPvE.Cooldown.IsCoolingDown) ||
-                    EnableSandbagMode && SongEndAfter(WandRemainTime))
+                if (InWanderers && SongEndAfter(WandRemainTime - 0.625f)
+                                && (Repertoire == 0 || !HasHostilesInMaxRange || IsLastAbility(ActionID.PitchPerfectPvE))
+                    || InArmys && SongEndAfterGCD(2) && TheWanderersMinuetPvE.Cooldown.IsCoolingDown
+                    || NoSong && (TheWanderersMinuetPvE.Cooldown.IsCoolingDown || ArmysPaeonPvE.Cooldown.IsCoolingDown)
+                    || EnableSandbagMode && SongEndAfter(WandRemainTime))
                 {
-                    return true;
+                    return CanLateWeave;
                 }
 
             }
@@ -492,27 +492,32 @@ public sealed class ChurinBRD : BardRotation
 
         private bool TryUseArmys(out IAction? act)
         {
-            if (!ArmysPaeonPvE.EnoughLevel ||
-                !EnableSandbagMode && (IsLastAbility(ActionID.TheWanderersMinuetPvE) ||
-                                       IsLastAbility(ActionID.MagesBalladPvE)))
+            act = null;
+            if (!ArmysPaeonPvE.EnoughLevel
+                || !EnableSandbagMode && (IsLastAbility(ActionID.TheWanderersMinuetPvE)
+                                          || IsLastAbility(ActionID.MagesBalladPvE)))
             {
-                return SetActToNull(out act);
+                return false;
             }
 
             switch (SongTimings)
             {
                 case SongTiming.Standard or SongTiming.AdjustedStandard or SongTiming.Custom:
-                    if (((InMages && SongEndAfter(MageRemainTime)) ||
-                         (InWanderers && SongEndAfter(2) && MagesBalladPvE.Cooldown.IsCoolingDown) ||
-                         (!TheWanderersMinuetPvE.EnoughLevel && SongEndAfter(2)) ||
-                         (NoSong && (TheWanderersMinuetPvE.Cooldown.IsCoolingDown ||
-                                     MagesBalladPvE.Cooldown.IsCoolingDown))) && CanLateWeave || EnableSandbagMode && InMages && SongEndAfter(MageRemainTime))
+                    if (((InMages && SongEndAfter(MageRemainTime))
+                         || (InWanderers && SongEndAfter(2f) && MagesBalladPvE.Cooldown.IsCoolingDown)
+                         || (!TheWanderersMinuetPvE.EnoughLevel && SongEndAfter(2f))
+                         || (NoSong && (TheWanderersMinuetPvE.Cooldown.IsCoolingDown ||
+                                        MagesBalladPvE.Cooldown.IsCoolingDown))) && CanLateWeave
+                        || EnableSandbagMode && InMages && SongEndAfter(MageRemainTime))
+                    {
                         return ArmysPaeonPvE.CanUse(out act);
+                    }
                     break;
+
                 case SongTiming.Cycle369:
-                    if (!EnableSandbagMode && (InMages && SongEndAfter(MageRemainTime) ||
-                                               (InWanderers && SongEndAfter(2) && MagesBalladPvE.Cooldown.IsCoolingDown) ||
-                                               (!TheWanderersMinuetPvE.EnoughLevel && SongEndAfter(2))))
+                    if (!EnableSandbagMode && (InMages && SongEndAfter(MageRemainTime)
+                                               || (InWanderers && SongEndAfter(2f) && MagesBalladPvE.Cooldown.IsCoolingDown)
+                                               || (!TheWanderersMinuetPvE.EnoughLevel && SongEndAfter(2f))))
                         switch (IsFirstCycle)
                         {
                             case true:
@@ -522,8 +527,11 @@ public sealed class ChurinBRD : BardRotation
                                 if (ArmysPaeonPvE.CanUse(out act)) return true;
                                 break;
                         }
+
                     if (EnableSandbagMode && InMages && SongEndAfter(MageRemainTime))
+                    {
                         return ArmysPaeonPvE.CanUse(out act);
+                    }
 
                     break;
             }
@@ -537,7 +545,8 @@ public sealed class ChurinBRD : BardRotation
 
         private bool TryUseRadiantFinale(out IAction? act)
         {
-            if (!RadiantFinalePvE.EnoughLevel || !RadiantFinalePvE.IsEnabled) return SetActToNull(out act);
+            act = null;
+            if (!RadiantFinalePvE.EnoughLevel || !RadiantFinalePvE.IsEnabled) return false;
 
             switch (SongTimings)
             {
@@ -557,12 +566,13 @@ public sealed class ChurinBRD : BardRotation
                     break;
             }
 
-            return SetActToNull(out act);
+            return false;
         }
 
         private bool TryUseBattleVoice(out IAction? act)
         {
-            if (!BattleVoicePvE.EnoughLevel || !BattleVoicePvE.IsEnabled) return SetActToNull(out act);
+            act = null;
+            if (!BattleVoicePvE.EnoughLevel || !BattleVoicePvE.IsEnabled) return false;
 
             switch (SongTimings)
             {
@@ -595,14 +605,17 @@ public sealed class ChurinBRD : BardRotation
 
         private bool TryUseRagingStrikes(out IAction? act)
         {
-            if ((HasBattleVoice && HasRadiantFinale ||
-                !RadiantFinalePvE.EnoughLevel ||
-                !BattleVoicePvE.EnoughLevel) && CanLateWeave)
+            act = null;
+            if (!RagingStrikesPvE.Cooldown.WillHaveOneCharge(WeaponRemain)) return false;
+
+            if ((HasBattleVoice && HasRadiantFinale
+                 || !RadiantFinalePvE.EnoughLevel
+                 || !BattleVoicePvE.EnoughLevel) && CanLateWeave)
             {
                 return RagingStrikesPvE.CanUse(out act);
             }
 
-            return SetActToNull(out act);
+            return false;
         }
 
         #endregion
@@ -611,41 +624,50 @@ public sealed class ChurinBRD : BardRotation
 
         private bool TryUseHeartBreakShot(out IAction? act)
         {
-            if (ShouldEnterSandbagMode()) return SetActToNull(out act);
+            act = null;
+            if (ShouldEnterSandbagMode() || !HeartbreakShotPvE.Cooldown.HasOneCharge) return false;
 
-            var willHaveMaxCharges = BloodletterPvE.Cooldown.WillHaveXCharges(BloodletterMax, 3);
-            var willHave1ChargeInMages = BloodletterPvE.Cooldown.WillHaveXCharges(1, 7.5f) && InMages;
-            var willHave1ChargeInArmys = BloodletterPvE.Cooldown.WillHaveXCharges(1, 7.5f) && InArmys;
+            var willHaveMaxCharges = HeartbreakShotPvE.Cooldown.WillHaveXCharges(BloodletterMax, WeaponRemain - AnimLock) && WeaponRemain > AnimLock;
+            var willHaveOneCharge = HeartbreakShotPvE.Cooldown.WillHaveOneCharge(WeaponRemain - AnimLock) && WeaponRemain > AnimLock;
 
-            if ((InWanderers && !HasRagingStrikes && BloodletterPvE.Cooldown.CurrentCharges < 3 && !willHaveMaxCharges) ||
-                (InArmys && SongTime <= 30 && BloodletterPvE.Cooldown.CurrentCharges < 3 && !willHaveMaxCharges) ||
-                (InMages && SongEndAfter((float)(MageRemainTime + RecastTime * 0.9))) ||
-                (!NoSong && (EmpyrealArrowPvE.CanUse(out _) || EmpyrealArrowPvE.Cooldown.WillHaveOneCharge(0.5f))))
+            if ((InWanderers && (((!InBurst || !HasRagingStrikes) && BloodletterPvE.Cooldown.CurrentCharges < 3 && !willHaveMaxCharges)
+                || InBurst && (!willHaveOneCharge || IsLastAbility(ActionID.BloodletterPvE, ActionID.RainOfDeathPvE, ActionID.HeartbreakShotPvE))))
+                || (InArmys && SongTime <= 30f && BloodletterPvE.Cooldown.CurrentCharges < 3 && !willHaveMaxCharges)
+                || (InMages && SongEndAfter(MageRemainTime + WeaponTotal * 0.9f))
+                || (!NoSong && (EmpyrealArrowPvE.CanUse(out _) || EmpyrealArrowPvE.Cooldown.WillHaveOneCharge(WeaponTotal))))
             {
-                return SetActToNull(out act);
+                return false;
             }
 
-            if (SongTimings == SongTiming.Cycle369 && NoSong &&
-                HeartbreakShotPvE.CanUse(out act, usedUp: false)) return true;
+            if (SongTimings == SongTiming.Cycle369 && NoSong && HeartbreakShotPvE.CanUse(out act, usedUp: false)) 
+            {
+                return true;
+            }
 
-            if ((InBurst || BloodletterPvE.Cooldown.CurrentCharges < 3 &&
-                    (willHaveMaxCharges || willHave1ChargeInMages || (willHave1ChargeInArmys && SongTime > 30)) ||
-                    IsMedicated) && EnoughWeaveTime)
+            if ((InBurst || IsMedicated || willHaveOneCharge && (InMages || InArmys && SongTime > 30f)) && EnoughWeaveTime)
             {
                 return RainOfDeathPvE.CanUse(out act, usedUp: true) ||
                     HeartbreakShotPvE.CanUse(out act, usedUp: true) ||
                     BloodletterPvE.CanUse(out act, usedUp: true);
             }
-
+            
+            if ((BloodletterPvE.Cooldown.CurrentCharges == BloodletterMax 
+            || willHaveMaxCharges) && EnoughWeaveTime)
+            {
+                return RainOfDeathPvE.CanUse(out act, usedUp: false) 
+                || HeartbreakShotPvE.CanUse(out act, usedUp: false) 
+                || BloodletterPvE.CanUse(out act, usedUp: false);
+            }
             return SetActToNull(out act);
         }
 
         private bool TryUseSideWinder(out IAction? act)
         {
-            if (ShouldEnterSandbagMode()) return SetActToNull(out act);
+            act = null;
+            if (ShouldEnterSandbagMode() || !SidewinderPvE.Cooldown.WillHaveOneCharge(WeaponRemain)) return false;
 
-            var rFWillHaveCharge = RadiantFinalePvE.Cooldown.IsCoolingDown &&RadiantFinalePvE.Cooldown.WillHaveOneCharge(10);
-            var bVWillHaveCharge = BattleVoicePvE.Cooldown.IsCoolingDown && BattleVoicePvE.Cooldown.WillHaveOneCharge(10);
+            var rFWillHaveCharge = RadiantFinalePvE.Cooldown.IsCoolingDown &&RadiantFinalePvE.Cooldown.WillHaveOneCharge(10f);
+            var bVWillHaveCharge = BattleVoicePvE.Cooldown.IsCoolingDown && BattleVoicePvE.Cooldown.WillHaveOneCharge(10f);
 
             if  (InBurst || !RadiantFinalePvE.EnoughLevel ||
                 (!rFWillHaveCharge && !bVWillHaveCharge && RagingStrikesPvE.Cooldown.IsCoolingDown) ||
@@ -657,19 +679,21 @@ public sealed class ChurinBRD : BardRotation
 
         private bool TryUsePitchPerfect(out IAction? act)
         {
-            if (!InBurst && !RagingStrikesPvE.Cooldown.IsCoolingDown || ShouldEnterSandbagMode() || Song != Song.Wanderer) return SetActToNull(out act);
+            act = null;
+            if (!InBurst && !RagingStrikesPvE.Cooldown.IsCoolingDown || ShouldEnterSandbagMode() || Song != Song.Wanderer) return false;
 
             return Repertoire switch
             {
                 3 when PitchPerfectPvE.CanUse(out act) => true,
                 2 when EmpyrealArrowPvE.Cooldown.WillHaveOneChargeGCD(1) && PitchPerfectPvE.CanUse(out act) => true,
-                > 0 when SongEndAfter(WandRemainTime) && SongTime <= WandRemainTime - 0.6f  && PitchPerfectPvE.CanUse(out act) => true,
-                _ => SetActToNull(out act)
+                > 0 when SongEndAfter(WandRemainTime) && SongTime < (WandRemainTime - AnimationLock) && PitchPerfectPvE.CanUse(out act) => true,
+                _ => false
             };
         }
 
         #endregion
-    #endregion
+
+        #endregion
 
     #region Miscellaneous
 
@@ -687,80 +711,59 @@ public sealed class ChurinBRD : BardRotation
                     !IsFirstCycle && !BattleVoicePvE.Cooldown.HasOneCharge && !RagingStrikesPvE.Cooldown.HasOneCharge);
         }
 
-        private bool TryUsePotion(out IAction? act)
+    /// <summary>
+    /// BRD-specific potion manager that extends base potion logic with job-specific conditions.
+    /// </summary>
+    private class ChurinBRDPotions : Potions
+    {
+        public override bool IsConditionMet()
         {
-            act = null;
-
-            for (var i = 0; i < _potions.Count; i++)
+            if (IsFirstCycle)
             {
-                var (time, enabled, used) = _potions[i];
-                if (!enabled || used) continue;
-
-                var potionTimeInSeconds = time * 60;
-                var isEarlyPotion = potionTimeInSeconds == 0 && OpenerPotionTime > 0;
-                var isOpenerPotion = potionTimeInSeconds == 0 && OpenerPotionTime == 0;
-
-                bool canUse;
-                if (isEarlyPotion)
+                switch (ChurinBRD.OpenerPotionTime)
                 {
-                    canUse = !InCombat && Countdown.TimeRemaining <= OpenerPotionTime;
+                    case > 0f:
+                    case 0f when InWanderers && TargetHasDoTs:
+                        return true;
                 }
-                else if (isOpenerPotion)
+            }
+            else
+            {
+                if (InWanderers && HasBattleVoice && HasRadiantFinale)
                 {
-                    canUse = InCombat && IsFirstCycle && !CombatElapsedLessGCD(2);
-                }
-                else
-                {
-                    canUse = InCombat && CombatTime >= potionTimeInSeconds && CombatTime <= potionTimeInSeconds + 59;
+                    return true;
                 }
 
-                if (IsMedicated && canUse)
+                if (InOddMinuteWindow)
                 {
-                    _potions[i] = (time, enabled, true);
-                    continue;
-                }
-
-                if (!canUse) continue;
-
-                var condition =  isOpenerPotion || InTwoMinuteWindow || InOddMinuteWindow;
-
-                if (condition && UseBurstMedicine(out act, false))
-                {
-                    _potions[i] = (time, enabled, true);
                     return true;
                 }
             }
             return false;
         }
 
-    private PotionTimings _lastPotionTiming;
-    private int _lastFirst, _lastSecond, _lastThird;
-
-    private void UpdatePotions()
-    {
-        if (_lastPotionTiming != PotionTiming ||
-            _lastFirst != CustomFirstPotionTime ||
-            _lastSecond != CustomSecondPotionTime ||
-            _lastThird != CustomThirdPotionTime)
+        protected override bool IsTimingValid(float timing)
         {
-            var oldPotions = new List<(int Time, bool Enabled, bool Used)>(_potions);
+            if (timing > 0 && (DataCenter.CombatTimeRaw >= timing) && ((DataCenter.CombatTimeRaw - timing) <= TimingWindowSeconds))
+            {
+                return true;
+            }
 
-            InitializePotions();
+            // Check opener timing: if it's an opener potion and countdown is within configured time
+            float countDown = Service.CountDownTime;
 
-            // Merge used state if in combat
-            if (InCombat)
-                for (var i = 0; i < _potions.Count; i++)
+            if (IsOpenerPotion(timing))
+            {
+                if (ChurinBRD.OpenerPotionTime == 0f)
                 {
-                    var (time, enabled, _) = _potions[i];
-                    var old = oldPotions.FirstOrDefault(p => p.Time == time);
-                    if (old.Time == time)
-                        _potions[i] = (time, enabled, old.Used);
+                    return IsFirstCycle && InWanderers;
                 }
-
-            _lastPotionTiming = PotionTiming;
-            _lastFirst = CustomFirstPotionTime;
-            _lastSecond = CustomSecondPotionTime;
-            _lastThird = CustomThirdPotionTime;
+                else
+                {
+                    return countDown > 0f && countDown <= ChurinBRD.OpenerPotionTime; 
+                }
+            }
+            return false;
         }
     }
 

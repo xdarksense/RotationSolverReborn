@@ -3,7 +3,6 @@ namespace RotationSolver.RebornRotations.Melee;
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.35")]
 [SourceCode(Path = "main/RebornRotations/Melee/NIN_Reborn.cs")]
 
-
 public sealed class NIN_Reborn : NinjaRotation
 {
     #region Config Options
@@ -17,6 +16,9 @@ public sealed class NIN_Reborn : NinjaRotation
 
     [RotationConfig(CombatType.PvE, Name = "Use Mudras outside of combat when enemies are near")]
     public bool CombatMudra { get; set; } = true;
+
+    [RotationConfig(CombatType.PvE, Name = "Use both stacks of Mudras")]
+    public bool BurnMudraStacks { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Use Forked Raiju instead of Fleeting Raiju if you are outside of range (Dangerous)")]
     public bool ForkedUse { get; set; } = false;
@@ -239,20 +241,13 @@ public sealed class NIN_Reborn : NinjaRotation
         if (InTrickAttack)
         {
             // If Dream Within A Dream is not yet available, checks if Assassinate can be used.
-            if (!DreamWithinADreamPvE.EnoughLevel)
+            if (DreamWithinADreamPvE.CanUse(out act))
             {
-                if (AssassinatePvE.CanUse(out act))
-                {
-                    return true;
-                }
+                return true;
             }
-            else if (DreamWithinADreamPvE.EnoughLevel)
+            if (!DreamWithinADreamPvE.Info.EnoughLevelAndQuest() && AssassinatePvE.CanUse(out act))
             {
-                // If Dream Within A Dream is available, it's set as the next action.
-                if (DreamWithinADreamPvE.CanUse(out act))
-                {
-                    return true;
-                }
+                return true;
             }
         }
 
@@ -361,7 +356,7 @@ public sealed class NIN_Reborn : NinjaRotation
                 SetNinjutsu(RaitonPvE);
             }
         }
-        else if (TenPvE.CanUse(out _, usedUp: ShadowWalkerNeeded || InTrickAttack || TenPvE.Cooldown.WillHaveXChargesGCD(2, 2, 0)) && _ninActionAim == null)
+        else if (TenPvE.CanUse(out _, usedUp: ShadowWalkerNeeded || InTrickAttack || TenPvE.Cooldown.WillHaveXChargesGCD(2, 2, 0) || BurnMudraStacks) && _ninActionAim == null)
         {
             //Vulnerable
             if (ShadowWalkerNeeded && (!MeisuiPvE.Cooldown.IsCoolingDown || !TrickAttackPvE.Cooldown.IsCoolingDown || KunaisBanePvE.Cooldown.IsCoolingDown) && !IsShadowWalking && !HasTenChiJin && SuitonPvE.EnoughLevel)

@@ -27,6 +27,17 @@ public class ActionConfig()
         set => _isIntercepted = value;
     }
 
+    private bool _isRestrictedDOT = false;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool IsRestrictedDOT
+    {
+        get => _isRestrictedDOT;
+        set => _isRestrictedDOT = value;
+    }
+
     /// <summary>
     /// Should check the status for this action.
     /// </summary>
@@ -98,6 +109,16 @@ public class ActionConfig()
     /// Is this action in the cd window.
     /// </summary>
     public bool IsOnCooldownWindow { get; set; } = true;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public bool MinHPFeature { get; set; } = false;
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public float MinHPPercent { get; set; } = 0.2f;
 
     /// <summary>
     /// One-time flag to indicate the AOE-count reset has been applied.

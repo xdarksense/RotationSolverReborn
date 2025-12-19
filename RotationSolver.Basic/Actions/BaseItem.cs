@@ -1,6 +1,5 @@
 ﻿using ECommons.GameHelpers;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using Lumina.Excel.Sheets;
 
 namespace RotationSolver.Basic.Actions;
@@ -91,12 +90,39 @@ public class BaseItem : IBaseItem
     }
 
     /// <summary>
+    /// 
+    /// </summary>
+    public bool IsRestrictedDOT
+    {
+        get => Config.IsRestrictedDOT;
+        set => Config.IsRestrictedDOT = value;
+    }
+
+    /// <summary>
     /// Is the item in the cd window.
     /// </summary>
     public bool IsOnCooldownWindow
     {
         get => Config.IsOnCooldownWindow;
         set => Config.IsOnCooldownWindow = value;
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether this action is restricted by min HP.
+    /// </summary>
+    public bool MinHPFeature
+    {
+        get => Config.MinHPFeature;
+        set => Config.MinHPFeature = value;
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public float MinHPPercent
+    {
+        get => Config.MinHPPercent;
+        set => Config.MinHPPercent = value;
     }
 
     /// <summary>

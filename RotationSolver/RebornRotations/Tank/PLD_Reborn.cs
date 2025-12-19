@@ -3,13 +3,15 @@
 [Rotation("Reborn", CombatType.PvE, GameVersion = "7.35")]
 [SourceCode(Path = "main/RebornRotations/Tank/PLD_Reborn.cs")]
 
-
 public sealed class PLD_Reborn : PaladinRotation
 {
     #region Config Options
 
     [RotationConfig(CombatType.PvE, Name = "Use GCDs to heal. (Ignored if there are no healers alive in party)")]
     public bool GCDHeal { get; set; } = false;
+
+    [RotationConfig(CombatType.PvE, Name = "Use Divine Veil during countdown")]
+    public bool DivineVeilCountdown { get; set; } = false;
 
     [RotationConfig(CombatType.PvE, Name = "Only use Fight or Flight while in melee range of an enemy")]
     public bool MeleeFoF { get; set; } = true;
@@ -76,7 +78,7 @@ public sealed class PLD_Reborn : PaladinRotation
             return act;
         }
 
-        if (remainTime < 15 && DivineVeilPvE.CanUse(out act))
+        if (DivineVeilCountdown && remainTime < 15 && DivineVeilPvE.CanUse(out act))
         {
             return act;
         }
@@ -251,13 +253,18 @@ public sealed class PLD_Reborn : PaladinRotation
             }
 
             // If Rampart is not cooling down or has been cooling down for more than 60 seconds, and Sentinel can be used, use Sentinel and return true.
-            if ((!RampartPvE.Cooldown.IsCoolingDown || RampartPvE.Cooldown.ElapsedAfter(60)) && SentinelPvE.CanUse(out act))
+            if ((!RampartPvE.Cooldown.IsCoolingDown || RampartPvE.Cooldown.ElapsedAfter(60)) && GuardianPvE.CanUse(out act) && GuardianPvE.EnoughLevel)
+            {
+                return true;
+            }
+
+            if ((!RampartPvE.Cooldown.IsCoolingDown || RampartPvE.Cooldown.ElapsedAfter(60)) && SentinelPvE.CanUse(out act) && !GuardianPvE.EnoughLevel)
             {
                 return true;
             }
 
             // If Sentinel is at an enough level and is cooling down for more than 60 seconds, or if Sentinel is not at an enough level, and Rampart can be used, use Rampart and return true.
-            if (((SentinelPvE.EnoughLevel && SentinelPvE.Cooldown.IsCoolingDown && SentinelPvE.Cooldown.ElapsedAfter(60)) || !SentinelPvE.EnoughLevel) && RampartPvE.CanUse(out act))
+            if (((GuardianPvE.EnoughLevel && GuardianPvE.Cooldown.IsCoolingDown && GuardianPvE.Cooldown.ElapsedAfter(60)) || (!GuardianPvE.EnoughLevel && SentinelPvE.EnoughLevel && SentinelPvE.Cooldown.IsCoolingDown && SentinelPvE.Cooldown.ElapsedAfter(60)) || !SentinelPvE.EnoughLevel) && RampartPvE.CanUse(out act))
             {
                 return true;
             }
@@ -315,12 +322,12 @@ public sealed class PLD_Reborn : PaladinRotation
             return true;
         }
 
-        if (ExpiacionPvE.CanUse(out act, skipAoeCheck: true) && FightOrFlightPvE.Cooldown.IsCoolingDown && (ImperatorPvE.EnoughLevel && ImperatorPvE.Cooldown.IsCoolingDown || !ImperatorPvE.EnoughLevel))
+        if (ExpiacionPvE.EnoughLevel && ExpiacionPvE.CanUse(out act, skipAoeCheck: true) && FightOrFlightPvE.Cooldown.IsCoolingDown && (ImperatorPvE.EnoughLevel && ImperatorPvE.Cooldown.IsCoolingDown || !ImperatorPvE.EnoughLevel))
         {
             return true;
         }
 
-        if (SpiritsWithinPvE.CanUse(out act, skipAoeCheck: true) && FightOrFlightPvE.Cooldown.IsCoolingDown && (ImperatorPvE.EnoughLevel && ImperatorPvE.Cooldown.IsCoolingDown || !ImperatorPvE.EnoughLevel))
+        if (!ExpiacionPvE.EnoughLevel && SpiritsWithinPvE.CanUse(out act, skipAoeCheck: true) && FightOrFlightPvE.Cooldown.IsCoolingDown && (ImperatorPvE.EnoughLevel && ImperatorPvE.Cooldown.IsCoolingDown || !ImperatorPvE.EnoughLevel))
         {
             return true;
         }
@@ -339,10 +346,9 @@ public sealed class PLD_Reborn : PaladinRotation
     [RotationDesc(ActionID.ClemencyPvE)]
     protected override bool HealSingleGCD(out IAction? act)
     {
-        act = null;
         if (PassageProtec && Player.HasStatus(true, StatusID.PassageOfArms))
         {
-            return false;
+            return base.HealSingleGCD(out act);
         }
 
         if (RequiescatHealBot && RequiescatStacks > 0 && ClemencyPvE.CanUse(out act, skipCastingCheck: true) && ClemencyPvE.Target.Target?.GetHealthRatio() < ClemencyRequi)
@@ -402,7 +408,7 @@ public sealed class PLD_Reborn : PaladinRotation
 
         if (((!HasAtonementReady && (SepulchreReady || SupplicationReady || HasDivineMight)) ||
              (HasAtonementReady && !HasDivineMight)) &&
-            !Player.HasStatus(true, StatusID.Medicated) && !HasFightOrFlight && !RageOfHalonePvE.CanUse(out act, skipComboCheck: false))
+            !Player.HasStatus(true, StatusID.Medicated) && !HasFightOrFlight && !RageOfHalonePvE.CanUse(out _, skipComboCheck: false))
         {
             if (!TotalEclipsePvE.CanUse(out _) && (RiotBladePvE.CanUse(out act) || FastBladePvE.CanUse(out act)))
             {
@@ -451,7 +457,11 @@ public sealed class PLD_Reborn : PaladinRotation
             return true;
         }
 
-        if (RageOfHalonePvE.CanUse(out act))
+        if (RoyalAuthorityPvE.CanUse(out act))
+        {
+            return true;
+        }
+        if (!RoyalAuthorityPvE.Info.EnoughLevelAndQuest() && RageOfHalonePvE.CanUse(out act))
         {
             return true;
         }
@@ -491,12 +501,12 @@ public sealed class PLD_Reborn : PaladinRotation
             return true;
         }
 
-        if (HolySheltronPvE.CanUse(out act))
+        if (HolySheltronPvE.CanUse(out act) && HolySheltronPvE.EnoughLevel)
         {
             return true;
         }
 
-        if (SheltronPvE.CanUse(out act))
+        if (SheltronPvE.CanUse(out act) && !HolySheltronPvE.EnoughLevel)
         {
             return true;
         }

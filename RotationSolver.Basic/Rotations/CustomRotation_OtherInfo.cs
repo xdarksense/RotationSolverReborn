@@ -1,4 +1,5 @@
 ﻿using Dalamud.Game;
+using Dalamud.Game.ClientState.JobGauge.Enums;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Plugin.Services;
 using ECommons.DalamudServices;
@@ -114,8 +115,16 @@ public partial class CustomRotation
     }
 
     /// <summary>
-    ///
+    /// Determines whether the player has any active buffs or the hostile target has any active debuffs from the predefined list of status effects.
+    /// <para>This property first populates the <see cref="Buffs"/> list by calling <see cref="StatusList"/> to ensure it reflects the current party composition or player's job.</para>
+    /// <para>It checks for buffs on the player: if the player exists, it verifies that all buff-type statuses in <see cref="Buffs"/> are currently active on the player and not about to end.</para>
+    /// <para>It checks for debuffs on the hostile target: if a hostile target exists, it verifies that all debuff-type statuses in <see cref="Buffs"/> are currently active on the target and not about to end.</para>
+    /// <para>In the context of FFXIV rotation solving, this helps determine if beneficial status effects (buffs) are maintained on the player or if detrimental effects (debuffs) are applied to the target, influencing rotation decisions.</para>
     /// </summary>
+    /// <returns>
+    /// <c>true</c> if the player has all relevant buffs active (or if no player is present but buffs are defined) or if the hostile target has all relevant debuffs active; otherwise, <c>false</c>.
+    /// <para>Note: Returns <c>false</c> if <see cref="Buffs"/> is empty after population.</para>
+    /// </returns>
     public static bool HasBuffs
     {
         get
@@ -165,13 +174,56 @@ public partial class CustomRotation
         }
     }
 
+        /// <summary>
+        /// Gets the duration (remaining time in seconds) of the status effect (buff or debuff) that will expire last among all active ones.
+        /// </summary>
+        public static float PartyBuffDuration
+        {
+            get
+            {
+                StatusList();
+
+                if (Buffs.Count == 0) return 0;
+
+                float maxDuration = 0;
+                foreach (var buff in Buffs)
+                {
+                    if (buff.Type == StatusType.Buff)
+                    {
+                        if (Player == null) continue;
+                        if (!Player.HasStatus(false, buff.Ids)) continue;
+
+                        float remaining = Player.StatusTime(true, buff.Ids[0]);
+                        if (remaining > maxDuration) maxDuration = remaining;
+                    }
+                    else if (buff.Type == StatusType.Debuff)
+                    {
+                        if (HostileTarget == null) continue;
+                        if (!HostileTarget.HasStatus(false, buff.Ids)) continue;
+
+                        float remaining = HostileTarget.StatusTime(true, buff.Ids[0]);
+                        if (remaining > maxDuration) maxDuration = remaining;
+                    }
+                }
+
+                return maxDuration;
+            }
+        }
+    
+
     /// <summary>
-    ///
+    /// Gets the static list of status effects (buffs and debuffs) that are relevant to the current rotation configuration.
+    /// <para>This list is populated by <see cref="StatusList"/> based on the party composition or the player's current job, and is used to track which status effects should be monitored for activation on the player (buffs) or hostile target (debuffs).</para>
     /// </summary>
     public static List<StatusInfo> Buffs { get; } = [];
 
     /// <summary>
-    ///
+    /// Populates the <see cref="Buffs"/> list with status effects (buffs and debuffs) based on the current party composition or the player's job.
+    /// <para>This method clears any existing entries in <see cref="Buffs"/> and rebuilds the list to reflect the jobs present in the party or the solo player's job.</para>
+    /// <para>If <see cref="PartyComposition"/> is null (indicating a solo scenario), it adds buffs specific to the player's current job abbreviation.</para>
+    /// <para>If <see cref="PartyComposition"/> is available, it iterates through each party member's job and adds relevant buffs, avoiding duplicates via a processed jobs set.</para>
+    /// <para>The <see cref="AddJobBuffs"/> method is called for each unique job abbreviation to append appropriate <see cref="StatusInfo"/> entries to <see cref="Buffs"/>.</para>
+    /// <para>This ensures that <see cref="Buffs"/> contains only the status effects pertinent to the current group setup.</para>
     /// </summary>
     public static void StatusList()
     {
@@ -453,7 +505,17 @@ public partial class CustomRotation
         // Helper to lazily test & cache a status.
         bool HasPartyStatus(StatusID id)
         {
-            if (partyStatuses.Contains(id)) return true;
+            bool haspartyStatuses = false;
+            foreach (var status in partyStatuses)
+            {
+                if (status == id)
+                {
+                    haspartyStatuses = true;
+                    break;
+                }
+            }
+            if (haspartyStatuses) return true;
+
             if (partyEnum != null)
             {
                 foreach (var m in partyEnum)
@@ -828,7 +890,7 @@ public partial class CustomRotation
                 return false;
 
             // Finally, attempt to use the burst medicine
-            return rotation.UseBurstMedicine(out act);
+            return IsConditionMet() && CanUseAtTime() && rotation.UseBurstMedicine(out act);
         }
 
         /// <summary>

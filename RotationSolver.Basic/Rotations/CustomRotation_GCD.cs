@@ -24,6 +24,11 @@ public partial class CustomRotation
 
         IBaseAction.ForceEnable = false;
 
+        if ((Service.Config.LagMitigation || Player.HasStatus(true, StatusID.Mudra)) && DataCenter.DefaultGCDRemain >= 0.625f)
+        {
+            return null;
+        }
+
         try
         {
             IBaseAction.ShouldEndSpecial = false;
@@ -185,7 +190,7 @@ public partial class CustomRotation
                 if (DataCenter.CurrentDutyRotation?.HealAreaGCD(out act) == true)
                     return act;
 
-                if (!Player.HasStatus(false, StatusID.Scalebound) && !Player.HasStatus(false, StatusID.ShackledHealing))
+                if (!Player.HasStatus(false, StatusID.Scalebound) && (!Player.HasStatus(false, StatusID.ShackledHealing) || Player.HasStatus(false, StatusID.ShackledHealing) && DataCenter.NumberOfPartyMembersInRangeOf(21) == 1))
                 {
                     if (HealAreaGCD(out IAction? action))
                     {
@@ -205,7 +210,7 @@ public partial class CustomRotation
 
                 if (CanHealAreaSpell)
                 {
-                    if (!Player.HasStatus(false, StatusID.Scalebound) && !Player.HasStatus(false, StatusID.ShackledHealing))
+                    if (!Player.HasStatus(false, StatusID.Scalebound) && (!Player.HasStatus(false, StatusID.ShackledHealing) || Player.HasStatus(false, StatusID.ShackledHealing) && DataCenter.NumberOfPartyMembersInRangeOf(21) == 1))
                     {
                         if (HealAreaGCD(out IAction? action))
                         {
@@ -223,7 +228,7 @@ public partial class CustomRotation
                 if (DataCenter.CurrentDutyRotation?.HealSingleGCD(out act) == true)
                     return act;
 
-                if (!Player.HasStatus(false, StatusID.Scalebound) && !Player.HasStatus(false, StatusID.ShackledHealing))
+                if (!Player.HasStatus(false, StatusID.Scalebound) && (!Player.HasStatus(false, StatusID.ShackledHealing) || Player.HasStatus(false, StatusID.ShackledHealing) && DataCenter.NumberOfPartyMembersInRangeOf(21) == 1))
                 {
                     if (HealSingleGCD(out IAction? action))
                     {
@@ -246,7 +251,7 @@ public partial class CustomRotation
 
                 if (CanHealSingleSpell)
                 {
-                    if (!Player.HasStatus(false, StatusID.Scalebound) && !Player.HasStatus(false, StatusID.ShackledHealing))
+                    if (!Player.HasStatus(false, StatusID.Scalebound) && (!Player.HasStatus(false, StatusID.ShackledHealing) || Player.HasStatus(false, StatusID.ShackledHealing) && DataCenter.NumberOfPartyMembersInRangeOf(21) == 1))
                     {
                         if (HealSingleGCD(out IAction? action))
                         {

@@ -110,7 +110,7 @@ internal static class ActionUpdater
         {
             _startCombatTime = DateTime.MinValue;
 
-            if (Service.Config.AutoOffAfterCombat)
+            if (Service.Config.AutoOffAfterCombat && !DataCenter.IsHenched && !DataCenter.IsAutoDuty)
             {
                 AutoCancelTime = now.AddSeconds(Service.Config.AutoOffAfterCombatTime);
             }
@@ -233,7 +233,7 @@ internal static class ActionUpdater
         _lastMP = player.CurrentMp;
     }
 
-internal static unsafe bool CanDoAction()
+    internal static unsafe bool CanDoAction()
     {
         // In Target-Only mode we never perform actions.
         if (DataCenter.IsTargetOnly)
@@ -289,7 +289,7 @@ internal static unsafe bool CanDoAction()
 
     private unsafe static bool IsPlayerOccupied()
     {
-        if (Svc.ClientState.LocalPlayer?.IsTargetable != true)
+        if (Svc.Objects.LocalPlayer?.IsTargetable != true)
         {
             return true;
         }
@@ -328,7 +328,7 @@ internal static unsafe bool CanDoAction()
 
     private static void LogError(string message, Exception ex)
     {
-        WarningHelper.AddSystemWarning($"{message} because: {ex.Message}");
+        BasicWarningHelper.AddSystemWarning($"{message} because: {ex.Message}");
         PluginLog.Error($"{message} because: {ex.Message}");
     }
 }

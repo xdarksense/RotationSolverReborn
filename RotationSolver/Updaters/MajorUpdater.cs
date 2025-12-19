@@ -147,7 +147,7 @@ internal static class MajorUpdater
             {
                 TargetUpdater.UpdateTargets();
             }
-            if (!DataCenter.IsActivated())
+            if (!_isActivatedThisCycle)
                 return;
 
             bool canDoAction = ActionUpdater.CanDoAction();
@@ -160,14 +160,11 @@ internal static class MajorUpdater
 
             MacroUpdater.UpdateMacro();
 
-            if (!autoOnEnabled)
-            {
-                TargetUpdater.UpdateTargets();
-            }
+            TargetUpdater.UpdateTargets();
 
             StateUpdater.UpdateState();
 
-ActionUpdater.UpdateNextAction();
+            ActionUpdater.UpdateNextAction();
 
             // In Target-Only mode, update the player's target from the computed next action without executing it.
             if (DataCenter.IsTargetOnly)
@@ -357,7 +354,15 @@ ActionUpdater.UpdateNextAction();
 
                         if (closestEnemy != null)
                         {
-                            Svc.Targets.Target = closestEnemy;
+                            if (!Service.Config.TargetDelayEnable)
+                            {
+                                Svc.Targets.Target = closestEnemy;
+                            }
+                            // Respect TargetDelay before auto-targeting the closest enemy
+                            if (Service.Config.TargetDelayEnable)
+                            {
+                                RSCommands.SetTargetWithDelay(closestEnemy);
+                            }
                             PluginLog.Information($"Targeting {closestEnemy}");
                         }
                     }
