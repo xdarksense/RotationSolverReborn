@@ -1,5 +1,6 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.Config;
+using ECommons;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices;
 using ECommons.GameHelpers;
@@ -68,10 +69,35 @@ internal static class DataCenter
 
     public static bool PlayerAvailable()
     {
-        return Player.Available;
+        return Player.Available && Player.Object != null;
     }
 
-    public static bool AutoFaceTargetOnActionSetting()
+	public static bool DalamudStagingEnabled = false;
+	public static bool IsOnStaging()
+	{
+		try
+		{
+			var v = Svc.PluginInterface.GetDalamudVersion();
+			if (v.BetaTrack != null && v.BetaTrack.Equals("release", StringComparison.CurrentCultureIgnoreCase))
+			{
+				DalamudStagingEnabled = false;
+				return false;
+			}
+			else
+			{
+				DalamudStagingEnabled = true;
+				return true;
+			}
+		}
+		catch (Exception ex)
+		{
+			ex.Log("Probably CN or something");
+			DalamudStagingEnabled = false;
+			return false;
+		}
+	}
+
+	public static bool AutoFaceTargetOnActionSetting()
     {
         return Svc.GameConfig.UiControl.GetBool(UiControlOption.AutoFaceTargetOnAction.ToString());
     }
@@ -463,7 +489,7 @@ internal static class DataCenter
     /// Determines if the current content is Bozjan Southern Front CE or Zadnor CE.
     /// </summary>
     public static bool IsInBozjanFieldOpCE => IsInBozjanFieldOp
-        && Player.Object.HasStatus(false, StatusID.DutiesAsAssigned);
+        && StatusHelper.PlayerHasStatus(false, StatusID.DutiesAsAssigned);
 
     /// <summary>
     /// Determines if the current content is Delubrum Reginae.
@@ -495,7 +521,7 @@ internal static class DataCenter
     /// Determines if the current content is Forked Tower.
     /// </summary>
     public static bool IsInForkedTower => IsInOccultCrescentOp
-        && Player.Object.HasStatus(false, StatusID.DutiesAsAssigned_4228);
+        && StatusHelper.PlayerHasStatus(false, StatusID.DutiesAsAssigned_4228);
     #endregion
 
     #region Variant Dungeon
@@ -1279,14 +1305,19 @@ internal static class DataCenter
                 return false;
             }
 
-            // For x6fe, ignore target and player role checks.
-            if (s.Path.StartsWith("vfx/lockon/eff/x6fe"))
+			if (Player.Object == null)
+			{
+				return false;
+			}
+
+			// For x6fe, ignore target and player role checks.
+			if (s.Path.StartsWith("vfx/lockon/eff/x6fe"))
             {
                 return true;
             }
 
             // Preserve original checks for other tank lock-on effects.
-            return (!Player.Object.IsJobCategory(JobRole.Tank) || s.ObjectId == Player.Object.GameObjectId)
+            return (!TargetFilter.PlayerJobCategory(JobRole.Tank) || s.ObjectId == Player.Object.GameObjectId)
                    && (s.Path.StartsWith("vfx/lockon/eff/tank_lockon")
                        || s.Path.StartsWith("vfx/lockon/eff/tank_laser"));
         });

@@ -100,9 +100,38 @@ public sealed class RDM_Reborn : RedMageRotation
         return base.DefenseAreaAbility(nextGCD, out act);
     }
 
-    protected override bool AttackAbility(IAction nextGCD, out IAction? act)
+	protected override bool EmergencyAbility(IAction nextGCD, out IAction? act)
+	{
+		bool AnyoneInMeleeRange = NumberOfHostilesInRangeOf(3) > 0;
+
+		if (!AnyonesMeleeRule)
+		{
+			if (IsBurst && InCombat && HasHostilesInRange && EmboldenPvE.CanUse(out act))
+			{
+				return true;
+			}
+		}
+		else if (AnyonesMeleeRule)
+		{
+			if (IsBurst && InCombat && AnyoneInMeleeRange && EmboldenPvE.CanUse(out act))
+			{
+				return true;
+			}
+		}
+
+		if (HasEmbolden || IsLastAbility(ActionID.EmboldenPvE))
+		{
+			if (ManaficationPvE.CanUse(out act))
+			{
+				return true;
+			}
+		}
+
+		return base.EmergencyAbility(nextGCD, out act);
+	}
+
+	protected override bool AttackAbility(IAction nextGCD, out IAction? act)
     {
-        bool AnyoneInRange = NumberOfHostilesInRangeOf(3) > 0;
         bool Meleecheck = nextGCD.IsTheSameTo(true, ActionID.RipostePvE, ActionID.ZwerchhauPvE, ActionID.RedoublementPvE, ActionID.MoulinetPvE, ActionID.ReprisePvE);
 
         act = null;
@@ -172,32 +201,6 @@ public sealed class RDM_Reborn : RedMageRotation
         if (FlechePvE.CanUse(out act))
         {
             return true;
-        }
-
-        if (!AnyonesMeleeRule)
-        {
-            if (IsBurst && InCombat && HasHostilesInRange && EmboldenPvE.CanUse(out act))
-            {
-                return true;
-            }
-        }
-        else if (AnyonesMeleeRule)
-        {
-            if (IsBurst && InCombat && AnyoneInRange && EmboldenPvE.CanUse(out act))
-            {
-                return true;
-            }
-        }
-
-        if (HasEmbolden || IsLastAbility(ActionID.EmboldenPvE))
-        {
-            if (!IsLastComboAction(ActionID.RipostePvE, ActionID.ZwerchhauPvE))
-            {
-                if (ManaficationPvE.CanUse(out act))
-                {
-                    return true;
-                }
-            }
         }
 
         if (PrefulgencePvE.CanUse(out act))
@@ -368,25 +371,40 @@ public sealed class RDM_Reborn : RedMageRotation
             return true;
         }
 
-        if (EnchantedRedoublementPvE.CanUse(out act))
+		if (EnchantedRedoublementPvE_45962.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (EnchantedRedoublementPvE.CanUse(out act))
         {
             return true;
         }
 
-        if (EnchantedZwerchhauPvE.CanUse(out act))
+		if (EnchantedZwerchhauPvE_45961.CanUse(out act))
+		{
+			return true;
+		}
+
+		if (EnchantedZwerchhauPvE.CanUse(out act))
         {
             return true;
         }
 
-        //Check if you can start melee combo
-        if ((EnoughManaCombo || CanMagickedSwordplay) && (!CanVerBoth || !ManaStackTrait.EnoughLevel))
+		//Check if you can start melee combo
+		if (EnoughManaCombo || CanMagickedSwordplay)
         {
             if (EnchantedMoulinetPvE.CanUse(out act))
             {
                 return true;
             }
-            
-            if (EnchantedRipostePvE.CanUse(out act))
+
+			if (EnchantedRipostePvE_45960.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (EnchantedRipostePvE.CanUse(out act))
             {
                 return true;
             }
