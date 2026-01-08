@@ -5,6 +5,7 @@ using ECommons.GameHelpers;
 using ECommons.Logging;
 using Lumina.Excel.Sheets;
 using RotationSolver.Commands;
+using RotationSolver.IPC;
 using RotationSolver.UI.HighlightTeachingMode;
 using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureHotbarModule;
 
@@ -136,10 +137,10 @@ internal static class MajorUpdater
         if (!_shouldRunThisCycle)
             return;
 
-        var autoOnEnabled = Service.Config.StartOnAllianceIsInCombat 
-            || Service.Config.StartOnAttackedBySomeone 
-            || Service.Config.StartOnFieldOpInCombat 
-            || Service.Config.StartOnPartyIsInCombat;
+        var autoOnEnabled = Service.Config.StartOnAllianceIsInCombat2 
+            || Service.Config.StartOnAttackedBySomeone2 
+            || Service.Config.StartOnFieldOpInCombat2 
+            || Service.Config.StartOnPartyIsInCombat2;
 
         try
         {
@@ -173,7 +174,8 @@ internal static class MajorUpdater
             }
 
             ActionSequencerUpdater.UpdateActionSequencerAction();
-        }
+			Wrath_IPCSubscriber.DisableAutoRotation();
+		}
         catch (Exception ex)
         {
             LogOnce("RSRUpdate DC Exception", ex);
@@ -214,16 +216,18 @@ internal static class MajorUpdater
             }
         }
 
-        // Apply reddening of disabled actions on hotbars alongside highlight
-        try
-        {
-            HotbarDisabledColor.ApplyFrame();
-        }
-        catch (Exception ex)
-        {
-            LogOnce("Hotbar Disabled Redden Exception", ex);
-        }
-
+		// Apply reddening of disabled actions on hotbars alongside highlight
+		if (Service.Config.ReddenDisabledHotbarActions)
+		{
+			try
+			{
+				HotbarDisabledColor.ApplyFrame();
+			}
+			catch (Exception ex)
+			{
+				LogOnce("Hotbar Disabled Redden Exception", ex);
+			}
+		}
     }
 
 	private static void RSRCommonUpdate(IFramework framework)
@@ -328,7 +332,7 @@ internal static class MajorUpdater
         {
             MiscUpdater.UpdateMisc();
 
-            if (Service.Config.TargetFreely && !DataCenter.IsPvP)
+            if (Service.Config.TargetFreely && !DataCenter.IsPvP && DataCenter.State)
             {
                 IAction? nextAction2 = ActionUpdater.NextAction;
                 if (nextAction2 == null)

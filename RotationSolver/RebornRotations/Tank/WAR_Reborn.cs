@@ -182,7 +182,7 @@ public sealed class WAR_Reborn : WarriorRotation
         return base.GeneralAbility(nextGCD, out act);
     }
 
-    [RotationDesc(ActionID.ShakeItOffPvE, ActionID.ReprisalPvE)]
+    [RotationDesc(ActionID.ShakeItOffPvE)]
     protected override bool HealSingleAbility(IAction nextGCD, out IAction? act)
     {
         if (ShakeItOffPvE.CanUse(out act, skipAoeCheck: true))
@@ -219,10 +219,18 @@ public sealed class WAR_Reborn : WarriorRotation
             return true;
         }
 
-        if ((!RampartPvE.Cooldown.IsCoolingDown || RampartPvE.Cooldown.ElapsedAfter(60)) && VengeancePvE.CanUse(out act))
+        if ((!RampartPvE.Cooldown.IsCoolingDown || RampartPvE.Cooldown.ElapsedAfter(60)) && !StatusHelper.PlayerHasStatus(true, StatusID.ArmsLength))
         {
-            return true;
-        }
+			if (DamnationPvE.EnoughLevel && DamnationPvE.CanUse(out act))
+			{
+				return true;
+			}
+
+			if (!DamnationPvE.EnoughLevel && VengeancePvE.CanUse(out act))
+			{
+				return true;
+			}
+		}
 
         if (((VengeancePvE.Cooldown.IsCoolingDown && VengeancePvE.Cooldown.ElapsedAfter(60)) || !VengeancePvE.EnoughLevel) && RampartPvE.CanUse(out act))
         {

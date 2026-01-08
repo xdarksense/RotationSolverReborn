@@ -141,7 +141,12 @@ public static class ObjectHelper
 
     internal static bool IsAttackable(this IBattleChara battleChara)
     {
-        if (battleChara.IsAllianceMember())
+		if (Player.Object == null)
+		{
+			return false;
+		}
+
+		if (battleChara.IsAllianceMember())
         {
             return false;
         }
@@ -161,8 +166,13 @@ public static class ObjectHelper
             return false; // For conditionally immune mobs
         }
 
-        // Dead.
-        if (Service.Config.FilterOneHpInvincible && battleChara.CurrentHp <= 1)
+		if (battleChara.GetEventType() == EventHandlerContent.DpsChallengeDirector && Player.Object.GetEventType() != EventHandlerContent.DpsChallengeDirector)
+		{
+			return false;
+		}
+
+		// Dead.
+		if (Service.Config.FilterOneHpInvincible && battleChara.CurrentHp <= 1)
         {
             return false;
         }
@@ -788,6 +798,11 @@ public static class ObjectHelper
 			return true;
 		}
 
+		if (battleChara.IsM9SavagePriority())
+		{
+			return true;
+		}
+
 		// Check IBattleChara bespoke IsSpecialInclusionPriority method
 		if (battleChara.IsSpecialInclusionPriority())
         {
@@ -911,6 +926,180 @@ public static class ObjectHelper
 
         return false;
     }
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsM9SavagePriority(this IBattleChara battleChara)
+	{
+		if (Player.Object == null)
+		{
+			return false;
+		}
+
+		if (DataCenter.IsInM9S)
+		{
+			var DeadlyDoornail = battleChara.NameId == 14303;
+			var FatalFlail = battleChara.NameId == 14302;
+			//var VampFatale = battleChara.NameId == 14501;
+			var CharnelCell = battleChara.NameId == 14304;
+
+			var HasHellInACell = StatusHelper.PlayerHasStatus(false, StatusID.Rsv47341100S74Cfc3B0E74Cfc3B0);
+			//var HasHellAwaits = StatusHelper.PlayerHasStatus(false, StatusID.Rsv47301100S74Cfc3B0E74Cfc3B0);
+
+			if (CharnelCell && battleChara.DistanceToPlayer() <= 6f && HasHellInACell)
+			{
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Information("IsM9SavagePriority CharnelCell mob found");
+				}
+				return true;
+			}
+
+			if (DeadlyDoornail)
+			{
+				JobRole role = Player.Object?.ClassJob.Value.GetJobRole() ?? JobRole.None;
+
+				if (role == JobRole.RangedPhysical)
+				{
+					if (Service.Config.InDebug)
+					{
+						PluginLog.Information("IsM9SavagePriority DeadlyDoornail mob found on RangedPhysical");
+					}
+					return true;
+				}
+				if (role == JobRole.RangedMagical)
+				{
+					if (Service.Config.InDebug)
+					{
+						PluginLog.Information("IsM9SavagePriority DeadlyDoornail mob found on RangedMagical");
+					}
+					return true;
+				}
+				if (role == JobRole.Healer)
+				{
+					if (Service.Config.InDebug)
+					{
+						PluginLog.Information("IsM9SavagePriority DeadlyDoornail mob found on Healer");
+					}
+					return true;
+				}
+
+				if (role == JobRole.Melee && battleChara.DistanceToPlayer() < 5f)
+				{
+					if (Service.Config.InDebug)
+					{
+						PluginLog.Information("IsM9SavagePriority DeadlyDoornail mob found on Melee and in range");
+					}
+					return true;
+				}
+
+				if (role == JobRole.Tank && battleChara.DistanceToPlayer() < 5f)
+				{
+					if (Service.Config.InDebug)
+					{
+						PluginLog.Information("IsM9SavagePriority DeadlyDoornail mob found on Tank and in range");
+					}
+					return true;
+				}
+			}
+
+			if (FatalFlail)
+			{
+				JobRole role = Player.Object?.ClassJob.Value.GetJobRole() ?? JobRole.None;
+
+				if (role == JobRole.Melee)
+				{
+					if (Service.Config.InDebug)
+					{
+						PluginLog.Information("IsM9SavagePriority FatalFlail mob found on Melee and in range");
+					}
+					return true;
+				}
+
+				if (role == JobRole.Tank)
+				{
+					if (Service.Config.InDebug)
+					{
+						PluginLog.Information("IsM9SavagePriority FatalFlail mob found on Tank");
+					}
+					return true;
+				}
+			}
+
+		}
+
+		return false;
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsM10SavagePriority(this IBattleChara battleChara)
+	{
+		if (Player.Object == null)
+		{
+			return false;
+		}
+
+		if (DataCenter.IsInM10S)
+		{
+			var RedHot = battleChara.NameId == 14370;
+			var DeepBlue = battleChara.NameId == 14369;
+			var WateryGrave = battleChara.NameId == 14373;
+
+			var Firesnaking = StatusHelper.PlayerHasStatus(false, StatusID.Firesnaking);
+			var Watersnaking = StatusHelper.PlayerHasStatus(false, StatusID.Watersnaking);
+
+			if (RedHot && Firesnaking)
+			{
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Information("IsM10SavagePriority RedHot status found");
+				}
+				return true;
+			}
+
+			if (DeepBlue && Watersnaking)
+			{
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Information("IsM10SavagePriority DeepBlue status found");
+				}
+				return true;
+			}
+
+			if (WateryGrave)
+			{
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Information("IsM10SavagePriority WateryGrave status found");
+				}
+				return true;
+			}
+
+		}
+
+		return false;
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	//public static bool IsM12SavagePriority(this IBattleChara battleChara)
+	//{
+	//	if (Player.Object == null)
+	//	{
+	//		return false;
+	//	}
+
+	//	if (DataCenter.IsInM12S)
+	//	{
+
+	//	}
+
+	//	return false;
+	//}
 
 	/// <summary>
 	/// 
@@ -1320,8 +1509,9 @@ private static readonly HashSet<uint> IsOCUndeadSet =
     /// <returns>True if the target is immune due to any special mechanic; otherwise, false.</returns>
     public static bool IsSpecialImmune(this IBattleChara battleChara)
     {
-        return battleChara.IsCrystalOfDarknessImmune()
-            || battleChara.IsColossusRubricatusImmune()
+        return battleChara.IsM9SavageImmune()
+			|| battleChara.IsCrystalOfDarknessImmune()
+			|| battleChara.IsColossusRubricatusImmune()
 			|| battleChara.IsTrueHeartImmune()
 			|| battleChara.IsEminentGriefImmune()
             || battleChara.IsLOTAImmune()
@@ -1340,6 +1530,40 @@ private static readonly HashSet<uint> IsOCUndeadSet =
             || battleChara.IsLimitlessBlue()
             || battleChara.IsHanselorGretelShielded();
     }
+
+	/// <summary>
+	/// 
+	/// </summary>
+	public static bool IsM9SavageImmune(this IBattleChara battleChara)
+	{
+		if (Player.Object == null)
+		{
+			return false;
+		}
+
+		if (DataCenter.IsInM9S)
+		{
+			//var DeadlyDoornail = battleChara.NameId == 14303;
+			//var FatalFlail = battleChara.NameId == 14302;
+			//var VampFatale = battleChara.NameId == 14501;
+			var CharnelCell = battleChara.NameId == 14304;
+
+			var HasHellInACell = StatusHelper.PlayerHasStatus(false, StatusID.Rsv47341100S74Cfc3B0E74Cfc3B0);
+			//var HasHellAwaits = StatusHelper.PlayerHasStatus(false, StatusID.Rsv47301100S74Cfc3B0E74Cfc3B0);
+
+			if (CharnelCell && !HasHellInACell)
+			{
+				if (Service.Config.InDebug)
+				{
+					PluginLog.Information("IsM9SavageImmune CharnelCell mob found");
+				}
+				return true;
+			}
+
+		}
+
+		return false;
+	}
 
 	/// <summary>
 	/// 
@@ -2492,6 +2716,25 @@ internal static float GetTTK(this IBattleChara battleChara, bool wholeTime = fal
         Vector3 playerPos = Player.Object.Position; playerPos.Y += playerYOffset;
         return CanSeeFrom(battleChara, playerPos, targetYOffset);
     }
+
+	/// <summary>
+	/// Get the Player's current MP percentage.
+	/// </summary>
+	/// <returns></returns>
+	public static float GetPlayerMPRatio()
+	{
+		if (Player.Object == null)
+		{
+			return 0;
+		}
+
+		if (Player.Object.MaxHp == 0)
+		{
+			return 0; // Avoid division by zero
+		}
+
+		return (float)Player.Object.CurrentMp / Player.Object.MaxMp;
+	}
 
 	/// <summary>
 	/// Get the Player's current HP percentage.
