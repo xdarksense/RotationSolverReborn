@@ -44,7 +44,30 @@ public static class ObjectHelper
         return battleChara == null ? null : Service.GetSheet<Lumina.Excel.Sheets.BNpcBase>().GetRow(battleChara.BaseId);
     }
 
-    internal static bool CanProvoke(this IBattleChara target)
+	/// <summary>
+	/// Returns true if any current hostile target has the specified BNpc NameId.
+	/// </summary>
+	private static bool AnyHostileHasNameId(uint nameId)
+	{
+		var hostiles = DataCenter.AllHostileTargets;
+		if (hostiles == null || hostiles.Count == 0)
+		{
+			return false;
+		}
+
+		for (int i = 0, n = hostiles.Count; i < n; i++)
+		{
+			var h = hostiles[i];
+			if (h != null && h.NameId == nameId)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	internal static bool CanProvoke(this IBattleChara target)
     {
         if (target == null)
         {
@@ -928,6 +951,16 @@ public static class ObjectHelper
     }
 
 	/// <summary>
+	/// True if a Deadly Doornail (NameId 14303) is currently in AllHostileTargets.
+	/// </summary>
+	public static bool HasDeadlyDoornail => AnyHostileHasNameId(14303);
+
+	/// <summary>
+	/// True if a Fatal Flail (NameId 14302) is currently in AllHostileTargets.
+	/// </summary>
+	public static bool HasFatalFlail => AnyHostileHasNameId(14302);
+
+	/// <summary>
 	/// 
 	/// </summary>
 	public static bool IsM9SavagePriority(this IBattleChara battleChara)
@@ -941,19 +974,57 @@ public static class ObjectHelper
 		{
 			var DeadlyDoornail = battleChara.NameId == 14303;
 			var FatalFlail = battleChara.NameId == 14302;
-			//var VampFatale = battleChara.NameId == 14501;
 			var CharnelCell = battleChara.NameId == 14304;
 
-			var HasHellInACell = StatusHelper.PlayerHasStatus(false, StatusID.Rsv47341100S74Cfc3B0E74Cfc3B0);
-			//var HasHellAwaits = StatusHelper.PlayerHasStatus(false, StatusID.Rsv47301100S74Cfc3B0E74Cfc3B0);
-
-			if (CharnelCell && battleChara.DistanceToPlayer() <= 6f && HasHellInACell)
+			if (CharnelCell)
 			{
-				if (Service.Config.InDebug)
+				// Heel (on target) vs Hell (on player) pairs
+				StatusID HeelInACell1 = (StatusID)4739;
+				StatusID HellInACell1 = (StatusID)4731;
+
+				StatusID HeelInACell2 = (StatusID)4740;
+				StatusID HellInACell2 = (StatusID)4732;
+
+				StatusID HeelInACell3 = (StatusID)4741;
+				StatusID HellInACell3 = (StatusID)4733;
+
+				StatusID HeelInACell4 = (StatusID)4742;
+				StatusID HellInACell4 = (StatusID)4734;
+
+				StatusID HeelInACell5 = (StatusID)4743;
+				StatusID HellInACell5 = (StatusID)4735;
+
+				StatusID HeelInACell6 = (StatusID)4744;
+				StatusID HellInACell6 = (StatusID)4736;
+
+				StatusID HeelInACell7 = (StatusID)4745;
+				StatusID HellInACell7 = (StatusID)4737;
+
+				StatusID HeelInACell8 = (StatusID)4746;
+				StatusID HellInACell8 = (StatusID)4738;
+
+				// Iterate all Heel/Hell pairs; priority if target has Heel and player does have corresponding Hell
+				foreach (var (heel, hell) in new (StatusID heel, StatusID hell)[]
 				{
-					PluginLog.Information("IsM9SavagePriority CharnelCell mob found");
+					(HeelInACell1, HellInACell1),
+					(HeelInACell2, HellInACell2),
+					(HeelInACell3, HellInACell3),
+					(HeelInACell4, HellInACell4),
+					(HeelInACell5, HellInACell5),
+					(HeelInACell6, HellInACell6),
+					(HeelInACell7, HellInACell7),
+					(HeelInACell8, HellInACell8),
+				})
+				{
+					if (battleChara.HasStatus(false, heel) && StatusHelper.PlayerHasStatus(false, hell))
+					{
+						if (Service.Config.InDebug)
+						{
+							PluginLog.Information("IsM9SavagePriority: CharnelCell priority due to Heel/Hell match");
+						}
+						return true;
+					}
 				}
-				return true;
 			}
 
 			if (DeadlyDoornail)
@@ -985,7 +1056,7 @@ public static class ObjectHelper
 					return true;
 				}
 
-				if (role == JobRole.Melee && battleChara.DistanceToPlayer() < 5f)
+				if (role == JobRole.Melee && battleChara.DistanceToPlayer() < 5f && !HasFatalFlail)
 				{
 					if (Service.Config.InDebug)
 					{
@@ -994,7 +1065,7 @@ public static class ObjectHelper
 					return true;
 				}
 
-				if (role == JobRole.Tank && battleChara.DistanceToPlayer() < 5f)
+				if (role == JobRole.Tank && battleChara.DistanceToPlayer() < 5f && !HasFatalFlail)
 				{
 					if (Service.Config.InDebug)
 					{
@@ -1012,7 +1083,7 @@ public static class ObjectHelper
 				{
 					if (Service.Config.InDebug)
 					{
-						PluginLog.Information("IsM9SavagePriority FatalFlail mob found on Melee and in range");
+						PluginLog.Information("IsM9SavagePriority FatalFlail mob found on Melee");
 					}
 					return true;
 				}
@@ -1022,6 +1093,15 @@ public static class ObjectHelper
 					if (Service.Config.InDebug)
 					{
 						PluginLog.Information("IsM9SavagePriority FatalFlail mob found on Tank");
+					}
+					return true;
+				}
+
+				if (role != JobRole.Tank && role != JobRole.Melee && !HasDeadlyDoornail)
+				{
+					if (Service.Config.InDebug)
+					{
+						PluginLog.Information("IsM9SavagePriority FatalFlail mob found on NonMelee");
 					}
 					return true;
 				}
@@ -1083,9 +1163,6 @@ public static class ObjectHelper
 		return false;
 	}
 
-	/// <summary>
-	/// 
-	/// </summary>
 	//public static bool IsM12SavagePriority(this IBattleChara battleChara)
 	//{
 	//	if (Player.Object == null)
@@ -1179,7 +1256,6 @@ public static class ObjectHelper
             }
         }
 
-
         // forgiven adulation - Floor 30 boss ads
         if (DataCenter.TerritoryID == 1284)
         {
@@ -1208,7 +1284,7 @@ public static class ObjectHelper
     /// <summary>
     /// List of NameIds that Undead enemies in Occult Crecent.
     /// </summary>
-private static readonly HashSet<uint> IsOCUndeadSet =
+    private static readonly HashSet<uint> IsOCUndeadSet =
     [
         13741, //Lifereaper
         13924, //Armor
@@ -1510,7 +1586,7 @@ private static readonly HashSet<uint> IsOCUndeadSet =
     public static bool IsSpecialImmune(this IBattleChara battleChara)
     {
         return battleChara.IsM9SavageImmune()
-			|| battleChara.IsCrystalOfDarknessImmune()
+			|| battleChara.IsColossusRubricatusImmune()
 			|| battleChara.IsColossusRubricatusImmune()
 			|| battleChara.IsTrueHeartImmune()
 			|| battleChara.IsEminentGriefImmune()
@@ -1543,23 +1619,58 @@ private static readonly HashSet<uint> IsOCUndeadSet =
 
 		if (DataCenter.IsInM9S)
 		{
-			//var DeadlyDoornail = battleChara.NameId == 14303;
-			//var FatalFlail = battleChara.NameId == 14302;
-			//var VampFatale = battleChara.NameId == 14501;
 			var CharnelCell = battleChara.NameId == 14304;
 
-			var HasHellInACell = StatusHelper.PlayerHasStatus(false, StatusID.Rsv47341100S74Cfc3B0E74Cfc3B0);
-			//var HasHellAwaits = StatusHelper.PlayerHasStatus(false, StatusID.Rsv47301100S74Cfc3B0E74Cfc3B0);
+			// Heel (on target) vs Hell (on player) pairs
+			StatusID HeelInACell1 = (StatusID)4739;
+			StatusID HellInACell1 = (StatusID)4731;
 
-			if (CharnelCell && !HasHellInACell)
+			StatusID HeelInACell2 = (StatusID)4740;
+			StatusID HellInACell2 = (StatusID)4732;
+
+			StatusID HeelInACell3 = (StatusID)4741;
+			StatusID HellInACell3 = (StatusID)4733;
+
+			StatusID HeelInACell4 = (StatusID)4742;
+			StatusID HellInACell4 = (StatusID)4734;
+
+			StatusID HeelInACell5 = (StatusID)4743;
+			StatusID HellInACell5 = (StatusID)4735;
+
+			StatusID HeelInACell6 = (StatusID)4744;
+			StatusID HellInACell6 = (StatusID)4736;
+
+			StatusID HeelInACell7 = (StatusID)4745;
+			StatusID HellInACell7 = (StatusID)4737;
+
+			StatusID HeelInACell8 = (StatusID)4746;
+			StatusID HellInACell8 = (StatusID)4738;
+
+			if (CharnelCell)
 			{
-				if (Service.Config.InDebug)
+				// Iterate all Heel/Hell pairs; immune if target has Heel and player does NOT have corresponding Hell
+				foreach (var (heel, hell) in new (StatusID heel, StatusID hell)[]
 				{
-					PluginLog.Information("IsM9SavageImmune CharnelCell mob found");
+					(HeelInACell1, HellInACell1),
+					(HeelInACell2, HellInACell2),
+					(HeelInACell3, HellInACell3),
+					(HeelInACell4, HellInACell4),
+					(HeelInACell5, HellInACell5),
+					(HeelInACell6, HellInACell6),
+					(HeelInACell7, HellInACell7),
+					(HeelInACell8, HellInACell8),
+				})
+				{
+					if (battleChara.HasStatus(false, heel) && !StatusHelper.PlayerHasStatus(false, hell))
+					{
+						if (Service.Config.InDebug)
+						{
+							PluginLog.Information("IsM9SavageImmune: CharnelCell immune due to Heel/Hell mismatch");
+						}
+						return true;
+					}
 				}
-				return true;
 			}
-
 		}
 
 		return false;
