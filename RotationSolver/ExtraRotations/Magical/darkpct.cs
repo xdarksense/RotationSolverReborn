@@ -1,15 +1,20 @@
 ﻿
 using Dalamud.Game.ClientState.JobGauge.Enums;
+using ECommons;
+using ExCSS;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using RotationSolver.Basic.Actions;
 using RotationSolver.Basic.Attributes;
+using RotationSolver.Basic.Configuration.Conditions;
 using RotationSolver.Basic.Data;
 using RotationSolver.Basic.Helpers;
 using RotationSolver.Basic.Rotations.Basic;
+using System.Linq;
 
 
-    
+
 namespace RotationSolver.ExtraRotations.Magical;
-[Rotation("Dark PCT", CombatType.PvE, GameVersion = "7.31")]
+[Rotation("Dark PCT", CombatType.PvE, GameVersion = "7.4")]
 [SourceCode(Path = "main/ExtraRotations/Magical/darkpct.cs")]
 [ExtraRotation]
 
@@ -201,17 +206,17 @@ public sealed class DarkPct : PictomancerRotation
                 return false;
             }
 
-            if (PomMusePvE.CanUse(out act, usedUp: true) && !RetributionOfTheMadeenPvEReady)
+            if (PomMusePvE.CanUse(out act, usedUp: true) && !RetributionOfTheMadeenPvEReady && LivingMusePvE.Cooldown.CurrentCharges > 1)
             {
                 return true;
             }
 
-            if (WingedMusePvE.CanUse(out act, usedUp: true) && !RetributionOfTheMadeenPvEReady)
+            if (WingedMusePvE.CanUse(out act, usedUp: true) && !RetributionOfTheMadeenPvEReady && LivingMusePvE.Cooldown.CurrentCharges > 1)
             {
                 return true;
             }
 
-            if (ClawedMusePvE.CanUse(out act, usedUp: true))
+            if (ClawedMusePvE.CanUse(out act, usedUp: true) && LivingMusePvE.Cooldown.CurrentCharges > 1)
             {
                 return true;
             }
@@ -291,18 +296,18 @@ public sealed class DarkPct : PictomancerRotation
                 return true;
             }
 
-            if (PolishingHammerPvE.CanUse(out act, skipComboCheck: true))
+            if (PolishingHammerPvE.CanUse(out act, skipComboCheck: false) && (IsMoving || HasStarryMuse || Player.StatusTime(true, StatusID.HammerTime) < 10f))
+        {
+                return true;
+            }
+
+            if (HammerBrushPvE.CanUse(out act, skipComboCheck: false) && (IsMoving || HasStarryMuse || Player.StatusTime(true, StatusID.HammerTime) < 7f))
             {
                 return true;
             }
 
-            if (HammerBrushPvE.CanUse(out act, skipComboCheck: true))
-            {
-                return true;
-            }
-
-            if (HammerStampPvE.CanUse(out act, skipComboCheck: true))
-            {
+            if (HammerStampPvE.CanUse(out act, skipComboCheck: false) && (IsMoving || HasStarryMuse || Player.StatusTime(true, StatusID.HammerTime) < 5f))
+        {
                 return true;
             }
 
