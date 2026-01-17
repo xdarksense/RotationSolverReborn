@@ -173,14 +173,35 @@ public sealed class DarkPct : PictomancerRotation
                 return true;
             }
 
-            if (SubtractivePalettePvE.CanUse(out act) || !HasSubtractivePalette && (PaletteGauge == 100 || HasSubtractiveSpectrum) && !HasMonochromeTones)
+            if (SubtractivePalettePvE.CanUse(out act) && !HasSubtractivePalette && PaletteGauge == 100 && !HasMonochromeTones)
             {
                 return true;
             }
 
             if (HasStarryMuse)
             {
+
+                if (SubtractivePalettePvE.CanUse(out act) && !HasMonochromeTones)
+                {
+                    return true;
+                }
+
                 if (FangedMusePvE.CanUse(out act, usedUp: true))
+                {
+                    return true;
+                }
+
+                if (PomMusePvE.CanUse(out act, usedUp: true) && !RetributionOfTheMadeenPvEReady)
+                {
+                    return true;
+                }
+
+                if (WingedMusePvE.CanUse(out act, usedUp: true) && !RetributionOfTheMadeenPvEReady)
+                {
+                    return true;
+                }
+
+                if (ClawedMusePvE.CanUse(out act, usedUp: true))
                 {
                     return true;
                 }
@@ -296,17 +317,17 @@ public sealed class DarkPct : PictomancerRotation
                 return true;
             }
 
-            if (PolishingHammerPvE.CanUse(out act, skipComboCheck: false) && (IsMoving || HasStarryMuse || Player.StatusTime(true, StatusID.HammerTime) < 10f))
+            if (PolishingHammerPvE.CanUse(out act, skipComboCheck: true) && (IsMoving || HasStarryMuse || Player.StatusTime(true, StatusID.HammerTime) <= 7f))
         {
                 return true;
             }
 
-            if (HammerBrushPvE.CanUse(out act, skipComboCheck: false) && (IsMoving || HasStarryMuse || Player.StatusTime(true, StatusID.HammerTime) < 7f))
+            if (HammerBrushPvE.CanUse(out act, skipComboCheck: true) && (IsMoving || HasStarryMuse || Player.StatusTime(true, StatusID.HammerTime) <= 10f))
             {
                 return true;
             }
 
-            if (HammerStampPvE.CanUse(out act, skipComboCheck: false) && (IsMoving || HasStarryMuse || Player.StatusTime(true, StatusID.HammerTime) < 5f))
+            if (HammerStampPvE.CanUse(out act, skipComboCheck: true) && (IsMoving || HasStarryMuse || Player.StatusTime(true, StatusID.HammerTime) <= 13f))
         {
                 return true;
             }
@@ -420,41 +441,76 @@ public sealed class DarkPct : PictomancerRotation
             }
 
             // When in swift management
+            //if (HasSwift && (!LandscapeMotifDrawn || !CreatureMotifDrawn || !WeaponMotifDrawn))
+            //{
+            //    if (PomMotifPvE.CanUse(out act, skipCastingCheck: MotifSwiftCast is CanvasFlags.Pom) && MotifSwiftCast is CanvasFlags.Pom)
+            //    {
+            //        return true;
+            //    }
+            //
+            //    if (WingMotifPvE.CanUse(out act, skipCastingCheck: MotifSwiftCast is CanvasFlags.Wing) && MotifSwiftCast is CanvasFlags.Wing)
+            //    {
+            //        return true;
+            //    }
+            //
+            //    if (ClawMotifPvE.CanUse(out act, skipCastingCheck: MotifSwiftCast is CanvasFlags.Claw) && MotifSwiftCast is CanvasFlags.Claw)
+            //    {
+            //        return true;
+            //    }
+            //
+            //    if (MawMotifPvE.CanUse(out act, skipCastingCheck: MotifSwiftCast is CanvasFlags.Maw) && MotifSwiftCast is CanvasFlags.Maw)
+            //    {
+            //        return true;
+            //    }
+            //
+            //    if (HammerMotifPvE.CanUse(out act, skipCastingCheck: MotifSwiftCast is CanvasFlags.Weapon) && MotifSwiftCast is CanvasFlags.Weapon)
+            //    {
+            //        return true;
+            //    }
+            //
+            //    if (StarrySkyMotifPvE.CanUse(out act, skipCastingCheck: MotifSwiftCast is CanvasFlags.Landscape) && !HasHyperphantasia && MotifSwiftCast is CanvasFlags.Landscape)
+            //    {
+            //        return true;
+            //   }
+            //}
+
+
             if (HasSwift && (!LandscapeMotifDrawn || !CreatureMotifDrawn || !WeaponMotifDrawn))
             {
-                if (PomMotifPvE.CanUse(out act, skipCastingCheck: MotifSwiftCast is CanvasFlags.Pom) && MotifSwiftCast is CanvasFlags.Pom)
+                if (PomMotifPvE.CanUse(out act, skipCastingCheck: MotifSwiftCast is CanvasFlags.Pom) && (LandscapeMotifDrawn && WeaponMotifDrawn))
                 {
                     return true;
                 }
 
-                if (WingMotifPvE.CanUse(out act, skipCastingCheck: MotifSwiftCast is CanvasFlags.Wing) && MotifSwiftCast is CanvasFlags.Wing)
+                if (WingMotifPvE.CanUse(out act, skipCastingCheck: MotifSwiftCast is CanvasFlags.Wing) && (LandscapeMotifDrawn && WeaponMotifDrawn))
                 {
                     return true;
                 }
 
-                if (ClawMotifPvE.CanUse(out act, skipCastingCheck: MotifSwiftCast is CanvasFlags.Claw) && MotifSwiftCast is CanvasFlags.Claw)
+                if (ClawMotifPvE.CanUse(out act, skipCastingCheck: MotifSwiftCast is CanvasFlags.Claw) && (LandscapeMotifDrawn && WeaponMotifDrawn))
                 {
                     return true;
                 }
 
-                if (MawMotifPvE.CanUse(out act, skipCastingCheck: MotifSwiftCast is CanvasFlags.Maw) && MotifSwiftCast is CanvasFlags.Maw)
+                if (MawMotifPvE.CanUse(out act, skipCastingCheck: MotifSwiftCast is CanvasFlags.Maw) && (LandscapeMotifDrawn && WeaponMotifDrawn))
                 {
                     return true;
                 }
 
-                if (HammerMotifPvE.CanUse(out act, skipCastingCheck: MotifSwiftCast is CanvasFlags.Weapon) && MotifSwiftCast is CanvasFlags.Weapon)
+                if (HammerMotifPvE.CanUse(out act, skipCastingCheck: MotifSwiftCast is CanvasFlags.Weapon) && (!LandscapeMotifDrawn || !CreatureMotifDrawn || !WeaponMotifDrawn))
                 {
                     return true;
                 }
 
-                if (StarrySkyMotifPvE.CanUse(out act, skipCastingCheck: MotifSwiftCast is CanvasFlags.Landscape) && !HasHyperphantasia && MotifSwiftCast is CanvasFlags.Landscape)
+                if (StarrySkyMotifPvE.CanUse(out act, skipCastingCheck: MotifSwiftCast is CanvasFlags.Landscape) && !HasHyperphantasia && WeaponMotifDrawn)
                 {
                     return true;
                 }
             }
 
-            //white paint over cap protection
-            if (Paint == HolyCometMax && !HasStarryMuse && (UseCapCometHoly || UseCapCometOnly))
+
+        //white paint over cap protection
+        if (Paint == HolyCometMax && !HasStarryMuse && (UseCapCometHoly || UseCapCometOnly))
             {
                 if (CometInBlackPvE.CanUse(out act))
                 {
